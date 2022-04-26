@@ -35,7 +35,7 @@ import javax.servlet.http.HttpServletRequest;
 import org.n52.shetland.filter.SelectFilter;
 import org.n52.shetland.oasis.odata.query.option.QueryOptions;
 import org.n52.shetland.ogc.filter.FilterClause;
-import org.n52.sta.api.old.EntityServiceFactory;
+import org.n52.sta.api.old.EntityServiceLookup;
 import org.n52.sta.api.old.dto.common.StaDTO;
 import org.n52.sta.old.utils.AbstractSTARequestHandler;
 import org.springframework.web.servlet.HandlerMapping;
@@ -53,7 +53,7 @@ public abstract class EntityRequestHandler extends AbstractSTARequestHandler {
 
     public EntityRequestHandler(String rootUrl,
             boolean shouldEscapeId,
-            EntityServiceFactory serviceRepository) {
+            EntityServiceLookup serviceRepository) {
         super(rootUrl, shouldEscapeId, serviceRepository);
     }
 
@@ -82,7 +82,7 @@ public abstract class EntityRequestHandler extends AbstractSTARequestHandler {
 
         String entityId = unescapeIdIfWanted(id.substring(1, id.length() - 1));
         QueryOptions options = decodeQueryString(request);
-        return serviceRepository.getEntityService(entity)
+        return serviceRepository.lookupService(entity)
                 .getEntity(entityId, options);
     }
 
@@ -108,7 +108,7 @@ public abstract class EntityRequestHandler extends AbstractSTARequestHandler {
         HashSet<FilterClause> filters = new HashSet<>();
         // Overwrite select filter with filter only returning id
         filters.add(new SelectFilter(ID));
-        return serviceRepository.getEntityService(entity)
+        return serviceRepository.lookupService(entity)
                 .getEntity(entityId, QUERY_OPTIONS_FACTORY.createQueryOptions(filters));
     }
 
@@ -134,7 +134,7 @@ public abstract class EntityRequestHandler extends AbstractSTARequestHandler {
         String sourceId = split[1];
 
         QueryOptions options = decodeQueryString(request);
-        return serviceRepository.getEntityService(target)
+        return serviceRepository.lookupService(target)
                 .getEntityByRelatedEntity(sourceId,
                         sourceType,
                         null,
@@ -166,7 +166,7 @@ public abstract class EntityRequestHandler extends AbstractSTARequestHandler {
         HashSet<FilterClause> filters = new HashSet<>();
         // Overwrite select filter with filter only returning id
         filters.add(new SelectFilter(ID));
-        return serviceRepository.getEntityService(target)
+        return serviceRepository.lookupService(target)
                 .getEntityByRelatedEntity(sourceId,
                         sourceType,
                         null,

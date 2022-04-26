@@ -31,7 +31,7 @@ import javax.servlet.http.HttpServletRequest;
 
 import org.n52.shetland.oasis.odata.query.option.QueryOptions;
 import org.n52.shetland.ogc.sta.StaConstants;
-import org.n52.sta.api.old.EntityServiceFactory;
+import org.n52.sta.api.old.EntityServiceLookup;
 import org.n52.sta.api.old.dto.common.StaDTO;
 import org.n52.sta.http.old.common.EntityRequestHandler;
 import org.n52.sta.plus.old.CitSciExtensionRequestUtils;
@@ -57,7 +57,7 @@ public class CitSciEntityRequestHandler extends EntityRequestHandler implements 
 
     public CitSciEntityRequestHandler(@Value("${server.rootUrl}") String rootUrl,
                                       @Value("${server.feature.escapeId:true}") boolean shouldEscapeId,
-                                      EntityServiceFactory serviceRepository) {
+                                      EntityServiceLookup serviceRepository) {
         super(rootUrl, shouldEscapeId, serviceRepository);
     }
 
@@ -101,7 +101,7 @@ public class CitSciEntityRequestHandler extends EntityRequestHandler implements 
             String sourceId = split[1];
 
             QueryOptions options = decodeQueryString(request);
-            return serviceRepository.getEntityService(target)
+            return serviceRepository.lookupService(target)
                 .getEntityByRelatedEntity(sourceId,
                                           target,
                                           null,

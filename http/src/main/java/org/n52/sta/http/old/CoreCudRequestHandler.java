@@ -36,7 +36,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.n52.shetland.ogc.sta.exception.STACRUDException;
 import org.n52.shetland.ogc.sta.exception.STAInvalidUrlException;
 import org.n52.sta.api.old.CoreRequestUtils;
-import org.n52.sta.api.old.EntityServiceFactory;
+import org.n52.sta.api.old.EntityServiceLookup;
 import org.n52.sta.api.old.dto.common.StaDTO;
 import org.n52.sta.http.old.common.CudRequestHandler;
 import org.n52.sta.old.utils.DTOMapper;
@@ -55,7 +55,7 @@ public class CoreCudRequestHandler extends CudRequestHandler<StaDTO> implements 
 
     public CoreCudRequestHandler(String rootUrl,
                                  boolean escapeId,
-                                 EntityServiceFactory serviceRepository,
+                                 EntityServiceLookup serviceRepository,
                                  ObjectMapper mapper,
                                  DTOMapper dtoMapper) {
         super(rootUrl, escapeId, serviceRepository, mapper, dtoMapper);

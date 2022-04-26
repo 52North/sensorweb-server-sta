@@ -39,7 +39,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import org.n52.shetland.oasis.odata.query.option.QueryOptions;
 import org.n52.sta.api.old.CoreRequestUtils;
-import org.n52.sta.api.old.EntityServiceFactory;
+import org.n52.sta.api.old.EntityServiceLookup;
 import org.n52.sta.api.old.dto.common.StaDTO;
 import org.n52.sta.mqtt.old.subscription.AbstractMqttSubscription;
 import org.n52.sta.mqtt.old.subscription.MqttEntityCollectionSubscription;
@@ -78,7 +78,7 @@ public class MqttSubscriptionEventHandlerImpl extends AbstractSTARequestHandler
             0);
 
     private final ObjectMapper mapper;
-    private EntityServiceFactory serviceRepository;
+    private EntityServiceLookup serviceRepository;
     private Server mqttBroker;
     private Map<AbstractMqttSubscription, HashSet<String>> subscriptions = new HashMap<>();
     /*
@@ -143,7 +143,7 @@ public class MqttSubscriptionEventHandlerImpl extends AbstractSTARequestHandler
     }
 
     @Override
-    public void setServiceRepository(EntityServiceFactory serviceRepository) {
+    public void setServiceRepository(EntityServiceLookup serviceRepository) {
         this.serviceRepository = serviceRepository;
     }
 

@@ -32,7 +32,7 @@ import javax.servlet.http.HttpServletRequest;
 import org.n52.shetland.ogc.sta.exception.STACRUDException;
 import org.n52.sta.api.old.CollectionWrapper;
 import org.n52.sta.api.old.CoreRequestUtils;
-import org.n52.sta.api.old.EntityServiceFactory;
+import org.n52.sta.api.old.EntityServiceLookup;
 import org.n52.sta.http.old.common.CollectionRequestHandler;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -49,7 +49,7 @@ import org.springframework.web.bind.annotation.PathVariable;
  */
 public class CoreCollectionRequestHandler extends CollectionRequestHandler implements CoreRequestUtils {
 
-    public CoreCollectionRequestHandler(String rootUrl, boolean escapeId, EntityServiceFactory serviceRepository) {
+    public CoreCollectionRequestHandler(String rootUrl, boolean escapeId, EntityServiceLookup serviceRepository) {
         super(rootUrl, escapeId, serviceRepository);
     }
 

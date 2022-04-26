@@ -30,13 +30,13 @@ package org.n52.sta.api.old;
 /**
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
  */
-public interface EntityServiceFactory {
+public interface EntityServiceLookup {
 
     /**
      * Provides an entity data service for a entity type
      *
-     * @param entityTypeName the type name of the requested entity service
+     * @param name the name of the requested entity service
      * @return the requested entity data service
      */
-    AbstractSensorThingsEntityService<?> getEntityService(String entityTypeName);
+    AbstractSensorThingsEntityService<?> lookupService(String name);
 }

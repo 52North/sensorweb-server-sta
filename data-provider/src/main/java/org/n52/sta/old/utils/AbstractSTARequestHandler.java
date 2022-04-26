@@ -31,7 +31,7 @@ import org.n52.shetland.ogc.sta.exception.STACRUDException;
 import org.n52.shetland.ogc.sta.exception.STAInvalidUrlException;
 import org.n52.shetland.ogc.sta.exception.STANotFoundException;
 import org.n52.shetland.ogc.sta.model.STAEntityDefinition;
-import org.n52.sta.api.old.EntityServiceFactory;
+import org.n52.sta.api.old.EntityServiceLookup;
 import org.n52.sta.api.old.RequestUtils;
 
 /**
@@ -42,12 +42,12 @@ import org.n52.sta.api.old.RequestUtils;
 public abstract class AbstractSTARequestHandler implements RequestUtils {
 
     protected final boolean shouldEscapeId;
-    protected final EntityServiceFactory serviceRepository;
+    protected final EntityServiceLookup serviceRepository;
     protected final String rootUrl;
 
     public AbstractSTARequestHandler(String rootUrl,
             boolean shouldEscapeId,
-            EntityServiceFactory serviceRepository) {
+            EntityServiceLookup serviceRepository) {
         this.shouldEscapeId = shouldEscapeId;
         this.serviceRepository = serviceRepository;
         this.rootUrl = rootUrl;
@@ -61,7 +61,7 @@ public abstract class AbstractSTARequestHandler implements RequestUtils {
      * @throws Exception if URL is not valid
      */
     protected void validateResource(StringBuffer requestURI,
-            EntityServiceFactory serviceRepository)
+            EntityServiceLookup serviceRepository)
             throws Exception {
         validateResource(requestURI.toString(), serviceRepository);
     }
@@ -74,7 +74,7 @@ public abstract class AbstractSTARequestHandler implements RequestUtils {
      * @throws Exception if URL is not valid
      */
     protected void validateResource(String requestURI,
-            EntityServiceFactory serviceRepository)
+            EntityServiceLookup serviceRepository)
             throws Exception {
         String[] uriResources;
         if (requestURI.startsWith("/")) {
@@ -120,7 +120,7 @@ public abstract class AbstractSTARequestHandler implements RequestUtils {
      * @return STAInvalidUrlException if URI is malformed
      */
     protected Exception validateURISemantic(String[] uriResources,
-            EntityServiceFactory serviceRepository) throws STACRUDException {
+            EntityServiceLookup serviceRepository) throws STACRUDException {
         // Check if this is Request to root collection. They are always valid
         if (uriResources.length == 1 && !uriResources[0].contains(ROUND_BRACKET_OPEN)) {
             return null;
@@ -131,7 +131,7 @@ public abstract class AbstractSTARequestHandler implements RequestUtils {
         sourceId = unescapeIdIfWanted(sourceId.replaceAll("%2F", "/"));
         String sourceType = sourceEntity[0];
 
-        if (!serviceRepository.getEntityService(sourceType).existsEntity(sourceId)) {
+        if (!serviceRepository.lookupService(sourceType).existsEntity(sourceId)) {
             return createNotFoundExceptionNoEntity(uriResources[0]);
         }
 
@@ -144,7 +144,7 @@ public abstract class AbstractSTARequestHandler implements RequestUtils {
                 // Resource is addressed by related Entity
                 // e.g. /Datastreams(1)/Thing/
                 // Getting id directly as it is needed for next iteration
-                targetId = serviceRepository.getEntityService(targetType)
+                targetId = serviceRepository.lookupService(targetType)
                         .getEntityIdByRelatedEntity(sourceId, sourceType);
                 if (targetId == null) {
                     return createInvalidUrlExceptionNoEntityAssociated(uriResources[i], uriResources[i - 1]);
@@ -154,7 +154,7 @@ public abstract class AbstractSTARequestHandler implements RequestUtils {
                 // e.g. /Things(1)/
                 // Only checking exists as Id is already known
                 targetId = targetEntity[1];
-                if (!serviceRepository.getEntityService(targetType)
+                if (!serviceRepository.lookupService(targetType)
                         .existsEntityByRelatedEntity(sourceId, sourceType, targetId)) {
                     return createInvalidUrlExceptionNoEntityAssociated(uriResources[i], uriResources[i - 1]);
                 }

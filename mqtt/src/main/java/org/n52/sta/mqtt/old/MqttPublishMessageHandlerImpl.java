@@ -42,7 +42,7 @@ import org.n52.shetland.ogc.sta.exception.STAInvalidUrlException;
 import org.n52.shetland.ogc.sta.model.STAEntityDefinition;
 import org.n52.sta.api.old.AbstractSensorThingsEntityService;
 import org.n52.sta.api.old.CoreRequestUtils;
-import org.n52.sta.api.old.EntityServiceFactory;
+import org.n52.sta.api.old.EntityServiceLookup;
 import org.n52.sta.api.old.dto.common.StaDTO;
 import org.n52.sta.old.utils.AbstractSTARequestHandler;
 import org.n52.sta.old.utils.DTOMapper;
@@ -71,7 +71,7 @@ public class MqttPublishMessageHandlerImpl extends AbstractSTARequestHandler
             @Value("${server.feature.mqttReadOnly}") boolean readOnly,
             @Value("${server.rootUrl}") String rootUrl,
             @Value("${server.feature.escapeId:true}") boolean shouldEscapeId,
-            EntityServiceFactory serviceRepository,
+            EntityServiceLookup serviceRepository,
             ObjectMapper mapper,
             DTOMapper dtoMapper) {
         super(rootUrl, shouldEscapeId, serviceRepository);
@@ -149,7 +149,7 @@ public class MqttPublishMessageHandlerImpl extends AbstractSTARequestHandler
                 }
 
                 Class<T> clazz = dtoMapper.collectionNameToClass(collection);
-                ((AbstractSensorThingsEntityService<T>) serviceRepository.getEntityService(collection))
+                ((AbstractSensorThingsEntityService<T>) serviceRepository.lookupService(collection))
                         .create(mapper.readValue(payload, clazz));
             } else {
                 throw new STAInvalidUrlException("Topic does not reference a Collection allowed for POSTing via mqtt");

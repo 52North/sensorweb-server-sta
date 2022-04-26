@@ -30,7 +30,7 @@ package org.n52.sta.http.old;
 import javax.servlet.http.HttpServletRequest;
 
 import org.n52.sta.api.old.CoreRequestUtils;
-import org.n52.sta.api.old.EntityServiceFactory;
+import org.n52.sta.api.old.EntityServiceLookup;
 import org.n52.sta.api.old.dto.common.StaDTO;
 import org.n52.sta.http.old.common.EntityRequestHandler;
 import org.springframework.beans.factory.annotation.Value;
@@ -52,7 +52,7 @@ public class CoreEntityRequestHandler extends EntityRequestHandler implements Co
 
     public CoreEntityRequestHandler(@Value("${server.rootUrl}") String rootUrl,
                                     @Value("${server.feature.escapeId:true}") boolean escapeId,
-                                    EntityServiceFactory serviceRepository) {
+                                    EntityServiceLookup serviceRepository) {
         super(rootUrl, escapeId, serviceRepository);
     }
 

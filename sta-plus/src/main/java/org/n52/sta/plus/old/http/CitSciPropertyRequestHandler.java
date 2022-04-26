@@ -32,7 +32,7 @@ import javax.servlet.http.HttpServletRequest;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import org.n52.shetland.ogc.sta.StaConstants;
-import org.n52.sta.api.old.EntityServiceFactory;
+import org.n52.sta.api.old.EntityServiceLookup;
 import org.n52.sta.api.old.RequestUtils;
 import org.n52.sta.api.old.dto.common.StaDTO;
 import org.n52.sta.http.old.common.PropertyRequestHandler;
@@ -58,7 +58,7 @@ public class CitSciPropertyRequestHandler extends PropertyRequestHandler impleme
 
     public CitSciPropertyRequestHandler(@Value("${server.rootUrl}") String rootUrl,
                                         @Value("${server.feature.escapeId:true}") boolean shouldEscapeId,
-                                        EntityServiceFactory serviceRepository,
+                                        EntityServiceLookup serviceRepository,
                                         ObjectMapper mapper) {
         super(rootUrl, shouldEscapeId, serviceRepository, mapper);
     }

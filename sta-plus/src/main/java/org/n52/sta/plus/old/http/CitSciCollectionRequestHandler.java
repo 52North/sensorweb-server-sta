@@ -33,7 +33,7 @@ import org.n52.shetland.oasis.odata.query.option.QueryOptions;
 import org.n52.shetland.ogc.sta.StaConstants;
 import org.n52.shetland.ogc.sta.exception.STACRUDException;
 import org.n52.sta.api.old.CollectionWrapper;
-import org.n52.sta.api.old.EntityServiceFactory;
+import org.n52.sta.api.old.EntityServiceLookup;
 import org.n52.sta.http.old.common.CollectionRequestHandler;
 import org.n52.sta.plus.old.CitSciExtensionRequestUtils;
 import org.springframework.beans.factory.annotation.Value;
@@ -59,7 +59,7 @@ public class CitSciCollectionRequestHandler extends CollectionRequestHandler imp
 
     public CitSciCollectionRequestHandler(@Value("${server.rootUrl}") String rootUrl,
                                           @Value("${server.feature.escapeId:true}") boolean shouldEscapeId,
-                                          EntityServiceFactory serviceRepository) {
+                                          EntityServiceLookup serviceRepository) {
         super(rootUrl, shouldEscapeId, serviceRepository);
     }
 
@@ -114,7 +114,7 @@ public class CitSciCollectionRequestHandler extends CollectionRequestHandler imp
             String sourceId = split[1];
 
             QueryOptions options = decodeQueryString(request);
-            return serviceRepository.getEntityService(target)
+            return serviceRepository.lookupService(target)
                 .getEntityCollectionByRelatedEntity(sourceId,
                                                     target,
                                                     options)

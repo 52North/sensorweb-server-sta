@@ -59,5 +59,5 @@ public interface STAEventHandler {
      */
     Set<String> getWatchedEntityTypes();
 
-    void setServiceRepository(EntityServiceFactory serviceRepository);
+    void setServiceRepository(EntityServiceLookup serviceRepository);
 }

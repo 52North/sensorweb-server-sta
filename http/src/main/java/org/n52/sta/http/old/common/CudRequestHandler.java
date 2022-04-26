@@ -38,7 +38,7 @@ import org.n52.shetland.ogc.sta.StaConstants;
 import org.n52.shetland.ogc.sta.exception.STACRUDException;
 import org.n52.shetland.ogc.sta.exception.STAInvalidUrlException;
 import org.n52.sta.api.old.AbstractSensorThingsEntityService;
-import org.n52.sta.api.old.EntityServiceFactory;
+import org.n52.sta.api.old.EntityServiceLookup;
 import org.n52.sta.api.old.dto.common.EntityPatch;
 import org.n52.sta.api.old.dto.common.StaDTO;
 import org.n52.sta.old.utils.AbstractSTARequestHandler;
@@ -63,7 +63,7 @@ public abstract class CudRequestHandler<T extends StaDTO> extends AbstractSTAReq
 
         public CudRequestHandler(String rootUrl,
                         boolean shouldEscapeId,
-                        EntityServiceFactory serviceRepository,
+                        EntityServiceLookup serviceRepository,
                         ObjectMapper mapper,
                         DTOMapper dtoMapper) {
                 super(rootUrl, shouldEscapeId, serviceRepository);
@@ -84,7 +84,7 @@ public abstract class CudRequestHandler<T extends StaDTO> extends AbstractSTAReq
                         String body)
                         throws IOException, STACRUDException, STAInvalidUrlException {
                 Class<T> clazz = dtoMapper.collectionNameToClass(collectionName);
-                return ((AbstractSensorThingsEntityService<T>) serviceRepository.getEntityService(collectionName))
+                return ((AbstractSensorThingsEntityService<T>) serviceRepository.lookupService(collectionName))
                                 .create(mapper.readValue(body, clazz));
         }
 
@@ -119,7 +119,7 @@ public abstract class CudRequestHandler<T extends StaDTO> extends AbstractSTAReq
                 jsonBody.put(REFERENCED_FROM_ID, sourceId);
 
                 Class<T> clazz = dtoMapper.collectionNameToClass(target);
-                return ((AbstractSensorThingsEntityService<T>) serviceRepository.getEntityService(target))
+                return ((AbstractSensorThingsEntityService<T>) serviceRepository.lookupService(target))
                                 .create(mapper.readValue(jsonBody.toString(), clazz));
         }
 
@@ -146,7 +146,7 @@ public abstract class CudRequestHandler<T extends StaDTO> extends AbstractSTAReq
                 ObjectNode jsonBody = (ObjectNode) mapper.readTree(body);
                 String strippedId = unescapeIdIfWanted(id.substring(1, id.length() - 1));
                 jsonBody.put(StaConstants.AT_IOT_ID, strippedId);
-                return ((AbstractSensorThingsEntityService<T>) serviceRepository.getEntityService(collectionName))
+                return ((AbstractSensorThingsEntityService<T>) serviceRepository.lookupService(collectionName))
                                 .update(
                                                 strippedId,
                                                 (T) ((mapper.readValue(jsonBody.toString(),
@@ -179,7 +179,7 @@ public abstract class CudRequestHandler<T extends StaDTO> extends AbstractSTAReq
 
                 @SuppressWarnings("checkstyle:linelength")
                 AbstractSensorThingsEntityService<T> entityService = (AbstractSensorThingsEntityService<T>) serviceRepository
-                                .getEntityService(target);
+                                .lookupService(target);
 
                 // Get Id from datastore
                 String entityId = entityService.getEntityIdByRelatedEntity(sourceId, sourceType);
@@ -214,7 +214,7 @@ public abstract class CudRequestHandler<T extends StaDTO> extends AbstractSTAReq
                         throws Exception {
                 String lookupPath = (String) request.getAttribute(HandlerMapping.LOOKUP_PATH);
                 validateResource(lookupPath, serviceRepository);
-                serviceRepository.getEntityService(collectionName).delete(
+                serviceRepository.lookupService(collectionName).delete(
                                 unescapeIdIfWanted(id.substring(1, id.length() - 1)));
                 return null;
         }
@@ -244,7 +244,7 @@ public abstract class CudRequestHandler<T extends StaDTO> extends AbstractSTAReq
 
                 @SuppressWarnings("checkstyle:linelength")
                 AbstractSensorThingsEntityService<T> entityService = (AbstractSensorThingsEntityService<T>) serviceRepository
-                                .getEntityService(target);
+                                .lookupService(target);
 
                 // Get Id from datastore
                 String entityId = entityService.getEntityIdByRelatedEntity(sourceId, sourceType);

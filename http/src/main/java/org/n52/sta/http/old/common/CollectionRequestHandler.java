@@ -37,7 +37,7 @@ import org.n52.shetland.oasis.odata.query.option.QueryOptions;
 import org.n52.shetland.ogc.filter.FilterClause;
 import org.n52.shetland.ogc.sta.exception.STACRUDException;
 import org.n52.sta.api.old.CollectionWrapper;
-import org.n52.sta.api.old.EntityServiceFactory;
+import org.n52.sta.api.old.EntityServiceLookup;
 import org.n52.sta.api.old.RequestUtils;
 import org.n52.sta.old.utils.AbstractSTARequestHandler;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -50,7 +50,7 @@ public abstract class CollectionRequestHandler<T extends RequestUtils> extends A
 
     public CollectionRequestHandler(String rootUrl,
                                     boolean shouldEscapeId,
-                                    EntityServiceFactory serviceRepository) {
+                                    EntityServiceLookup serviceRepository) {
         super(rootUrl, shouldEscapeId, serviceRepository);
     }
 
@@ -76,7 +76,7 @@ public abstract class CollectionRequestHandler<T extends RequestUtils> extends A
         throws STACRUDException {
         QueryOptions options = decodeQueryString(request);
         return serviceRepository
-            .getEntityService(collectionName)
+            .lookupService(collectionName)
             .getEntityCollection(options)
             .setRequestURL(rootUrl + collectionName);
     }
@@ -105,7 +105,7 @@ public abstract class CollectionRequestHandler<T extends RequestUtils> extends A
         // Overwrite select filter with filter only returning id
         filters.add(new SelectFilter(ID));
         return serviceRepository
-            .getEntityService(collectionName)
+            .lookupService(collectionName)
             .getEntityCollection(QUERY_OPTIONS_FACTORY.createQueryOptions(filters))
             .setRequestURL(rootUrl + collectionName);
     }
@@ -130,7 +130,7 @@ public abstract class CollectionRequestHandler<T extends RequestUtils> extends A
         String sourceId = split[1];
 
         QueryOptions options = decodeQueryString(request);
-        return serviceRepository.getEntityService(target)
+        return serviceRepository.lookupService(target)
             .getEntityCollectionByRelatedEntity(sourceId,
                                                 sourceType,
                                                 options)
@@ -169,7 +169,7 @@ public abstract class CollectionRequestHandler<T extends RequestUtils> extends A
         }
         // Overwrite select filter with filter only returning id
         filters.add(new SelectFilter(ID));
-        return serviceRepository.getEntityService(target)
+        return serviceRepository.lookupService(target)
             .getEntityCollectionByRelatedEntity(sourceId,
                                                 sourceType,
                                                 QUERY_OPTIONS_FACTORY.createQueryOptions(filters))

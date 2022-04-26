@@ -41,7 +41,7 @@ import org.n52.shetland.ogc.sta.StaConstants;
 import org.n52.shetland.ogc.sta.exception.STACRUDException;
 import org.n52.shetland.ogc.sta.exception.STANotFoundException;
 import org.n52.sta.api.old.AbstractSensorThingsEntityService;
-import org.n52.sta.api.old.EntityServiceFactory;
+import org.n52.sta.api.old.EntityServiceLookup;
 import org.n52.sta.api.old.dto.common.StaDTO;
 import org.n52.sta.plus.old.entity.PlusObservationDTO;
 import org.slf4j.Logger;
@@ -74,7 +74,7 @@ public class CitSciMultipartObservationRequestHandler {
     private static final String SQ = "\"";
     private static final String FILES_ENDPOINT = "/files";
 
-    private final EntityServiceFactory serviceRepository;
+    private final EntityServiceLookup serviceRepository;
     private final ObjectMapper mapper;
     private final Path uploadDirectory;
     private final String rootUrl;
@@ -82,7 +82,7 @@ public class CitSciMultipartObservationRequestHandler {
     public CitSciMultipartObservationRequestHandler(
                                      @Value("${server.rootUrl}") String rootUrl,
                                      @Value("${server.feature.blobUploadDir:/tmp/sta_blobs}") String uploadDirectory,
-                                     EntityServiceFactory serviceRepository,
+                                     EntityServiceLookup serviceRepository,
                                      ObjectMapper mapper) {
         this.serviceRepository = serviceRepository;
         this.rootUrl = rootUrl;
@@ -123,7 +123,7 @@ public class CitSciMultipartObservationRequestHandler {
     }
 
     private AbstractSensorThingsEntityService<PlusObservationDTO> getObservationRepository() {
-        return (AbstractSensorThingsEntityService<PlusObservationDTO>) serviceRepository.getEntityService(
+        return (AbstractSensorThingsEntityService<PlusObservationDTO>) serviceRepository.lookupService(
             "Observation");
     }
 

@@ -33,7 +33,7 @@ import java.util.Map;
 import javax.annotation.PostConstruct;
 
 import org.n52.sta.api.old.AbstractSensorThingsEntityService;
-import org.n52.sta.api.old.EntityServiceFactory;
+import org.n52.sta.api.old.EntityServiceLookup;
 import org.n52.sta.api.old.STAEventHandler;
 import org.n52.sta.data.old.common.CommonSTAServiceImpl;
 import org.n52.sta.data.old.common.CommonServiceFacade;
@@ -45,7 +45,7 @@ import org.springframework.beans.factory.annotation.Autowired;
  * @author <a href="mailto:s.drost@52north.org">Sebastian Drost</a>
  */
 // @Component
-public class CommonEntityServiceRepository implements EntityServiceFactory {
+public class CommonEntityServiceRepository implements EntityServiceLookup {
 
     protected Map<String, CommonServiceFacade<?, ?>> entityServices = new LinkedHashMap<>();
 
@@ -115,7 +115,7 @@ public class CommonEntityServiceRepository implements EntityServiceFactory {
      * @return the requested entity data service
      */
     @Override
-    public AbstractSensorThingsEntityService<?> getEntityService(String entityTypeName) {
+    public AbstractSensorThingsEntityService<?> lookupService(String entityTypeName) {
         return entityServices.get(entityTypeName);
     }
 

@@ -35,7 +35,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import org.n52.shetland.filter.SelectFilter;
 import org.n52.shetland.ogc.filter.FilterClause;
-import org.n52.sta.api.old.EntityServiceFactory;
+import org.n52.sta.api.old.EntityServiceLookup;
 import org.n52.sta.api.old.dto.common.StaDTO;
 import org.n52.sta.old.utils.AbstractSTARequestHandler;
 import org.springframework.web.servlet.HandlerMapping;
@@ -55,7 +55,7 @@ public abstract class PropertyRequestHandler extends AbstractSTARequestHandler {
 
     public PropertyRequestHandler(String rootUrl,
                                   boolean shouldEscapeId,
-                                  EntityServiceFactory serviceRepository,
+                                  EntityServiceLookup serviceRepository,
                                   ObjectMapper mapper) {
         super(rootUrl, shouldEscapeId, serviceRepository);
         this.mapper = mapper;
@@ -91,7 +91,7 @@ public abstract class PropertyRequestHandler extends AbstractSTARequestHandler {
 
         // Add select filter with filter only returning property
         filters.add(new SelectFilter(property));
-        return serviceRepository.getEntityService(entity)
+        return serviceRepository.lookupService(entity)
             .getEntity(entityId, QUERY_OPTIONS_FACTORY.createQueryOptions(filters));
     }
 
@@ -130,7 +130,7 @@ public abstract class PropertyRequestHandler extends AbstractSTARequestHandler {
         // Add select filter with filter only returning property
         filters.add(new SelectFilter(property));
 
-        return serviceRepository.getEntityService(target)
+        return serviceRepository.lookupService(target)
             .getEntityByRelatedEntity(sourceId,
                                       sourceType,
                                       null,
