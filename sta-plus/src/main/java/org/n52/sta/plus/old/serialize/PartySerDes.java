@@ -40,7 +40,6 @@ import org.n52.shetland.ogc.sta.model.STAEntityDefinition;
 import org.n52.sta.api.old.dto.common.EntityPatch;
 import org.n52.sta.api.old.serialize.common.AbstractSTASerializer;
 import org.n52.sta.api.old.serialize.common.JSONBase;
-import org.n52.sta.plus.data.entity.StaPlusParty;
 import org.n52.sta.plus.old.dto.Party;
 import org.n52.sta.plus.old.serialize.json.JSONParty;
 

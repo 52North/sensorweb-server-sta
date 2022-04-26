@@ -32,7 +32,6 @@ import java.util.Set;
 
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 
-import org.n52.sta.api.old.entity.ObservationDTO;
 import org.n52.sta.api.old.serialize.common.AbstractJSONEntity;
 import org.n52.sta.api.old.serialize.common.JSONBase;
 import org.n52.sta.api.old.serialize.common.JSONBase.EntityType;
@@ -42,14 +41,18 @@ import org.n52.sta.plus.old.entity.GroupDTO;
 import org.n52.sta.plus.old.entity.PlusObservationDTO;
 import org.n52.sta.plus.old.entity.RelationDTO;
 
+@SuppressWarnings("VisibilityModifier")
 public class JSONPlusObservation extends JSONBase.JSONwithIdTime<PlusObservationDTO> implements AbstractJSONEntity {
 
     @JsonManagedReference
     public JSONGroup[] ObservationGroups;
+
     @JsonManagedReference
     public JSONRelation[] Subjects;
+
     @JsonManagedReference
     public JSONRelation[] Objects;
+
     @JsonManagedReference
     public JSONLicense License;
 

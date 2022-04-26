@@ -34,7 +34,6 @@ import com.fasterxml.jackson.annotation.JsonManagedReference;
 
 import org.n52.sta.api.old.serialize.common.AbstractJSONEntity;
 import org.n52.sta.api.old.serialize.common.JSONBase;
-import org.n52.sta.api.old.serialize.json.JSONObservation;
 import org.n52.sta.plus.old.dto.Relation;
 import org.n52.sta.plus.old.entity.GroupDTO;
 import org.n52.sta.plus.old.entity.RelationDTO;

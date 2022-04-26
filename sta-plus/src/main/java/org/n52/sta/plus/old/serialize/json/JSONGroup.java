@@ -35,10 +35,8 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import org.n52.shetland.ogc.sta.StaConstants;
-import org.n52.sta.api.old.entity.ObservationDTO;
 import org.n52.sta.api.old.serialize.common.AbstractJSONEntity;
 import org.n52.sta.api.old.serialize.common.JSONBase;
-import org.n52.sta.api.old.serialize.json.JSONObservation;
 import org.n52.sta.plus.old.dto.Group;
 import org.n52.sta.plus.old.entity.GroupDTO;
 import org.n52.sta.plus.old.entity.PlusObservationDTO;

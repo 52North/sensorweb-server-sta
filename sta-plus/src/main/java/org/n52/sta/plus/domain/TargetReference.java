@@ -39,19 +39,17 @@ import org.n52.sta.plus.data.entity.StaPlusRelation;
  * Used in combination with {@link StaPlusRelation} to ensure both
  * properties are mutually exclusive.
  */
-public class TargetReference {
-
-    public static TargetReference objectExternal(String externalObject) {
-        return new TargetReference(externalObject);
-    }
-
-    public static TargetReference objectInternal(Observation<?> observation) {
-        return new TargetReference(observation);
-    }
+public final class TargetReference {
 
     private final String externalObject;
 
     private final Optional<Observation<?>> object;
+
+    private TargetReference(Observation<?> observation) {
+        Objects.requireNonNull(observation, "observation must not be null");
+        this.object = Optional.of(observation);
+        this.externalObject = null;
+    }
 
     private TargetReference(String externalObject) {
         Objects.requireNonNull(externalObject, "externalObject must not be null!");
@@ -62,10 +60,12 @@ public class TargetReference {
         this.object = Optional.empty();
     }
 
-    public TargetReference(Observation<?> observation) {
-        Objects.requireNonNull(observation, "observation must not be null");
-        this.object = Optional.of(observation);
-        this.externalObject = null;
+    public static TargetReference objectExternal(String externalObject) {
+        return new TargetReference(externalObject);
+    }
+
+    public static TargetReference objectInternal(Observation<?> observation) {
+        return new TargetReference(observation);
     }
 
     public boolean isObjectPresent() {

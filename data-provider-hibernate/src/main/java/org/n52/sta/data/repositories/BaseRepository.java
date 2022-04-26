@@ -52,7 +52,7 @@ import org.springframework.data.repository.NoRepositoryBean;
  * @see BaseRepositoryImpl
  */
 @NoRepositoryBean
-public interface BaseRepository<T> extends JpaSpecificationExecutor<T>, JpaRepository<T,Long> {
+public interface BaseRepository<T> extends JpaSpecificationExecutor<T>, JpaRepository<T, Long> {
 
     /**
      * Gets the property value of a single entity matching the given
