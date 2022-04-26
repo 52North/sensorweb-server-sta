@@ -29,11 +29,11 @@ package org.n52.sta.plus.persistence.service;
 
 import javax.annotation.PostConstruct;
 
-import org.n52.sta.data.old.common.service.CommonEntityServiceRepository;
+import org.n52.sta.data.old.common.service.CommonEntityServiceLookup;
 import org.springframework.beans.factory.annotation.Autowired;
 
 // @Component
-public class CitSciEntityServiceRepository extends CommonEntityServiceRepository {
+public class CitSciEntityServiceLookup extends CommonEntityServiceLookup {
 
     @Autowired
     private StaPlusServiceFacade.GroupServiceFacade groupService;
