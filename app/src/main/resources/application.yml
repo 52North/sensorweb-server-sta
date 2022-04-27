@@ -61,6 +61,7 @@ server:
     ## When true DatasetType is set to trajectory if Thing->property contains KVP '"isMobile": "true"'
     isMobile: false
 
+    mqttEnabled: false
     # Toggle whether this Instance should be read-only. Can be toggled separately for MQTT and HTTP
     # All MQTT Publish Messages will be dropped silently
     mqttReadOnly: false

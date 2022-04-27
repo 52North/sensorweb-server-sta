@@ -77,6 +77,7 @@ public class ServerProperties {
     private Set<String> mqttPublishTopics;
     private Boolean variableEncodingType;
     private Boolean isMobile;
+    private Boolean mqttEnabled;
     private Boolean mqttReadOnly;
     private Boolean httpReadOnly;
     private Map<String, String> observation;
@@ -125,6 +126,14 @@ public class ServerProperties {
         isMobile = mobile;
     }
 
+    public Boolean getMqttEnabled() {
+        return mqttEnabled;
+    }
+
+    public void setMqttEnabled(Boolean mqttEnabled) {
+        this.mqttEnabled = mqttEnabled;
+    }
+
     public Boolean getMqttReadOnly() {
         return mqttReadOnly;
     }
@@ -164,6 +173,7 @@ public class ServerProperties {
         props.put("updateFOI", this.getUpdateFOI());
         props.put("variableEncodingType", this.getVariableEncodingType());
         props.put("isMobile", this.getIsMobile());
+        props.put("mqttEnabled", this.getMqttEnabled());
         props.put("mqttReadOnly", this.getMqttReadOnly());
         props.put("httpReadOnly", this.getHttpReadOnly());
         props.put("mqttPublishTopics", String.join(",", this.getMqttPublishTopics()));
