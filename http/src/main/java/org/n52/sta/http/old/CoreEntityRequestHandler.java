@@ -36,7 +36,6 @@ import org.n52.sta.http.old.common.EntityRequestHandler;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RestController;
 
 /**
  * Handles all requests to Entities and to Entity association links
@@ -47,7 +46,7 @@ import org.springframework.web.bind.annotation.RestController;
  *
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
  */
-@RestController
+// @RestController
 public class CoreEntityRequestHandler extends EntityRequestHandler implements CoreRequestUtils {
 
     public CoreEntityRequestHandler(@Value("${server.rootUrl}") String rootUrl,

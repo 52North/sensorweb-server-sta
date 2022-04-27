@@ -33,7 +33,6 @@ import javax.servlet.http.HttpServletRequest;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import org.n52.shetland.ogc.sta.StaConstants;
 import org.n52.shetland.ogc.sta.exception.STACRUDException;
 import org.n52.shetland.ogc.sta.exception.STAInvalidUrlException;
 import org.n52.sta.api.old.EntityServiceFactory;
@@ -43,23 +42,20 @@ import org.n52.sta.http.old.common.CudRequestHandler;
 import org.n52.sta.old.utils.DTOMapper;
 import org.n52.sta.plus.old.CitSciExtensionRequestUtils;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
-import org.springframework.context.annotation.Profile;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
 
 /**
  * Handles all CUD requests (POST, PUT, DELETE) to Entities in the Citizen Science STA Extension
  *
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
  */
-@RestController
-@ConditionalOnProperty(value = "server.feature.httpReadOnly", havingValue = "false", matchIfMissing = true)
-@Profile(StaConstants.STAPLUS)
+// @RestController
+// @ConditionalOnProperty(value = "server.feature.httpReadOnly", havingValue = "false", matchIfMissing = true)
+// @Profile(StaConstants.STAPLUS)
 public class CitSciCudRequestHandler<T extends StaDTO>
     extends CudRequestHandler implements CitSciExtensionRequestUtils {
 

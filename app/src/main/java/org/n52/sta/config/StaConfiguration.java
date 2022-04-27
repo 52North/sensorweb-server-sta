@@ -27,12 +27,37 @@
  */
 package org.n52.sta.config;
 
+import java.util.Optional;
+
+import org.n52.sta.api.EntityProvider;
+import org.n52.sta.api.EntityServiceLookup;
+import org.n52.sta.api.EntityServiceLookup.StaEntityType;
+import org.n52.sta.api.domain.DomainService;
+import org.n52.sta.api.entity.Thing;
+import org.n52.sta.api.service.EntityService;
+import org.n52.sta.api.service.ThingService;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-/**
- * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
- */
 @Configuration
 public class StaConfiguration {
 
+    @Bean
+    public EntityServiceLookup getEntityProviderLookup() {
+        return new EntityServiceLookup();
+    }
+
+    @Bean
+    public EntityService<Thing> getThingService(
+            EntityProvider<Thing> entityProvider,
+            Optional<DomainService<Thing>> thingDomainService,
+            EntityServiceLookup lookup) {
+
+        ThingService service = thingDomainService.isPresent()
+                ? new ThingService(entityProvider, thingDomainService.get())
+                : new ThingService(entityProvider);
+        lookup.addEntityService(StaEntityType.Thing, service);
+        lookup.addEntityService(StaEntityType.Things, service);
+        return service;
+    }
 }

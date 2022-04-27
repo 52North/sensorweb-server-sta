@@ -44,7 +44,7 @@ import org.n52.sta.api.entity.Thing;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class ThingService implements EntityProvider<Thing>, EntityEditor<Thing> {
+public class ThingService implements EntityService<Thing>, EntityEditor<Thing> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ThingService.class);
 

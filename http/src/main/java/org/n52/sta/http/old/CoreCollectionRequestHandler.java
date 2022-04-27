@@ -34,6 +34,7 @@ import org.n52.sta.api.old.CollectionWrapper;
 import org.n52.sta.api.old.CoreRequestUtils;
 import org.n52.sta.api.old.EntityServiceFactory;
 import org.n52.sta.http.old.common.CollectionRequestHandler;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 
@@ -49,7 +50,10 @@ import org.springframework.web.bind.annotation.PathVariable;
  */
 public class CoreCollectionRequestHandler extends CollectionRequestHandler implements CoreRequestUtils {
 
-    public CoreCollectionRequestHandler(String rootUrl, boolean escapeId, EntityServiceFactory serviceRepository) {
+    public CoreCollectionRequestHandler(
+            @Value("${server.rootUrl}") String rootUrl,
+            @Value("${server.feature.escapeId:true}") boolean escapeId,
+            EntityServiceFactory serviceRepository) {
         super(rootUrl, escapeId, serviceRepository);
     }
 

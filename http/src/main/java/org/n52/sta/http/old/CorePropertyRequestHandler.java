@@ -35,6 +35,7 @@ import org.n52.sta.api.old.CoreRequestUtils;
 import org.n52.sta.api.old.EntityServiceFactory;
 import org.n52.sta.api.old.dto.common.StaDTO;
 import org.n52.sta.http.old.common.PropertyRequestHandler;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 
@@ -49,60 +50,62 @@ import org.springframework.web.bind.annotation.PathVariable;
  */
 public class CorePropertyRequestHandler extends PropertyRequestHandler implements CoreRequestUtils {
 
-    public CorePropertyRequestHandler(String rootUrl, boolean escapeId,
-            EntityServiceFactory serviceRepository,
-            ObjectMapper mapper) {
-        super(rootUrl, escapeId, serviceRepository, mapper);
-    }
+        public CorePropertyRequestHandler(
+                        @Value("${server.rootUrl}") String rootUrl,
+                        @Value("${server.feature.escapeId:true}") boolean escapeId,
+                        EntityServiceFactory serviceRepository,
+                        ObjectMapper mapper) {
+                super(rootUrl, escapeId, serviceRepository, mapper);
+        }
 
-    @GetMapping(value = MAPPING_PREFIX + CoreRequestUtils.ENTITY_IDENTIFIED_DIRECTLY + SLASH
-            + PATH_PROPERTY, produces = "application/json")
-    public StaDTO readEntityPropertyDirect(@PathVariable String entity,
-            @PathVariable String id,
-            @PathVariable String property,
-            HttpServletRequest request) throws Exception {
-        return super.readEntityPropertyDirect(entity, id, property, request);
-    }
+        @GetMapping(value = MAPPING_PREFIX + CoreRequestUtils.ENTITY_IDENTIFIED_DIRECTLY + SLASH
+                        + PATH_PROPERTY, produces = "application/json")
+        public StaDTO readEntityPropertyDirect(@PathVariable String entity,
+                        @PathVariable String id,
+                        @PathVariable String property,
+                        HttpServletRequest request) throws Exception {
+                return super.readEntityPropertyDirect(entity, id, property, request);
+        }
 
-    @GetMapping(value = {
-            MAPPING_PREFIX + CoreRequestUtils.ENTITY_PROPERTY_IDENTIFIED_BY_DATASTREAM_PATH_VARIABLE,
-            MAPPING_PREFIX + CoreRequestUtils.ENTITY_PROPERTY_IDENTIFIED_BY_OBSERVATION_PATH_VARIABLE,
-            MAPPING_PREFIX + CoreRequestUtils.ENTITY_PROPERTY_IDENTIFIED_BY_HISTORICAL_LOCATION_PATH_VARIABLE
-    }, produces = "application/json")
-    public StaDTO readRelatedEntityProperty(@PathVariable String entity,
-            @PathVariable String target,
-            @PathVariable String property,
-            HttpServletRequest request)
-            throws Exception {
-        return super.readRelatedEntityProperty(entity, target, property, request);
-    }
+        @GetMapping(value = {
+                        MAPPING_PREFIX + CoreRequestUtils.ENTITY_PROPERTY_IDENTIFIED_BY_DATASTREAM_PATH_VARIABLE,
+                        MAPPING_PREFIX + CoreRequestUtils.ENTITY_PROPERTY_IDENTIFIED_BY_OBSERVATION_PATH_VARIABLE,
+                        MAPPING_PREFIX + CoreRequestUtils.ENTITY_PROPERTY_IDENTIFIED_BY_HISTORICAL_LOCATION_PATH_VARIABLE
+        }, produces = "application/json")
+        public StaDTO readRelatedEntityProperty(@PathVariable String entity,
+                        @PathVariable String target,
+                        @PathVariable String property,
+                        HttpServletRequest request)
+                        throws Exception {
+                return super.readRelatedEntityProperty(entity, target, property, request);
+        }
 
-    @GetMapping(value = MAPPING_PREFIX
-            + CoreRequestUtils.ENTITY_IDENTIFIED_DIRECTLY + SLASH
-            + PATH_PROPERTY
-            + SLASHVALUE, produces = "text/plain")
-    public String readEntityPropertyValueDirect(@PathVariable String entity,
-            @PathVariable String id,
-            @PathVariable String property,
-            HttpServletRequest request) throws Exception {
-        return super.readEntityPropertyValueDirect(entity, id, property, request);
-    }
+        @GetMapping(value = MAPPING_PREFIX
+                        + CoreRequestUtils.ENTITY_IDENTIFIED_DIRECTLY + SLASH
+                        + PATH_PROPERTY
+                        + SLASHVALUE, produces = "text/plain")
+        public String readEntityPropertyValueDirect(@PathVariable String entity,
+                        @PathVariable String id,
+                        @PathVariable String property,
+                        HttpServletRequest request) throws Exception {
+                return super.readEntityPropertyValueDirect(entity, id, property, request);
+        }
 
-    @GetMapping(value = {
-            MAPPING_PREFIX
-                    + CoreRequestUtils.ENTITY_PROPERTY_IDENTIFIED_BY_DATASTREAM_PATH_VARIABLE
-                    + SLASHVALUE,
-            MAPPING_PREFIX
-                    + CoreRequestUtils.ENTITY_PROPERTY_IDENTIFIED_BY_OBSERVATION_PATH_VARIABLE
-                    + SLASHVALUE,
-            MAPPING_PREFIX
-                    + CoreRequestUtils.ENTITY_PROPERTY_IDENTIFIED_BY_HISTORICAL_LOCATION_PATH_VARIABLE
-                    + SLASHVALUE
-    }, produces = "text/plain")
-    public String readRelatedEntityPropertyValue(@PathVariable String entity,
-            @PathVariable String target,
-            @PathVariable String property,
-            HttpServletRequest request) throws Exception {
-        return super.readRelatedEntityPropertyValue(entity, target, property, request);
-    }
+        @GetMapping(value = {
+                        MAPPING_PREFIX
+                                        + CoreRequestUtils.ENTITY_PROPERTY_IDENTIFIED_BY_DATASTREAM_PATH_VARIABLE
+                                        + SLASHVALUE,
+                        MAPPING_PREFIX
+                                        + CoreRequestUtils.ENTITY_PROPERTY_IDENTIFIED_BY_OBSERVATION_PATH_VARIABLE
+                                        + SLASHVALUE,
+                        MAPPING_PREFIX
+                                        + CoreRequestUtils.ENTITY_PROPERTY_IDENTIFIED_BY_HISTORICAL_LOCATION_PATH_VARIABLE
+                                        + SLASHVALUE
+        }, produces = "text/plain")
+        public String readRelatedEntityPropertyValue(@PathVariable String entity,
+                        @PathVariable String target,
+                        @PathVariable String property,
+                        HttpServletRequest request) throws Exception {
+                return super.readRelatedEntityPropertyValue(entity, target, property, request);
+        }
 }

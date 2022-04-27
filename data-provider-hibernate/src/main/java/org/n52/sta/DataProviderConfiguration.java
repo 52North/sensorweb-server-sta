@@ -39,7 +39,9 @@ import org.hibernate.jpa.boot.internal.EntityManagerFactoryBuilderImpl;
 import org.hibernate.jpa.boot.spi.TypeContributorList;
 import org.hibernate.type.BasicType;
 import org.n52.hibernate.type.SmallBooleanType;
+import org.n52.sta.data.provider.ThingEntityProvider;
 import org.n52.sta.data.repositories.BaseRepositoryImpl;
+import org.n52.sta.data.repositories.entity.ThingRepository;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.orm.jpa.JpaProperties;
 import org.springframework.boot.context.properties.ConfigurationProperties;
@@ -54,6 +56,11 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 @EnableTransactionManagement
 @ConfigurationProperties(prefix = "dao-postgres")
 public class DataProviderConfiguration {
+
+    @Bean
+    public ThingEntityProvider getThingEntityProvider(ThingRepository thingRepository) {
+        return new ThingEntityProvider(thingRepository);
+    }
 
     @Configuration
     @EnableJpaRepositories(

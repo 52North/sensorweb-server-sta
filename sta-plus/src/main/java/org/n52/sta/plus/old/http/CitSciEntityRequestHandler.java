@@ -36,10 +36,8 @@ import org.n52.sta.api.old.dto.common.StaDTO;
 import org.n52.sta.http.old.common.EntityRequestHandler;
 import org.n52.sta.plus.old.CitSciExtensionRequestUtils;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.Profile;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.HandlerMapping;
 
 /**
@@ -51,8 +49,8 @@ import org.springframework.web.servlet.HandlerMapping;
  *
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
  */
-@RestController
-@Profile(StaConstants.STAPLUS)
+// @RestController
+// @Profile(StaConstants.STAPLUS)
 public class CitSciEntityRequestHandler extends EntityRequestHandler implements CitSciExtensionRequestUtils {
 
     public CitSciEntityRequestHandler(@Value("${server.rootUrl}") String rootUrl,

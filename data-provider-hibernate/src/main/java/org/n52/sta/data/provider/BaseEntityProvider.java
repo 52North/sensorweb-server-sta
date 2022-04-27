@@ -45,9 +45,11 @@ public abstract class BaseEntityProvider<T extends Identifiable> implements Enti
      * @return the entity graph builder
      */
     protected <E> EntityGraphBuilder<E> createEntityGraph(QueryOptions options, Class<E> entityType) {
-        ExpandFilter expand = options.getExpandFilter();
         EntityGraphBuilder<E> graphBuilder = new EntityGraphBuilder<>(entityType);
-        Streams.stream(expand.getItems()).forEach(graphBuilder::addUnfilteredExpandItem);
+        if (options.hasExpandFilter()) {
+            ExpandFilter expand = options.getExpandFilter();
+            Streams.stream(expand.getItems()).forEach(graphBuilder::addUnfilteredExpandItem);
+        }
         return graphBuilder;
     }
 

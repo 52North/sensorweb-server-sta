@@ -29,25 +29,13 @@ package org.n52.sta.config;
 
 import javax.servlet.Filter;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-
-import org.n52.sta.api.old.EntityServiceFactory;
-import org.n52.sta.http.old.CoreCollectionRequestHandler;
-import org.n52.sta.http.old.CoreCudRequestHandler;
-import org.n52.sta.http.old.CoreEntityRequestHandler;
-import org.n52.sta.http.old.CorePropertyRequestHandler;
-import org.n52.sta.http.old.common.CollectionRequestHandler;
 import org.n52.sta.http.old.common.CustomUrlPathHelper;
-import org.n52.sta.http.old.common.EntityRequestHandler;
-import org.n52.sta.http.old.common.PropertyRequestHandler;
-import org.n52.sta.http.old.common.RootRequestHandler;
 import org.n52.sta.http.old.filter.CorsFilter;
-import org.n52.sta.old.utils.DTOMapper;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.env.Environment;
+import org.springframework.http.MediaType;
+import org.springframework.web.servlet.config.annotation.ContentNegotiationConfigurer;
 import org.springframework.web.servlet.config.annotation.PathMatchConfigurer;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
@@ -59,48 +47,9 @@ public class WebConfiguration implements WebMvcConfigurer {
         configurer.setUrlPathHelper(new CustomUrlPathHelper());
     }
 
-    @Bean
-    public RootRequestHandler getRootRequestHandler(
-            ObjectMapper mapper,
-            Environment environment,
-            ServerProperties serverProperties) {
-        return new RootRequestHandler(mapper, environment, serverProperties);
-    }
-
-    @Bean
-    public EntityRequestHandler getEntityRequestHandler(
-            @Value("${server.rootUrl}") String rootUrl,
-            @Value("${server.feature.escapeId:true}") boolean escapeId,
-            EntityServiceFactory serviceRepository) {
-        return new CoreEntityRequestHandler(rootUrl, escapeId, serviceRepository);
-    }
-
-    @Bean
-    public PropertyRequestHandler getPropertyRequestHandler(
-            @Value("${server.rootUrl}") String rootUrl,
-            @Value("${server.feature.escapeId:true}") boolean escapeId,
-            EntityServiceFactory serviceRepository,
-            ObjectMapper mapper) {
-        return new CorePropertyRequestHandler(rootUrl, escapeId, serviceRepository, mapper);
-    }
-
-    @Bean
-    public CollectionRequestHandler getCollectionRequestHandler(
-            @Value("${server.rootUrl}") String rootUrl,
-            @Value("${server.feature.escapeId:true}") boolean escapeId,
-            EntityServiceFactory serviceRepository) {
-        return new CoreCollectionRequestHandler(rootUrl, escapeId, serviceRepository);
-    }
-
-    @Bean
-    @ConditionalOnProperty(value = "server.feature.httpReadOnly", havingValue = "false", matchIfMissing = true)
-    public CoreCudRequestHandler getWritableRequestHandler(
-            @Value("${server.rootUrl}") String rootUrl,
-            @Value("${server.feature.escapeId:true}") boolean escapeId,
-            EntityServiceFactory serviceRepository,
-            ObjectMapper mapper,
-            DTOMapper dtoMapper) {
-        return new CoreCudRequestHandler(rootUrl, escapeId, serviceRepository, mapper, dtoMapper);
+    @Override
+    public void configureContentNegotiation(ContentNegotiationConfigurer configurer) {
+        configurer.defaultContentType(MediaType.APPLICATION_JSON);
     }
 
     @Bean

@@ -37,10 +37,8 @@ import org.n52.sta.api.old.EntityServiceFactory;
 import org.n52.sta.http.old.common.CollectionRequestHandler;
 import org.n52.sta.plus.old.CitSciExtensionRequestUtils;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.Profile;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.HandlerMapping;
 
 /**
@@ -53,8 +51,8 @@ import org.springframework.web.servlet.HandlerMapping;
  *
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
  */
-@RestController
-@Profile(StaConstants.STAPLUS)
+// @RestController
+// @Profile(StaConstants.STAPLUS)
 public class CitSciCollectionRequestHandler extends CollectionRequestHandler implements CitSciExtensionRequestUtils {
 
     public CitSciCollectionRequestHandler(@Value("${server.rootUrl}") String rootUrl,
