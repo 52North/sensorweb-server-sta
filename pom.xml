@@ -40,28 +40,24 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-        <java.version>1.8</java.version>
-        <maven.compiler.source>1.8</maven.compiler.source>
-        <maven.compiler.target>1.8</maven.compiler.target>
-        <db-model.version>4.0.2-STA-SNAPSHOT</db-model.version>
+        <java.version>11</java.version>
+        <maven.compiler.source>11</maven.compiler.source>
+        <maven.compiler.target>11</maven.compiler.target>
+        <antlr-runtime.version>4.8-1</antlr-runtime.version>
         <arctic-sea.version>8.1.0-SNAPSHOT</arctic-sea.version>
-        <slf4j.version>1.7.30</slf4j.version>
-        <spotbugs.version>4.1.2</spotbugs.version>
+        <db-model.version>4.0.2-STA-SNAPSHOT</db-model.version>
         <findbugs.version>3.0.2</findbugs.version>
-        <spring-boot.version>2.3.5.RELEASE</spring-boot.version>
         <geolatte-geom.version>1.6.0</geolatte-geom.version>
-        <hibernate.version>5.4.12.Final</hibernate.version>
-        <jackson.version>2.11.3</jackson.version>
+        <guava.version>30.1-jre</guava.version>
         <hamcrest.version>2.2</hamcrest.version>
+        <joda.version>2.10.8</joda.version>
         <locationtech-jts.version>1.16.1</locationtech-jts.version>
-        <h2database.version>1.4.200</h2database.version>
-        <mockito.version>4.4.0</mockito.version>
+        <paho.version>1.2.5</paho.version>
+        <spotbugs.version>4.1.2</spotbugs.version>
+        <spotbugs.version>4.1.4</spotbugs.version>
+        <spring-boot.version>2.3.5.RELEASE</spring-boot.version>
         <testcontainers.jupiter.version>1.16.3</testcontainers.jupiter.version>
         <testcontainers.postgres.version>1.16.3</testcontainers.postgres.version>
-        <spotbugs.version>4.1.4</spotbugs.version>
-        <paho.version>1.2.5</paho.version>
-        <antlr-runtime.version>4.8-1</antlr-runtime.version>
-        <joda.version>2.10.8</joda.version>
     </properties>
 
     <dependencyManagement>
@@ -164,16 +160,10 @@
             </dependency>
 
             <dependency>
-                <groupId>com.fasterxml.jackson.core</groupId>
-                <artifactId>jackson-core</artifactId>
-                <version>${jackson.version}</version>
+                <groupId>com.google.guava</groupId>
+                <artifactId>guava</artifactId>
+                <version>${guava.version}</version>
             </dependency>
-            <dependency>
-                <groupId>com.fasterxml.jackson.module</groupId>
-                <artifactId>jackson-module-afterburner</artifactId>
-                <version>${jackson.version}</version>
-            </dependency>
-
             <dependency>
                 <groupId>joda-time</groupId>
                 <artifactId>joda-time</artifactId>
@@ -208,52 +198,11 @@
             </dependency>
 
             <dependency>
-                <groupId>org.hibernate</groupId>
-                <artifactId>hibernate-core</artifactId>
-                <version>${hibernate.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.hibernate</groupId>
-                <artifactId>hibernate-spatial</artifactId>
-                <version>${hibernate.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>com.h2database</groupId>
-                <artifactId>h2-mvstore</artifactId>
-                <version>${h2database.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>org.slf4j</groupId>
-                <artifactId>slf4j-api</artifactId>
-                <version>${slf4j.version}</version>
-            </dependency>
-
-
-            <dependency>
                 <groupId>com.github.spotbugs</groupId>
                 <artifactId>spotbugs-annotations</artifactId>
                 <version>${spotbugs.version}</version>
             </dependency>
-            <!--            <dependency>
-                <groupId>com.google.code.findbugs</groupId>
-                <artifactId>jsr305</artifactId>
-                <version>${findbugs.version}</version>
-            </dependency>-->
 
-            <dependency>
-                <groupId>org.hamcrest</groupId>
-                <artifactId>hamcrest-core</artifactId>
-                <scope>test</scope>
-                <version>${hamcrest.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.hamcrest</groupId>
-                <artifactId>hamcrest</artifactId>
-                <scope>test</scope>
-                <version>${hamcrest.version}</version>
-            </dependency>
             <dependency>
                 <groupId>org.testcontainers</groupId>
                 <artifactId>junit-jupiter</artifactId>
@@ -264,12 +213,6 @@
                 <groupId>org.testcontainers</groupId>
                 <artifactId>postgresql</artifactId>
                 <version>${testcontainers.postgres.version}</version>
-                <scope>test</scope>
-            </dependency>
-            <dependency>
-                <groupId>org.mockito</groupId>
-                <artifactId>mockito-core</artifactId>
-                <version>${mockito.version}</version>
                 <scope>test</scope>
             </dependency>
             <dependency>
