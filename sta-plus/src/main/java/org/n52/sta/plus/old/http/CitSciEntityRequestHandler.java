@@ -53,7 +53,7 @@ import org.springframework.web.servlet.HandlerMapping;
 // @Profile(StaConstants.STAPLUS)
 public class CitSciEntityRequestHandler extends EntityRequestHandler implements CitSciExtensionRequestUtils {
 
-    public CitSciEntityRequestHandler(@Value("${server.rootUrl}") String rootUrl,
+    public CitSciEntityRequestHandler(@Value("${server.config.service-root-url}") String rootUrl,
                                       @Value("${server.feature.escapeId:true}") boolean shouldEscapeId,
                                       EntityServiceFactory serviceRepository) {
         super(rootUrl, shouldEscapeId, serviceRepository);

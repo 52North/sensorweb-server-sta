@@ -34,6 +34,8 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.n52.shetland.ogc.sta.StaConstants;
 import org.n52.shetland.ogc.sta.model.STAEntityDefinition;
 import org.n52.sta.config.ServerProperties;
+import org.n52.sta.config.VersionProperties;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.env.Environment;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -49,12 +51,7 @@ public class RootRequestHandler {
     private static final String ENDPOINTS = "endpoints";
     private static final String COLON = ":";
     private static final String SLASH = "/";
-    private static final String
-        HTTP_WWW_OPENGIS_NET_SPEC_IOT_SENSING_1_1_REQ_CREATE_OBSERVATIONS_VIA_MQTT_OBSERVATIONS_CREATION =
-        "http://www.opengis.net/spec/iot_sensing/1.1/req/create-observations-via-mqtt/observations-creation";
-    private static final String
-        HTTP_WWW_OPENGIS_NET_SPEC_IOT_SENSING_1_1_REQ_RECEIVE_UPDATES_VIA_MQTT_RECEIVE_UPDATES =
-        "http://www.opengis.net/spec/iot_sensing/1.1/req/receive-updates-via-mqtt/receive-updates";
+    
     private static final String HTTP_WWW_OPENGIS_NET_SPEC_IOT_SENSING_1_1_REQ_CREATE_UPDATE_DELETE =
         "http://www.opengis.net/spec/iot_sensing/1.1/req/create-update-delete";
     private static final String HTTP_WWW_OPENGIS_NET_SPEC_IOT_SENSING_1_1_REQ_REQUEST_DATA =
@@ -64,19 +61,26 @@ public class RootRequestHandler {
         "http://www.opengis.net/spec/iot_sensing/1.1/req/resource-path/resource-path-to-entities";
     private static final String HTTP_WWW_OPENGIS_NET_SPEC_IOT_SENSING_1_1_REQ_DATAMODEL =
         "http://www.opengis.net/spec/iot_sensing/1.1/req/datamodel";
-    private static final String HTTPS_GITHUB_COM_52_NORTH_SENSORWEB_SERVER_STA_EXTENSION_CREATE_VIA_MQTT_MD =
-        "https://github.com/52North/sensorweb-server-sta/extension/create-via-mqtt.md";
+    
     private static final String HTTPS_GITHUB_COM_52_NORTH_SENSORWEB_SERVER_STA_EXTENSION_SERVER_VERSION_MD =
         "https://github.com/52North/sensorweb-server-sta/extension/server-version.md";
     private static final String HTTPS_GITHUB_COM_52_NORTH_SENSORWEB_SERVER_STA_EXTENSION_EXTENDED_SENSOR_ENCODINGTYPE =
         "https://github.com/52North/sensorweb-server-sta/extension/extended-sensor-encodingtype.md";
 
+    @Value("${server.feature.http.read-only}")
+    private Boolean httpReadOnly = true;
     private final String rootResponse;
+    private final ServerProperties serverProperties;
+    private final VersionProperties versionProperties;
 
-    public RootRequestHandler(ObjectMapper mapper,
-                              Environment environment,
-                              ServerProperties serverProperties) {
-        rootResponse = createRootResponse(mapper, environment, serverProperties);
+    public RootRequestHandler(
+            ObjectMapper mapper,
+            Environment environment,
+            ServerProperties serverProperties,
+            VersionProperties versionProperties) {
+        this.serverProperties = serverProperties;
+        this.versionProperties = versionProperties;
+        rootResponse = createRootResponse(mapper, environment);
     }
 
     @GetMapping(value = "/")
@@ -84,11 +88,9 @@ public class RootRequestHandler {
         return rootResponse;
     }
 
-    private String createRootResponse(ObjectMapper mapper,
-                                      Environment environment,
-                                      ServerProperties serverProperties) {
+    private String createRootResponse(ObjectMapper mapper, Environment environment) {
         ArrayNode endpoints = mapper.createArrayNode();
-        String rootUrl = environment.getRequiredProperty("server.rootUrl");
+        String rootUrl = environment.getRequiredProperty("server.config.service-root-url");
 
         // parse Endpoints
         addToArray(rootUrl, mapper, endpoints, STAEntityDefinition.CORECOLLECTIONS);
@@ -111,7 +113,7 @@ public class RootRequestHandler {
         conformanceClasses.add(
             HTTP_WWW_OPENGIS_NET_SPEC_IOT_SENSING_1_1_REQ_REQUEST_DATA);
         // Do not list CUD if we are in readOnly-Mode
-        if (!serverProperties.getHttpReadOnly()) {
+        if (!httpReadOnly) {
             conformanceClasses.add(
                 HTTP_WWW_OPENGIS_NET_SPEC_IOT_SENSING_1_1_REQ_CREATE_UPDATE_DELETE);
         }
@@ -125,7 +127,7 @@ public class RootRequestHandler {
         conformanceClasses.add(
             HTTPS_GITHUB_COM_52_NORTH_SENSORWEB_SERVER_STA_EXTENSION_SERVER_VERSION_MD);
         serverSettings.set(HTTPS_GITHUB_COM_52_NORTH_SENSORWEB_SERVER_STA_EXTENSION_SERVER_VERSION_MD,
-                           serverProperties.getVersionInformation(mapper));
+                           versionProperties.getVersionInformation(mapper));
 
         if (environment.getRequiredProperty("server.feature.variableEncodingType", Boolean.class)) {
             conformanceClasses.add(
@@ -133,61 +135,7 @@ public class RootRequestHandler {
             );
         }
 
-        // MQTT Extensions
-        Boolean plainTcpEnabled = environment.getRequiredProperty("mqtt.broker.plaintcp.enabled", Boolean.class);
-        Boolean wsEnabled = environment.getRequiredProperty("mqtt.broker.websocket.enabled", Boolean.class);
-        if (plainTcpEnabled || wsEnabled) {
-            // Add to conformanceClasses Array
-            conformanceClasses.add(
-                HTTP_WWW_OPENGIS_NET_SPEC_IOT_SENSING_1_1_REQ_RECEIVE_UPDATES_VIA_MQTT_RECEIVE_UPDATES);
-            if (!serverProperties.getMqttReadOnly()) {
-                conformanceClasses.add(
-                    HTTP_WWW_OPENGIS_NET_SPEC_IOT_SENSING_1_1_REQ_CREATE_OBSERVATIONS_VIA_MQTT_OBSERVATIONS_CREATION);
-                conformanceClasses.add(
-                    HTTPS_GITHUB_COM_52_NORTH_SENSORWEB_SERVER_STA_EXTENSION_CREATE_VIA_MQTT_MD);
-            }
-
-            // Parse MQTT Endpoints
-            ArrayNode mqttEndpoints = mapper.createArrayNode();
-            // Check which endpoints are enabled
-            if (plainTcpEnabled) {
-                mqttEndpoints.add(environment.getRequiredProperty("mqtt.broker.plaintcp.host")
-                                      + COLON
-                                      + environment.getRequiredProperty("mqtt.broker.plaintcp.port"));
-
-            }
-            if (wsEnabled) {
-                mqttEndpoints.add(environment.getRequiredProperty("mqtt.broker.websocket.host")
-                                      + COLON
-                                      + environment.getRequiredProperty("mqtt.broker.websocket.port"));
-
-            }
-
-            // MQTT Updates are always active if mqtt is active
-            ObjectNode mqttEndpointsArray = mapper.createObjectNode();
-            mqttEndpointsArray.set(ENDPOINTS, mqttEndpoints);
-            serverSettings.set(
-                HTTP_WWW_OPENGIS_NET_SPEC_IOT_SENSING_1_1_REQ_RECEIVE_UPDATES_VIA_MQTT_RECEIVE_UPDATES,
-                mqttEndpointsArray);
-
-            // MQTT Publish
-            if (!serverProperties.getMqttReadOnly()) {
-                ObjectNode mqttPublishSettings = mapper.createObjectNode();
-                mqttPublishSettings.set(ENDPOINTS, mqttEndpoints);
-                serverSettings.set(
-                    HTTP_WWW_OPENGIS_NET_SPEC_IOT_SENSING_1_1_REQ_CREATE_OBSERVATIONS_VIA_MQTT_OBSERVATIONS_CREATION,
-                    mqttEndpointsArray);
-
-                ObjectNode mqttCustomPublishSettings = mapper.createObjectNode();
-                ArrayNode availableMqttPublishEndpoints = mapper.createArrayNode();
-                serverProperties.getMqttPublishTopics().forEach(availableMqttPublishEndpoints::add);
-                mqttCustomPublishSettings.set(ENDPOINTS, mqttEndpoints);
-                mqttCustomPublishSettings.set("entities", availableMqttPublishEndpoints);
-                serverSettings.set(
-                    HTTPS_GITHUB_COM_52_NORTH_SENSORWEB_SERVER_STA_EXTENSION_CREATE_VIA_MQTT_MD,
-                    mqttCustomPublishSettings);
-            }
-        }
+        
         node.set("serverSettings", serverSettings);
         return node.toString();
     }

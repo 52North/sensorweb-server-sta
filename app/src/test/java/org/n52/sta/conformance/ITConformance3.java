@@ -62,7 +62,7 @@ public class ITConformance3 extends ConformanceTests implements TestUtil {
 
     private static final Logger logger = LoggerFactory.getLogger(ITConformance3.class);
 
-    public ITConformance3(@Value("${server.rootUrl}") String rootUrl) {
+    public ITConformance3(@Value("${server.config.service-root-url}") String rootUrl) {
         super(rootUrl);
     }
 

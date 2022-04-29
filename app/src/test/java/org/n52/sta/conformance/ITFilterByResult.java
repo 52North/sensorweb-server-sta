@@ -47,7 +47,7 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 public class ITFilterByResult extends ConformanceTests implements TestUtil {
 
-    ITFilterByResult(@Value("${server.rootUrl}") String rootUrl) {
+    ITFilterByResult(@Value("${server.config.service-root-url}") String rootUrl) {
         super(rootUrl);
     }
 

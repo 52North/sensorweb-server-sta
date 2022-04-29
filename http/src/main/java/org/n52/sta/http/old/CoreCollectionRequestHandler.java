@@ -51,7 +51,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 public class CoreCollectionRequestHandler extends CollectionRequestHandler implements CoreRequestUtils {
 
     public CoreCollectionRequestHandler(
-            @Value("${server.rootUrl}") String rootUrl,
+            @Value("${server.config.service-root-url}") String rootUrl,
             @Value("${server.feature.escapeId:true}") boolean escapeId,
             EntityServiceFactory serviceRepository) {
         super(rootUrl, escapeId, serviceRepository);

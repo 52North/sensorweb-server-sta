@@ -58,7 +58,7 @@ public class ITConformance2 extends ConformanceTests implements TestUtil {
 
     private static final Logger logger = LoggerFactory.getLogger(ITConformance2.class);
 
-    public ITConformance2(@Value("${server.rootUrl}") String rootUrl) throws IOException {
+    public ITConformance2(@Value("${server.config.service-root-url}") String rootUrl) throws IOException {
         super(rootUrl);
 
         // Create required test harness

@@ -126,7 +126,7 @@ public class ITRollbackOnInvalidPost extends ConformanceTests {
         "\"encodingType\":\"application/pdf\",\"metadata\":\"http://datasheets.maxim-ic.com/en/ds/DS18B20" +
         ".pdf\"}}]}";
 
-    ITRollbackOnInvalidPost(@Value("${server.rootUrl}") String rootUrl) {
+    ITRollbackOnInvalidPost(@Value("${server.config.service-root-url}") String rootUrl) {
         super(rootUrl);
     }
 

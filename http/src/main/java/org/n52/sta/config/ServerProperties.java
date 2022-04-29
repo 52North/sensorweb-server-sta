@@ -27,16 +27,12 @@
  */
 package org.n52.sta.config;
 
-import java.util.HashMap;
 import java.util.Map;
-import java.util.Set;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.boot.info.BuildProperties;
 import org.springframework.context.annotation.Configuration;
 
 /**
@@ -48,43 +44,12 @@ import org.springframework.context.annotation.Configuration;
 @ConfigurationProperties(prefix = "server.feature")
 public class ServerProperties {
 
-    private final BuildProperties buildProperties;
-
-    @Value("${project.version}")
-    private String projectVersion;
-
-    @Value("${git.build.time}")
-    private String buildTime;
-
-    @Value("${git.remote.origin.url}")
-    private String repository;
-
-    @Value("${git.branch}")
-    private String branch;
-
-    @Value("${git.commit.id.full}")
-    private String commitId;
-
-    @Value("${git.commit.time}")
-    private String commitTime;
-
-    @Value("${git.commit.message.short}")
-    private String commitMessage;
-
     private Boolean escapeId;
     private Boolean implicitExpand;
     private Boolean updateFOI;
-    private Set<String> mqttPublishTopics;
     private Boolean variableEncodingType;
     private Boolean isMobile;
-    private Boolean mqttEnabled;
-    private Boolean mqttReadOnly;
-    private Boolean httpReadOnly;
     private Map<String, String> observation;
-
-    public ServerProperties(BuildProperties buildProperties) {
-        this.buildProperties = buildProperties;
-    }
 
     public Boolean getImplicitExpand() {
         return implicitExpand;
@@ -102,14 +67,6 @@ public class ServerProperties {
         this.updateFOI = updateFOI;
     }
 
-    public Set<String> getMqttPublishTopics() {
-        return mqttPublishTopics;
-    }
-
-    public void setMqttPublishTopics(Set<String> mqttPublishTopics) {
-        this.mqttPublishTopics = mqttPublishTopics;
-    }
-
     public Boolean getVariableEncodingType() {
         return variableEncodingType;
     }
@@ -124,30 +81,6 @@ public class ServerProperties {
 
     public void setIsMobile(Boolean mobile) {
         isMobile = mobile;
-    }
-
-    public Boolean getMqttEnabled() {
-        return mqttEnabled;
-    }
-
-    public void setMqttEnabled(Boolean mqttEnabled) {
-        this.mqttEnabled = mqttEnabled;
-    }
-
-    public Boolean getMqttReadOnly() {
-        return mqttReadOnly;
-    }
-
-    public void setMqttReadOnly(Boolean mqttReadOnly) {
-        this.mqttReadOnly = mqttReadOnly;
-    }
-
-    public Boolean getHttpReadOnly() {
-        return httpReadOnly;
-    }
-
-    public void setHttpReadOnly(Boolean httpReadOnly) {
-        this.httpReadOnly = httpReadOnly;
     }
 
     public Map<String, String> getObservation() {
@@ -173,30 +106,10 @@ public class ServerProperties {
         props.put("updateFOI", this.getUpdateFOI());
         props.put("variableEncodingType", this.getVariableEncodingType());
         props.put("isMobile", this.getIsMobile());
-        props.put("mqttEnabled", this.getMqttEnabled());
-        props.put("mqttReadOnly", this.getMqttReadOnly());
-        props.put("httpReadOnly", this.getHttpReadOnly());
-        props.put("mqttPublishTopics", String.join(",", this.getMqttPublishTopics()));
         ObjectNode observationJSON = mapper.createObjectNode();
         this.getObservation().forEach(observationJSON::put);
         props.set("observation", observationJSON);
         return props;
-    }
-
-    public ObjectNode getVersionInformation(ObjectMapper mapper) {
-        Map<String, String> result = new HashMap<>();
-        result.put("project.name", "52North SensorThingsAPI");
-        result.put("project.version", buildProperties.getVersion());
-        result.put("project.time", buildProperties.getTime().toString());
-        result.put("git.builddate", buildTime);
-        result.put("git.repository", repository);
-        result.put("git.path", branch);
-        result.put("git.revision", commitId);
-        result.put("git.lastCommitMessage", commitMessage);
-        result.put("git.lastCommitDate", commitTime);
-        ObjectNode json = mapper.createObjectNode();
-        result.forEach(json::put);
-        return json;
     }
 
 }

@@ -75,7 +75,7 @@ public class ITQueryOptionPrecedence extends ConformanceTests implements TestUti
         filterFilter, expandFilter
     };
 
-    public ITQueryOptionPrecedence(@Value("${server.rootUrl}") String rootUrl) throws Exception {
+    public ITQueryOptionPrecedence(@Value("${server.config.service-root-url}") String rootUrl) throws Exception {
         super(rootUrl);
 
         // Create required test harness

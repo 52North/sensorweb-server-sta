@@ -55,7 +55,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 public class CoreCudRequestHandler extends CudRequestHandler<StaDTO> implements CoreRequestUtils {
 
     public CoreCudRequestHandler(
-            @Value("${server.rootUrl}") String rootUrl,
+            @Value("${server.config.service-root-url}") String rootUrl,
             @Value("${server.feature.escapeId:true}") boolean escapeId,
             EntityServiceFactory serviceRepository,
             ObjectMapper mapper,

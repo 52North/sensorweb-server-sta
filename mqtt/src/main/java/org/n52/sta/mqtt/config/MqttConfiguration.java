@@ -40,23 +40,28 @@ import org.n52.sta.mqtt.old.MqttSubscriptionEventHandlerImpl;
 import org.n52.sta.old.utils.DTOMapper;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
-@ConditionalOnProperty(name = "server.feature.mqttEnabled", havingValue = "true")
+@ConfigurationProperties(prefix = "server.feature")
+@ConditionalOnProperty(name = "server.feature.mqtt.enabled", havingValue = "true", matchIfMissing = false)
 public class MqttConfiguration {
+
+    @Value("mqtt.enabled:false")
+    private boolean mqttEnabled;
 
     @Bean(initMethod = "init", destroyMethod = "stopServer")
     public MqttBroker getMqttBroker(
-            @Value("${mqtt.broker.persistence.path:}") String storePath,
-            @Value("${mqtt.broker.persistence.filename:52N-STA-MQTTBroker.h2}") String storeFilename,
-            @Value("${mqtt.broker.persistence.autosave_interval:300}") String autosaveIntervalProperty,
-            @Value("${mqtt.broker.persistence.enabled}") Boolean persistenceEnabled,
-            @Value("${mqtt.broker.websocket.enabled}") Boolean websocketEnabled,
-            @Value("${mqtt.broker.websocket.port:8080}") String websocketPort,
-            @Value("${mqtt.broker.plaintcp.enabled}") Boolean plainTcpEnabled,
-            @Value("${mqtt.broker.plain_tcp.port:1883}") String plainTcpPort,
+            @Value("${mqtt.broker.store.folder:}") String storePath,
+            @Value("${mqtt.broker.store.filename:52N-STA-MQTTBroker.h2}") String storeFilename,
+            @Value("${mqtt.broker.store.autosave-in-seconds:30}") String autosaveIntervalProperty,
+            @Value("${mqtt.broker.store.enabled}") Boolean persistenceEnabled,
+            @Value("${mqtt.broker.ws.enabled}") Boolean websocketEnabled,
+            @Value("${mqtt.broker.ws.port:8080}") String websocketPort,
+            @Value("${mqtt.broker.tcp.enabled}") Boolean plainTcpEnabled,
+            @Value("${mqtt.broker.tcp.port:1883}") String plainTcpPort,
             MqttSubscriptionEventHandler subscriptionHandler,
             MqttPublishMessageHandler publishHandler) {
 
@@ -67,7 +72,7 @@ public class MqttConfiguration {
 
     @Bean
     public MqttSubscriptionEventHandler getMqttMessageHandler(
-            @Value("${server.rootUrl}") String rootUrl,
+            @Value("${server.config.service-root-url}") String rootUrl,
             @Value("${server.feature.escapeId:true}") boolean shouldEscapeId,
             ObjectMapper mapper) {
         return new MqttSubscriptionEventHandlerImpl(rootUrl, shouldEscapeId, mapper);
@@ -75,9 +80,9 @@ public class MqttConfiguration {
 
     @Bean
     public MqttPublishMessageHandler getMqttMessageHandler(
-            @Value("${server.feature.mqttPublishTopics:Observations}") List<String> publishTopics,
-            @Value("${server.feature.mqttReadOnly}") boolean readOnly,
-            @Value("${server.rootUrl}") String rootUrl,
+            @Value("${mqtt.publication-topics:Observations}") List<String> publishTopics,
+            @Value("${mqtt.read-only}") boolean readOnly,
+            @Value("${server.config.service-root-url}") String rootUrl,
             @Value("${server.feature.escapeId:true}") boolean escapeId,
             EntityServiceFactory serviceRepository,
             ObjectMapper mapper,
@@ -86,4 +91,5 @@ public class MqttConfiguration {
         return new MqttPublishMessageHandlerImpl(publishTopics, readOnly, rootUrl, escapeId,
                 serviceRepository, mapper, dtoMapper);
     }
+
 }

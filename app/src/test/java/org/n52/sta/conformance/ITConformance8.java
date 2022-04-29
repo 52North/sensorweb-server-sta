@@ -107,7 +107,7 @@ public class ITConformance8 extends ConformanceTests implements TestUtil {
         + "  }\n"
         + "}";
 
-    public ITConformance8(@Value("${server.rootUrl}") String rootUrl) {
+    public ITConformance8(@Value("${server.config.service-root-url}") String rootUrl) {
         super(rootUrl);
     }
 

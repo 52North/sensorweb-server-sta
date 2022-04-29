@@ -43,7 +43,7 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 public class ITFilterByRelatedEntities extends ConformanceTests implements TestUtil {
 
-    ITFilterByRelatedEntities(@Value("${server.rootUrl}") String rootUrl) throws Exception {
+    ITFilterByRelatedEntities(@Value("${server.config.service-root-url}") String rootUrl) throws Exception {
         super(rootUrl);
 
         // Create required test harness

@@ -53,7 +53,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 // @Profile(StaConstants.STAPLUS)
 public class CitSciPropertyRequestHandler extends PropertyRequestHandler implements CitSciExtensionRequestUtils {
 
-    public CitSciPropertyRequestHandler(@Value("${server.rootUrl}") String rootUrl,
+    public CitSciPropertyRequestHandler(@Value("${server.config.service-root-url}") String rootUrl,
                                         @Value("${server.feature.escapeId:true}") boolean shouldEscapeId,
                                         EntityServiceFactory serviceRepository,
                                         ObjectMapper mapper) {

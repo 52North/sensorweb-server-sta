@@ -67,7 +67,7 @@ public class JacksonConfiguration {
 
     @Bean
     public ObjectMapper customMapper(
-        @Value("${server.rootUrl}") String rootUrl,
+        @Value("${server.config.service-root-url}") String rootUrl,
         @Value("${server.feature.variableEncodingType:false}") boolean variableSensorEncodingTypeEnabled,
         @Value("${server.feature.observation.samplingGeometry}") String samplingGeometryMapping,
         @Value("${server.feature.observation.verticalFrom}") String verticalFromMapping,

@@ -58,7 +58,7 @@ public class ITConformance7 extends ConformanceTests {
 
     private static IMqttClient mqttClient;
 
-    public ITConformance7(@Value("${server.rootUrl}") String rootUrl) {
+    public ITConformance7(@Value("${server.config.service-root-url}") String rootUrl) {
         super(rootUrl);
     }
 

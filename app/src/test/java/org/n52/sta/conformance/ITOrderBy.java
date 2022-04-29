@@ -51,7 +51,7 @@ public class ITOrderBy extends ConformanceTests implements TestUtil {
 
     final String result = "result";
 
-    public ITOrderBy(@Value("${server.rootUrl}") String rootUrl) throws Exception {
+    public ITOrderBy(@Value("${server.config.service-root-url}") String rootUrl) throws Exception {
         super(rootUrl);
 
         // Create required test harness

@@ -49,7 +49,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 // @RestController
 public class CoreEntityRequestHandler extends EntityRequestHandler implements CoreRequestUtils {
 
-    public CoreEntityRequestHandler(@Value("${server.rootUrl}") String rootUrl,
+    public CoreEntityRequestHandler(@Value("${server.config.service-root-url}") String rootUrl,
                                     @Value("${server.feature.escapeId:true}") boolean escapeId,
                                     EntityServiceFactory serviceRepository) {
         super(rootUrl, escapeId, serviceRepository);

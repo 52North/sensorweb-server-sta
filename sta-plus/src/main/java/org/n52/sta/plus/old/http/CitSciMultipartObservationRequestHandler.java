@@ -62,7 +62,7 @@ import org.springframework.web.multipart.MultipartFile;
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
  */
 // @RestController
-// @ConditionalOnProperty(value = "server.feature.httpReadOnly", havingValue = "false", matchIfMissing = true)
+// @ConditionalOnProperty(value = "server.feature.http.read-Only", havingValue = "false", matchIfMissing = true)
 // @Profile(StaConstants.STAPLUS)
 public class CitSciMultipartObservationRequestHandler {
 
@@ -76,7 +76,7 @@ public class CitSciMultipartObservationRequestHandler {
     private final String rootUrl;
 
     public CitSciMultipartObservationRequestHandler(
-                                     @Value("${server.rootUrl}") String rootUrl,
+                                     @Value("${server.config.service-root-url}") String rootUrl,
                                      @Value("${server.feature.blobUploadDir:/tmp/sta_blobs}") String uploadDirectory,
                                      EntityServiceFactory serviceRepository,
                                      ObjectMapper mapper) {

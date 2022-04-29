@@ -59,7 +59,7 @@ public class ITRootResponseTest extends ConformanceTests {
 
     private ObjectMapper mapper = new ObjectMapper();
 
-    ITRootResponseTest(@Value("${server.rootUrl}") String rootUrl) {
+    ITRootResponseTest(@Value("${server.config.service-root-url}") String rootUrl) {
         super(rootUrl);
     }
 

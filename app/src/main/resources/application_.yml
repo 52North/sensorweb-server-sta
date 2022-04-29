@@ -77,22 +77,9 @@ server:
 # Database Configuration
 database:
   jpa:
-    # Mappings to be loaded. See https://github.com/52North/sensorweb-server-sta/wiki for details
-    # Options:
-    # - Vanilla STA: sta-vanilla.xml
-    # - STA Plus: sta-plus.xml
-    persistence-location: classpath:META-INF/sta-plus.xml
+    persistence-location: classpath:META-INF/sta-vanilla.xml
 spring:
-  # Profile of the application.
-  # Options:
-  # - Vanilla STA: vanilla
-  # - UFZ Aggregata backend: ufzaggregata
-  # - STA Plus (CitSci Extension): citSci
-  # - [not implemented yet] STA with MultiDatastream Extension: multiDatastreamExtension
-  profiles:
-    active: staplus
   datasource:
-    platform: postgres
     username: postgres
     password: postgres
     url: jdbc:postgresql://localhost:5000/sta

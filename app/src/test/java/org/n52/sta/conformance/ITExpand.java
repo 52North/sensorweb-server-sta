@@ -48,7 +48,7 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 public class ITExpand extends ConformanceTests implements TestUtil {
 
-    ITExpand(@Value("${server.rootUrl}") String rootUrl) throws Exception {
+    ITExpand(@Value("${server.config.service-root-url}") String rootUrl) throws Exception {
         super(rootUrl);
 
         // Create required test harness

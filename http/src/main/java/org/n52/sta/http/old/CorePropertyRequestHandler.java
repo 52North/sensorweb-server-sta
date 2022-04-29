@@ -48,10 +48,11 @@ import org.springframework.web.bind.annotation.PathVariable;
  *
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
  */
+@SuppressWarnings("checkstyle:linelength")
 public class CorePropertyRequestHandler extends PropertyRequestHandler implements CoreRequestUtils {
 
         public CorePropertyRequestHandler(
-                        @Value("${server.rootUrl}") String rootUrl,
+                        @Value("${server.config.service-root-url}") String rootUrl,
                         @Value("${server.feature.escapeId:true}") boolean escapeId,
                         EntityServiceFactory serviceRepository,
                         ObjectMapper mapper) {

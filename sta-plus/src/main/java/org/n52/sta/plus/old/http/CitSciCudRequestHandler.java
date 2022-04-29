@@ -54,12 +54,12 @@ import org.springframework.web.bind.annotation.RequestBody;
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
  */
 // @RestController
-// @ConditionalOnProperty(value = "server.feature.httpReadOnly", havingValue = "false", matchIfMissing = true)
+// @ConditionalOnProperty(value = "server.feature.http.read-only", havingValue = "false", matchIfMissing = true)
 // @Profile(StaConstants.STAPLUS)
 public class CitSciCudRequestHandler<T extends StaDTO>
     extends CudRequestHandler implements CitSciExtensionRequestUtils {
 
-    public CitSciCudRequestHandler(@Value("${server.rootUrl}") String rootUrl,
+    public CitSciCudRequestHandler(@Value("${server.config.service-root-url}") String rootUrl,
                                    @Value("${server.feature.escapeId:true}") boolean shouldEscapeId,
                                    EntityServiceFactory serviceRepository,
                                    ObjectMapper mapper,
