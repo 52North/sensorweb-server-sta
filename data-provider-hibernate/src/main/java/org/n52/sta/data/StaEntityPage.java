@@ -37,13 +37,21 @@ import org.springframework.data.domain.Page;
 
 public class StaEntityPage<E, T> implements EntityPage<T> {
 
+    private final Class<T> type;
+
     private final Page<E> results;
 
     private final Function<E, T> entityFactory;
 
-    public StaEntityPage(Page<E> results, Function<E, T> factory) {
+    public StaEntityPage(Class<T> type, Page<E> results, Function<E, T> factory) {
+        this.type = type;
         this.results = results;
         this.entityFactory = factory;
+    }
+
+    @Override
+    public Class<T> getEntityType() {
+        return type;
     }
 
     @Override

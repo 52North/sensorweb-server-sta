@@ -30,11 +30,6 @@ package org.n52.sta.api.entity;
 import java.util.Map;
 import java.util.Set;
 
-/**
- * Data Transfer Object for handling a Sensor as specified in 18-088 OGC SensorThingsAPI Part I Section 8.2.5
- *
- * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
- */
 public interface Sensor extends Identifiable {
 
     String getName();

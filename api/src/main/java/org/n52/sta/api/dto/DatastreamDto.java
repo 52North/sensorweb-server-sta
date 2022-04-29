@@ -149,4 +149,5 @@ public class DatastreamDto extends BaseDto implements Datastream {
     public void addObservation(Observation<?> observation) {
         this.observations.add(observation);
     }
+
 }

@@ -25,7 +25,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
-package org.n52.sta.http.old.common;
+package org.n52.sta.http.util;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.exc.MismatchedInputException;
@@ -42,6 +42,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotWritableException;
+import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
 /**
@@ -49,7 +50,8 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
  *
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
  */
-// @ControllerAdvice
+@ControllerAdvice
+@SuppressWarnings("checkstyle:linelength")
 public class ErrorHandler {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ErrorHandler.class);

@@ -31,12 +31,6 @@ import java.util.Map;
 
 import org.n52.shetland.ogc.gml.time.Time;
 
-/**
- * Data Transfer Object for handling an Observation as specified in 18-088 OGC
- * SensorThingsAPI Part I Section 8.2.7
- *
- * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
- */
 public interface Observation<T> extends Identifiable {
 
     Time getPhenomenonTime();
@@ -57,7 +51,7 @@ public interface Observation<T> extends Identifiable {
 
     Time getValidTime();
 
-    Map<String, Object> getProperties();
+    Map<String, Object> getParameters();
 
     FeatureOfInterest getFeatureOfInterest();
 

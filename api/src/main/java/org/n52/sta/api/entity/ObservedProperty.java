@@ -30,11 +30,6 @@ package org.n52.sta.api.entity;
 import java.util.Map;
 import java.util.Set;
 
-/**
- * Data Transfer Object for handling an ObservedProperty as specified in 18-088 OGC SensorThingsAPI Part I Section 8.2.6
- *
- * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
- */
 public interface ObservedProperty extends Identifiable {
 
     String getName();

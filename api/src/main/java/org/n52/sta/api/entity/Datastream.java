@@ -33,9 +33,6 @@ import java.util.Set;
 import org.locationtech.jts.geom.Geometry;
 import org.n52.shetland.ogc.gml.time.Time;
 
-/**
- * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
- */
 public interface Datastream extends Identifiable {
 
     String getName();

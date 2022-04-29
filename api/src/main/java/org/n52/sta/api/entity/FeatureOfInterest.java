@@ -32,11 +32,6 @@ import java.util.Set;
 
 import org.locationtech.jts.geom.Geometry;
 
-/**
- * Data Transfer Object for handling a FeatureOfInterest as specified in 18-088 OGC SensorThingsAPI Part I Section 8.2.8
- *
- * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
- */
 public interface FeatureOfInterest extends Identifiable {
 
     String getName();

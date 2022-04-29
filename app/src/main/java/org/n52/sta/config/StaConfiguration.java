@@ -31,7 +31,6 @@ import java.util.Optional;
 
 import org.n52.sta.api.EntityProvider;
 import org.n52.sta.api.EntityServiceLookup;
-import org.n52.sta.api.EntityServiceLookup.StaEntityType;
 import org.n52.sta.api.domain.DomainService;
 import org.n52.sta.api.entity.Thing;
 import org.n52.sta.api.service.EntityService;
@@ -56,8 +55,7 @@ public class StaConfiguration {
         ThingService service = thingDomainService.isPresent()
                 ? new ThingService(entityProvider, thingDomainService.get())
                 : new ThingService(entityProvider);
-        lookup.addEntityService(StaEntityType.Thing, service);
-        lookup.addEntityService(StaEntityType.Things, service);
+        lookup.addEntityService(Thing.class, service);
         return service;
     }
 }

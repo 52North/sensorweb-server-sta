@@ -50,14 +50,14 @@ public class ObservationDto<T> extends StaDto implements Observation<T> {
 
     private Time validTime;
 
-    private Map<String, Object> properties;
+    private Map<String, Object> parameters;
 
     private Datastream datastream;
 
     private FeatureOfInterest featureOfInterest;
 
     public ObservationDto() {
-        this.properties = new HashMap<>();
+        this.parameters = new HashMap<>();
     }
 
     @Override
@@ -106,16 +106,16 @@ public class ObservationDto<T> extends StaDto implements Observation<T> {
     }
 
     @Override
-    public Map<String, Object> getProperties() {
-        return new HashMap<>(properties);
+    public Map<String, Object> getParameters() {
+        return new HashMap<>(parameters);
     }
 
-    public void setProperties(Map<String, Object> properties) {
-        this.properties = new HashMap<>(properties);
+    public void setParameters(Map<String, Object> parameters) {
+        this.parameters = new HashMap<>(parameters);
     }
 
-    public void addProperty(String key, Object value) {
-        this.properties.put(key, value);
+    public void addParameter(String key, Object value) {
+        this.parameters.put(key, value);
     }
 
     @Override

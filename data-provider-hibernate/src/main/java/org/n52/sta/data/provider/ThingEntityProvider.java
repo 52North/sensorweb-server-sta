@@ -76,7 +76,7 @@ public class ThingEntityProvider extends BaseEntityProvider<Thing> {
         EntityGraphBuilder<PlatformEntity> graphBuilder = createEntityGraph(options, PlatformEntity.class);
         Specification<PlatformEntity> spec = FilterQueryParser.parse(options, new ThingQuerySpecifications());
         Page<PlatformEntity> results = thingRepository.findAll(spec, pagable, graphBuilder);
-        return new StaEntityPage<>(results, ThingFactory::create);
+        return new StaEntityPage<>(Thing.class, results, ThingFactory::create);
     }
 
 }

@@ -37,4 +37,6 @@ public interface EntityPage<T> {
 
     Collection<T> getEntities();
 
+    Class<T> getEntityType();
+
 }

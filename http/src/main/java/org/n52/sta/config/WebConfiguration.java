@@ -29,8 +29,9 @@ package org.n52.sta.config;
 
 import javax.servlet.Filter;
 
-import org.n52.sta.http.old.common.CustomUrlPathHelper;
 import org.n52.sta.http.old.filter.CorsFilter;
+import org.n52.sta.http.util.CustomUrlPathHelper;
+import org.n52.sta.http.util.StaUriValidator;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -50,6 +51,12 @@ public class WebConfiguration implements WebMvcConfigurer {
     @Override
     public void configureContentNegotiation(ContentNegotiationConfigurer configurer) {
         configurer.defaultContentType(MediaType.APPLICATION_JSON);
+    }
+
+    @Bean
+    public StaUriValidator getUriValidator(ServerProperties serverProperties) {
+        // TODO probably not needed when path grammer jumps in
+        return new StaUriValidator(serverProperties);
     }
 
     @Bean

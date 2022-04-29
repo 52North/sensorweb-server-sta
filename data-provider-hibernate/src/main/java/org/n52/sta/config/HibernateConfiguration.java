@@ -22,6 +22,8 @@ import org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter;
 @Configuration
 public class HibernateConfiguration {
 
+    // TODO https://www.airpair.com/java/posts/spring-streams-memory-efficiency
+
     @Bean
     public EntityManagerFactory entityManagerFactory(
             @Value("${database.jpa.persistence-location}") String persistenceXmlLocation,

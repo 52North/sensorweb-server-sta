@@ -58,7 +58,7 @@ public final class ObservationFactory<T> {
         factory.setFeatureOfInterest(entity.getFeature());
 
         // TODO handle special properties (verticalTo, etc.)
-        factory.setProperties(entity);
+        factory.setParameters(entity);
         factory.setTime(entity);
         return factory.get();
     }
@@ -86,19 +86,19 @@ public final class ObservationFactory<T> {
         return this;
     }
 
-    private ObservationFactory<T> setProperties(DataEntity<?> entity) {
+    private ObservationFactory<T> setParameters(DataEntity<?> entity) {
         Set<ParameterEntity<?>> parameters = entity.getParameters();
-        Streams.stream(parameters).forEach(this::addProperty);
+        Streams.stream(parameters).forEach(this::addParameter);
         return this;
     }
 
-    private ObservationFactory<T> addProperty(ParameterEntity<?> entity) {
+    private ObservationFactory<T> addParameter(ParameterEntity<?> entity) {
         addProperty(entity.getName(), entity.getValue());
         return this;
     }
 
     public ObservationFactory<T> addProperty(String key, Object value) {
-        dto.addProperty(key, value);
+        dto.addParameter(key, value);
         return this;
     }
 

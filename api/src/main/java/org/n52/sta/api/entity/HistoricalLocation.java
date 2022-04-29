@@ -31,12 +31,6 @@ import java.util.Set;
 
 import org.n52.shetland.ogc.gml.time.Time;
 
-/**
- * Data Transfer Object for handling a HistoricalLocation as specified in 18-088 OGC SensorThingsAPI Part I Section
- * 8.2.3
- *
- * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
- */
 public interface HistoricalLocation extends Identifiable {
 
     Time getTime();
