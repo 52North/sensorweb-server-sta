@@ -303,8 +303,8 @@ public interface TestUtil {
             response.get("value").isEmpty(),
             "Entity is not returned although it should"
         );
-        Assertions.assertEquals(response.get("value").size(),
-                                valueCount,
+        Assertions.assertEquals(valueCount,
+                                response.get("value").size(),
                                 "value has invalid number of elements! Expected: "
                                     + valueCount
                                     + ", Actual: "
