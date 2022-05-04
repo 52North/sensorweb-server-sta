@@ -36,6 +36,7 @@ import java.util.Set;
 import javax.persistence.EntityGraph;
 import javax.persistence.EntityManager;
 
+import org.hibernate.engine.spi.SessionImplementor;
 import org.hibernate.graph.EntityGraphs;
 import org.hibernate.graph.GraphParser;
 import org.hibernate.graph.InvalidGraphException;
@@ -88,7 +89,8 @@ public final class EntityGraphBuilder<T> {
                 throw new STAInvalidQueryError("Invalid expand!");
             }
         }
-        return EntityGraphs.merge(em, entityType, graphs.toArray(new EntityGraph[0]));
+        EntityManager provider = em.unwrap(SessionImplementor.class);
+        return EntityGraphs.merge(provider, entityType, graphs.toArray(new EntityGraph[0]));
     }
 
     /*
@@ -119,7 +121,8 @@ public final class EntityGraphBuilder<T> {
     }
 
     private RootGraph<T> parseGraph(String path, EntityManager em) {
-        return GraphParser.parse(entityType, path, em);
+        SessionImplementor provider = em.unwrap(SessionImplementor.class);
+        return GraphParser.parse(entityType, path, provider);
     }
 
     private void handleExpandDatastream(ExpandItem expandItem) {
