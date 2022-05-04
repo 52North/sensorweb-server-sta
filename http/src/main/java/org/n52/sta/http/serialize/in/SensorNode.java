@@ -1,18 +1,18 @@
-package org.n52.sta.http.serialize.json;
+package org.n52.sta.http.serialize.in;
+
+import java.util.Map;
+import java.util.Set;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import java.util.Map;
-import java.util.Set;
+
 import org.n52.shetland.ogc.sta.StaConstants;
 import org.n52.sta.api.entity.Datastream;
-import org.n52.sta.api.entity.HistoricalLocation;
-import org.n52.sta.api.entity.Location;
-import org.n52.sta.api.entity.Thing;
+import org.n52.sta.api.entity.Sensor;
 
-public class ThingNode extends StaNode implements Thing {
+public class SensorNode extends StaNode implements Sensor {
 
-    public ThingNode(JsonNode node, ObjectMapper mapper) {
+    public SensorNode(JsonNode node, ObjectMapper mapper) {
         super(node, mapper);
     }
 
@@ -32,13 +32,14 @@ public class ThingNode extends StaNode implements Thing {
     }
 
     @Override
-    public Set<HistoricalLocation> getHistoricalLocations() {
-        return toSet(StaConstants.HISTORICAL_LOCATIONS, n -> new HistoricalLocationNode(n, mapper));
+    public String getEncodingType() {
+        return getOrNull(StaConstants.PROP_ENCODINGTYPE, JsonNode::asText);
     }
 
     @Override
-    public Set<Location> getLocations() {
-        return toSet(StaConstants.LOCATIONS, n -> new LocationNode(n, mapper));
+    public String getMetadata() {
+        // TODO why this is not an object?!
+        return getOrNull(StaConstants.PROP_METADATA, JsonNode::asText);
     }
 
     @Override

@@ -1,16 +1,20 @@
-package org.n52.sta.http.serialize.json;
+package org.n52.sta.http.serialize.in;
+
+import java.util.Map;
+import java.util.Set;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import java.util.Map;
-import java.util.Set;
+
 import org.n52.shetland.ogc.sta.StaConstants;
 import org.n52.sta.api.entity.Datastream;
-import org.n52.sta.api.entity.ObservedProperty;
+import org.n52.sta.api.entity.HistoricalLocation;
+import org.n52.sta.api.entity.Location;
+import org.n52.sta.api.entity.Thing;
 
-public class ObservedPropertyNode extends StaNode implements ObservedProperty {
+public class ThingNode extends StaNode implements Thing {
 
-    public ObservedPropertyNode(JsonNode node, ObjectMapper mapper) {
+    public ThingNode(JsonNode node, ObjectMapper mapper) {
         super(node, mapper);
     }
 
@@ -30,8 +34,13 @@ public class ObservedPropertyNode extends StaNode implements ObservedProperty {
     }
 
     @Override
-    public String getDefinition() {
-        return getOrNull(StaConstants.PROP_DEFINITION, JsonNode::asText);
+    public Set<HistoricalLocation> getHistoricalLocations() {
+        return toSet(StaConstants.HISTORICAL_LOCATIONS, n -> new HistoricalLocationNode(n, mapper));
+    }
+
+    @Override
+    public Set<Location> getLocations() {
+        return toSet(StaConstants.LOCATIONS, n -> new LocationNode(n, mapper));
     }
 
     @Override

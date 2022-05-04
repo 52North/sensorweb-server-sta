@@ -1,8 +1,5 @@
-package org.n52.sta.http.serialize.json;
+package org.n52.sta.http.serialize.in;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Objects;
@@ -11,6 +8,12 @@ import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import org.n52.janmayen.stream.Streams;
 import org.n52.shetland.ogc.gml.time.Time;
 import org.n52.shetland.ogc.sta.StaConstants;
@@ -31,6 +34,7 @@ abstract class StaNode implements Identifiable {
     }
 
     @Override
+    @JsonProperty("@iot.id")
     public String getId() {
         return getOrNull(StaConstants.AT_IOT_ID, JsonNode::asText);
     }

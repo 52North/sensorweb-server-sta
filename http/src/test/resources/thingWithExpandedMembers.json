@@ -1,0 +1,232 @@
+{
+    "@iot.id": "06aac1af-d925-4a6a-9df3-aa40067a210e",
+    "@iot.selfLink": "https://cos4cloud.sta.52north.org/v1.1/Things(06aac1af-d925-4a6a-9df3-aa40067a210e)",
+    "name": "Raspberry Pi 4 B, 4x 1,5 GHz, 4 GB RAM, WLAN, BT",
+    "description": "Raspberry Pi 4 Model B is the latest product in the popular Raspberry Pi range of computers",
+    "properties": {
+        "CPU": "1.4GHz",
+        "RAM": "4GB"
+    },
+    "Datastreams": [
+        {
+            "@iot.id": "4a366ec8-2339-4c88-b735-1e5eaac281e2",
+            "@iot.selfLink": "https://cos4cloud.sta.52north.org/v1.1/Datastreams(4a366ec8-2339-4c88-b735-1e5eaac281e2)",
+            "name": "GBIF Identifier for Species",
+            "description": "The GBIF identifiers for species",
+            "observationType": "http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_TextObservation",
+            "unitOfMeasurement": {
+                "name": "GBIF Identity",
+                "symbol": "n/a",
+                "definition": "https://www.gbif.org/species"
+            },
+            "observedArea": null,
+            "resultTime": null,
+            "phenomenonTime": "2021-06-01T06:50:12.000Z/2021-06-07T03:57:42.000Z",
+            "properties": null,
+            "Party@iot.navigationLink": "https://cos4cloud.sta.52north.org/v1.1/Datastreams(4a366ec8-2339-4c88-b735-1e5eaac281e2)/Party",
+            "Project@iot.navigationLink": "https://cos4cloud.sta.52north.org/v1.1/Datastreams(4a366ec8-2339-4c88-b735-1e5eaac281e2)/Project",
+            "ObservedProperty@iot.navigationLink": "https://cos4cloud.sta.52north.org/v1.1/Datastreams(4a366ec8-2339-4c88-b735-1e5eaac281e2)/ObservedProperty",
+            "Observations@iot.navigationLink": "https://cos4cloud.sta.52north.org/v1.1/Datastreams(4a366ec8-2339-4c88-b735-1e5eaac281e2)/Observations",
+            "Thing@iot.navigationLink": "https://cos4cloud.sta.52north.org/v1.1/Datastreams(4a366ec8-2339-4c88-b735-1e5eaac281e2)/Thing",
+            "Sensor@iot.navigationLink": "https://cos4cloud.sta.52north.org/v1.1/Datastreams(4a366ec8-2339-4c88-b735-1e5eaac281e2)/Sensor"
+        },
+        {
+            "@iot.id": "a6bbc98c-54b8-408f-b1f0-6b765f2620ef",
+            "@iot.selfLink": "https://cos4cloud.sta.52north.org/v1.1/Datastreams(a6bbc98c-54b8-408f-b1f0-6b765f2620ef)",
+            "name": "imagery datastream",
+            "description": "this datastream is about imagery",
+            "observationType": "http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_TextObservation",
+            "unitOfMeasurement": {
+                "name": "n/a",
+                "symbol": "",
+                "definition": "https://www.merriam-webster.com/dictionary/picture"
+            },
+            "observedArea": null,
+            "resultTime": null,
+            "phenomenonTime": "2021-06-01T06:50:12.000Z/2021-06-07T03:57:42.000Z",
+            "properties": null,
+            "Party@iot.navigationLink": "https://cos4cloud.sta.52north.org/v1.1/Datastreams(a6bbc98c-54b8-408f-b1f0-6b765f2620ef)/Party",
+            "Project@iot.navigationLink": "https://cos4cloud.sta.52north.org/v1.1/Datastreams(a6bbc98c-54b8-408f-b1f0-6b765f2620ef)/Project",
+            "ObservedProperty@iot.navigationLink": "https://cos4cloud.sta.52north.org/v1.1/Datastreams(a6bbc98c-54b8-408f-b1f0-6b765f2620ef)/ObservedProperty",
+            "Observations@iot.navigationLink": "https://cos4cloud.sta.52north.org/v1.1/Datastreams(a6bbc98c-54b8-408f-b1f0-6b765f2620ef)/Observations",
+            "Thing@iot.navigationLink": "https://cos4cloud.sta.52north.org/v1.1/Datastreams(a6bbc98c-54b8-408f-b1f0-6b765f2620ef)/Thing",
+            "Sensor@iot.navigationLink": "https://cos4cloud.sta.52north.org/v1.1/Datastreams(a6bbc98c-54b8-408f-b1f0-6b765f2620ef)/Sensor"
+        }
+    ],
+    "Locations": [
+        {
+            "@iot.id": "camera_trap_location",
+            "@iot.selfLink": "https://cos4cloud.sta.52north.org/v1.1/Locations(camera_trap_location)",
+            "name": "My Camera Trap",
+            "description": "A DynAIkon camera trap deployed at a local rabbit box",
+            "encodingType": "application/vnd.geo+json",
+            "location": {
+                "type": "Point",
+                "coordinates": [
+                    6.56473,
+                    51.3027951
+                ],
+                "crs": {
+                    "type": "name",
+                    "properties": {
+                        "name": "EPSG:4326"
+                    }
+                }
+            },
+            "properties": {
+                "city": "Krefeld",
+                "countryCode": "DE"
+            },
+            "Things@iot.navigationLink": "https://cos4cloud.sta.52north.org/v1.1/Locations(camera_trap_location)/Things",
+            "HistoricalLocations@iot.navigationLink": "https://cos4cloud.sta.52north.org/v1.1/Locations(camera_trap_location)/HistoricalLocations"
+        }
+    ],
+    "HistoricalLocations": [
+        {
+            "@iot.id": "14f4d02a-dbc5-4159-9de6-2a6f0cb943e9",
+            "@iot.selfLink": "https://cos4cloud.sta.52north.org/v1.1/HistoricalLocations(14f4d02a-dbc5-4159-9de6-2a6f0cb943e9)",
+            "time": "2021-08-28T08:20:23.521Z",
+            "Locations@iot.navigationLink": "https://cos4cloud.sta.52north.org/v1.1/HistoricalLocations(14f4d02a-dbc5-4159-9de6-2a6f0cb943e9)/Locations",
+            "Thing@iot.navigationLink": "https://cos4cloud.sta.52north.org/v1.1/HistoricalLocations(14f4d02a-dbc5-4159-9de6-2a6f0cb943e9)/Thing"
+        }
+    ]
+},
+{
+    "@iot.id": "60069882-43e7-47f2-a8f4-0aa0160f58ba",
+    "@iot.selfLink": "https://cos4cloud.sta.52north.org/v1.1/Things(60069882-43e7-47f2-a8f4-0aa0160f58ba)",
+    "name": "Universal Environment Board",
+    "description": "todo",
+    "properties": {
+        "Temperature": "temperature on board",
+        "Pressure": "air pressure sensor",
+        "GPS": "GPS unit available",
+        "Humidity": "air humidity"
+    },
+    "Datastreams": [
+        {
+            "@iot.id": "0fa21638-1ceb-49e5-95d3-1adab3da6407",
+            "@iot.selfLink": "https://cos4cloud.sta.52north.org/v1.1/Datastreams(0fa21638-1ceb-49e5-95d3-1adab3da6407)",
+            "name": "Relative Humidity",
+            "description": " The ratio of how much water vapour is in the air and how much water vapour the air could potentially contain",
+            "observationType": "http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_Measurement",
+            "unitOfMeasurement": {
+                "name": "percent",
+                "symbol": "%",
+                "definition": "https://en.wikipedia.org/wiki/Percentage"
+            },
+            "observedArea": null,
+            "resultTime": null,
+            "phenomenonTime": "2021-06-01T06:50:12.000Z/2021-06-07T03:57:42.000Z",
+            "properties": null,
+            "Party@iot.navigationLink": "https://cos4cloud.sta.52north.org/v1.1/Datastreams(0fa21638-1ceb-49e5-95d3-1adab3da6407)/Party",
+            "Project@iot.navigationLink": "https://cos4cloud.sta.52north.org/v1.1/Datastreams(0fa21638-1ceb-49e5-95d3-1adab3da6407)/Project",
+            "ObservedProperty@iot.navigationLink": "https://cos4cloud.sta.52north.org/v1.1/Datastreams(0fa21638-1ceb-49e5-95d3-1adab3da6407)/ObservedProperty",
+            "Observations@iot.navigationLink": "https://cos4cloud.sta.52north.org/v1.1/Datastreams(0fa21638-1ceb-49e5-95d3-1adab3da6407)/Observations",
+            "Thing@iot.navigationLink": "https://cos4cloud.sta.52north.org/v1.1/Datastreams(0fa21638-1ceb-49e5-95d3-1adab3da6407)/Thing",
+            "Sensor@iot.navigationLink": "https://cos4cloud.sta.52north.org/v1.1/Datastreams(0fa21638-1ceb-49e5-95d3-1adab3da6407)/Sensor"
+        },
+        {
+            "@iot.id": "030c2cab-fc2d-4488-96e7-fadf5736bc6f",
+            "@iot.selfLink": "https://cos4cloud.sta.52north.org/v1.1/Datastreams(030c2cab-fc2d-4488-96e7-fadf5736bc6f)",
+            "name": "Pressure",
+            "description": "Atmospheric air pressure",
+            "observationType": "http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_Measurement",
+            "unitOfMeasurement": {
+                "name": "milli bar",
+                "symbol": "mbar",
+                "definition": "http://www.qudt.org/qudt/owl/1.0.0/qudt/index.html#LuminanceUnit"
+            },
+            "observedArea": null,
+            "resultTime": null,
+            "phenomenonTime": "2021-06-01T06:50:12.000Z/2021-06-07T03:57:42.000Z",
+            "properties": null,
+            "Party@iot.navigationLink": "https://cos4cloud.sta.52north.org/v1.1/Datastreams(030c2cab-fc2d-4488-96e7-fadf5736bc6f)/Party",
+            "Project@iot.navigationLink": "https://cos4cloud.sta.52north.org/v1.1/Datastreams(030c2cab-fc2d-4488-96e7-fadf5736bc6f)/Project",
+            "ObservedProperty@iot.navigationLink": "https://cos4cloud.sta.52north.org/v1.1/Datastreams(030c2cab-fc2d-4488-96e7-fadf5736bc6f)/ObservedProperty",
+            "Observations@iot.navigationLink": "https://cos4cloud.sta.52north.org/v1.1/Datastreams(030c2cab-fc2d-4488-96e7-fadf5736bc6f)/Observations",
+            "Thing@iot.navigationLink": "https://cos4cloud.sta.52north.org/v1.1/Datastreams(030c2cab-fc2d-4488-96e7-fadf5736bc6f)/Thing",
+            "Sensor@iot.navigationLink": "https://cos4cloud.sta.52north.org/v1.1/Datastreams(030c2cab-fc2d-4488-96e7-fadf5736bc6f)/Sensor"
+        },
+        {
+            "@iot.id": "1a77f003-ab90-46a1-ac31-4b433b419713",
+            "@iot.selfLink": "https://cos4cloud.sta.52north.org/v1.1/Datastreams(1a77f003-ab90-46a1-ac31-4b433b419713)",
+            "name": "Temperature",
+            "description": "Temperature at the rabbit box",
+            "observationType": "http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_Measurement",
+            "unitOfMeasurement": {
+                "name": "Temperature",
+                "symbol": "C",
+                "definition": "http://www.qudt.org/qudt/owl/1.0.0/qudt/index.html#TemperatureUnit"
+            },
+            "observedArea": null,
+            "resultTime": null,
+            "phenomenonTime": "2021-06-01T06:50:12.000Z/2021-06-07T03:57:42.000Z",
+            "properties": null,
+            "Party@iot.navigationLink": "https://cos4cloud.sta.52north.org/v1.1/Datastreams(1a77f003-ab90-46a1-ac31-4b433b419713)/Party",
+            "Project@iot.navigationLink": "https://cos4cloud.sta.52north.org/v1.1/Datastreams(1a77f003-ab90-46a1-ac31-4b433b419713)/Project",
+            "ObservedProperty@iot.navigationLink": "https://cos4cloud.sta.52north.org/v1.1/Datastreams(1a77f003-ab90-46a1-ac31-4b433b419713)/ObservedProperty",
+            "Observations@iot.navigationLink": "https://cos4cloud.sta.52north.org/v1.1/Datastreams(1a77f003-ab90-46a1-ac31-4b433b419713)/Observations",
+            "Thing@iot.navigationLink": "https://cos4cloud.sta.52north.org/v1.1/Datastreams(1a77f003-ab90-46a1-ac31-4b433b419713)/Thing",
+            "Sensor@iot.navigationLink": "https://cos4cloud.sta.52north.org/v1.1/Datastreams(1a77f003-ab90-46a1-ac31-4b433b419713)/Sensor"
+        },
+        {
+            "@iot.id": "c38cef43-9c7a-4857-94de-2fb484592303",
+            "@iot.selfLink": "https://cos4cloud.sta.52north.org/v1.1/Datastreams(c38cef43-9c7a-4857-94de-2fb484592303)",
+            "name": "Brightness",
+            "description": "Photometric measure of the luminous intensity per unit area of light travelling in a given direction",
+            "observationType": "http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_Measurement",
+            "unitOfMeasurement": {
+                "name": "percent",
+                "symbol": "%",
+                "definition": "https://en.wikipedia.org/wiki/Percentage"
+            },
+            "observedArea": null,
+            "resultTime": null,
+            "phenomenonTime": "2021-06-01T06:50:12.000Z/2021-06-07T03:57:42.000Z",
+            "properties": null,
+            "Party@iot.navigationLink": "https://cos4cloud.sta.52north.org/v1.1/Datastreams(c38cef43-9c7a-4857-94de-2fb484592303)/Party",
+            "Project@iot.navigationLink": "https://cos4cloud.sta.52north.org/v1.1/Datastreams(c38cef43-9c7a-4857-94de-2fb484592303)/Project",
+            "ObservedProperty@iot.navigationLink": "https://cos4cloud.sta.52north.org/v1.1/Datastreams(c38cef43-9c7a-4857-94de-2fb484592303)/ObservedProperty",
+            "Observations@iot.navigationLink": "https://cos4cloud.sta.52north.org/v1.1/Datastreams(c38cef43-9c7a-4857-94de-2fb484592303)/Observations",
+            "Thing@iot.navigationLink": "https://cos4cloud.sta.52north.org/v1.1/Datastreams(c38cef43-9c7a-4857-94de-2fb484592303)/Thing",
+            "Sensor@iot.navigationLink": "https://cos4cloud.sta.52north.org/v1.1/Datastreams(c38cef43-9c7a-4857-94de-2fb484592303)/Sensor"
+        }
+    ],
+    "Locations": [
+        {
+            "@iot.id": "camera_trap_location",
+            "@iot.selfLink": "https://cos4cloud.sta.52north.org/v1.1/Locations(camera_trap_location)",
+            "name": "My Camera Trap",
+            "description": "A DynAIkon camera trap deployed at a local rabbit box",
+            "encodingType": "application/vnd.geo+json",
+            "location": {
+                "type": "Point",
+                "coordinates": [
+                    6.56473,
+                    51.3027951
+                ],
+                "crs": {
+                    "type": "name",
+                    "properties": {
+                        "name": "EPSG:4326"
+                    }
+                }
+            },
+            "properties": {
+                "city": "Krefeld",
+                "countryCode": "DE"
+            },
+            "Things@iot.navigationLink": "https://cos4cloud.sta.52north.org/v1.1/Locations(camera_trap_location)/Things",
+            "HistoricalLocations@iot.navigationLink": "https://cos4cloud.sta.52north.org/v1.1/Locations(camera_trap_location)/HistoricalLocations"
+        }
+    ],
+    "HistoricalLocations": [
+        {
+            "@iot.id": "e98e2df6-71d6-46d4-8d8d-fe7a4753d7fd",
+            "@iot.selfLink": "https://cos4cloud.sta.52north.org/v1.1/HistoricalLocations(e98e2df6-71d6-46d4-8d8d-fe7a4753d7fd)",
+            "time": "2021-08-28T08:20:23.792Z",
+            "Locations@iot.navigationLink": "https://cos4cloud.sta.52north.org/v1.1/HistoricalLocations(e98e2df6-71d6-46d4-8d8d-fe7a4753d7fd)/Locations",
+            "Thing@iot.navigationLink": "https://cos4cloud.sta.52north.org/v1.1/HistoricalLocations(e98e2df6-71d6-46d4-8d8d-fe7a4753d7fd)/Thing"
+        }
+    ]
+}

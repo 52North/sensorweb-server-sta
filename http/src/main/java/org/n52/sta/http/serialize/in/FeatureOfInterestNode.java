@@ -1,9 +1,11 @@
-package org.n52.sta.http.serialize.json;
+package org.n52.sta.http.serialize.in;
+
+import java.util.Map;
+import java.util.Set;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import java.util.Map;
-import java.util.Set;
+
 import org.locationtech.jts.geom.Geometry;
 import org.n52.shetland.ogc.sta.StaConstants;
 import org.n52.sta.api.entity.FeatureOfInterest;

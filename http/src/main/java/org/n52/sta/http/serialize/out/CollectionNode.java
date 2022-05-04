@@ -1,4 +1,4 @@
-package org.n52.sta.http.serialize.json;
+package org.n52.sta.http.serialize.out;
 
 import java.util.Collection;
 import java.util.Objects;
