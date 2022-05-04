@@ -38,6 +38,7 @@ import org.n52.sta.api.entity.Thing;
 import org.n52.sta.data.StaEntityPage;
 import org.n52.sta.data.StaPageRequest;
 import org.n52.sta.data.dto.ThingFactory;
+import org.n52.sta.data.entity.ThingData;
 import org.n52.sta.data.query.FilterQueryParser;
 import org.n52.sta.data.query.specifications.ThingQuerySpecifications;
 import org.n52.sta.data.repositories.entity.ThingRepository;
@@ -76,7 +77,7 @@ public class ThingEntityProvider extends BaseEntityProvider<Thing> {
         EntityGraphBuilder<PlatformEntity> graphBuilder = createEntityGraph(options, PlatformEntity.class);
         Specification<PlatformEntity> spec = FilterQueryParser.parse(options, new ThingQuerySpecifications());
         Page<PlatformEntity> results = thingRepository.findAll(spec, pagable, graphBuilder);
-        return new StaEntityPage<>(Thing.class, results, ThingFactory::create);
+        return new StaEntityPage<>(Thing.class, results, ThingData::new);
     }
 
 }
