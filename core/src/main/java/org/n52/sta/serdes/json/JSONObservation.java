@@ -29,11 +29,10 @@
 
 package org.n52.sta.serdes.json;
 
-import java.math.BigDecimal;
-import java.util.Date;
-import java.util.Iterator;
-import java.util.Map;
-
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.joda.time.DateTime;
 import org.locationtech.jts.geom.GeometryFactory;
 import org.locationtech.jts.geom.PrecisionModel;
@@ -50,11 +49,10 @@ import org.n52.shetland.ogc.sta.StaConstants;
 import org.n52.sta.utils.IdGenerator;
 import org.springframework.util.Assert;
 
-import com.fasterxml.jackson.annotation.JsonManagedReference;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
-
-import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+import java.math.BigDecimal;
+import java.util.Date;
+import java.util.Iterator;
+import java.util.Map;
 
 @SuppressWarnings("VisibilityModifier")
 @SuppressFBWarnings({"NM_FIELD_NAMING_CONVENTION", "UWF_UNWRITTEN_PUBLIC_OR_PROTECTED_FIELD"})
@@ -249,8 +247,12 @@ public class JSONObservation extends JSONBase.JSONwithIdTime<DataEntity<?>> impl
 
     private String generateIdentifier() {
         StringBuffer buffer = new StringBuffer();
-        buffer.append(Datastream.identifier).append(phenomenonTime).append(result).append(resultTime)
-                .append(self.getVerticalFrom()).append(self.getVerticalTo());
+        buffer.append(self.getDataset().getIdentifier())
+            .append(phenomenonTime)
+            .append(result)
+            .append(resultTime)
+            .append(self.getVerticalFrom())
+            .append(self.getVerticalTo());
         return IdGenerator.generate(buffer.toString());
     }
 
