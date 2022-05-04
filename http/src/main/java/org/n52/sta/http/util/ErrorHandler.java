@@ -44,6 +44,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotWritableException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.ResponseStatus;
 
 /**
  * Class used to customize Exception serialization to json.
@@ -64,26 +65,6 @@ public class ErrorHandler {
         headers = new HttpHeaders();
         headers.add("Content-Type", "application/json");
     }
-
-    /*
-    @ExceptionHandler(value = PersistenceException.class)
-    public ResponseEntity<Object> persistenceException(PersistenceException exception) {
-        String msg = "";
-        if (exception.getCause() instanceof DataException) {
-            msg = ((DataException) exception.getCause()).getSQLException().toString();
-        } else if (exception.getCause() instanceof ConstraintViolationException) {
-            msg = exception.getCause().getCause().getMessage();
-        } else {
-            msg = exception.getMessage();
-        }
-
-        LOGGER.debug(msg, exception);
-        return new ResponseEntity<>(
-            createErrorMessage(exception.getClass().getName(), msg),
-            headers,
-            HttpStatus.INTERNAL_SERVER_ERROR);
-    }
-    */
 
     @ExceptionHandler(value = STACRUDException.class)
     public ResponseEntity<Object> staCrudException(STACRUDException exception) {
@@ -139,31 +120,28 @@ public class ErrorHandler {
                                     HttpStatus.BAD_REQUEST);
     }
 
-    @ExceptionHandler(value = IllegalArgumentException.class)
-    public ResponseEntity<Object> staIllegalArgumentException(IllegalArgumentException exception) {
-        String msg = createErrorMessage(exception.getClass().getName(), exception.getMessage());
-        LOGGER.debug(msg, exception);
-        return new ResponseEntity<>(msg,
-                                    headers,
-                                    HttpStatus.BAD_REQUEST);
-    }
-
-    @ExceptionHandler(value = IllegalStateException.class)
-    public ResponseEntity<Object> staIllegalStateException(IllegalStateException exception) {
-        String msg = createErrorMessage(exception.getClass().getName(), exception.getMessage());
-        LOGGER.debug(msg, exception);
-        return new ResponseEntity<>(msg,
-                                    headers,
-                                    HttpStatus.BAD_REQUEST);
-    }
-
     @ExceptionHandler(value = HttpMessageNotWritableException.class)
     public ResponseEntity<Object> staHttpMessageNotWritableException(HttpMessageNotWritableException exception) {
         String msg = createErrorMessage(exception.getClass().getName(), exception.getMessage());
         LOGGER.debug(msg, exception);
         return new ResponseEntity<>(msg,
-                                    headers,
-                                    HttpStatus.BAD_REQUEST);
+                headers,
+                HttpStatus.BAD_REQUEST);
+    }
+    
+
+    @ExceptionHandler(value = Exception.class)
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    public void fallbackException(Exception exception) {
+        String msg = createErrorMessage(exception.getClass().getName(), exception.getMessage());
+        LOGGER.error(msg, exception);
+    }
+
+
+    @ExceptionHandler(value = RuntimeException.class)
+    public void fallbackRuntimeException(RuntimeException exception) {
+        String msg = createErrorMessage(exception.getClass().getName(), exception.getMessage());
+        LOGGER.error(msg, exception);
     }
 
     private String createErrorMessage(String error, String message) {
