@@ -29,8 +29,19 @@
 
 package org.n52.sta.data.service;
 
+import java.math.BigDecimal;
+import java.util.Collections;
+import java.util.Date;
+import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+import javax.persistence.EntityManager;
+import javax.persistence.criteria.Predicate;
+
 import org.hibernate.Hibernate;
 import org.hibernate.query.criteria.internal.CriteriaBuilderImpl;
+import org.joda.time.DateTime;
 import org.n52.janmayen.http.HTTPStatus;
 import org.n52.series.db.beans.AbstractDatasetEntity;
 import org.n52.series.db.beans.AbstractFeatureEntity;
@@ -64,6 +75,7 @@ import org.n52.sta.data.service.util.CollectionWrapper;
 import org.n52.sta.data.service.util.FilterExprVisitor;
 import org.n52.sta.data.service.util.HibernateSpatialCriteriaBuilderImpl;
 import org.n52.sta.serdes.util.ElementWithQueryOptions;
+import org.n52.sta.utils.IdGenerator;
 import org.n52.svalbard.odata.core.expr.Expr;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -74,16 +86,6 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
-
-import javax.persistence.EntityManager;
-import javax.persistence.criteria.Predicate;
-import java.math.BigDecimal;
-import java.util.Collections;
-import java.util.Date;
-import java.util.Optional;
-import java.util.Set;
-import java.util.UUID;
-import java.util.stream.Collectors;
 
 /**
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
@@ -741,7 +743,7 @@ public class ObservationService
                 data.setStaIdentifier(observation.getStaIdentifier());
             }
         } else {
-            String uuid = UUID.randomUUID().toString();
+            String uuid = generateIdentifier(observation);
             data.setIdentifier(uuid);
             data.setStaIdentifier(uuid);
         }
@@ -754,5 +756,15 @@ public class ObservationService
         data.setVerticalFrom(observation.getVerticalFrom());
         data.setVerticalTo(observation.getVerticalTo());
         return data;
+    }
+
+    private String generateIdentifier(DataEntity<?> observation) {
+        StringBuffer buffer = new StringBuffer();
+        buffer.append(observation.getDataset().getIdentifier())
+                .append(new DateTime(observation.getSamplingTimeStart())).append("/")
+                .append(new DateTime(observation.getSamplingTimeEnd())).append(observation.getValue())
+                .append(new DateTime(observation.getResultTime())).append(observation.getVerticalFrom())
+                .append(observation.getVerticalTo());
+        return IdGenerator.generate(buffer.toString());
     }
 }

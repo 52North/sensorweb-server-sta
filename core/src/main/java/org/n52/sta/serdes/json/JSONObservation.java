@@ -29,10 +29,11 @@
 
 package org.n52.sta.serdes.json;
 
-import com.fasterxml.jackson.annotation.JsonManagedReference;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
-import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+import java.math.BigDecimal;
+import java.util.Date;
+import java.util.Iterator;
+import java.util.Map;
+
 import org.joda.time.DateTime;
 import org.locationtech.jts.geom.GeometryFactory;
 import org.locationtech.jts.geom.PrecisionModel;
@@ -46,12 +47,14 @@ import org.n52.shetland.ogc.gml.time.Time;
 import org.n52.shetland.ogc.gml.time.TimeInstant;
 import org.n52.shetland.ogc.gml.time.TimePeriod;
 import org.n52.shetland.ogc.sta.StaConstants;
+import org.n52.sta.utils.IdGenerator;
 import org.springframework.util.Assert;
 
-import java.math.BigDecimal;
-import java.util.Date;
-import java.util.Iterator;
-import java.util.Map;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 
 @SuppressWarnings("VisibilityModifier")
 @SuppressFBWarnings({"NM_FIELD_NAMING_CONVENTION", "UWF_UNWRITTEN_PUBLIC_OR_PROTECTED_FIELD"})
@@ -176,9 +179,6 @@ public class JSONObservation extends JSONBase.JSONwithIdTime<DataEntity<?>> impl
     }
 
     private DataEntity<?> createPostEntity() {
-        self.setIdentifier(identifier);
-        self.setStaIdentifier(identifier);
-
         // phenomenonTime
         if (phenomenonTime != null) {
             Time time = parseTime(phenomenonTime);
@@ -238,7 +238,20 @@ public class JSONObservation extends JSONBase.JSONwithIdTime<DataEntity<?>> impl
             self.setFeature(((JSONFeatureOfInterest) backReference).getEntity());
         }
 
+        if (generatedId) {
+            identifier = generateIdentifier();
+        }
+        self.setIdentifier(identifier);
+        self.setStaIdentifier(identifier);
+
         return self;
+    }
+
+    private String generateIdentifier() {
+        StringBuffer buffer = new StringBuffer();
+        buffer.append(Datastream.identifier).append(phenomenonTime).append(result).append(resultTime)
+                .append(self.getVerticalFrom()).append(self.getVerticalTo());
+        return IdGenerator.generate(buffer.toString());
     }
 
     public JSONObservation parseParameters(Map<String, String> propertyMapping) {
