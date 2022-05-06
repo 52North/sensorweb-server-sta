@@ -1,78 +1,126 @@
 package org.n52.sta.http.serialize.out;
 
-import java.io.UnsupportedEncodingException;
-import java.net.URLDecoder;
-import java.nio.charset.StandardCharsets;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.function.Function;
-
-import javax.servlet.http.HttpServletRequest;
+import java.util.Set;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
+import com.fasterxml.jackson.databind.module.SimpleModule;
 
+import org.n52.janmayen.stream.Streams;
+import org.n52.shetland.filter.ExpandFilter;
+import org.n52.shetland.filter.ExpandItem;
+import org.n52.shetland.filter.SelectFilter;
 import org.n52.shetland.oasis.odata.query.option.QueryOptions;
-import org.n52.svalbard.odata.core.QueryOptionsFactory;
+import org.n52.sta.http.controller.RequestContext;
 
-public class SerializationContext<T> {
+public class SerializationContext {
 
-    private final ObjectMapper requestMapper;
+    private final String serviceUri;
 
     private final QueryOptions queryOptions;
 
-    private final Class<T> type;
+    private final ObjectMapper mapper;
 
-    public static <E> SerializationContext<E> create(ObjectMapper mapperConfig, HttpServletRequest request, Function<QueryOptions, StaSerializer<E>> factory) {
+    private final Optional<Set<String>> selectFilter;
+
+    private final Optional<Set<ExpandItem>> expandFilter;
+
+    SerializationContext(String serviceUri, QueryOptions queryOptions, ObjectMapper mapper) {
+        Objects.requireNonNull(serviceUri, "serviceUri must not be null!");
+        Objects.requireNonNull(queryOptions, "queryOptions must not be null!");
+        Objects.requireNonNull(mapper, "mapper must not be null");
+
+        this.serviceUri = serviceUri;
+        this.queryOptions = queryOptions;
+        this.mapper = mapper;
+
+        this.selectFilter = getSelects(queryOptions);
+        this.expandFilter = getExpands(queryOptions);
+    }
+
+    public static SerializationContext create(RequestContext requestContext, ObjectMapper mapperConfig) {
+        Objects.requireNonNull(requestContext, "requestContext must not be null");
         Objects.requireNonNull(mapperConfig, "mapperConfig must not be null!");
-        Objects.requireNonNull(request, "request must not be null");
-        Objects.requireNonNull(factory, "factory must not be null");
 
         ObjectMapper mapper = mapperConfig.copy();
-        QueryOptions queryOptions = parseQueryOptions(request);
-        StaSerializer<E> serializer = factory.apply(queryOptions);
-        return new SerializationContext<>(queryOptions, mapper, serializer);
+        String serviceUri = requestContext.getServiceUri();
+        QueryOptions queryOptions = requestContext.getQueryOptions();
+        return new SerializationContext(serviceUri, queryOptions, mapper);
     }
 
-    public SerializationContext(QueryOptions queryOptions, ObjectMapper requestMapper, StaSerializer<T> serializer) {
-        Objects.requireNonNull(queryOptions, "queryOptions must not be null!");
-        Objects.requireNonNull(requestMapper, "requestMapper must not be null!");
-        Objects.requireNonNull(serializer, "serializer must not be null");
-
-        this.requestMapper = requestMapper;
-        this.queryOptions = queryOptions;
-        serializer.registerAt(requestMapper);
-        this.type = serializer.getType();
+    public static SerializationContext create(SerializationContext otherContext, QueryOptions queryOptions) {
+        Objects.requireNonNull(otherContext, "otherContext must not be null");
+        ObjectMapper mapper = otherContext.mapper;
+        String serviceUri = otherContext.serviceUri;
+        return new SerializationContext(serviceUri, queryOptions, mapper);
     }
 
-    private static QueryOptions parseQueryOptions(HttpServletRequest request) {
-        String queryString = request.getQueryString();
-        QueryOptionsFactory factory = new QueryOptionsFactory();
-        return Optional.ofNullable(queryString).map(decodeQueryString())
-                .map(factory::createQueryOptions)
-                .orElse(factory.createDummy());
+    /**
+     * Registers specified serializer at the context's object mapper.
+     * 
+     * @param serializer the serializer to register
+     */
+    public <T> void register(StaBaseSerializer<T> serializer) {
+        SimpleModule module = new SimpleModule();
+        module.addSerializer(serializer.getType(), serializer);
+        mapper.registerModule(module);
     }
 
-    private static Function<String, String> decodeQueryString() {
-        return query -> {
-            try {
-                return URLDecoder.decode(query, StandardCharsets.UTF_8.name());
-            } catch (UnsupportedEncodingException e) {
-                throw new IllegalStateException("Encoding not found!");
-            }
-        };
-    }
-
-    public ObjectWriter createWriter() {
-        return requestMapper.writer();
+    public String getServiceUri() {
+        return serviceUri;
     }
 
     public QueryOptions getQueryOptions() {
         return queryOptions;
     }
 
-    public Class<T> getType() {
-        return type;
+    public ObjectWriter createWriter() {
+        return mapper.writer();
+    }
+
+    public boolean isSelected(String name) {
+        return selectFilter.map(selects -> selects.isEmpty() || selects.contains(name)).orElse(true);
+    }
+
+    public boolean isExpanded(String member) {
+        if (!expandFilter.isPresent()) {
+            return false;
+        }
+        Set<ExpandItem> expands = expandFilter.get();
+        return Streams.stream(expands).anyMatch(item -> member.equals(item.getPath()));
+    }
+
+    public Optional<QueryOptions> getQueryOptionsForExpanded(String member) {
+        if (!isExpanded(member)) {
+            return Optional.empty();
+        }
+        Set<ExpandItem> expands = expandFilter.get();
+        return Streams.stream(expands).filter(item -> member.equals(item.getPath())).findFirst()
+                .map(ExpandItem::getQueryOptions);
+    }
+
+    private Optional<Set<ExpandItem>> getExpands(QueryOptions queryOptions) {
+        Optional<ExpandFilter> optionalFilter = getExpandFilter(queryOptions);
+        return optionalFilter.map(ExpandFilter::getItems);
+    }
+
+    private Optional<ExpandFilter> getExpandFilter(QueryOptions queryOptions) {
+        return queryOptions != null
+                ? Optional.ofNullable(queryOptions.getExpandFilter())
+                : Optional.empty();
+    }
+
+    private Optional<Set<String>> getSelects(QueryOptions queryOptions) {
+        Optional<SelectFilter> optionalFilter = getSelectFilter(queryOptions);
+        return optionalFilter.map(SelectFilter::getItems);
+    }
+
+    private Optional<SelectFilter> getSelectFilter(QueryOptions queryOptions) {
+        return queryOptions != null
+                ? Optional.ofNullable(queryOptions.getSelectFilter())
+                : Optional.empty();
     }
 
 }

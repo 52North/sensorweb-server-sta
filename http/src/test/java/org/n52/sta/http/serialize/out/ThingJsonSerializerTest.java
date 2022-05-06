@@ -36,25 +36,22 @@ public class ThingJsonSerializerTest {
 
     @Test
     public void expectAvailabilityOfIotProperties() throws Exception {
-        QueryOptions options = createEmptyQueryOptions("http://localhost:8080/v1.1/Things");
-        SerializationContext<Thing> context = createContext(options);
+        SerializationContext context = createEmptyContext();
         JsonNode parsedNode = serializeEntity(context, new ThingAdapter("foo"));
 
         assertTrue(parsedNode.has("@iot.id"));
         assertThat(parsedNode.get("@iot.id").asText(), is("foo"));
 
         assertTrue(parsedNode.has("@iot.selfLink"));
-        assertThat(parsedNode.get("@iot.selfLink").asText(), is("http://localhost:8080/v1.1/Things(foo)"));
+        assertThat(parsedNode.get("@iot.selfLink").asText(), is("http://localhost/v1.1/Things(foo)"));
     }
 
     @Test
     public void expectOnlySelectedPropertiesSerialized() throws Exception {
-        SerializationContext<Thing> context = createContext("$select=name");
+        SerializationContext context = createContext("$select=name");
         Thing thing = new ThingAdapter("foo", "bar", "baz");
         JsonNode parsedNode = serializeEntity(context, thing);
 
-        // id is always included
-        assertTrue(parsedNode.has("@iot.id"));
         assertTrue(parsedNode.has("name"));
         assertFalse(parsedNode.has("description"));
 
@@ -64,7 +61,7 @@ public class ThingJsonSerializerTest {
 
     @Test
     public void expectEmptyPropertiesObject() throws Exception {
-        SerializationContext<Thing> context = createEmptyContext();
+        SerializationContext context = createEmptyContext();
         JsonNode parsedNode = serializeEntity(context, new ThingAdapter("foo"));
 
         assertTrue(parsedNode.has("properties"));
@@ -73,7 +70,7 @@ public class ThingJsonSerializerTest {
 
     @Test
     public void expectPropertiesGetSerialized() throws Exception {
-        SerializationContext<Thing> context = createEmptyContext();
+        SerializationContext context = createEmptyContext();
         ThingAdapter thing = new ThingAdapter("foo");
         Map<String, Object> properties = new HashMap<>();
         properties.put("foo", "bar");
@@ -89,8 +86,7 @@ public class ThingJsonSerializerTest {
 
     @Test
     public void expectNavLinkOnUnexpandedDatastream() throws Exception {
-        QueryOptions query = createQueryOptions("http://localhost:8080/v1.1/Things", "$expand=Datastreams");
-        SerializationContext<Thing> context = createContext(query);
+        SerializationContext context = createContext("$expand=Datastreams");
         Thing thing = new ThingNode(om.readTree(readFromFile("thingWithExpandedMembers.json")), om);
         JsonNode parsedNode = serializeEntity(context, thing);
 
@@ -101,8 +97,7 @@ public class ThingJsonSerializerTest {
 
     @Test
     public void expectExpandedDatastreamsWhenExpanded() throws Exception {
-        QueryOptions options = createEmptyQueryOptions("http://localhost:8080/v1.1/Things");
-        SerializationContext<Thing> context = createContext(options);
+        SerializationContext context = createEmptyContext();
         Thing thing = new ThingNode(om.readTree(readFromFile("thingWithExpandedMembers.json")), om);
         JsonNode parsedNode = serializeEntity(context, thing);
 
@@ -110,13 +105,12 @@ public class ThingJsonSerializerTest {
         assertTrue(parsedNode.has("Datastreams@iot.navigationLink"));
         JsonNode datastreamsLink = parsedNode.get("Datastreams@iot.navigationLink");
         assertThat(datastreamsLink.asText(),
-                is("http://localhost:8080/v1.1/Things(06aac1af-d925-4a6a-9df3-aa40067a210e)/Datastreams"));
+                is("http://localhost/v1.1/Things(06aac1af-d925-4a6a-9df3-aa40067a210e)/Datastreams"));
     }
 
     @Test
     public void expectIotCountOnExpandedDatastreamsWhenCountTrue() throws Exception {
-        QueryOptions options = createQueryOptions("http://localhost:8080/v1.1/Things", "$count=true");
-        SerializationContext<Thing> context = createContext(options);
+        SerializationContext context = createEmptyContext();
         Thing thing = new ThingNode(om.readTree(readFromFile("thingWithExpandedMembers.json")), om);
         JsonNode parsedNode = serializeEntity(context, thing);
 
@@ -124,44 +118,36 @@ public class ThingJsonSerializerTest {
         assertTrue(parsedNode.has("Datastreams@iot.navigationLink"));
         JsonNode datastreamsLink = parsedNode.get("Datastreams@iot.navigationLink");
         assertThat(datastreamsLink.asText(),
-                is("http://localhost:8080/v1.1/Things(06aac1af-d925-4a6a-9df3-aa40067a210e)/Datastreams"));
+                is("http://localhost/v1.1/Things(06aac1af-d925-4a6a-9df3-aa40067a210e)/Datastreams"));
     }
 
-    private QueryOptions createEmptyQueryOptions(String baseUri) {
-        return createQueryOptions(baseUri, "");
-    }
-
-    private QueryOptions createFromPlainQueryOptions(String options) {
-        return createQueryOptions("", options);
-    }
-
-    private QueryOptions createQueryOptions(String baseUri, String options) {
-        QueryOptions queryOptions = new QueryOptionsFactory().createQueryOptions(options);
-        return new QueryOptions(baseUri, queryOptions.getAllFilters());
-    }
-
-    private SerializationContext<Thing> createEmptyContext() {
+    private SerializationContext createEmptyContext() {
         return createContext("");
     }
 
-    private SerializationContext<Thing> createContext(String query) {
-        ObjectMapper mapper = new ObjectMapper();
-        QueryOptions options = createFromPlainQueryOptions(query);
-        StaSerializer<Thing> serializer = new ThingJsonSerializer(options);
-        return new SerializationContext<>(options, mapper, serializer);
+    private SerializationContext createContext(String query) {
+        QueryOptions options = createQueryOptions(query);
+        return createContext(options);
     }
 
-    private SerializationContext<Thing> createContext(QueryOptions query) {
+    private QueryOptions createQueryOptions(String options) {
+        QueryOptions queryOptions = new QueryOptionsFactory().createQueryOptions(options);
+        return new QueryOptions(queryOptions.getAllFilters());
+    }
+
+    private SerializationContext createContext(QueryOptions query) {
         ObjectMapper mapper = new ObjectMapper();
-        StaSerializer<Thing> serializer = new ThingJsonSerializer(query);
-        return new SerializationContext<>(query, mapper, serializer);
+        SerializationContext context = new SerializationContext("http://localhost/v1.1", query, mapper);
+        StaBaseSerializer<Thing> serializer = new ThingJsonSerializer(context);
+        context.register(serializer);
+        return context;
     }
 
     private InputStream readFromFile(String file) {
         return getClass().getClassLoader().getResourceAsStream(file);
     }
 
-    private JsonNode serializeEntity(SerializationContext<Thing> context, Thing thing) throws Exception {
+    private JsonNode serializeEntity(SerializationContext context, Thing thing) throws Exception {
         ObjectWriter writer = context.createWriter();
         return om.readTree(writer.writeValueAsString(thing));
     }

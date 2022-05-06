@@ -38,13 +38,13 @@ public interface EntityProvider<T extends Identifiable> {
     boolean exists(String id) throws ProviderException;
 
     default Optional<T> getEntity(String id) throws ProviderException {
-        return getEntity(id, new QueryOptionsFactory().createDummy());
+        return getEntity(id, new QueryOptionsFactory().createEmpty());
     }
 
     Optional<T> getEntity(String id, QueryOptions options) throws ProviderException;
 
     default EntityPage<T> getEntities() throws ProviderException {
-        return getEntities(new QueryOptionsFactory().createDummy());
+        return getEntities(new QueryOptionsFactory().createEmpty());
     }
 
     EntityPage<T> getEntities(QueryOptions options) throws ProviderException;

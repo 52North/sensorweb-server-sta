@@ -30,6 +30,7 @@ package org.n52.sta.http.controller;
 import java.io.BufferedOutputStream;
 import java.io.OutputStream;
 import java.util.Objects;
+import java.util.function.Function;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -44,8 +45,10 @@ import org.n52.sta.api.entity.Identifiable;
 import org.n52.sta.api.service.EntityService;
 import org.n52.sta.http.serialize.out.CollectionNode;
 import org.n52.sta.http.serialize.out.SerializationContext;
+import org.n52.sta.http.serialize.out.StaBaseSerializer;
 import org.n52.sta.http.serialize.out.ThingJsonSerializer;
 import org.n52.sta.http.util.StaUriValidator;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.HandlerMapping;
@@ -54,6 +57,8 @@ import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBo
 @RestController
 public class ReadController {
 
+    private final String serviceUri;
+
     private final StaUriValidator validator;
 
     private final EntityServiceLookup lookup;
@@ -61,12 +66,15 @@ public class ReadController {
     private final ObjectMapper mapper;
 
     public ReadController(
+            @Value("${server.config.service-root-url}") String serviceUri,
             StaUriValidator validator,
             EntityServiceLookup lookup,
             ObjectMapper mapper) {
+        Objects.requireNonNull(serviceUri, "serviceUri must not be null!");
         Objects.requireNonNull(validator, "validator must not be null!");
         Objects.requireNonNull(lookup, "lookup must not be null!");
         Objects.requireNonNull(mapper, "mapper must not be null!");
+        this.serviceUri = serviceUri;
         this.validator = validator;
         this.lookup = lookup;
         this.mapper = mapper;
@@ -74,64 +82,66 @@ public class ReadController {
 
     @GetMapping(value = "/Observations")
     public StreamingResponseBody getObservations(HttpServletRequest request) throws STAInvalidUrlException {
-        return validateAndProcess(request, SerializationContext.create(mapper, request, null));
+        return validateAndProcess(request, null);
     }
 
     @GetMapping(value = "/Datastreams")
     public StreamingResponseBody getDatastreams(HttpServletRequest request) throws STAInvalidUrlException {
-        return validateAndProcess(request, SerializationContext.create(mapper, request, null));
+        return validateAndProcess(request, null);
     }
 
     @GetMapping(value = "/Things")
     public StreamingResponseBody getThings(HttpServletRequest request) throws STAInvalidUrlException {
-        return validateAndProcess(request, SerializationContext.create(mapper, request, ThingJsonSerializer::new));
+        return validateAndProcess(request, ThingJsonSerializer::new);
     }
 
     @GetMapping(value = "/Sensors")
     public StreamingResponseBody getSensors(HttpServletRequest request) throws STAInvalidUrlException {
-        return validateAndProcess(request, SerializationContext.create(mapper, request, null));
+        return validateAndProcess(request, null);
     }
 
     @GetMapping(value = "/Locations")
     public StreamingResponseBody getLocations(HttpServletRequest request) throws STAInvalidUrlException {
-        return validateAndProcess(request, SerializationContext.create(mapper, request, null));
+        return validateAndProcess(request, null);
     }
 
     @GetMapping(value = "/HistoricalLocations")
     public StreamingResponseBody getHistoricalLocations(HttpServletRequest request) throws STAInvalidUrlException {
-        return validateAndProcess(request, SerializationContext.create(mapper, request, null));
+        return validateAndProcess(request, null);
     }
 
     @GetMapping(value = "/FeaturesOfInterest")
     public StreamingResponseBody getFeaturesOfInterest(HttpServletRequest request) throws STAInvalidUrlException {
-        return validateAndProcess(request, SerializationContext.create(mapper, request, null));
+        return validateAndProcess(request, null);
     }
 
     @GetMapping(value = "/ObservedProperties")
     public StreamingResponseBody getObservedProperties(HttpServletRequest request) throws STAInvalidUrlException {
-        return validateAndProcess(request, SerializationContext.create(mapper, request, null));
+        return validateAndProcess(request, null);
     }
 
     private <T extends Identifiable> StreamingResponseBody validateAndProcess(HttpServletRequest request,
-            SerializationContext<T> context) throws STAInvalidUrlException {
+            Function<SerializationContext, StaBaseSerializer<T>> factory) throws STAInvalidUrlException {
         validateRequestPath(request);
-        return getAndWriteToResponse(context);
+        RequestContext requestContext = RequestContext.create(serviceUri, request);
+        SerializationContext context = SerializationContext.create(requestContext, mapper);
+        StaBaseSerializer<T> serializer = factory.apply(context);
+        context.register(serializer);
+        return getAndWriteToResponse(context, serializer.getType());
     }
 
-    private <T extends Identifiable> StreamingResponseBody getAndWriteToResponse(SerializationContext<T> context)
-            throws ProviderException {
-        EntityPage<T> collection = getCollection(context);
+    private <T extends Identifiable> StreamingResponseBody getAndWriteToResponse(SerializationContext context,Class<T> type) throws ProviderException {
+        EntityPage<T> collection = getCollection(context, type);
         return writeCollection(collection, context);
     }
 
-    private <T extends Identifiable> EntityPage<T> getCollection(SerializationContext<T> context)
-            throws ProviderException {
-        EntityService<T> entityService = getEntityService(context.getType());
+    private <T extends Identifiable> EntityPage<T> getCollection(SerializationContext context, Class<T> type) throws ProviderException {
+        EntityService<T> entityService = getEntityService(type);
         return entityService.getEntities(context.getQueryOptions());
     }
 
     private <T extends Identifiable> StreamingResponseBody writeCollection(EntityPage<T> page,
-            SerializationContext<T> context) {
+            SerializationContext context) {
         return outputStream -> {
             try (OutputStream out = new BufferedOutputStream(outputStream)) {
                 ObjectWriter writer = context.createWriter();

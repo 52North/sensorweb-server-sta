@@ -59,7 +59,7 @@ public abstract class CollectionRequestHandler<T extends RequestUtils> extends A
             String decoded = URLDecoder.decode(request.getQueryString());
             return QUERY_OPTIONS_FACTORY.createQueryOptions(decoded);
         } else {
-            return QUERY_OPTIONS_FACTORY.createDummy();
+            return QUERY_OPTIONS_FACTORY.createEmpty();
         }
     }
 

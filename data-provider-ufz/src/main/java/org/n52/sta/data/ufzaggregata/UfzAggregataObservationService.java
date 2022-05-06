@@ -233,7 +233,7 @@ public class UfzAggregataObservationService extends ObservationService {
                 ProcedureEntity sensor = sensorService.getEntityByRelatedEntityRaw(relatedId,
                         relatedType,
                         null,
-                        new QueryOptions("", null));
+                        new QueryOptions(null));
                 Matcher matcher = longNamePattern.matcher(sensor.getName());
                 String target;
                 if (matcher.matches()) {

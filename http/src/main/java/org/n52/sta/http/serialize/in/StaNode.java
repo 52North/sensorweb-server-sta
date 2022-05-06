@@ -47,12 +47,12 @@ abstract class StaNode implements Identifiable {
 
     protected <T> T getOrNull(String property, Function<JsonNode, T> asResult) {
         Optional<JsonNode> propertyNode = get(property);
-        return propertyNode.map(n -> asResult.apply(n)).orElse(null);
+        return propertyNode.map(asResult::apply).orElse(null);
     }
 
     protected Optional<JsonNode> get(String property) {
         JsonNode propertyNode = node.get(property);
-        return propertyNode.isNull()
+        return propertyNode == null || propertyNode.isNull()
                 ? Optional.empty()
                 : Optional.of(propertyNode);
     }
