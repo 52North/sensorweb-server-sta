@@ -18,20 +18,19 @@ public class DatastreamJsonSerializer extends StaBaseSerializer<Datastream> {
     @Override
     public void serialize(Datastream value, JsonGenerator gen, SerializerProvider serializers) throws IOException {
         gen.writeStartObject();
-        String datastreamId = value.getId();
+        String id = value.getId();
 
         // entity properties
         
-        gen.writeStringField(StaConstants.AT_IOT_ID, datastreamId);
-        String selfLink = createSelfLink(datastreamId);
-        writeProperty(StaConstants.AT_IOT_SELFLINK, name -> gen.writeStringField(name, selfLink));
-        writeProperty(StaConstants.PROP_NAME, name -> gen.writeStringField(name, value.getName()));
-        writeProperty(StaConstants.PROP_DESCRIPTION, name -> gen.writeStringField(name, value.getDescription()));
-        writeProperty(StaConstants.PROP_PROPERTIES, name -> gen.writeObjectField(name, value.getProperties()));
+        writeProperty("id", name -> gen.writeStringField(StaConstants.AT_IOT_ID, id));
+        writeStringProperty(StaConstants.AT_IOT_SELFLINK, () -> createSelfLink(id), gen);
+        writeStringProperty(StaConstants.PROP_NAME, value::getName, gen);
+        writeStringProperty(StaConstants.PROP_DESCRIPTION, value::getDescription, gen);
+        writeObjectProperty(StaConstants.PROP_PROPERTIES, value::getProperties, gen);
 
         // entity members
         String member = StaConstants.THING;
-        writeMember(member, datastreamId, gen, ThingJsonSerializer::new, writer(value.getThing(), gen, serializers));
+        writeMember(member, id, gen, ThingJsonSerializer::new, writer(value.getThing(), gen, serializers));
         
         // writeMemberArray(StaConstants.DATASTREAMS, name -> {
         //     gen.writeArrayFieldStart(name);

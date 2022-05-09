@@ -1,13 +1,14 @@
 package org.n52.sta.http.serialize.out;
 
 import java.io.IOException;
-import java.util.Set;
 
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.SerializerProvider;
 
 import org.n52.shetland.ogc.sta.StaConstants;
 import org.n52.sta.api.entity.Datastream;
+import org.n52.sta.api.entity.HistoricalLocation;
+import org.n52.sta.api.entity.Location;
 import org.n52.sta.api.entity.Thing;
 
 public class ThingJsonSerializer extends StaBaseSerializer<Thing> {
@@ -19,25 +20,35 @@ public class ThingJsonSerializer extends StaBaseSerializer<Thing> {
     @Override
     public void serialize(Thing value, JsonGenerator gen, SerializerProvider serializers) throws IOException {
         gen.writeStartObject();
-        String thingId = value.getId();
+        String id = value.getId();
 
         // entity properties
-        writeProperty("id", name -> gen.writeStringField(StaConstants.AT_IOT_ID, thingId));
-        String selfLink = createSelfLink(thingId);
-        writeProperty(StaConstants.AT_IOT_SELFLINK, name -> gen.writeStringField(name, selfLink));
-        writeProperty(StaConstants.PROP_NAME, name -> gen.writeStringField(name, value.getName()));
-        writeProperty(StaConstants.PROP_DESCRIPTION, name -> gen.writeStringField(name, value.getDescription()));
-        writeProperty(StaConstants.PROP_PROPERTIES, name -> gen.writeObjectField(name, value.getProperties()));
+        writeProperty("id", name -> gen.writeStringField(StaConstants.AT_IOT_ID, id));
+        writeStringProperty(StaConstants.AT_IOT_SELFLINK, () -> createSelfLink(id), gen);
+        writeStringProperty(StaConstants.PROP_NAME, value::getName, gen);
+        writeStringProperty(StaConstants.PROP_DESCRIPTION, value::getDescription, gen);
+        writeObjectProperty(StaConstants.PROP_PROPERTIES, value::getProperties, gen);
 
         // entity members
-        String member = StaConstants.DATASTREAMS;
-        Set<Datastream> collection = value.getDatastreams();
-        writeMember(member, thingId, gen, DatastreamJsonSerializer::new, serializer -> {
-            gen.writeArrayFieldStart(member);
-            for (Datastream item : collection) {
+        String datastreams = StaConstants.DATASTREAMS;
+        writeMemberCollection(datastreams, id, gen, DatastreamJsonSerializer::new, serializer -> {
+            for (Datastream item : value.getDatastreams()) {
                 serializer.serialize(item, gen, serializers);
             }
-            gen.writeEndArray();
+        });
+
+        String locations = StaConstants.LOCATIONS;
+        writeMemberCollection(locations, id, gen, LocationJsonSerializer::new, serializer -> {
+            for (Location item : value.getLocations()) {
+                serializer.serialize(item, gen, serializers);
+            }
+        });
+
+        String historicalLocations = StaConstants.HISTORICAL_LOCATIONS;
+        writeMemberCollection(historicalLocations, id, gen, HistoricalLocationJsonSerializer::new, serializer -> {
+            for (HistoricalLocation item : value.getHistoricalLocations()) {
+                serializer.serialize(item, gen, serializers);
+            }
         });
         
         gen.writeEndObject();

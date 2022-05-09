@@ -55,7 +55,6 @@ public class ThingJsonSerializerTest {
         assertTrue(parsedNode.has("name"));
         assertFalse(parsedNode.has("description"));
 
-        assertThat(parsedNode.get("@iot.id").asText(), is("foo"));
         assertThat(parsedNode.get("name").asText(), is("bar"));
     }
 
