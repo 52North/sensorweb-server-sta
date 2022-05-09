@@ -225,6 +225,11 @@ public interface BaseQuerySpecifications<T> {
     }
 
     @FunctionalInterface
+    interface MemberFilter<T> {
+        Specification<T> apply(Specification<?> memberSpecification);
+    }
+
+    @FunctionalInterface
     interface MemberQuery {
         /**
          * Creates a subquery based on dynamic {@link Specification} parameters.

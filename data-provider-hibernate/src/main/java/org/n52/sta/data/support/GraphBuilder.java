@@ -35,15 +35,26 @@ public abstract class GraphBuilder<T> {
 
     public abstract void addExpanded(ExpandItem expandItem);
 
-    /*
-     * TODO this is rather ugly but might pave the path to introduce kind of a
-     * configurable/extensible entity graph later on
-     */
     public void addUnfilteredExpandItem(ExpandItem expandItem) {
         if (isNestedQueryOrExpand(expandItem)) {
             // unsupported -> no expand
             LOGGER.debug("Skip adding $expand to entity graph: {}", expandItem);
         } else {
+
+            // TODO do this recursively by using dots
+            // this may require some refactoring how the actual member/db-properties
+            // are  being mapped (currently via switch statements)
+
+            // DISCUSS adding more entity graphs recursively is an
+            // anti pattern as it makes the query bigger, and OData
+            // makes it completely worse as it would allow to expand
+            // deep entity paths on collections!
+            // 
+            // Options:
+            // - configurable limit of expanded entities (restricts standard)
+            // - do n+1 query (db anti pattern)
+            // - ...
+
             addExpanded(expandItem);
         }
     }

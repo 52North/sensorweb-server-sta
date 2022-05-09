@@ -66,8 +66,6 @@ public class ThingQuerySpecifications implements BaseQuerySpecifications<Platfor
         this.entityPathByProperty.put(StaConstants.PROP_NAME, createStringComparator(HasName.PROPERTY_NAME));
         this.entityPathByProperty.put(StaConstants.PROP_DESCRIPTION,
                 createStringComparator(HasDescription.PROPERTY_DESCRIPTION));
-
-        // TODO properties/<xyz>
     }
 
     public Specification<PlatformEntity> withMemberStaIdentifier(String member, String staIdentifier) {
@@ -119,11 +117,6 @@ public class ThingQuerySpecifications implements BaseQuerySpecifications<Platfor
 
     // TODO discuss: split multiple (tiny) subqueries so that we are able to use
     // kind of a DSL query language
-
-    @FunctionalInterface
-    private interface MemberFilter<T> {
-        Specification<T> apply(Specification<?> memberSpecification);
-    }
 
     private final class DatastreamFilter implements MemberFilter<PlatformEntity> {
 
