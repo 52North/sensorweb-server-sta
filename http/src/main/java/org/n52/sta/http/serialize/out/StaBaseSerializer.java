@@ -17,7 +17,7 @@ import org.n52.shetland.util.DateTimeHelper;
 
 public abstract class StaBaseSerializer<T> extends StdSerializer<T> implements StaSerializer<T> {
 
-    protected static final String ENCODINGTYPE_GEOJSON = "application/vnd.geo+json";
+    private static final String ENCODINGTYPE_GEOJSON = "application/vnd.geo+json";
 
     private final transient GeoJsonWriter geometryWriter;
 
@@ -31,13 +31,14 @@ public abstract class StaBaseSerializer<T> extends StdSerializer<T> implements S
         super(type);
         Objects.requireNonNull(context, "context must not be null!");
         Objects.requireNonNull(collectionName, "collectionName must not be null!");
+
         this.serviceUri = removeTrailingSlash(context.getServiceUri());
         this.geometryWriter = new GeoJsonWriter();
         this.collectionName = collectionName;
         this.context = context;
         context.register(this);
     }
-
+    
     private static String removeTrailingSlash(String serviceUri) {
         return serviceUri.endsWith("/")
                 ? serviceUri.substring(0, serviceUri.length() - 1)
@@ -49,10 +50,15 @@ public abstract class StaBaseSerializer<T> extends StdSerializer<T> implements S
         return handledType();
     }
 
-    protected void writeGeometry(String name, Supplier<Geometry> geometry, JsonGenerator gen) throws IOException {
+    protected void writeGeometryAndEncodingType(String name, Supplier<Geometry> geometry, JsonGenerator gen) throws IOException {
         if (context.isSelected(name)) {
             gen.writeFieldName(name);
-            gen.writeRawValue(geometryWriter.write(geometry.get()));
+            Geometry value = geometry.get();
+            gen.writeRawValue(geometryWriter.write(value));
+            if (value != null) {
+                // only write out encodingtype if there is a location present
+                writeStringProperty(StaConstants.PROP_ENCODINGTYPE, () -> ENCODINGTYPE_GEOJSON, gen);
+            }
         }
     }
 

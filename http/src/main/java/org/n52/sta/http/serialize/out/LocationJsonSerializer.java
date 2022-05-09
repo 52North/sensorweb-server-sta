@@ -5,7 +5,6 @@ import java.io.IOException;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.SerializerProvider;
 
-import org.locationtech.jts.geom.Geometry;
 import org.n52.shetland.ogc.sta.StaConstants;
 import org.n52.sta.api.entity.HistoricalLocation;
 import org.n52.sta.api.entity.Location;
@@ -28,13 +27,7 @@ public class LocationJsonSerializer extends StaBaseSerializer<Location> {
         writeStringProperty(StaConstants.PROP_NAME, value::getName, gen);
         writeStringProperty(StaConstants.PROP_DESCRIPTION, value::getDescription, gen);
         writeObjectProperty(StaConstants.PROP_PROPERTIES, value::getProperties, gen);
-
-        Geometry geometry = value.getGeometry();
-        writeGeometry(StaConstants.PROP_LOCATION, value::getGeometry, gen);
-        if (geometry != null) {
-            // only write out encodingtype if there is a location present
-            writeStringProperty(StaConstants.PROP_ENCODINGTYPE, () -> ENCODINGTYPE_GEOJSON, gen);
-        }
+        writeGeometryAndEncodingType(StaConstants.PROP_LOCATION, value::getGeometry, gen);
 
         // entity members
         String things = StaConstants.LOCATIONS;
