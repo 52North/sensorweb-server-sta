@@ -37,7 +37,6 @@ import org.n52.sta.api.ProviderException;
 import org.n52.sta.api.entity.Thing;
 import org.n52.sta.data.StaEntityPage;
 import org.n52.sta.data.StaPageRequest;
-import org.n52.sta.data.dto.ThingFactory;
 import org.n52.sta.data.entity.ThingData;
 import org.n52.sta.data.query.FilterQueryParser;
 import org.n52.sta.data.query.specifications.ThingQuerySpecifications;
@@ -68,7 +67,7 @@ public class ThingEntityProvider extends BaseEntityProvider<Thing> {
         EntityGraphBuilder<PlatformEntity> graphBuilder = createEntityGraph(options, PlatformEntity.class);
         Specification<PlatformEntity> spec = FilterQueryParser.parse(options, new ThingQuerySpecifications());
         Optional<PlatformEntity> platform = thingRepository.findOne(spec, graphBuilder);
-        return platform.map(ThingFactory::create);
+        return platform.map(ThingData::new);
     }
 
     @Override
