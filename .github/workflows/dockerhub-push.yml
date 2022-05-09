@@ -2,6 +2,12 @@
 
 name: Publish Docker image
 
+env:
+  TITLE: "52°North SensorThingsAPI"
+  VENDOR: "52°North GmbH"
+  AUTHORS: "https://github.com/52North/sensorweb-server-sta/graphs/contributors"
+  DESCRIPTION: "Implementation of the OGC SensorThings API Part I: Sensing Version 1.1 (18-088)"
+
 on:
   push:
     tags:
@@ -27,7 +33,11 @@ jobs:
         uses: docker/metadata-action@v3
         with:
           images: 52north/sensorweb-server-sta
-
+          labels: |
+            -  org.opencontainers.image.authors=$AUTHORS 
+            -  org.opencontainers.image.vendor=$VENDOR
+            -  org.opencontainers.image.description=$DESCRIPTION
+            -  org.opencontainers.image.title=$TITLE
       - name: Log in to Docker Hub
         if: github.event_name != 'pull_request'
         uses: docker/login-action@v1
