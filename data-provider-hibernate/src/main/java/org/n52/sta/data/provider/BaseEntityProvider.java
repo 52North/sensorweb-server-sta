@@ -32,25 +32,22 @@ import org.n52.shetland.filter.ExpandFilter;
 import org.n52.shetland.oasis.odata.query.option.QueryOptions;
 import org.n52.sta.api.EntityProvider;
 import org.n52.sta.api.entity.Identifiable;
-import org.n52.sta.data.support.EntityGraphBuilder;
+import org.n52.sta.data.support.GraphBuilder;
 
 public abstract class BaseEntityProvider<T extends Identifiable> implements EntityProvider<T> {
 
     /**
      * Creates an entity graph for unfiltered entity members.
      *
-     * @param <E>        the root entity type
+     * @param <E>        the database entity type
      * @param options    the OData query options
-     * @param entityType the graph's root entity type
-     * @return the entity graph builder
+     * @param graphBuilder the graph builder adding unfiltered expanded items
      */
-    protected <E> EntityGraphBuilder<E> createEntityGraph(QueryOptions options, Class<E> entityType) {
-        EntityGraphBuilder<E> graphBuilder = new EntityGraphBuilder<>(entityType);
+    protected <E> void addUnfilteredExpandItems(QueryOptions options, GraphBuilder<E> graphBuilder) {
         if (options.hasExpandFilter()) {
             ExpandFilter expand = options.getExpandFilter();
             Streams.stream(expand.getItems()).forEach(graphBuilder::addUnfilteredExpandItem);
         }
-        return graphBuilder;
     }
 
     /**

@@ -41,7 +41,7 @@ import org.n52.sta.data.entity.ThingData;
 import org.n52.sta.data.query.FilterQueryParser;
 import org.n52.sta.data.query.specifications.ThingQuerySpecifications;
 import org.n52.sta.data.repositories.entity.ThingRepository;
-import org.n52.sta.data.support.EntityGraphBuilder;
+import org.n52.sta.data.support.ThingGraphBuilder;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
@@ -64,7 +64,10 @@ public class ThingEntityProvider extends BaseEntityProvider<Thing> {
     @Override
     public Optional<Thing> getEntity(String id, QueryOptions options) throws ProviderException {
         assertIdentifier(id);
-        EntityGraphBuilder<PlatformEntity> graphBuilder = createEntityGraph(options, PlatformEntity.class);
+
+        ThingGraphBuilder graphBuilder = new ThingGraphBuilder();
+        addUnfilteredExpandItems(options, graphBuilder);
+
         Specification<PlatformEntity> spec = FilterQueryParser.parse(options, new ThingQuerySpecifications());
         Optional<PlatformEntity> platform = thingRepository.findOne(spec, graphBuilder);
         return platform.map(ThingData::new);
@@ -73,7 +76,10 @@ public class ThingEntityProvider extends BaseEntityProvider<Thing> {
     @Override
     public EntityPage<Thing> getEntities(QueryOptions options) throws ProviderException {
         Pageable pagable = StaPageRequest.create(options);
-        EntityGraphBuilder<PlatformEntity> graphBuilder = createEntityGraph(options, PlatformEntity.class);
+        
+        ThingGraphBuilder graphBuilder = new ThingGraphBuilder();
+        addUnfilteredExpandItems(options, graphBuilder);
+        
         Specification<PlatformEntity> spec = FilterQueryParser.parse(options, new ThingQuerySpecifications());
         Page<PlatformEntity> results = thingRepository.findAll(spec, pagable, graphBuilder);
         return new StaEntityPage<>(Thing.class, results, ThingData::new);

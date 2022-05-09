@@ -22,7 +22,7 @@ public class LocationData extends StaData<LocationEntity> implements Location {
 
     @Override
     public String getDescription() {
-        return getDescription();
+        return data.getDescription();
     }
 
     @Override

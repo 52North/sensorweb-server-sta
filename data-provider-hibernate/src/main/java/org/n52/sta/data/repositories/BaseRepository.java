@@ -32,7 +32,7 @@ import java.util.Optional;
 
 import javax.persistence.EntityGraph;
 
-import org.n52.sta.data.support.EntityGraphBuilder;
+import org.n52.sta.data.support.GraphBuilder;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -83,18 +83,18 @@ public interface BaseRepository<T> extends JpaSpecificationExecutor<T>, JpaRepos
 
     boolean existsByStaIdentifier(String staIdentifier);
 
-    Optional<T> findByStaIdentifier(String identifier, EntityGraphBuilder<T> graphBuilder);
+    Optional<T> findByStaIdentifier(String identifier, GraphBuilder<T> graphBuilder);
+
+    Optional<T> findById(Long id, GraphBuilder<T> entityGraphBuilder);
+
+    Optional<T> findOne(Specification<T> spec, GraphBuilder<T> entityGraphBuilder);
+
+    List<T> findAll(Specification<T> spec, GraphBuilder<T> entityGraphBuilder);
+
+    List<T> findAll(Specification<T> spec, Sort sort, GraphBuilder<T> entityGraphBuilder);
+
+    Page<T> findAll(Specification<T> spec, Pageable pageable, GraphBuilder<T> entityGraphBuilder);
 
     void deleteByStaIdentifier(String identifier);
-
-    Optional<T> findById(Long id, EntityGraphBuilder<T> entityGraphBuilder);
-
-    Optional<T> findOne(Specification<T> spec, EntityGraphBuilder<T> entityGraphBuilder);
-
-    List<T> findAll(Specification<T> spec, EntityGraphBuilder<T> entityGraphBuilder);
-
-    List<T> findAll(Specification<T> spec, Sort sort, EntityGraphBuilder<T> entityGraphBuilder);
-
-    Page<T> findAll(Specification<T> spec, Pageable pageable, EntityGraphBuilder<T> entityGraphBuilder);
 
 }

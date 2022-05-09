@@ -43,7 +43,7 @@ import javax.persistence.criteria.Root;
 
 import org.n52.series.db.beans.DescribableEntity;
 import org.n52.series.db.beans.IdEntity;
-import org.n52.sta.data.support.EntityGraphBuilder;
+import org.n52.sta.data.support.GraphBuilder;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -98,38 +98,38 @@ public class BaseRepositoryImpl<T>
     }
 
     @Override
-    public Optional<T> findByStaIdentifier(String id, EntityGraphBuilder<T> graphBuilder) {
+    public Optional<T> findByStaIdentifier(String id, GraphBuilder<T> graphBuilder) {
         return findByUniqueProperty(id, DescribableEntity.PROPERTY_STA_IDENTIFIER, graphBuilder);
     }
 
     @Override
-    public Optional<T> findById(Long id, EntityGraphBuilder<T> graphBuilder) {
+    public Optional<T> findById(Long id, GraphBuilder<T> graphBuilder) {
         return findByUniqueProperty(id, IdEntity.PROPERTY_ID, graphBuilder);
     }
 
     @Override
-    public Optional<T> findOne(Specification<T> spec, EntityGraphBuilder<T> graphBuilder) {
+    public Optional<T> findOne(Specification<T> spec, GraphBuilder<T> graphBuilder) {
         TypedQuery<T> query = getQuery(spec, graphBuilder);
         return getSingleResult(query);
     }
 
     @Override
-    public List<T> findAll(Specification<T> spec, EntityGraphBuilder<T> graphBuilder) {
+    public List<T> findAll(Specification<T> spec, GraphBuilder<T> graphBuilder) {
         return findAll(spec, Sort.unsorted(), graphBuilder);
     }
 
     @Override
-    public List<T> findAll(Specification<T> spec, Sort sort, EntityGraphBuilder<T> entityGraph) {
+    public List<T> findAll(Specification<T> spec, Sort sort, GraphBuilder<T> entityGraph) {
         return getQuery(spec, entityGraph, sort).getResultList();
     }
 
     @Override
-    public Page<T> findAll(Specification<T> spec, Pageable pageable, EntityGraphBuilder<T> graphBuilder) {
+    public Page<T> findAll(Specification<T> spec, Pageable pageable, GraphBuilder<T> graphBuilder) {
         TypedQuery<T> query = getQuery(spec, graphBuilder, pageable.getSort());
         return readPage(query, getDomainClass(), pageable, spec);
     }
 
-    private Optional<T> findByUniqueProperty(Object id, String uniqueProperty, EntityGraphBuilder<T> graphBuilder) {
+    private Optional<T> findByUniqueProperty(Object id, String uniqueProperty, GraphBuilder<T> graphBuilder) {
         CriteriaQuery<T> query = createQuery(root -> {
             Path<Object> path = root.get(uniqueProperty);
             return criteriaBuilder.equal(path, id);
@@ -147,11 +147,11 @@ public class BaseRepositoryImpl<T>
         return query.where(where.resolve(root));
     }
 
-    private TypedQuery<T> getQuery(Specification<T> spec, EntityGraphBuilder<T> graphBuilder) {
+    private TypedQuery<T> getQuery(Specification<T> spec, GraphBuilder<T> graphBuilder) {
         return getQuery(spec, graphBuilder, Sort.unsorted());
     }
 
-    private TypedQuery<T> getQuery(Specification<T> spec, EntityGraphBuilder<T> graphBuilder, Sort sort) {
+    private TypedQuery<T> getQuery(Specification<T> spec, GraphBuilder<T> graphBuilder, Sort sort) {
         Class<T> entityClass = getDomainClass();
         CriteriaQuery<T> query = criteriaBuilder.createQuery(entityClass);
         Root<T> root = query.from(entityClass);
