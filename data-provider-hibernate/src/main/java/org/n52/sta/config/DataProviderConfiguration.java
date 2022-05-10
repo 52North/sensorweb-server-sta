@@ -27,8 +27,10 @@
  */
 package org.n52.sta.config;
 
+import org.n52.sta.data.provider.DatastreamEntityProvider;
 import org.n52.sta.data.provider.ThingEntityProvider;
 import org.n52.sta.data.repositories.BaseRepositoryImpl;
+import org.n52.sta.data.repositories.entity.DatastreamRepository;
 import org.n52.sta.data.repositories.entity.ThingRepository;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
@@ -42,8 +44,13 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 public class DataProviderConfiguration {
 
     @Bean
-    public ThingEntityProvider getThingEntityProvider(ThingRepository thingRepository) {
-        return new ThingEntityProvider(thingRepository);
+    public ThingEntityProvider getThingEntityProvider(ThingRepository repository) {
+        return new ThingEntityProvider(repository);
+    }
+
+    @Bean
+    public DatastreamEntityProvider getDatastreamEntityProvider(DatastreamRepository repository) {
+        return new DatastreamEntityProvider(repository);
     }
 
     @Configuration

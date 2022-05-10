@@ -31,21 +31,17 @@ import java.util.Objects;
 import java.util.Optional;
 
 import org.n52.series.db.beans.AbstractDatasetEntity;
-import org.n52.series.db.beans.PlatformEntity;
 import org.n52.shetland.oasis.odata.query.option.QueryOptions;
 import org.n52.sta.api.EntityPage;
 import org.n52.sta.api.ProviderException;
 import org.n52.sta.api.entity.Datastream;
-import org.n52.sta.api.entity.Thing;
 import org.n52.sta.data.StaEntityPage;
 import org.n52.sta.data.StaPageRequest;
 import org.n52.sta.data.entity.DatastreamData;
-import org.n52.sta.data.entity.ThingData;
 import org.n52.sta.data.query.FilterQueryParser;
-import org.n52.sta.data.query.specifications.ThingQuerySpecifications;
+import org.n52.sta.data.query.specifications.DatastreamQuerySpecification;
 import org.n52.sta.data.repositories.entity.DatastreamRepository;
 import org.n52.sta.data.support.DatastreamGraphBuilder;
-import org.n52.sta.data.support.ThingGraphBuilder;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
@@ -81,12 +77,12 @@ public class DatastreamEntityProvider extends BaseEntityProvider<Datastream> {
     public EntityPage<Datastream> getEntities(QueryOptions options) throws ProviderException {
         Pageable pagable = StaPageRequest.create(options);
         
-        ThingGraphBuilder graphBuilder = new ThingGraphBuilder();
+        DatastreamGraphBuilder graphBuilder = new DatastreamGraphBuilder();
         addUnfilteredExpandItems(options, graphBuilder);
         
-        Specification<PlatformEntity> spec = FilterQueryParser.parse(options, new ThingQuerySpecifications());
-        Page<PlatformEntity> results = datastreamRepository.findAll(spec, pagable, graphBuilder);
-        return new StaEntityPage<>(Thing.class, results, ThingData::new);
+        Specification<AbstractDatasetEntity> spec = FilterQueryParser.parse(options, new DatastreamQuerySpecification());
+        Page<AbstractDatasetEntity> results = datastreamRepository.findAll(spec, pagable, graphBuilder);
+        return new StaEntityPage<>(Datastream.class, results, DatastreamData::new);
     }
 
 }

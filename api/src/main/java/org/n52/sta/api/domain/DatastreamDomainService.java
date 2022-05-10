@@ -25,23 +25,15 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
-package org.n52.sta.data.support;
+package org.n52.sta.api.domain;
 
-import org.n52.series.db.beans.sta.StaFeatureEntity;
-import org.n52.shetland.filter.ExpandItem;
+import org.n52.sta.api.domain.DomainService.DomainServiceAdapter;
+import org.n52.sta.api.entity.Datastream;
 
-public class FeatureOfInterestGraphBuilder extends GraphBuilder<StaFeatureEntity<?>> {
+public class DatastreamDomainService extends DomainServiceAdapter<Datastream> {
 
-    protected FeatureOfInterestGraphBuilder(Class<StaFeatureEntity<?>> entityType) {
-        super(entityType);
-        addGraphText(GraphText.GRAPH_PARAMETERS);
-        addGraphText(GraphText.GRAPH_FEATURETYPE);
+    public DatastreamDomainService(DomainService<Datastream> domainService) {
+        super(domainService);
     }
 
-    @Override
-    public void addExpanded(ExpandItem expandItem) {
-        // no member to expand
-        
-    }
-    
 }

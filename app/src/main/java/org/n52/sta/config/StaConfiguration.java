@@ -32,7 +32,9 @@ import java.util.Optional;
 import org.n52.sta.api.EntityProvider;
 import org.n52.sta.api.EntityServiceLookup;
 import org.n52.sta.api.domain.DomainService;
+import org.n52.sta.api.entity.Datastream;
 import org.n52.sta.api.entity.Thing;
+import org.n52.sta.api.service.DatastreamService;
 import org.n52.sta.api.service.EntityService;
 import org.n52.sta.api.service.ThingService;
 import org.springframework.context.annotation.Bean;
@@ -56,6 +58,19 @@ public class StaConfiguration {
                 ? new ThingService(entityProvider, thingDomainService.get())
                 : new ThingService(entityProvider);
         lookup.addEntityService(Thing.class, service);
+        return service;
+    }
+
+    @Bean
+    public EntityService<Datastream> getDatastreamService(
+            EntityProvider<Datastream> entityProvider,
+            Optional<DomainService<Datastream>> datastreamDomainService,
+            EntityServiceLookup lookup) {
+
+        DatastreamService service = datastreamDomainService.isPresent()
+                ? new DatastreamService(entityProvider, datastreamDomainService.get())
+                : new DatastreamService(entityProvider);
+        lookup.addEntityService(Datastream.class, service);
         return service;
     }
 }

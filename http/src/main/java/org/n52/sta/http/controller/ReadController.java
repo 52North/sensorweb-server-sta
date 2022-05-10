@@ -44,6 +44,12 @@ import org.n52.sta.api.ProviderException;
 import org.n52.sta.api.entity.Identifiable;
 import org.n52.sta.api.service.EntityService;
 import org.n52.sta.http.serialize.out.CollectionNode;
+import org.n52.sta.http.serialize.out.DatastreamJsonSerializer;
+import org.n52.sta.http.serialize.out.FeatureOfInterestJsonSerializer;
+import org.n52.sta.http.serialize.out.HistoricalLocationJsonSerializer;
+import org.n52.sta.http.serialize.out.ObservationJsonSerializer;
+import org.n52.sta.http.serialize.out.ObservedPropertyJsonSerializer;
+import org.n52.sta.http.serialize.out.SensorJsonSerializer;
 import org.n52.sta.http.serialize.out.SerializationContext;
 import org.n52.sta.http.serialize.out.StaBaseSerializer;
 import org.n52.sta.http.serialize.out.ThingJsonSerializer;
@@ -82,12 +88,12 @@ public class ReadController {
 
     @GetMapping(value = "/Observations")
     public StreamingResponseBody getObservations(HttpServletRequest request) throws STAInvalidUrlException {
-        return validateAndProcess(request, null);
+        return validateAndProcess(request, ObservationJsonSerializer::new);
     }
 
     @GetMapping(value = "/Datastreams")
     public StreamingResponseBody getDatastreams(HttpServletRequest request) throws STAInvalidUrlException {
-        return validateAndProcess(request, null);
+        return validateAndProcess(request, DatastreamJsonSerializer::new);
     }
 
     @GetMapping(value = "/Things")
@@ -97,7 +103,7 @@ public class ReadController {
 
     @GetMapping(value = "/Sensors")
     public StreamingResponseBody getSensors(HttpServletRequest request) throws STAInvalidUrlException {
-        return validateAndProcess(request, null);
+        return validateAndProcess(request, SensorJsonSerializer::new);
     }
 
     @GetMapping(value = "/Locations")
@@ -107,17 +113,17 @@ public class ReadController {
 
     @GetMapping(value = "/HistoricalLocations")
     public StreamingResponseBody getHistoricalLocations(HttpServletRequest request) throws STAInvalidUrlException {
-        return validateAndProcess(request, null);
+        return validateAndProcess(request, HistoricalLocationJsonSerializer::new);
     }
 
     @GetMapping(value = "/FeaturesOfInterest")
     public StreamingResponseBody getFeaturesOfInterest(HttpServletRequest request) throws STAInvalidUrlException {
-        return validateAndProcess(request, null);
+        return validateAndProcess(request, FeatureOfInterestJsonSerializer::new);
     }
 
     @GetMapping(value = "/ObservedProperties")
     public StreamingResponseBody getObservedProperties(HttpServletRequest request) throws STAInvalidUrlException {
-        return validateAndProcess(request, null);
+        return validateAndProcess(request, ObservedPropertyJsonSerializer::new);
     }
 
     private <T extends Identifiable> StreamingResponseBody validateAndProcess(HttpServletRequest request,
