@@ -27,6 +27,9 @@
  */
 package org.n52.sta.config;
 
+import org.n52.sta.api.EntityProvider;
+import org.n52.sta.api.entity.Datastream;
+import org.n52.sta.api.entity.Thing;
 import org.n52.sta.data.provider.DatastreamEntityProvider;
 import org.n52.sta.data.provider.FeatureOfInterestEntityProvider;
 import org.n52.sta.data.provider.HistoricalLocationEntityProvider;
