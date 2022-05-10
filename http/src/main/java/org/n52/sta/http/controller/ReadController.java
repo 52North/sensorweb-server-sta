@@ -130,22 +130,23 @@ public class ReadController {
             Function<SerializationContext, StaBaseSerializer<T>> factory) throws STAInvalidUrlException {
         validateRequestPath(request);
         RequestContext requestContext = RequestContext.create(serviceUri, request);
-        SerializationContext context = SerializationContext.create(requestContext, mapper);
-        StaBaseSerializer<T> serializer = factory.apply(context);
-        context.register(serializer);
-        return getAndWriteToResponse(context, serializer.getType());
+        SerializationContext serializationContext = SerializationContext.create(requestContext, mapper);
+        StaBaseSerializer<T> serializer = factory.apply(serializationContext);
+        serializationContext.register(serializer);
+        return getAndWriteToResponse(requestContext, serializationContext, serializer.getType());
     }
 
-    private <T extends Identifiable> StreamingResponseBody getAndWriteToResponse(SerializationContext context,
+    private <T extends Identifiable> StreamingResponseBody getAndWriteToResponse(RequestContext requestContext,
+            SerializationContext context,
             Class<T> type) throws ProviderException {
-        EntityPage<T> collection = getCollection(context, type);
+        EntityPage<T> collection = getCollection(requestContext, type);
         return writeCollection(collection, context);
     }
 
-    private <T extends Identifiable> EntityPage<T> getCollection(SerializationContext context, Class<T> type)
+    private <T extends Identifiable> EntityPage<T> getCollection(RequestContext requestContext, Class<T> type)
             throws ProviderException {
         EntityService<T> entityService = getEntityService(type);
-        return entityService.getEntities(context.getQueryOptions());
+        return entityService.getEntities(requestContext.getQueryOptions());
     }
 
     private <T extends Identifiable> StreamingResponseBody writeCollection(EntityPage<T> page,
