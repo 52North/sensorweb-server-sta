@@ -68,7 +68,8 @@ public class DatastreamEntityProvider extends BaseEntityProvider<Datastream> {
         DatastreamGraphBuilder graphBuilder = new DatastreamGraphBuilder();
         addUnfilteredExpandItems(options, graphBuilder);
 
-        Specification<AbstractDatasetEntity> spec = FilterQueryParser.parse(options, new DatastreamQuerySpecification());
+        Specification<AbstractDatasetEntity> spec = FilterQueryParser.parse(options,
+                new DatastreamQuerySpecification());
         Optional<AbstractDatasetEntity> datastream = datastreamRepository.findOne(spec, graphBuilder);
         return datastream.map(DatastreamData::new);
     }
@@ -76,11 +77,12 @@ public class DatastreamEntityProvider extends BaseEntityProvider<Datastream> {
     @Override
     public EntityPage<Datastream> getEntities(QueryOptions options) throws ProviderException {
         Pageable pagable = StaPageRequest.create(options);
-        
+
         DatastreamGraphBuilder graphBuilder = new DatastreamGraphBuilder();
         addUnfilteredExpandItems(options, graphBuilder);
-        
-        Specification<AbstractDatasetEntity> spec = FilterQueryParser.parse(options, new DatastreamQuerySpecification());
+
+        Specification<AbstractDatasetEntity> spec = FilterQueryParser.parse(options,
+                new DatastreamQuerySpecification());
         Page<AbstractDatasetEntity> results = datastreamRepository.findAll(spec, pagable, graphBuilder);
         return new StaEntityPage<>(Datastream.class, results, DatastreamData::new);
     }

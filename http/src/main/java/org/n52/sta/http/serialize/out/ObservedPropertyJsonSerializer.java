@@ -43,7 +43,8 @@ public class ObservedPropertyJsonSerializer extends StaBaseSerializer<ObservedPr
     }
 
     @Override
-    public void serialize(ObservedProperty value, JsonGenerator gen, SerializerProvider serializers) throws IOException {
+    public void serialize(ObservedProperty value, JsonGenerator gen, SerializerProvider serializers)
+            throws IOException {
         gen.writeStartObject();
         String id = value.getId();
 
@@ -62,7 +63,7 @@ public class ObservedPropertyJsonSerializer extends StaBaseSerializer<ObservedPr
                 serializer.serialize(item, gen, serializers);
             }
         });
-        
+
     }
 
 }

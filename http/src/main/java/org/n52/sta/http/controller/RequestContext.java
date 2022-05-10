@@ -40,10 +40,17 @@ import org.n52.shetland.oasis.odata.query.option.QueryOptions;
 import org.n52.svalbard.odata.core.QueryOptionsFactory;
 
 public class RequestContext {
-    
+
     private final String serviceUri;
 
     private final QueryOptions queryOptions;
+
+    RequestContext(String serviceUri, QueryOptions queryOptions) {
+        Objects.requireNonNull(serviceUri, "serviceUri must not be null");
+        Objects.requireNonNull(queryOptions, "queryOptions must not be null");
+        this.serviceUri = serviceUri;
+        this.queryOptions = queryOptions;
+    }
 
     public static RequestContext create(String serviceUri, HttpServletRequest request) {
         Objects.requireNonNull(request, "request must not be null");
@@ -52,13 +59,6 @@ public class RequestContext {
         // TODO parse StaPath
 
         return new RequestContext(serviceUri, queryOptions);
-    }
-    
-    RequestContext(String serviceUri, QueryOptions queryOptions) {
-        Objects.requireNonNull(serviceUri, "serviceUri must not be null");
-        Objects.requireNonNull(queryOptions, "request must not be null");
-        this.serviceUri = serviceUri;
-        this.queryOptions = queryOptions;
     }
 
     private static QueryOptions parseQueryOptions(HttpServletRequest request) {

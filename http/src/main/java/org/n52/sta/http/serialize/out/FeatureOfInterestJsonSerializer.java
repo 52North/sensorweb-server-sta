@@ -43,7 +43,8 @@ public class FeatureOfInterestJsonSerializer extends StaBaseSerializer<FeatureOf
     }
 
     @Override
-    public void serialize(FeatureOfInterest value, JsonGenerator gen, SerializerProvider serializers) throws IOException {
+    public void serialize(FeatureOfInterest value, JsonGenerator gen, SerializerProvider serializers)
+            throws IOException {
         gen.writeStartObject();
         String id = value.getId();
 
@@ -54,7 +55,7 @@ public class FeatureOfInterestJsonSerializer extends StaBaseSerializer<FeatureOf
         writeStringProperty(StaConstants.PROP_DESCRIPTION, value::getDescription, gen);
         writeObjectProperty(StaConstants.PROP_DESCRIPTION, value::getProperties, gen);
         writeGeometryAndEncodingType(StaConstants.PROP_FEATURE, value::getFeature, gen);
-        
+
         // entity members
         String observations = StaConstants.OBSERVATIONS;
         writeMemberCollection(observations, id, gen, ObservationJsonSerializer::new, serializer -> {

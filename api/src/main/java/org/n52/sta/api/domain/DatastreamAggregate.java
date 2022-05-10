@@ -47,9 +47,10 @@ public class DatastreamAggregate extends EntityAggregate<Datastream> implements 
         this(datastream, domainService, null);
     }
 
-    public DatastreamAggregate(Datastream thing, DomainService<Datastream> domainService, EntityEditor<Datastream> editor) {
-        super(thing, domainService, editor);
-        this.datastream = thing;
+    public DatastreamAggregate(Datastream datastream, DomainService<Datastream> domainService,
+            EntityEditor<Datastream> editor) {
+        super(datastream, domainService, editor);
+        this.datastream = datastream;
     }
 
     public String getId() {
@@ -103,7 +104,5 @@ public class DatastreamAggregate extends EntityAggregate<Datastream> implements 
     public Set<Observation<?>> getObservations() {
         return datastream.getObservations();
     }
-
-
 
 }

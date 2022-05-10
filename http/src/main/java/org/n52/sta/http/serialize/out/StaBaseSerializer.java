@@ -65,7 +65,7 @@ public abstract class StaBaseSerializer<T> extends StdSerializer<T> implements S
         this.context = context;
         context.register(this);
     }
-    
+
     private static String removeTrailingSlash(String serviceUri) {
         return serviceUri.endsWith("/")
                 ? serviceUri.substring(0, serviceUri.length() - 1)
@@ -77,7 +77,8 @@ public abstract class StaBaseSerializer<T> extends StdSerializer<T> implements S
         return handledType();
     }
 
-    protected void writeGeometryAndEncodingType(String name, Supplier<Geometry> geometry, JsonGenerator gen) throws IOException {
+    protected void writeGeometryAndEncodingType(String name, Supplier<Geometry> geometry, JsonGenerator gen)
+            throws IOException {
         if (context.isSelected(name)) {
             Geometry value = geometry.get();
             if (value != null) {

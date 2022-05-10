@@ -136,12 +136,14 @@ public class ReadController {
         return getAndWriteToResponse(context, serializer.getType());
     }
 
-    private <T extends Identifiable> StreamingResponseBody getAndWriteToResponse(SerializationContext context,Class<T> type) throws ProviderException {
+    private <T extends Identifiable> StreamingResponseBody getAndWriteToResponse(SerializationContext context,
+            Class<T> type) throws ProviderException {
         EntityPage<T> collection = getCollection(context, type);
         return writeCollection(collection, context);
     }
 
-    private <T extends Identifiable> EntityPage<T> getCollection(SerializationContext context, Class<T> type) throws ProviderException {
+    private <T extends Identifiable> EntityPage<T> getCollection(SerializationContext context, Class<T> type)
+            throws ProviderException {
         EntityService<T> entityService = getEntityService(type);
         return entityService.getEntities(context.getQueryOptions());
     }
