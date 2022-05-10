@@ -27,6 +27,30 @@
  */
 package org.n52.sta.http.controller;
 
-public interface WriteController {
+import java.util.Objects;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import org.n52.sta.api.entity.Thing;
+import org.n52.sta.http.serialize.in.ThingNode;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RestController;
+
+@RestController
+public class WriteController {
+
+    private final ObjectMapper mapper;
+
+    public WriteController(ObjectMapper mapper) {
+        Objects.requireNonNull(mapper, "mapper must not be null");
+        this.mapper = mapper;
+    }
+
+    @PostMapping("/Things")
+    public ResponseEntity<Thing> createThing(@RequestBody JsonNode thing) {
+        return ResponseEntity.ok(new ThingNode(thing, mapper));
+    }
 }
