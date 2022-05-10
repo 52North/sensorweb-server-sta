@@ -44,7 +44,10 @@ import org.n52.sta.api.old.dto.Location;
 import org.n52.sta.api.old.serialize.common.AbstractJSONEntity;
 import org.n52.sta.api.old.serialize.common.JSONBase;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+
 @SuppressWarnings("VisibilityModifier")
+@SuppressFBWarnings({ "NM_FIELD_NAMING_CONVENTION", "UWF_UNWRITTEN_PUBLIC_OR_PROTECTED_FIELD" })
 public class JSONLocation extends JSONBase.JSONwithIdNameDescription<Location> implements AbstractJSONEntity {
 
     private static final String COULD_NOT_PARSE = "Could not parse location to GeoJSON. Error was: ";
