@@ -45,6 +45,8 @@ public class RequestContext {
 
     private final QueryOptions queryOptions;
 
+    private final PathOptions pathOptions;
+
     RequestContext(String serviceUri, QueryOptions queryOptions) {
         Objects.requireNonNull(serviceUri, "serviceUri must not be null");
         Objects.requireNonNull(queryOptions, "queryOptions must not be null");
