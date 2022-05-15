@@ -25,6 +25,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
+
 package org.n52.sta.http.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -35,8 +36,18 @@ import org.n52.sta.api.EntityServiceLookup;
 import org.n52.sta.api.ProviderException;
 import org.n52.sta.api.entity.Identifiable;
 import org.n52.sta.api.service.EntityService;
-import org.n52.sta.http.serialize.out.*;
+import org.n52.sta.http.serialize.out.CollectionNode;
+import org.n52.sta.http.serialize.out.DatastreamJsonSerializer;
+import org.n52.sta.http.serialize.out.FeatureOfInterestJsonSerializer;
+import org.n52.sta.http.serialize.out.HistoricalLocationJsonSerializer;
+import org.n52.sta.http.serialize.out.ObservationJsonSerializer;
+import org.n52.sta.http.serialize.out.ObservedPropertyJsonSerializer;
+import org.n52.sta.http.serialize.out.SensorJsonSerializer;
+import org.n52.sta.http.serialize.out.SerializationContext;
+import org.n52.sta.http.serialize.out.StaBaseSerializer;
+import org.n52.sta.http.serialize.out.ThingJsonSerializer;
 import org.n52.sta.http.util.StaUriValidator;
+import org.n52.sta.http.util.path.PathFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -62,97 +73,99 @@ public class ReadController {
 
     private final ObjectMapper mapper;
 
+    private final PathFactory pathFactory;
+
     public ReadController(
-            @Value("${server.config.service-root-url}") String serviceUri,
-            StaUriValidator validator,
-            EntityServiceLookup lookup,
-            ObjectMapper mapper) {
+        @Value("${server.config.service-root-url}") String serviceUri,
+        StaUriValidator validator,
+        EntityServiceLookup lookup,
+        PathFactory pathFactory,
+        ObjectMapper mapper) {
         Objects.requireNonNull(serviceUri, "serviceUri must not be null!");
         Objects.requireNonNull(validator, "validator must not be null!");
         Objects.requireNonNull(lookup, "lookup must not be null!");
+        Objects.requireNonNull(pathFactory, "pathFactory must not be null!");
         Objects.requireNonNull(mapper, "mapper must not be null!");
         this.serviceUri = serviceUri;
         this.validator = validator;
         this.lookup = lookup;
         this.mapper = mapper;
+        this.pathFactory = pathFactory;
     }
 
-    @GetMapping(value = "/*")
-    public ResponseEntity<StreamingResponseBody> get(HttpServletRequest request) {
-
-    }
-
-    @GetMapping(value = "/Observations")
+    @GetMapping(value = "**/Observations")
     public ResponseEntity<StreamingResponseBody> getObservations(HttpServletRequest request)
-            throws STAInvalidUrlException {
+        throws STAInvalidUrlException {
         return validateAndProcess(request, ObservationJsonSerializer::new);
     }
 
-    @GetMapping(value = "/Datastreams")
+    @GetMapping(value = "**/Datastreams")
     public ResponseEntity<StreamingResponseBody> getDatastreams(HttpServletRequest request)
-            throws STAInvalidUrlException {
+        throws STAInvalidUrlException {
         return validateAndProcess(request, DatastreamJsonSerializer::new);
     }
 
-    @GetMapping(value = "/Things", produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(value = "**/Things")
     public ResponseEntity<StreamingResponseBody> getThings(HttpServletRequest request)
-            throws STAInvalidUrlException {
+        throws STAInvalidUrlException {
         return validateAndProcess(request, ThingJsonSerializer::new);
     }
 
-    @GetMapping(value = "/Sensors")
+    @GetMapping(value = "**/Sensors")
     public ResponseEntity<StreamingResponseBody> getSensors(HttpServletRequest request)
-            throws STAInvalidUrlException {
+        throws STAInvalidUrlException {
         return validateAndProcess(request, SensorJsonSerializer::new);
     }
 
-    @GetMapping(value = "/Locations")
+    @GetMapping(value = "**/Locations")
     public ResponseEntity<StreamingResponseBody> getLocations(HttpServletRequest request)
-            throws STAInvalidUrlException {
+        throws STAInvalidUrlException {
         return validateAndProcess(request, null);
     }
 
-    @GetMapping(value = "/HistoricalLocations")
+    @GetMapping(value = "**/HistoricalLocations")
     public ResponseEntity<StreamingResponseBody> getHistoricalLocations(HttpServletRequest request)
-            throws STAInvalidUrlException {
+        throws STAInvalidUrlException {
         return validateAndProcess(request, HistoricalLocationJsonSerializer::new);
     }
 
-    @GetMapping(value = "/FeaturesOfInterest")
+    @GetMapping(value = "**/FeaturesOfInterest")
     public ResponseEntity<StreamingResponseBody> getFeaturesOfInterest(HttpServletRequest request)
-            throws STAInvalidUrlException {
+        throws STAInvalidUrlException {
         return validateAndProcess(request, FeatureOfInterestJsonSerializer::new);
     }
 
-    @GetMapping(value = "/ObservedProperties")
+    @GetMapping(value = "**/ObservedProperties")
     public ResponseEntity<StreamingResponseBody> getObservedProperties(HttpServletRequest request)
-            throws STAInvalidUrlException {
+        throws STAInvalidUrlException {
         return validateAndProcess(request, ObservedPropertyJsonSerializer::new);
     }
 
-    private <T extends Identifiable> ResponseEntity<StreamingResponseBody> validateAndProcess(
-            HttpServletRequest request,
-            Function<SerializationContext, StaBaseSerializer<T>> factory) throws STAInvalidUrlException {
-        validateRequestPath(request);
-        RequestContext requestContext = RequestContext.create(serviceUri, request);
+    private <T extends Identifiable> ResponseEntity<StreamingResponseBody>
+    validateAndProcess(HttpServletRequest request,
+                       Function<SerializationContext, StaBaseSerializer<T>> factory)
+        throws STAInvalidUrlException {
+        RequestContext requestContext = RequestContext.create(serviceUri, request, pathFactory);
+        validator.validateRequestPath(requestContext);
+
         SerializationContext serializationContext = SerializationContext.create(requestContext, mapper);
         StaBaseSerializer<T> serializer = factory.apply(serializationContext);
         serializationContext.register(serializer);
         return ResponseEntity.ok()
-                .contentType(MediaType.APPLICATION_JSON)
-                .body(getAndWriteToResponse(requestContext, serializationContext, serializer.getType()));
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(getAndWriteToResponse(requestContext, serializationContext, serializer.getType()));
     }
 
-    private <T extends Identifiable> StreamingResponseBody getAndWriteToResponse(
-            RequestContext requestContext,
-            SerializationContext context,
-            Class<T> type) throws ProviderException {
+    private <T extends Identifiable> StreamingResponseBody getAndWriteToResponse(RequestContext requestContext,
+                                                                                 SerializationContext context,
+                                                                                 Class<T> type)
+        throws ProviderException {
         EntityPage<T> collection = getCollection(requestContext, type);
         return writeCollection(collection, context);
     }
 
     private <T extends Identifiable> EntityPage<T> getCollection(RequestContext requestContext, Class<T> type)
-            throws ProviderException {
+        throws ProviderException {
         EntityService<T> entityService = getEntityService(type);
         return entityService.getEntities(requestContext.getQueryOptions());
     }
@@ -171,13 +184,8 @@ public class ReadController {
 
     private <T extends Identifiable> EntityService<T> getEntityService(Class<T> type) {
         return lookup.getService(type)
-                .orElseThrow(() -> new IllegalStateException("No service registered for collection '"
-                                                                     + type.getSimpleName() + "'"));
-    }
-
-    private void validateRequestPath(HttpServletRequest request) throws STAInvalidUrlException {
-        String path = (String) request.getAttribute(HandlerMapping.LOOKUP_PATH);
-        validator.validateRequestPath(path);
+            .orElseThrow(() -> new IllegalStateException("No service registered for collection '"
+                                                             + type.getSimpleName() + "'"));
     }
 
 }

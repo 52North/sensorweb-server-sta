@@ -25,8 +25,16 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
+
 package org.n52.sta.http.controller;
 
+import org.n52.shetland.oasis.odata.query.option.QueryOptions;
+import org.n52.sta.http.util.path.PathFactory;
+import org.n52.sta.http.util.path.StaPath;
+import org.n52.svalbard.odata.core.QueryOptionsFactory;
+import org.springframework.web.servlet.HandlerMapping;
+
+import javax.servlet.http.HttpServletRequest;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
@@ -34,41 +42,36 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Function;
 
-import javax.servlet.http.HttpServletRequest;
-
-import org.n52.shetland.oasis.odata.query.option.QueryOptions;
-import org.n52.svalbard.odata.core.QueryOptionsFactory;
-
 public class RequestContext {
 
     private final String serviceUri;
-
     private final QueryOptions queryOptions;
+    private final StaPath path;
 
-    private final PathOptions pathOptions;
-
-    RequestContext(String serviceUri, QueryOptions queryOptions) {
+    private RequestContext(String serviceUri, QueryOptions queryOptions, StaPath path) {
         Objects.requireNonNull(serviceUri, "serviceUri must not be null");
         Objects.requireNonNull(queryOptions, "queryOptions must not be null");
+        Objects.requireNonNull(path, "path must not be null");
+        this.path = path;
         this.serviceUri = serviceUri;
         this.queryOptions = queryOptions;
     }
 
-    public static RequestContext create(String serviceUri, HttpServletRequest request) {
+    public static RequestContext create(String serviceUri, HttpServletRequest request, PathFactory pathFactory) {
         Objects.requireNonNull(request, "request must not be null");
         QueryOptions queryOptions = parseQueryOptions(request);
 
-        // TODO parse StaPath
+        StaPath path = pathFactory.parsePath((String) request.getAttribute(HandlerMapping.LOOKUP_PATH));
 
-        return new RequestContext(serviceUri, queryOptions);
+        return new RequestContext(serviceUri, queryOptions, path);
     }
 
     private static QueryOptions parseQueryOptions(HttpServletRequest request) {
         String queryString = request.getQueryString();
         QueryOptionsFactory factory = new QueryOptionsFactory();
         return Optional.ofNullable(queryString).map(decodeQueryString())
-                .map(factory::createQueryOptions)
-                .orElse(factory.createEmpty());
+            .map(factory::createQueryOptions)
+            .orElse(factory.createEmpty());
     }
 
     private static Function<String, String> decodeQueryString() {
@@ -89,4 +92,7 @@ public class RequestContext {
         return queryOptions;
     }
 
+    public StaPath getPath() {
+        return path;
+    }
 }

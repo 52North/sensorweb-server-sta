@@ -25,34 +25,26 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
+
 package org.n52.sta.http.util;
+
+import org.n52.shetland.ogc.sta.exception.STAInvalidUrlException;
+import org.n52.sta.http.controller.RequestContext;
 
 import java.util.Objects;
 
-import org.n52.shetland.ogc.sta.exception.STAInvalidUrlException;
-import org.n52.sta.config.ServerProperties;
-
 public class StaUriValidator {
 
-    private final ServerProperties settings;
+    public void validateRequestPath(RequestContext context) throws STAInvalidUrlException {
+        Objects.requireNonNull(context, "context must not be null!");
 
-    public StaUriValidator(ServerProperties settings) {
-        this.settings = settings;
-    }
-
-    public void validateRequestPath(String path) throws STAInvalidUrlException {
-        Objects.requireNonNull(path, "path must not be null!");
-        if (path.isEmpty()) {
-            throw new STAInvalidUrlException("'" + path + "' is not a valid resource path");
-        }
-        String toValidate = trimLeadingSlash(path);
-
-        // TODO sta path grammar
+        // TODO: check in database whether path exists
+        return;
     }
 
     private String trimLeadingSlash(String path) {
         return path.startsWith("/")
-                ? path.substring(1)
-                : path;
+            ? path.substring(1)
+            : path;
     }
 }

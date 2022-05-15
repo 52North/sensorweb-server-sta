@@ -25,11 +25,16 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
+
 package org.n52.sta.config;
 
+import org.n52.grammar.STAPathGrammar;
+import org.n52.grammar.STAPathLexer;
 import org.n52.sta.http.old.filter.CorsFilter;
 import org.n52.sta.http.util.CustomUrlPathHelper;
 import org.n52.sta.http.util.StaUriValidator;
+import org.n52.sta.http.util.path.PathFactory;
+import org.n52.sta.http.util.path.StaPathVisitor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -53,24 +58,33 @@ public class WebConfiguration implements WebMvcConfigurer {
     @Override
     public void configureContentNegotiation(ContentNegotiationConfigurer configurer) {
         configurer.defaultContentType(MediaType.APPLICATION_JSON)
-                .ignoreAcceptHeader(true);
+            .ignoreAcceptHeader(true);
     }
 
     @Bean
-    public StaUriValidator getUriValidator(ServerProperties serverProperties) {
-        // TODO probably not needed when path grammer jumps in
-        return new StaUriValidator(serverProperties);
+    public PathFactory pathFactory() {
+        return new PathFactory(
+            STAPathLexer::new,
+            STAPathGrammar::new,
+            StaPathVisitor::new,
+            "path"
+        );
+    }
+
+    @Bean
+    StaUriValidator uriValidator() {
+        return new StaUriValidator();
     }
 
     @Bean
     public Filter getCorsFilter(
-            @Value("${http.cors.allowOrigin:*}") String origin,
-            @Value("${http.cors.allowMethods:POST, GET, OPTIONS, DELETE, PATCH}") String methods,
-            @Value("${http.cors.maxAge:3600}") String maxAge,
-            @Value("${http.cors.allowHeaders:Access-Control-Allow-Headers," +
-                           "Content-Type, Access-Control-Allow-Headers," +
-                           "Authorization," +
-                           "X-Requested-With}") String headers) {
+        @Value("${http.cors.allowOrigin:*}") String origin,
+        @Value("${http.cors.allowMethods:POST, GET, OPTIONS, DELETE, PATCH}") String methods,
+        @Value("${http.cors.maxAge:3600}") String maxAge,
+        @Value("${http.cors.allowHeaders:Access-Control-Allow-Headers," +
+            "Content-Type, Access-Control-Allow-Headers," +
+            "Authorization," +
+            "X-Requested-With}") String headers) {
         return new CorsFilter(origin, methods, maxAge, headers);
     }
 
