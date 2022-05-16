@@ -27,8 +27,10 @@
  */
 package org.n52.sta.http.serialize.out;
 
-public interface StaSerializer<T> {
+import org.n52.sta.api.entity.Identifiable;
+
+public interface StaSerializer<T extends Identifiable> {
 
     Class<T> getType();
-    
+
 }

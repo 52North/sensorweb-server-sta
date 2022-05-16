@@ -27,22 +27,22 @@
  */
 package org.n52.sta.http.serialize.out;
 
+import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.databind.ser.std.StdSerializer;
+import org.locationtech.jts.geom.Geometry;
+import org.locationtech.jts.io.geojson.GeoJsonWriter;
+import org.n52.shetland.ogc.gml.time.Time;
+import org.n52.shetland.ogc.sta.StaConstants;
+import org.n52.shetland.util.DateTimeHelper;
+import org.n52.sta.api.entity.Identifiable;
+
 import java.io.IOException;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
-import com.fasterxml.jackson.core.JsonGenerator;
-import com.fasterxml.jackson.databind.ser.std.StdSerializer;
-
-import org.locationtech.jts.geom.Geometry;
-import org.locationtech.jts.io.geojson.GeoJsonWriter;
-import org.n52.shetland.ogc.gml.time.Time;
-import org.n52.shetland.ogc.sta.StaConstants;
-import org.n52.shetland.util.DateTimeHelper;
-
-public abstract class StaBaseSerializer<T> extends StdSerializer<T> implements StaSerializer<T> {
+public abstract class StaBaseSerializer<T extends Identifiable> extends StdSerializer<T> implements StaSerializer<T> {
 
     private static final String ENCODINGTYPE_GEOJSON = "application/vnd.geo+json";
 
@@ -111,7 +111,7 @@ public abstract class StaBaseSerializer<T> extends StdSerializer<T> implements S
         }
     }
 
-    protected <E> void writeMemberCollection(
+    protected <E extends Identifiable> void writeMemberCollection(
             String member,
             String parentId,
             JsonGenerator gen,
@@ -125,7 +125,7 @@ public abstract class StaBaseSerializer<T> extends StdSerializer<T> implements S
         });
     }
 
-    protected <E> void writeMember(
+    protected <E extends Identifiable> void writeMember(
             String member,
             String parentId,
             JsonGenerator gen,
@@ -134,7 +134,7 @@ public abstract class StaBaseSerializer<T> extends StdSerializer<T> implements S
         writeMemberInternal(member, parentId, gen, serializerFactory, memberWriter);
     }
 
-    private <E> void writeMemberInternal(String member,
+    private <E extends Identifiable> void writeMemberInternal(String member,
             String parentId,
             JsonGenerator gen,
             Function<SerializationContext, StaBaseSerializer<E>> serializerFactory,
@@ -171,7 +171,7 @@ public abstract class StaBaseSerializer<T> extends StdSerializer<T> implements S
     }
 
     @FunctionalInterface
-    protected interface ThrowingMemberWriter<T> {
+    protected interface ThrowingMemberWriter<T extends Identifiable> {
         void writeIfSelected(StaBaseSerializer<T> context) throws IOException;
     }
 

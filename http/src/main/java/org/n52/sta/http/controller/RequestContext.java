@@ -29,6 +29,7 @@
 package org.n52.sta.http.controller;
 
 import org.n52.shetland.oasis.odata.query.option.QueryOptions;
+import org.n52.shetland.ogc.sta.exception.STAInvalidUrlException;
 import org.n52.sta.http.util.path.PathFactory;
 import org.n52.sta.http.util.path.StaPath;
 import org.n52.svalbard.odata.core.QueryOptionsFactory;
@@ -57,12 +58,12 @@ public class RequestContext {
         this.queryOptions = queryOptions;
     }
 
-    public static RequestContext create(String serviceUri, HttpServletRequest request, PathFactory pathFactory) {
+    public static RequestContext create(String serviceUri, HttpServletRequest request, PathFactory pathFactory)
+        throws STAInvalidUrlException {
         Objects.requireNonNull(request, "request must not be null");
         QueryOptions queryOptions = parseQueryOptions(request);
 
         StaPath path = pathFactory.parsePath((String) request.getAttribute(HandlerMapping.LOOKUP_PATH));
-
         return new RequestContext(serviceUri, queryOptions, path);
     }
 

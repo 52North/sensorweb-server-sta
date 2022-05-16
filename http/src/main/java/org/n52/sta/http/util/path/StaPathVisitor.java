@@ -4,8 +4,19 @@ import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.tree.TerminalNode;
 import org.n52.grammar.STAPathGrammar;
 import org.n52.grammar.STAPathGrammarBaseVisitor;
+import org.n52.sta.http.serialize.out.DatastreamJsonSerializer;
+import org.n52.sta.http.serialize.out.FeatureOfInterestJsonSerializer;
+import org.n52.sta.http.serialize.out.HistoricalLocationJsonSerializer;
+import org.n52.sta.http.serialize.out.LocationJsonSerializer;
+import org.n52.sta.http.serialize.out.ObservationJsonSerializer;
+import org.n52.sta.http.serialize.out.ObservedPropertyJsonSerializer;
+import org.n52.sta.http.serialize.out.SensorJsonSerializer;
+import org.n52.sta.http.serialize.out.SerializationContext;
+import org.n52.sta.http.serialize.out.StaBaseSerializer;
+import org.n52.sta.http.serialize.out.ThingJsonSerializer;
 
 import java.util.Optional;
+import java.util.function.Function;
 
 public class StaPathVisitor extends STAPathGrammarBaseVisitor<StaPath> {
 
@@ -19,7 +30,10 @@ public class StaPathVisitor extends STAPathGrammarBaseVisitor<StaPath> {
         return ctx.getChild(0).accept(this);
     }
 
-    private StaPath parseEntity(int ttEntity, ParserRuleContext propertyCtx, ParserRuleContext ctx) {
+    private StaPath parseEntity(int ttEntity,
+                                ParserRuleContext propertyCtx,
+                                ParserRuleContext ctx,
+                                Function<SerializationContext, StaBaseSerializer<?>> serializerFactory) {
         TerminalNode entity = ctx.getToken(ttEntity, 0);
 
         // Parse optional Identifier
@@ -34,22 +48,22 @@ public class StaPathVisitor extends STAPathGrammarBaseVisitor<StaPath> {
         // path ending with entity identified by Id
         if (ctx.getToken(STAPathGrammar.SLASH, 0) == null) {
             return new StaPath(StaPath.PathType.entity,
-                               new PathSegment(entity.getText(), identifier)
-            );
+                               new PathSegment(entity.getText(), identifier),
+                               serializerFactory);
         } else {
             // path ending in $ref
             if (ctx.getToken(STAPathGrammar.REF, 0) != null) {
                 return new StaPath(StaPath.PathType.ref,
-                                   new PathSegment(entity.getText(), identifier)
-                );
+                                   new PathSegment(entity.getText(), identifier),
+                                   serializerFactory);
             }
             // path ending in property
             if (propertyCtx != null) {
                 return new StaPath(StaPath.PathType.property,
                                    new PathSegment(entity.getText(),
                                                    identifier,
-                                                   Optional.ofNullable(propertyCtx.getText()))
-                );
+                                                   Optional.ofNullable(propertyCtx.getText())),
+                                   serializerFactory);
             }
 
             // path does not end here but continues. Delegate to next segment
@@ -69,36 +83,48 @@ public class StaPathVisitor extends STAPathGrammarBaseVisitor<StaPath> {
     public StaPath visitDatastream(STAPathGrammar.DatastreamContext ctx) {
         return parseEntity((ctx.DATASTREAM() != null) ? STAPathGrammar.DATASTREAM : STAPathGrammar.DATASTREAMS,
                            ctx.datastreamProperty(),
-                           ctx);
+                           ctx,
+                           DatastreamJsonSerializer::new);
     }
 
     @Override
     public StaPath visitObservation(STAPathGrammar.ObservationContext ctx) {
-        return parseEntity(STAPathGrammar.OBSERVATIONS, ctx.observationProperty(), ctx);
+        return parseEntity(STAPathGrammar.OBSERVATIONS,
+                           ctx.observationProperty(),
+                           ctx,
+                           ObservationJsonSerializer::new);
     }
 
     @Override
     public StaPath visitThing(STAPathGrammar.ThingContext ctx) {
         return parseEntity((ctx.THING() != null) ? STAPathGrammar.THING : STAPathGrammar.THINGS,
                            ctx.thingProperty(),
-                           ctx);
+                           ctx,
+                           ThingJsonSerializer::new);
     }
 
     @Override
     public StaPath visitLocation(STAPathGrammar.LocationContext ctx) {
-        return parseEntity(STAPathGrammar.LOCATIONS, ctx.locationProperty(), ctx);
+        return parseEntity(STAPathGrammar.LOCATIONS,
+                           ctx.locationProperty(),
+                           ctx,
+                           LocationJsonSerializer::new);
     }
 
     @Override
     public StaPath visitHistoricalLocation(STAPathGrammar.HistoricalLocationContext ctx) {
-        return parseEntity(STAPathGrammar.HISTORICAL_LOCATIONS, ctx.historicalLocationProperty(), ctx);
+        return parseEntity(STAPathGrammar.HISTORICAL_LOCATIONS,
+                           ctx.historicalLocationProperty(),
+                           ctx,
+                           HistoricalLocationJsonSerializer::new);
     }
 
     @Override
     public StaPath visitSensor(STAPathGrammar.SensorContext ctx) {
         return parseEntity((ctx.SENSOR() != null) ? STAPathGrammar.SENSOR : STAPathGrammar.SENSORS,
                            ctx.sensorProperty(),
-                           ctx);
+                           ctx,
+                           SensorJsonSerializer::new);
     }
 
     @Override
@@ -107,7 +133,8 @@ public class StaPathVisitor extends STAPathGrammarBaseVisitor<StaPath> {
                                STAPathGrammar.OBSERVED_PROPERTY :
                                STAPathGrammar.OBSERVED_PROPERTIES,
                            ctx.observedPropertyProperty(),
-                           ctx);
+                           ctx,
+                           ObservedPropertyJsonSerializer::new);
     }
 
     @Override
@@ -116,46 +143,63 @@ public class StaPathVisitor extends STAPathGrammarBaseVisitor<StaPath> {
                                STAPathGrammar.FEATURE_OF_INTEREST :
                                STAPathGrammar.FEATURES_OF_INTEREST,
                            ctx.featureOfInterestProperty(),
-                           ctx);
+                           ctx,
+                           FeatureOfInterestJsonSerializer::new);
     }
 
     @Override
     public StaPath visitDatastreams(STAPathGrammar.DatastreamsContext ctx) {
-        return new StaPath(StaPath.PathType.collection, new PathSegment(ctx.DATASTREAMS().getText()));
+        return new StaPath(StaPath.PathType.collection,
+                           new PathSegment(ctx.DATASTREAMS().getText()),
+                           DatastreamJsonSerializer::new);
     }
 
     @Override
     public StaPath visitObservations(STAPathGrammar.ObservationsContext ctx) {
-        return new StaPath(StaPath.PathType.collection, new PathSegment(ctx.OBSERVATIONS().getText()));
+        return new StaPath(StaPath.PathType.collection,
+                           new PathSegment(ctx.OBSERVATIONS().getText()),
+                           ObservationJsonSerializer::new);
     }
 
     @Override
     public StaPath visitThings(STAPathGrammar.ThingsContext ctx) {
-        return new StaPath(StaPath.PathType.collection, new PathSegment(ctx.THINGS().getText()));
+        return new StaPath(StaPath.PathType.collection,
+                           new PathSegment(ctx.THINGS().getText()),
+                           ThingJsonSerializer::new);
     }
 
     @Override
     public StaPath visitLocations(STAPathGrammar.LocationsContext ctx) {
-        return new StaPath(StaPath.PathType.collection, new PathSegment(ctx.LOCATIONS().getText()));
+        return new StaPath(StaPath.PathType.collection,
+                           new PathSegment(ctx.LOCATIONS().getText()),
+                           LocationJsonSerializer::new);
     }
 
     @Override
     public StaPath visitHistoricalLocations(STAPathGrammar.HistoricalLocationsContext ctx) {
-        return new StaPath(StaPath.PathType.collection, new PathSegment(ctx.HISTORICAL_LOCATIONS().getText()));
+        return new StaPath(StaPath.PathType.collection,
+                           new PathSegment(ctx.HISTORICAL_LOCATIONS().getText()),
+                           HistoricalLocationJsonSerializer::new);
     }
 
     @Override
     public StaPath visitSensors(STAPathGrammar.SensorsContext ctx) {
-        return new StaPath(StaPath.PathType.collection, new PathSegment(ctx.SENSORS().getText()));
+        return new StaPath(StaPath.PathType.collection,
+                           new PathSegment(ctx.SENSORS().getText()),
+                           SensorJsonSerializer::new);
     }
 
     @Override
     public StaPath visitObservedProperties(STAPathGrammar.ObservedPropertiesContext ctx) {
-        return new StaPath(StaPath.PathType.collection, new PathSegment(ctx.OBSERVED_PROPERTIES().getText()));
+        return new StaPath(StaPath.PathType.collection,
+                           new PathSegment(ctx.OBSERVED_PROPERTIES().getText()),
+                           ObservedPropertyJsonSerializer::new);
     }
 
     @Override
     public StaPath visitFeaturesOfInterest(STAPathGrammar.FeaturesOfInterestContext ctx) {
-        return new StaPath(StaPath.PathType.collection, new PathSegment(ctx.FEATURES_OF_INTEREST().getText()));
+        return new StaPath(StaPath.PathType.collection,
+                           new PathSegment(ctx.FEATURES_OF_INTEREST().getText()),
+                           FeatureOfInterestJsonSerializer::new);
     }
 }

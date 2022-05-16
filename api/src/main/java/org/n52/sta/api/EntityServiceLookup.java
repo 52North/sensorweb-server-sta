@@ -27,15 +27,15 @@
  */
 package org.n52.sta.api;
 
+import org.n52.sta.api.entity.Identifiable;
+import org.n52.sta.api.service.EntityService;
+
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
-
-import org.n52.sta.api.entity.Identifiable;
-import org.n52.sta.api.service.EntityService;
 
 public final class EntityServiceLookup {
 
@@ -63,7 +63,7 @@ public final class EntityServiceLookup {
     }
 
     public <T extends Identifiable> void addEntityService(Class<T> type, EntityService<T> service) {
-        Objects.requireNonNull(type, "typemust not be null!");
+        Objects.requireNonNull(type, "type must not be null!");
         Objects.requireNonNull(service, "service must not be null!");
         entityServicesByType.put(type, service);
     }

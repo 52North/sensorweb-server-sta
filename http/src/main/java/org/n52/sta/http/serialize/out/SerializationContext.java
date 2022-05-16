@@ -35,6 +35,7 @@ import org.n52.shetland.filter.ExpandFilter;
 import org.n52.shetland.filter.ExpandItem;
 import org.n52.shetland.filter.SelectFilter;
 import org.n52.shetland.oasis.odata.query.option.QueryOptions;
+import org.n52.sta.api.entity.Identifiable;
 import org.n52.sta.http.controller.RequestContext;
 
 import java.util.Objects;
@@ -92,7 +93,7 @@ public class SerializationContext {
      *
      * @param serializer the serializer to register
      */
-    public <T> void register(StaBaseSerializer<T> serializer) {
+    public <T extends Identifiable> void register(StaBaseSerializer<T> serializer) {
         SimpleModule module = new SimpleModule();
         module.addSerializer(serializer.getType(), serializer);
         mapper.registerModule(module);

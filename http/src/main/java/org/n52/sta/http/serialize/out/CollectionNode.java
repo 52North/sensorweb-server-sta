@@ -27,11 +27,11 @@
  */
 package org.n52.sta.http.serialize.out;
 
-import java.util.Collection;
-import java.util.Objects;
-
 import org.n52.sta.api.EntityPage;
 import org.n52.sta.api.entity.Identifiable;
+
+import java.util.Collection;
+import java.util.Objects;
 
 public class CollectionNode<T extends Identifiable> {
 
