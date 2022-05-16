@@ -27,20 +27,19 @@
  */
 package org.n52.sta.http.serialize.out;
 
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Set;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
 import com.fasterxml.jackson.databind.module.SimpleModule;
-
 import org.n52.janmayen.stream.Streams;
 import org.n52.shetland.filter.ExpandFilter;
 import org.n52.shetland.filter.ExpandItem;
 import org.n52.shetland.filter.SelectFilter;
 import org.n52.shetland.oasis.odata.query.option.QueryOptions;
 import org.n52.sta.http.controller.RequestContext;
+
+import java.util.Objects;
+import java.util.Optional;
+import java.util.Set;
 
 public class SerializationContext {
 
@@ -65,6 +64,10 @@ public class SerializationContext {
 
         this.selectFilter = getSelects(queryOptions);
         this.expandFilter = getExpands(queryOptions);
+
+        SimpleModule module = new SimpleModule();
+        module.addSerializer(CollectionNode.class, new CollectionNodeSerializer(this));
+        mapper.registerModule(module);
     }
 
     public static SerializationContext create(RequestContext requestContext, ObjectMapper mapperConfig) {
@@ -86,7 +89,7 @@ public class SerializationContext {
 
     /**
      * Registers specified serializer at the context's object mapper.
-     * 
+     *
      * @param serializer the serializer to register
      */
     public <T> void register(StaBaseSerializer<T> serializer) {
@@ -117,6 +120,10 @@ public class SerializationContext {
         }
         Set<ExpandItem> expands = expandFilter.get();
         return Streams.stream(expands).anyMatch(item -> member.equals(item.getPath()));
+    }
+
+    public boolean isCounted() {
+        return queryOptions.hasCountFilter() && queryOptions.getCountFilter().getValue();
     }
 
     public Optional<QueryOptions> getQueryOptionsForExpanded(String member) {
