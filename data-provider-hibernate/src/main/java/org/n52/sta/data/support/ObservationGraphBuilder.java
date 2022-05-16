@@ -30,10 +30,10 @@ package org.n52.sta.data.support;
 import org.n52.series.db.beans.DataEntity;
 import org.n52.shetland.filter.ExpandItem;
 
-public class ObservationGraphBuilder extends GraphBuilder<DataEntity<?>> {
+public class ObservationGraphBuilder extends GraphBuilder<DataEntity> {
 
-    public ObservationGraphBuilder(Class<DataEntity<?>> entityType) {
-        super(entityType);
+    public ObservationGraphBuilder() {
+        super(DataEntity.class);
         addGraphText(GraphText.GRAPH_PARAMETERS);
     }
 
