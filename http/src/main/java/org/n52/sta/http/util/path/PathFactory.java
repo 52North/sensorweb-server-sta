@@ -78,10 +78,10 @@ public class PathFactory {
                 int tokenType = e.getOffendingToken().getType();
                 String tokenName = vocabulary.getDisplayName(tokenType);
                 message = String.format(
-                    "Failed to parse QueryOptions due to %s with offending token: %s", msg,
+                    "Failed to parse URL due to %s with offending token: %s", msg,
                     tokenName);
             } else {
-                message = String.format("Failed to parse QueryOptions due to error: %s", msg);
+                message = String.format("Failed to parse URL due to error: %s", msg);
             }
             throw new IllegalStateException(message, e);
         }
