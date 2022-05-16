@@ -27,7 +27,7 @@ SLASH : '/' ;
 SQ : ['] ;
 OP : '(' ;
 CP : ')' ;
-fragment ALPHAPLUS : [a-zA-Z]+ ;
+IDENTIFIER : OP SQ? .*? SQ? CP;
 fragment DIGIT : [0-9] ;
 REF : '$ref' ;
 DIGITPLUS : DIGIT+ ;

@@ -28,8 +28,8 @@
 
 package org.n52.sta.config;
 
-import org.n52.grammar.STAPathGrammar;
-import org.n52.grammar.STAPathLexer;
+import org.n52.grammar.StaPathGrammar;
+import org.n52.grammar.StaPathLexer;
 import org.n52.sta.http.old.filter.CorsFilter;
 import org.n52.sta.http.util.CustomUrlPathHelper;
 import org.n52.sta.http.util.StaUriValidator;
@@ -64,8 +64,8 @@ public class WebConfiguration implements WebMvcConfigurer {
     @Bean
     public PathFactory pathFactory() {
         return new PathFactory(
-            STAPathLexer::new,
-            STAPathGrammar::new,
+            StaPathLexer::new,
+            StaPathGrammar::new,
             StaPathVisitor::new,
             "path"
         );

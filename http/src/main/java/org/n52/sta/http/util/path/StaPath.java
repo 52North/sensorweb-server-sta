@@ -25,6 +25,7 @@ public class StaPath {
     private final List<PathSegment> path = new ArrayList<>();
 
     private final Function<SerializationContext, StaBaseSerializer<?>> serializerFactory;
+
     public StaPath(PathType type,
                    PathSegment segment,
                    Function<SerializationContext, StaBaseSerializer<?>> serializerFactory) {

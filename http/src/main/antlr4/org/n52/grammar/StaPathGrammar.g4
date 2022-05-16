@@ -22,7 +22,7 @@
  */
 parser grammar StaPathGrammar;
 
-options { tokenVocab = STAPathLexer; }
+options { tokenVocab = StaPathLexer; }
 
 path
    : SLASH resource EOF
@@ -49,7 +49,7 @@ resource
 
 datastream
    : DATASTREAM
-   | DATASTREAMS identifier?
+   | DATASTREAMS identifier
         (SLASH (observations
                 | observation
                 | observedProperties
@@ -200,5 +200,5 @@ featuresOfInterest : FEATURES_OF_INTEREST ;
 ////////////////////////////////////////////////////////////////
 
 identifier
-   : OP ((SQ ALPHAPLUS SQ) | ALPHAPLUS | DIGITPLUS) CP
+   : IDENTIFIER
    ;
