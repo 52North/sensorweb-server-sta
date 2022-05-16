@@ -25,20 +25,21 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
+
 package org.n52.sta.data.provider;
 
-import org.n52.series.db.beans.PlatformEntity;
+import org.n52.series.db.beans.sta.HistoricalLocationEntity;
 import org.n52.shetland.oasis.odata.query.option.QueryOptions;
 import org.n52.sta.api.EntityPage;
 import org.n52.sta.api.ProviderException;
-import org.n52.sta.api.entity.Thing;
+import org.n52.sta.api.entity.HistoricalLocation;
 import org.n52.sta.data.StaEntityPage;
 import org.n52.sta.data.StaPageRequest;
-import org.n52.sta.data.entity.ThingData;
+import org.n52.sta.data.entity.HistoricalLocationData;
 import org.n52.sta.data.query.FilterQueryParser;
-import org.n52.sta.data.query.specifications.ThingQuerySpecification;
-import org.n52.sta.data.repositories.entity.ThingRepository;
-import org.n52.sta.data.support.ThingGraphBuilder;
+import org.n52.sta.data.query.specifications.HistoricalLocationQuerySpecification;
+import org.n52.sta.data.repositories.entity.HistoricalLocationRepository;
+import org.n52.sta.data.support.HistoricalLocationGraphBuilder;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
@@ -46,43 +47,45 @@ import org.springframework.data.jpa.domain.Specification;
 import java.util.Objects;
 import java.util.Optional;
 
-public class ThingEntityProvider extends BaseEntityProvider<Thing> {
+public class HistoricalLocationEntityProvider extends BaseEntityProvider<HistoricalLocation> {
 
-    private final ThingRepository thingRepository;
+    private final HistoricalLocationRepository historicalLocationRepository;
 
-    public ThingEntityProvider(ThingRepository thingRepository) {
-        Objects.requireNonNull(thingRepository, "thingRepository must not be null");
-        this.thingRepository = thingRepository;
+    public HistoricalLocationEntityProvider(HistoricalLocationRepository historicalLocationRepository) {
+        Objects.requireNonNull(historicalLocationRepository, "historicalLocationRepository must not be null");
+        this.historicalLocationRepository = historicalLocationRepository;
     }
 
     @Override
     public boolean exists(String id) throws ProviderException {
         assertIdentifier(id);
-        return thingRepository.existsByStaIdentifier(id);
+        return historicalLocationRepository.existsByStaIdentifier(id);
     }
 
     @Override
-    public Optional<Thing> getEntity(String id, QueryOptions options) throws ProviderException {
+    public Optional<HistoricalLocation> getEntity(String id, QueryOptions options) throws ProviderException {
         assertIdentifier(id);
 
-        ThingGraphBuilder graphBuilder = new ThingGraphBuilder();
+        HistoricalLocationGraphBuilder graphBuilder = new HistoricalLocationGraphBuilder();
         addUnfilteredExpandItems(options, graphBuilder);
 
-        Specification<PlatformEntity> spec = FilterQueryParser.parse(options, new ThingQuerySpecification());
-        Optional<PlatformEntity> platform = thingRepository.findOne(spec, graphBuilder);
-        return platform.map(ThingData::new);
+        Specification<HistoricalLocationEntity> spec =
+            FilterQueryParser.parse(options, new HistoricalLocationQuerySpecification());
+        Optional<HistoricalLocationEntity> platform = historicalLocationRepository.findOne(spec, graphBuilder);
+        return platform.map(HistoricalLocationData::new);
     }
 
     @Override
-    public EntityPage<Thing> getEntities(QueryOptions options) throws ProviderException {
+    public EntityPage<HistoricalLocation> getEntities(QueryOptions options) throws ProviderException {
         Pageable pagable = StaPageRequest.create(options);
 
-        ThingGraphBuilder graphBuilder = new ThingGraphBuilder();
+        HistoricalLocationGraphBuilder graphBuilder = new HistoricalLocationGraphBuilder();
         addUnfilteredExpandItems(options, graphBuilder);
 
-        Specification<PlatformEntity> spec = FilterQueryParser.parse(options, new ThingQuerySpecification());
-        Page<PlatformEntity> results = thingRepository.findAll(spec, pagable, graphBuilder);
-        return new StaEntityPage<>(Thing.class, results, ThingData::new);
+        Specification<HistoricalLocationEntity> spec =
+            FilterQueryParser.parse(options, new HistoricalLocationQuerySpecification());
+        Page<HistoricalLocationEntity> results = historicalLocationRepository.findAll(spec, pagable, graphBuilder);
+        return new StaEntityPage<>(HistoricalLocation.class, results, HistoricalLocationData::new);
     }
 
 }

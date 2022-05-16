@@ -29,7 +29,7 @@ package org.n52.sta.data.query;
 
 import org.n52.shetland.ogc.sta.exception.STAInvalidFilterExpressionException;
 import org.n52.sta.data.query.specifications.BaseQuerySpecifications;
-import org.n52.sta.data.query.specifications.ThingQuerySpecifications;
+import org.n52.sta.data.query.specifications.ThingQuerySpecification;
 
 @SuppressWarnings("checkstyle:multiplestringliterals")
 public class QuerySpecificationFactory {
@@ -59,7 +59,7 @@ public class QuerySpecificationFactory {
             case "PlatformEntity":
             case "Thing":
             case "Things": {
-                return new ThingQuerySpecifications();
+                return new ThingQuerySpecification();
             }
             // case "LocationEntity":
             // case "Location":

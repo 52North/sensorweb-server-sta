@@ -25,16 +25,17 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
-package org.n52.sta.api.domain;
-
-import java.util.Map;
-import java.util.Set;
+package org.n52.sta.api.domain.aggregate;
 
 import org.n52.sta.api.EntityEditor;
+import org.n52.sta.api.domain.service.DomainService;
 import org.n52.sta.api.entity.Datastream;
 import org.n52.sta.api.entity.HistoricalLocation;
 import org.n52.sta.api.entity.Location;
 import org.n52.sta.api.entity.Thing;
+
+import java.util.Map;
+import java.util.Set;
 
 public class ThingAggregate extends EntityAggregate<Thing> implements Thing {
 

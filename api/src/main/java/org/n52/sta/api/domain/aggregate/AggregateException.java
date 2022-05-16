@@ -25,44 +25,17 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
-package org.n52.sta.data.entity;
+package org.n52.sta.api.domain.aggregate;
 
-import java.util.Map;
-import java.util.Set;
+import org.n52.sta.api.domain.DomainException;
 
-import org.n52.series.db.beans.PhenomenonEntity;
-import org.n52.sta.api.entity.Datastream;
-import org.n52.sta.api.entity.ObservedProperty;
+public class AggregateException extends DomainException {
 
-public class ObservedPropertyData extends StaData<PhenomenonEntity> implements ObservedProperty {
-
-    public ObservedPropertyData(PhenomenonEntity dataEntity) {
-        super(dataEntity);
+    public AggregateException(String message) {
+        super(message);
     }
 
-    @Override
-    public String getName() {
-        return data.getName();
+    public AggregateException(String message, Throwable cause) {
+        super(message, cause);
     }
-
-    @Override
-    public String getDescription() {
-        return data.getDescription();
-    }
-
-    @Override
-    public String getDefinition() {
-        return data.getIdentifier();
-    }
-
-    @Override
-    public Map<String, Object> getProperties() {
-        return toMap(data.getParameters());
-    }
-
-    @Override
-    public Set<Datastream> getDatastreams() {
-        return toSet(data.getDatasets(), DatastreamData::new);
-    }
-
 }

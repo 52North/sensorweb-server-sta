@@ -27,15 +27,6 @@
  */
 package org.n52.sta.data.query.specifications;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.function.Function;
-
-import javax.persistence.criteria.Expression;
-import javax.persistence.criteria.Join;
-import javax.persistence.criteria.JoinType;
-import javax.persistence.criteria.Subquery;
-
 import org.n52.series.db.beans.AbstractDatasetEntity;
 import org.n52.series.db.beans.DescribableEntity;
 import org.n52.series.db.beans.HibernateRelations.HasDescription;
@@ -48,13 +39,21 @@ import org.n52.shetland.ogc.filter.FilterConstants.ComparisonOperator;
 import org.n52.shetland.ogc.sta.StaConstants;
 import org.springframework.data.jpa.domain.Specification;
 
-public class ThingQuerySpecifications implements BaseQuerySpecifications<PlatformEntity> {
+import javax.persistence.criteria.Expression;
+import javax.persistence.criteria.Join;
+import javax.persistence.criteria.JoinType;
+import javax.persistence.criteria.Subquery;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.function.Function;
+
+public class ThingQuerySpecification implements BaseQuerySpecifications<PlatformEntity> {
 
     private final Map<String, MemberFilter<PlatformEntity>> filterByMember;
 
     private final Map<String, PropertyComparator<PlatformEntity, ?>> entityPathByProperty;
 
-    public ThingQuerySpecifications() {
+    public ThingQuerySpecification() {
         this.filterByMember = new HashMap<>();
         this.filterByMember.put(StaConstants.DATASTREAMS, new DatastreamFilter());
         this.filterByMember.put(StaConstants.HISTORICAL_LOCATIONS, new HistoricalLocationsFilter());

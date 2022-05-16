@@ -25,44 +25,32 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
-package org.n52.sta.data.entity;
+package org.n52.sta.api.domain.service;
 
-import java.util.Map;
-import java.util.Set;
+import org.n52.sta.api.ProviderException;
+import org.n52.sta.api.domain.service.DomainService.DomainServiceAdapter;
+import org.n52.sta.api.entity.Thing;
 
-import org.n52.series.db.beans.PhenomenonEntity;
-import org.n52.sta.api.entity.Datastream;
-import org.n52.sta.api.entity.ObservedProperty;
+public class ThingDomainService extends DomainServiceAdapter<Thing> {
 
-public class ObservedPropertyData extends StaData<PhenomenonEntity> implements ObservedProperty {
+    private final DomainService<Thing> domainService;
 
-    public ObservedPropertyData(PhenomenonEntity dataEntity) {
-        super(dataEntity);
+    public ThingDomainService(DomainService<Thing> domainService) {
+        super(domainService);
+        this.domainService = domainService;
     }
 
     @Override
-    public String getName() {
-        return data.getName();
+    public boolean exists(String id) throws ProviderException {
+
+        // TODO action before
+
+        boolean exists = domainService.exists(id);
+
+        // TODO action after
+
+        return exists;
     }
 
-    @Override
-    public String getDescription() {
-        return data.getDescription();
-    }
-
-    @Override
-    public String getDefinition() {
-        return data.getIdentifier();
-    }
-
-    @Override
-    public Map<String, Object> getProperties() {
-        return toMap(data.getParameters());
-    }
-
-    @Override
-    public Set<Datastream> getDatastreams() {
-        return toSet(data.getDatasets(), DatastreamData::new);
-    }
 
 }

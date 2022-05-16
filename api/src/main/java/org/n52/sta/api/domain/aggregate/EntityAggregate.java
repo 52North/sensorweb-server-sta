@@ -25,16 +25,17 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
-package org.n52.sta.api.domain;
-
-import java.util.Objects;
-import java.util.Optional;
+package org.n52.sta.api.domain.aggregate;
 
 import org.n52.sta.api.EntityEditor;
 import org.n52.sta.api.domain.event.DomainEvent;
 import org.n52.sta.api.domain.event.EntityDeletedEvent;
 import org.n52.sta.api.domain.event.EntityUpdateEvent;
+import org.n52.sta.api.domain.service.DomainService;
 import org.n52.sta.api.entity.Identifiable;
+
+import java.util.Objects;
+import java.util.Optional;
 
 public abstract class EntityAggregate<T extends Identifiable> {
 

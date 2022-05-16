@@ -25,44 +25,16 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
-package org.n52.sta.data.entity;
+package org.n52.sta.api.domain.service;
 
-import java.util.Map;
-import java.util.Set;
+import org.n52.sta.api.EntityProvider;
+import org.n52.sta.api.domain.service.DomainService.DomainServiceAdapter;
+import org.n52.sta.api.entity.Identifiable;
 
-import org.n52.series.db.beans.PhenomenonEntity;
-import org.n52.sta.api.entity.Datastream;
-import org.n52.sta.api.entity.ObservedProperty;
+public final class DefaultDomainService<T extends Identifiable> extends DomainServiceAdapter<T> {
 
-public class ObservedPropertyData extends StaData<PhenomenonEntity> implements ObservedProperty {
-
-    public ObservedPropertyData(PhenomenonEntity dataEntity) {
-        super(dataEntity);
-    }
-
-    @Override
-    public String getName() {
-        return data.getName();
-    }
-
-    @Override
-    public String getDescription() {
-        return data.getDescription();
-    }
-
-    @Override
-    public String getDefinition() {
-        return data.getIdentifier();
-    }
-
-    @Override
-    public Map<String, Object> getProperties() {
-        return toMap(data.getParameters());
-    }
-
-    @Override
-    public Set<Datastream> getDatastreams() {
-        return toSet(data.getDatasets(), DatastreamData::new);
+    public DefaultDomainService(EntityProvider<T> entityProvider) {
+        super(entityProvider);
     }
 
 }

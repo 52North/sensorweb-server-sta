@@ -25,15 +25,18 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
-package org.n52.sta.api.domain;
+package org.n52.sta.api.domain.service;
 
-import org.n52.sta.api.domain.DomainService.DomainServiceAdapter;
-import org.n52.sta.api.entity.Datastream;
+import org.n52.sta.api.domain.service.DomainService.DomainServiceAdapter;
+import org.n52.sta.api.entity.Observation;
 
-public class DatastreamDomainService extends DomainServiceAdapter<Datastream> {
+public class ObservationDomainService extends DomainServiceAdapter<Observation> {
 
-    public DatastreamDomainService(DomainService<Datastream> domainService) {
+    private final DomainService<Observation> domainService;
+
+    public ObservationDomainService(DomainService<Observation> domainService) {
         super(domainService);
+        this.domainService = domainService;
     }
 
 }

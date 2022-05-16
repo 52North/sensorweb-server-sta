@@ -25,44 +25,47 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
-package org.n52.sta.data.entity;
+package org.n52.sta.api.domain.aggregate;
 
-import java.util.Map;
+import org.n52.shetland.ogc.gml.time.Time;
+import org.n52.sta.api.EntityEditor;
+import org.n52.sta.api.domain.service.DomainService;
+import org.n52.sta.api.entity.HistoricalLocation;
+import org.n52.sta.api.entity.Location;
+import org.n52.sta.api.entity.Thing;
+
 import java.util.Set;
 
-import org.n52.series.db.beans.PhenomenonEntity;
-import org.n52.sta.api.entity.Datastream;
-import org.n52.sta.api.entity.ObservedProperty;
+public class HistoricalLocationAggregate extends EntityAggregate<HistoricalLocation> implements HistoricalLocation {
 
-public class ObservedPropertyData extends StaData<PhenomenonEntity> implements ObservedProperty {
+    private final HistoricalLocation historicalLocation;
 
-    public ObservedPropertyData(PhenomenonEntity dataEntity) {
-        super(dataEntity);
+    public HistoricalLocationAggregate(HistoricalLocation historicalLocation, DomainService<HistoricalLocation> domainService) {
+        this(historicalLocation, domainService, null);
+    }
+
+    public HistoricalLocationAggregate(HistoricalLocation historicalLocation, DomainService<HistoricalLocation> domainService, EntityEditor<HistoricalLocation> editor) {
+        super(historicalLocation, domainService, editor);
+        this.historicalLocation = historicalLocation;
     }
 
     @Override
-    public String getName() {
-        return data.getName();
+    public String getId() {
+        return historicalLocation.getId();
     }
 
     @Override
-    public String getDescription() {
-        return data.getDescription();
+    public Time getTime() {
+        return historicalLocation.getTime();
     }
 
     @Override
-    public String getDefinition() {
-        return data.getIdentifier();
+    public Set<Location> getLocations() {
+        return historicalLocation.getLocations();
     }
 
     @Override
-    public Map<String, Object> getProperties() {
-        return toMap(data.getParameters());
+    public Thing getThing() {
+        return historicalLocation.getThing();
     }
-
-    @Override
-    public Set<Datastream> getDatastreams() {
-        return toSet(data.getDatasets(), DatastreamData::new);
-    }
-
 }

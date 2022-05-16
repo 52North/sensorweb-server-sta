@@ -25,71 +25,71 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
-package org.n52.sta.data.entity;
+package org.n52.sta.api.domain.aggregate;
 
-import org.joda.time.DateTime;
-import org.n52.series.db.beans.DataEntity;
 import org.n52.shetland.ogc.gml.time.Time;
+import org.n52.sta.api.EntityEditor;
+import org.n52.sta.api.domain.service.DomainService;
 import org.n52.sta.api.entity.Datastream;
 import org.n52.sta.api.entity.FeatureOfInterest;
 import org.n52.sta.api.entity.Observation;
-import org.n52.sta.old.utils.TimeUtil;
 
-import java.util.Date;
 import java.util.Map;
-import java.util.Optional;
 
-public class ObservationData<T> extends StaData<DataEntity<T>> implements Observation<T> {
+public class ObservationAggregate extends EntityAggregate<Observation> implements Observation {
 
-    public ObservationData(DataEntity<T> data) {
-        super(data);
+    private final Observation observation;
+
+    public ObservationAggregate(Observation observation, DomainService<Observation> domainService) {
+        this(observation, domainService, null);
+    }
+
+    public ObservationAggregate(Observation observation, DomainService<Observation> domainService, EntityEditor<Observation> editor) {
+        super(observation, domainService, editor);
+        this.observation = observation;
+    }
+
+    public String getId() {
+        return observation.getId();
     }
 
     @Override
     public Time getPhenomenonTime() {
-        Date samplingTimeStart = data.getSamplingTimeStart();
-        Date samplingTimeEnd = data.getSamplingTimeEnd();
-        Optional<DateTime> sStart = Optional.ofNullable(samplingTimeStart).map(TimeUtil::createDateTime);
-        Optional<DateTime> sEnd = Optional.ofNullable(samplingTimeEnd).map(TimeUtil::createDateTime);
-        return sStart.map(start -> TimeUtil.createTime(start, sEnd.orElse(null))).orElse(null);
+        return observation.getPhenomenonTime();
     }
 
     @Override
     public Time getResultTime() {
-        return toTime(data.getResultTime());
+        return observation.getResultTime();
     }
 
     @Override
-    public T getResult() {
-        return data.getValue();
+    public Object getResult() {
+        return observation.getResult();
     }
 
     @Override
     public Object getResultQuality() {
-        // TODO Auto-generated method stub
-        return null;
+        return observation.getResultQuality();
     }
 
     @Override
     public Time getValidTime() {
-        Date samplingTimeStart = data.getSamplingTimeStart();
-        Date samplingTimeEnd = data.getSamplingTimeEnd();
-        return toTimeInterval(samplingTimeStart, samplingTimeEnd);
+        return observation.getValidTime();
     }
 
     @Override
     public Map<String, Object> getParameters() {
-        return toMap(data.getParameters());
+        return observation.getParameters();
     }
 
     @Override
     public FeatureOfInterest getFeatureOfInterest() {
-        return new FeatureOfInterestData(data.getFeature());
+        return observation.getFeatureOfInterest();
     }
 
     @Override
     public Datastream getDatastream() {
-        return new DatastreamData(data.getDataset());
+        return observation.getDatastream();
     }
-
 }

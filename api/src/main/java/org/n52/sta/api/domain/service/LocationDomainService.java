@@ -25,16 +25,18 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
-package org.n52.sta.api.domain;
+package org.n52.sta.api.domain.service;
 
-import org.n52.sta.api.EntityProvider;
-import org.n52.sta.api.domain.DomainService.DomainServiceAdapter;
-import org.n52.sta.api.entity.Identifiable;
+import org.n52.sta.api.domain.service.DomainService.DomainServiceAdapter;
+import org.n52.sta.api.entity.Location;
 
-public final class DefaultDomainService<T extends Identifiable> extends DomainServiceAdapter<T> {
+public class LocationDomainService extends DomainServiceAdapter<Location> {
 
-    public DefaultDomainService(EntityProvider<T> entityProvider) {
-        super(entityProvider);
+    private final DomainService<Location> domainService;
+
+    public LocationDomainService(DomainService<Location> domainService) {
+        super(domainService);
+        this.domainService = domainService;
     }
 
 }

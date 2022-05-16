@@ -46,5 +46,5 @@ public class SensorGraphBuilder extends GraphBuilder<ProcedureEntity> {
             addGraphText(GraphText.GRAPH_DATASETS);
         }
     }
-    
+
 }

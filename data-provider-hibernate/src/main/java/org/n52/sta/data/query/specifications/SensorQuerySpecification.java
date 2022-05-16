@@ -25,50 +25,47 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
-package org.n52.sta.data.entity;
+package org.n52.sta.data.query.specifications;
 
-import org.n52.series.db.beans.PlatformEntity;
-import org.n52.sta.api.entity.Datastream;
-import org.n52.sta.api.entity.HistoricalLocation;
-import org.n52.sta.api.entity.Location;
-import org.n52.sta.api.entity.Thing;
+import org.n52.series.db.beans.ProcedureEntity;
+import org.n52.shetland.ogc.filter.FilterConstants.ComparisonOperator;
+import org.springframework.data.jpa.domain.Specification;
 
+import javax.persistence.criteria.Expression;
+import java.util.HashMap;
 import java.util.Map;
-import java.util.Set;
 
-public class ThingData extends StaData<PlatformEntity> implements Thing {
+public class SensorQuerySpecification implements BaseQuerySpecifications<ProcedureEntity> {
 
-    public ThingData(PlatformEntity data) {
-        super(data);
+    private final Map<String, MemberFilter<ProcedureEntity>> filterByMember;
+
+    private final Map<String, PropertyComparator<ProcedureEntity, ?>> entityPathByProperty;
+
+    public SensorQuerySpecification() {
+        this.filterByMember = new HashMap<>();
+
+        this.entityPathByProperty = new HashMap<>();
     }
 
     @Override
-    public String getName() {
-        return data.getName();
+    public Specification<ProcedureEntity> compareProperty(String property, ComparisonOperator operator,
+            Expression<?> rightExpr) throws SpecificationsException {
+        // TODO Auto-generated method stub
+        return null;
     }
 
     @Override
-    public String getDescription() {
-        return data.getDescription();
+    public Specification<ProcedureEntity> compareProperty(Expression<?> leftExpr, ComparisonOperator operator,
+            String property) throws SpecificationsException {
+        // TODO Auto-generated method stub
+        return null;
     }
 
     @Override
-    public Map<String, Object> getProperties() {
-        return toMap(data.getParameters());
+    public Specification<ProcedureEntity> applyOnMember(String member, Specification<?> memberSpec)
+            throws SpecificationsException {
+        // TODO Auto-generated method stub
+        return null;
     }
 
-    @Override
-    public Set<HistoricalLocation> getHistoricalLocations() {
-        return toSet(data.getHistoricalLocations(), HistoricalLocationData::new);
-    }
-
-    @Override
-    public Set<Location> getLocations() {
-        return toSet(data.getLocations(), LocationData::new);
-    }
-
-    @Override
-    public Set<Datastream> getDatastreams() {
-        return toSet(data.getDatasets(), DatastreamData::new);
-    }
 }

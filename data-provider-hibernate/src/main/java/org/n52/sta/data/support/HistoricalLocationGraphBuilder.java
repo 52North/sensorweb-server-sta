@@ -55,5 +55,5 @@ public class HistoricalLocationGraphBuilder extends GraphBuilder<HistoricalLocat
                 // no expand
         }
     }
-    
+
 }

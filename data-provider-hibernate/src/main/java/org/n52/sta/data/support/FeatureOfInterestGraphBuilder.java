@@ -41,7 +41,7 @@ public class FeatureOfInterestGraphBuilder extends GraphBuilder<StaFeatureEntity
     @Override
     public void addExpanded(ExpandItem expandItem) {
         // no member to expand
-        
+
     }
-    
+
 }

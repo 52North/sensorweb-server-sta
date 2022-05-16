@@ -28,9 +28,21 @@
 package org.n52.sta.config;
 
 import org.n52.sta.data.provider.DatastreamEntityProvider;
+import org.n52.sta.data.provider.FeatureOfInterestEntityProvider;
+import org.n52.sta.data.provider.HistoricalLocationEntityProvider;
+import org.n52.sta.data.provider.LocationEntityProvider;
+import org.n52.sta.data.provider.ObservationEntityProvider;
+import org.n52.sta.data.provider.ObservedPropertyEntityProvider;
+import org.n52.sta.data.provider.SensorEntityProvider;
 import org.n52.sta.data.provider.ThingEntityProvider;
 import org.n52.sta.data.repositories.BaseRepositoryImpl;
 import org.n52.sta.data.repositories.entity.DatastreamRepository;
+import org.n52.sta.data.repositories.entity.FeatureOfInterestRepository;
+import org.n52.sta.data.repositories.entity.HistoricalLocationRepository;
+import org.n52.sta.data.repositories.entity.LocationRepository;
+import org.n52.sta.data.repositories.entity.ObservationRepository;
+import org.n52.sta.data.repositories.entity.PhenomenonRepository;
+import org.n52.sta.data.repositories.entity.ProcedureRepository;
 import org.n52.sta.data.repositories.entity.ThingRepository;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
@@ -44,15 +56,44 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 public class DataProviderConfiguration {
 
     @Bean
-    public ThingEntityProvider getThingEntityProvider(ThingRepository repository) {
+    public ThingEntityProvider thingEntityProvider(ThingRepository repository) {
         return new ThingEntityProvider(repository);
     }
 
     @Bean
-    public DatastreamEntityProvider getDatastreamEntityProvider(DatastreamRepository repository) {
+    public DatastreamEntityProvider datastreamEntityProvider(DatastreamRepository repository) {
         return new DatastreamEntityProvider(repository);
     }
 
+    @Bean
+    public SensorEntityProvider sensorEntityProvider(ProcedureRepository repository) {
+        return new SensorEntityProvider(repository);
+    }
+
+    @Bean
+    public LocationEntityProvider locationEntityProvider(LocationRepository repository) {
+        return new LocationEntityProvider(repository);
+    }
+
+    @Bean
+    public HistoricalLocationEntityProvider historicalLocationEntityProvider(HistoricalLocationRepository repository) {
+        return new HistoricalLocationEntityProvider(repository);
+    }
+
+    @Bean
+    public ObservedPropertyEntityProvider observedPropertyEntityProvider(PhenomenonRepository repository) {
+        return new ObservedPropertyEntityProvider(repository);
+    }
+
+    @Bean
+    public ObservationEntityProvider observationEntityProvider(ObservationRepository repository) {
+        return new ObservationEntityProvider(repository);
+    }
+
+    @Bean
+    public FeatureOfInterestEntityProvider featureOfInterestEntityProvider(FeatureOfInterestRepository repository) {
+        return new FeatureOfInterestEntityProvider(repository);
+    }
     @Configuration
     @EnableJpaRepositories(
             repositoryBaseClass = BaseRepositoryImpl.class,

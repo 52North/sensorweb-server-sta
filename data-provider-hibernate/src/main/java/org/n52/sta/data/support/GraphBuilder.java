@@ -27,15 +27,6 @@
  */
 package org.n52.sta.data.support;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Objects;
-import java.util.Set;
-
-import javax.persistence.EntityGraph;
-import javax.persistence.EntityManager;
-
 import org.hibernate.engine.spi.SessionImplementor;
 import org.hibernate.graph.EntityGraphs;
 import org.hibernate.graph.GraphParser;
@@ -45,6 +36,14 @@ import org.n52.shetland.filter.ExpandItem;
 import org.n52.shetland.ogc.sta.exception.STAInvalidQueryError;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import javax.persistence.EntityGraph;
+import javax.persistence.EntityManager;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Objects;
+import java.util.Set;
 
 public abstract class GraphBuilder<T> {
 
@@ -76,7 +75,7 @@ public abstract class GraphBuilder<T> {
             // anti pattern as it makes the query bigger, and OData
             // makes it completely worse as it would allow to expand
             // deep entity paths on collections!
-            // 
+            //
             // Options:
             // - configurable limit of expanded entities (restricts standard)
             // - do n+1 query (db anti pattern)
@@ -85,7 +84,7 @@ public abstract class GraphBuilder<T> {
             addExpanded(expandItem);
         }
     }
-    
+
     /**
      * Builds an entity graph based on all entries added via addGraphText().
      *

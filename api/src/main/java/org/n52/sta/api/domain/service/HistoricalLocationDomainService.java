@@ -25,44 +25,19 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
-package org.n52.sta.data.entity;
 
-import java.util.Map;
-import java.util.Set;
+package org.n52.sta.api.domain.service;
 
-import org.n52.series.db.beans.PhenomenonEntity;
-import org.n52.sta.api.entity.Datastream;
-import org.n52.sta.api.entity.ObservedProperty;
+import org.n52.sta.api.domain.service.DomainService.DomainServiceAdapter;
+import org.n52.sta.api.entity.HistoricalLocation;
 
-public class ObservedPropertyData extends StaData<PhenomenonEntity> implements ObservedProperty {
+public class HistoricalLocationDomainService extends DomainServiceAdapter<HistoricalLocation> {
 
-    public ObservedPropertyData(PhenomenonEntity dataEntity) {
-        super(dataEntity);
-    }
+    private final DomainService<HistoricalLocation> domainService;
 
-    @Override
-    public String getName() {
-        return data.getName();
-    }
-
-    @Override
-    public String getDescription() {
-        return data.getDescription();
-    }
-
-    @Override
-    public String getDefinition() {
-        return data.getIdentifier();
-    }
-
-    @Override
-    public Map<String, Object> getProperties() {
-        return toMap(data.getParameters());
-    }
-
-    @Override
-    public Set<Datastream> getDatastreams() {
-        return toSet(data.getDatasets(), DatastreamData::new);
+    public HistoricalLocationDomainService(DomainService<HistoricalLocation> domainService) {
+        super(domainService);
+        this.domainService = domainService;
     }
 
 }

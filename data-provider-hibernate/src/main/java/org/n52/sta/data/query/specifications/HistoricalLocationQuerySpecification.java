@@ -27,7 +27,7 @@
  */
 package org.n52.sta.data.query.specifications;
 
-import org.n52.series.db.beans.AbstractDatasetEntity;
+import org.n52.series.db.beans.sta.HistoricalLocationEntity;
 import org.n52.shetland.ogc.filter.FilterConstants.ComparisonOperator;
 import org.springframework.data.jpa.domain.Specification;
 
@@ -35,46 +35,34 @@ import javax.persistence.criteria.Expression;
 import java.util.HashMap;
 import java.util.Map;
 
-public class DatastreamQuerySpecification implements BaseQuerySpecifications<AbstractDatasetEntity> {
+public class HistoricalLocationQuerySpecification implements BaseQuerySpecifications<HistoricalLocationEntity> {
 
-    private final Map<String, MemberFilter<AbstractDatasetEntity>> filterByMember;
+    private final Map<String, MemberFilter<HistoricalLocationEntity>> filterByMember;
 
-    private final Map<String, PropertyComparator<AbstractDatasetEntity, ?>> entityPathByProperty;
+    private final Map<String, PropertyComparator<HistoricalLocationEntity, ?>> entityPathByProperty;
 
-    public DatastreamQuerySpecification() {
+    public HistoricalLocationQuerySpecification() {
         this.filterByMember = new HashMap<>();
 
         this.entityPathByProperty = new HashMap<>();
-
-        // TODO maybe we should refactor the above maps to a super class
-        //
-        // interface -> abstract class
-        // define and add specifications within constructor
-        // ThingQuerySpecification has some implementation
-        // which would move to the base class then
-        //
-        // it is possible that some interface methods can
-        // become private then and the subclasses are there
-        // just to define property/member comparator specs
-
     }
 
     @Override
-    public Specification<AbstractDatasetEntity> compareProperty(String property, ComparisonOperator operator,
+    public Specification<HistoricalLocationEntity> compareProperty(String property, ComparisonOperator operator,
             Expression<?> rightExpr) throws SpecificationsException {
         // TODO Auto-generated method stub
         return null;
     }
 
     @Override
-    public Specification<AbstractDatasetEntity> compareProperty(Expression<?> leftExpr, ComparisonOperator operator,
+    public Specification<HistoricalLocationEntity> compareProperty(Expression<?> leftExpr, ComparisonOperator operator,
             String property) throws SpecificationsException {
         // TODO Auto-generated method stub
         return null;
     }
 
     @Override
-    public Specification<AbstractDatasetEntity> applyOnMember(String member, Specification<?> memberSpec)
+    public Specification<HistoricalLocationEntity> applyOnMember(String member, Specification<?> memberSpec)
             throws SpecificationsException {
         // TODO Auto-generated method stub
         return null;

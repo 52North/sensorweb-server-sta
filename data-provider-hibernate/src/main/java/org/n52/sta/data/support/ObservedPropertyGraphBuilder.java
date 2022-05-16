@@ -44,5 +44,5 @@ public class ObservedPropertyGraphBuilder extends GraphBuilder<PhenomenonEntity>
             addGraphText(GraphText.GRAPH_DATASETS);
         }
     }
-    
+
 }

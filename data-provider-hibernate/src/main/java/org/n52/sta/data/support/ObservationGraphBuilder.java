@@ -41,5 +41,5 @@ public class ObservationGraphBuilder extends GraphBuilder<DataEntity<?>> {
     public void addExpanded(ExpandItem expandItem) {
         // no member to expand
     }
-    
+
 }

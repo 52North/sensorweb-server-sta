@@ -25,20 +25,21 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
+
 package org.n52.sta.data.provider;
 
-import org.n52.series.db.beans.PlatformEntity;
+import org.n52.series.db.beans.PhenomenonEntity;
 import org.n52.shetland.oasis.odata.query.option.QueryOptions;
 import org.n52.sta.api.EntityPage;
 import org.n52.sta.api.ProviderException;
-import org.n52.sta.api.entity.Thing;
+import org.n52.sta.api.entity.ObservedProperty;
 import org.n52.sta.data.StaEntityPage;
 import org.n52.sta.data.StaPageRequest;
-import org.n52.sta.data.entity.ThingData;
+import org.n52.sta.data.entity.ObservedPropertyData;
 import org.n52.sta.data.query.FilterQueryParser;
-import org.n52.sta.data.query.specifications.ThingQuerySpecification;
-import org.n52.sta.data.repositories.entity.ThingRepository;
-import org.n52.sta.data.support.ThingGraphBuilder;
+import org.n52.sta.data.query.specifications.ObservedPropertyQuerySpecification;
+import org.n52.sta.data.repositories.entity.PhenomenonRepository;
+import org.n52.sta.data.support.ObservedPropertyGraphBuilder;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
@@ -46,43 +47,45 @@ import org.springframework.data.jpa.domain.Specification;
 import java.util.Objects;
 import java.util.Optional;
 
-public class ThingEntityProvider extends BaseEntityProvider<Thing> {
+public class ObservedPropertyEntityProvider extends BaseEntityProvider<ObservedProperty> {
 
-    private final ThingRepository thingRepository;
+    private final PhenomenonRepository observedPropertyRepository;
 
-    public ThingEntityProvider(ThingRepository thingRepository) {
-        Objects.requireNonNull(thingRepository, "thingRepository must not be null");
-        this.thingRepository = thingRepository;
+    public ObservedPropertyEntityProvider(PhenomenonRepository observedPropertyRepository) {
+        Objects.requireNonNull(observedPropertyRepository, "observedPropertyRepository must not be null");
+        this.observedPropertyRepository = observedPropertyRepository;
     }
 
     @Override
     public boolean exists(String id) throws ProviderException {
         assertIdentifier(id);
-        return thingRepository.existsByStaIdentifier(id);
+        return observedPropertyRepository.existsByStaIdentifier(id);
     }
 
     @Override
-    public Optional<Thing> getEntity(String id, QueryOptions options) throws ProviderException {
+    public Optional<ObservedProperty> getEntity(String id, QueryOptions options) throws ProviderException {
         assertIdentifier(id);
 
-        ThingGraphBuilder graphBuilder = new ThingGraphBuilder();
+        ObservedPropertyGraphBuilder graphBuilder = new ObservedPropertyGraphBuilder();
         addUnfilteredExpandItems(options, graphBuilder);
 
-        Specification<PlatformEntity> spec = FilterQueryParser.parse(options, new ThingQuerySpecification());
-        Optional<PlatformEntity> platform = thingRepository.findOne(spec, graphBuilder);
-        return platform.map(ThingData::new);
+        Specification<PhenomenonEntity> spec =
+            FilterQueryParser.parse(options, new ObservedPropertyQuerySpecification());
+        Optional<PhenomenonEntity> platform = observedPropertyRepository.findOne(spec, graphBuilder);
+        return platform.map(ObservedPropertyData::new);
     }
 
     @Override
-    public EntityPage<Thing> getEntities(QueryOptions options) throws ProviderException {
+    public EntityPage<ObservedProperty> getEntities(QueryOptions options) throws ProviderException {
         Pageable pagable = StaPageRequest.create(options);
 
-        ThingGraphBuilder graphBuilder = new ThingGraphBuilder();
+        ObservedPropertyGraphBuilder graphBuilder = new ObservedPropertyGraphBuilder();
         addUnfilteredExpandItems(options, graphBuilder);
 
-        Specification<PlatformEntity> spec = FilterQueryParser.parse(options, new ThingQuerySpecification());
-        Page<PlatformEntity> results = thingRepository.findAll(spec, pagable, graphBuilder);
-        return new StaEntityPage<>(Thing.class, results, ThingData::new);
+        Specification<PhenomenonEntity> spec =
+            FilterQueryParser.parse(options, new ObservedPropertyQuerySpecification());
+        Page<PhenomenonEntity> results = observedPropertyRepository.findAll(spec, pagable, graphBuilder);
+        return new StaEntityPage<>(ObservedProperty.class, results, ObservedPropertyData::new);
     }
 
 }

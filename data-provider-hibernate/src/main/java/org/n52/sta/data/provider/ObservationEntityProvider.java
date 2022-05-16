@@ -27,62 +27,65 @@
  */
 package org.n52.sta.data.provider;
 
-import org.n52.series.db.beans.PlatformEntity;
 import org.n52.shetland.oasis.odata.query.option.QueryOptions;
 import org.n52.sta.api.EntityPage;
 import org.n52.sta.api.ProviderException;
-import org.n52.sta.api.entity.Thing;
-import org.n52.sta.data.StaEntityPage;
-import org.n52.sta.data.StaPageRequest;
-import org.n52.sta.data.entity.ThingData;
-import org.n52.sta.data.query.FilterQueryParser;
-import org.n52.sta.data.query.specifications.ThingQuerySpecification;
-import org.n52.sta.data.repositories.entity.ThingRepository;
-import org.n52.sta.data.support.ThingGraphBuilder;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.jpa.domain.Specification;
+import org.n52.sta.api.entity.Observation;
+import org.n52.sta.data.repositories.entity.ObservationRepository;
 
 import java.util.Objects;
 import java.util.Optional;
 
-public class ThingEntityProvider extends BaseEntityProvider<Thing> {
+public class ObservationEntityProvider extends BaseEntityProvider<Observation> {
 
-    private final ThingRepository thingRepository;
+    private final ObservationRepository observationRepository;
 
-    public ThingEntityProvider(ThingRepository thingRepository) {
-        Objects.requireNonNull(thingRepository, "thingRepository must not be null");
-        this.thingRepository = thingRepository;
+    public ObservationEntityProvider(ObservationRepository observationRepository) {
+        Objects.requireNonNull(observationRepository, "observationRepository must not be null");
+        this.observationRepository = observationRepository;
     }
 
     @Override
     public boolean exists(String id) throws ProviderException {
         assertIdentifier(id);
-        return thingRepository.existsByStaIdentifier(id);
+        return observationRepository.existsByStaIdentifier(id);
     }
 
     @Override
-    public Optional<Thing> getEntity(String id, QueryOptions options) throws ProviderException {
+    public Optional<Observation> getEntity(String id, QueryOptions options) throws ProviderException {
+        return Optional.empty();
+    }
+
+    @Override
+    public EntityPage<Observation> getEntities(QueryOptions options) throws ProviderException {
+        return null;
+    }
+
+    //TODO: implement
+    /*
+    @Override
+    public Optional<Observation> getEntity(String id, QueryOptions options) throws ProviderException {
         assertIdentifier(id);
 
-        ThingGraphBuilder graphBuilder = new ThingGraphBuilder();
+        ObservationGraphBuilder graphBuilder = new ObservationGraphBuilder();
         addUnfilteredExpandItems(options, graphBuilder);
 
-        Specification<PlatformEntity> spec = FilterQueryParser.parse(options, new ThingQuerySpecification());
-        Optional<PlatformEntity> platform = thingRepository.findOne(spec, graphBuilder);
-        return platform.map(ThingData::new);
+        Specification<DataEntity<?>> spec = FilterQueryParser.parse(options, new ObservationQuerySpecification());
+        Optional<DataEntity<?>> platform = observationRepository.findOne(spec, graphBuilder);
+        return platform.map(ObservationData::new);
     }
 
     @Override
-    public EntityPage<Thing> getEntities(QueryOptions options) throws ProviderException {
+    public EntityPage<Observation> getEntities(QueryOptions options) throws ProviderException {
         Pageable pagable = StaPageRequest.create(options);
 
-        ThingGraphBuilder graphBuilder = new ThingGraphBuilder();
+        ObservationGraphBuilder graphBuilder = new ObservationGraphBuilder();
         addUnfilteredExpandItems(options, graphBuilder);
 
-        Specification<PlatformEntity> spec = FilterQueryParser.parse(options, new ThingQuerySpecification());
-        Page<PlatformEntity> results = thingRepository.findAll(spec, pagable, graphBuilder);
-        return new StaEntityPage<>(Thing.class, results, ThingData::new);
+        Specification<DataEntity<?>> spec = FilterQueryParser.parse(options, new ObservationQuerySpecification());
+        Page<DataEntity<?>> results = observationRepository.findAll(spec, pagable, graphBuilder);
+        return new StaEntityPage<>(Observation.class, results, ObservationData::new);
     }
+    */
 
 }

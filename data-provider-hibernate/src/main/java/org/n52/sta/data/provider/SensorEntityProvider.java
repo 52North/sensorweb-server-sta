@@ -27,18 +27,18 @@
  */
 package org.n52.sta.data.provider;
 
-import org.n52.series.db.beans.PlatformEntity;
+import org.n52.series.db.beans.ProcedureEntity;
 import org.n52.shetland.oasis.odata.query.option.QueryOptions;
 import org.n52.sta.api.EntityPage;
 import org.n52.sta.api.ProviderException;
-import org.n52.sta.api.entity.Thing;
+import org.n52.sta.api.entity.Sensor;
 import org.n52.sta.data.StaEntityPage;
 import org.n52.sta.data.StaPageRequest;
-import org.n52.sta.data.entity.ThingData;
+import org.n52.sta.data.entity.SensorData;
 import org.n52.sta.data.query.FilterQueryParser;
-import org.n52.sta.data.query.specifications.ThingQuerySpecification;
-import org.n52.sta.data.repositories.entity.ThingRepository;
-import org.n52.sta.data.support.ThingGraphBuilder;
+import org.n52.sta.data.query.specifications.SensorQuerySpecification;
+import org.n52.sta.data.repositories.entity.ProcedureRepository;
+import org.n52.sta.data.support.SensorGraphBuilder;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
@@ -46,43 +46,43 @@ import org.springframework.data.jpa.domain.Specification;
 import java.util.Objects;
 import java.util.Optional;
 
-public class ThingEntityProvider extends BaseEntityProvider<Thing> {
+public class SensorEntityProvider extends BaseEntityProvider<Sensor> {
 
-    private final ThingRepository thingRepository;
+    private final ProcedureRepository sensorRepository;
 
-    public ThingEntityProvider(ThingRepository thingRepository) {
-        Objects.requireNonNull(thingRepository, "thingRepository must not be null");
-        this.thingRepository = thingRepository;
+    public SensorEntityProvider(ProcedureRepository sensorRepository) {
+        Objects.requireNonNull(sensorRepository, "sensorRepository must not be null");
+        this.sensorRepository = sensorRepository;
     }
 
     @Override
     public boolean exists(String id) throws ProviderException {
         assertIdentifier(id);
-        return thingRepository.existsByStaIdentifier(id);
+        return sensorRepository.existsByStaIdentifier(id);
     }
 
     @Override
-    public Optional<Thing> getEntity(String id, QueryOptions options) throws ProviderException {
+    public Optional<Sensor> getEntity(String id, QueryOptions options) throws ProviderException {
         assertIdentifier(id);
 
-        ThingGraphBuilder graphBuilder = new ThingGraphBuilder();
+        SensorGraphBuilder graphBuilder = new SensorGraphBuilder();
         addUnfilteredExpandItems(options, graphBuilder);
 
-        Specification<PlatformEntity> spec = FilterQueryParser.parse(options, new ThingQuerySpecification());
-        Optional<PlatformEntity> platform = thingRepository.findOne(spec, graphBuilder);
-        return platform.map(ThingData::new);
+        Specification<ProcedureEntity> spec = FilterQueryParser.parse(options, new SensorQuerySpecification());
+        Optional<ProcedureEntity> platform = sensorRepository.findOne(spec, graphBuilder);
+        return platform.map(SensorData::new);
     }
 
     @Override
-    public EntityPage<Thing> getEntities(QueryOptions options) throws ProviderException {
+    public EntityPage<Sensor> getEntities(QueryOptions options) throws ProviderException {
         Pageable pagable = StaPageRequest.create(options);
 
-        ThingGraphBuilder graphBuilder = new ThingGraphBuilder();
+        SensorGraphBuilder graphBuilder = new SensorGraphBuilder();
         addUnfilteredExpandItems(options, graphBuilder);
 
-        Specification<PlatformEntity> spec = FilterQueryParser.parse(options, new ThingQuerySpecification());
-        Page<PlatformEntity> results = thingRepository.findAll(spec, pagable, graphBuilder);
-        return new StaEntityPage<>(Thing.class, results, ThingData::new);
+        Specification<ProcedureEntity> spec = FilterQueryParser.parse(options, new SensorQuerySpecification());
+        Page<ProcedureEntity> results = sensorRepository.findAll(spec, pagable, graphBuilder);
+        return new StaEntityPage<>(Sensor.class, results, SensorData::new);
     }
 
 }

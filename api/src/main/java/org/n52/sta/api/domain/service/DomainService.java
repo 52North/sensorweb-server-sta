@@ -25,9 +25,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
-package org.n52.sta.api.domain;
-
-import java.util.Optional;
+package org.n52.sta.api.domain.service;
 
 import org.n52.shetland.oasis.odata.query.option.QueryOptions;
 import org.n52.sta.api.EntityPage;
@@ -36,6 +34,8 @@ import org.n52.sta.api.ProviderException;
 import org.n52.sta.api.domain.event.DomainEvent;
 import org.n52.sta.api.domain.event.DomainEventService;
 import org.n52.sta.api.entity.Identifiable;
+
+import java.util.Optional;
 
 public interface DomainService<T extends Identifiable> extends EntityProvider<T> {
 

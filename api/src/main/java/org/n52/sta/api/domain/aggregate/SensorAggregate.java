@@ -25,44 +25,62 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
-package org.n52.sta.data.entity;
+
+package org.n52.sta.api.domain.aggregate;
+
+import org.n52.sta.api.EntityEditor;
+import org.n52.sta.api.domain.service.DomainService;
+import org.n52.sta.api.entity.Datastream;
+import org.n52.sta.api.entity.Sensor;
 
 import java.util.Map;
 import java.util.Set;
 
-import org.n52.series.db.beans.PhenomenonEntity;
-import org.n52.sta.api.entity.Datastream;
-import org.n52.sta.api.entity.ObservedProperty;
+public class SensorAggregate extends EntityAggregate<Sensor> implements Sensor {
 
-public class ObservedPropertyData extends StaData<PhenomenonEntity> implements ObservedProperty {
+    private final Sensor sensor;
 
-    public ObservedPropertyData(PhenomenonEntity dataEntity) {
-        super(dataEntity);
+    public SensorAggregate(Sensor sensor, DomainService<Sensor> domainService) {
+        this(sensor, domainService, null);
+    }
+
+    public SensorAggregate(Sensor sensor, DomainService<Sensor> domainService, EntityEditor<Sensor> editor) {
+        super(sensor, domainService, editor);
+        this.sensor = sensor;
+    }
+
+    @Override
+    public String getId() {
+        return sensor.getId();
     }
 
     @Override
     public String getName() {
-        return data.getName();
+        return sensor.getName();
     }
 
     @Override
     public String getDescription() {
-        return data.getDescription();
+        return sensor.getDescription();
     }
 
     @Override
-    public String getDefinition() {
-        return data.getIdentifier();
+    public String getEncodingType() {
+        return sensor.getEncodingType();
+    }
+
+    @Override
+    public String getMetadata() {
+        return sensor.getMetadata();
     }
 
     @Override
     public Map<String, Object> getProperties() {
-        return toMap(data.getParameters());
+        return sensor.getProperties();
     }
 
     @Override
     public Set<Datastream> getDatastreams() {
-        return toSet(data.getDatasets(), DatastreamData::new);
+        return sensor.getDatastreams();
     }
-
 }

@@ -51,5 +51,5 @@ public class LocationGraphBuilder extends GraphBuilder<LocationEntity> {
                 // no expand
         }
     }
-    
+
 }

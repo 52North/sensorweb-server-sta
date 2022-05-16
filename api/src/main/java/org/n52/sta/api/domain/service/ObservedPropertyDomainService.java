@@ -25,32 +25,18 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
-package org.n52.sta.api.domain;
+package org.n52.sta.api.domain.service;
 
-import org.n52.sta.api.ProviderException;
-import org.n52.sta.api.domain.DomainService.DomainServiceAdapter;
-import org.n52.sta.api.entity.Thing;
+import org.n52.sta.api.domain.service.DomainService.DomainServiceAdapter;
+import org.n52.sta.api.entity.ObservedProperty;
 
-public class ThingDomainService extends DomainServiceAdapter<Thing> {
+public class ObservedPropertyDomainService extends DomainServiceAdapter<ObservedProperty> {
 
-    private final DomainService<Thing> domainService;
+    private final DomainService<ObservedProperty> domainService;
 
-    public ThingDomainService(DomainService<Thing> domainService) {
+    public ObservedPropertyDomainService(DomainService<ObservedProperty> domainService) {
         super(domainService);
         this.domainService = domainService;
     }
-
-    @Override
-    public boolean exists(String id) throws ProviderException {
-
-        // TODO action before
-
-        boolean exists = domainService.exists(id);
-
-        // TODO action after
-
-        return exists;
-    }
-
 
 }

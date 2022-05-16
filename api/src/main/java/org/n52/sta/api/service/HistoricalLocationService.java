@@ -27,40 +27,40 @@
  */
 package org.n52.sta.api.service;
 
-import java.util.Objects;
-import java.util.Optional;
-
 import org.n52.shetland.oasis.odata.query.option.QueryOptions;
 import org.n52.sta.api.EntityEditor;
 import org.n52.sta.api.EntityPage;
 import org.n52.sta.api.EntityProvider;
 import org.n52.sta.api.ProviderException;
 import org.n52.sta.api.domain.aggregate.AggregateException;
+import org.n52.sta.api.domain.aggregate.EntityAggregate;
+import org.n52.sta.api.domain.aggregate.HistoricalLocationAggregate;
 import org.n52.sta.api.domain.service.DefaultDomainService;
 import org.n52.sta.api.domain.service.DomainService;
-import org.n52.sta.api.domain.aggregate.EntityAggregate;
-import org.n52.sta.api.domain.aggregate.ThingAggregate;
-import org.n52.sta.api.entity.Thing;
+import org.n52.sta.api.entity.HistoricalLocation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class ThingService implements EntityService<Thing>, EntityEditor<Thing> {
+import java.util.Objects;
+import java.util.Optional;
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(ThingService.class);
+public class HistoricalLocationService implements EntityService<HistoricalLocation>, EntityEditor<HistoricalLocation> {
 
-    private final EntityProvider<Thing> thingProvider;
+    private static final Logger LOGGER = LoggerFactory.getLogger(HistoricalLocationService.class);
 
-    private final DomainService<Thing> domainService;
+    private final EntityProvider<HistoricalLocation> historicalLocationProvider;
 
-    private Optional<EntityEditor<Thing>> thingEditor;
+    private final DomainService<HistoricalLocation> domainService;
 
-    public ThingService(EntityProvider<Thing> provider) {
+    private Optional<EntityEditor<HistoricalLocation>> historicalLocationEditor;
+
+    public HistoricalLocationService(EntityProvider<HistoricalLocation> provider) {
         this(provider, new DefaultDomainService<>(provider));
     }
 
-    public ThingService(EntityProvider<Thing> provider, DomainService<Thing> domainService) {
+    public HistoricalLocationService(EntityProvider<HistoricalLocation> provider, DomainService<HistoricalLocation> domainService) {
         Objects.requireNonNull(provider, "provider must not be null");
-        this.thingProvider = provider;
+        this.historicalLocationProvider = provider;
         this.domainService = domainService == null
                 ? new DefaultDomainService<>(provider)
                 : domainService;
@@ -72,58 +72,58 @@ public class ThingService implements EntityService<Thing>, EntityEditor<Thing> {
     }
 
     @Override
-    public Optional<Thing> getEntity(String id, QueryOptions options) throws ProviderException {
+    public Optional<HistoricalLocation> getEntity(String id, QueryOptions options) throws ProviderException {
         return domainService.getEntity(id, options);
     }
 
     @Override
-    public EntityPage<Thing> getEntities(QueryOptions options) throws ProviderException {
+    public EntityPage<HistoricalLocation> getEntities(QueryOptions options) throws ProviderException {
         return domainService.getEntities(options);
     }
 
     @Override
-    public Thing create(Thing entity) throws ProviderException {
+    public HistoricalLocation create(HistoricalLocation entity) throws ProviderException {
         try {
             return createAggregate(entity).save();
         } catch (AggregateException e) {
             LOGGER.error("Could not create entity: {}", entity, e);
-            throw new ProviderException("Could not create Thing!");
+            throw new ProviderException("Could not create HistoricalLocation!");
         }
     }
 
     @Override
-    public Thing update(Thing entity) throws ProviderException {
+    public HistoricalLocation update(HistoricalLocation entity) throws ProviderException {
         Objects.requireNonNull(entity, "entity must not be null!");
         try {
             String id = entity.getId();
-            Thing thing = getOrThrow(id);
-            return createAggregate(thing).save(entity);
+            HistoricalLocation historicalLocation = getOrThrow(id);
+            return createAggregate(historicalLocation).save(entity);
         } catch (AggregateException e) {
             LOGGER.error("Could not update entity: {}", entity, e);
-            throw new ProviderException("Could not update Thing!");
+            throw new ProviderException("Could not update HistoricalLocation!");
         }
     }
 
     @Override
     public void delete(String id) throws ProviderException {
-        Thing entity = getOrThrow(id);
+        HistoricalLocation entity = getOrThrow(id);
         try {
             createAggregate(entity).delete();
         } catch (AggregateException e) {
             LOGGER.error("Could not delete entity: {}", entity, e);
-            throw new ProviderException("Could not delete Thing!");
+            throw new ProviderException("Could not delete HistoricalLocation!");
         }
     }
 
-    public void setThingEditor(EntityEditor<Thing> editor) {
-        thingEditor = Optional.ofNullable(editor);
+    public void setHistoricalLocationEditor(EntityEditor<HistoricalLocation> editor) {
+        historicalLocationEditor = Optional.ofNullable(editor);
     }
 
-    private EntityAggregate<Thing> createAggregate(Thing entity) {
-        return new ThingAggregate(entity, domainService, thingEditor.orElse(null));
+    private EntityAggregate<HistoricalLocation> createAggregate(HistoricalLocation entity) {
+        return new HistoricalLocationAggregate(entity, domainService, historicalLocationEditor.orElse(null));
     }
 
-    private Thing getOrThrow(String id) throws ProviderException {
+    private HistoricalLocation getOrThrow(String id) throws ProviderException {
         return domainService.getEntity(id)
                 .orElseThrow(() -> new ProviderException("Id '" + id + "' does not exist."));
     }

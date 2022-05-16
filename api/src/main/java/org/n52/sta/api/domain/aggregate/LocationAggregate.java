@@ -25,44 +25,69 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
-package org.n52.sta.data.entity;
+
+package org.n52.sta.api.domain.aggregate;
+
+import org.locationtech.jts.geom.Geometry;
+import org.n52.sta.api.EntityEditor;
+import org.n52.sta.api.domain.service.DomainService;
+import org.n52.sta.api.entity.HistoricalLocation;
+import org.n52.sta.api.entity.Location;
+import org.n52.sta.api.entity.Thing;
 
 import java.util.Map;
 import java.util.Set;
 
-import org.n52.series.db.beans.PhenomenonEntity;
-import org.n52.sta.api.entity.Datastream;
-import org.n52.sta.api.entity.ObservedProperty;
+public class LocationAggregate extends EntityAggregate<Location> implements Location {
 
-public class ObservedPropertyData extends StaData<PhenomenonEntity> implements ObservedProperty {
+    private final Location location;
 
-    public ObservedPropertyData(PhenomenonEntity dataEntity) {
-        super(dataEntity);
+    public LocationAggregate(Location location, DomainService<Location> domainService) {
+        this(location, domainService, null);
+    }
+
+    public LocationAggregate(Location location, DomainService<Location> domainService, EntityEditor<Location> editor) {
+        super(location, domainService, editor);
+        this.location = location;
+    }
+
+    @Override
+    public String getId() {
+        return location.getId();
     }
 
     @Override
     public String getName() {
-        return data.getName();
+        return location.getName();
     }
 
     @Override
     public String getDescription() {
-        return data.getDescription();
-    }
-
-    @Override
-    public String getDefinition() {
-        return data.getIdentifier();
+        return location.getDescription();
     }
 
     @Override
     public Map<String, Object> getProperties() {
-        return toMap(data.getParameters());
+        return location.getProperties();
     }
 
     @Override
-    public Set<Datastream> getDatastreams() {
-        return toSet(data.getDatasets(), DatastreamData::new);
+    public String getEncodingType() {
+        return location.getEncodingType();
     }
 
+    @Override
+    public Geometry getGeometry() {
+        return location.getGeometry();
+    }
+
+    @Override
+    public Set<HistoricalLocation> getHistoricalLocations() {
+        return location.getHistoricalLocations();
+    }
+
+    @Override
+    public Set<Thing> getThings() {
+        return location.getThings();
+    }
 }

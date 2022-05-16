@@ -25,44 +25,59 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
-package org.n52.sta.data.entity;
+
+package org.n52.sta.api.domain.aggregate;
+
+import org.n52.sta.api.EntityEditor;
+import org.n52.sta.api.domain.service.DomainService;
+import org.n52.sta.api.entity.Datastream;
+import org.n52.sta.api.entity.ObservedProperty;
 
 import java.util.Map;
 import java.util.Set;
 
-import org.n52.series.db.beans.PhenomenonEntity;
-import org.n52.sta.api.entity.Datastream;
-import org.n52.sta.api.entity.ObservedProperty;
+public class ObservedPropertyAggregate extends EntityAggregate<ObservedProperty> implements ObservedProperty {
 
-public class ObservedPropertyData extends StaData<PhenomenonEntity> implements ObservedProperty {
+    private final ObservedProperty observedProperty;
 
-    public ObservedPropertyData(PhenomenonEntity dataEntity) {
-        super(dataEntity);
+    public ObservedPropertyAggregate(ObservedProperty observedProperty, DomainService<ObservedProperty> domainService) {
+        this(observedProperty, domainService, null);
+    }
+
+    public ObservedPropertyAggregate(ObservedProperty observedProperty,
+                                     DomainService<ObservedProperty> domainService,
+                                     EntityEditor<ObservedProperty> editor) {
+        super(observedProperty, domainService, editor);
+        this.observedProperty = observedProperty;
+    }
+
+    @Override
+    public String getId() {
+        return observedProperty.getId();
     }
 
     @Override
     public String getName() {
-        return data.getName();
+        return observedProperty.getName();
     }
 
     @Override
     public String getDescription() {
-        return data.getDescription();
+        return observedProperty.getDescription();
     }
 
     @Override
     public String getDefinition() {
-        return data.getIdentifier();
+        return observedProperty.getDefinition();
     }
 
     @Override
     public Map<String, Object> getProperties() {
-        return toMap(data.getParameters());
+        return observedProperty.getProperties();
     }
 
     @Override
     public Set<Datastream> getDatastreams() {
-        return toSet(data.getDatasets(), DatastreamData::new);
+        return observedProperty.getDatastreams();
     }
-
 }

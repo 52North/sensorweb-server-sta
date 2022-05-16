@@ -25,15 +25,18 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
-package org.n52.sta.api.domain;
+package org.n52.sta.api.domain.service;
 
-public class AggregateException extends DomainException {
+import org.n52.sta.api.domain.service.DomainService.DomainServiceAdapter;
+import org.n52.sta.api.entity.Sensor;
 
-    public AggregateException(String message) {
-        super(message);
+public class SensorDomainService extends DomainServiceAdapter<Sensor> {
+
+    private final DomainService<Sensor> domainService;
+
+    public SensorDomainService(DomainService<Sensor> domainService) {
+        super(domainService);
+        this.domainService = domainService;
     }
 
-    public AggregateException(String message, Throwable cause) {
-        super(message, cause);
-    }
 }
