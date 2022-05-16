@@ -54,6 +54,7 @@ import javax.servlet.http.HttpServletRequest;
 import java.io.BufferedOutputStream;
 import java.io.OutputStream;
 import java.util.Objects;
+import java.util.Optional;
 
 @RestController
 public class ReadController {
@@ -113,7 +114,10 @@ public class ReadController {
                 EntityPage<T> collection = entityService.getEntities(requestContext.getQueryOptions());
                 return writeCollection(collection, context);
             case entity:
-                // fallthru
+                StaPath path = requestContext.getPath();
+                Optional<T> entity = entityService.getEntity(path.getPath().get(0).getIdentifier().get(),
+                                                             requestContext.getQueryOptions());
+                return writeEntity(entity.orElseThrow(() ->  new STACRUDException("no such entity")), context);
             case ref:
                 // fallthru
             case property:
@@ -121,6 +125,15 @@ public class ReadController {
             default:
                 throw new STACRUDException("not implemented!");
         }
+    }
+
+    private <T extends Identifiable> StreamingResponseBody writeEntity(T entity, SerializationContext context) {
+        return outputStream -> {
+            OutputStream out = new BufferedOutputStream(outputStream);
+            ObjectWriter writer = context.createWriter();
+            // TODO apply service-root-uri
+            writer.writeValue(out, entity);
+        };
     }
 
     private <T extends Identifiable> StreamingResponseBody writeCollection(EntityPage<T> page,
