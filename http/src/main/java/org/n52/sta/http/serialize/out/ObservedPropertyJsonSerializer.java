@@ -27,14 +27,13 @@
  */
 package org.n52.sta.http.serialize.out;
 
-import java.io.IOException;
-
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.SerializerProvider;
-
 import org.n52.shetland.ogc.sta.StaConstants;
 import org.n52.sta.api.entity.Datastream;
 import org.n52.sta.api.entity.ObservedProperty;
+
+import java.io.IOException;
 
 public class ObservedPropertyJsonSerializer extends StaBaseSerializer<ObservedProperty> {
 
@@ -64,6 +63,7 @@ public class ObservedPropertyJsonSerializer extends StaBaseSerializer<ObservedPr
             }
         });
 
+        gen.writeEndObject();
     }
 
 }
