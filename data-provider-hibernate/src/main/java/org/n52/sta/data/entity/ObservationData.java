@@ -44,7 +44,6 @@ public class ObservationData<T> extends StaData<DataEntity<T>> implements Observ
     public ObservationData(DataEntity<T> data) {
         super(data);
     }
-
     @Override
     public Time getPhenomenonTime() {
         Date samplingTimeStart = data.getSamplingTimeStart();

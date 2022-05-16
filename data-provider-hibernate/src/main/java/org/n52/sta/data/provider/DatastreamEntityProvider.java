@@ -27,9 +27,6 @@
  */
 package org.n52.sta.data.provider;
 
-import java.util.Objects;
-import java.util.Optional;
-
 import org.n52.series.db.beans.AbstractDatasetEntity;
 import org.n52.shetland.oasis.odata.query.option.QueryOptions;
 import org.n52.sta.api.EntityPage;
@@ -45,6 +42,9 @@ import org.n52.sta.data.support.DatastreamGraphBuilder;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
+
+import java.util.Objects;
+import java.util.Optional;
 
 public class DatastreamEntityProvider extends BaseEntityProvider<Datastream> {
 
@@ -68,9 +68,7 @@ public class DatastreamEntityProvider extends BaseEntityProvider<Datastream> {
         DatastreamGraphBuilder graphBuilder = new DatastreamGraphBuilder();
         addUnfilteredExpandItems(options, graphBuilder);
 
-        Specification<AbstractDatasetEntity> spec = FilterQueryParser.parse(options,
-                new DatastreamQuerySpecification());
-        Optional<AbstractDatasetEntity> datastream = datastreamRepository.findOne(spec, graphBuilder);
+        Optional<AbstractDatasetEntity> datastream = datastreamRepository.findByStaIdentifier(id, graphBuilder);
         return datastream.map(DatastreamData::new);
     }
 

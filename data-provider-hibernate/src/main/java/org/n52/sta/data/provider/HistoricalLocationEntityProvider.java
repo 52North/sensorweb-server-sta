@@ -69,9 +69,7 @@ public class HistoricalLocationEntityProvider extends BaseEntityProvider<Histori
         HistoricalLocationGraphBuilder graphBuilder = new HistoricalLocationGraphBuilder();
         addUnfilteredExpandItems(options, graphBuilder);
 
-        Specification<HistoricalLocationEntity> spec =
-            FilterQueryParser.parse(options, new HistoricalLocationQuerySpecification());
-        Optional<HistoricalLocationEntity> platform = historicalLocationRepository.findOne(spec, graphBuilder);
+        Optional<HistoricalLocationEntity> platform = historicalLocationRepository.findByStaIdentifier(id, graphBuilder);
         return platform.map(HistoricalLocationData::new);
     }
 

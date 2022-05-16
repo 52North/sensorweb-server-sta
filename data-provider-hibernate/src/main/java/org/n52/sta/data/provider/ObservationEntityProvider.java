@@ -27,11 +27,21 @@
  */
 package org.n52.sta.data.provider;
 
+import org.n52.series.db.beans.DataEntity;
 import org.n52.shetland.oasis.odata.query.option.QueryOptions;
 import org.n52.sta.api.EntityPage;
 import org.n52.sta.api.ProviderException;
 import org.n52.sta.api.entity.Observation;
+import org.n52.sta.data.StaEntityPage;
+import org.n52.sta.data.StaPageRequest;
+import org.n52.sta.data.entity.ObservationData;
+import org.n52.sta.data.query.FilterQueryParser;
+import org.n52.sta.data.query.specifications.ObservationQuerySpecification;
 import org.n52.sta.data.repositories.entity.ObservationRepository;
+import org.n52.sta.data.support.ObservationGraphBuilder;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 
 import java.util.Objects;
 import java.util.Optional;
@@ -53,25 +63,12 @@ public class ObservationEntityProvider extends BaseEntityProvider<Observation> {
 
     @Override
     public Optional<Observation> getEntity(String id, QueryOptions options) throws ProviderException {
-        return Optional.empty();
-    }
-
-    @Override
-    public EntityPage<Observation> getEntities(QueryOptions options) throws ProviderException {
-        return null;
-    }
-
-    //TODO: implement
-    /*
-    @Override
-    public Optional<Observation> getEntity(String id, QueryOptions options) throws ProviderException {
         assertIdentifier(id);
 
         ObservationGraphBuilder graphBuilder = new ObservationGraphBuilder();
         addUnfilteredExpandItems(options, graphBuilder);
 
-        Specification<DataEntity<?>> spec = FilterQueryParser.parse(options, new ObservationQuerySpecification());
-        Optional<DataEntity<?>> platform = observationRepository.findOne(spec, graphBuilder);
+        Optional<DataEntity<?>> platform = observationRepository.findByStaIdentifier(id, graphBuilder);
         return platform.map(ObservationData::new);
     }
 
@@ -86,6 +83,5 @@ public class ObservationEntityProvider extends BaseEntityProvider<Observation> {
         Page<DataEntity<?>> results = observationRepository.findAll(spec, pagable, graphBuilder);
         return new StaEntityPage<>(Observation.class, results, ObservationData::new);
     }
-    */
 
 }

@@ -68,8 +68,7 @@ public class ThingEntityProvider extends BaseEntityProvider<Thing> {
         ThingGraphBuilder graphBuilder = new ThingGraphBuilder();
         addUnfilteredExpandItems(options, graphBuilder);
 
-        Specification<PlatformEntity> spec = FilterQueryParser.parse(options, new ThingQuerySpecification());
-        Optional<PlatformEntity> platform = thingRepository.findOne(spec, graphBuilder);
+        Optional<PlatformEntity> platform = thingRepository.findByStaIdentifier(id, graphBuilder);
         return platform.map(ThingData::new);
     }
 

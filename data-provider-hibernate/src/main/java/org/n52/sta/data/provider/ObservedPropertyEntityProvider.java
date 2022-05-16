@@ -69,9 +69,7 @@ public class ObservedPropertyEntityProvider extends BaseEntityProvider<ObservedP
         ObservedPropertyGraphBuilder graphBuilder = new ObservedPropertyGraphBuilder();
         addUnfilteredExpandItems(options, graphBuilder);
 
-        Specification<PhenomenonEntity> spec =
-            FilterQueryParser.parse(options, new ObservedPropertyQuerySpecification());
-        Optional<PhenomenonEntity> platform = observedPropertyRepository.findOne(spec, graphBuilder);
+        Optional<PhenomenonEntity> platform = observedPropertyRepository.findByStaIdentifier(id, graphBuilder);
         return platform.map(ObservedPropertyData::new);
     }
 

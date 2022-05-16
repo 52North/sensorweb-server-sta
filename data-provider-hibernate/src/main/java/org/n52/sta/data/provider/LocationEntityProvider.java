@@ -68,8 +68,7 @@ public class LocationEntityProvider extends BaseEntityProvider<Location> {
         LocationGraphBuilder graphBuilder = new LocationGraphBuilder();
         addUnfilteredExpandItems(options, graphBuilder);
 
-        Specification<LocationEntity> spec = FilterQueryParser.parse(options, new LocationQuerySpecification());
-        Optional<LocationEntity> platform = locationRepository.findOne(spec, graphBuilder);
+        Optional<LocationEntity> platform = locationRepository.findByStaIdentifier(id, graphBuilder);
         return platform.map(LocationData::new);
     }
 

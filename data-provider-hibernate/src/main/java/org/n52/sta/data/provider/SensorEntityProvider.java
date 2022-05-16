@@ -68,8 +68,7 @@ public class SensorEntityProvider extends BaseEntityProvider<Sensor> {
         SensorGraphBuilder graphBuilder = new SensorGraphBuilder();
         addUnfilteredExpandItems(options, graphBuilder);
 
-        Specification<ProcedureEntity> spec = FilterQueryParser.parse(options, new SensorQuerySpecification());
-        Optional<ProcedureEntity> platform = sensorRepository.findOne(spec, graphBuilder);
+        Optional<ProcedureEntity> platform = sensorRepository.findByStaIdentifier(id, graphBuilder);
         return platform.map(SensorData::new);
     }
 
