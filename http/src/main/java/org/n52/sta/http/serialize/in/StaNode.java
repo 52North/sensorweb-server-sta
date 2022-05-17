@@ -107,6 +107,7 @@ abstract class StaNode implements Identifiable {
     private Stream<JsonNode> toStream(JsonNode arrayNode) {
         return arrayNode.isArray()
                 ? Streams.stream(arrayNode)
+                // FIXME throw exception as json is invalid
                 : Stream.empty();
     }
 

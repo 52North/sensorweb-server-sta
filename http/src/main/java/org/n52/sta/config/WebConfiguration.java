@@ -28,6 +28,8 @@
 
 package org.n52.sta.config;
 
+import javax.servlet.Filter;
+
 import org.n52.grammar.StaPathGrammar;
 import org.n52.grammar.StaPathLexer;
 import org.n52.sta.http.old.filter.CorsFilter;
@@ -43,8 +45,6 @@ import org.springframework.web.servlet.config.annotation.ContentNegotiationConfi
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import org.springframework.web.servlet.config.annotation.PathMatchConfigurer;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
-
-import javax.servlet.Filter;
 
 @Configuration
 @EnableWebMvc
