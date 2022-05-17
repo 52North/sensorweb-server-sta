@@ -41,7 +41,7 @@ public class StaPathVisitor extends StaPathGrammarBaseVisitor<StaPath> {
         Optional<String> identifier;
         if (identifierctx != null) {
             String text = identifierctx.getText();
-            identifier = Optional.of(text.substring(1, text.length()-1));
+            identifier = Optional.of(text.substring(1, text.length() - 1));
         } else {
             identifier = Optional.empty();
         }
