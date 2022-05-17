@@ -128,7 +128,7 @@ public class ErrorHandler {
                 headers,
                 HttpStatus.BAD_REQUEST);
     }
-    
+
 
     @ExceptionHandler(value = Exception.class)
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)

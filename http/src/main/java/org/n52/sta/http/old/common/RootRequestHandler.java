@@ -51,7 +51,7 @@ public class RootRequestHandler {
     private static final String ENDPOINTS = "endpoints";
     private static final String COLON = ":";
     private static final String SLASH = "/";
-    
+
     private static final String HTTP_WWW_OPENGIS_NET_SPEC_IOT_SENSING_1_1_REQ_CREATE_UPDATE_DELETE =
         "http://www.opengis.net/spec/iot_sensing/1.1/req/create-update-delete";
     private static final String HTTP_WWW_OPENGIS_NET_SPEC_IOT_SENSING_1_1_REQ_REQUEST_DATA =
@@ -61,7 +61,7 @@ public class RootRequestHandler {
         "http://www.opengis.net/spec/iot_sensing/1.1/req/resource-path/resource-path-to-entities";
     private static final String HTTP_WWW_OPENGIS_NET_SPEC_IOT_SENSING_1_1_REQ_DATAMODEL =
         "http://www.opengis.net/spec/iot_sensing/1.1/req/datamodel";
-    
+
     private static final String HTTPS_GITHUB_COM_52_NORTH_SENSORWEB_SERVER_STA_EXTENSION_SERVER_VERSION_MD =
         "https://github.com/52North/sensorweb-server-sta/extension/server-version.md";
     private static final String HTTPS_GITHUB_COM_52_NORTH_SENSORWEB_SERVER_STA_EXTENSION_EXTENDED_SENSOR_ENCODINGTYPE =
@@ -135,7 +135,7 @@ public class RootRequestHandler {
             );
         }
 
-        
+
         node.set("serverSettings", serverSettings);
         return node.toString();
     }

@@ -96,7 +96,10 @@ public class DataProviderConfiguration {
     }
 
     @Configuration
-    @EnableJpaRepositories(repositoryBaseClass = BaseRepositoryImpl.class, basePackages = "org.n52.sta.data.repositories")
+    @EnableJpaRepositories(
+            repositoryBaseClass = BaseRepositoryImpl.class,
+            basePackages = "org.n52.sta.data.repositories"
+    )
     public static class RepositoryConfig {
         // inject via annotations
     }

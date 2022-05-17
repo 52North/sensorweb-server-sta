@@ -49,7 +49,7 @@ public class ObservationJsonSerializer extends StaBaseSerializer<Observation> {
         // entity properties
         writeProperty("id", name -> gen.writeStringField(StaConstants.AT_IOT_ID, id));
         writeStringProperty(StaConstants.AT_IOT_SELFLINK, () -> createSelfLink(id), gen);
-        
+
         writeObjectProperty(StaConstants.PROP_RESULT_QUALITY, value::getResultQuality, gen);
         writeObjectProperty(StaConstants.PROP_PARAMETERS, value::getParameters, gen);
         writeObjectProperty(StaConstants.PROP_RESULT, value::getResult, gen);

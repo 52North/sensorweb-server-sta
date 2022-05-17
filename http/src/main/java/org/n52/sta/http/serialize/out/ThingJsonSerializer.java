@@ -77,7 +77,7 @@ public class ThingJsonSerializer extends StaBaseSerializer<Thing> {
                 serializer.serialize(item, gen, serializers);
             }
         });
-        
+
         gen.writeEndObject();
     }
 

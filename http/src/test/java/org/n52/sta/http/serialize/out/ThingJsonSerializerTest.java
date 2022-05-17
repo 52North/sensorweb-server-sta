@@ -57,7 +57,7 @@ public class ThingJsonSerializerTest {
     private ObjectMapper om;
 
     @BeforeEach
-    void setUp() { 
+    void setUp() {
         this.om = new ObjectMapper();
     }
 
