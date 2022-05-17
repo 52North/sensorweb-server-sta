@@ -247,8 +247,10 @@ public class JSONObservation extends JSONBase.JSONwithIdTime<DataEntity<?>> impl
 
     private String generateIdentifier() {
         StringBuffer buffer = new StringBuffer();
-        buffer.append(self.getDataset().getIdentifier())
-            .append(phenomenonTime)
+        if (self.isSetDataset()) {
+            buffer.append(self.getDataset().getIdentifier());
+        }
+        buffer.append(phenomenonTime)
             .append(result)
             .append(resultTime)
             .append(self.getVerticalFrom())
