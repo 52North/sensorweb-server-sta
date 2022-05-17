@@ -27,6 +27,9 @@
  */
 package org.n52.sta.api.service;
 
+import java.util.Objects;
+import java.util.Optional;
+
 import org.n52.shetland.oasis.odata.query.option.QueryOptions;
 import org.n52.sta.api.EntityEditor;
 import org.n52.sta.api.EntityPage;
@@ -40,9 +43,6 @@ import org.n52.sta.api.domain.service.DomainService;
 import org.n52.sta.api.entity.HistoricalLocation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.Objects;
-import java.util.Optional;
 
 public class HistoricalLocationService implements EntityService<HistoricalLocation>, EntityEditor<HistoricalLocation> {
 
@@ -58,7 +58,8 @@ public class HistoricalLocationService implements EntityService<HistoricalLocati
         this(provider, new DefaultDomainService<>(provider));
     }
 
-    public HistoricalLocationService(EntityProvider<HistoricalLocation> provider, DomainService<HistoricalLocation> domainService) {
+    public HistoricalLocationService(EntityProvider<HistoricalLocation> provider,
+            DomainService<HistoricalLocation> domainService) {
         Objects.requireNonNull(provider, "provider must not be null");
         this.historicalLocationProvider = provider;
         this.domainService = domainService == null

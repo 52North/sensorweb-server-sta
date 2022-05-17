@@ -27,6 +27,10 @@
  */
 package org.n52.sta.data.entity;
 
+import java.util.Date;
+import java.util.Map;
+import java.util.Optional;
+
 import org.joda.time.DateTime;
 import org.n52.series.db.beans.DataEntity;
 import org.n52.shetland.ogc.gml.time.Time;
@@ -35,15 +39,12 @@ import org.n52.sta.api.entity.FeatureOfInterest;
 import org.n52.sta.api.entity.Observation;
 import org.n52.sta.old.utils.TimeUtil;
 
-import java.util.Date;
-import java.util.Map;
-import java.util.Optional;
-
 public class ObservationData<T> extends StaData<DataEntity<T>> implements Observation<T> {
 
     public ObservationData(DataEntity<T> data) {
         super(data);
     }
+
     @Override
     public Time getPhenomenonTime() {
         Date samplingTimeStart = data.getSamplingTimeStart();

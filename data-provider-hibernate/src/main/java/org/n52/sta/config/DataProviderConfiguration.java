@@ -27,9 +27,6 @@
  */
 package org.n52.sta.config;
 
-import org.n52.sta.api.EntityProvider;
-import org.n52.sta.api.entity.Datastream;
-import org.n52.sta.api.entity.Thing;
 import org.n52.sta.data.provider.DatastreamEntityProvider;
 import org.n52.sta.data.provider.FeatureOfInterestEntityProvider;
 import org.n52.sta.data.provider.HistoricalLocationEntityProvider;
@@ -97,10 +94,9 @@ public class DataProviderConfiguration {
     public FeatureOfInterestEntityProvider featureOfInterestEntityProvider(FeatureOfInterestRepository repository) {
         return new FeatureOfInterestEntityProvider(repository);
     }
+
     @Configuration
-    @EnableJpaRepositories(
-            repositoryBaseClass = BaseRepositoryImpl.class,
-            basePackages = "org.n52.sta.data.repositories")
+    @EnableJpaRepositories(repositoryBaseClass = BaseRepositoryImpl.class, basePackages = "org.n52.sta.data.repositories")
     public static class RepositoryConfig {
         // inject via annotations
     }

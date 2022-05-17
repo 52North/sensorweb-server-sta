@@ -28,6 +28,9 @@
 
 package org.n52.sta.data.provider;
 
+import java.util.Objects;
+import java.util.Optional;
+
 import org.n52.series.db.beans.sta.HistoricalLocationEntity;
 import org.n52.shetland.oasis.odata.query.option.QueryOptions;
 import org.n52.sta.api.EntityPage;
@@ -43,9 +46,6 @@ import org.n52.sta.data.support.HistoricalLocationGraphBuilder;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
-
-import java.util.Objects;
-import java.util.Optional;
 
 public class HistoricalLocationEntityProvider extends BaseEntityProvider<HistoricalLocation> {
 
@@ -69,7 +69,8 @@ public class HistoricalLocationEntityProvider extends BaseEntityProvider<Histori
         HistoricalLocationGraphBuilder graphBuilder = new HistoricalLocationGraphBuilder();
         addUnfilteredExpandItems(options, graphBuilder);
 
-        Optional<HistoricalLocationEntity> platform = historicalLocationRepository.findByStaIdentifier(id, graphBuilder);
+        Optional<HistoricalLocationEntity> platform = historicalLocationRepository.findByStaIdentifier(id,
+                graphBuilder);
         return platform.map(HistoricalLocationData::new);
     }
 
@@ -80,8 +81,8 @@ public class HistoricalLocationEntityProvider extends BaseEntityProvider<Histori
         HistoricalLocationGraphBuilder graphBuilder = new HistoricalLocationGraphBuilder();
         addUnfilteredExpandItems(options, graphBuilder);
 
-        Specification<HistoricalLocationEntity> spec =
-            FilterQueryParser.parse(options, new HistoricalLocationQuerySpecification());
+        Specification<HistoricalLocationEntity> spec = FilterQueryParser.parse(options,
+                new HistoricalLocationQuerySpecification());
         Page<HistoricalLocationEntity> results = historicalLocationRepository.findAll(spec, pagable, graphBuilder);
         return new StaEntityPage<>(HistoricalLocation.class, results, HistoricalLocationData::new);
     }

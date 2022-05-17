@@ -27,14 +27,14 @@
  */
 package org.n52.sta.api.domain.aggregate;
 
+import java.util.Map;
+
 import org.n52.shetland.ogc.gml.time.Time;
 import org.n52.sta.api.EntityEditor;
 import org.n52.sta.api.domain.service.DomainService;
 import org.n52.sta.api.entity.Datastream;
 import org.n52.sta.api.entity.FeatureOfInterest;
 import org.n52.sta.api.entity.Observation;
-
-import java.util.Map;
 
 public class ObservationAggregate extends EntityAggregate<Observation> implements Observation {
 
@@ -44,7 +44,8 @@ public class ObservationAggregate extends EntityAggregate<Observation> implement
         this(observation, domainService, null);
     }
 
-    public ObservationAggregate(Observation observation, DomainService<Observation> domainService, EntityEditor<Observation> editor) {
+    public ObservationAggregate(Observation observation, DomainService<Observation> domainService,
+            EntityEditor<Observation> editor) {
         super(observation, domainService, editor);
         this.observation = observation;
     }

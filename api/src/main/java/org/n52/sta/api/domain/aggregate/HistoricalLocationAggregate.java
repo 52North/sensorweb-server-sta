@@ -27,6 +27,8 @@
  */
 package org.n52.sta.api.domain.aggregate;
 
+import java.util.Set;
+
 import org.n52.shetland.ogc.gml.time.Time;
 import org.n52.sta.api.EntityEditor;
 import org.n52.sta.api.domain.service.DomainService;
@@ -34,17 +36,17 @@ import org.n52.sta.api.entity.HistoricalLocation;
 import org.n52.sta.api.entity.Location;
 import org.n52.sta.api.entity.Thing;
 
-import java.util.Set;
-
 public class HistoricalLocationAggregate extends EntityAggregate<HistoricalLocation> implements HistoricalLocation {
 
     private final HistoricalLocation historicalLocation;
 
-    public HistoricalLocationAggregate(HistoricalLocation historicalLocation, DomainService<HistoricalLocation> domainService) {
+    public HistoricalLocationAggregate(HistoricalLocation historicalLocation,
+            DomainService<HistoricalLocation> domainService) {
         this(historicalLocation, domainService, null);
     }
 
-    public HistoricalLocationAggregate(HistoricalLocation historicalLocation, DomainService<HistoricalLocation> domainService, EntityEditor<HistoricalLocation> editor) {
+    public HistoricalLocationAggregate(HistoricalLocation historicalLocation,
+            DomainService<HistoricalLocation> domainService, EntityEditor<HistoricalLocation> editor) {
         super(historicalLocation, domainService, editor);
         this.historicalLocation = historicalLocation;
     }
