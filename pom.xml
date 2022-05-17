@@ -43,7 +43,7 @@
         <spring-boot.version>2.5.4</spring-boot.version>
         <geolatte-geom.version>1.8.2</geolatte-geom.version>
         <hibernate.version>5.5.7.Final</hibernate.version>
-        <jackson.version>2.12.5</jackson.version>
+        <jackson.version>2.13.3</jackson.version>
         <hamcrest.version>2.2</hamcrest.version>
         <locationtech-jts.version>1.18.2</locationtech-jts.version>
         <h2database.version>1.4.200</h2database.version>
