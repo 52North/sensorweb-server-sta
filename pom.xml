@@ -309,6 +309,7 @@
                                 <allowedRepositories>
                                     <id>
                                         sonatype-nexus-snapshots,edu-repo,n52-releases,n52-snapshots,refractions,hibernate-spatial,unidata-releases,
+                                        bintray
                                     </id>
                                 </allowedRepositories>
                             </requireNoRepositories>
