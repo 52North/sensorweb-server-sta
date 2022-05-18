@@ -38,7 +38,7 @@
         <java.version>1.8</java.version>
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
-        <db-model.version>4.0.0-PR.1</db-model.version>
+        <db-model.version>4.0.0-PR.8</db-model.version>
         <arctic-sea.version>9.5.3</arctic-sea.version>
         <spring-boot.version>2.5.13</spring-boot.version>
         <geolatte-geom.version>1.8.2</geolatte-geom.version>
