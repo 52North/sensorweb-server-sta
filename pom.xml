@@ -39,20 +39,20 @@
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
         <db-model.version>4.0.0-PR.1</db-model.version>
-        <arctic-sea.version>9.1.1</arctic-sea.version>
-        <spring-boot.version>2.5.4</spring-boot.version>
+        <arctic-sea.version>9.5.3</arctic-sea.version>
+        <spring-boot.version>2.5.13</spring-boot.version>
         <geolatte-geom.version>1.8.2</geolatte-geom.version>
-        <hibernate.version>5.5.7.Final</hibernate.version>
-        <jackson.version>2.12.5</jackson.version>
+        <hibernate.version>5.6.9.Final</hibernate.version>
+        <jackson.version>2.13.3</jackson.version>
         <hamcrest.version>2.2</hamcrest.version>
         <locationtech-jts.version>1.18.2</locationtech-jts.version>
-        <h2database.version>1.4.200</h2database.version>
-        <testcontainers.jupiter.version>1.16.3</testcontainers.jupiter.version>
-        <testcontainers.postgres.version>1.16.3</testcontainers.postgres.version>
-        <spotbugs.version>4.1.4</spotbugs.version>
+        <h2database.version>2.1.212</h2database.version>
+        <testcontainers.jupiter.version>1.17.1</testcontainers.jupiter.version>
+        <testcontainers.postgres.version>1.17.1</testcontainers.postgres.version>
+        <spotbugs.version>4.7.0</spotbugs.version>
         <paho.version>1.2.5</paho.version>
-        <antlr-runtime.version>4.8-1</antlr-runtime.version>
-        <joda.version>2.10.10</joda.version>
+        <antlr-runtime.version>4.9.2</antlr-runtime.version>
+        <joda.version>2.10.14</joda.version>
     </properties>
 
     <dependencyManagement>
@@ -95,6 +95,12 @@
                 <artifactId>javaee-api</artifactId>
                 <version>8.0.1</version>
                 <scope>provided</scope>
+				<exclusions>
+					<exclusion>
+						<groupId>javax.activation</groupId>
+						<artifactId>activation</artifactId>
+					</exclusion>
+				</exclusions>
             </dependency>
 
             <dependency>
@@ -178,7 +184,7 @@
             <dependency>
                 <groupId>org.slf4j</groupId>
                 <artifactId>slf4j-api</artifactId>
-                <version>1.7.32</version>
+                <version>1.7.36</version>
             </dependency>
             <dependency>
                 <groupId>org.hamcrest</groupId>
@@ -197,6 +203,20 @@
                 <artifactId>junit-jupiter</artifactId>
                 <version>${testcontainers.jupiter.version}</version>
                 <scope>test</scope>
+				<exclusions>
+					<exclusion>
+						<groupId>org.jetbrains</groupId>
+						<artifactId>annotations</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>com.google.code.findbugs</groupId>
+						<artifactId>jsr305</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>com.google.code.findbugs</groupId>
+						<artifactId>annotations</artifactId>
+					</exclusion>
+				</exclusions>
             </dependency>
             <dependency>
                 <groupId>org.testcontainers</groupId>
@@ -263,7 +283,7 @@
                 <plugin>
                     <groupId>pl.project13.maven</groupId>
                     <artifactId>git-commit-id-plugin</artifactId>
-                    <version>4.0.2</version>
+                    <version>4.9.10</version>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>

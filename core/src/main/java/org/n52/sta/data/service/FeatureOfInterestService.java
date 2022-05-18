@@ -69,6 +69,8 @@ import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+
 import javax.persistence.EntityManager;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -86,6 +88,7 @@ import java.util.stream.Collectors;
 @Component
 @DependsOn({"springApplicationContext"})
 @Transactional
+@SuppressFBWarnings({"EI_EXPOSE_REP2"})
 public class FeatureOfInterestService
     extends AbstractSensorThingsEntityServiceImpl<FeatureOfInterestRepository, AbstractFeatureEntity<?>> {
 

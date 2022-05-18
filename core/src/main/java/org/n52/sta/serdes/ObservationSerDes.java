@@ -74,6 +74,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 
+@SuppressFBWarnings({"EI_EXPOSE_REP", "EI_EXPOSE_REP2"})
 public class ObservationSerDes {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ObservationSerDes.class);

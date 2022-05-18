@@ -63,6 +63,8 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpMethod;
 import org.springframework.transaction.annotation.Transactional;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+
 import javax.persistence.EntityManager;
 import javax.persistence.criteria.Predicate;
 import java.util.Optional;
@@ -75,6 +77,7 @@ import java.util.Set;
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
  */
 @Transactional(rollbackFor = Exception.class)
+@SuppressFBWarnings({"EI_EXPOSE_REP2"})
 public abstract class AbstractSensorThingsEntityServiceImpl<T extends StaIdentifierRepository<S>,
     S extends HibernateRelations.HasId> implements AbstractSensorThingsEntityService<S> {
 

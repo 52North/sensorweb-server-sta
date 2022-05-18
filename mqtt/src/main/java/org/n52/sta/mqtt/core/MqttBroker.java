@@ -54,6 +54,8 @@ import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -64,6 +66,7 @@ import java.util.Properties;
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
  */
 @Component
+@SuppressFBWarnings({"EI_EXPOSE_REP"})
 public class MqttBroker {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MqttBroker.class);

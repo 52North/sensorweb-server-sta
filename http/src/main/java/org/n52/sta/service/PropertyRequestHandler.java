@@ -30,6 +30,9 @@
 package org.n52.sta.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+
 import org.n52.shetland.filter.SelectFilter;
 import org.n52.shetland.ogc.filter.FilterClause;
 import org.n52.sta.data.service.EntityServiceRepository;
@@ -49,6 +52,7 @@ import java.util.HashSet;
  *
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
  */
+@SuppressFBWarnings({"EI_EXPOSE_REP2"})
 public abstract class PropertyRequestHandler extends AbstractSTARequestHandler {
 
     private final ObjectMapper mapper;

@@ -53,6 +53,7 @@ import java.io.IOException;
 import java.util.Collections;
 import java.util.Optional;
 
+@SuppressFBWarnings({"EI_EXPOSE_REP"})
 public class SensorSerDes {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SensorSerDes.class);

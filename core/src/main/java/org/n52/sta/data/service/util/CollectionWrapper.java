@@ -31,11 +31,14 @@ package org.n52.sta.data.service.util;
 
 import org.n52.sta.serdes.util.ElementWithQueryOptions;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+
 import java.util.List;
 
 /**
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
  */
+@SuppressFBWarnings({"EI_EXPOSE_REP", "EI_EXPOSE_REP2"})
 public class CollectionWrapper {
 
     /**

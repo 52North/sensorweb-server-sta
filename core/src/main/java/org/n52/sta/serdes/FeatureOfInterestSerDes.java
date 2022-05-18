@@ -52,6 +52,7 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.util.Collections;
 
+@SuppressFBWarnings({"EI_EXPOSE_REP"})
 public class FeatureOfInterestSerDes {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(FeatureOfInterestSerDes.class);

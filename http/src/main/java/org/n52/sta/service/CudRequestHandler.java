@@ -31,6 +31,9 @@ package org.n52.sta.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+
 import org.n52.series.db.beans.IdEntity;
 import org.n52.shetland.ogc.sta.StaConstants;
 import org.n52.shetland.ogc.sta.exception.STACRUDException;
@@ -54,6 +57,7 @@ import java.io.IOException;
  *
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
  */
+@SuppressFBWarnings({"EI_EXPOSE_REP2"})
 public abstract class CudRequestHandler<T extends IdEntity> extends AbstractSTARequestHandler {
 
     private static final String COULD_NOT_FIND_RELATED_ENTITY = "Could not find related Entity!";

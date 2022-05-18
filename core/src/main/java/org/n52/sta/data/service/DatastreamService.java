@@ -30,6 +30,9 @@
 package org.n52.sta.data.service;
 
 import com.google.common.collect.Sets;
+
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+
 import org.hibernate.Hibernate;
 import org.hibernate.query.criteria.internal.CriteriaBuilderImpl;
 import org.n52.janmayen.http.HTTPStatus;
@@ -95,6 +98,7 @@ import java.util.stream.Collectors;
 @Component
 @DependsOn({"springApplicationContext", "datastreamRepository"})
 @Transactional
+@SuppressFBWarnings({"EI_EXPOSE_REP2"})
 public class DatastreamService extends
                                AbstractSensorThingsEntityServiceImpl<DatastreamRepository, AbstractDatasetEntity> {
 
@@ -493,8 +497,8 @@ public class DatastreamService extends
             .orElseThrow(() -> new STACRUDException("Could not find default SOS Category!"));
         OfferingEntity offering = offeringService.createOrFetchOffering(datastream.getProcedure());
         DatasetEntity dataset = createDatasetSkeleton(datastream.getOMObservationType().getFormat(),
-                                                      (isMobileFeatureEnabled
-                                                          && datastream.getThing().hasParameters())
+                                                      isMobileFeatureEnabled
+                                                          && datastream.getThing().hasParameters()
                                                           && datastream.getThing()
                                                           .getParameters()
                                                           .stream()

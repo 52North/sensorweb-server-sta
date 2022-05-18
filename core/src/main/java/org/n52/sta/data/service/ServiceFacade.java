@@ -46,6 +46,8 @@ import org.n52.sta.serdes.util.ElementWithQueryOptions;
 import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Component;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+
 /**
  * Facade proxying actual Service implementations. Used to restrict the number of parallel threads accessing the Data
  * Persistence Layer. This is necessary as each Thread uses a seperate Database Transaction and therefore needs a
@@ -53,6 +55,7 @@ import org.springframework.stereotype.Component;
  *
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
  */
+@SuppressFBWarnings({"EI_EXPOSE_REP2"})
 public class ServiceFacade<S extends HibernateRelations.HasId>
     implements AbstractSensorThingsEntityService<S> {
 

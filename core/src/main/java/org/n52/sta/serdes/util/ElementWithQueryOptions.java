@@ -44,11 +44,14 @@ import org.n52.series.db.beans.sta.StaFeatureEntity;
 import org.n52.shetland.filter.ExpandItem;
 import org.n52.shetland.oasis.odata.query.option.QueryOptions;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+@SuppressFBWarnings({"EI_EXPOSE_REP"})
 public abstract class ElementWithQueryOptions<P extends HibernateRelations.HasId> {
 
     protected P entity;

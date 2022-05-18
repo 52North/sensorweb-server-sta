@@ -31,6 +31,9 @@ package org.n52.sta;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.info.BuildProperties;
@@ -47,6 +50,7 @@ import java.util.Set;
  */
 @Configuration
 @ConfigurationProperties(prefix = "server.feature")
+@SuppressFBWarnings({"EI_EXPOSE_REP", "EI_EXPOSE_REP2"})
 public class ServerProperties {
 
     private final BuildProperties buildProperties;

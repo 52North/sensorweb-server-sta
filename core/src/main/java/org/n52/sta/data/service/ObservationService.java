@@ -659,8 +659,8 @@ public class ObservationService
             synchronized (getLock(dataset.getId().toString() + "Dataset")) {
                 LOGGER.debug("Updating First/Last/Geometry of of Dataset: {}", dataset.getId());
                 if (!dataset.isSetFirstValueAt()
-                    || (dataset.isSetFirstValueAt()
-                    && data.getSamplingTimeStart().before(dataset.getFirstValueAt()))) {
+                    || dataset.isSetFirstValueAt()
+                    && data.getSamplingTimeStart().before(dataset.getFirstValueAt())) {
                     dataset.setFirstValueAt(data.getSamplingTimeStart());
                     dataset.setFirstObservation(rawObservation.get());
                     if (data instanceof QuantityDataEntity) {
@@ -668,8 +668,8 @@ public class ObservationService
                     }
                 }
                 if (!dataset.isSetLastValueAt()
-                    || (dataset.isSetLastValueAt()
-                    && data.getSamplingTimeEnd().after(dataset.getLastValueAt()))) {
+                    || dataset.isSetLastValueAt()
+                    && data.getSamplingTimeEnd().after(dataset.getLastValueAt())) {
                     dataset.setLastValueAt(data.getSamplingTimeEnd());
                     dataset.setLastObservation(rawObservation.get());
                     if (data instanceof QuantityDataEntity) {

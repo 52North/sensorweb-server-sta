@@ -32,6 +32,9 @@ package org.n52.sta;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.exc.MismatchedInputException;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+
 import org.hibernate.exception.ConstraintViolationException;
 import org.hibernate.exception.DataException;
 import org.n52.shetland.ogc.sta.exception.STACRUDException;
@@ -56,6 +59,7 @@ import javax.persistence.PersistenceException;
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
  */
 @ControllerAdvice
+@SuppressFBWarnings({"EI_EXPOSE_REP2"})
 public class ErrorHandler {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ErrorHandler.class);

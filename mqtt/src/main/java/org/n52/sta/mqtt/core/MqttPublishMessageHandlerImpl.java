@@ -31,6 +31,8 @@ package org.n52.sta.mqtt.core;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import io.moquette.interception.messages.InterceptPublishMessage;
 import org.n52.series.db.beans.IdEntity;
 import org.n52.shetland.ogc.sta.exception.STAInvalidUrlException;
@@ -57,6 +59,7 @@ import java.util.Set;
  * @author <a href="mailto:s.drost@52north.org">Sebastian Drost</a>
  */
 @Component
+@SuppressFBWarnings({"EI_EXPOSE_REP2"})
 public class MqttPublishMessageHandlerImpl extends AbstractSTARequestHandler
     implements MqttPublishMessageHandler, CoreRequestUtils {
 

@@ -31,6 +31,8 @@ package org.n52.sta.mqtt.core;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import io.moquette.broker.Server;
 import io.moquette.interception.messages.InterceptSubscribeMessage;
 import io.moquette.interception.messages.InterceptUnsubscribeMessage;
@@ -69,6 +71,7 @@ import java.util.regex.Pattern;
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
  */
 @Component
+@SuppressFBWarnings({"EI_EXPOSE_REP", "EI_EXPOSE_REP2"})
 public class MqttSubscriptionEventHandlerImpl extends AbstractSTARequestHandler
     implements MqttSubscriptionEventHandler, CoreRequestUtils {
 
