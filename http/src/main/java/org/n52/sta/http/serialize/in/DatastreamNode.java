@@ -80,7 +80,7 @@ public class DatastreamNode extends StaNode implements Datastream {
 
     @Override
     public Geometry getObservedArea() {
-        throw new UnsupportedOperationException("Not supported yet.");
+        return parseGeometry(StaConstants.PROP_OBSERVED_AREA);
     }
 
     @Override

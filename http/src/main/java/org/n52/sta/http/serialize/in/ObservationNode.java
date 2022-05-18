@@ -62,7 +62,7 @@ public class ObservationNode extends StaNode implements Observation<Object> {
 
     @Override
     public Object getResultQuality() {
-        throw new UnsupportedOperationException("Not supported yet.");
+        return null;
     }
 
     @Override

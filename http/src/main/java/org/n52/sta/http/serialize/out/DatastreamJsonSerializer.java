@@ -25,7 +25,6 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
-
 package org.n52.sta.http.serialize.out;
 
 import com.fasterxml.jackson.core.JsonGenerator;
@@ -69,13 +68,13 @@ public class DatastreamJsonSerializer extends StaBaseSerializer<Datastream> {
         });
 
         writeMember(StaConstants.THING, id, gen, ThingJsonSerializer::new,
-                    serializer -> serializer.serialize(value.getThing(), gen, serializers));
+                serializer -> serializer.serialize(value.getThing(), gen, serializers));
 
         writeMember(StaConstants.SENSOR, id, gen, SensorJsonSerializer::new,
-                    serializer -> serializer.serialize(value.getSensor(), gen, serializers));
+                serializer -> serializer.serialize(value.getSensor(), gen, serializers));
 
         writeMember(StaConstants.OBSERVED_PROPERTY, id, gen, ObservedPropertyJsonSerializer::new,
-                    serializer -> serializer.serialize(value.getObservedProperty(), gen, serializers));
+                serializer -> serializer.serialize(value.getObservedProperty(), gen, serializers));
 
         gen.writeEndObject();
     }

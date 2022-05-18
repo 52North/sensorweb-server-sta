@@ -36,6 +36,7 @@ import org.n52.shetland.ogc.sta.exception.STAInvalidFilterExpressionException;
 import org.n52.shetland.ogc.sta.exception.STAInvalidQueryException;
 import org.n52.shetland.ogc.sta.exception.STAInvalidUrlException;
 import org.n52.shetland.ogc.sta.exception.STANotFoundException;
+import org.n52.sta.http.serialize.in.InvalidValueException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpHeaders;
@@ -93,8 +94,11 @@ public class ErrorHandler {
                                     HttpStatus.BAD_REQUEST);
     }
 
-    @ExceptionHandler(value = STAInvalidQueryException.class)
-    public ResponseEntity<Object> staInvalidQuery(STAInvalidQueryException exception) {
+    @ExceptionHandler(value = {
+        STAInvalidQueryException.class,
+        InvalidValueException.class
+    })
+    public ResponseEntity<Object> staInvalidQuery(Exception exception) {
         String msg = createErrorMessage(exception.getClass().getName(), exception.getMessage());
         LOGGER.debug(msg, exception);
         return new ResponseEntity<>(msg,
@@ -129,14 +133,12 @@ public class ErrorHandler {
                 HttpStatus.BAD_REQUEST);
     }
 
-
     @ExceptionHandler(value = Exception.class)
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public void fallbackException(Exception exception) {
         String msg = createErrorMessage(exception.getClass().getName(), exception.getMessage());
         LOGGER.error(msg, exception);
     }
-
 
     @ExceptionHandler(value = RuntimeException.class)
     public void fallbackRuntimeException(RuntimeException exception) {

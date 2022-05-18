@@ -41,17 +41,26 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import org.locationtech.jts.geom.Geometry;
+import org.locationtech.jts.geom.GeometryFactory;
+import org.locationtech.jts.geom.PrecisionModel;
+import org.locationtech.jts.io.ParseException;
+import org.locationtech.jts.io.geojson.GeoJsonReader;
 import org.n52.janmayen.stream.Streams;
 import org.n52.shetland.ogc.gml.time.Time;
 import org.n52.shetland.ogc.sta.StaConstants;
 import org.n52.sta.api.entity.Identifiable;
 import org.n52.sta.old.utils.TimeUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 abstract class StaNode implements Identifiable {
-
-    protected final JsonNode node;
+    
+    private static final Logger LOGGER = LoggerFactory.getLogger(StaNode.class);
 
     protected final ObjectMapper mapper;
+    
+    private final JsonNode node;
 
     protected StaNode(JsonNode node, ObjectMapper mapper) {
         Objects.requireNonNull(node, "node must not be null");
@@ -65,11 +74,39 @@ abstract class StaNode implements Identifiable {
     public String getId() {
         return getOrNull(StaConstants.AT_IOT_ID, JsonNode::asText);
     }
+    
+    protected Geometry parseGeometry(String property) throws InvalidValueException {
+        Optional<JsonNode> propertyNode = get(property);
+        if (!propertyNode.isPresent()) {
+            return null;
+        }
+        
+        // TODO read srs from geometry?
+        int srs = 4326;
+        PrecisionModel precisionModel = new PrecisionModel(PrecisionModel.FLOATING);
+        GeometryFactory geometryFactory = new GeometryFactory(precisionModel, srs);
+        GeoJsonReader reader = new GeoJsonReader(geometryFactory);
+        JsonNode geometry = propertyNode.get();
+        try {
+            return reader.read(geometry.toString());
+        } catch (ParseException e) {
+            LOGGER.debug("Could not parse GeoJson at '{}': {}", property, geometry.toPrettyString());
+            throw new InvalidValueException("GeoJSON in '" + property + "' is not valid!");
+        }
+    }
 
     protected Time parseTime(String property) {
-        return get(property).map(propertyNode -> {
-            return TimeUtil.parseTime(propertyNode.asText());
-        }).orElseThrow(() -> new IllegalArgumentException("Could not parse Time at '" + property + "'"));
+        Optional<JsonNode> propertyNode = get(property);
+        if (!propertyNode.isPresent()) {
+            return null;
+        }
+        JsonNode time = propertyNode.get();
+        try {
+            return TimeUtil.parseTime(time.asText());
+        } catch (IllegalArgumentException e) {
+            LOGGER.debug("Could not parse Time at '{}': {}", property, time.toPrettyString());
+            throw new InvalidValueException("Time in '" + property + "' is not valid!");
+        }
     }
 
     protected <T> T getOrNull(String property, Function<JsonNode, T> asResult) {
