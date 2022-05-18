@@ -36,7 +36,10 @@ import org.eclipse.paho.client.mqttv3.MqttConnectOptions;
 import org.eclipse.paho.client.mqttv3.MqttException;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestMethodOrder;
+import org.junit.jupiter.api.MethodOrderer.OrderAnnotation;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -55,6 +58,7 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 @Testcontainers
 @ExtendWith(SpringExtension.class)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
+@TestMethodOrder(OrderAnnotation.class)
 public class ITConformance7 extends ConformanceTests implements TestUtil {
 
     private static IMqttClient mqttClient;
@@ -63,7 +67,8 @@ public class ITConformance7 extends ConformanceTests implements TestUtil {
         super(rootUrl);
     }
 
-    @AfterAll static void disconnectClient() throws MqttException {
+    @AfterAll
+    static void disconnectClient() throws MqttException {
         if (mqttClient.isConnected()) {
             mqttClient.disconnect();
             mqttClient.close();
@@ -158,6 +163,7 @@ public class ITConformance7 extends ConformanceTests implements TestUtil {
     }
 
     @Test
+    @Order(1)
     public void postObservationDirect() throws Exception {
         init();
         String observation = "{\n" +
@@ -193,6 +199,7 @@ public class ITConformance7 extends ConformanceTests implements TestUtil {
     }
 
     @Test
+    @Order(2)
     public void postObservationRelatedDatastream() throws Exception {
         init();
         String observation = "{\n" +
@@ -219,6 +226,7 @@ public class ITConformance7 extends ConformanceTests implements TestUtil {
     }
 
     @Test
+    @Order(3)
     public void postObservationRelatedFOI() throws Exception {
         init();
         String observation = "{\n" +

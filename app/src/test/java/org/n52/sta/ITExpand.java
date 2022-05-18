@@ -31,7 +31,10 @@ package org.n52.sta;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestMethodOrder;
+import org.junit.jupiter.api.MethodOrderer.OrderAnnotation;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.DirtiesContext;
@@ -47,6 +50,7 @@ import java.util.Arrays;
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 @Testcontainers
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
+@TestMethodOrder(OrderAnnotation.class)
 public class ITExpand extends ConformanceTests implements TestUtil {
 
     ITExpand(@Value("${server.rootUrl}") String rootUrl) throws Exception {
@@ -78,6 +82,7 @@ public class ITExpand extends ConformanceTests implements TestUtil {
     }
 
     @Test
+    @Order(1)
     public void testSingleExpandonCollection() throws Exception {
         checkSingleExpandOnCollection(EntityType.THING, DATASTREAMS);
         checkSingleExpandOnCollection(EntityType.THING, LOCATIONS);
@@ -119,6 +124,7 @@ public class ITExpand extends ConformanceTests implements TestUtil {
     }
 
     @Test
+    @Order(2)
     public void testMultipleExpandOnCollection() throws Exception {
         checkMultipleExpandOnCollection(EntityType.THING, DATASTREAMS, LOCATIONS);
         checkMultipleExpandOnCollection(EntityType.THING, DATASTREAMS, HISTORICALLOCATIONS);
@@ -184,6 +190,7 @@ public class ITExpand extends ConformanceTests implements TestUtil {
     }
 
     @Test
+    @Order(3)
     public void testSingleExpandOnEntity() throws Exception {
         checkSingleExpandOnEntity(EntityType.THING, DATASTREAMS);
         checkSingleExpandOnEntity(EntityType.THING, LOCATIONS);
@@ -225,6 +232,7 @@ public class ITExpand extends ConformanceTests implements TestUtil {
     }
 
     @Test
+    @Order(4)
     public void testMultipleExpandOnEntity() throws Exception {
         checkMultipleExpandOnEntity(EntityType.THING, DATASTREAMS, LOCATIONS);
         checkMultipleExpandOnEntity(EntityType.THING, DATASTREAMS, HISTORICALLOCATIONS);
@@ -288,6 +296,7 @@ public class ITExpand extends ConformanceTests implements TestUtil {
     }
 
     @Test
+    @Order(5)
     public void testNestedExpandOnCollection() throws Exception {
         checkNestedExpandOnCollection(EntityType.THING, DATASTREAMS, OBSERVATIONS);
         checkNestedExpandOnCollection(EntityType.THING, DATASTREAMS, OBSERVEDPROPERTY);
@@ -387,6 +396,7 @@ public class ITExpand extends ConformanceTests implements TestUtil {
     }
 
     @Test
+    @Order(6)
     public void testNestedExpandOnEntity() throws Exception {
         checkNestedExpandOnEntity(EntityType.THING, DATASTREAMS, OBSERVATIONS);
         checkNestedExpandOnEntity(EntityType.THING, DATASTREAMS, OBSERVEDPROPERTY);

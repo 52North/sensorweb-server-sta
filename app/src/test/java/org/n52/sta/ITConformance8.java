@@ -40,7 +40,10 @@ import org.eclipse.paho.client.mqttv3.MqttMessage;
 import org.joda.time.DateTime;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestMethodOrder;
+import org.junit.jupiter.api.MethodOrderer.OrderAnnotation;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.n52.shetland.ogc.gml.time.TimeInstant;
 import org.slf4j.Logger;
@@ -69,6 +72,7 @@ import java.util.Set;
 @Testcontainers
 @ExtendWith(SpringExtension.class)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
+@TestMethodOrder(OrderAnnotation.class)
 public class ITConformance8 extends ConformanceTests implements TestUtil {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ITConformance8.class);
@@ -112,7 +116,8 @@ public class ITConformance8 extends ConformanceTests implements TestUtil {
         super(rootUrl);
     }
 
-    @AfterAll static void disconnectClient() throws MqttException {
+    @AfterAll
+    static void disconnectClient() throws MqttException {
         if (mqttClient.isConnected()) {
             mqttClient.disconnect();
             mqttClient.close();
@@ -138,6 +143,7 @@ public class ITConformance8 extends ConformanceTests implements TestUtil {
      * @throws Exception     when an error occurred
      */
     @Test
+    @Order(1)
     public void checkThings() throws MqttException, Exception {
         init();
         /* Thing */
@@ -165,6 +171,7 @@ public class ITConformance8 extends ConformanceTests implements TestUtil {
      * @throws Exception     when an error occurred
      */
     @Test
+    @Order(2)
     public void checkLocations() throws MqttException, Exception {
         init();
         /* Location */
@@ -193,6 +200,7 @@ public class ITConformance8 extends ConformanceTests implements TestUtil {
      * @throws Exception     when an error occurred
      */
     @Test
+    @Order(3)
     public void checkSensors() throws MqttException, Exception {
         init();
         /* Sensor */
@@ -222,6 +230,7 @@ public class ITConformance8 extends ConformanceTests implements TestUtil {
      * @throws Exception     when an error occurred
      */
     @Test
+    @Order(4)
     public void checkObservedProperties() throws MqttException, Exception {
         init();
         /* ObservedProperty */
@@ -250,6 +259,7 @@ public class ITConformance8 extends ConformanceTests implements TestUtil {
      * @throws Exception     when an error occurred
      */
     @Test
+    @Order(5)
     public void checkFOI() throws MqttException, Exception {
         init();
         /* FeatureOfInterest */
@@ -280,6 +290,7 @@ public class ITConformance8 extends ConformanceTests implements TestUtil {
      * @throws Exception     when an error occurred
      */
     @Test
+    @Order(6)
     public void checkDatastreams() throws MqttException, Exception {
         init();
         /* Thing */
@@ -332,6 +343,7 @@ public class ITConformance8 extends ConformanceTests implements TestUtil {
      * @throws Exception     when an error occurred
      */
     @Test
+    @Order(7)
     public void checkObservations() throws MqttException, Exception {
         init();
         /* Thing */

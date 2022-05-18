@@ -33,7 +33,10 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestMethodOrder;
+import org.junit.jupiter.api.MethodOrderer.OrderAnnotation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -59,6 +62,7 @@ import java.util.Set;
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 @Testcontainers
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
+@TestMethodOrder(OrderAnnotation.class)
 public class ITConformance3 extends ConformanceTests implements TestUtil {
 
     private static final Logger logger = LoggerFactory.getLogger(ITConformance3.class);
@@ -68,6 +72,7 @@ public class ITConformance3 extends ConformanceTests implements TestUtil {
     }
 
     @Test
+    @Order(1)
     public void createEntities() throws Exception {
         /* Thing */
         String urlParameters = "{"
@@ -288,6 +293,7 @@ public class ITConformance3 extends ConformanceTests implements TestUtil {
      * service.
      */
     @Test
+    @Order(2)
     public void createEntitiesWithDeepInsert() throws Exception {
         /* Thing */
         String urlParameters = "{\n"
@@ -479,6 +485,7 @@ public class ITConformance3 extends ConformanceTests implements TestUtil {
     }
 
     @Test
+    @Order(3)
     public void createInvalidEntitiesWithDeepInsert() throws Exception {
         String urlParameters = "{\n"
             + "  \"name\": \"Office Building\",\n"
@@ -685,6 +692,7 @@ public class ITConformance3 extends ConformanceTests implements TestUtil {
     }
 
     @Test()
+    @Order(4)
     public void createInvalidEntities() throws Exception {
         // Create necessary structures
         /* Thing */
@@ -825,6 +833,7 @@ public class ITConformance3 extends ConformanceTests implements TestUtil {
      * rest must be unchanged.
      */
     @Test()
+    @Order(5)
     public void patchEntities() throws Exception {
         // Create Entities
 

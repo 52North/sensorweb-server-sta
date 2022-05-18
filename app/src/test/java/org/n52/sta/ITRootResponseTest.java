@@ -41,7 +41,10 @@ import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.entity.ContentType;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestMethodOrder;
+import org.junit.jupiter.api.MethodOrderer.OrderAnnotation;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.testcontainers.junit.jupiter.Testcontainers;
@@ -53,6 +56,7 @@ import java.io.IOException;
  */
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 @Testcontainers
+@TestMethodOrder(OrderAnnotation.class)
 public class ITRootResponseTest extends ConformanceTests {
 
     protected final static String jsonMimeType = "application/json";
@@ -64,6 +68,7 @@ public class ITRootResponseTest extends ConformanceTests {
     }
 
     @Test
+    @Order(1)
     public void rootResponseIsCorrect() throws IOException {
         HttpUriRequest request = new HttpGet(rootUrl);
         HttpResponse response = HttpClientBuilder.create().build().execute(request);

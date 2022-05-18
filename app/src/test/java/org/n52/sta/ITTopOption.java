@@ -30,7 +30,11 @@
 package org.n52.sta;
 
 import com.fasterxml.jackson.databind.JsonNode;
+
+import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestMethodOrder;
+import org.junit.jupiter.api.MethodOrderer.OrderAnnotation;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.DirtiesContext;
@@ -47,6 +51,7 @@ import java.io.IOException;
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 @Testcontainers
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
+@TestMethodOrder(OrderAnnotation.class)
 public class ITTopOption extends ConformanceTests implements TestUtil {
 
     public ITTopOption(@Value("${server.rootUrl}") String rootUrl) throws Exception {
@@ -78,6 +83,7 @@ public class ITTopOption extends ConformanceTests implements TestUtil {
     }
 
     @Test
+    @Order(1)
     public void testTopOnObservationCollection() throws IOException {
         // Check directly on Collection
         JsonNode allObservations = getCollection(EntityType.OBSERVATION, "$top=1");

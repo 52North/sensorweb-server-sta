@@ -29,7 +29,10 @@
 
 package org.n52.sta;
 
+import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestMethodOrder;
+import org.junit.jupiter.api.MethodOrderer.OrderAnnotation;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.DirtiesContext;
@@ -43,6 +46,7 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 @Testcontainers
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
+@TestMethodOrder(OrderAnnotation.class)
 public class ITFilterByRelatedEntities extends ConformanceTests implements TestUtil {
 
     ITFilterByRelatedEntities(@Value("${server.rootUrl}") String rootUrl) throws Exception {
@@ -74,6 +78,7 @@ public class ITFilterByRelatedEntities extends ConformanceTests implements TestU
     }
 
     @Test
+    @Order(1)
     public void testFilterOnSingleNavigationDoesNotThrowError() throws Exception {
         int thingCount = getCollection(EntityType.THING).get(value).size();
         int locationCount = getCollection(EntityType.LOCATION).get(value).size();
@@ -135,6 +140,7 @@ public class ITFilterByRelatedEntities extends ConformanceTests implements TestU
     }
 
     @Test
+    @Order(2)
     public void testFilterOnDoubleNavigationHasCorrectCount() throws Exception {
         int thingCount = getCollection(EntityType.THING).get(value).size();
         int locationCount = getCollection(EntityType.LOCATION).get(value).size();

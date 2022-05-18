@@ -30,7 +30,11 @@
 package org.n52.sta;
 
 import com.fasterxml.jackson.databind.JsonNode;
+
+import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestMethodOrder;
+import org.junit.jupiter.api.MethodOrderer.OrderAnnotation;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.DirtiesContext;
@@ -46,6 +50,7 @@ import java.io.IOException;
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 @Testcontainers
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
+@TestMethodOrder(OrderAnnotation.class)
 public class ITFilterByResult extends ConformanceTests implements TestUtil {
 
     ITFilterByResult(@Value("${server.rootUrl}") String rootUrl) {
@@ -53,6 +58,7 @@ public class ITFilterByResult extends ConformanceTests implements TestUtil {
     }
 
     @Test
+    @Order(1)
     public void testOMMeasurementResultFiltering() throws IOException {
         createMeasurementHarness();
         JsonNode collection = getCollection(EntityType.OBSERVATION, "$filter=result ge 6");
@@ -60,6 +66,7 @@ public class ITFilterByResult extends ConformanceTests implements TestUtil {
     }
 
     @Test
+    @Order(2)
     public void testOMCategoryResultFiltering() throws IOException {
         createCategoryHarness();
         JsonNode collection = getCollection(EntityType.OBSERVATION, "$filter=result ge 'Embryophyta'");
@@ -67,6 +74,7 @@ public class ITFilterByResult extends ConformanceTests implements TestUtil {
     }
 
     @Test
+    @Order(3)
     public void testNoNumericResultWhenFilteringOMCategory() throws IOException {
         createCategoryHarness();
         createMeasurementHarness();
@@ -76,6 +84,7 @@ public class ITFilterByResult extends ConformanceTests implements TestUtil {
     }
 
     @Test
+    @Order(4)
     public void testNoStringResultWhenFilteringOMMeasurement() throws IOException {
         createCategoryHarness();
         createMeasurementHarness();

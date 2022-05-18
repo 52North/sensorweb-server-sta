@@ -30,7 +30,10 @@
 package org.n52.sta;
 
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestMethodOrder;
+import org.junit.jupiter.api.MethodOrderer.OrderAnnotation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -60,6 +63,7 @@ import java.util.function.Consumer;
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 @Testcontainers
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
+@TestMethodOrder(OrderAnnotation.class)
 public class ITQueryOptionPrecedence extends ConformanceTests implements TestUtil {
 
     private static final Logger logger = LoggerFactory.getLogger(ITQueryOptionPrecedence.class);
@@ -124,6 +128,7 @@ public class ITQueryOptionPrecedence extends ConformanceTests implements TestUti
     }
 
     @Test
+    @Order(1)
     public void testAllOrderingsThrowNoError() {
         testPermutations(Arrays.asList(0, 1, 2, 3, 4, 5, 6), 0, (list) -> {
             StringBuilder filters = new StringBuilder();

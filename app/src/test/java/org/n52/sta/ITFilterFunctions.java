@@ -31,7 +31,10 @@ package org.n52.sta;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestMethodOrder;
+import org.junit.jupiter.api.MethodOrderer.OrderAnnotation;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.DirtiesContext;
@@ -47,6 +50,7 @@ import java.io.IOException;
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 @Testcontainers
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
+@TestMethodOrder(OrderAnnotation.class)
 public class ITFilterFunctions extends ConformanceTests implements TestUtil {
 
     public ITFilterFunctions(@Value("${server.rootUrl}") String rootUrl) {
@@ -81,6 +85,7 @@ public class ITFilterFunctions extends ConformanceTests implements TestUtil {
     }
 
     @Test
+    @Order(1)
     public void testSubstringOf() throws IOException {
         createMeasurementHarness();
         JsonNode collection;
@@ -92,6 +97,7 @@ public class ITFilterFunctions extends ConformanceTests implements TestUtil {
     }
 
     @Test
+    @Order(2)
     public void testEndsWith() throws IOException {
         createMeasurementHarness();
         JsonNode collection;
@@ -103,6 +109,7 @@ public class ITFilterFunctions extends ConformanceTests implements TestUtil {
     }
 
     @Test
+    @Order(3)
     public void testStartsWith() throws IOException {
         createMeasurementHarness();
         JsonNode collection;
@@ -114,6 +121,7 @@ public class ITFilterFunctions extends ConformanceTests implements TestUtil {
     }
 
     //@Test
+//    @Order(4)
     public void testLength() throws IOException {
         createMeasurementHarness();
         JsonNode collection;
@@ -125,6 +133,7 @@ public class ITFilterFunctions extends ConformanceTests implements TestUtil {
     }
 
     @Test
+    @Order(5)
     public void testIndexOf() throws IOException {
         createMeasurementHarness();
         JsonNode collection;
@@ -136,6 +145,7 @@ public class ITFilterFunctions extends ConformanceTests implements TestUtil {
     }
 
     //@Test
+//    @Order(6)
     public void testSubstring() throws IOException {
         createMeasurementHarness();
         JsonNode collection;
@@ -147,6 +157,7 @@ public class ITFilterFunctions extends ConformanceTests implements TestUtil {
     }
 
     @Test
+    @Order(7)
     public void testToLower() throws IOException {
         createMeasurementHarness();
         JsonNode collection;
@@ -158,6 +169,7 @@ public class ITFilterFunctions extends ConformanceTests implements TestUtil {
     }
 
     @Test
+    @Order(8)
     public void testToUpper() throws IOException {
         createMeasurementHarness();
         JsonNode collection;
@@ -169,6 +181,7 @@ public class ITFilterFunctions extends ConformanceTests implements TestUtil {
     }
 
     @Test
+    @Order(9)
     public void testTrim() throws IOException {
         createMeasurementHarness();
         JsonNode collection;
@@ -180,6 +193,7 @@ public class ITFilterFunctions extends ConformanceTests implements TestUtil {
     }
 
     @Test
+    @Order(10)
     public void testConcat() throws IOException {
         createMeasurementHarness();
         JsonNode collection;
@@ -191,6 +205,7 @@ public class ITFilterFunctions extends ConformanceTests implements TestUtil {
     }
 
     @Test
+    @Order(11)
     public void testYear() throws IOException {
         createMeasurementHarness();
         JsonNode collection;
@@ -202,6 +217,7 @@ public class ITFilterFunctions extends ConformanceTests implements TestUtil {
     }
 
     //@Test
+//    @Order(12)
     public void testMonth() throws IOException {
         createMeasurementHarness();
         JsonNode collection;
@@ -213,6 +229,7 @@ public class ITFilterFunctions extends ConformanceTests implements TestUtil {
     }
 
     @Test
+    @Order(13)
     public void testDay() throws IOException {
         createMeasurementHarness();
         JsonNode collection;
@@ -226,6 +243,7 @@ public class ITFilterFunctions extends ConformanceTests implements TestUtil {
     }
 
     @Test
+    @Order(14)
     public void testHour() throws IOException {
         createMeasurementHarness();
         JsonNode collection;
@@ -239,6 +257,7 @@ public class ITFilterFunctions extends ConformanceTests implements TestUtil {
     }
 
     @Test
+    @Order(15)
     public void testMinute() throws IOException {
         createMeasurementHarness();
         JsonNode collection;
@@ -252,6 +271,7 @@ public class ITFilterFunctions extends ConformanceTests implements TestUtil {
     }
 
     @Test
+    @Order(16)
     public void testSecond() throws IOException {
         createMeasurementHarness();
         JsonNode collection;
@@ -265,11 +285,13 @@ public class ITFilterFunctions extends ConformanceTests implements TestUtil {
     }
 
     //@Test
+//    @Order(17)
     public void testFractionalSeconds() throws IOException {
         Assertions.fail("TODO: implement!");
     }
 
     //@Test
+//    @Order(18)
     public void testDate() throws IOException {
         createMeasurementHarness();
         JsonNode collection;
@@ -283,6 +305,7 @@ public class ITFilterFunctions extends ConformanceTests implements TestUtil {
     }
 
     //@Test
+//    @Order(19)
     public void testTime() throws IOException {
         createMeasurementHarness();
         JsonNode collection;
@@ -296,11 +319,13 @@ public class ITFilterFunctions extends ConformanceTests implements TestUtil {
     }
 
     //@Test
+//    @Order(20)
     public void testTotalOffsetMinutes() throws IOException {
         Assertions.fail("TODO: implement!");
     }
 
     //@Test
+//    @Order(21)
     public void testNow() throws IOException {
         createMeasurementHarness();
         JsonNode collection;
@@ -312,6 +337,7 @@ public class ITFilterFunctions extends ConformanceTests implements TestUtil {
     }
 
     @Test
+    @Order(22)
     public void testMinDateTime() throws IOException {
         createMeasurementHarness();
         JsonNode collection;
@@ -323,6 +349,7 @@ public class ITFilterFunctions extends ConformanceTests implements TestUtil {
     }
 
     //@Test
+//    @Order(23)
     public void testMaxDateTime() throws IOException {
         createMeasurementHarness();
         JsonNode collection;
@@ -334,6 +361,7 @@ public class ITFilterFunctions extends ConformanceTests implements TestUtil {
     }
 
     //@Test
+//    @Order(24)
     public void testRound() throws IOException {
         createMeasurementHarness();
         JsonNode collection;
@@ -346,6 +374,7 @@ public class ITFilterFunctions extends ConformanceTests implements TestUtil {
     }
 
     //@Test
+//    @Order(25)
     public void testFloor() throws IOException {
         createMeasurementHarness();
         JsonNode collection;
@@ -358,6 +387,7 @@ public class ITFilterFunctions extends ConformanceTests implements TestUtil {
     }
 
     //@Test
+//    @Order(26)
     public void testCeiling() throws IOException {
         createMeasurementHarness();
         JsonNode collection;

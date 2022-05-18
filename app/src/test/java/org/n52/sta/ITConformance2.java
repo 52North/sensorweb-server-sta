@@ -30,7 +30,11 @@
 package org.n52.sta;
 
 import com.fasterxml.jackson.databind.JsonNode;
+
+import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestMethodOrder;
+import org.junit.jupiter.api.MethodOrderer.OrderAnnotation;
 import org.n52.shetland.ogc.sta.model.STAEntityDefinition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -55,6 +59,7 @@ import java.util.Set;
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 @Testcontainers
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
+@TestMethodOrder(OrderAnnotation.class)
 public class ITConformance2 extends ConformanceTests implements TestUtil {
 
     private static final Logger logger = LoggerFactory.getLogger(ITConformance2.class);
@@ -103,6 +108,7 @@ public class ITConformance2 extends ConformanceTests implements TestUtil {
 
     }*/
     @Test
+    @Order(1)
     public void testSelect() throws Exception {
         for (String collectionName : STAEntityDefinition.ALLCOLLECTIONS) {
             STAEntityDefinition definition = STAEntityDefinition.definitions.get(collectionName);
@@ -131,6 +137,7 @@ public class ITConformance2 extends ConformanceTests implements TestUtil {
     }
 
     @Test
+    @Order(2)
     public void testExpand() {
 
     }

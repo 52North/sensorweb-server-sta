@@ -32,7 +32,10 @@ package org.n52.sta;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.MethodOrderer.OrderAnnotation;
+import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestMethodOrder;
 import org.n52.shetland.ogc.sta.StaConstants;
 import org.n52.shetland.ogc.sta.model.DatastreamEntityDefinition;
 import org.n52.shetland.ogc.sta.model.FeatureOfInterestEntityDefinition;
@@ -66,6 +69,7 @@ import java.util.Set;
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 @Testcontainers
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
+@TestMethodOrder(OrderAnnotation.class)
 public class ITConformance1 extends ConformanceTests implements TestUtil {
 
     public ITConformance1(@Value("${server.rootUrl}") String rootUrl) throws Exception {
@@ -102,6 +106,7 @@ public class ITConformance1 extends ConformanceTests implements TestUtil {
      * properties, and mandatory related entities.
      */
     @Test
+    @Order(1)
     public void testReadEntitiesAndCheckResponse() throws Exception {
         JsonNode collection;
         collection = getCollection(EntityType.THING);
@@ -127,6 +132,7 @@ public class ITConformance1 extends ConformanceTests implements TestUtil {
      * response should be 404.
      */
     @Test
+    @Order(2)
     public void readNonexistentEntity() throws Exception {
         getNonExistentEntity(EntityType.THING);
         getNonExistentEntity(EntityType.LOCATION);
@@ -144,6 +150,7 @@ public class ITConformance1 extends ConformanceTests implements TestUtil {
      * entities for the response entity.
      */
     @Test
+    @Order(3)
     public void readEntityAndCheckResponse() throws Exception {
         Set<JsonNode> response;
         response = readEntityWithEntityType(EntityType.THING);
@@ -168,6 +175,7 @@ public class ITConformance1 extends ConformanceTests implements TestUtil {
      * This method is testing GET for a property of an entity.
      */
     @Test
+    @Order(4)
     public void readPropertyOfEntityAndCheckResponse() throws Exception {
         readPropertyOfEntityWithEntityType(EntityType.THING, new ThingEntityDefinition());
         readPropertyOfEntityWithEntityType(EntityType.LOCATION, new LocationEntityDefinition());
@@ -184,6 +192,7 @@ public class ITConformance1 extends ConformanceTests implements TestUtil {
      * specified level.
      */
     @Test
+    @Order(5)
     public void checkResourcePaths() throws Exception {
         Set<JsonNode> response;
         response = readEntityWithEntityType(EntityType.THING);
@@ -208,6 +217,7 @@ public class ITConformance1 extends ConformanceTests implements TestUtil {
      * This method is testing the root URL of the service under test.
      */
     @Test()
+    @Order(6)
     public void checkServiceRootUri() throws Exception {
         JsonNode response = getRootResponse();
         ArrayNode entities = (ArrayNode) response.get(value);

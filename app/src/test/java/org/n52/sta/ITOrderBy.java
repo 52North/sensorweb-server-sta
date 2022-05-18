@@ -31,7 +31,10 @@ package org.n52.sta;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestMethodOrder;
+import org.junit.jupiter.api.MethodOrderer.OrderAnnotation;
 import org.n52.shetland.ogc.filter.FilterConstants;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -48,6 +51,7 @@ import java.io.IOException;
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 @Testcontainers
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
+@TestMethodOrder(OrderAnnotation.class)
 public class ITOrderBy extends ConformanceTests implements TestUtil {
 
     final String result = "result";
@@ -81,6 +85,7 @@ public class ITOrderBy extends ConformanceTests implements TestUtil {
     }
 
     @Test
+    @Order(1)
     public void testOrderByResultOnObservationCollection() throws IOException {
         // Check directly on Collection
         // default ascending

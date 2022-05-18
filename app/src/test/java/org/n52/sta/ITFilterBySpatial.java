@@ -30,7 +30,11 @@
 package org.n52.sta;
 
 import com.fasterxml.jackson.databind.JsonNode;
+
+import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestMethodOrder;
+import org.junit.jupiter.api.MethodOrderer.OrderAnnotation;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.DirtiesContext;
@@ -44,6 +48,7 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 @Testcontainers
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
+@TestMethodOrder(OrderAnnotation.class)
 public class ITFilterBySpatial extends ConformanceTests implements TestUtil {
 
     public ITFilterBySpatial(@Value("${server.rootUrl}") String rootUrl) {
@@ -75,6 +80,7 @@ public class ITFilterBySpatial extends ConformanceTests implements TestUtil {
     }
 
     @Test
+    @Order(1)
     public void testFilterSTequals() throws Exception {
         init();
         JsonNode response =
@@ -96,6 +102,7 @@ public class ITFilterBySpatial extends ConformanceTests implements TestUtil {
     }
 
     @Test
+    @Order(2)
     public void testFilterSTdisjoint() throws Exception {
         init();
         JsonNode response = getCollection(EntityType.LOCATION,
@@ -116,6 +123,7 @@ public class ITFilterBySpatial extends ConformanceTests implements TestUtil {
     }
 
     @Test
+    @Order(3)
     public void testFilterSTtouches() throws Exception {
         init();
         JsonNode response = getCollection(
@@ -140,6 +148,7 @@ public class ITFilterBySpatial extends ConformanceTests implements TestUtil {
     }
 
     @Test
+    @Order(4)
     public void testFilterSTwithin() throws Exception {
         init();
         JsonNode response = getCollection(
@@ -165,6 +174,7 @@ public class ITFilterBySpatial extends ConformanceTests implements TestUtil {
     }
 
     @Test
+    @Order(5)
     public void testFilterSToverlaps() throws Exception {
         init();
         JsonNode response = getCollection(
@@ -189,6 +199,7 @@ public class ITFilterBySpatial extends ConformanceTests implements TestUtil {
     }
 
     @Test
+    @Order(6)
     public void testFilterSTcrosses() throws Exception {
         init();
         JsonNode response = getCollection(
@@ -213,6 +224,7 @@ public class ITFilterBySpatial extends ConformanceTests implements TestUtil {
     }
 
     @Test
+    @Order(7)
     public void testFilterSTintersects() throws Exception {
         init();
         JsonNode response = getCollection(
@@ -237,6 +249,7 @@ public class ITFilterBySpatial extends ConformanceTests implements TestUtil {
     }
 
     @Test
+    @Order(8)
     public void testFilterSTcontains() throws Exception {
         init();
         JsonNode response = getCollection(
@@ -261,6 +274,7 @@ public class ITFilterBySpatial extends ConformanceTests implements TestUtil {
     }
 
     @Test
+    @Order(9)
     public void testFilterSTrelate() throws Exception {
         init();
 
@@ -269,6 +283,7 @@ public class ITFilterBySpatial extends ConformanceTests implements TestUtil {
     }
 
     @Test
+    @Order(10)
     public void testFilterGEOlength() throws Exception {
         init();
 
@@ -301,6 +316,7 @@ public class ITFilterBySpatial extends ConformanceTests implements TestUtil {
     }
 
     @Test
+    @Order(11)
     public void testFilterGEOdistance() throws Exception {
         init();
         JsonNode response;
@@ -334,6 +350,7 @@ public class ITFilterBySpatial extends ConformanceTests implements TestUtil {
     }
 
     @Test
+    @Order(12)
     public void testFilterGEOintersects() throws Exception {
         init();
         JsonNode response = getCollection(

@@ -29,7 +29,10 @@
 
 package org.n52.sta;
 
+import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestMethodOrder;
+import org.junit.jupiter.api.MethodOrderer.OrderAnnotation;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.testcontainers.junit.jupiter.Testcontainers;
@@ -44,6 +47,7 @@ import java.util.Arrays;
  */
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 @Testcontainers
+@TestMethodOrder(OrderAnnotation.class)
 public class ITRollbackOnInvalidPost extends ConformanceTests {
 
     private final String invalidSensor = "{\"description\":\"This is the Lobby of the 52N HQ\",\"name\":\"52N HQ " +
@@ -133,6 +137,7 @@ public class ITRollbackOnInvalidPost extends ConformanceTests {
     }
 
     @Test
+    @Order(1)
     public void checkNoEntityCreatedOnInvalidThingPost() throws Exception {
         postInvalidEntity(EntityType.THING, invalidSensor);
         checkNotExisting(Arrays.asList(EntityType.values()));
