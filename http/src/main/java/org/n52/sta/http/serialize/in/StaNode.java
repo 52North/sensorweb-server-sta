@@ -55,11 +55,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 abstract class StaNode implements Identifiable {
-    
+
     private static final Logger LOGGER = LoggerFactory.getLogger(StaNode.class);
 
     protected final ObjectMapper mapper;
-    
+
     private final JsonNode node;
 
     protected StaNode(JsonNode node, ObjectMapper mapper) {
@@ -74,13 +74,13 @@ abstract class StaNode implements Identifiable {
     public String getId() {
         return getOrNull(StaConstants.AT_IOT_ID, JsonNode::asText);
     }
-    
+
     protected Geometry parseGeometry(String property) throws InvalidValueException {
         Optional<JsonNode> propertyNode = get(property);
         if (!propertyNode.isPresent()) {
             return null;
         }
-        
+
         // TODO read srs from geometry?
         int srs = 4326;
         PrecisionModel precisionModel = new PrecisionModel(PrecisionModel.FLOATING);
@@ -91,7 +91,7 @@ abstract class StaNode implements Identifiable {
             return reader.read(geometry.toString());
         } catch (ParseException e) {
             LOGGER.debug("Could not parse GeoJson at '{}': {}", property, geometry.toPrettyString());
-            throw new InvalidValueException("GeoJSON in '" + property + "' is not valid!");
+            throw new InvalidValueException(String.format("Invalid GeoJSON at '%s'!", property));
         }
     }
 
@@ -105,7 +105,7 @@ abstract class StaNode implements Identifiable {
             return TimeUtil.parseTime(time.asText());
         } catch (IllegalArgumentException e) {
             LOGGER.debug("Could not parse Time at '{}': {}", property, time.toPrettyString());
-            throw new InvalidValueException("Time in '" + property + "' is not valid!");
+            throw new InvalidValueException(String.format("Invalid Time at '%s'!", property));
         }
     }
 
