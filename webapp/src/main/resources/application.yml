@@ -120,6 +120,8 @@ spring:
   mvc:
     servlet:
       path: /v1.1
+    pathmatch:
+      matching-strategy: ant_path_matcher
 
 # HTTP Configuration
 http:

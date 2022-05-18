@@ -111,6 +111,9 @@ spring:
         #use_sql_comments: true
   jmx:
     enabled: false
+  mvc:
+    pathmatch:
+      matching-strategy: ant_path_matcher
 
 # HTTP Configuration
 http:
