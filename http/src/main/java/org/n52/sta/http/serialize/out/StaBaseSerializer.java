@@ -27,26 +27,24 @@
  */
 package org.n52.sta.http.serialize.out;
 
-import com.fasterxml.jackson.core.JsonGenerator;
-import com.fasterxml.jackson.databind.ser.std.StdSerializer;
-import org.locationtech.jts.geom.Geometry;
-import org.locationtech.jts.io.geojson.GeoJsonWriter;
-import org.n52.shetland.ogc.gml.time.Time;
-import org.n52.shetland.ogc.sta.StaConstants;
-import org.n52.shetland.util.DateTimeHelper;
-import org.n52.sta.api.entity.Identifiable;
-
 import java.io.IOException;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
+import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.databind.ser.std.StdSerializer;
+
+import org.locationtech.jts.geom.Geometry;
+import org.n52.shetland.ogc.gml.time.Time;
+import org.n52.shetland.ogc.sta.StaConstants;
+import org.n52.shetland.util.DateTimeHelper;
+import org.n52.sta.api.entity.Identifiable;
+
 public abstract class StaBaseSerializer<T extends Identifiable> extends StdSerializer<T> implements StaSerializer<T> {
 
     private static final String ENCODINGTYPE_GEOJSON = "application/vnd.geo+json";
-
-    private final transient GeoJsonWriter geometryWriter;
 
     private final String serviceUri;
 
@@ -60,7 +58,6 @@ public abstract class StaBaseSerializer<T extends Identifiable> extends StdSeria
         Objects.requireNonNull(collectionName, "collectionName must not be null!");
 
         this.serviceUri = removeTrailingSlash(context.getServiceUri());
-        this.geometryWriter = new GeoJsonWriter();
         this.collectionName = collectionName;
         this.context = context;
         context.register(this);
@@ -77,27 +74,26 @@ public abstract class StaBaseSerializer<T extends Identifiable> extends StdSeria
         return handledType();
     }
 
-    protected void writeGeometryAndEncodingType(String name, Supplier<Geometry> geometry, JsonGenerator gen)
-            throws IOException {
-        if (context.isSelected(name)) {
-            Geometry value = geometry.get();
-            if (value != null) {
-                gen.writeFieldName(name);
-                gen.writeRawValue(geometryWriter.write(value));
-                // only write out encodingtype if there is a location present
-                writeStringProperty(StaConstants.PROP_ENCODINGTYPE, () -> ENCODINGTYPE_GEOJSON, gen);
-            } else {
-                gen.writeStringField(name, null);
-            }
-        }
-    }
-
     protected void writeStringProperty(String name, Supplier<String> value, JsonGenerator gen) throws IOException {
         writeProperty(name, fieldName -> gen.writeStringField(fieldName, value.get()));
     }
 
     protected void writeObjectProperty(String name, Supplier<Object> value, JsonGenerator gen) throws IOException {
         writeProperty(name, fieldName -> gen.writeObjectField(fieldName, value.get()));
+    }
+
+    protected void writeGeometryAndEncodingType(String name, Supplier<Geometry> geometry, JsonGenerator gen)
+            throws IOException {
+        if (context.isSelected(name)) {
+            Geometry value = geometry.get();
+            if (value != null) {
+                gen.writeObjectField(name, value);
+                gen.writeStringField(StaConstants.PROP_ENCODINGTYPE, ENCODINGTYPE_GEOJSON);
+            } else {
+                gen.writeStringField(name, null);
+                gen.writeStringField(StaConstants.PROP_ENCODINGTYPE, null);
+            }
+        }
     }
 
     protected void writeTimeProperty(String name, Supplier<Time> value, JsonGenerator gen) throws IOException {
@@ -157,12 +153,16 @@ public abstract class StaBaseSerializer<T extends Identifiable> extends StdSeria
         gen.writeStringField(iotNavLinkProperty, navLink);
     }
 
+    protected String createNavigationLink(String id, String member) {
+        return String.format("%s/%s", createSelfLink(id), member);
+    }
+
     protected String createSelfLink(String id) {
         return String.format("%s/%s(%s)", serviceUri, collectionName, id);
     }
 
-    protected String createNavigationLink(String id, String member) {
-        return String.format("%s/%s", createSelfLink(id), member);
+    protected SerializationContext getSerializationContext() {
+        return context;
     }
 
     @FunctionalInterface
