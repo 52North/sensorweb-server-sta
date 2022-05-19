@@ -44,7 +44,7 @@ import org.n52.sta.data.repositories.entity.ObservationRepository;
 import org.n52.sta.data.repositories.entity.PhenomenonRepository;
 import org.n52.sta.data.repositories.entity.ProcedureRepository;
 import org.n52.sta.data.repositories.entity.ThingRepository;
-import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
@@ -52,47 +52,49 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 @Configuration
 @EnableTransactionManagement
-@ConfigurationProperties(prefix = "dao-postgres")
 public class DataProviderConfiguration {
+
+    @Autowired
+    private EntityPropertyMapping propertyMapping;
 
     @Bean
     public ThingEntityProvider thingEntityProvider(ThingRepository repository) {
-        return new ThingEntityProvider(repository);
+        return new ThingEntityProvider(repository, propertyMapping);
     }
 
     @Bean
     public DatastreamEntityProvider datastreamEntityProvider(DatastreamRepository repository) {
-        return new DatastreamEntityProvider(repository);
+        return new DatastreamEntityProvider(repository, propertyMapping);
     }
 
     @Bean
     public SensorEntityProvider sensorEntityProvider(ProcedureRepository repository) {
-        return new SensorEntityProvider(repository);
+        return new SensorEntityProvider(repository, propertyMapping);
     }
 
     @Bean
     public LocationEntityProvider locationEntityProvider(LocationRepository repository) {
-        return new LocationEntityProvider(repository);
+        return new LocationEntityProvider(repository, propertyMapping);
     }
 
     @Bean
     public HistoricalLocationEntityProvider historicalLocationEntityProvider(HistoricalLocationRepository repository) {
-        return new HistoricalLocationEntityProvider(repository);
+        return new HistoricalLocationEntityProvider(repository, propertyMapping);
     }
 
     @Bean
     public ObservedPropertyEntityProvider observedPropertyEntityProvider(PhenomenonRepository repository) {
-        return new ObservedPropertyEntityProvider(repository);
+        return new ObservedPropertyEntityProvider(repository, propertyMapping);
     }
 
     @Bean
-    public ObservationEntityProvider observationEntityProvider(ObservationRepository repository) {
-        return new ObservationEntityProvider(repository);
+    public ObservationEntityProvider observationEntityProvider(ObservationRepository<?> repository) {
+        return new ObservationEntityProvider(repository, propertyMapping);
     }
 
     @Bean
     public FeatureOfInterestEntityProvider featureOfInterestEntityProvider(FeatureOfInterestRepository repository) {
-        return new FeatureOfInterestEntityProvider(repository);
+        return new FeatureOfInterestEntityProvider(repository, propertyMapping);
     }
 
     @Configuration

@@ -36,15 +36,16 @@ import org.n52.series.db.beans.AbstractFeatureEntity;
 import org.n52.series.db.beans.sta.StaFeatureEntity;
 import org.n52.sta.api.entity.FeatureOfInterest;
 import org.n52.sta.api.entity.Observation;
+import org.n52.sta.config.EntityPropertyMapping;
 
 public class FeatureOfInterestData extends StaData<StaFeatureEntity<?>> implements FeatureOfInterest {
 
-    public FeatureOfInterestData(AbstractFeatureEntity<?> dataEntity) {
-        this(tryToCast(dataEntity));
+    public FeatureOfInterestData(AbstractFeatureEntity<?> dataEntity, EntityPropertyMapping parameterProperties) {
+        this(tryToCast(dataEntity), parameterProperties);
     }
 
-    public FeatureOfInterestData(StaFeatureEntity<?> dataEntity) {
-        super(dataEntity);
+    public FeatureOfInterestData(StaFeatureEntity<?> dataEntity, EntityPropertyMapping propertyMapping) {
+        super(dataEntity, propertyMapping);
     }
 
     @Override
@@ -69,6 +70,7 @@ public class FeatureOfInterestData extends StaData<StaFeatureEntity<?>> implemen
 
     @Override
     public Set<Observation> getObservations() {
+        return toSet(data.getObservations(), entity -> new ObservationData(entity, propertyMapping));
     }
 
     private static StaFeatureEntity<?> tryToCast(AbstractFeatureEntity<?> feature) {

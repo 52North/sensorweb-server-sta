@@ -28,11 +28,15 @@
 
 package org.n52.sta.data.provider;
 
+import java.util.Objects;
+import java.util.Optional;
+
 import org.n52.series.db.beans.PhenomenonEntity;
 import org.n52.shetland.oasis.odata.query.option.QueryOptions;
 import org.n52.sta.api.EntityPage;
 import org.n52.sta.api.ProviderException;
 import org.n52.sta.api.entity.ObservedProperty;
+import org.n52.sta.config.EntityPropertyMapping;
 import org.n52.sta.data.StaEntityPage;
 import org.n52.sta.data.StaPageRequest;
 import org.n52.sta.data.entity.ObservedPropertyData;
@@ -44,14 +48,13 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 
-import java.util.Objects;
-import java.util.Optional;
-
 public class ObservedPropertyEntityProvider extends BaseEntityProvider<ObservedProperty> {
 
     private final PhenomenonRepository observedPropertyRepository;
 
-    public ObservedPropertyEntityProvider(PhenomenonRepository observedPropertyRepository) {
+    public ObservedPropertyEntityProvider(PhenomenonRepository observedPropertyRepository,
+            EntityPropertyMapping propertyMapping) {
+        super(propertyMapping);
         Objects.requireNonNull(observedPropertyRepository, "observedPropertyRepository must not be null");
         this.observedPropertyRepository = observedPropertyRepository;
     }
@@ -70,7 +73,7 @@ public class ObservedPropertyEntityProvider extends BaseEntityProvider<ObservedP
         addUnfilteredExpandItems(options, graphBuilder);
 
         Optional<PhenomenonEntity> platform = observedPropertyRepository.findByStaIdentifier(id, graphBuilder);
-        return platform.map(ObservedPropertyData::new);
+        return platform.map(entity -> new ObservedPropertyData(entity, propertyMapping));
     }
 
     @Override
@@ -80,10 +83,11 @@ public class ObservedPropertyEntityProvider extends BaseEntityProvider<ObservedP
         ObservedPropertyGraphBuilder graphBuilder = new ObservedPropertyGraphBuilder();
         addUnfilteredExpandItems(options, graphBuilder);
 
-        Specification<PhenomenonEntity> spec =
-            FilterQueryParser.parse(options, new ObservedPropertyQuerySpecification());
+        Specification<PhenomenonEntity> spec = FilterQueryParser.parse(options,
+                new ObservedPropertyQuerySpecification());
         Page<PhenomenonEntity> results = observedPropertyRepository.findAll(spec, pagable, graphBuilder);
-        return new StaEntityPage<>(ObservedProperty.class, results, ObservedPropertyData::new);
+        return new StaEntityPage<>(ObservedProperty.class, results,
+                entity -> new ObservedPropertyData(entity, propertyMapping));
     }
 
 }

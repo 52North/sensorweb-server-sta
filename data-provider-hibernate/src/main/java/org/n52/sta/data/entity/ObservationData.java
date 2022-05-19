@@ -33,16 +33,18 @@ import java.util.Optional;
 
 import org.joda.time.DateTime;
 import org.n52.series.db.beans.DataEntity;
+import org.n52.series.db.beans.GeometryEntity;
 import org.n52.shetland.ogc.gml.time.Time;
 import org.n52.sta.api.entity.Datastream;
 import org.n52.sta.api.entity.FeatureOfInterest;
 import org.n52.sta.api.entity.Observation;
+import org.n52.sta.config.EntityPropertyMapping;
 import org.n52.sta.old.utils.TimeUtil;
 
 public class ObservationData<T> extends StaData<DataEntity<T>> implements Observation {
 
-    public ObservationData(DataEntity<T> data) {
-        super(data);
+    public ObservationData(DataEntity<T> dataEntity, EntityPropertyMapping parameterProperties) {
+        super(dataEntity, parameterProperties);
     }
 
     @Override
@@ -78,16 +80,28 @@ public class ObservationData<T> extends StaData<DataEntity<T>> implements Observ
 
     @Override
     public Map<String, Object> getParameters() {
-        return toMap(data.getParameters());
+        Map<String, Object> parameters = toMap(data.getParameters());
+        String samplingGeometry = propertyMapping.getSamplingGeometry();
+        Optional<GeometryEntity> optionalSamplingGeometry = Optional.ofNullable(data.getGeometryEntity());
+        optionalSamplingGeometry.ifPresent(entity -> parameters.put(samplingGeometry, entity.getGeometry()));
+
+        if ("profile".equals(getValueType())) {
+            String verticalFrom = propertyMapping.getVerticalFrom();
+            String verticalTo = propertyMapping.getVerticalTo();
+            Optional.ofNullable(data.getVerticalFrom()).ifPresent(entity -> parameters.put(verticalFrom, entity));
+            Optional.ofNullable(data.getVerticalTo()).ifPresent(entity -> parameters.put(verticalTo, entity));
+        }
+        return parameters;
     }
 
     @Override
     public FeatureOfInterest getFeatureOfInterest() {
-        return new FeatureOfInterestData(data.getFeature());
+        return new FeatureOfInterestData(data.getFeature(), propertyMapping);
     }
 
     @Override
     public Datastream getDatastream() {
+        return new DatastreamData(data.getDataset(), propertyMapping);
     }
 
     @Override

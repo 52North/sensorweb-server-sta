@@ -28,20 +28,23 @@
 
 package org.n52.sta.data.provider;
 
+import java.util.Objects;
+import java.util.Optional;
+
 import org.n52.shetland.oasis.odata.query.option.QueryOptions;
 import org.n52.sta.api.EntityPage;
 import org.n52.sta.api.ProviderException;
 import org.n52.sta.api.entity.FeatureOfInterest;
+import org.n52.sta.config.EntityPropertyMapping;
 import org.n52.sta.data.repositories.entity.FeatureOfInterestRepository;
-
-import java.util.Objects;
-import java.util.Optional;
 
 public class FeatureOfInterestEntityProvider extends BaseEntityProvider<FeatureOfInterest> {
 
     private final FeatureOfInterestRepository featureOfInterestRepository;
 
-    public FeatureOfInterestEntityProvider(FeatureOfInterestRepository featureOfInterestRepository) {
+    public FeatureOfInterestEntityProvider(FeatureOfInterestRepository featureOfInterestRepository,
+            EntityPropertyMapping propertyMapping) {
+        super(propertyMapping);
         Objects.requireNonNull(featureOfInterestRepository, "featureOfInterestRepository must not be null");
         this.featureOfInterestRepository = featureOfInterestRepository;
     }

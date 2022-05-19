@@ -42,11 +42,12 @@ import org.n52.sta.api.entity.Observation;
 import org.n52.sta.api.entity.ObservedProperty;
 import org.n52.sta.api.entity.Sensor;
 import org.n52.sta.api.entity.Thing;
+import org.n52.sta.config.EntityPropertyMapping;
 
 public class DatastreamData extends StaData<AbstractDatasetEntity> implements Datastream {
 
-    public DatastreamData(AbstractDatasetEntity data) {
-        super(data);
+    public DatastreamData(AbstractDatasetEntity dataEntity, EntityPropertyMapping propertyMapping) {
+        super(dataEntity, propertyMapping);
     }
 
     @Override
@@ -98,22 +99,22 @@ public class DatastreamData extends StaData<AbstractDatasetEntity> implements Da
 
     @Override
     public Thing getThing() {
-        return new ThingData(data.getPlatform());
+        return new ThingData(data.getPlatform(), propertyMapping);
     }
 
     @Override
     public Sensor getSensor() {
-        return new SensorData(data.getProcedure());
+        return new SensorData(data.getProcedure(), propertyMapping);
     }
 
     @Override
     public ObservedProperty getObservedProperty() {
-        return new ObservedPropertyData(data.getObservableProperty());
+        return new ObservedPropertyData(data.getObservableProperty(), propertyMapping);
     }
 
     @Override
     public Set<Observation> getObservations() {
-        return toSet(data.getObservations(), ObservationData::new);
+        return toSet(data.getObservations(), entity -> new ObservationData(entity, propertyMapping));
     }
 
     private Optional<Datastream.UnitOfMeasurement> createUom(UnitEntity entity) {

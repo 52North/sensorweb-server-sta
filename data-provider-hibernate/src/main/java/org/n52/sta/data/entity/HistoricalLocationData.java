@@ -36,12 +36,13 @@ import org.n52.shetland.ogc.gml.time.Time;
 import org.n52.sta.api.entity.HistoricalLocation;
 import org.n52.sta.api.entity.Location;
 import org.n52.sta.api.entity.Thing;
+import org.n52.sta.config.EntityPropertyMapping;
 import org.n52.sta.old.utils.TimeUtil;
 
 public class HistoricalLocationData extends StaData<HistoricalLocationEntity> implements HistoricalLocation {
 
-    public HistoricalLocationData(HistoricalLocationEntity data) {
-        super(data);
+    public HistoricalLocationData(HistoricalLocationEntity dataEntity, EntityPropertyMapping propertyMapping) {
+        super(dataEntity, propertyMapping);
     }
 
     @Override
@@ -53,11 +54,11 @@ public class HistoricalLocationData extends StaData<HistoricalLocationEntity> im
 
     @Override
     public Set<Location> getLocations() {
-        return toSet(data.getLocations(), LocationData::new);
+        return toSet(data.getLocations(), entity -> new LocationData(entity, propertyMapping));
     }
 
     @Override
     public Thing getThing() {
-        return new ThingData(data.getPlatform());
+        return new ThingData(data.getPlatform(), propertyMapping);
     }
 }

@@ -33,11 +33,12 @@ import java.util.Set;
 import org.n52.series.db.beans.PhenomenonEntity;
 import org.n52.sta.api.entity.Datastream;
 import org.n52.sta.api.entity.ObservedProperty;
+import org.n52.sta.config.EntityPropertyMapping;
 
 public class ObservedPropertyData extends StaData<PhenomenonEntity> implements ObservedProperty {
 
-    public ObservedPropertyData(PhenomenonEntity dataEntity) {
-        super(dataEntity);
+    public ObservedPropertyData(PhenomenonEntity dataEntity, EntityPropertyMapping propertyMapping) {
+        super(dataEntity, propertyMapping);
     }
 
     @Override
@@ -62,7 +63,7 @@ public class ObservedPropertyData extends StaData<PhenomenonEntity> implements O
 
     @Override
     public Set<Datastream> getDatastreams() {
-        return toSet(data.getDatasets(), DatastreamData::new);
+        return toSet(data.getDatasets(), entity -> new DatastreamData(entity, propertyMapping));
     }
 
 }

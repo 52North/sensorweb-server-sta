@@ -42,15 +42,20 @@ import org.n52.series.db.beans.DescribableEntity;
 import org.n52.series.db.beans.parameter.ParameterEntity;
 import org.n52.shetland.ogc.gml.time.Time;
 import org.n52.sta.api.entity.Identifiable;
+import org.n52.sta.config.EntityPropertyMapping;
 import org.n52.sta.old.utils.TimeUtil;
 
 public class StaData<T extends DescribableEntity> implements Identifiable {
 
     protected final T data;
 
-    protected StaData(T dataEntity) {
+    protected final EntityPropertyMapping propertyMapping;
+
+    protected StaData(T dataEntity, EntityPropertyMapping propertyMapping) {
         Objects.requireNonNull(dataEntity, "dataEntity must not be null!");
+        Objects.requireNonNull(propertyMapping, "propertyMapping must not be null");
         this.data = dataEntity;
+        this.propertyMapping = propertyMapping;
     }
 
     @Override

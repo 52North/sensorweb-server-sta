@@ -35,11 +35,12 @@ import org.n52.series.db.beans.sta.LocationEntity;
 import org.n52.sta.api.entity.HistoricalLocation;
 import org.n52.sta.api.entity.Location;
 import org.n52.sta.api.entity.Thing;
+import org.n52.sta.config.EntityPropertyMapping;
 
 public class LocationData extends StaData<LocationEntity> implements Location {
 
-    public LocationData(LocationEntity data) {
-        super(data);
+    public LocationData(LocationEntity dataEntity, EntityPropertyMapping propertyMapping) {
+        super(dataEntity, propertyMapping);
     }
 
     @Override
@@ -69,11 +70,11 @@ public class LocationData extends StaData<LocationEntity> implements Location {
 
     @Override
     public Set<HistoricalLocation> getHistoricalLocations() {
-        return toSet(data.getHistoricalLocations(), HistoricalLocationData::new);
+        return toSet(data.getHistoricalLocations(), entity -> new HistoricalLocationData(entity, propertyMapping));
     }
 
     @Override
     public Set<Thing> getThings() {
-        return toSet(data.getPlatforms(), ThingData::new);
+        return toSet(data.getPlatforms(), entity -> new ThingData(entity, propertyMapping));
     }
 }
