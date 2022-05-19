@@ -59,7 +59,7 @@ public class ObservationJsonSerializer extends StaBaseSerializer<Observation> {
             String text = (String) result;
             writeProperty(StaConstants.PROP_RESULT, name -> gen.writeStringField(name, text));
         } else if ("profile".equals(valueType) && Collection.class.isAssignableFrom(type)) {
-
+            
             writeProperty(StaConstants.PROP_RESULT, name -> {
                 gen.writeArrayFieldStart(name);
                 Collection<Observation> items = (Collection<Observation>) result;
@@ -77,7 +77,23 @@ public class ObservationJsonSerializer extends StaBaseSerializer<Observation> {
             });
 
         } else if ("trajectory".equals(valueType)) {
-            writeProperty(StaConstants.PROP_RESULT, name -> gen.writeStringField("foo", "traj"));
+
+            writeProperty(StaConstants.PROP_RESULT, name -> {
+                gen.writeArrayFieldStart(name);
+                Collection<Observation> items = (Collection<Observation>) result;
+                for (Observation item : items) {
+                    gen.writeStartObject();
+                    String id = item.getId();
+                    writeProperty("id", n -> gen.writeStringField(StaConstants.AT_IOT_ID, id));
+                    writeStringProperty(StaConstants.AT_IOT_SELFLINK, () -> createSelfLink(id), gen);
+                    writeObjectProperty(StaConstants.PROP_PARAMETERS, value::getParameters, gen);
+                    writeTimeProperty(StaConstants.PROP_PHENOMENON_TIME, value::getPhenomenonTime, gen);
+                    serializeResult(item, gen, serializers);
+                    gen.writeEndObject();
+                }
+
+                gen.writeEndArray();
+            });
         }
     }
 
