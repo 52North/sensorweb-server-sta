@@ -59,7 +59,7 @@ public class DatastreamDto extends BaseDto implements Datastream {
 
     private ObservedProperty observedProperty;
 
-    private Set<Observation<?>> observations;
+    private Set<Observation> observations;
 
     public DatastreamDto() {
         this.observations = new HashSet<>();
@@ -138,15 +138,15 @@ public class DatastreamDto extends BaseDto implements Datastream {
     }
 
     @Override
-    public Set<Observation<?>> getObservations() {
+    public Set<Observation> getObservations() {
         return new HashSet<>(observations);
     }
 
-    public void setObservations(Set<Observation<?>> observations) {
+    public void setObservations(Set<Observation> observations) {
         this.observations = new HashSet<>(observations);
     }
 
-    public void addObservation(Observation<?> observation) {
+    public void addObservation(Observation observation) {
         this.observations.add(observation);
     }
 

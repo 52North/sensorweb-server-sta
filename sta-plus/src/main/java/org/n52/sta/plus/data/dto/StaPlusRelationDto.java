@@ -46,7 +46,7 @@ public class StaPlusRelationDto extends StaDto implements StaPlusRelation {
 
     private String description;
 
-    private Observation<?> subject;
+    private Observation subject;
 
     private TargetReference object;
 
@@ -94,11 +94,11 @@ public class StaPlusRelationDto extends StaDto implements StaPlusRelation {
     }
 
     @Override
-    public Observation<?> getSubject() {
+    public Observation getSubject() {
         return subject;
     }
 
-    public void setSubject(Observation<?> subject) {
+    public void setSubject(Observation subject) {
         assertNonNull(subject, "subject must not be empty!");
         this.subject = subject;
     }
@@ -112,7 +112,7 @@ public class StaPlusRelationDto extends StaDto implements StaPlusRelation {
         this.object = TargetReference.objectExternal(externalObject);
     }
 
-    public void setObject(Observation<?> observation) {
+    public void setObject(Observation observation) {
         this.object = TargetReference.objectInternal(observation);
     }
 

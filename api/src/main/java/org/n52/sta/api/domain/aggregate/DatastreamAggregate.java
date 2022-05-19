@@ -102,7 +102,7 @@ public class DatastreamAggregate extends EntityAggregate<Datastream> implements 
         return datastream.getObservedProperty();
     }
 
-    public Set<Observation<?>> getObservations() {
+    public Set<Observation> getObservations() {
         return datastream.getObservations();
     }
 

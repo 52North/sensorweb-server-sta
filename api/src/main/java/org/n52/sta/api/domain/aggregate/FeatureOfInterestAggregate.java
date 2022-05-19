@@ -79,7 +79,7 @@ public class FeatureOfInterestAggregate extends EntityAggregate<FeatureOfInteres
     }
 
     @Override
-    public Set<Observation<?>> getObservations() {
+    public Set<Observation> getObservations() {
         return featureOfInterest.getObservations();
     }
 }

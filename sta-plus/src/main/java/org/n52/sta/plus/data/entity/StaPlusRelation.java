@@ -43,7 +43,7 @@ public interface StaPlusRelation extends Identifiable {
 
     Map<String, Object> getProperties();
 
-    Observation<?> getSubject();
+    Observation getSubject();
 
     /**
      * References the relation's target.

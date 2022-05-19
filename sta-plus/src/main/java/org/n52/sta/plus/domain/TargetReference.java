@@ -43,9 +43,9 @@ public final class TargetReference {
 
     private final String externalObject;
 
-    private final Optional<Observation<?>> object;
+    private final Optional<Observation> object;
 
-    private TargetReference(Observation<?> observation) {
+    private TargetReference(Observation observation) {
         Objects.requireNonNull(observation, "observation must not be null");
         this.object = Optional.of(observation);
         this.externalObject = null;
@@ -64,7 +64,7 @@ public final class TargetReference {
         return new TargetReference(externalObject);
     }
 
-    public static TargetReference objectInternal(Observation<?> observation) {
+    public static TargetReference objectInternal(Observation observation) {
         return new TargetReference(observation);
     }
 
@@ -76,7 +76,7 @@ public final class TargetReference {
         return externalObject;
     }
 
-    public Observation<?> getObject() {
+    public Observation getObject() {
         return object.get();
     }
 

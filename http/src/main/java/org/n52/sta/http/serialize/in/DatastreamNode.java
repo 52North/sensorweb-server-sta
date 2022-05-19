@@ -109,7 +109,7 @@ public class DatastreamNode extends StaNode implements Datastream {
     }
 
     @Override
-    public Set<Observation<?>> getObservations() {
+    public Set<Observation> getObservations() {
         return toSet(StaConstants.OBSERVATIONS, n -> new ObservationNode(n, mapper));
     }
 

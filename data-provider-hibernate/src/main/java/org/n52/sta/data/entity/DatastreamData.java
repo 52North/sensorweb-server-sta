@@ -112,7 +112,7 @@ public class DatastreamData extends StaData<AbstractDatasetEntity> implements Da
     }
 
     @Override
-    public Set<Observation<?>> getObservations() {
+    public Set<Observation> getObservations() {
         return toSet(data.getObservations(), ObservationData::new);
     }
 

@@ -39,7 +39,7 @@ import org.n52.sta.api.entity.FeatureOfInterest;
 import org.n52.sta.api.entity.Observation;
 import org.n52.sta.old.utils.TimeUtil;
 
-public class ObservationData<T> extends StaData<DataEntity<T>> implements Observation<T> {
+public class ObservationData<T> extends StaData<DataEntity<T>> implements Observation {
 
     public ObservationData(DataEntity<T> data) {
         super(data);
@@ -60,8 +60,7 @@ public class ObservationData<T> extends StaData<DataEntity<T>> implements Observ
     }
 
     @Override
-    public T getResult() {
-        return data.getValue();
+    public Object getResult() {
     }
 
     @Override

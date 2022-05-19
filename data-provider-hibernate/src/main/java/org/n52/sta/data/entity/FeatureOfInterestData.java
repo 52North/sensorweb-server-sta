@@ -68,9 +68,7 @@ public class FeatureOfInterestData extends StaData<StaFeatureEntity<?>> implemen
     }
 
     @Override
-    @SuppressWarnings("unchecked")
-    public Set<Observation<?>> getObservations() {
-        return toSet(data.getObservations(), ObservationData::new);
+    public Set<Observation> getObservations() {
     }
 
     private static StaFeatureEntity<?> tryToCast(AbstractFeatureEntity<?> feature) {
