@@ -39,7 +39,7 @@ import org.n52.sta.plus.old.CitSciExtensionRequestUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.servlet.HandlerMapping;
+//import org.springframework.web.servlet.HandlerMapping;
 
 /**
  * Handles all requests to Entity Collections and Entity Collections association Links defined in the CitizenScience
@@ -105,7 +105,7 @@ public class CitSciCollectionRequestHandler extends CollectionRequestHandler imp
                                                    HttpServletRequest request)
         throws Exception {
         if (target.equals(StaConstants.SUBJECTS) || target.equals(StaConstants.OBJECTS)) {
-            validateResource((String) request.getAttribute(HandlerMapping.LOOKUP_PATH));
+//            validateResource((String) request.getAttribute(HandlerMapping.LOOKUP_PATH));
 
             String[] split = splitId(entity);
             String sourceType = split[0];

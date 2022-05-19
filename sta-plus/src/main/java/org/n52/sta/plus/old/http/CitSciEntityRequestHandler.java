@@ -38,7 +38,7 @@ import org.n52.sta.plus.old.CitSciExtensionRequestUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.servlet.HandlerMapping;
+//import org.springframework.web.servlet.HandlerMapping;
 
 /**
  * Handles all requests to Entities and to Entity association links
@@ -92,7 +92,7 @@ public class CitSciEntityRequestHandler extends EntityRequestHandler implements 
                                     HttpServletRequest request)
         throws Exception {
         if (target.equals(StaConstants.SUBJECT) || target.equals(StaConstants.OBJECT)) {
-            validateResource((String) request.getAttribute(HandlerMapping.LOOKUP_PATH));
+//            validateResource((String) request.getAttribute(HandlerMapping.LOOKUP_PATH));
 
             String[] split = splitId(entity);
             String sourceType = split[0];
