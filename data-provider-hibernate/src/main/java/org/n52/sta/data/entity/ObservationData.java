@@ -27,9 +27,11 @@
  */
 package org.n52.sta.data.entity;
 
+import java.util.Collection;
 import java.util.Date;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.joda.time.DateTime;
 import org.n52.series.db.beans.DataEntity;
@@ -63,6 +65,15 @@ public class ObservationData<T> extends StaData<DataEntity<T>> implements Observ
 
     @Override
     public Object getResult() {
+        Object value = data.getValue();
+        Class<? extends Object> type = value.getClass();
+        if (Collection.class.isAssignableFrom(type)) {
+            @SuppressWarnings("unchecked")
+            Collection<DataEntity<?>> items = (Collection<DataEntity<?>>) value;
+            return items.stream().map(v -> new ObservationData<>(v, propertyMapping)).collect(Collectors.toSet());
+        } else {
+            return value;
+        }
     }
 
     @Override
