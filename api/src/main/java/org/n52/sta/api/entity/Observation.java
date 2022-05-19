@@ -39,6 +39,8 @@ public interface Observation extends Identifiable {
 
     Object getResult();
 
+    String getValueType();
+
     /**
      * It is currently unclear what this element actually contains.
      *

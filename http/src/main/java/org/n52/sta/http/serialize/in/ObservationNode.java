@@ -84,4 +84,12 @@ public class ObservationNode extends StaNode implements Observation {
     public Datastream getDatastream() {
         return getOrNull(StaConstants.DATASTREAM, n -> new DatastreamNode(n, mapper));
     }
+
+    @Override
+    public String getValueType() {
+
+        // TODO determine type
+
+        return null;
+    }
 }

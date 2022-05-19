@@ -138,4 +138,13 @@ public class ObservationDto extends StaDto implements Observation {
         this.datastream = datastream;
     }
 
+    @Override
+    public String getValueType() {
+        return valueType;
+    }
+
+    public void setValueType(String valueType) {
+        this.valueType = valueType;
+    }
+
 }

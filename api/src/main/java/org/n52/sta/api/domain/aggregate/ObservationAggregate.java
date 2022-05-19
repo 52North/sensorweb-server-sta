@@ -93,4 +93,10 @@ public class ObservationAggregate extends EntityAggregate<Observation> implement
     public Datastream getDatastream() {
         return observation.getDatastream();
     }
+
+    @Override
+    public String getValueType() {
+        return observation.getValueType();
+    }
+
 }

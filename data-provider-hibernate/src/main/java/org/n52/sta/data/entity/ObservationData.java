@@ -88,7 +88,11 @@ public class ObservationData<T> extends StaData<DataEntity<T>> implements Observ
 
     @Override
     public Datastream getDatastream() {
-        return new DatastreamData(data.getDataset());
+    }
+
+    @Override
+    public String getValueType() {
+        return data.getValueType();
     }
 
 }
