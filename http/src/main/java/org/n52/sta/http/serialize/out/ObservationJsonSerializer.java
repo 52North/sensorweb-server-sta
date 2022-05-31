@@ -59,7 +59,7 @@ public class ObservationJsonSerializer extends StaBaseSerializer<Observation> {
             String text = (String) result;
             writeProperty(StaConstants.PROP_RESULT, name -> gen.writeStringField(name, text));
         } else if ("profile".equals(valueType) && Collection.class.isAssignableFrom(type)) {
-            
+
             writeProperty(StaConstants.PROP_RESULT, name -> {
                 gen.writeArrayFieldStart(name);
                 Collection<Observation> items = (Collection<Observation>) result;

@@ -1,12 +1,11 @@
 package org.n52.sta.http.serialize.out;
 
-import java.io.IOException;
-
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.ser.std.StdSerializer;
-
 import org.n52.shetland.ogc.sta.StaConstants;
+
+import java.io.IOException;
 
 public class CollectionNodeSerializer extends StdSerializer<CollectionNode> {
 
@@ -25,9 +24,8 @@ public class CollectionNodeSerializer extends StdSerializer<CollectionNode> {
             gen.writeNumberField(StaConstants.AT_IOT_COUNT, value.getTotalEntityCount());
         }
 
-        gen.writeArrayFieldStart("value");
+        gen.writeFieldName("value");
         provider.defaultSerializeValue(value.getEntities(), gen);
-        gen.writeEndArray();
 
         gen.writeEndObject();
     }

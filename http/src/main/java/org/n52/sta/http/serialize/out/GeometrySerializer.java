@@ -23,5 +23,5 @@ public class GeometrySerializer extends StdSerializer<Geometry> {
         String geoJson = geometryWriter.write(value);
         gen.writeRawValue(geoJson);
     }
-    
+
 }
