@@ -39,11 +39,12 @@ import org.n52.series.db.beans.ProcedureEntity;
 import org.n52.series.db.beans.ProcedureHistoryEntity;
 import org.n52.sta.api.entity.Datastream;
 import org.n52.sta.api.entity.Sensor;
+import org.n52.sta.config.EntityPropertyMapping;
 
 public class SensorData extends StaData<ProcedureEntity> implements Sensor {
 
-    public SensorData(ProcedureEntity data) {
-        super(data);
+    public SensorData(ProcedureEntity dataEntity, EntityPropertyMapping propertyMapping) {
+        super(dataEntity, propertyMapping);
     }
 
     @Override
@@ -75,7 +76,7 @@ public class SensorData extends StaData<ProcedureEntity> implements Sensor {
 
     @Override
     public Set<Datastream> getDatastreams() {
-        return toSet(data.getDatasets(), DatastreamData::new);
+        return toSet(data.getDatasets(), entity -> new DatastreamData(entity, propertyMapping));
     }
 
     private Optional<String> useLinkToFile(String file) {

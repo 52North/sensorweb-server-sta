@@ -27,14 +27,24 @@
  */
 package org.n52.sta.data.provider;
 
+import java.util.Objects;
+
 import org.n52.janmayen.stream.Streams;
 import org.n52.shetland.filter.ExpandFilter;
 import org.n52.shetland.oasis.odata.query.option.QueryOptions;
 import org.n52.sta.api.EntityProvider;
 import org.n52.sta.api.entity.Identifiable;
+import org.n52.sta.config.EntityPropertyMapping;
 import org.n52.sta.data.support.GraphBuilder;
 
 public abstract class BaseEntityProvider<T extends Identifiable> implements EntityProvider<T> {
+
+    protected final EntityPropertyMapping propertyMapping;
+
+    protected BaseEntityProvider(EntityPropertyMapping propertyMapping) {
+        Objects.requireNonNull(propertyMapping, "propertyMapping must not be null!");
+        this.propertyMapping = propertyMapping;
+    }
 
     /**
      * Creates an entity graph for unfiltered entity members.

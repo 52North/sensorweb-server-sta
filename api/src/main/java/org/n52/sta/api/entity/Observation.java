@@ -31,13 +31,15 @@ import java.util.Map;
 
 import org.n52.shetland.ogc.gml.time.Time;
 
-public interface Observation<T> extends Identifiable {
+public interface Observation extends Identifiable {
 
     Time getPhenomenonTime();
 
     Time getResultTime();
 
-    T getResult();
+    Object getResult();
+
+    String getValueType();
 
     /**
      * It is currently unclear what this element actually contains.

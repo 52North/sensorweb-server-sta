@@ -28,6 +28,9 @@
 
 package org.n52.sta.data.provider;
 
+import java.util.Objects;
+import java.util.Optional;
+
 import org.n52.series.db.beans.PlatformEntity;
 import org.n52.shetland.oasis.odata.query.option.QueryOptions;
 import org.n52.shetland.ogc.sta.exception.STAInvalidFilterExpressionException;
@@ -37,6 +40,7 @@ import org.n52.sta.api.entity.Thing;
 import org.n52.sta.api.path.Path;
 import org.n52.sta.api.path.PathSegment;
 import org.n52.sta.api.path.Request;
+import org.n52.sta.config.EntityPropertyMapping;
 import org.n52.sta.data.StaEntityPage;
 import org.n52.sta.data.StaPageRequest;
 import org.n52.sta.data.entity.ThingData;
@@ -58,7 +62,8 @@ public class ThingEntityProvider extends BaseEntityProvider<Thing> {
 
     private final ThingRepository thingRepository;
 
-    public ThingEntityProvider(ThingRepository thingRepository) {
+    public ThingEntityProvider(ThingRepository thingRepository, EntityPropertyMapping propertyMapping) {
+        super(propertyMapping);
         Objects.requireNonNull(thingRepository, "thingRepository must not be null");
         this.thingRepository = thingRepository;
     }
@@ -81,7 +86,7 @@ public class ThingEntityProvider extends BaseEntityProvider<Thing> {
 
         ThingQuerySpecification tQS = parsePath(req.getPath());
         Optional<PlatformEntity> platform = thingRepository.findOne(tQS., graphBuilder);
-        return platform.map(ThingData::new);
+        return platform.map(entity -> new ThingData(entity, propertyMapping));
     }
 
     private <T> Specification<T> parsePath(Path path, BaseQuerySpecifications<T> qs) throws ProviderException {
@@ -119,7 +124,7 @@ public class ThingEntityProvider extends BaseEntityProvider<Thing> {
 
         Specification<PlatformEntity> spec = FilterQueryParser.parse(options, new ThingQuerySpecification());
         Page<PlatformEntity> results = thingRepository.findAll(spec, pagable, graphBuilder);
-        return new StaEntityPage<>(Thing.class, results, ThingData::new);
+        return new StaEntityPage<>(Thing.class, results, entity -> new ThingData(entity, propertyMapping));
     }
 
 }

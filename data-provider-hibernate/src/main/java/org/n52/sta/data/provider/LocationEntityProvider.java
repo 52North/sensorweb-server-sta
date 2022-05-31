@@ -27,11 +27,15 @@
  */
 package org.n52.sta.data.provider;
 
+import java.util.Objects;
+import java.util.Optional;
+
 import org.n52.series.db.beans.sta.LocationEntity;
 import org.n52.shetland.oasis.odata.query.option.QueryOptions;
 import org.n52.sta.api.EntityPage;
 import org.n52.sta.api.ProviderException;
 import org.n52.sta.api.entity.Location;
+import org.n52.sta.config.EntityPropertyMapping;
 import org.n52.sta.data.StaEntityPage;
 import org.n52.sta.data.StaPageRequest;
 import org.n52.sta.data.entity.LocationData;
@@ -43,14 +47,12 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 
-import java.util.Objects;
-import java.util.Optional;
-
 public class LocationEntityProvider extends BaseEntityProvider<Location> {
 
     private final LocationRepository locationRepository;
 
-    public LocationEntityProvider(LocationRepository locationRepository) {
+    public LocationEntityProvider(LocationRepository locationRepository, EntityPropertyMapping propertyMapping) {
+        super(propertyMapping);
         Objects.requireNonNull(locationRepository, "locationRepository must not be null");
         this.locationRepository = locationRepository;
     }
@@ -69,7 +71,7 @@ public class LocationEntityProvider extends BaseEntityProvider<Location> {
         addUnfilteredExpandItems(path, graphBuilder);
 
         Optional<LocationEntity> platform = locationRepository.findByStaIdentifier(id, graphBuilder);
-        return platform.map(LocationData::new);
+        return platform.map(entity -> new LocationData(entity, propertyMapping));
     }
 
     @Override
@@ -81,7 +83,7 @@ public class LocationEntityProvider extends BaseEntityProvider<Location> {
 
         Specification<LocationEntity> spec = FilterQueryParser.parse(options, new LocationQuerySpecification());
         Page<LocationEntity> results = locationRepository.findAll(spec, pagable, graphBuilder);
-        return new StaEntityPage<>(Location.class, results, LocationData::new);
+        return new StaEntityPage<>(Location.class, results, entity -> new LocationData(entity, propertyMapping));
     }
 
 }

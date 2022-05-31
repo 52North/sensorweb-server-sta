@@ -59,7 +59,7 @@ public class FeatureOfInterestJsonSerializer extends StaBaseSerializer<FeatureOf
         // entity members
         String observations = StaConstants.OBSERVATIONS;
         writeMemberCollection(observations, id, gen, ObservationJsonSerializer::new, serializer -> {
-            for (Observation<?> item : value.getObservations()) {
+            for (Observation item : value.getObservations()) {
                 serializer.serialize(item, gen, serializers);
             }
         });

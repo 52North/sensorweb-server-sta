@@ -27,12 +27,16 @@
  */
 package org.n52.sta.data.provider;
 
+import java.util.Objects;
+import java.util.Optional;
+
 import org.n52.series.db.beans.AbstractDatasetEntity;
 import org.n52.shetland.oasis.odata.query.option.QueryOptions;
 import org.n52.sta.api.EntityPage;
 import org.n52.sta.api.ProviderException;
 import org.n52.sta.api.entity.Datastream;
 import org.n52.sta.api.path.Request;
+import org.n52.sta.config.EntityPropertyMapping;
 import org.n52.sta.data.StaEntityPage;
 import org.n52.sta.data.StaPageRequest;
 import org.n52.sta.data.entity.DatastreamData;
@@ -44,14 +48,12 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 
-import java.util.Objects;
-import java.util.Optional;
-
 public class DatastreamEntityProvider extends BaseEntityProvider<Datastream> {
 
     private final DatastreamRepository datastreamRepository;
 
-    public DatastreamEntityProvider(DatastreamRepository datastreamRepository) {
+    public DatastreamEntityProvider(DatastreamRepository datastreamRepository, EntityPropertyMapping propertyMapping) {
+        super(propertyMapping);
         Objects.requireNonNull(datastreamRepository, "datastreamRepository must not be null");
         this.datastreamRepository = datastreamRepository;
     }
@@ -67,10 +69,11 @@ public class DatastreamEntityProvider extends BaseEntityProvider<Datastream> {
         DatastreamGraphBuilder graphBuilder = new DatastreamGraphBuilder(req.getPath());
         addUnfilteredExpandItems(req.getQueryOptions(), graphBuilder);
 
-        DatastreamQuerySpecification dQS = new DatastreamQuerySpecification();
-        dQS
-        Optional<AbstractDatasetEntity> datastream = datastreamRepository.findOne(id, graphBuilder);
-        return datastream.map(DatastreamData::new);
+        DatastreamGraphBuilder graphBuilder = new DatastreamGraphBuilder();
+        addUnfilteredExpandItems(options, graphBuilder);
+
+        Optional<AbstractDatasetEntity> datastream = datastreamRepository.findByStaIdentifier(id, graphBuilder);
+        return datastream.map(entity -> new DatastreamData(entity, propertyMapping));
     }
 
     @Override
@@ -83,7 +86,7 @@ public class DatastreamEntityProvider extends BaseEntityProvider<Datastream> {
         Specification<AbstractDatasetEntity> spec = FilterQueryParser.parse(options,
                 new DatastreamQuerySpecification());
         Page<AbstractDatasetEntity> results = datastreamRepository.findAll(spec, pagable, graphBuilder);
-        return new StaEntityPage<>(Datastream.class, results, DatastreamData::new);
+        return new StaEntityPage<>(Datastream.class, results, entity -> new DatastreamData(entity, propertyMapping));
     }
 
 }

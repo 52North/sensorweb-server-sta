@@ -27,11 +27,15 @@
  */
 package org.n52.sta.data.provider;
 
+import java.util.Objects;
+import java.util.Optional;
+
 import org.n52.series.db.beans.ProcedureEntity;
 import org.n52.shetland.oasis.odata.query.option.QueryOptions;
 import org.n52.sta.api.EntityPage;
 import org.n52.sta.api.ProviderException;
 import org.n52.sta.api.entity.Sensor;
+import org.n52.sta.config.EntityPropertyMapping;
 import org.n52.sta.data.StaEntityPage;
 import org.n52.sta.data.StaPageRequest;
 import org.n52.sta.data.entity.SensorData;
@@ -43,14 +47,12 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 
-import java.util.Objects;
-import java.util.Optional;
-
 public class SensorEntityProvider extends BaseEntityProvider<Sensor> {
 
     private final ProcedureRepository sensorRepository;
 
-    public SensorEntityProvider(ProcedureRepository sensorRepository) {
+    public SensorEntityProvider(ProcedureRepository sensorRepository, EntityPropertyMapping propertyMapping) {
+        super(propertyMapping);
         Objects.requireNonNull(sensorRepository, "sensorRepository must not be null");
         this.sensorRepository = sensorRepository;
     }
@@ -69,7 +71,7 @@ public class SensorEntityProvider extends BaseEntityProvider<Sensor> {
         addUnfilteredExpandItems(path, graphBuilder);
 
         Optional<ProcedureEntity> platform = sensorRepository.findByStaIdentifier(id, graphBuilder);
-        return platform.map(SensorData::new);
+        return platform.map(entity -> new SensorData(entity, propertyMapping));
     }
 
     @Override
@@ -81,7 +83,7 @@ public class SensorEntityProvider extends BaseEntityProvider<Sensor> {
 
         Specification<ProcedureEntity> spec = FilterQueryParser.parse(options, new SensorQuerySpecification());
         Page<ProcedureEntity> results = sensorRepository.findAll(spec, pagable, graphBuilder);
-        return new StaEntityPage<>(Sensor.class, results, SensorData::new);
+        return new StaEntityPage<>(Sensor.class, results, entity -> new SensorData(entity, propertyMapping));
     }
 
 }

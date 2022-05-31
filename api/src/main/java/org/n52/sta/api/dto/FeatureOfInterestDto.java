@@ -41,7 +41,7 @@ public class FeatureOfInterestDto extends BaseDto implements FeatureOfInterest {
 
     private Geometry feature;
 
-    private Set<Observation<?>> observations;
+    private Set<Observation> observations;
 
     public FeatureOfInterestDto() {
         this.observations = new HashSet<>();
@@ -57,15 +57,15 @@ public class FeatureOfInterestDto extends BaseDto implements FeatureOfInterest {
     }
 
     @Override
-    public Set<Observation<?>> getObservations() {
+    public Set<Observation> getObservations() {
         return new HashSet<>(observations);
     }
 
-    public void setObservations(Set<Observation<?>> observations) {
+    public void setObservations(Set<Observation> observations) {
         this.observations = new HashSet<>(observations);
     }
 
-    public void addObservation(Observation<?> observation) {
+    public void addObservation(Observation observation) {
         this.observations.add(observation);
     }
 }

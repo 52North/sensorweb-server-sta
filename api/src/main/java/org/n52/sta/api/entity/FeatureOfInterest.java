@@ -42,5 +42,5 @@ public interface FeatureOfInterest extends Identifiable {
 
     Geometry getFeature();
 
-    Set<Observation<?>> getObservations();
+    Set<Observation> getObservations();
 }

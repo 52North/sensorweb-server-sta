@@ -36,6 +36,7 @@ import org.n52.shetland.oasis.odata.query.option.QueryOptions;
 import org.n52.sta.api.EntityPage;
 import org.n52.sta.api.ProviderException;
 import org.n52.sta.api.entity.HistoricalLocation;
+import org.n52.sta.config.EntityPropertyMapping;
 import org.n52.sta.data.StaEntityPage;
 import org.n52.sta.data.StaPageRequest;
 import org.n52.sta.data.entity.HistoricalLocationData;
@@ -51,7 +52,9 @@ public class HistoricalLocationEntityProvider extends BaseEntityProvider<Histori
 
     private final HistoricalLocationRepository historicalLocationRepository;
 
-    public HistoricalLocationEntityProvider(HistoricalLocationRepository historicalLocationRepository) {
+    public HistoricalLocationEntityProvider(HistoricalLocationRepository historicalLocationRepository,
+            EntityPropertyMapping propertyMapping) {
+        super(propertyMapping);
         Objects.requireNonNull(historicalLocationRepository, "historicalLocationRepository must not be null");
         this.historicalLocationRepository = historicalLocationRepository;
     }
@@ -71,7 +74,7 @@ public class HistoricalLocationEntityProvider extends BaseEntityProvider<Histori
 
         Optional<HistoricalLocationEntity> platform = historicalLocationRepository.findByStaIdentifier(id,
                 graphBuilder);
-        return platform.map(HistoricalLocationData::new);
+        return platform.map(entity -> new HistoricalLocationData(entity, propertyMapping));
     }
 
     @Override
@@ -84,7 +87,8 @@ public class HistoricalLocationEntityProvider extends BaseEntityProvider<Histori
         Specification<HistoricalLocationEntity> spec = FilterQueryParser.parse(options,
                 new HistoricalLocationQuerySpecification());
         Page<HistoricalLocationEntity> results = historicalLocationRepository.findAll(spec, pagable, graphBuilder);
-        return new StaEntityPage<>(HistoricalLocation.class, results, HistoricalLocationData::new);
+        return new StaEntityPage<>(HistoricalLocation.class, results,
+                entity -> new HistoricalLocationData(entity, propertyMapping));
     }
 
 }

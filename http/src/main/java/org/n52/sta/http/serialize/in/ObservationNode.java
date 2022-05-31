@@ -38,7 +38,7 @@ import org.n52.sta.api.entity.Datastream;
 import org.n52.sta.api.entity.FeatureOfInterest;
 import org.n52.sta.api.entity.Observation;
 
-public class ObservationNode extends StaNode implements Observation<Object> {
+public class ObservationNode extends StaNode implements Observation {
 
     public ObservationNode(JsonNode node, ObjectMapper mapper) {
         super(node, mapper);
@@ -83,5 +83,13 @@ public class ObservationNode extends StaNode implements Observation<Object> {
     @Override
     public Datastream getDatastream() {
         return getOrNull(StaConstants.DATASTREAM, n -> new DatastreamNode(n, mapper));
+    }
+
+    @Override
+    public String getValueType() {
+
+        // TODO determine type
+
+        return null;
     }
 }

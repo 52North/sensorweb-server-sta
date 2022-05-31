@@ -27,13 +27,14 @@
  */
 package org.n52.sta.http.serialize.out;
 
+import java.io.IOException;
+
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.SerializerProvider;
+
 import org.n52.shetland.ogc.sta.StaConstants;
 import org.n52.sta.api.entity.Datastream;
 import org.n52.sta.api.entity.Observation;
-
-import java.io.IOException;
 
 public class DatastreamJsonSerializer extends StaBaseSerializer<Datastream> {
 
@@ -62,7 +63,7 @@ public class DatastreamJsonSerializer extends StaBaseSerializer<Datastream> {
         // entity members
         String observations = StaConstants.OBSERVATIONS;
         writeMemberCollection(observations, id, gen, ObservationJsonSerializer::new, serializer -> {
-            for (Observation<?> item : value.getObservations()) {
+            for (Observation item : value.getObservations()) {
                 serializer.serialize(item, gen, serializers);
             }
         });

@@ -65,7 +65,7 @@ public class FeatureOfInterestNode extends StaNode implements FeatureOfInterest 
     }
 
     @Override
-    public Set<Observation<?>> getObservations() {
+    public Set<Observation> getObservations() {
         return toSet(StaConstants.OBSERVATIONS, n -> new ObservationNode(n, mapper));
     }
 
