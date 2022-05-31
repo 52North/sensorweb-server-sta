@@ -25,19 +25,34 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
-package org.n52.sta.data.provider;
 
-import java.util.Objects;
+package org.n52.sta.data.provider;
 
 import org.n52.janmayen.stream.Streams;
 import org.n52.shetland.filter.ExpandFilter;
 import org.n52.shetland.oasis.odata.query.option.QueryOptions;
+import org.n52.shetland.ogc.sta.exception.STAInvalidFilterExpressionException;
 import org.n52.sta.api.EntityProvider;
+import org.n52.sta.api.ProviderException;
 import org.n52.sta.api.entity.Identifiable;
+import org.n52.sta.api.path.PathSegment;
+import org.n52.sta.api.path.Request;
 import org.n52.sta.config.EntityPropertyMapping;
+import org.n52.sta.data.query.FilterQueryParser;
+import org.n52.sta.data.query.QuerySpecificationFactory;
+import org.n52.sta.data.query.specifications.BaseQuerySpecifications;
+import org.n52.sta.data.query.specifications.SpecificationsException;
 import org.n52.sta.data.support.GraphBuilder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.data.jpa.domain.Specification;
+
+import java.util.List;
+import java.util.Objects;
 
 public abstract class BaseEntityProvider<T extends Identifiable> implements EntityProvider<T> {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(BaseEntityProvider.class);
 
     protected final EntityPropertyMapping propertyMapping;
 
@@ -49,8 +64,8 @@ public abstract class BaseEntityProvider<T extends Identifiable> implements Enti
     /**
      * Creates an entity graph for unfiltered entity members.
      *
-     * @param <E>        the database entity type
-     * @param options    the OData query options
+     * @param <E>          the database entity type
+     * @param options      the OData query options
      * @param graphBuilder the graph builder adding unfiltered expanded items
      */
     protected <E> void addUnfilteredExpandItems(QueryOptions options, GraphBuilder<E> graphBuilder) {
@@ -72,4 +87,48 @@ public abstract class BaseEntityProvider<T extends Identifiable> implements Enti
         }
     }
 
+    protected <E> Specification<E> createSpecificationFromRequest(Request req, BaseQuerySpecifications<E> qs)
+        throws ProviderException {
+        // Case 1: We have no path - match based on queryOptions alone
+        if (!req.getPath().isPresent() || req.getPath().get().getSegments().size() == 1) {
+            return FilterQueryParser.parse(req.getQueryOptions(), qs);
+        }
+
+        // Case 2: We have a path specifying the entity
+        // Iterate over all Segments and chain specifications
+        try {
+            List<PathSegment> segments = req.getPath().get().getSegments();
+            //BaseQuerySpecifications<?> currentBase = qs;
+            //Specification<?> specification = null;
+            PathSegment current = segments.get(segments.size() - 1);
+            BaseQuerySpecifications<?> spec =
+                QuerySpecificationFactory.createSpecification(current.getCollection());
+            Specification<?> specification1 = spec.equalsStaIdentifier(current.getIdentifier().get());
+
+            //TODO: implement handling of this
+            if (segments.size() > 2) {
+                throw new SpecificationsException("navigation via >1 relations is not implemented yet!");
+            /*for (int i = segments.size() - 2; i > 0 ; i--) {
+                current = segments.get(i);
+                try {
+                    BaseQuerySpecifications<?> spec =
+                            QuerySpecificationFactory.createSpecification(current.getCollection());
+
+                    Specification<?> specification = currentBase.applyOnMember(current.getCollection(),
+                            spec.equalsStaIdentifier(current.getIdentifier()
+                                    .orElse(null)));
+                    specification.and()
+                    currentBase = spec;
+                } catch (STAInvalidFilterExpressionException e) {
+                    throw new ProviderException("could not parse path", e);
+                }
+            }*/
+            }
+
+            return qs.applyOnMember(current.getCollection(), specification1);
+        } catch (SpecificationsException | STAInvalidFilterExpressionException e) {
+            LOGGER.debug(e.getMessage());
+            throw new ProviderException(e.getMessage());
+        }
+    }
 }

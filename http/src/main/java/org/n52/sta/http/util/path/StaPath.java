@@ -34,7 +34,7 @@ public class StaPath implements Path {
     }
 
     @Override
-    public List<PathSegment> getPath() {
+    public List<PathSegment> getSegments() {
         return path;
     }
 

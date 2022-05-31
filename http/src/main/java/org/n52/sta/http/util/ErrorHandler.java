@@ -36,6 +36,7 @@ import org.n52.shetland.ogc.sta.exception.STAInvalidFilterExpressionException;
 import org.n52.shetland.ogc.sta.exception.STAInvalidQueryException;
 import org.n52.shetland.ogc.sta.exception.STAInvalidUrlException;
 import org.n52.shetland.ogc.sta.exception.STANotFoundException;
+import org.n52.sta.api.ProviderException;
 import org.n52.sta.http.serialize.in.InvalidValueException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -140,7 +141,10 @@ public class ErrorHandler {
         LOGGER.error(msg, exception);
     }
 
-    @ExceptionHandler(value = RuntimeException.class)
+    @ExceptionHandler(value = {
+        RuntimeException.class,
+        ProviderException.class
+    })
     public void fallbackRuntimeException(RuntimeException exception) {
         String msg = createErrorMessage(exception.getClass().getName(), exception.getMessage());
         LOGGER.error(msg, exception);

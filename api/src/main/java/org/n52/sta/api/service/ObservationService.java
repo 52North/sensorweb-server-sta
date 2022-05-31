@@ -27,7 +27,6 @@
  */
 package org.n52.sta.api.service;
 
-import org.n52.shetland.oasis.odata.query.option.QueryOptions;
 import org.n52.sta.api.EntityEditor;
 import org.n52.sta.api.EntityPage;
 import org.n52.sta.api.EntityProvider;
@@ -38,6 +37,7 @@ import org.n52.sta.api.domain.aggregate.ObservationAggregate;
 import org.n52.sta.api.domain.service.DefaultDomainService;
 import org.n52.sta.api.domain.service.DomainService;
 import org.n52.sta.api.entity.Observation;
+import org.n52.sta.api.path.Request;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -72,13 +72,13 @@ public class ObservationService implements EntityService<Observation>, EntityEdi
     }
 
     @Override
-    public Optional<Observation> getEntity(StaRequest path) throws ProviderException {
-        return domainService.getEntity(path);
+    public Optional<Observation> getEntity(Request req) throws ProviderException {
+        return domainService.getEntity(req);
     }
 
     @Override
-    public EntityPage<Observation> getEntities(QueryOptions options) throws ProviderException {
-        return domainService.getEntities(options);
+    public EntityPage<Observation> getEntities(Request req)throws ProviderException {
+        return domainService.getEntities(req);
     }
 
     @Override

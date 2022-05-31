@@ -69,10 +69,9 @@ public final class RequestContext {
 
     private static QueryOptions parseQueryOptions(HttpServletRequest request) {
         String queryString = request.getQueryString();
-        QueryOptionsFactory factory = new QueryOptionsFactory();
         return Optional.ofNullable(queryString).map(decodeQueryString())
-            .map(factory::createQueryOptions)
-            .orElse(factory.createEmpty());
+            .map(QueryOptionsFactory::createQueryOptions)
+            .orElse(QueryOptionsFactory.createEmpty());
     }
 
     private static Function<String, String> decodeQueryString() {
@@ -98,6 +97,6 @@ public final class RequestContext {
     }
 
     public StaPath getPath() {
-        return (StaPath) request.getPath();
+        return (StaPath) request.getPath().get();
     }
 }

@@ -51,22 +51,19 @@ public class ObservedPropertyQuerySpecification implements BaseQuerySpecificatio
     @Override
     public Specification<PhenomenonEntity> compareProperty(String property, ComparisonOperator operator,
                                                            Expression<?> rightExpr) throws SpecificationsException {
-        // TODO Auto-generated method stub
-        return null;
+        throw new SpecificationsException("not implemented");
     }
 
     @Override
     public Specification<PhenomenonEntity> compareProperty(Expression<?> leftExpr, ComparisonOperator operator,
                                                            String property) throws SpecificationsException {
-        // TODO Auto-generated method stub
-        return null;
+        throw new SpecificationsException("not implemented");
     }
 
     @Override
     public Specification<PhenomenonEntity> applyOnMember(String member, Specification<?> memberSpec)
         throws SpecificationsException {
-        // TODO Auto-generated method stub
-        return null;
+        throw new SpecificationsException("not implemented");
     }
 
 }

@@ -50,22 +50,19 @@ public class ObservationQuerySpecification implements BaseQuerySpecifications<Da
     @Override
     public Specification<DataEntity<?>> compareProperty(String property, ComparisonOperator operator,
             Expression<?> rightExpr) throws SpecificationsException {
-        // TODO Auto-generated method stub
-        return null;
+        throw new SpecificationsException("not implemented");
     }
 
     @Override
     public Specification<DataEntity<?>> compareProperty(Expression<?> leftExpr, ComparisonOperator operator,
             String property) throws SpecificationsException {
-        // TODO Auto-generated method stub
-        return null;
+        throw new SpecificationsException("not implemented");
     }
 
     @Override
     public Specification<DataEntity<?>> applyOnMember(String member, Specification<?> memberSpec)
             throws SpecificationsException {
-        // TODO Auto-generated method stub
-        return null;
+        throw new SpecificationsException("not implemented");
     }
 
 }

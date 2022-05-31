@@ -25,16 +25,15 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
-package org.n52.sta.data.provider;
 
-import java.util.Objects;
-import java.util.Optional;
+package org.n52.sta.data.provider;
 
 import org.n52.series.db.beans.DataEntity;
 import org.n52.shetland.oasis.odata.query.option.QueryOptions;
 import org.n52.sta.api.EntityPage;
 import org.n52.sta.api.ProviderException;
 import org.n52.sta.api.entity.Observation;
+import org.n52.sta.api.path.Request;
 import org.n52.sta.config.EntityPropertyMapping;
 import org.n52.sta.data.StaEntityPage;
 import org.n52.sta.data.StaPageRequest;
@@ -47,12 +46,15 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 
+import java.util.Objects;
+import java.util.Optional;
+
 public class ObservationEntityProvider extends BaseEntityProvider<Observation> {
 
     private final ObservationRepository observationRepository;
 
     public ObservationEntityProvider(ObservationRepository observationRepository,
-            EntityPropertyMapping propertyMapping) {
+                                     EntityPropertyMapping propertyMapping) {
         super(propertyMapping);
         Objects.requireNonNull(observationRepository, "observationRepository must not be null!");
         this.observationRepository = observationRepository;
@@ -65,18 +67,19 @@ public class ObservationEntityProvider extends BaseEntityProvider<Observation> {
     }
 
     @Override
-    public Optional<Observation> getEntity(StaRequest path) throws ProviderException {
-        assertIdentifier(id);
-
+    public Optional<Observation> getEntity(Request req) throws ProviderException {
         ObservationGraphBuilder graphBuilder = new ObservationGraphBuilder();
-        addUnfilteredExpandItems(path, graphBuilder);
+        addUnfilteredExpandItems(req.getQueryOptions(), graphBuilder);
 
-        Optional<DataEntity<?>> platform = observationRepository.findByStaIdentifier(id, graphBuilder);
+        Specification<DataEntity<?>> spec =
+            createSpecificationFromRequest(req, new ObservationQuerySpecification());
+        Optional<DataEntity<?>> platform = observationRepository.findOne(spec, graphBuilder);
         return platform.map(entity -> new ObservationData(entity, propertyMapping));
     }
 
     @Override
-    public EntityPage<Observation> getEntities(QueryOptions options) throws ProviderException {
+    public EntityPage<Observation> getEntities(Request req) throws ProviderException {
+        QueryOptions options = req.getQueryOptions();
         Pageable pagable = StaPageRequest.create(options);
 
         ObservationGraphBuilder graphBuilder = new ObservationGraphBuilder();

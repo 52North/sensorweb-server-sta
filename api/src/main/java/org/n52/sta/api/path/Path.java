@@ -6,7 +6,7 @@ public interface Path {
 
     PathType getType();
 
-    List<PathSegment> getPath();
+    List<PathSegment> getSegments();
 
     enum PathType {
         collection,

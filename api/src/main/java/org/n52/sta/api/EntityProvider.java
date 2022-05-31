@@ -29,12 +29,8 @@
 package org.n52.sta.api;
 
 import org.n52.sta.api.entity.Identifiable;
-import org.n52.sta.api.path.Path;
-import org.n52.sta.api.path.PathSegment;
 import org.n52.sta.api.path.Request;
-import org.n52.svalbard.odata.core.QueryOptionsFactory;
 
-import java.util.List;
 import java.util.Optional;
 
 public interface EntityProvider<T extends Identifiable> {
@@ -44,8 +40,8 @@ public interface EntityProvider<T extends Identifiable> {
     Optional<T> getEntity(Request request) throws ProviderException;
 
     default Optional<T> getEntity(String id) throws ProviderException {
-        return getEntity();
-    };
+        return getEntity(new Request(id));
+    }
 
     EntityPage<T> getEntities(Request request) throws ProviderException;
 

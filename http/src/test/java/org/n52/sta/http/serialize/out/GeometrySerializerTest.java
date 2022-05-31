@@ -15,7 +15,7 @@ import org.locationtech.jts.geom.GeometryFactory;
 import org.locationtech.jts.geom.Point;
 
 public class GeometrySerializerTest {
-    
+
     @Test
     public void expectValidJsonOnSerializingGeometry() throws JsonProcessingException {
         GeometryFactory geometryFactory = new GeometryFactory();
@@ -26,5 +26,5 @@ public class GeometrySerializerTest {
         ObjectMapper om = new ObjectMapper().registerModule(geometryModule);
         String json = om.writeValueAsString(point);
         assertThat(json, is(not(nullValue())));
-    }   
+    }
 }

@@ -27,22 +27,22 @@
  */
 package org.n52.sta.api.service;
 
-import java.util.Objects;
-import java.util.Optional;
-
-import org.n52.shetland.oasis.odata.query.option.QueryOptions;
 import org.n52.sta.api.EntityEditor;
 import org.n52.sta.api.EntityPage;
 import org.n52.sta.api.EntityProvider;
 import org.n52.sta.api.ProviderException;
 import org.n52.sta.api.domain.aggregate.AggregateException;
-import org.n52.sta.api.domain.service.DefaultDomainService;
-import org.n52.sta.api.domain.service.DomainService;
 import org.n52.sta.api.domain.aggregate.EntityAggregate;
 import org.n52.sta.api.domain.aggregate.ThingAggregate;
+import org.n52.sta.api.domain.service.DefaultDomainService;
+import org.n52.sta.api.domain.service.DomainService;
 import org.n52.sta.api.entity.Thing;
+import org.n52.sta.api.path.Request;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.Objects;
+import java.util.Optional;
 
 public class ThingService implements EntityService<Thing>, EntityEditor<Thing> {
 
@@ -62,8 +62,8 @@ public class ThingService implements EntityService<Thing>, EntityEditor<Thing> {
         Objects.requireNonNull(provider, "provider must not be null");
         this.thingProvider = provider;
         this.domainService = domainService == null
-                ? new DefaultDomainService<>(provider)
-                : domainService;
+                                     ? new DefaultDomainService<>(provider)
+                                     : domainService;
     }
 
     @Override
@@ -72,13 +72,13 @@ public class ThingService implements EntityService<Thing>, EntityEditor<Thing> {
     }
 
     @Override
-    public Optional<Thing> getEntity(StaRequest path) throws ProviderException {
-        return domainService.getEntity(path);
+    public Optional<Thing> getEntity(Request req) throws ProviderException {
+        return domainService.getEntity(req);
     }
 
     @Override
-    public EntityPage<Thing> getEntities(QueryOptions options) throws ProviderException {
-        return domainService.getEntities(options);
+    public EntityPage<Thing> getEntities(Request req) throws ProviderException {
+        return domainService.getEntities(req);
     }
 
     @Override

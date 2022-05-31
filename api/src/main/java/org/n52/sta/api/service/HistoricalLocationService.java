@@ -27,10 +27,6 @@
  */
 package org.n52.sta.api.service;
 
-import java.util.Objects;
-import java.util.Optional;
-
-import org.n52.shetland.oasis.odata.query.option.QueryOptions;
 import org.n52.sta.api.EntityEditor;
 import org.n52.sta.api.EntityPage;
 import org.n52.sta.api.EntityProvider;
@@ -41,8 +37,12 @@ import org.n52.sta.api.domain.aggregate.HistoricalLocationAggregate;
 import org.n52.sta.api.domain.service.DefaultDomainService;
 import org.n52.sta.api.domain.service.DomainService;
 import org.n52.sta.api.entity.HistoricalLocation;
+import org.n52.sta.api.path.Request;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.Objects;
+import java.util.Optional;
 
 public class HistoricalLocationService implements EntityService<HistoricalLocation>, EntityEditor<HistoricalLocation> {
 
@@ -73,13 +73,13 @@ public class HistoricalLocationService implements EntityService<HistoricalLocati
     }
 
     @Override
-    public Optional<HistoricalLocation> getEntity(StaRequest path) throws ProviderException {
-        return domainService.getEntity(path);
+    public Optional<HistoricalLocation> getEntity(Request req) throws ProviderException {
+        return domainService.getEntity(req);
     }
 
     @Override
-    public EntityPage<HistoricalLocation> getEntities(QueryOptions options) throws ProviderException {
-        return domainService.getEntities(options);
+    public EntityPage<HistoricalLocation> getEntities(Request req)throws ProviderException {
+        return domainService.getEntities(req);
     }
 
     @Override

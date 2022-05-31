@@ -50,22 +50,19 @@ public class HistoricalLocationQuerySpecification implements BaseQuerySpecificat
     @Override
     public Specification<HistoricalLocationEntity> compareProperty(String property, ComparisonOperator operator,
             Expression<?> rightExpr) throws SpecificationsException {
-        // TODO Auto-generated method stub
-        return null;
+        throw new SpecificationsException("not implemented");
     }
 
     @Override
     public Specification<HistoricalLocationEntity> compareProperty(Expression<?> leftExpr, ComparisonOperator operator,
             String property) throws SpecificationsException {
-        // TODO Auto-generated method stub
-        return null;
+        throw new SpecificationsException("not implemented");
     }
 
     @Override
     public Specification<HistoricalLocationEntity> applyOnMember(String member, Specification<?> memberSpec)
             throws SpecificationsException {
-        // TODO Auto-generated method stub
-        return null;
+        throw new SpecificationsException("not implemented");
     }
 
 }

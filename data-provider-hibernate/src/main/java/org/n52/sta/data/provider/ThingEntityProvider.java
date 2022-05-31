@@ -28,25 +28,16 @@
 
 package org.n52.sta.data.provider;
 
-import java.util.Objects;
-import java.util.Optional;
-
 import org.n52.series.db.beans.PlatformEntity;
 import org.n52.shetland.oasis.odata.query.option.QueryOptions;
-import org.n52.shetland.ogc.sta.exception.STAInvalidFilterExpressionException;
 import org.n52.sta.api.EntityPage;
 import org.n52.sta.api.ProviderException;
 import org.n52.sta.api.entity.Thing;
-import org.n52.sta.api.path.Path;
-import org.n52.sta.api.path.PathSegment;
 import org.n52.sta.api.path.Request;
 import org.n52.sta.config.EntityPropertyMapping;
 import org.n52.sta.data.StaEntityPage;
 import org.n52.sta.data.StaPageRequest;
 import org.n52.sta.data.entity.ThingData;
-import org.n52.sta.data.query.FilterQueryParser;
-import org.n52.sta.data.query.QuerySpecificationFactory;
-import org.n52.sta.data.query.specifications.BaseQuerySpecifications;
 import org.n52.sta.data.query.specifications.ThingQuerySpecification;
 import org.n52.sta.data.repositories.entity.ThingRepository;
 import org.n52.sta.data.support.ThingGraphBuilder;
@@ -54,7 +45,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 
-import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -76,53 +66,26 @@ public class ThingEntityProvider extends BaseEntityProvider<Thing> {
 
     @Override
     public Optional<Thing> getEntity(Request req) throws ProviderException {
-
         /**
          /Datastreams(123)/Thing
-         /Datastreams(123)/Thing/$ref
          */
         ThingGraphBuilder graphBuilder = new ThingGraphBuilder(req);
         addUnfilteredExpandItems(req.getQueryOptions(), graphBuilder);
 
-        ThingQuerySpecification tQS = parsePath(req.getPath());
-        Optional<PlatformEntity> platform = thingRepository.findOne(tQS., graphBuilder);
+        Specification<PlatformEntity> spec = createSpecificationFromRequest(req, new ThingQuerySpecification());
+        Optional<PlatformEntity> platform = thingRepository.findOne(spec, graphBuilder);
         return platform.map(entity -> new ThingData(entity, propertyMapping));
     }
 
-    private <T> Specification<T> parsePath(Path path, BaseQuerySpecifications<T> qs) throws ProviderException {
-        List<PathSegment> segments = path.getPath();
-
-        BaseQuerySpecifications<?> currentBase = qs;
-
-        for (int i = segments.size() ; i > 0 ; i--) {
-            PathSegment current = segments.get(i);
-            try {
-                BaseQuerySpecifications<?> spec =
-                    QuerySpecificationFactory.createSpecification(current.getCollection());
-
-                Specification<?> specification = currentBase.applyOnMember(current.getCollection(),
-                                                                           spec.equalsStaIdentifier(current.getIdentifier()
-                                                                                                        .orElse(null)));
-
-
-                currentBase = spec;
-            } catch (STAInvalidFilterExpressionException e) {
-                throw new ProviderException("could not parse path", e);
-            }
-        }
-
-        return qs.
-
-    }
-
     @Override
-    public EntityPage<Thing> getEntities(QueryOptions options) throws ProviderException {
+    public EntityPage<Thing> getEntities(Request req) throws ProviderException {
+        QueryOptions options = req.getQueryOptions();
         Pageable pagable = StaPageRequest.create(options);
 
-        ThingGraphBuilder graphBuilder = new ThingGraphBuilder();
+        ThingGraphBuilder graphBuilder = new ThingGraphBuilder(req);
         addUnfilteredExpandItems(options, graphBuilder);
 
-        Specification<PlatformEntity> spec = FilterQueryParser.parse(options, new ThingQuerySpecification());
+        Specification<PlatformEntity> spec = createSpecificationFromRequest(req, new ThingQuerySpecification());
         Page<PlatformEntity> results = thingRepository.findAll(spec, pagable, graphBuilder);
         return new StaEntityPage<>(Thing.class, results, entity -> new ThingData(entity, propertyMapping));
     }

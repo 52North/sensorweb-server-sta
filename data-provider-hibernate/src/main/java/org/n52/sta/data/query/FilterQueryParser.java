@@ -25,16 +25,8 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
+
 package org.n52.sta.data.query;
-
-import java.util.Optional;
-import java.util.function.Function;
-
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Expression;
-import javax.persistence.criteria.Predicate;
-import javax.persistence.criteria.Root;
 
 import org.n52.shetland.oasis.odata.query.option.QueryOptions;
 import org.n52.shetland.ogc.filter.FilterConstants.BinaryLogicOperator;
@@ -57,19 +49,36 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.jpa.domain.Specification;
 
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Expression;
+import javax.persistence.criteria.Predicate;
+import javax.persistence.criteria.Root;
+import java.util.Optional;
+import java.util.function.Function;
+
 public final class FilterQueryParser<T> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(FilterQueryParser.class);
 
     public static <E> Specification<E> parse(QueryOptions options,
-            BaseQuerySpecifications<E> specs) {
+                                             BaseQuerySpecifications<E> specs) {
         return (root, query, builder) -> {
             FilterQueryRoot<E> filterRoot = new FilterQueryRoot<>(root, query, specs);
             FilterQueryVisitor<E> visitor = new FilterQueryVisitor<>(filterRoot, builder);
-            return Optional.ofNullable(options.getFilterFilter())
-                    .map(filter -> (Expr) filter.getFilter())
-                    .map(visitExpression(visitor))
-                    .orElse(null);
+            Optional<Specification<E>> defaultPredicate = specs.isStaEntity();
+
+            Optional<Predicate> filterPredicate = Optional.ofNullable(options.getFilterFilter())
+                .map(filter -> (Expr) filter.getFilter())
+                .map(visitExpression(visitor));
+
+            if (filterPredicate.isPresent() && defaultPredicate.isPresent()) {
+                return builder.and(defaultPredicate.get().toPredicate(root, query, builder), filterPredicate.get());
+            } else if (defaultPredicate.isPresent()) {
+                return defaultPredicate.get().toPredicate(root, query, builder);
+            } else {
+                return filterPredicate.orElse(null);
+            }
         };
     }
 
@@ -107,8 +116,8 @@ public final class FilterQueryParser<T> {
             Predicate right = (Predicate) expr.getRight().accept(this);
             BinaryLogicOperator operator = expr.getOperator();
             return operator.equals(BinaryLogicOperator.And)
-                    ? criteriaBuilder.and(left, right)
-                    : criteriaBuilder.or(left, right);
+                ? criteriaBuilder.and(left, right)
+                : criteriaBuilder.or(left, right);
         }
 
         @Override
@@ -125,12 +134,12 @@ public final class FilterQueryParser<T> {
             Expr right = expr.getRight();
             ComparisonOperator operator = expr.getOperator();
             return left.isMember() || right.isMember()
-                    ? compareMember(left, right, operator)
-                    : compareNonMembers(left, right, operator);
+                ? compareMember(left, right, operator)
+                : compareNonMembers(left, right, operator);
         }
 
         private Predicate compareMember(Expr left, Expr right, ComparisonOperator operator)
-                throws FilterQueryException {
+            throws FilterQueryException {
             if (right.isMember()) {
                 String member = toMember(right);
                 if (isOnRoot(member)) {
@@ -151,22 +160,23 @@ public final class FilterQueryParser<T> {
         }
 
         private Predicate compareMemberOnLeft(String member, ComparisonOperator operator,
-                Expr right) throws FilterQueryException {
+                                              Expr right) throws FilterQueryException {
             Expression<?> rightExpr = right.accept(this);
             return rootSpecification.compareProperty(member, operator, rightExpr)
-                    .toPredicate(root, query, criteriaBuilder);
+                .toPredicate(root, query, criteriaBuilder);
         }
 
         private Predicate compareMemberOnRight(Expr left, ComparisonOperator operator, String member)
-                throws FilterQueryException {
+            throws FilterQueryException {
             Expression<?> leftExpr = left.accept(this);
             return rootSpecification.compareProperty(leftExpr, operator, member)
-                    .toPredicate(root, query, criteriaBuilder);
+                .toPredicate(root, query, criteriaBuilder);
         }
 
         @SuppressWarnings("unchecked")
         private <Y extends Comparable<? super Y>> Predicate compareNonMembers(Expr left, Expr right,
-                ComparisonOperator operator) throws FilterQueryException {
+                                                                              ComparisonOperator operator)
+            throws FilterQueryException {
             Expression<? extends Y> leftExpr = (Expression<? extends Y>) left.accept(this);
             Expression<? extends Y> rightExpr = (Expression<? extends Y>) right.accept(this);
             return rootSpecification.compare(leftExpr, rightExpr, operator, criteriaBuilder);
@@ -224,8 +234,8 @@ public final class FilterQueryParser<T> {
 
         private String toMember(Expr right) throws FilterQueryException {
             return right.asMember()
-                    .map(MemberExpr::getValue)
-                    .orElseThrow(() -> new FilterQueryException("no member found!"));
+                .map(MemberExpr::getValue)
+                .orElseThrow(() -> new FilterQueryException("no member found!"));
         }
 
     }

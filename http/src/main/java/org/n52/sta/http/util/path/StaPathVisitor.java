@@ -75,7 +75,7 @@ public class StaPathVisitor extends StaPathGrammarBaseVisitor<StaPath> {
             } else {
                 path = this.visit(ctx.getChild(2));
             }
-            path.getPath().add(new PathSegment(entity.getText(),
+            path.getSegments().add(new PathSegment(entity.getText(),
                                                identifier));
             return path;
         }

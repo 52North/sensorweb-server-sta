@@ -25,11 +25,10 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
+
 package org.n52.sta.data.provider;
 
 import org.hamcrest.Matchers;
-import org.n52.sta.api.EntityPage;
-import org.n52.sta.api.entity.Thing;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -59,8 +58,9 @@ public class ThingEntityProviderTest {
     //@Test
     public void test() {
         LOGGER.debug("Testing starts");
-        EntityPage<Thing> emptyPage = provider.getEntities();
-        assertThat(emptyPage.getTotalCount(), is(0));
+
+        //        EntityPage<Thing> emptyPage = provider.getEntities();
+        //        assertThat(emptyPage.getTotalCount(), is(0));
     }
 
 }

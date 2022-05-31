@@ -27,13 +27,15 @@
  */
 package org.n52.sta.data.old.query;
 
+import org.n52.shetland.ogc.sta.exception.STAInvalidFilterExpressionException;
+import org.n52.shetland.ogc.sta.exception.STAInvalidQueryException;
+
 /**
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
  */
 @SuppressWarnings("checkstyle:multiplestringliterals")
 public class QuerySpecificationFactory {
 
-    /*
     public static SpatialQuerySpecifications createSpatialSpecification(String name)
             throws STAInvalidFilterExpressionException {
         switch (name) {
@@ -104,6 +106,5 @@ public class QuerySpecificationFactory {
                 throw new STAInvalidQueryException("Unable to find QuerySpecification for type: " + name);
         }
     }
-     */
 
 }

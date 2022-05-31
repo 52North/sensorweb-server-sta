@@ -29,6 +29,13 @@ package org.n52.sta.data.query;
 
 import org.n52.shetland.ogc.sta.exception.STAInvalidFilterExpressionException;
 import org.n52.sta.data.query.specifications.BaseQuerySpecifications;
+import org.n52.sta.data.query.specifications.DatastreamQuerySpecification;
+import org.n52.sta.data.query.specifications.FeatureOfInterestQuerySpecification;
+import org.n52.sta.data.query.specifications.HistoricalLocationQuerySpecification;
+import org.n52.sta.data.query.specifications.LocationQuerySpecification;
+import org.n52.sta.data.query.specifications.ObservationQuerySpecification;
+import org.n52.sta.data.query.specifications.ObservedPropertyQuerySpecification;
+import org.n52.sta.data.query.specifications.SensorQuerySpecification;
 import org.n52.sta.data.query.specifications.ThingQuerySpecification;
 
 @SuppressWarnings("checkstyle:multiplestringliterals")
@@ -61,45 +68,45 @@ public class QuerySpecificationFactory {
             case "Things": {
                 return new ThingQuerySpecification();
             }
-            // case "LocationEntity":
-            // case "Location":
-            // case "Locations": {
-            //     return new LocationQuerySpecifications();
-            // }
-            // case "HistoricalLocationEntity":
-            // case "HistoricalLocation":
-            // case "HistoricalLocations": {
-            //     return new HistoricalLocationQuerySpecifications();
-            // }
-            // case "AbstractDatasetEntity":
-            // case "DatasetEntity":
-            // case "DatasetAggregationEntity":
-            // case "Datastream":
-            // case "Datastreams": {
-            //     return new DatastreamQuerySpecifications();
-            // }
-            // case "ProcedureEntity":
-            // case "Sensor":
-            // case "Sensors": {
-            //     return new SensorQuerySpecifications();
-            // }
-            // case "ObservationEntity":
-            // case "DataEntity":
-            // case "Observation":
-            // case "Observations": {
-            //     return new ObservationQuerySpecifications();
-            // }
-            // case "FeatureEntity":
-            // case "AbstractFeatureEntity":
-            // case "FeatureOfInterest":
-            // case "FeaturesOfInterest": {
-            //     return new FeatureOfInterestQuerySpecifications();
-            // }
-            // case "PhenomenonEntity":
-            // case "ObservedProperty":
-            // case "ObservedProperties": {
-            //     return new ObservedPropertyQuerySpecifications();
-            // }
+             case "LocationEntity":
+             case "Location":
+             case "Locations": {
+                 return new LocationQuerySpecification();
+             }
+             case "HistoricalLocationEntity":
+             case "HistoricalLocation":
+             case "HistoricalLocations": {
+                 return new HistoricalLocationQuerySpecification();
+             }
+             case "AbstractDatasetEntity":
+             case "DatasetEntity":
+             case "DatasetAggregationEntity":
+             case "Datastream":
+             case "Datastreams": {
+                 return new DatastreamQuerySpecification();
+             }
+             case "ProcedureEntity":
+             case "Sensor":
+             case "Sensors": {
+                 return new SensorQuerySpecification();
+             }
+             case "ObservationEntity":
+             case "DataEntity":
+             case "Observation":
+             case "Observations": {
+                 return new ObservationQuerySpecification();
+             }
+             case "FeatureEntity":
+             case "AbstractFeatureEntity":
+             case "FeatureOfInterest":
+             case "FeaturesOfInterest": {
+                 return new FeatureOfInterestQuerySpecification();
+             }
+             case "PhenomenonEntity":
+             case "ObservedProperty":
+             case "ObservedProperties": {
+                 return new ObservedPropertyQuerySpecification();
+             }
             default:
                 throw new STAInvalidFilterExpressionException("Unable to find QuerySpecification for type: " + name);
         }

@@ -31,7 +31,6 @@ import org.n52.series.db.beans.DescribableEntity;
 import org.n52.series.db.beans.HibernateRelations;
 import org.n52.shetland.ogc.filter.FilterConstants;
 import org.n52.shetland.ogc.filter.FilterConstants.ComparisonOperator;
-import org.n52.shetland.ogc.sta.StaConstants;
 import org.springframework.data.jpa.domain.Specification;
 
 import javax.persistence.criteria.CriteriaBuilder;
@@ -40,8 +39,18 @@ import javax.persistence.criteria.Expression;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 import javax.persistence.criteria.Subquery;
+import java.util.Optional;
 
 public interface BaseQuerySpecifications<T> {
+
+    /**
+     * Filters out Database Entities that are not valid STA Entities. e.g. Datasets in state: not_initialized
+     * Defaults to not filter out any entities
+     *
+     */
+    default Optional<Specification<T>> isStaEntity() {
+        return Optional.empty();
+    }
 
     /**
      * Creates an equals specification on the {@code name} property.
@@ -225,8 +234,6 @@ public interface BaseQuerySpecifications<T> {
 
     @FunctionalInterface
     interface MemberFilter<T> {
-
-        void get();
 
         Specification<T> apply(Specification<?> memberSpecification);
     }

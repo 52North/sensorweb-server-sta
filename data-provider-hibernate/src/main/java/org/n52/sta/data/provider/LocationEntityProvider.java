@@ -25,16 +25,15 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
-package org.n52.sta.data.provider;
 
-import java.util.Objects;
-import java.util.Optional;
+package org.n52.sta.data.provider;
 
 import org.n52.series.db.beans.sta.LocationEntity;
 import org.n52.shetland.oasis.odata.query.option.QueryOptions;
 import org.n52.sta.api.EntityPage;
 import org.n52.sta.api.ProviderException;
 import org.n52.sta.api.entity.Location;
+import org.n52.sta.api.path.Request;
 import org.n52.sta.config.EntityPropertyMapping;
 import org.n52.sta.data.StaEntityPage;
 import org.n52.sta.data.StaPageRequest;
@@ -46,6 +45,9 @@ import org.n52.sta.data.support.LocationGraphBuilder;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
+
+import java.util.Objects;
+import java.util.Optional;
 
 public class LocationEntityProvider extends BaseEntityProvider<Location> {
 
@@ -64,18 +66,18 @@ public class LocationEntityProvider extends BaseEntityProvider<Location> {
     }
 
     @Override
-    public Optional<Location> getEntity(StaRequest path) throws ProviderException {
-        assertIdentifier(id);
-
+    public Optional<Location> getEntity(Request req) throws ProviderException {
         LocationGraphBuilder graphBuilder = new LocationGraphBuilder();
-        addUnfilteredExpandItems(path, graphBuilder);
+        addUnfilteredExpandItems(req.getQueryOptions(), graphBuilder);
 
-        Optional<LocationEntity> platform = locationRepository.findByStaIdentifier(id, graphBuilder);
+        Specification<LocationEntity> spec = createSpecificationFromRequest(req, new LocationQuerySpecification());
+        Optional<LocationEntity> platform = locationRepository.findOne(spec, graphBuilder);
         return platform.map(entity -> new LocationData(entity, propertyMapping));
     }
 
     @Override
-    public EntityPage<Location> getEntities(QueryOptions options) throws ProviderException {
+    public EntityPage<Location> getEntities(Request req) throws ProviderException {
+        QueryOptions options = req.getQueryOptions();
         Pageable pagable = StaPageRequest.create(options);
 
         LocationGraphBuilder graphBuilder = new LocationGraphBuilder();

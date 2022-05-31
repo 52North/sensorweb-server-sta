@@ -27,10 +27,6 @@
  */
 package org.n52.sta.api.service;
 
-import java.util.Objects;
-import java.util.Optional;
-
-import org.n52.shetland.oasis.odata.query.option.QueryOptions;
 import org.n52.sta.api.EntityEditor;
 import org.n52.sta.api.EntityPage;
 import org.n52.sta.api.EntityProvider;
@@ -41,8 +37,12 @@ import org.n52.sta.api.domain.aggregate.ObservedPropertyAggregate;
 import org.n52.sta.api.domain.service.DefaultDomainService;
 import org.n52.sta.api.domain.service.DomainService;
 import org.n52.sta.api.entity.ObservedProperty;
+import org.n52.sta.api.path.Request;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.Objects;
+import java.util.Optional;
 
 public class ObservedPropertyService implements EntityService<ObservedProperty>, EntityEditor<ObservedProperty> {
 
@@ -73,13 +73,13 @@ public class ObservedPropertyService implements EntityService<ObservedProperty>,
     }
 
     @Override
-    public Optional<ObservedProperty> getEntity(StaRequest path) throws ProviderException {
-        return domainService.getEntity(path);
+    public Optional<ObservedProperty> getEntity(Request req) throws ProviderException {
+        return domainService.getEntity(req);
     }
 
     @Override
-    public EntityPage<ObservedProperty> getEntities(QueryOptions options) throws ProviderException {
-        return domainService.getEntities(options);
+    public EntityPage<ObservedProperty> getEntities(Request req)throws ProviderException {
+        return domainService.getEntities(req);
     }
 
     @Override

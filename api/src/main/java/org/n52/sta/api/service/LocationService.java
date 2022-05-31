@@ -27,7 +27,6 @@
  */
 package org.n52.sta.api.service;
 
-import org.n52.shetland.oasis.odata.query.option.QueryOptions;
 import org.n52.sta.api.EntityEditor;
 import org.n52.sta.api.EntityPage;
 import org.n52.sta.api.EntityProvider;
@@ -38,6 +37,7 @@ import org.n52.sta.api.domain.aggregate.LocationAggregate;
 import org.n52.sta.api.domain.service.DefaultDomainService;
 import org.n52.sta.api.domain.service.DomainService;
 import org.n52.sta.api.entity.Location;
+import org.n52.sta.api.path.Request;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -72,13 +72,13 @@ public class LocationService implements EntityService<Location>, EntityEditor<Lo
     }
 
     @Override
-    public Optional<Location> getEntity(StaRequest path) throws ProviderException {
-        return domainService.getEntity(path);
+    public Optional<Location> getEntity(Request req) throws ProviderException {
+        return domainService.getEntity(req);
     }
 
     @Override
-    public EntityPage<Location> getEntities(QueryOptions options) throws ProviderException {
-        return domainService.getEntities(options);
+    public EntityPage<Location> getEntities(Request req) throws ProviderException {
+        return domainService.getEntities(req);
     }
 
     @Override

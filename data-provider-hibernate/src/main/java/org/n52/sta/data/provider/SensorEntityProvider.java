@@ -31,10 +31,10 @@ import java.util.Objects;
 import java.util.Optional;
 
 import org.n52.series.db.beans.ProcedureEntity;
-import org.n52.shetland.oasis.odata.query.option.QueryOptions;
 import org.n52.sta.api.EntityPage;
 import org.n52.sta.api.ProviderException;
 import org.n52.sta.api.entity.Sensor;
+import org.n52.sta.api.path.Request;
 import org.n52.sta.config.EntityPropertyMapping;
 import org.n52.sta.data.StaEntityPage;
 import org.n52.sta.data.StaPageRequest;
@@ -64,24 +64,24 @@ public class SensorEntityProvider extends BaseEntityProvider<Sensor> {
     }
 
     @Override
-    public Optional<Sensor> getEntity(StaRequest path) throws ProviderException {
-        assertIdentifier(id);
-
+    public Optional<Sensor> getEntity(Request req) throws ProviderException {
         SensorGraphBuilder graphBuilder = new SensorGraphBuilder();
-        addUnfilteredExpandItems(path, graphBuilder);
+        addUnfilteredExpandItems(req.getQueryOptions(), graphBuilder);
 
-        Optional<ProcedureEntity> platform = sensorRepository.findByStaIdentifier(id, graphBuilder);
+        Specification<ProcedureEntity> spec = createSpecificationFromRequest(req, new SensorQuerySpecification());
+        Optional<ProcedureEntity> platform = sensorRepository.findOne(spec, graphBuilder);
         return platform.map(entity -> new SensorData(entity, propertyMapping));
     }
 
     @Override
-    public EntityPage<Sensor> getEntities(QueryOptions options) throws ProviderException {
-        Pageable pagable = StaPageRequest.create(options);
+    public EntityPage<Sensor> getEntities(Request req)throws ProviderException {
+        Pageable pagable = StaPageRequest.create(req.getQueryOptions());
 
         SensorGraphBuilder graphBuilder = new SensorGraphBuilder();
-        addUnfilteredExpandItems(options, graphBuilder);
+        addUnfilteredExpandItems(req.getQueryOptions(), graphBuilder);
 
-        Specification<ProcedureEntity> spec = FilterQueryParser.parse(options, new SensorQuerySpecification());
+        Specification<ProcedureEntity> spec = FilterQueryParser.parse(req.getQueryOptions(),
+                new SensorQuerySpecification());
         Page<ProcedureEntity> results = sensorRepository.findAll(spec, pagable, graphBuilder);
         return new StaEntityPage<>(Sensor.class, results, entity -> new SensorData(entity, propertyMapping));
     }

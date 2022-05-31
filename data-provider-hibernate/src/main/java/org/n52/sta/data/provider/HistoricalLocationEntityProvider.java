@@ -28,14 +28,12 @@
 
 package org.n52.sta.data.provider;
 
-import java.util.Objects;
-import java.util.Optional;
-
 import org.n52.series.db.beans.sta.HistoricalLocationEntity;
 import org.n52.shetland.oasis.odata.query.option.QueryOptions;
 import org.n52.sta.api.EntityPage;
 import org.n52.sta.api.ProviderException;
 import org.n52.sta.api.entity.HistoricalLocation;
+import org.n52.sta.api.path.Request;
 import org.n52.sta.config.EntityPropertyMapping;
 import org.n52.sta.data.StaEntityPage;
 import org.n52.sta.data.StaPageRequest;
@@ -48,12 +46,15 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 
+import java.util.Objects;
+import java.util.Optional;
+
 public class HistoricalLocationEntityProvider extends BaseEntityProvider<HistoricalLocation> {
 
     private final HistoricalLocationRepository historicalLocationRepository;
 
     public HistoricalLocationEntityProvider(HistoricalLocationRepository historicalLocationRepository,
-            EntityPropertyMapping propertyMapping) {
+                                            EntityPropertyMapping propertyMapping) {
         super(propertyMapping);
         Objects.requireNonNull(historicalLocationRepository, "historicalLocationRepository must not be null");
         this.historicalLocationRepository = historicalLocationRepository;
@@ -66,29 +67,30 @@ public class HistoricalLocationEntityProvider extends BaseEntityProvider<Histori
     }
 
     @Override
-    public Optional<HistoricalLocation> getEntity(StaRequest path) throws ProviderException {
-        assertIdentifier(id);
-
+    public Optional<HistoricalLocation> getEntity(Request req) throws ProviderException {
         HistoricalLocationGraphBuilder graphBuilder = new HistoricalLocationGraphBuilder();
-        addUnfilteredExpandItems(path, graphBuilder);
+        addUnfilteredExpandItems(req.getQueryOptions(), graphBuilder);
 
-        Optional<HistoricalLocationEntity> platform = historicalLocationRepository.findByStaIdentifier(id,
-                graphBuilder);
+        Specification<HistoricalLocationEntity> spec =
+            createSpecificationFromRequest(req, new HistoricalLocationQuerySpecification());
+        Optional<HistoricalLocationEntity> platform = historicalLocationRepository.findOne(spec, graphBuilder);
         return platform.map(entity -> new HistoricalLocationData(entity, propertyMapping));
     }
 
     @Override
-    public EntityPage<HistoricalLocation> getEntities(QueryOptions options) throws ProviderException {
+    public EntityPage<HistoricalLocation> getEntities(Request req) throws ProviderException {
+        QueryOptions options = req.getQueryOptions();
         Pageable pagable = StaPageRequest.create(options);
 
         HistoricalLocationGraphBuilder graphBuilder = new HistoricalLocationGraphBuilder();
         addUnfilteredExpandItems(options, graphBuilder);
 
-        Specification<HistoricalLocationEntity> spec = FilterQueryParser.parse(options,
-                new HistoricalLocationQuerySpecification());
+        Specification<HistoricalLocationEntity> spec =
+            FilterQueryParser.parse(options, new HistoricalLocationQuerySpecification());
         Page<HistoricalLocationEntity> results = historicalLocationRepository.findAll(spec, pagable, graphBuilder);
-        return new StaEntityPage<>(HistoricalLocation.class, results,
-                entity -> new HistoricalLocationData(entity, propertyMapping));
+        return new StaEntityPage<>(HistoricalLocation.class,
+                                   results,
+                                   entity -> new HistoricalLocationData(entity, propertyMapping));
     }
 
 }

@@ -50,22 +50,19 @@ public class FeatureOfInterestQuerySpecification implements BaseQuerySpecificati
     @Override
     public Specification<AbstractFeatureEntity<?>> compareProperty(String property, ComparisonOperator operator,
             Expression<?> rightExpr) throws SpecificationsException {
-        // TODO Auto-generated method stub
-        return null;
+        throw new SpecificationsException("not implemented");
     }
 
     @Override
     public Specification<AbstractFeatureEntity<?>> compareProperty(Expression<?> leftExpr, ComparisonOperator operator,
             String property) throws SpecificationsException {
-        // TODO Auto-generated method stub
-        return null;
+        throw new SpecificationsException("not implemented");
     }
 
     @Override
     public Specification<AbstractFeatureEntity<?>> applyOnMember(String member, Specification<?> memberSpec)
             throws SpecificationsException {
-        // TODO Auto-generated method stub
-        return null;
+        throw new SpecificationsException("not implemented");
     }
 
 }

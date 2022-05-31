@@ -108,21 +108,25 @@ public class ReadController {
     private <T extends Identifiable> StreamingResponseBody getAndWriteToResponse(RequestContext requestContext,
                                                                                  SerializationContext context,
                                                                                  Class<T> type)
-        throws ProviderException, STACRUDException {
-        EntityService<T> entityService = getEntityService(type);
-        Request request = requestContext.getRequest();
-        switch (requestContext.getPath().getType()) {
-            case collection:
-                EntityPage<T> collection = entityService.getEntities(request);
-                return writeCollection(collection, context);
-            case ref:
-                // fallthru
-            case entity:
-            case property:
-                Optional<T> entity = entityService.getEntity(request);
-                return writeEntity(entity.orElseThrow(() ->  new STACRUDException("no such entity")), context);
-            default:
-                throw new STACRUDException("not implemented!");
+        throws STACRUDException {
+        try {
+            EntityService<T> entityService = getEntityService(type);
+            Request request = requestContext.getRequest();
+            switch (requestContext.getPath().getType()) {
+                case collection:
+                    EntityPage<T> collection = entityService.getEntities(request);
+                    return writeCollection(collection, context);
+                case ref:
+                    // fallthru
+                case entity:
+                case property:
+                    Optional<T> entity = entityService.getEntity(request);
+                    return writeEntity(entity.orElseThrow(() -> new STACRUDException("no such entity")), context);
+                default:
+                    throw new STACRUDException("not implemented!");
+            }
+        } catch (ProviderException e) {
+            throw new STACRUDException(e.getLocalizedMessage());
         }
     }
 

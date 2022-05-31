@@ -30,11 +30,14 @@ package org.n52.sta.data.support;
 import org.n52.series.db.beans.PlatformEntity;
 import org.n52.shetland.filter.ExpandItem;
 import org.n52.shetland.ogc.sta.StaConstants;
+import org.n52.sta.api.path.Request;
 
 public class ThingGraphBuilder extends GraphBuilder<PlatformEntity> {
 
-    public ThingGraphBuilder() {
+    public ThingGraphBuilder(Request req) {
         super(PlatformEntity.class);
+
+        //TODO: use different default Graph if req has $select as it may not need everything
         addGraphText(GraphText.GRAPH_PARAMETERS);
     }
 

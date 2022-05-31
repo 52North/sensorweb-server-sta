@@ -27,15 +27,6 @@
  */
 package org.n52.sta.data.old.util;
 
-import java.util.Date;
-import java.util.function.BiFunction;
-
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Expression;
-import javax.persistence.criteria.Predicate;
-import javax.persistence.criteria.Root;
-
 import org.n52.series.db.beans.DataEntity;
 import org.n52.shetland.oasis.odata.ODataConstants;
 import org.n52.shetland.ogc.filter.FilterConstants;
@@ -60,6 +51,14 @@ import org.n52.svalbard.odata.core.expr.bool.ComparisonExpr;
 import org.n52.svalbard.odata.core.expr.temporal.TimeValueExpr;
 import org.springframework.data.jpa.domain.Specification;
 
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Expression;
+import javax.persistence.criteria.Predicate;
+import javax.persistence.criteria.Root;
+import java.util.Date;
+import java.util.function.BiFunction;
+
 /**
  * Visitor visiting svalbard.odata.Expr and parsing it into javax.expression to be used in database access.
  * Not all methods return predicate (e.g. internal ones return concrete types) so abstract Expression&lt;?&gt; is used.
@@ -81,7 +80,7 @@ public final class FilterExprVisitor<T> implements ExprVisitor<Expression<?>, ST
     private CriteriaQuery query;
 
     public FilterExprVisitor(Root root, CriteriaQuery query, CriteriaBuilder builder)
-        throws STAInvalidFilterExpressionException {
+        throws STAInvalidQueryException {
         this.builder = builder;
         this.query = query;
         this.root = root;
@@ -334,7 +333,7 @@ public final class FilterExprVisitor<T> implements ExprVisitor<Expression<?>, ST
     private Predicate convertToForeignExpression(String path,
                                                  Expression<?> value,
                                                  FilterConstants.ComparisonOperator operator)
-        throws STAInvalidFilterExpressionException {
+        throws STAInvalidQueryException {
         String[] resources = path.split(SLASH);
         String lastResource = resources[resources.length - 2];
 
@@ -365,7 +364,7 @@ public final class FilterExprVisitor<T> implements ExprVisitor<Expression<?>, ST
     private Predicate convertToForeignSpatialExpression(String path,
                                                         String functionName,
                                                         String... value)
-        throws STAInvalidFilterExpressionException {
+        throws STAInvalidQueryException {
         String[] resources = path.split(SLASH);
         EntityQuerySpecifications<?> stepQS;
         // Get filter on Entity
@@ -386,7 +385,7 @@ public final class FilterExprVisitor<T> implements ExprVisitor<Expression<?>, ST
     }
 
     private Predicate resolveForeignExpression(String[] resources, Specification<?> rawFilter)
-        throws STAInvalidFilterExpressionException {
+        throws STAInvalidQueryException {
         EntityQuerySpecifications<?> stepQS;
         Specification<?> filter = rawFilter;
         for (int i = resources.length - 3; i >= 0; i--) {
