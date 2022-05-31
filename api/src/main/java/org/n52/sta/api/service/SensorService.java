@@ -72,8 +72,8 @@ public class SensorService implements EntityService<Sensor>, EntityEditor<Sensor
     }
 
     @Override
-    public Optional<Sensor> getEntity(String id, QueryOptions options) throws ProviderException {
-        return domainService.getEntity(id, options);
+    public Optional<Sensor> getEntity(StaRequest path) throws ProviderException {
+        return domainService.getEntity(path);
     }
 
     @Override

@@ -72,8 +72,8 @@ public class ObservationService implements EntityService<Observation>, EntityEdi
     }
 
     @Override
-    public Optional<Observation> getEntity(String id, QueryOptions options) throws ProviderException {
-        return domainService.getEntity(id, options);
+    public Optional<Observation> getEntity(StaRequest path) throws ProviderException {
+        return domainService.getEntity(path);
     }
 
     @Override

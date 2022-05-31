@@ -63,11 +63,11 @@ public class ObservedPropertyEntityProvider extends BaseEntityProvider<ObservedP
     }
 
     @Override
-    public Optional<ObservedProperty> getEntity(String id, QueryOptions options) throws ProviderException {
+    public Optional<ObservedProperty> getEntity(StaRequest path) throws ProviderException {
         assertIdentifier(id);
 
         ObservedPropertyGraphBuilder graphBuilder = new ObservedPropertyGraphBuilder();
-        addUnfilteredExpandItems(options, graphBuilder);
+        addUnfilteredExpandItems(path, graphBuilder);
 
         Optional<PhenomenonEntity> platform = observedPropertyRepository.findByStaIdentifier(id, graphBuilder);
         return platform.map(ObservedPropertyData::new);

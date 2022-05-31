@@ -53,7 +53,7 @@ public class FeatureOfInterestEntityProvider extends BaseEntityProvider<FeatureO
     }
 
     @Override
-    public Optional<FeatureOfInterest> getEntity(String id, QueryOptions options) throws ProviderException {
+    public Optional<FeatureOfInterest> getEntity(StaRequest path) throws ProviderException {
         return Optional.empty();
     }
 

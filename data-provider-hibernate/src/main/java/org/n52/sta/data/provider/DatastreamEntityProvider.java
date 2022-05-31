@@ -32,6 +32,7 @@ import org.n52.shetland.oasis.odata.query.option.QueryOptions;
 import org.n52.sta.api.EntityPage;
 import org.n52.sta.api.ProviderException;
 import org.n52.sta.api.entity.Datastream;
+import org.n52.sta.api.path.Request;
 import org.n52.sta.data.StaEntityPage;
 import org.n52.sta.data.StaPageRequest;
 import org.n52.sta.data.entity.DatastreamData;
@@ -62,13 +63,13 @@ public class DatastreamEntityProvider extends BaseEntityProvider<Datastream> {
     }
 
     @Override
-    public Optional<Datastream> getEntity(String id, QueryOptions options) throws ProviderException {
-        assertIdentifier(id);
+    public Optional<Datastream> getEntity(Request req) throws ProviderException {
+        DatastreamGraphBuilder graphBuilder = new DatastreamGraphBuilder(req.getPath());
+        addUnfilteredExpandItems(req.getQueryOptions(), graphBuilder);
 
-        DatastreamGraphBuilder graphBuilder = new DatastreamGraphBuilder();
-        addUnfilteredExpandItems(options, graphBuilder);
-
-        Optional<AbstractDatasetEntity> datastream = datastreamRepository.findByStaIdentifier(id, graphBuilder);
+        DatastreamQuerySpecification dQS = new DatastreamQuerySpecification();
+        dQS
+        Optional<AbstractDatasetEntity> datastream = datastreamRepository.findOne(id, graphBuilder);
         return datastream.map(DatastreamData::new);
     }
 

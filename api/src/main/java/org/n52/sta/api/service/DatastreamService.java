@@ -27,22 +27,22 @@
  */
 package org.n52.sta.api.service;
 
-import java.util.Objects;
-import java.util.Optional;
-
-import org.n52.shetland.oasis.odata.query.option.QueryOptions;
 import org.n52.sta.api.EntityEditor;
 import org.n52.sta.api.EntityPage;
 import org.n52.sta.api.EntityProvider;
 import org.n52.sta.api.ProviderException;
 import org.n52.sta.api.domain.aggregate.AggregateException;
 import org.n52.sta.api.domain.aggregate.DatastreamAggregate;
+import org.n52.sta.api.domain.aggregate.EntityAggregate;
 import org.n52.sta.api.domain.service.DefaultDomainService;
 import org.n52.sta.api.domain.service.DomainService;
-import org.n52.sta.api.domain.aggregate.EntityAggregate;
 import org.n52.sta.api.entity.Datastream;
+import org.n52.sta.api.path.Request;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.Objects;
+import java.util.Optional;
 
 public class DatastreamService implements EntityService<Datastream>, EntityEditor<Datastream> {
 
@@ -72,13 +72,13 @@ public class DatastreamService implements EntityService<Datastream>, EntityEdito
     }
 
     @Override
-    public Optional<Datastream> getEntity(String id, QueryOptions options) throws ProviderException {
-        return domainService.getEntity(id, options);
+    public Optional<Datastream> getEntity(Request req) throws ProviderException {
+        return domainService.getEntity(req);
     }
 
     @Override
-    public EntityPage<Datastream> getEntities(QueryOptions options) throws ProviderException {
-        return domainService.getEntities(options);
+    public EntityPage<Datastream> getEntities(Request req) throws ProviderException {
+        return domainService.getEntities(req);
     }
 
     @Override

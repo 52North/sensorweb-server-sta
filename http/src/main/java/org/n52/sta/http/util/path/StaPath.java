@@ -1,5 +1,7 @@
 package org.n52.sta.http.util.path;
 
+import org.n52.sta.api.path.Path;
+import org.n52.sta.api.path.PathSegment;
 import org.n52.sta.http.serialize.out.SerializationContext;
 import org.n52.sta.http.serialize.out.StaBaseSerializer;
 
@@ -10,17 +12,9 @@ import java.util.function.Function;
 /**
  * Holds a URI referencing an STA entity.
  */
-public class StaPath {
+public class StaPath implements Path {
 
-    public enum PathType {
-        collection,
-        entity,
-        ref,
-        property
-    }
-
-
-    private final PathType type;
+    private final Path.PathType type;
 
     private final List<PathSegment> path = new ArrayList<>();
 
@@ -34,10 +28,12 @@ public class StaPath {
         this.path.add(segment);
     }
 
+    @Override
     public PathType getType() {
         return type;
     }
 
+    @Override
     public List<PathSegment> getPath() {
         return path;
     }

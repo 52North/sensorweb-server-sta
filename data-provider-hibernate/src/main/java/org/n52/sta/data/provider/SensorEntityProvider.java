@@ -62,11 +62,11 @@ public class SensorEntityProvider extends BaseEntityProvider<Sensor> {
     }
 
     @Override
-    public Optional<Sensor> getEntity(String id, QueryOptions options) throws ProviderException {
+    public Optional<Sensor> getEntity(StaRequest path) throws ProviderException {
         assertIdentifier(id);
 
         SensorGraphBuilder graphBuilder = new SensorGraphBuilder();
-        addUnfilteredExpandItems(options, graphBuilder);
+        addUnfilteredExpandItems(path, graphBuilder);
 
         Optional<ProcedureEntity> platform = sensorRepository.findByStaIdentifier(id, graphBuilder);
         return platform.map(SensorData::new);

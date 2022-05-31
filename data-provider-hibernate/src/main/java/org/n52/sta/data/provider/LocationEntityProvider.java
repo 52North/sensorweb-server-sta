@@ -62,11 +62,11 @@ public class LocationEntityProvider extends BaseEntityProvider<Location> {
     }
 
     @Override
-    public Optional<Location> getEntity(String id, QueryOptions options) throws ProviderException {
+    public Optional<Location> getEntity(StaRequest path) throws ProviderException {
         assertIdentifier(id);
 
         LocationGraphBuilder graphBuilder = new LocationGraphBuilder();
-        addUnfilteredExpandItems(options, graphBuilder);
+        addUnfilteredExpandItems(path, graphBuilder);
 
         Optional<LocationEntity> platform = locationRepository.findByStaIdentifier(id, graphBuilder);
         return platform.map(LocationData::new);

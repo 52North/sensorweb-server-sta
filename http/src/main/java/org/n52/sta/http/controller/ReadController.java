@@ -36,6 +36,7 @@ import org.n52.sta.api.EntityPage;
 import org.n52.sta.api.EntityServiceLookup;
 import org.n52.sta.api.ProviderException;
 import org.n52.sta.api.entity.Identifiable;
+import org.n52.sta.api.path.Request;
 import org.n52.sta.api.service.EntityService;
 import org.n52.sta.http.serialize.out.CollectionNode;
 import org.n52.sta.http.serialize.out.SerializationContext;
@@ -109,19 +110,17 @@ public class ReadController {
                                                                                  Class<T> type)
         throws ProviderException, STACRUDException {
         EntityService<T> entityService = getEntityService(type);
+        Request request = requestContext.getRequest();
         switch (requestContext.getPath().getType()) {
             case collection:
-                EntityPage<T> collection = entityService.getEntities(requestContext.getQueryOptions());
+                EntityPage<T> collection = entityService.getEntities(request);
                 return writeCollection(collection, context);
-            case entity:
-                StaPath path = requestContext.getPath();
-                Optional<T> entity = entityService.getEntity(path.getPath().get(0).getIdentifier().get(),
-                                                             requestContext.getQueryOptions());
-                return writeEntity(entity.orElseThrow(() ->  new STACRUDException("no such entity")), context);
             case ref:
                 // fallthru
+            case entity:
             case property:
-                // fallthru
+                Optional<T> entity = entityService.getEntity(request);
+                return writeEntity(entity.orElseThrow(() ->  new STACRUDException("no such entity")), context);
             default:
                 throw new STACRUDException("not implemented!");
         }

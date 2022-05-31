@@ -63,11 +63,11 @@ public class HistoricalLocationEntityProvider extends BaseEntityProvider<Histori
     }
 
     @Override
-    public Optional<HistoricalLocation> getEntity(String id, QueryOptions options) throws ProviderException {
+    public Optional<HistoricalLocation> getEntity(StaRequest path) throws ProviderException {
         assertIdentifier(id);
 
         HistoricalLocationGraphBuilder graphBuilder = new HistoricalLocationGraphBuilder();
-        addUnfilteredExpandItems(options, graphBuilder);
+        addUnfilteredExpandItems(path, graphBuilder);
 
         Optional<HistoricalLocationEntity> platform = historicalLocationRepository.findByStaIdentifier(id,
                 graphBuilder);

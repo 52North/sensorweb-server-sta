@@ -4,6 +4,7 @@ import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.tree.TerminalNode;
 import org.n52.grammar.StaPathGrammar;
 import org.n52.grammar.StaPathGrammarBaseVisitor;
+import org.n52.sta.api.path.PathSegment;
 import org.n52.sta.http.serialize.out.DatastreamJsonSerializer;
 import org.n52.sta.http.serialize.out.FeatureOfInterestJsonSerializer;
 import org.n52.sta.http.serialize.out.HistoricalLocationJsonSerializer;

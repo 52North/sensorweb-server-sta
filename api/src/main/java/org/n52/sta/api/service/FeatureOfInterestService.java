@@ -73,8 +73,8 @@ public class FeatureOfInterestService implements EntityService<FeatureOfInterest
     }
 
     @Override
-    public Optional<FeatureOfInterest> getEntity(String id, QueryOptions options) throws ProviderException {
-        return domainService.getEntity(id, options);
+    public Optional<FeatureOfInterest> getEntity(StaRequest path) throws ProviderException {
+        return domainService.getEntity(path);
     }
 
     @Override

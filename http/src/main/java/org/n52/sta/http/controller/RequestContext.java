@@ -30,6 +30,7 @@ package org.n52.sta.http.controller;
 
 import org.n52.shetland.oasis.odata.query.option.QueryOptions;
 import org.n52.shetland.ogc.sta.exception.STAInvalidUrlException;
+import org.n52.sta.api.path.Request;
 import org.n52.sta.http.util.path.PathFactory;
 import org.n52.sta.http.util.path.StaPath;
 import org.n52.svalbard.odata.core.QueryOptionsFactory;
@@ -46,16 +47,15 @@ import java.util.function.Function;
 public final class RequestContext {
 
     private final String serviceUri;
-    private final QueryOptions queryOptions;
-    private final StaPath path;
+
+    private final Request request;
 
     private RequestContext(String serviceUri, QueryOptions queryOptions, StaPath path) {
         Objects.requireNonNull(serviceUri, "serviceUri must not be null");
         Objects.requireNonNull(queryOptions, "queryOptions must not be null");
         Objects.requireNonNull(path, "path must not be null");
-        this.path = path;
         this.serviceUri = serviceUri;
-        this.queryOptions = queryOptions;
+        this.request = new Request(path, queryOptions);
     }
 
     public static RequestContext create(String serviceUri, HttpServletRequest request, PathFactory pathFactory)
@@ -90,10 +90,14 @@ public final class RequestContext {
     }
 
     public QueryOptions getQueryOptions() {
-        return queryOptions;
+        return request.getQueryOptions();
+    }
+
+    public Request getRequest() {
+        return request;
     }
 
     public StaPath getPath() {
-        return path;
+        return (StaPath) request.getPath();
     }
 }

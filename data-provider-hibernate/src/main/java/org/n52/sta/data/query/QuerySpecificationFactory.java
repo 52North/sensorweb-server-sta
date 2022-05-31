@@ -53,7 +53,7 @@ public class QuerySpecificationFactory {
     //     }
     // }
 
-    public BaseQuerySpecifications<?> createSpecification(String name)
+    public static BaseQuerySpecifications<?> createSpecification(String name)
         throws STAInvalidFilterExpressionException {
         switch (name) {
             case "PlatformEntity":

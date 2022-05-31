@@ -73,8 +73,8 @@ public class HistoricalLocationService implements EntityService<HistoricalLocati
     }
 
     @Override
-    public Optional<HistoricalLocation> getEntity(String id, QueryOptions options) throws ProviderException {
-        return domainService.getEntity(id, options);
+    public Optional<HistoricalLocation> getEntity(StaRequest path) throws ProviderException {
+        return domainService.getEntity(path);
     }
 
     @Override

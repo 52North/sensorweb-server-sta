@@ -27,7 +27,12 @@
  */
 package org.n52.sta.data.query.specifications;
 
-
+import org.n52.series.db.beans.DescribableEntity;
+import org.n52.series.db.beans.HibernateRelations;
+import org.n52.shetland.ogc.filter.FilterConstants;
+import org.n52.shetland.ogc.filter.FilterConstants.ComparisonOperator;
+import org.n52.shetland.ogc.sta.StaConstants;
+import org.springframework.data.jpa.domain.Specification;
 
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
@@ -35,12 +40,6 @@ import javax.persistence.criteria.Expression;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 import javax.persistence.criteria.Subquery;
-
-import org.n52.series.db.beans.DescribableEntity;
-import org.n52.series.db.beans.HibernateRelations;
-import org.n52.shetland.ogc.filter.FilterConstants;
-import org.n52.shetland.ogc.filter.FilterConstants.ComparisonOperator;
-import org.springframework.data.jpa.domain.Specification;
 
 public interface BaseQuerySpecifications<T> {
 
@@ -226,6 +225,9 @@ public interface BaseQuerySpecifications<T> {
 
     @FunctionalInterface
     interface MemberFilter<T> {
+
+        void get();
+
         Specification<T> apply(Specification<?> memberSpecification);
     }
 

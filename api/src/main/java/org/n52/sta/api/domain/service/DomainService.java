@@ -27,13 +27,13 @@
  */
 package org.n52.sta.api.domain.service;
 
-import org.n52.shetland.oasis.odata.query.option.QueryOptions;
 import org.n52.sta.api.EntityPage;
 import org.n52.sta.api.EntityProvider;
 import org.n52.sta.api.ProviderException;
 import org.n52.sta.api.domain.event.DomainEvent;
 import org.n52.sta.api.domain.event.DomainEventService;
 import org.n52.sta.api.entity.Identifiable;
+import org.n52.sta.api.path.Request;
 
 import java.util.Optional;
 
@@ -63,13 +63,13 @@ public interface DomainService<T extends Identifiable> extends EntityProvider<T>
         }
 
         @Override
-        public Optional<T> getEntity(String id, QueryOptions options) throws ProviderException {
-            return entityProvider.getEntity(id, options);
+        public Optional<T> getEntity(Request req) throws ProviderException {
+            return entityProvider.getEntity(req);
         }
 
         @Override
-        public EntityPage<T> getEntities(QueryOptions options) throws ProviderException {
-            return entityProvider.getEntities(options);
+        public EntityPage<T> getEntities(Request req) throws ProviderException {
+            return entityProvider.getEntities(req);
         }
 
         public void setDomainEventService(DomainEventService domainEventService) {

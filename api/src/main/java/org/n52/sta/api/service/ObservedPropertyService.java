@@ -73,8 +73,8 @@ public class ObservedPropertyService implements EntityService<ObservedProperty>,
     }
 
     @Override
-    public Optional<ObservedProperty> getEntity(String id, QueryOptions options) throws ProviderException {
-        return domainService.getEntity(id, options);
+    public Optional<ObservedProperty> getEntity(StaRequest path) throws ProviderException {
+        return domainService.getEntity(path);
     }
 
     @Override

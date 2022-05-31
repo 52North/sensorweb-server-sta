@@ -62,11 +62,11 @@ public class ObservationEntityProvider extends BaseEntityProvider<Observation> {
     }
 
     @Override
-    public Optional<Observation> getEntity(String id, QueryOptions options) throws ProviderException {
+    public Optional<Observation> getEntity(StaRequest path) throws ProviderException {
         assertIdentifier(id);
 
         ObservationGraphBuilder graphBuilder = new ObservationGraphBuilder();
-        addUnfilteredExpandItems(options, graphBuilder);
+        addUnfilteredExpandItems(path, graphBuilder);
 
         Optional<DataEntity<?>> platform = observationRepository.findByStaIdentifier(id, graphBuilder);
         return platform.map(ObservationData::new);

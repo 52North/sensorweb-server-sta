@@ -1,4 +1,4 @@
-package org.n52.sta.http.util.path;
+package org.n52.sta.api.path;
 
 import java.util.Optional;
 

@@ -25,28 +25,28 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
+
 package org.n52.sta.api;
 
-import java.util.Optional;
-
-import org.n52.shetland.oasis.odata.query.option.QueryOptions;
 import org.n52.sta.api.entity.Identifiable;
+import org.n52.sta.api.path.Path;
+import org.n52.sta.api.path.PathSegment;
+import org.n52.sta.api.path.Request;
 import org.n52.svalbard.odata.core.QueryOptionsFactory;
+
+import java.util.List;
+import java.util.Optional;
 
 public interface EntityProvider<T extends Identifiable> {
 
     boolean exists(String id) throws ProviderException;
 
+    Optional<T> getEntity(Request request) throws ProviderException;
+
     default Optional<T> getEntity(String id) throws ProviderException {
-        return getEntity(id, new QueryOptionsFactory().createEmpty());
-    }
+        return getEntity();
+    };
 
-    Optional<T> getEntity(String id, QueryOptions options) throws ProviderException;
-
-    default EntityPage<T> getEntities() throws ProviderException {
-        return getEntities(new QueryOptionsFactory().createEmpty());
-    }
-
-    EntityPage<T> getEntities(QueryOptions options) throws ProviderException;
+    EntityPage<T> getEntities(Request request) throws ProviderException;
 
 }

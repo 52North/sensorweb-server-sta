@@ -72,8 +72,8 @@ public class ThingService implements EntityService<Thing>, EntityEditor<Thing> {
     }
 
     @Override
-    public Optional<Thing> getEntity(String id, QueryOptions options) throws ProviderException {
-        return domainService.getEntity(id, options);
+    public Optional<Thing> getEntity(StaRequest path) throws ProviderException {
+        return domainService.getEntity(path);
     }
 
     @Override

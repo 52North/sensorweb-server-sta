@@ -27,14 +27,13 @@
  */
 package org.n52.sta.data.old.query;
 
-import org.n52.shetland.ogc.sta.exception.STAInvalidFilterExpressionException;
-
 /**
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
  */
 @SuppressWarnings("checkstyle:multiplestringliterals")
 public class QuerySpecificationFactory {
 
+    /*
     public static SpatialQuerySpecifications createSpatialSpecification(String name)
             throws STAInvalidFilterExpressionException {
         switch (name) {
@@ -55,7 +54,7 @@ public class QuerySpecificationFactory {
     }
 
     public static EntityQuerySpecifications getSpecification(String name)
-            throws STAInvalidFilterExpressionException {
+            throws STAInvalidQueryException {
         switch (name) {
             case "PlatformEntity":
             case "Thing":
@@ -102,8 +101,9 @@ public class QuerySpecificationFactory {
                 return new ObservedPropertyQuerySpecifications();
             }
             default:
-                throw new STAInvalidFilterExpressionException("Unable to find QuerySpecification for type: " + name);
+                throw new STAInvalidQueryException("Unable to find QuerySpecification for type: " + name);
         }
     }
+     */
 
 }
