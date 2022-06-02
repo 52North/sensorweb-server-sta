@@ -38,7 +38,6 @@ import org.n52.sta.config.EntityPropertyMapping;
 import org.n52.sta.data.StaEntityPage;
 import org.n52.sta.data.StaPageRequest;
 import org.n52.sta.data.entity.ObservedPropertyData;
-import org.n52.sta.data.query.FilterQueryParser;
 import org.n52.sta.data.query.specifications.ObservedPropertyQuerySpecification;
 import org.n52.sta.data.repositories.entity.PhenomenonRepository;
 import org.n52.sta.data.support.ObservedPropertyGraphBuilder;
@@ -85,8 +84,8 @@ public class ObservedPropertyEntityProvider extends BaseEntityProvider<ObservedP
         ObservedPropertyGraphBuilder graphBuilder = new ObservedPropertyGraphBuilder();
         addUnfilteredExpandItems(options, graphBuilder);
 
-        Specification<PhenomenonEntity> spec = FilterQueryParser.parse(options,
-                                                                       new ObservedPropertyQuerySpecification());
+        Specification<PhenomenonEntity> spec =
+            createSpecificationFromRequest(req, new ObservedPropertyQuerySpecification());
         Page<PhenomenonEntity> results = observedPropertyRepository.findAll(spec, pagable, graphBuilder);
         return new StaEntityPage<>(ObservedProperty.class, results,
                                    entity -> new ObservedPropertyData(entity, propertyMapping));

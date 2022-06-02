@@ -38,7 +38,6 @@ import org.n52.sta.config.EntityPropertyMapping;
 import org.n52.sta.data.StaEntityPage;
 import org.n52.sta.data.StaPageRequest;
 import org.n52.sta.data.entity.HistoricalLocationData;
-import org.n52.sta.data.query.FilterQueryParser;
 import org.n52.sta.data.query.specifications.HistoricalLocationQuerySpecification;
 import org.n52.sta.data.repositories.entity.HistoricalLocationRepository;
 import org.n52.sta.data.support.HistoricalLocationGraphBuilder;
@@ -86,7 +85,7 @@ public class HistoricalLocationEntityProvider extends BaseEntityProvider<Histori
         addUnfilteredExpandItems(options, graphBuilder);
 
         Specification<HistoricalLocationEntity> spec =
-            FilterQueryParser.parse(options, new HistoricalLocationQuerySpecification());
+            createSpecificationFromRequest(req, new HistoricalLocationQuerySpecification());
         Page<HistoricalLocationEntity> results = historicalLocationRepository.findAll(spec, pagable, graphBuilder);
         return new StaEntityPage<>(HistoricalLocation.class,
                                    results,

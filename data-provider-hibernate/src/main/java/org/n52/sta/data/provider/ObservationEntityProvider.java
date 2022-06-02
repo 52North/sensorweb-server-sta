@@ -38,7 +38,6 @@ import org.n52.sta.config.EntityPropertyMapping;
 import org.n52.sta.data.StaEntityPage;
 import org.n52.sta.data.StaPageRequest;
 import org.n52.sta.data.entity.ObservationData;
-import org.n52.sta.data.query.FilterQueryParser;
 import org.n52.sta.data.query.specifications.ObservationQuerySpecification;
 import org.n52.sta.data.repositories.entity.ObservationRepository;
 import org.n52.sta.data.support.ObservationGraphBuilder;
@@ -85,7 +84,8 @@ public class ObservationEntityProvider extends BaseEntityProvider<Observation> {
         ObservationGraphBuilder graphBuilder = new ObservationGraphBuilder();
         addUnfilteredExpandItems(options, graphBuilder);
 
-        Specification<DataEntity<?>> spec = FilterQueryParser.parse(options, new ObservationQuerySpecification());
+        Specification<DataEntity<?>> spec =
+            createSpecificationFromRequest(req, new ObservationQuerySpecification());
         Page<DataEntity<?>> results = observationRepository.findAll(spec, pagable, graphBuilder);
         return new StaEntityPage<>(Observation.class, results, data -> new ObservationData(data, propertyMapping));
     }

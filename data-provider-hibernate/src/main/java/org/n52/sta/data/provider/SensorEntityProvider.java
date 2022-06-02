@@ -27,9 +27,6 @@
  */
 package org.n52.sta.data.provider;
 
-import java.util.Objects;
-import java.util.Optional;
-
 import org.n52.series.db.beans.ProcedureEntity;
 import org.n52.sta.api.EntityPage;
 import org.n52.sta.api.ProviderException;
@@ -39,13 +36,15 @@ import org.n52.sta.config.EntityPropertyMapping;
 import org.n52.sta.data.StaEntityPage;
 import org.n52.sta.data.StaPageRequest;
 import org.n52.sta.data.entity.SensorData;
-import org.n52.sta.data.query.FilterQueryParser;
 import org.n52.sta.data.query.specifications.SensorQuerySpecification;
 import org.n52.sta.data.repositories.entity.ProcedureRepository;
 import org.n52.sta.data.support.SensorGraphBuilder;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
+
+import java.util.Objects;
+import java.util.Optional;
 
 public class SensorEntityProvider extends BaseEntityProvider<Sensor> {
 
@@ -80,8 +79,7 @@ public class SensorEntityProvider extends BaseEntityProvider<Sensor> {
         SensorGraphBuilder graphBuilder = new SensorGraphBuilder();
         addUnfilteredExpandItems(req.getQueryOptions(), graphBuilder);
 
-        Specification<ProcedureEntity> spec = FilterQueryParser.parse(req.getQueryOptions(),
-                new SensorQuerySpecification());
+        Specification<ProcedureEntity> spec = createSpecificationFromRequest(req, new SensorQuerySpecification());
         Page<ProcedureEntity> results = sensorRepository.findAll(spec, pagable, graphBuilder);
         return new StaEntityPage<>(Sensor.class, results, entity -> new SensorData(entity, propertyMapping));
     }

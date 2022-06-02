@@ -38,7 +38,6 @@ import org.n52.sta.config.EntityPropertyMapping;
 import org.n52.sta.data.StaEntityPage;
 import org.n52.sta.data.StaPageRequest;
 import org.n52.sta.data.entity.LocationData;
-import org.n52.sta.data.query.FilterQueryParser;
 import org.n52.sta.data.query.specifications.LocationQuerySpecification;
 import org.n52.sta.data.repositories.entity.LocationRepository;
 import org.n52.sta.data.support.LocationGraphBuilder;
@@ -83,7 +82,7 @@ public class LocationEntityProvider extends BaseEntityProvider<Location> {
         LocationGraphBuilder graphBuilder = new LocationGraphBuilder();
         addUnfilteredExpandItems(options, graphBuilder);
 
-        Specification<LocationEntity> spec = FilterQueryParser.parse(options, new LocationQuerySpecification());
+        Specification<LocationEntity> spec = createSpecificationFromRequest(req, new LocationQuerySpecification());
         Page<LocationEntity> results = locationRepository.findAll(spec, pagable, graphBuilder);
         return new StaEntityPage<>(Location.class, results, entity -> new LocationData(entity, propertyMapping));
     }
