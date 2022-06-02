@@ -25,10 +25,9 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
+
 package org.n52.sta.data.query.specifications;
 
-import org.n52.series.db.beans.DescribableEntity;
-import org.n52.series.db.beans.HibernateRelations;
 import org.n52.shetland.ogc.filter.FilterConstants;
 import org.n52.shetland.ogc.filter.FilterConstants.ComparisonOperator;
 import org.springframework.data.jpa.domain.Specification;
@@ -37,16 +36,15 @@ import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Expression;
 import javax.persistence.criteria.Predicate;
-import javax.persistence.criteria.Root;
 import javax.persistence.criteria.Subquery;
 import java.util.Optional;
+import java.util.function.Function;
 
 public interface BaseQuerySpecifications<T> {
 
     /**
      * Filters out Database Entities that are not valid STA Entities. e.g. Datasets in state: not_initialized
      * Defaults to not filter out any entities
-     *
      */
     default Optional<Specification<T>> isStaEntity() {
         return Optional.empty();
@@ -58,12 +56,7 @@ public interface BaseQuerySpecifications<T> {
      * @param value the value to match the {@code name} property
      * @return a specification including the equals expression
      */
-    default Specification<T> equalsName(String value) {
-        return (root, query, builder) -> {
-            String property = HibernateRelations.HasName.PROPERTY_NAME;
-            return builder.equal(root.get(property), value);
-        };
-    }
+    Specification<T> equalsName(String value);
 
     /**
      * Creates an equals specification on the {@code staIdentifier}
@@ -72,12 +65,7 @@ public interface BaseQuerySpecifications<T> {
      * @param value the value to match the {@code staIdentifier} property
      * @return a specification including the equals expression
      */
-    default Specification<T> equalsStaIdentifier(String value) {
-        return (root, query, builder) -> {
-            String property = DescribableEntity.PROPERTY_STA_IDENTIFIER;
-            return builder.equal(root.get(property), value);
-        };
-    }
+    Specification<T> equalsStaIdentifier(String value);
 
     /**
      * Creates an {@literal IN} specification on the {@code staIdentifier} property.
@@ -88,21 +76,13 @@ public interface BaseQuerySpecifications<T> {
      * @param values the value candidates matching the {@code staIdentifier} property
      * @return a specification including the {@literal in} expression
      */
-    default Specification<T> equalsOneOfStaIdentifiers(String... values) {
-        return (root, query, builder) -> {
-            if (values == null || values.length == 0) {
-                return null;
-            }
-            String property = DescribableEntity.PROPERTY_IDENTIFIER;
-            return builder.in(root.get(property)).value(values);
-        };
-    }
+    Specification<T> equalsOneOfStaIdentifiers(String... values);
 
     Specification<T> compareProperty(String property, ComparisonOperator operator, Expression<?> rightExpr)
-            throws SpecificationsException;
+        throws SpecificationsException;
 
     Specification<T> compareProperty(Expression<?> leftExpr, ComparisonOperator operator, String property)
-            throws SpecificationsException;
+        throws SpecificationsException;
 
     /**
      * Creates a specification that compares two expressions with the specified
@@ -117,14 +97,12 @@ public interface BaseQuerySpecifications<T> {
      * @param operator the comparison operator
      * @return a specification comparing both expressions
      * @see #compare(Expression, Expression, ComparisonOperator, CriteriaBuilder)
-     *      for a list of supported operators
+     * for a list of supported operators
      */
-    default <Y extends Comparable<? super Y>> Specification<T> compare(
-            Expression<? extends Y> left,
-            Expression<? extends Y> right,
-            FilterConstants.ComparisonOperator operator) {
-        return (root, query, builder) -> compare(left, right, operator, builder);
-    }
+    <Y extends Comparable<? super Y>> Specification<T> compare(
+        Expression<? extends Y> left,
+        Expression<? extends Y> right,
+        FilterConstants.ComparisonOperator operator);
 
     /**
      * Creates a predicate that compares two expressions with the specified
@@ -157,30 +135,11 @@ public interface BaseQuerySpecifications<T> {
      * @param builder  the criteria builder
      * @return a predicate comparing both expressions, or null
      */
-    default <Y extends Comparable<? super Y>> Predicate compare(
-            Expression<? extends Y> left,
-            Expression<? extends Y> right,
-            FilterConstants.ComparisonOperator operator,
-            CriteriaBuilder builder) {
-        switch (operator) {
-            case PropertyIsEqualTo:
-                return builder.equal(left, right);
-            case PropertyIsNotEqualTo:
-                return builder.notEqual(left, right);
-            case PropertyIsLessThan:
-                return builder.lessThan(left, right);
-            case PropertyIsLessThanOrEqualTo:
-                return builder.lessThanOrEqualTo(left, right);
-            case PropertyIsGreaterThan:
-                return builder.greaterThan(left, right);
-            case PropertyIsGreaterThanOrEqualTo:
-                return builder.greaterThanOrEqualTo(left, right);
-            case PropertyIsBetween:
-                // unsupported between
-            default:
-                return null;
-        }
-    }
+    <Y extends Comparable<? super Y>> Predicate compare(
+        Expression<? extends Y> left,
+        Expression<? extends Y> right,
+        FilterConstants.ComparisonOperator operator,
+        CriteriaBuilder builder);
 
     /**
      * Applies given specification on a member of the root entity.
@@ -202,16 +161,10 @@ public interface BaseQuerySpecifications<T> {
      * @param ofEntity the member's type
      * @return a member query which can be used whithin a {@link Specification}
      */
-    default MemberQuery createMemberQuery(String onMember, Class<?> ofEntity) {
-        return (specification, query, builder) -> {
-            PreparedSubquery<?> subquery = selectOnSubquery(onMember, ofEntity);
-            return subquery.where(specification, query, builder);
-        };
-    }
+    EntityQuery createQuery(String onMember, Class<?> ofEntity);
 
     /**
      * Selects a property of a specified entity to perform a subquery on.
-     *
      * The returned {@link PreparedSubquery} allows to apply a where clause
      * before returning the actual {@link Subquery}.
      *
@@ -221,16 +174,7 @@ public interface BaseQuerySpecifications<T> {
      * @return a prepared subquery
      */
     @SuppressWarnings("unchecked")
-    default <E> PreparedSubquery<E> selectOnSubquery(String property, Class<E> entityType) {
-        return (specification, query, builder) -> {
-            Subquery<E> subquery = query.subquery(entityType);
-            Root<E> member = subquery.from(entityType);
-
-            Specification<E> where = (Specification<E>) specification;
-            return subquery.select(member.get(property))
-                    .where(where.toPredicate(member, query, builder));
-        };
-    }
+    <E> PreparedSubquery<E> selectOnSubquery(String property, Class<E> entityType);
 
     @FunctionalInterface
     interface MemberFilter<T> {
@@ -238,8 +182,26 @@ public interface BaseQuerySpecifications<T> {
         Specification<T> apply(Specification<?> memberSpecification);
     }
 
+    abstract class MemberFilterImpl<T> implements MemberFilter<T> {
+
+        protected final Function<Specification<?>, Specification<T>> queryApplier;
+
+        protected MemberFilterImpl() {
+            this.queryApplier = this::prepareQuery;
+        }
+
+        public Specification<T> apply(Specification<?> specification) {
+            return queryApplier.apply(specification);
+        }
+
+        protected abstract Specification<T> prepareQuery(Specification<?> specification);
+
+    }
+
+
     @FunctionalInterface
-    interface MemberQuery {
+    interface EntityQuery {
+
         /**
          * Creates a subquery based on dynamic {@link Specification} parameters.
          *
@@ -251,8 +213,10 @@ public interface BaseQuerySpecifications<T> {
         Subquery<?> create(Specification<?> specification, CriteriaQuery<?> query, CriteriaBuilder builder);
     }
 
+
     @FunctionalInterface
     interface PreparedSubquery<E> {
+
         /**
          * Creates a subquery with a where clause applied.
          *

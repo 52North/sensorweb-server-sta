@@ -29,62 +29,108 @@
 package org.n52.sta.data.query.specifications;
 
 import org.n52.series.db.beans.AbstractDatasetEntity;
+import org.n52.series.db.beans.DataEntity;
 import org.n52.series.db.beans.DatasetEntity;
-import org.n52.shetland.ogc.filter.FilterConstants.ComparisonOperator;
+import org.n52.series.db.beans.PhenomenonEntity;
+import org.n52.series.db.beans.PlatformEntity;
+import org.n52.series.db.beans.ProcedureEntity;
+import org.n52.shetland.ogc.sta.StaConstants;
 import org.springframework.data.jpa.domain.Specification;
 
-import javax.persistence.criteria.Expression;
-import java.util.HashMap;
-import java.util.Map;
+import javax.persistence.criteria.Subquery;
 import java.util.Optional;
 
-public class DatastreamQuerySpecification implements BaseQuerySpecifications<AbstractDatasetEntity> {
-
-    private final Map<String, MemberFilter<AbstractDatasetEntity>> filterByMember;
-
-    private final Map<String, PropertyComparator<AbstractDatasetEntity, ?>> entityPathByProperty;
+public class DatastreamQuerySpecification extends QuerySpecification<AbstractDatasetEntity> {
 
     public DatastreamQuerySpecification() {
-        this.filterByMember = new HashMap<>();
-
-        this.entityPathByProperty = new HashMap<>();
-
-        // TODO maybe we should refactor the above maps to a super class
-        //
-        // interface -> abstract class
-        // define and add specifications within constructor
-        // ThingQuerySpecification has some implementation
-        // which would move to the base class then
-        //
-        // it is possible that some interface methods can
-        // become private then and the subclasses are there
-        // just to define property/member comparator specs
-
+        super();
+        this.filterByMember.put(StaConstants.SENSORS, new DatastreamQuerySpecification.SensorFilter());
+        this.filterByMember.put(StaConstants.OBSERVED_PROPERTIES,
+                                new DatastreamQuerySpecification.ObservedPropertyFilter());
+        this.filterByMember.put(StaConstants.THINGS, new DatastreamQuerySpecification.ThingFilter());
+        this.filterByMember.put(StaConstants.OBSERVATIONS, new DatastreamQuerySpecification.ObservationFilter());
     }
 
-    @Override public Optional<Specification<AbstractDatasetEntity>> isStaEntity() {
+    @Override
+    public Optional<Specification<AbstractDatasetEntity>> isStaEntity() {
         //TODO: ideally we should check for datasetType == not_initialized, but it is not exposed in the abstract class
         return Optional.of((root, criteriaQuery, criteriaBuilder)
                                -> root.get(DatasetEntity.PROPERTY_PLATFORM).isNotNull());
     }
 
-    @Override
-    public Specification<AbstractDatasetEntity> compareProperty(String property, ComparisonOperator operator,
-                                                                Expression<?> rightExpr)
-        throws SpecificationsException {
-        throw new SpecificationsException("not implemented!");
+    private final class SensorFilter extends MemberFilterImpl<AbstractDatasetEntity> {
+
+        protected Specification<AbstractDatasetEntity> prepareQuery(Specification<?> specification) {
+            return (root, query, builder) -> {
+                EntityQuery memberQuery = createQuery(ProcedureEntity.PROPERTY_ID,
+                                                      ProcedureEntity.class);
+                Subquery<?> subquery = memberQuery.create(specification, query, builder);
+                // n..1
+                return builder.in(subquery).value(root.get(AbstractDatasetEntity.PROPERTY_PROCEDURE));
+            };
+        }
     }
 
-    @Override
-    public Specification<AbstractDatasetEntity> compareProperty(Expression<?> leftExpr, ComparisonOperator operator,
-                                                                String property) throws SpecificationsException {
-        throw new SpecificationsException("not implemented");
+
+    private final class ObservedPropertyFilter extends MemberFilterImpl<AbstractDatasetEntity> {
+
+        protected Specification<AbstractDatasetEntity> prepareQuery(Specification<?> specification) {
+            return (root, query, builder) -> {
+                EntityQuery memberQuery = createQuery(PhenomenonEntity.PROPERTY_ID,
+                                                      PhenomenonEntity.class);
+                Subquery<?> subquery = memberQuery.create(specification, query, builder);
+                // n..1
+                return builder.in(subquery).value(root.get(AbstractDatasetEntity.PROPERTY_PHENOMENON));
+            };
+        }
     }
 
-    @Override
-    public Specification<AbstractDatasetEntity> applyOnMember(String member, Specification<?> memberSpec)
-        throws SpecificationsException {
-        throw new SpecificationsException("not implemented");
+
+    private final class ThingFilter extends MemberFilterImpl<AbstractDatasetEntity> {
+
+        protected Specification<AbstractDatasetEntity> prepareQuery(Specification<?> specification) {
+            return (root, query, builder) -> {
+                EntityQuery memberQuery = createQuery(PlatformEntity.PROPERTY_ID,
+                                                      PlatformEntity.class);
+                Subquery<?> subquery = memberQuery.create(specification, query, builder);
+                // n..1
+                return builder.in(subquery).value(root.get(AbstractDatasetEntity.PROPERTY_PLATFORM));
+            };
+        }
     }
 
+
+    private final class ObservationFilter extends MemberFilterImpl<AbstractDatasetEntity> {
+
+        protected Specification<AbstractDatasetEntity> prepareQuery(Specification<?> specification) {
+            return (root, query, builder) -> {
+                EntityQuery memberQuery = createQuery(DataEntity.PROPERTY_DATASET_ID,
+                                                      DataEntity.class);
+                Subquery<?> subquery = memberQuery.create(specification, query, builder);
+
+                return builder.or(
+                    // Non-Aggregation Dataset directly linked in Observation
+                    builder.in(subquery).value(root.get(AbstractDatasetEntity.PROPERTY_ID)),
+                    // Aggregation Dataset directly linked in Observation
+                    builder.in(subquery).value(root.get(AbstractDatasetEntity.PROPERTY_AGGREGATION))
+                );
+
+                /*
+                Subquery<AbstractDatasetEntity> sq = query.subquery(AbstractDatasetEntity.class);
+                Root<DataEntity> data = sq.from(DataEntity.class);
+                sq.select(data.get(DataEntity.PROPERTY_DATASET_ID))
+                    .where(builder.equal(data.get(DataEntity.PROPERTY_STA_IDENTIFIER), observationIdentifier));
+
+                Subquery<AbstractDatasetEntity> subquery = query.subquery(AbstractDatasetEntity.class);
+                Root<AbstractDatasetEntity> realDataset = subquery.from(AbstractDatasetEntity.class);
+                subquery.select(realDataset.get(AbstractDatasetEntity.PROPERTY_AGGREGATION))
+                    .where(builder.equal(realDataset.get(AbstractDatasetEntity.PROPERTY_ID), sq));
+
+                // Either id matches or aggregation id matches
+                return builder.or(builder.equal(root.get(AbstractDatasetEntity.PROPERTY_ID), sq),
+                                  builder.equal(root.get(AbstractDatasetEntity.PROPERTY_ID), subquery));
+                 */
+            };
+        }
+    }
 }

@@ -25,44 +25,15 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
+
 package org.n52.sta.data.query.specifications;
 
 import org.n52.series.db.beans.sta.LocationEntity;
-import org.n52.shetland.ogc.filter.FilterConstants.ComparisonOperator;
-import org.springframework.data.jpa.domain.Specification;
 
-import javax.persistence.criteria.Expression;
-import java.util.HashMap;
-import java.util.Map;
-
-public class LocationQuerySpecification implements BaseQuerySpecifications<LocationEntity> {
-
-    private final Map<String, MemberFilter<LocationEntity>> filterByMember;
-
-    private final Map<String, PropertyComparator<LocationEntity, ?>> entityPathByProperty;
+public class LocationQuerySpecification extends QuerySpecification<LocationEntity> {
 
     public LocationQuerySpecification() {
-        this.filterByMember = new HashMap<>();
-
-        this.entityPathByProperty = new HashMap<>();
-    }
-
-    @Override
-    public Specification<LocationEntity> compareProperty(String property, ComparisonOperator operator,
-            Expression<?> rightExpr) throws SpecificationsException {
-        throw new SpecificationsException("not implemented");
-    }
-
-    @Override
-    public Specification<LocationEntity> compareProperty(Expression<?> leftExpr, ComparisonOperator operator,
-            String property) throws SpecificationsException {
-        throw new SpecificationsException("not implemented");
-    }
-
-    @Override
-    public Specification<LocationEntity> applyOnMember(String member, Specification<?> memberSpec)
-            throws SpecificationsException {
-        throw new SpecificationsException("not implemented");
+        super();
     }
 
 }

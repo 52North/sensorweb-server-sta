@@ -28,42 +28,32 @@
 
 package org.n52.sta.data.query.specifications;
 
+import org.n52.series.db.beans.AbstractDatasetEntity;
+import org.n52.series.db.beans.IdEntity;
 import org.n52.series.db.beans.PhenomenonEntity;
-import org.n52.shetland.ogc.filter.FilterConstants.ComparisonOperator;
+import org.n52.shetland.ogc.sta.StaConstants;
 import org.springframework.data.jpa.domain.Specification;
 
-import javax.persistence.criteria.Expression;
-import java.util.HashMap;
-import java.util.Map;
+import javax.persistence.criteria.Subquery;
 
-public class ObservedPropertyQuerySpecification implements BaseQuerySpecifications<PhenomenonEntity> {
-
-    private final Map<String, MemberFilter<PhenomenonEntity>> filterByMember;
-
-    private final Map<String, PropertyComparator<PhenomenonEntity, ?>> entityPathByProperty;
+public class ObservedPropertyQuerySpecification extends QuerySpecification<PhenomenonEntity> {
 
     public ObservedPropertyQuerySpecification() {
-        this.filterByMember = new HashMap<>();
-
-        this.entityPathByProperty = new HashMap<>();
+        super();
+        this.filterByMember.put(StaConstants.DATASTREAMS, new ObservedPropertyQuerySpecification.DatastreamFilter());
     }
 
-    @Override
-    public Specification<PhenomenonEntity> compareProperty(String property, ComparisonOperator operator,
-                                                           Expression<?> rightExpr) throws SpecificationsException {
-        throw new SpecificationsException("not implemented");
-    }
+    private final class DatastreamFilter extends MemberFilterImpl<PhenomenonEntity> {
 
-    @Override
-    public Specification<PhenomenonEntity> compareProperty(Expression<?> leftExpr, ComparisonOperator operator,
-                                                           String property) throws SpecificationsException {
-        throw new SpecificationsException("not implemented");
-    }
-
-    @Override
-    public Specification<PhenomenonEntity> applyOnMember(String member, Specification<?> memberSpec)
-        throws SpecificationsException {
-        throw new SpecificationsException("not implemented");
+        protected Specification<PhenomenonEntity> prepareQuery(Specification<?> specification) {
+            return (root, query, builder) -> {
+                EntityQuery memberQuery = createQuery(AbstractDatasetEntity.PROPERTY_PHENOMENON,
+                                                      AbstractDatasetEntity.class);
+                Subquery<?> subquery = memberQuery.create(specification, query, builder);
+                // 1..n
+                return builder.in(root.get(IdEntity.PROPERTY_ID)).value(subquery);
+            };
+        }
     }
 
 }

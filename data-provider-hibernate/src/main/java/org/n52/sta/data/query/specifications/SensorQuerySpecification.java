@@ -25,44 +25,34 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
+
 package org.n52.sta.data.query.specifications;
 
+import org.n52.series.db.beans.AbstractDatasetEntity;
+import org.n52.series.db.beans.IdEntity;
 import org.n52.series.db.beans.ProcedureEntity;
-import org.n52.shetland.ogc.filter.FilterConstants.ComparisonOperator;
+import org.n52.shetland.ogc.sta.StaConstants;
 import org.springframework.data.jpa.domain.Specification;
 
-import javax.persistence.criteria.Expression;
-import java.util.HashMap;
-import java.util.Map;
+import javax.persistence.criteria.Subquery;
 
-public class SensorQuerySpecification implements BaseQuerySpecifications<ProcedureEntity> {
-
-    private final Map<String, MemberFilter<ProcedureEntity>> filterByMember;
-
-    private final Map<String, PropertyComparator<ProcedureEntity, ?>> entityPathByProperty;
+public class SensorQuerySpecification extends QuerySpecification<ProcedureEntity> {
 
     public SensorQuerySpecification() {
-        this.filterByMember = new HashMap<>();
-
-        this.entityPathByProperty = new HashMap<>();
+        super();
+        this.filterByMember.put(StaConstants.DATASTREAMS, new SensorQuerySpecification.DatastreamFilter());
     }
 
-    @Override
-    public Specification<ProcedureEntity> compareProperty(String property, ComparisonOperator operator,
-            Expression<?> rightExpr) throws SpecificationsException {
-        throw new SpecificationsException("not implemented");
-    }
+    private final class DatastreamFilter extends MemberFilterImpl<ProcedureEntity> {
 
-    @Override
-    public Specification<ProcedureEntity> compareProperty(Expression<?> leftExpr, ComparisonOperator operator,
-            String property) throws SpecificationsException {
-        throw new SpecificationsException("not implemented");
+        protected Specification<ProcedureEntity> prepareQuery(Specification<?> specification) {
+            return (root, query, builder) -> {
+                EntityQuery memberQuery = createQuery(AbstractDatasetEntity.PROPERTY_PROCEDURE,
+                                                      AbstractDatasetEntity.class);
+                Subquery<?> subquery = memberQuery.create(specification, query, builder);
+                // 1..n
+                return builder.in(root.get(IdEntity.PROPERTY_ID)).value(subquery);
+            };
+        }
     }
-
-    @Override
-    public Specification<ProcedureEntity> applyOnMember(String member, Specification<?> memberSpec)
-            throws SpecificationsException {
-        throw new SpecificationsException("not implemented");
-    }
-
 }

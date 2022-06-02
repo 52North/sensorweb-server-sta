@@ -25,44 +25,15 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
+
 package org.n52.sta.data.query.specifications;
 
 import org.n52.series.db.beans.AbstractFeatureEntity;
-import org.n52.shetland.ogc.filter.FilterConstants.ComparisonOperator;
-import org.springframework.data.jpa.domain.Specification;
 
-import javax.persistence.criteria.Expression;
-import java.util.HashMap;
-import java.util.Map;
-
-public class FeatureOfInterestQuerySpecification implements BaseQuerySpecifications<AbstractFeatureEntity<?>> {
-
-    private final Map<String, MemberFilter<AbstractFeatureEntity<?>>> filterByMember;
-
-    private final Map<String, PropertyComparator<AbstractFeatureEntity<?>, ?>> entityPathByProperty;
+public class FeatureOfInterestQuerySpecification extends QuerySpecification<AbstractFeatureEntity<?>> {
 
     public FeatureOfInterestQuerySpecification() {
-        this.filterByMember = new HashMap<>();
-
-        this.entityPathByProperty = new HashMap<>();
-    }
-
-    @Override
-    public Specification<AbstractFeatureEntity<?>> compareProperty(String property, ComparisonOperator operator,
-            Expression<?> rightExpr) throws SpecificationsException {
-        throw new SpecificationsException("not implemented");
-    }
-
-    @Override
-    public Specification<AbstractFeatureEntity<?>> compareProperty(Expression<?> leftExpr, ComparisonOperator operator,
-            String property) throws SpecificationsException {
-        throw new SpecificationsException("not implemented");
-    }
-
-    @Override
-    public Specification<AbstractFeatureEntity<?>> applyOnMember(String member, Specification<?> memberSpec)
-            throws SpecificationsException {
-        throw new SpecificationsException("not implemented");
+        super();
     }
 
 }
