@@ -116,7 +116,7 @@ public class DatastreamQuerySpecification extends QuerySpecification<AbstractDat
                     // Non-Aggregation Dataset directly linked in Observation
                     builder.in(subquery).value(root.get(AbstractDatasetEntity.PROPERTY_ID)),
                     // Aggregation Dataset directly linked in Observation
-                    builder.in(subquery).value(root.get(AbstractDatasetEntity.PROPERTY_AGGREGATION))
+                    // builder.in(subquery).value(root.get(AbstractDatasetEntity.PROPERTY_AGGREGATION))
                 );
 
                 /*
@@ -133,9 +133,10 @@ public class DatastreamQuerySpecification extends QuerySpecification<AbstractDat
                 // Either id matches or aggregation id matches
                 return builder.or(builder.equal(root.get(AbstractDatasetEntity.PROPERTY_ID), sq),
                                   builder.equal(root.get(AbstractDatasetEntity.PROPERTY_ID), subquery));
+                                      */
 
             };
         }
     }
-    */
+
 }
