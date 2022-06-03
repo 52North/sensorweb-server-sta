@@ -32,6 +32,7 @@ import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import org.n52.shetland.ogc.sta.StaConstants;
 import org.n52.sta.api.entity.HistoricalLocation;
+import org.n52.sta.api.entity.Location;
 
 import java.io.IOException;
 
@@ -42,7 +43,7 @@ public class HistoricalLocationJsonSerializer extends StaBaseSerializer<Historic
     }
 
     @Override
-    public void serialize(HistoricalLocation value, JsonGenerator gen, SerializerProvider provider) throws IOException {
+    public void serialize(HistoricalLocation value, JsonGenerator gen, SerializerProvider serializers) throws IOException {
         gen.writeStartObject();
         String id = value.getId();
 
@@ -50,6 +51,16 @@ public class HistoricalLocationJsonSerializer extends StaBaseSerializer<Historic
         writeProperty("id", name -> gen.writeStringField(StaConstants.AT_IOT_ID, id));
         writeStringProperty(StaConstants.AT_IOT_SELFLINK, () -> createSelfLink(id), gen);
         writeTimeProperty(StaConstants.PROP_TIME, value::getTime, gen);
+
+        String locations = StaConstants.LOCATIONS;
+        writeMemberCollection(locations, id, gen, LocationJsonSerializer::new, serializer -> {
+            for (Location item : value.getLocations()) {
+                serializer.serialize(item, gen, serializers);
+            }
+        });
+
+        writeMember(StaConstants.THING, id, gen, ThingJsonSerializer::new,
+                    serializer -> serializer.serialize(value.getThing(), gen, serializers));
 
         gen.writeEndObject();
     }

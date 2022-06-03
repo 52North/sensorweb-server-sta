@@ -25,17 +25,17 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
-package org.n52.sta.http.serialize.out;
 
-import java.io.IOException;
+package org.n52.sta.http.serialize.out;
 
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.SerializerProvider;
-
 import org.n52.shetland.ogc.sta.StaConstants;
 import org.n52.sta.api.entity.HistoricalLocation;
 import org.n52.sta.api.entity.Location;
 import org.n52.sta.api.entity.Thing;
+
+import java.io.IOException;
 
 public class LocationJsonSerializer extends StaBaseSerializer<Location> {
 
@@ -57,20 +57,20 @@ public class LocationJsonSerializer extends StaBaseSerializer<Location> {
         writeGeometryAndEncodingType(StaConstants.PROP_LOCATION, value::getGeometry, gen);
 
         // entity members
-        String things = StaConstants.LOCATIONS;
+        String things = StaConstants.THINGS;
         writeMemberCollection(things, id, gen, ThingJsonSerializer::new, serializer -> {
             for (Thing item : value.getThings()) {
                 serializer.serialize(item, gen, serializers);
             }
         });
 
-        String hitoricalLocations = StaConstants.HISTORICAL_LOCATIONS;
-        writeMemberCollection(hitoricalLocations, id, gen, HistoricalLocationJsonSerializer::new,
-                serializer -> {
-                    for (HistoricalLocation item : value.getHistoricalLocations()) {
-                        serializer.serialize(item, gen, serializers);
-                    }
-                });
+        String historicalLocations = StaConstants.HISTORICAL_LOCATIONS;
+        writeMemberCollection(historicalLocations, id, gen, HistoricalLocationJsonSerializer::new,
+                              serializer -> {
+                                  for (HistoricalLocation item : value.getHistoricalLocations()) {
+                                      serializer.serialize(item, gen, serializers);
+                                  }
+                              });
 
         gen.writeEndObject();
     }
