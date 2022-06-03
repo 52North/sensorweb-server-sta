@@ -182,6 +182,7 @@ public interface BaseQuerySpecifications<T> {
         Specification<T> apply(Specification<?> memberSpecification);
     }
 
+
     abstract class MemberFilterImpl<T> implements MemberFilter<T> {
 
         protected final Function<Specification<?>, Specification<T>> queryApplier;

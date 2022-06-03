@@ -29,7 +29,6 @@
 package org.n52.sta.data.query.specifications;
 
 import org.n52.series.db.beans.AbstractDatasetEntity;
-import org.n52.series.db.beans.DataEntity;
 import org.n52.series.db.beans.DatasetEntity;
 import org.n52.series.db.beans.PhenomenonEntity;
 import org.n52.series.db.beans.PlatformEntity;
@@ -48,7 +47,7 @@ public class DatastreamQuerySpecification extends QuerySpecification<AbstractDat
         this.filterByMember.put(StaConstants.OBSERVED_PROPERTIES,
                                 new DatastreamQuerySpecification.ObservedPropertyFilter());
         this.filterByMember.put(StaConstants.THINGS, new DatastreamQuerySpecification.ThingFilter());
-        this.filterByMember.put(StaConstants.OBSERVATIONS, new DatastreamQuerySpecification.ObservationFilter());
+        // this.filterByMember.put(StaConstants.OBSERVATIONS, new DatastreamQuerySpecification.ObservationFilter());
     }
 
     @Override
@@ -100,6 +99,7 @@ public class DatastreamQuerySpecification extends QuerySpecification<AbstractDat
     }
 
 
+    /*
     private final class ObservationFilter extends MemberFilterImpl<AbstractDatasetEntity> {
 
         protected Specification<AbstractDatasetEntity> prepareQuery(Specification<?> specification) {
@@ -129,8 +129,9 @@ public class DatastreamQuerySpecification extends QuerySpecification<AbstractDat
                 // Either id matches or aggregation id matches
                 return builder.or(builder.equal(root.get(AbstractDatasetEntity.PROPERTY_ID), sq),
                                   builder.equal(root.get(AbstractDatasetEntity.PROPERTY_ID), subquery));
-                 */
+
             };
         }
     }
+    */
 }
