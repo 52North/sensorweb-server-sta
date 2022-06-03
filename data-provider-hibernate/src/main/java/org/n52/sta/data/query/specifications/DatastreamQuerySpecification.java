@@ -29,6 +29,7 @@
 package org.n52.sta.data.query.specifications;
 
 import org.n52.series.db.beans.AbstractDatasetEntity;
+import org.n52.series.db.beans.DataEntity;
 import org.n52.series.db.beans.DatasetEntity;
 import org.n52.series.db.beans.PhenomenonEntity;
 import org.n52.series.db.beans.PlatformEntity;
@@ -53,8 +54,12 @@ public class DatastreamQuerySpecification extends QuerySpecification<AbstractDat
     @Override
     public Optional<Specification<AbstractDatasetEntity>> isStaEntity() {
         //TODO: ideally we should check for datasetType == not_initialized, but it is not exposed in the abstract class
-        return Optional.of((root, criteriaQuery, criteriaBuilder)
-                               -> root.get(DatasetEntity.PROPERTY_PLATFORM).isNotNull());
+        // checking for platform == null as a workaround
+        return Optional.of(
+            (root, query, builder) -> builder.and(
+                root.get(DatasetEntity.PROPERTY_PLATFORM).isNotNull(),
+                builder.isNull(root.get(AbstractDatasetEntity.PROPERTY_AGGREGATION))
+            ));
     }
 
     private final class SensorFilter extends MemberFilterImpl<AbstractDatasetEntity> {
@@ -99,7 +104,6 @@ public class DatastreamQuerySpecification extends QuerySpecification<AbstractDat
     }
 
 
-    /*
     private final class ObservationFilter extends MemberFilterImpl<AbstractDatasetEntity> {
 
         protected Specification<AbstractDatasetEntity> prepareQuery(Specification<?> specification) {
