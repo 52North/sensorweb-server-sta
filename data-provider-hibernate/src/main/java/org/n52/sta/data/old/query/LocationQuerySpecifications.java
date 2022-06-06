@@ -27,11 +27,6 @@
  */
 package org.n52.sta.data.old.query;
 
-import javax.persistence.criteria.Expression;
-import javax.persistence.criteria.Join;
-import javax.persistence.criteria.Root;
-import javax.persistence.criteria.Subquery;
-
 import org.n52.series.db.beans.DescribableEntity;
 import org.n52.series.db.beans.FormatEntity;
 import org.n52.series.db.beans.PlatformEntity;
@@ -46,6 +41,11 @@ import org.n52.shetland.ogc.sta.exception.STAInvalidFilterExpressionException;
 import org.n52.sta.data.old.util.HibernateSpatialCriteriaBuilder;
 import org.n52.svalbard.odata.core.expr.GeoValueExpr;
 import org.springframework.data.jpa.domain.Specification;
+
+import javax.persistence.criteria.Expression;
+import javax.persistence.criteria.Join;
+import javax.persistence.criteria.Root;
+import javax.persistence.criteria.Subquery;
 
 /**
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
@@ -235,7 +235,7 @@ public class LocationQuerySpecifications extends EntityQuerySpecifications<Locat
                                 builder,
                                 switched);
                     case StaConstants.PROP_ENCODINGTYPE:
-                        Join<LocationEntity, FormatEntity> join = root.join(LocationEntity.PROPERTY_LOCATION_ENCODINT);
+                        Join<LocationEntity, FormatEntity> join = root.join(LocationEntity.PROPERTY_LOCATION_ENCODING);
                         return handleDirectStringPropertyFilter(join.get(FormatEntity.FORMAT),
                                 propertyValue,
                                 operator,
