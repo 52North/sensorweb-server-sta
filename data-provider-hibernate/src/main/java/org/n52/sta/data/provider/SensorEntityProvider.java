@@ -67,20 +67,20 @@ public class SensorEntityProvider extends BaseEntityProvider<Sensor> {
         SensorGraphBuilder graphBuilder = new SensorGraphBuilder();
         addUnfilteredExpandItems(req.getQueryOptions(), graphBuilder);
 
-        Specification<ProcedureEntity> spec = createSpecificationFromRequest(req, new SensorQuerySpecification());
+        Specification<ProcedureEntity> spec = buildSpecification(req, new SensorQuerySpecification());
         Optional<ProcedureEntity> platform = sensorRepository.findOne(spec, graphBuilder);
         return platform.map(entity -> new SensorData(entity, propertyMapping));
     }
 
     @Override
     public EntityPage<Sensor> getEntities(Request req)throws ProviderException {
-        Pageable pagable = StaPageRequest.create(req.getQueryOptions());
+        Pageable pageable = StaPageRequest.create(req.getQueryOptions());
 
         SensorGraphBuilder graphBuilder = new SensorGraphBuilder();
         addUnfilteredExpandItems(req.getQueryOptions(), graphBuilder);
 
-        Specification<ProcedureEntity> spec = createSpecificationFromRequest(req, new SensorQuerySpecification());
-        Page<ProcedureEntity> results = sensorRepository.findAll(spec, pagable, graphBuilder);
+        Specification<ProcedureEntity> spec = buildSpecification(req, new SensorQuerySpecification());
+        Page<ProcedureEntity> results = sensorRepository.findAll(spec, pageable, graphBuilder);
         return new StaEntityPage<>(Sensor.class, results, entity -> new SensorData(entity, propertyMapping));
     }
 

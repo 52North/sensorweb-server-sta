@@ -3,6 +3,7 @@ package org.n52.sta.data.query.specifications;
 import org.n52.series.db.beans.DescribableEntity;
 import org.n52.series.db.beans.HibernateRelations;
 import org.n52.shetland.ogc.filter.FilterConstants;
+import org.n52.shetland.ogc.sta.StaConstants;
 import org.springframework.data.jpa.domain.Specification;
 
 import javax.persistence.criteria.CriteriaBuilder;
@@ -21,6 +22,8 @@ public abstract class QuerySpecification<T> implements BaseQuerySpecifications<T
     public QuerySpecification() {
         this.filterByMember = new HashMap<>();
         this.entityPathByProperty = new HashMap<>();
+        this.entityPathByProperty.put(StaConstants.PROP_ID,
+                                      createStringComparator(DescribableEntity.PROPERTY_STA_IDENTIFIER));
     }
 
     @Override

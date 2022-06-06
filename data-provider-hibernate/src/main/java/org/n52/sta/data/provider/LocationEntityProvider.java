@@ -69,7 +69,7 @@ public class LocationEntityProvider extends BaseEntityProvider<Location> {
         LocationGraphBuilder graphBuilder = new LocationGraphBuilder();
         addUnfilteredExpandItems(req.getQueryOptions(), graphBuilder);
 
-        Specification<LocationEntity> spec = createSpecificationFromRequest(req, new LocationQuerySpecification());
+        Specification<LocationEntity> spec = buildSpecification(req, new LocationQuerySpecification());
         Optional<LocationEntity> platform = locationRepository.findOne(spec, graphBuilder);
         return platform.map(entity -> new LocationData(entity, propertyMapping));
     }
@@ -77,13 +77,13 @@ public class LocationEntityProvider extends BaseEntityProvider<Location> {
     @Override
     public EntityPage<Location> getEntities(Request req) throws ProviderException {
         QueryOptions options = req.getQueryOptions();
-        Pageable pagable = StaPageRequest.create(options);
+        Pageable pageable = StaPageRequest.create(options);
 
         LocationGraphBuilder graphBuilder = new LocationGraphBuilder();
         addUnfilteredExpandItems(options, graphBuilder);
 
-        Specification<LocationEntity> spec = createSpecificationFromRequest(req, new LocationQuerySpecification());
-        Page<LocationEntity> results = locationRepository.findAll(spec, pagable, graphBuilder);
+        Specification<LocationEntity> spec = buildSpecification(req, new LocationQuerySpecification());
+        Page<LocationEntity> results = locationRepository.findAll(spec, pageable, graphBuilder);
         return new StaEntityPage<>(Location.class, results, entity -> new LocationData(entity, propertyMapping));
     }
 

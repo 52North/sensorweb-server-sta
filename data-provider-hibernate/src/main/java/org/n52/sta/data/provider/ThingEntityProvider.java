@@ -72,7 +72,7 @@ public class ThingEntityProvider extends BaseEntityProvider<Thing> {
         ThingGraphBuilder graphBuilder = new ThingGraphBuilder(req);
         addUnfilteredExpandItems(req.getQueryOptions(), graphBuilder);
 
-        Specification<PlatformEntity> spec = createSpecificationFromRequest(req, new ThingQuerySpecification());
+        Specification<PlatformEntity> spec = buildSpecification(req, new ThingQuerySpecification());
         Optional<PlatformEntity> platform = thingRepository.findOne(spec, graphBuilder);
         return platform.map(entity -> new ThingData(entity, propertyMapping));
     }
@@ -80,13 +80,13 @@ public class ThingEntityProvider extends BaseEntityProvider<Thing> {
     @Override
     public EntityPage<Thing> getEntities(Request req) throws ProviderException {
         QueryOptions options = req.getQueryOptions();
-        Pageable pagable = StaPageRequest.create(options);
+        Pageable pageable = StaPageRequest.create(options);
 
         ThingGraphBuilder graphBuilder = new ThingGraphBuilder(req);
         addUnfilteredExpandItems(options, graphBuilder);
 
-        Specification<PlatformEntity> spec = createSpecificationFromRequest(req, new ThingQuerySpecification());
-        Page<PlatformEntity> results = thingRepository.findAll(spec, pagable, graphBuilder);
+        Specification<PlatformEntity> spec = buildSpecification(req, new ThingQuerySpecification());
+        Page<PlatformEntity> results = thingRepository.findAll(spec, pageable, graphBuilder);
         return new StaEntityPage<>(Thing.class, results, entity -> new ThingData(entity, propertyMapping));
     }
 

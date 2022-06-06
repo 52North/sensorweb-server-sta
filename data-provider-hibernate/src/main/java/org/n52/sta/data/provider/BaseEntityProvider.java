@@ -35,6 +35,7 @@ import org.n52.shetland.ogc.sta.exception.STAInvalidFilterExpressionException;
 import org.n52.sta.api.EntityProvider;
 import org.n52.sta.api.ProviderException;
 import org.n52.sta.api.entity.Identifiable;
+import org.n52.sta.api.path.Path;
 import org.n52.sta.api.path.PathSegment;
 import org.n52.sta.api.path.Request;
 import org.n52.sta.config.EntityPropertyMapping;
@@ -87,45 +88,77 @@ public abstract class BaseEntityProvider<T extends Identifiable> implements Enti
         }
     }
 
-    protected <E> Specification<E> createSpecificationFromRequest(Request req, BaseQuerySpecifications<E> qs)
-        throws ProviderException {
-        // Case 1: We have no path - match based on queryOptions alone
-        if (!req.getPath().isPresent() || req.getPath().get().getSegments().size() == 1) {
-            return FilterQueryParser.parse(req.getQueryOptions(), qs);
+    /**
+     * Builds specification based on Request. Parses QueryOptions and Request-Path if present.
+     *
+     * @param req Request
+     * @param qs  QuerySpecifications of requested Entity Type
+     * @param <E> Entity Type
+     * @return
+     */
+    protected <E> Specification<E> buildSpecification(Request req, BaseQuerySpecifications<E> qs) {
+        // Parse QueryOptions
+        Specification<E> querySpec = FilterQueryParser.parse(req.getQueryOptions(), qs);
+
+        // Parse Path if present
+        Specification<E> pathSpec = null;
+        if (req.getPath().isPresent()) {
+            pathSpec = parsePath(req.getPath().get(), qs);
         }
 
-        // Case 2: We have a path specifying the entity
-        // Iterate over all Segments and chain specifications
+        return (pathSpec != null) ? pathSpec.and(querySpec) : querySpec;
+    }
+
+    private <E> Specification<E> parsePath(Path path, BaseQuerySpecifications<E> qs)
+        throws ProviderException {
+        Specification<E> specification = null;
         try {
-            List<PathSegment> segments = req.getPath().get().getSegments();
-            //BaseQuerySpecifications<?> currentBase = qs;
-            //Specification<?> specification = null;
-            PathSegment current = segments.get(segments.size() - 1);
-            BaseQuerySpecifications<?> spec =
-                QuerySpecificationFactory.createSpecification(current.getCollection());
-            Specification<?> specification1 = spec.equalsStaIdentifier(current.getIdentifier().get());
+            List<PathSegment> segments = path.getSegments();
 
-            //TODO: implement handling of this
-            if (segments.size() > 2) {
-                throw new SpecificationsException("navigation via >1 relations is not implemented yet!");
-            /*for (int i = segments.size() - 2; i > 0 ; i--) {
-                current = segments.get(i);
-                try {
-                    BaseQuerySpecifications<?> spec =
-                            QuerySpecificationFactory.createSpecification(current.getCollection());
-
-                    Specification<?> specification = currentBase.applyOnMember(current.getCollection(),
-                            spec.equalsStaIdentifier(current.getIdentifier()
-                                    .orElse(null)));
-                    specification.and()
-                    currentBase = spec;
-                } catch (STAInvalidFilterExpressionException e) {
-                    throw new ProviderException("could not parse path", e);
-                }
-            }*/
+            // Segment of requested Entity
+            PathSegment current = segments.get(0);
+            if (current.getIdentifier().isPresent()) {
+                specification = qs.equalsStaIdentifier(current.getIdentifier().get());
             }
 
-            return qs.applyOnMember(current.getCollection(), specification1);
+            //TODO: implement handling of this
+            if (segments.size() > 3) {
+                throw new SpecificationsException("navigation via >1 relations is not implemented yet!");
+            }
+
+            if (segments.size() > 1) {
+                current = segments.get(1);
+                BaseQuerySpecifications<?> bqs =
+                    QuerySpecificationFactory.createSpecification(current.getCollection());
+
+                Specification<E> segmentSpec =
+                    qs.applyOnMember(current.getCollection(),
+                                         bqs.equalsStaIdentifier(current.getIdentifier().orElse(null)));
+
+                return segmentSpec;
+            } else {
+                return specification;
+            }
+
+            // Iterate over preceding Segments and chain specifications
+            /*
+            BaseQuerySpecifications<?> lastQS = qs;
+            Specification<?> stepSpec = specification;
+                for (int i = 1; i < segments.size(); i++) {
+                current = segments.get(i);
+
+                BaseQuerySpecifications<?> bqs =
+                        QuerySpecificationFactory.createSpecification(current.getCollection());
+
+                Specification<?> segmentSpec =
+                    lastQS.applyOnMember(current.getCollection(),
+                                         bqs.equalsStaIdentifier(current.getIdentifier().orElse(null)));
+
+                stepSpec = stepSpec.and(segmentSpec);
+                lastQS = bqs;
+                stepSpec = segmentSpec;
+            }
+            */
         } catch (SpecificationsException | STAInvalidFilterExpressionException e) {
             LOGGER.debug(e.getMessage());
             throw new ProviderException(e.getMessage());

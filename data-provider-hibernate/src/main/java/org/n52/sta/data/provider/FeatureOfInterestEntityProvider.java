@@ -81,14 +81,14 @@ public class FeatureOfInterestEntityProvider extends BaseEntityProvider<FeatureO
 
     @Override
     public EntityPage<FeatureOfInterest> getEntities(Request req)throws ProviderException {
-        Pageable pagable = StaPageRequest.create(options);
+        Pageable pageable = StaPageRequest.create(options);
 
         FeatureOfInterestGraphBuilder graphBuilder = new FeatureOfInterestGraphBuilder();
         addUnfilteredExpandItems(options, graphBuilder);
 
         Specification<AbstractFeatureEntity<?>> spec = FilterQueryParser.parse(options, new
         FeatureOfInterestQuerySpecification());
-        Page<AbstractFeatureEntity<?>> results = featureOfInterestRepository.findAll(spec, pagable, graphBuilder);
+        Page<AbstractFeatureEntity<?>> results = featureOfInterestRepository.findAll(spec, pageable, graphBuilder);
         return new StaEntityPage<>(FeatureOfInterest.class, results, FeatureOfInterestData::new);
     }
     */
