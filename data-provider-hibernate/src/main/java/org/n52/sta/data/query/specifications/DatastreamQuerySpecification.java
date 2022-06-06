@@ -37,6 +37,7 @@ import org.n52.series.db.beans.ProcedureEntity;
 import org.n52.shetland.ogc.sta.StaConstants;
 import org.springframework.data.jpa.domain.Specification;
 
+import javax.persistence.criteria.Root;
 import javax.persistence.criteria.Subquery;
 import java.util.Optional;
 
@@ -48,7 +49,7 @@ public class DatastreamQuerySpecification extends QuerySpecification<AbstractDat
         this.filterByMember.put(StaConstants.OBSERVED_PROPERTIES,
                                 new DatastreamQuerySpecification.ObservedPropertyFilter());
         this.filterByMember.put(StaConstants.THINGS, new DatastreamQuerySpecification.ThingFilter());
-        // this.filterByMember.put(StaConstants.OBSERVATIONS, new DatastreamQuerySpecification.ObservationFilter());
+        this.filterByMember.put(StaConstants.OBSERVATIONS, new DatastreamQuerySpecification.ObservationFilter());
     }
 
     @Override
@@ -108,22 +109,11 @@ public class DatastreamQuerySpecification extends QuerySpecification<AbstractDat
 
         protected Specification<AbstractDatasetEntity> prepareQuery(Specification<?> specification) {
             return (root, query, builder) -> {
-                EntityQuery memberQuery = createQuery(DataEntity.PROPERTY_DATASET_ID,
-                                                      DataEntity.class);
-                Subquery<?> subquery = memberQuery.create(specification, query, builder);
-
-                return builder.or(
-                    // Non-Aggregation Dataset directly linked in Observation
-                    builder.in(subquery).value(root.get(AbstractDatasetEntity.PROPERTY_ID)),
-                    // Aggregation Dataset directly linked in Observation
-                    // builder.in(subquery).value(root.get(AbstractDatasetEntity.PROPERTY_AGGREGATION))
-                );
-
-                /*
+                //TODO: maybe refactor this to use BaseQuerySpecifications.createQuery similar to other Filters
                 Subquery<AbstractDatasetEntity> sq = query.subquery(AbstractDatasetEntity.class);
                 Root<DataEntity> data = sq.from(DataEntity.class);
                 sq.select(data.get(DataEntity.PROPERTY_DATASET_ID))
-                    .where(builder.equal(data.get(DataEntity.PROPERTY_STA_IDENTIFIER), observationIdentifier));
+                    .where(((Specification<DataEntity>) specification).toPredicate(data, query, builder));
 
                 Subquery<AbstractDatasetEntity> subquery = query.subquery(AbstractDatasetEntity.class);
                 Root<AbstractDatasetEntity> realDataset = subquery.from(AbstractDatasetEntity.class);
@@ -133,7 +123,6 @@ public class DatastreamQuerySpecification extends QuerySpecification<AbstractDat
                 // Either id matches or aggregation id matches
                 return builder.or(builder.equal(root.get(AbstractDatasetEntity.PROPERTY_ID), sq),
                                   builder.equal(root.get(AbstractDatasetEntity.PROPERTY_ID), subquery));
-                                      */
 
             };
         }
