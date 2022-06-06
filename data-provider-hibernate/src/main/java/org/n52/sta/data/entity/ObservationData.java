@@ -25,13 +25,8 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
-package org.n52.sta.data.entity;
 
-import java.util.Collection;
-import java.util.Date;
-import java.util.Map;
-import java.util.Optional;
-import java.util.stream.Collectors;
+package org.n52.sta.data.entity;
 
 import org.joda.time.DateTime;
 import org.n52.series.db.beans.DataEntity;
@@ -42,6 +37,12 @@ import org.n52.sta.api.entity.FeatureOfInterest;
 import org.n52.sta.api.entity.Observation;
 import org.n52.sta.config.EntityPropertyMapping;
 import org.n52.sta.old.utils.TimeUtil;
+
+import java.util.Collection;
+import java.util.Date;
+import java.util.Map;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 public class ObservationData<T> extends StaData<DataEntity<T>> implements Observation {
 
@@ -93,14 +94,20 @@ public class ObservationData<T> extends StaData<DataEntity<T>> implements Observ
     public Map<String, Object> getParameters() {
         Map<String, Object> parameters = toMap(data.getParameters());
         String samplingGeometry = propertyMapping.getSamplingGeometry();
-        Optional<GeometryEntity> optionalSamplingGeometry = Optional.ofNullable(data.getGeometryEntity());
-        optionalSamplingGeometry.ifPresent(entity -> parameters.put(samplingGeometry, entity.getGeometry()));
+        if (samplingGeometry != null) {
+            Optional<GeometryEntity> optionalSamplingGeometry = Optional.ofNullable(data.getGeometryEntity());
+            optionalSamplingGeometry.ifPresent(entity -> parameters.put(samplingGeometry, entity.getGeometry()));
+        }
 
         if ("profile".equals(getValueType())) {
             String verticalFrom = propertyMapping.getVerticalFrom();
+            if (verticalFrom != null) {
+                Optional.ofNullable(data.getVerticalFrom()).ifPresent(entity -> parameters.put(verticalFrom, entity));
+            }
             String verticalTo = propertyMapping.getVerticalTo();
-            Optional.ofNullable(data.getVerticalFrom()).ifPresent(entity -> parameters.put(verticalFrom, entity));
-            Optional.ofNullable(data.getVerticalTo()).ifPresent(entity -> parameters.put(verticalTo, entity));
+            if (verticalTo != null) {
+                Optional.ofNullable(data.getVerticalTo()).ifPresent(entity -> parameters.put(verticalTo, entity));
+            }
         }
         return parameters;
     }

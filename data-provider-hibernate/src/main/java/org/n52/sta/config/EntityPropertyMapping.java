@@ -3,19 +3,17 @@ package org.n52.sta.config;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 
-// TODO probably we can define a general property mapping config?
-
 @Configuration
 @ConfigurationProperties(prefix = "server.observation.parameter")
 public class EntityPropertyMapping {
 
-    private String samplingGeometry;
+    private String samplingGeometry = "http://www.opengis.net/def/param-name/OGC-OM/2.0/samplingGeometry";
 
-    private String verticalFrom;
+    private String verticalFrom = "verticalFrom";
 
-    private String verticalTo;
+    private String verticalTo = "verticalTo";
 
-    private String verticalFromTo;
+    private String verticalFromTo = "verticalFromTo";
 
     public String getSamplingGeometry() {
         return samplingGeometry;
