@@ -27,16 +27,15 @@
  */
 package org.n52.sta.http.serialize.out;
 
-import java.io.IOException;
-
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.SerializerProvider;
-
 import org.n52.shetland.ogc.sta.StaConstants;
 import org.n52.sta.api.entity.Datastream;
 import org.n52.sta.api.entity.HistoricalLocation;
 import org.n52.sta.api.entity.Location;
 import org.n52.sta.api.entity.Thing;
+
+import java.io.IOException;
 
 public class ThingJsonSerializer extends StaBaseSerializer<Thing> {
 
@@ -50,8 +49,9 @@ public class ThingJsonSerializer extends StaBaseSerializer<Thing> {
         String id = value.getId();
 
         // entity properties
-        writeProperty("id", name -> gen.writeStringField(StaConstants.AT_IOT_ID, id));
-        writeStringProperty(StaConstants.AT_IOT_SELFLINK, () -> createSelfLink(id), gen);
+        writeProperty(StaConstants.PROP_ID, name -> gen.writeStringField(StaConstants.AT_IOT_ID, id));
+        writeProperty(StaConstants.PROP_SELF_LINK,
+                      name -> gen.writeStringField(StaConstants.AT_IOT_SELFLINK, createSelfLink(id)));
         writeStringProperty(StaConstants.PROP_NAME, value::getName, gen);
         writeStringProperty(StaConstants.PROP_DESCRIPTION, value::getDescription, gen);
         writeObjectProperty(StaConstants.PROP_PROPERTIES, value::getProperties, gen);

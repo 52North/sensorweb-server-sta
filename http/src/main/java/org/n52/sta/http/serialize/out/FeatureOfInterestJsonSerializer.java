@@ -25,6 +25,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
+
 package org.n52.sta.http.serialize.out;
 
 import com.fasterxml.jackson.core.JsonGenerator;
@@ -43,13 +44,14 @@ public class FeatureOfInterestJsonSerializer extends StaBaseSerializer<FeatureOf
 
     @Override
     public void serialize(FeatureOfInterest value, JsonGenerator gen, SerializerProvider serializers)
-            throws IOException {
+        throws IOException {
         gen.writeStartObject();
         String id = value.getId();
 
         // entity properties
-        writeProperty("id", name -> gen.writeStringField(StaConstants.AT_IOT_ID, id));
-        writeStringProperty(StaConstants.AT_IOT_SELFLINK, () -> createSelfLink(id), gen);
+        writeProperty(StaConstants.PROP_ID, name -> gen.writeStringField(StaConstants.AT_IOT_ID, id));
+        writeProperty(StaConstants.PROP_SELF_LINK,
+                      name -> gen.writeStringField(StaConstants.AT_IOT_SELFLINK, createSelfLink(id)));
         writeStringProperty(StaConstants.PROP_NAME, value::getName, gen);
         writeStringProperty(StaConstants.PROP_DESCRIPTION, value::getDescription, gen);
         writeObjectProperty(StaConstants.PROP_DESCRIPTION, value::getProperties, gen);

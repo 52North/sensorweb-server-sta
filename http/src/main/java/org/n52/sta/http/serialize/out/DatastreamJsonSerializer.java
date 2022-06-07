@@ -25,16 +25,16 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
-package org.n52.sta.http.serialize.out;
 
-import java.io.IOException;
+package org.n52.sta.http.serialize.out;
 
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.SerializerProvider;
-
 import org.n52.shetland.ogc.sta.StaConstants;
 import org.n52.sta.api.entity.Datastream;
 import org.n52.sta.api.entity.Observation;
+
+import java.io.IOException;
 
 public class DatastreamJsonSerializer extends StaBaseSerializer<Datastream> {
 
@@ -48,8 +48,9 @@ public class DatastreamJsonSerializer extends StaBaseSerializer<Datastream> {
         String id = value.getId();
 
         // entity properties
-        writeProperty("id", name -> gen.writeStringField(StaConstants.AT_IOT_ID, id));
-        writeStringProperty(StaConstants.AT_IOT_SELFLINK, () -> createSelfLink(id), gen);
+        writeProperty(StaConstants.PROP_ID, name -> gen.writeStringField(StaConstants.AT_IOT_ID, id));
+        writeProperty(StaConstants.PROP_SELF_LINK,
+                      name -> gen.writeStringField(StaConstants.AT_IOT_SELFLINK, createSelfLink(id)));
         writeStringProperty(StaConstants.PROP_NAME, value::getName, gen);
         writeStringProperty(StaConstants.PROP_DESCRIPTION, value::getDescription, gen);
         writeStringProperty(StaConstants.PROP_OBSERVATION_TYPE, value::getObservationType, gen);
@@ -69,13 +70,13 @@ public class DatastreamJsonSerializer extends StaBaseSerializer<Datastream> {
         });
 
         writeMember(StaConstants.THING, id, gen, ThingJsonSerializer::new,
-                serializer -> serializer.serialize(value.getThing(), gen, serializers));
+                    serializer -> serializer.serialize(value.getThing(), gen, serializers));
 
         writeMember(StaConstants.SENSOR, id, gen, SensorJsonSerializer::new,
-                serializer -> serializer.serialize(value.getSensor(), gen, serializers));
+                    serializer -> serializer.serialize(value.getSensor(), gen, serializers));
 
         writeMember(StaConstants.OBSERVED_PROPERTY, id, gen, ObservedPropertyJsonSerializer::new,
-                serializer -> serializer.serialize(value.getObservedProperty(), gen, serializers));
+                    serializer -> serializer.serialize(value.getObservedProperty(), gen, serializers));
 
         gen.writeEndObject();
     }

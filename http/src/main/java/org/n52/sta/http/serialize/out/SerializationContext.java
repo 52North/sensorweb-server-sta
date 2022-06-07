@@ -27,14 +27,9 @@
  */
 package org.n52.sta.http.serialize.out;
 
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Set;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
 import com.fasterxml.jackson.databind.module.SimpleModule;
-
 import org.n52.janmayen.stream.Streams;
 import org.n52.shetland.filter.ExpandFilter;
 import org.n52.shetland.filter.ExpandItem;
@@ -42,6 +37,10 @@ import org.n52.shetland.filter.SelectFilter;
 import org.n52.shetland.oasis.odata.query.option.QueryOptions;
 import org.n52.sta.api.entity.Identifiable;
 import org.n52.sta.http.controller.RequestContext;
+
+import java.util.Objects;
+import java.util.Optional;
+import java.util.Set;
 
 public class SerializationContext {
 

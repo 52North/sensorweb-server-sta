@@ -48,8 +48,9 @@ public class ObservedPropertyJsonSerializer extends StaBaseSerializer<ObservedPr
         String id = value.getId();
 
         // entity properties
-        writeProperty("id", name -> gen.writeStringField(StaConstants.AT_IOT_ID, id));
-        writeStringProperty(StaConstants.AT_IOT_SELFLINK, () -> createSelfLink(id), gen);
+        writeProperty(StaConstants.PROP_ID, name -> gen.writeStringField(StaConstants.AT_IOT_ID, id));
+        writeProperty(StaConstants.PROP_SELF_LINK,
+                      name -> gen.writeStringField(StaConstants.AT_IOT_SELFLINK, createSelfLink(id)));
         writeStringProperty(StaConstants.PROP_NAME, value::getName, gen);
         writeStringProperty(StaConstants.PROP_DESCRIPTION, value::getDescription, gen);
         writeStringProperty(StaConstants.PROP_DEFINITION, value::getDefinition, gen);

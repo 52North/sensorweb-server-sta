@@ -107,8 +107,9 @@ public class ObservationJsonSerializer extends StaBaseSerializer<Observation> {
         String id = value.getId();
 
         // entity properties
-        writeProperty("id", name -> gen.writeStringField(StaConstants.AT_IOT_ID, id));
-        writeStringProperty(StaConstants.AT_IOT_SELFLINK, () -> createSelfLink(id), gen);
+        writeProperty(StaConstants.PROP_ID, name -> gen.writeStringField(StaConstants.AT_IOT_ID, id));
+        writeProperty(StaConstants.PROP_SELF_LINK,
+                      name -> gen.writeStringField(StaConstants.AT_IOT_SELFLINK, createSelfLink(id)));
         writeObjectProperty(StaConstants.PROP_RESULT_QUALITY, value::getResultQuality, gen);
         writeObjectProperty(StaConstants.PROP_PARAMETERS, value::getParameters, gen);
 
@@ -116,7 +117,9 @@ public class ObservationJsonSerializer extends StaBaseSerializer<Observation> {
         writeTimeProperty(StaConstants.PROP_VALID_TIME, value::getValidTime, gen);
         writeTimeProperty(StaConstants.PROP_PHENOMENON_TIME, value::getPhenomenonTime, gen);
 
-        serializeResult(value, gen, serializers);
+        if (getSerializationContext().isSelected(StaConstants.PROP_RESULT)) {
+            serializeResult(value, gen, serializers);
+        }
 
         // entity members
         writeMember(StaConstants.DATASTREAM, id, gen, DatastreamJsonSerializer::new,
