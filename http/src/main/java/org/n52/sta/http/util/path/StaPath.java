@@ -1,32 +1,33 @@
 package org.n52.sta.http.util.path;
 
-import org.n52.sta.api.path.Path;
-import org.n52.sta.api.path.PathSegment;
-import org.n52.sta.http.serialize.out.SerializationContext;
-import org.n52.sta.http.serialize.out.StaBaseSerializer;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Function;
 
+import org.n52.sta.api.path.ODataPath;
+import org.n52.sta.api.path.PathSegment;
+import org.n52.sta.http.serialize.out.SerializationContext;
+import org.n52.sta.http.serialize.out.StaBaseSerializer;
+
 /**
  * Holds a URI referencing an STA entity.
  */
-public class StaPath implements Path {
+public class StaPath implements ODataPath {
 
-    private final Path.PathType type;
+    private final ODataPath.PathType type;
 
-    private boolean isRef;
-
-    private final List<PathSegment> path = new ArrayList<>();
+    private final List<PathSegment> path;
 
     private final Function<SerializationContext, StaBaseSerializer<?>> serializerFactory;
-
+    
+    private boolean isRef;
+    
     public StaPath(PathType type,
                    PathSegment segment,
                    Function<SerializationContext, StaBaseSerializer<?>> serializerFactory) {
         this.type = type;
         this.serializerFactory = serializerFactory;
+        this.path = new ArrayList<>();
         this.path.add(segment);
     }
 
@@ -36,8 +37,14 @@ public class StaPath implements Path {
     }
 
     @Override
-    public List<PathSegment> getSegments() {
+    public List<PathSegment> getPathSegments() {
         return path;
+    }
+
+    void addPathSegment(PathSegment pathSegment) {
+        if (pathSegment != null) {
+            path.add(pathSegment);
+        }
     }
 
     public Function<SerializationContext, StaBaseSerializer<?>> getSerializerFactory() {

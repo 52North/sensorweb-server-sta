@@ -28,21 +28,24 @@
 
 package org.n52.sta.http.controller;
 
-import org.n52.shetland.oasis.odata.query.option.QueryOptions;
-import org.n52.shetland.ogc.sta.exception.STAInvalidUrlException;
-import org.n52.sta.api.path.Request;
-import org.n52.sta.http.util.path.PathFactory;
-import org.n52.sta.http.util.path.StaPath;
-import org.n52.svalbard.odata.core.QueryOptionsFactory;
-import org.springframework.web.servlet.HandlerMapping;
-
-import javax.servlet.http.HttpServletRequest;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Function;
+
+import javax.servlet.http.HttpServletRequest;
+
+import org.n52.shetland.oasis.odata.query.option.QueryOptions;
+import org.n52.shetland.ogc.sta.exception.STAInvalidUrlException;
+import org.n52.sta.api.path.ODataPath;
+import org.n52.sta.api.path.ODataPath.PathType;
+import org.n52.sta.api.path.Request;
+import org.n52.sta.http.util.path.PathFactory;
+import org.n52.sta.http.util.path.StaPath;
+import org.n52.svalbard.odata.core.QueryOptionsFactory;
+import org.springframework.web.servlet.HandlerMapping;
 
 public final class RequestContext {
 
@@ -63,7 +66,7 @@ public final class RequestContext {
         Objects.requireNonNull(request, "request must not be null");
         QueryOptions queryOptions = parseQueryOptions(request);
 
-        StaPath path = pathFactory.parsePath((String) request.getAttribute(HandlerMapping.LOOKUP_PATH));
+        StaPath path = pathFactory.parse((String) request.getAttribute(HandlerMapping.LOOKUP_PATH));
         return new RequestContext(serviceUri, queryOptions, path);
     }
 
@@ -97,6 +100,8 @@ public final class RequestContext {
     }
 
     public StaPath getPath() {
-        return (StaPath) request.getPath().get();
+        return (StaPath) request.getPath();
+    }
+
     }
 }

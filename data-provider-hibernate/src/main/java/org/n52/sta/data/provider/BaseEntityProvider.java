@@ -35,7 +35,7 @@ import org.n52.shetland.ogc.sta.exception.STAInvalidFilterExpressionException;
 import org.n52.sta.api.EntityProvider;
 import org.n52.sta.api.ProviderException;
 import org.n52.sta.api.entity.Identifiable;
-import org.n52.sta.api.path.Path;
+import org.n52.sta.api.path.ODataPath;
 import org.n52.sta.api.path.PathSegment;
 import org.n52.sta.api.path.Request;
 import org.n52.sta.config.EntityPropertyMapping;
@@ -102,18 +102,16 @@ public abstract class BaseEntityProvider<T extends Identifiable> implements Enti
 
         // Parse Path if present
         Specification<E> pathSpec = null;
-        if (req.getPath().isPresent()) {
-            pathSpec = parsePath(req.getPath().get(), qs);
-        }
+        pathSpec = parsePath(req.getPath(), qs);
 
         return (pathSpec != null) ? pathSpec.and(querySpec) : querySpec;
     }
 
-    private <E> Specification<E> parsePath(Path path, BaseQuerySpecifications<E> qs)
+    private <E> Specification<E> parsePath(ODataPath path, BaseQuerySpecifications<E> qs)
         throws ProviderException {
         Specification<E> specification = null;
         try {
-            List<PathSegment> segments = path.getSegments();
+            List<PathSegment> segments = path.getPathSegments();
 
             // Segment of requested Entity
             PathSegment current = segments.get(0);

@@ -2,11 +2,11 @@ package org.n52.sta.api.path;
 
 import java.util.List;
 
-public interface Path {
+public interface ODataPath {
 
     PathType getType();
 
-    List<PathSegment> getSegments();
+    List<PathSegment> getPathSegments();
 
     enum PathType {
         collection,
