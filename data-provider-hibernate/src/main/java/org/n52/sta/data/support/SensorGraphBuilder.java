@@ -37,7 +37,7 @@ public class SensorGraphBuilder extends GraphBuilder<ProcedureEntity> {
     public SensorGraphBuilder(Request req) {
         super(ProcedureEntity.class);
         // do not fetch anything when getting by reference
-        if (req.getPath().isPresent() && req.getPath().get().isRef()) {
+        if (req.getPath().isRef()) {
             return;
         }
         addGraphText(GraphText.GRAPH_PARAMETERS);

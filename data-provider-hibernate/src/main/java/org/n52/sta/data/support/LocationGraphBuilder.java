@@ -37,7 +37,7 @@ public class LocationGraphBuilder extends GraphBuilder<LocationEntity> {
     public LocationGraphBuilder(Request req) {
         super(LocationEntity.class);
         // do not fetch anything when getting by reference
-        if (req.getPath().isPresent() && req.getPath().get().isRef()) {
+        if (req.getPath().isRef()) {
             return;
         }
         addGraphText(GraphText.GRAPH_PARAMETERS);

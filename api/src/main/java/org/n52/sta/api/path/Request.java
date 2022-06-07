@@ -36,7 +36,7 @@ public class Request {
      * Creating any $ref-request does not require any path as instances are
      * referencable by id. However, any call to {@link #getPath()} will result in
      * an {@link IllegalStateException}.
-     * 
+     *
      * @param id the instance's id
      * @return a request to get an instance by its id
      */
@@ -54,15 +54,12 @@ public class Request {
      * <p>
      * Illegal call, if the request has been created as $ref=id request via
      * {@link #createRefRequest(String)}.
-     * 
+     *
      * @return the request path
      * @throws IllegalStateException in case of any $ref=id request
      */
     public ODataPath getPath() {
-        if (path.isEmpty()) {
-            throw new IllegalStateException("Request has been created without any path!");
-        }
-        return path.get();
+        return path.orElseThrow(() -> new IllegalStateException("Request has been created without any path!"));
     }
 
     public QueryOptions getQueryOptions() {

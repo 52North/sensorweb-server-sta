@@ -31,5 +31,5 @@ public class DefaultStaPathFactory extends PathFactory {
             throw new STAInvalidUrlException("Invalid URL: " + url);
         }
     }
-    
+
 }

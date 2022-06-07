@@ -39,8 +39,6 @@ import javax.servlet.http.HttpServletRequest;
 
 import org.n52.shetland.oasis.odata.query.option.QueryOptions;
 import org.n52.shetland.ogc.sta.exception.STAInvalidUrlException;
-import org.n52.sta.api.path.ODataPath;
-import org.n52.sta.api.path.ODataPath.PathType;
 import org.n52.sta.api.path.Request;
 import org.n52.sta.http.util.path.PathFactory;
 import org.n52.sta.http.util.path.StaPath;
@@ -101,5 +99,4 @@ public final class RequestContext {
         return (StaPath) request.getPath();
     }
 
-    }
 }

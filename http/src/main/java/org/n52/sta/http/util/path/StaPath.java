@@ -19,9 +19,9 @@ public class StaPath implements ODataPath {
     private final List<PathSegment> path;
 
     private final Function<SerializationContext, StaBaseSerializer<?>> serializerFactory;
-    
+
     private boolean isRef;
-    
+
     public StaPath(PathType type,
                    PathSegment segment,
                    Function<SerializationContext, StaBaseSerializer<?>> serializerFactory) {
@@ -51,6 +51,7 @@ public class StaPath implements ODataPath {
         return serializerFactory;
     }
 
+    @Override
     public boolean isRef() {
         return isRef;
     }
