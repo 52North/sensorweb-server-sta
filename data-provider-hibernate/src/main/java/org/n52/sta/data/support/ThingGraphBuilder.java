@@ -36,8 +36,11 @@ public class ThingGraphBuilder extends GraphBuilder<PlatformEntity> {
 
     public ThingGraphBuilder(Request req) {
         super(PlatformEntity.class);
+        // do not fetch anything when getting by reference
+        if (req.getPath().isPresent() && req.getPath().get().isRef()) {
+            return;
+        }
 
-        //TODO: use different default Graph if req has $select as it may not need everything
         addGraphText(GraphText.GRAPH_PARAMETERS);
     }
 

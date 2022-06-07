@@ -25,16 +25,23 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
+
 package org.n52.sta.data.support;
 
 import org.n52.series.db.beans.AbstractDatasetEntity;
 import org.n52.shetland.filter.ExpandItem;
 import org.n52.shetland.ogc.sta.StaConstants;
+import org.n52.sta.api.path.Request;
 
 public class DatastreamGraphBuilder extends GraphBuilder<AbstractDatasetEntity> {
 
-    public DatastreamGraphBuilder() {
+    public DatastreamGraphBuilder(Request req) {
         super(AbstractDatasetEntity.class);
+        // do not fetch anything when getting by reference
+        if (req.getPath().isPresent() && req.getPath().get().isRef()) {
+            return;
+        }
+
         addGraphText(GraphText.GRAPH_PARAMETERS);
         addGraphText(GraphText.GRAPH_OM_OBS_TYPE);
         addGraphText(GraphText.GRAPH_UOM);

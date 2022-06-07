@@ -64,7 +64,7 @@ public class FeatureOfInterestEntityProvider extends BaseEntityProvider<FeatureO
     }
 
     @Override public Optional<FeatureOfInterest> getEntity(Request req) throws ProviderException {
-        FeatureOfInterestGraphBuilder graphBuilder = new FeatureOfInterestGraphBuilder();
+        FeatureOfInterestGraphBuilder graphBuilder = new FeatureOfInterestGraphBuilder(req);
         addUnfilteredExpandItems(req.getQueryOptions(), graphBuilder);
 
         Specification<AbstractFeatureEntity> spec = buildSpecification(req, new FeatureOfInterestQuerySpecification());
@@ -75,7 +75,7 @@ public class FeatureOfInterestEntityProvider extends BaseEntityProvider<FeatureO
     @Override public EntityPage<FeatureOfInterest> getEntities(Request req) throws ProviderException {
         Pageable pageable = StaPageRequest.create(req.getQueryOptions());
 
-        FeatureOfInterestGraphBuilder graphBuilder = new FeatureOfInterestGraphBuilder();
+        FeatureOfInterestGraphBuilder graphBuilder = new FeatureOfInterestGraphBuilder(req);
         addUnfilteredExpandItems(req.getQueryOptions(), graphBuilder);
 
         Specification<AbstractFeatureEntity> spec = buildSpecification(req, new FeatureOfInterestQuerySpecification());

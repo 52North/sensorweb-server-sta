@@ -16,6 +16,8 @@ public class StaPath implements Path {
 
     private final Path.PathType type;
 
+    private boolean isRef;
+
     private final List<PathSegment> path = new ArrayList<>();
 
     private final Function<SerializationContext, StaBaseSerializer<?>> serializerFactory;
@@ -40,6 +42,14 @@ public class StaPath implements Path {
 
     public Function<SerializationContext, StaBaseSerializer<?>> getSerializerFactory() {
         return serializerFactory;
+    }
+
+    public boolean isRef() {
+        return isRef;
+    }
+
+    public void setRef(boolean ref) {
+        isRef = ref;
     }
 
     @Override

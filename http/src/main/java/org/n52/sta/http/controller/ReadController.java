@@ -30,6 +30,9 @@ package org.n52.sta.http.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
+import org.n52.shetland.filter.SelectFilter;
+import org.n52.shetland.oasis.odata.query.option.QueryOptions;
+import org.n52.shetland.ogc.sta.StaConstants;
 import org.n52.shetland.ogc.sta.exception.STACRUDException;
 import org.n52.shetland.ogc.sta.exception.STAInvalidUrlException;
 import org.n52.sta.api.EntityPage;
@@ -54,6 +57,7 @@ import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBo
 import javax.servlet.http.HttpServletRequest;
 import java.io.BufferedOutputStream;
 import java.io.OutputStream;
+import java.util.Collections;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -97,6 +101,14 @@ public class ReadController {
         StaPath path = requestContext.getPath();
         SerializationContext serializationContext = SerializationContext.create(requestContext, mapper);
 
+        // Use $ref serialization-context
+        if (path.isRef()) {
+            serializationContext = SerializationContext.create(serializationContext,
+                                                               new QueryOptions(Collections.singleton(
+                                                                   new SelectFilter(StaConstants.PROP_SELF_LINK)
+                                                               )));
+        }
+
         StaBaseSerializer<?> serializer = path.getSerializerFactory().apply(serializationContext);
         serializationContext.register(serializer);
 
@@ -116,8 +128,6 @@ public class ReadController {
                 case collection:
                     EntityPage<T> collection = entityService.getEntities(request);
                     return writeCollection(collection, context);
-                case ref:
-                    // fallthru
                 case entity:
                 case property:
                     Optional<T> entity = entityService.getEntity(request);

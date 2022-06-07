@@ -30,11 +30,16 @@ package org.n52.sta.data.support;
 import org.n52.series.db.beans.ProcedureEntity;
 import org.n52.shetland.filter.ExpandItem;
 import org.n52.shetland.ogc.sta.StaConstants;
+import org.n52.sta.api.path.Request;
 
 public class SensorGraphBuilder extends GraphBuilder<ProcedureEntity> {
 
-    public SensorGraphBuilder() {
+    public SensorGraphBuilder(Request req) {
         super(ProcedureEntity.class);
+        // do not fetch anything when getting by reference
+        if (req.getPath().isPresent() && req.getPath().get().isRef()) {
+            return;
+        }
         addGraphText(GraphText.GRAPH_PARAMETERS);
         addGraphText(GraphText.GRAPH_FORMAT);
         addGraphText(GraphText.GRAPH_PROCEDUREHISTORY);

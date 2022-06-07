@@ -29,11 +29,16 @@ package org.n52.sta.data.support;
 
 import org.n52.series.db.beans.DataEntity;
 import org.n52.shetland.filter.ExpandItem;
+import org.n52.sta.api.path.Request;
 
 public class ObservationGraphBuilder extends GraphBuilder<DataEntity> {
 
-    public ObservationGraphBuilder() {
+    public ObservationGraphBuilder(Request req) {
         super(DataEntity.class);
+        // do not fetch anything when getting by reference
+        if (req.getPath().isPresent() && req.getPath().get().isRef()) {
+            return;
+        }
         addGraphText(GraphText.GRAPH_PARAMETERS);
     }
 

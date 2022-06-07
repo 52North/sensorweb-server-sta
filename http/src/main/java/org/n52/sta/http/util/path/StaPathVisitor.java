@@ -21,9 +21,16 @@ import java.util.function.Function;
 
 public class StaPathVisitor extends StaPathGrammarBaseVisitor<StaPath> {
 
+    private boolean isRefPath;
+
     @Override
     public StaPath visitPath(StaPathGrammar.PathContext ctx) {
-        return this.visitResource(ctx.resource());
+        StaPath path = this.visitResource(ctx.resource());
+        // path ending in $ref
+        if (ctx.getToken(StaPathGrammar.REF, 0) != null) {
+            path.setRef(true);
+        }
+        return path;
     }
 
     @Override
@@ -53,12 +60,6 @@ public class StaPathVisitor extends StaPathGrammarBaseVisitor<StaPath> {
                                new PathSegment(entity.getText(), identifier),
                                serializerFactory);
         } else {
-            // path ending in $ref
-            if (ctx.getToken(StaPathGrammar.REF, 0) != null) {
-                return new StaPath(StaPath.PathType.ref,
-                                   new PathSegment(entity.getText(), identifier),
-                                   serializerFactory);
-            }
             // path ending in property
             if (propertyCtx != null) {
                 return new StaPath(StaPath.PathType.property,

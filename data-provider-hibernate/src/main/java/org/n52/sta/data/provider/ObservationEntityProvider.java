@@ -67,7 +67,7 @@ public class ObservationEntityProvider extends BaseEntityProvider<Observation> {
 
     @Override
     public Optional<Observation> getEntity(Request req) throws ProviderException {
-        ObservationGraphBuilder graphBuilder = new ObservationGraphBuilder();
+        ObservationGraphBuilder graphBuilder = new ObservationGraphBuilder(req);
         addUnfilteredExpandItems(req.getQueryOptions(), graphBuilder);
 
         Specification<?> spec =
@@ -81,7 +81,7 @@ public class ObservationEntityProvider extends BaseEntityProvider<Observation> {
         QueryOptions options = req.getQueryOptions();
         Pageable pageable = StaPageRequest.create(options);
 
-        ObservationGraphBuilder graphBuilder = new ObservationGraphBuilder();
+        ObservationGraphBuilder graphBuilder = new ObservationGraphBuilder(req);
         addUnfilteredExpandItems(options, graphBuilder);
 
         Specification<?> spec =

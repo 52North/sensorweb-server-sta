@@ -25,7 +25,7 @@ parser grammar StaPathGrammar;
 options { tokenVocab = StaPathLexer; }
 
 path
-   : SLASH resource EOF
+   : SLASH resource (SLASH REF)? EOF
    ;
 
 resource
@@ -56,7 +56,6 @@ datastream
                 | observedProperty
                 | sensor
                 | thing
-                | REF
                 | datastreamProperty
                )
         )?
@@ -64,7 +63,7 @@ datastream
 
 observation
    : OBSERVATIONS identifier
-        (SLASH (datastream | featureOfInterest | REF | observationProperty ))?
+        (SLASH (datastream | featuresOfInterest | observationProperty ))?
    ;
 
 thing
@@ -76,7 +75,6 @@ thing
                 | locations
                 | historicalLocation
                 | historicalLocations
-                | REF
                 | thingProperty
                )
         )?
@@ -84,30 +82,30 @@ thing
 
 location
    : LOCATIONS identifier
-        (SLASH (thing | things | historicalLocation | historicalLocations | REF| locationProperty))?
+        (SLASH (thing | things | historicalLocation | historicalLocations | locationProperty))?
    ;
 
 historicalLocation
    : HISTORICAL_LOCATIONS identifier
-        (SLASH (thing | things | location| locations | REF | historicalLocationProperty))?
+        (SLASH (thing | things | location| locations | historicalLocationProperty))?
    ;
 
 sensor
    : SENSOR
    | SENSORS identifier
-        (SLASH (datastream | datastreams | REF | sensorProperty))?
+        (SLASH (datastream | datastreams | sensorProperty))?
    ;
 
 observedProperty
    : OBSERVED_PROPERTY
    | OBSERVED_PROPERTIES identifier
-        (SLASH (datastream | datastreams | REF | observedPropertyProperty))?
+        (SLASH (datastream | datastreams | observedPropertyProperty))?
    ;
 
 featureOfInterest
    : FEATURE_OF_INTEREST
    | FEATURES_OF_INTEREST identifier
-        (SLASH (observation | observations | REF | featureOfInterestProperty))?
+        (SLASH (observation | observations | featureOfInterestProperty))?
    ;
 
 ////////////////////////////////////////////////////////////////

@@ -29,11 +29,16 @@ package org.n52.sta.data.support;
 
 import org.n52.series.db.beans.AbstractFeatureEntity;
 import org.n52.shetland.filter.ExpandItem;
+import org.n52.sta.api.path.Request;
 
 public class FeatureOfInterestGraphBuilder extends GraphBuilder<AbstractFeatureEntity> {
 
-    public FeatureOfInterestGraphBuilder() {
+    public FeatureOfInterestGraphBuilder(Request req) {
         super(AbstractFeatureEntity.class);
+        // do not fetch anything when getting by reference
+        if (req.getPath().isPresent() && req.getPath().get().isRef()) {
+            return;
+        }
         addGraphText(GraphText.GRAPH_PARAMETERS);
         addGraphText(GraphText.GRAPH_FEATURETYPE);
     }

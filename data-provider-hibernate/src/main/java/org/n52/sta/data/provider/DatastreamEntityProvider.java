@@ -66,7 +66,7 @@ public class DatastreamEntityProvider extends BaseEntityProvider<Datastream> {
 
     @Override
     public Optional<Datastream> getEntity(Request req) throws ProviderException {
-        DatastreamGraphBuilder graphBuilder = new DatastreamGraphBuilder();
+        DatastreamGraphBuilder graphBuilder = new DatastreamGraphBuilder(req);
         addUnfilteredExpandItems(req.getQueryOptions(), graphBuilder);
 
         Specification<AbstractDatasetEntity> spec =
@@ -80,7 +80,7 @@ public class DatastreamEntityProvider extends BaseEntityProvider<Datastream> {
         QueryOptions options = req.getQueryOptions();
         Pageable pageable = StaPageRequest.create(options);
 
-        DatastreamGraphBuilder graphBuilder = new DatastreamGraphBuilder();
+        DatastreamGraphBuilder graphBuilder = new DatastreamGraphBuilder(req);
         addUnfilteredExpandItems(options, graphBuilder);
 
         Specification<AbstractDatasetEntity> spec =

@@ -67,7 +67,7 @@ public class ObservedPropertyEntityProvider extends BaseEntityProvider<ObservedP
 
     @Override
     public Optional<ObservedProperty> getEntity(Request req) throws ProviderException {
-        ObservedPropertyGraphBuilder graphBuilder = new ObservedPropertyGraphBuilder();
+        ObservedPropertyGraphBuilder graphBuilder = new ObservedPropertyGraphBuilder(req);
         addUnfilteredExpandItems(req.getQueryOptions(), graphBuilder);
 
         Specification<PhenomenonEntity> spec =
@@ -81,7 +81,7 @@ public class ObservedPropertyEntityProvider extends BaseEntityProvider<ObservedP
         QueryOptions options = req.getQueryOptions();
         Pageable pageable = StaPageRequest.create(options);
 
-        ObservedPropertyGraphBuilder graphBuilder = new ObservedPropertyGraphBuilder();
+        ObservedPropertyGraphBuilder graphBuilder = new ObservedPropertyGraphBuilder(req);
         addUnfilteredExpandItems(options, graphBuilder);
 
         Specification<PhenomenonEntity> spec =
