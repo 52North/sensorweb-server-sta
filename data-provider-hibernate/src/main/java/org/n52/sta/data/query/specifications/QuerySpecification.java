@@ -1,25 +1,26 @@
 package org.n52.sta.data.query.specifications;
 
-import org.n52.series.db.beans.DescribableEntity;
-import org.n52.series.db.beans.HibernateRelations;
-import org.n52.shetland.ogc.filter.FilterConstants;
-import org.n52.shetland.ogc.sta.StaConstants;
-import org.springframework.data.jpa.domain.Specification;
+import java.util.HashMap;
+import java.util.Map;
 
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.Expression;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 import javax.persistence.criteria.Subquery;
-import java.util.HashMap;
-import java.util.Map;
+
+import org.n52.series.db.beans.DescribableEntity;
+import org.n52.series.db.beans.HibernateRelations;
+import org.n52.shetland.ogc.filter.FilterConstants;
+import org.n52.shetland.ogc.sta.StaConstants;
+import org.springframework.data.jpa.domain.Specification;
 
 public abstract class QuerySpecification<T> implements BaseQuerySpecifications<T> {
 
     protected final Map<String, MemberFilter<T>> filterByMember;
     protected final Map<String, PropertyComparator<T, ?>> entityPathByProperty;
 
-    public QuerySpecification() {
+    protected QuerySpecification() {
         this.filterByMember = new HashMap<>();
         this.entityPathByProperty = new HashMap<>();
         this.entityPathByProperty.put(StaConstants.PROP_ID,

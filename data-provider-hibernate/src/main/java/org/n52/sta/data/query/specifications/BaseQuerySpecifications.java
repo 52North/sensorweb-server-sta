@@ -28,17 +28,17 @@
 
 package org.n52.sta.data.query.specifications;
 
-import org.n52.shetland.ogc.filter.FilterConstants;
-import org.n52.shetland.ogc.filter.FilterConstants.ComparisonOperator;
-import org.springframework.data.jpa.domain.Specification;
+import java.util.Optional;
 
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Expression;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Subquery;
-import java.util.Optional;
-import java.util.function.Function;
+
+import org.n52.shetland.ogc.filter.FilterConstants;
+import org.n52.shetland.ogc.filter.FilterConstants.ComparisonOperator;
+import org.springframework.data.jpa.domain.Specification;
 
 public interface BaseQuerySpecifications<T> {
 
@@ -173,7 +173,6 @@ public interface BaseQuerySpecifications<T> {
      * @param entityType the entity type
      * @return a prepared subquery
      */
-    @SuppressWarnings("unchecked")
     <E> PreparedSubquery<E> selectOnSubquery(String property, Class<E> entityType);
 
     @FunctionalInterface
@@ -183,16 +182,11 @@ public interface BaseQuerySpecifications<T> {
     }
 
 
+    // TODO get rid of this impl class?
     abstract class MemberFilterImpl<T> implements MemberFilter<T> {
 
-        protected final Function<Specification<?>, Specification<T>> queryApplier;
-
-        protected MemberFilterImpl() {
-            this.queryApplier = this::prepareQuery;
-        }
-
         public Specification<T> apply(Specification<?> specification) {
-            return queryApplier.apply(specification);
+            return prepareQuery(specification);
         }
 
         protected abstract Specification<T> prepareQuery(Specification<?> specification);
