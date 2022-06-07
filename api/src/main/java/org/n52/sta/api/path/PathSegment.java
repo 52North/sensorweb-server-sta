@@ -1,5 +1,6 @@
 package org.n52.sta.api.path;
 
+import java.util.Objects;
 import java.util.Optional;
 
 /**
@@ -18,21 +19,18 @@ public class PathSegment {
     private final Optional<String> property;
 
     public PathSegment(String collection) {
-        this.collection = collection;
-        this.identifier = Optional.empty();
-        this.property = Optional.empty();
+        this(collection, null);
     }
 
-    public PathSegment(String collection, Optional<String> identifier) {
-        this.collection = collection;
-        this.identifier = identifier;
-        this.property = Optional.empty();
+    public PathSegment(String collection, String identifier) {
+        this(collection, identifier, null);
     }
 
-    public PathSegment(String collection, Optional<String> identifier, Optional<String> property) {
+    public PathSegment(String collection, String identifier, String property) {
+        Objects.requireNonNull(collection, "collection must not be null");
         this.collection = collection;
-        this.identifier = identifier;
-        this.property = property;
+        this.identifier = Optional.ofNullable(identifier);
+        this.property = Optional.ofNullable(property);
     }
 
     public String getCollection() {
