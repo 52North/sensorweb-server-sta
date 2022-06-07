@@ -27,15 +27,14 @@
  */
 package org.n52.sta.http.serialize.out;
 
+import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.databind.SerializerProvider;
+import org.n52.shetland.ogc.sta.StaConstants;
+import org.n52.sta.api.entity.Observation;
+
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.Collection;
-
-import com.fasterxml.jackson.core.JsonGenerator;
-import com.fasterxml.jackson.databind.SerializerProvider;
-
-import org.n52.shetland.ogc.sta.StaConstants;
-import org.n52.sta.api.entity.Observation;
 
 @SuppressWarnings("MultipleStringLiterals")
 public class ObservationJsonSerializer extends StaBaseSerializer<Observation> {
@@ -66,8 +65,11 @@ public class ObservationJsonSerializer extends StaBaseSerializer<Observation> {
                 for (Observation item : items) {
                     gen.writeStartObject();
                     String id = item.getId();
-                    writeProperty("id", n -> gen.writeStringField(StaConstants.AT_IOT_ID, id));
-                    writeStringProperty(StaConstants.AT_IOT_SELFLINK, () -> createSelfLink(id), gen);
+
+                    // TODO: is serializing this useful in any way if the individual observations are not available
+                    // via STA anyway?
+                    //writeProperty("id", n -> gen.writeStringField(StaConstants.AT_IOT_ID, id));
+                    //writeStringProperty(StaConstants.AT_IOT_SELFLINK, () -> createSelfLink(id), gen);
                     writeObjectProperty(StaConstants.PROP_PARAMETERS, value::getParameters, gen);
                     serializeResult(item, gen, serializers);
                     gen.writeEndObject();
@@ -84,8 +86,10 @@ public class ObservationJsonSerializer extends StaBaseSerializer<Observation> {
                 for (Observation item : items) {
                     gen.writeStartObject();
                     String id = item.getId();
-                    writeProperty("id", n -> gen.writeStringField(StaConstants.AT_IOT_ID, id));
-                    writeStringProperty(StaConstants.AT_IOT_SELFLINK, () -> createSelfLink(id), gen);
+                    // TODO: is serializing this useful in any way if the individual observations are not available
+                    // via STA anyway?
+                    //writeProperty("id", n -> gen.writeStringField(StaConstants.AT_IOT_ID, id));
+                    //writeStringProperty(StaConstants.AT_IOT_SELFLINK, () -> createSelfLink(id), gen);
                     writeObjectProperty(StaConstants.PROP_PARAMETERS, value::getParameters, gen);
                     writeTimeProperty(StaConstants.PROP_PHENOMENON_TIME, value::getPhenomenonTime, gen);
                     serializeResult(item, gen, serializers);
