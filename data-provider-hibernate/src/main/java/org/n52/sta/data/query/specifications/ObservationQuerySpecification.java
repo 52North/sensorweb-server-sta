@@ -29,6 +29,9 @@
 package org.n52.sta.data.query.specifications;
 
 import org.n52.series.db.beans.DataEntity;
+import org.springframework.data.jpa.domain.Specification;
+
+import java.util.Optional;
 
 public class ObservationQuerySpecification extends QuerySpecification<DataEntity<?>> {
 
@@ -36,4 +39,7 @@ public class ObservationQuerySpecification extends QuerySpecification<DataEntity
         super();
     }
 
+    @Override public Optional<Specification<DataEntity<?>>> isStaEntity() {
+        return Optional.of((root, query, builder) -> builder.isNull(root.get(DataEntity.PROPERTY_PARENT)));
+    }
 }
