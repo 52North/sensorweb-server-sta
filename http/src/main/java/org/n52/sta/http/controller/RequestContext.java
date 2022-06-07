@@ -55,10 +55,8 @@ public final class RequestContext {
 
     private RequestContext(String serviceUri, QueryOptions queryOptions, StaPath path) {
         Objects.requireNonNull(serviceUri, "serviceUri must not be null");
-        Objects.requireNonNull(queryOptions, "queryOptions must not be null");
-        Objects.requireNonNull(path, "path must not be null");
-        this.serviceUri = serviceUri;
         this.request = new Request(path, queryOptions);
+        this.serviceUri = serviceUri;
     }
 
     public static RequestContext create(String serviceUri, HttpServletRequest request, PathFactory pathFactory)
