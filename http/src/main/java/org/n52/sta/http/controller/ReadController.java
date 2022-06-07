@@ -28,8 +28,14 @@
 
 package org.n52.sta.http.controller;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.ObjectWriter;
+import java.io.BufferedOutputStream;
+import java.io.OutputStream;
+import java.util.Collections;
+import java.util.Objects;
+import java.util.Optional;
+
+import javax.servlet.http.HttpServletRequest;
+
 import org.n52.shetland.filter.SelectFilter;
 import org.n52.shetland.oasis.odata.query.option.QueryOptions;
 import org.n52.shetland.ogc.sta.StaConstants;
@@ -44,7 +50,6 @@ import org.n52.sta.api.service.EntityService;
 import org.n52.sta.http.serialize.out.CollectionNode;
 import org.n52.sta.http.serialize.out.SerializationContext;
 import org.n52.sta.http.serialize.out.StaBaseSerializer;
-import org.n52.sta.http.util.StaUriValidator;
 import org.n52.sta.http.util.path.PathFactory;
 import org.n52.sta.http.util.path.StaPath;
 import org.springframework.beans.factory.annotation.Value;
@@ -54,19 +59,13 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
 
-import javax.servlet.http.HttpServletRequest;
-import java.io.BufferedOutputStream;
-import java.io.OutputStream;
-import java.util.Collections;
-import java.util.Objects;
-import java.util.Optional;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectWriter;
 
 @RestController
 public class ReadController {
 
     private final String serviceUri;
-
-    private final StaUriValidator validator;
 
     private final EntityServiceLookup lookup;
 
@@ -75,18 +74,15 @@ public class ReadController {
     private final PathFactory pathFactory;
 
     public ReadController(
-        @Value("${server.config.service-root-url}") String serviceUri,
-        StaUriValidator validator,
-        EntityServiceLookup lookup,
-        PathFactory pathFactory,
-        ObjectMapper mapper) {
+            @Value("${server.config.service-root-url}") String serviceUri,
+            EntityServiceLookup lookup,
+            PathFactory pathFactory,
+            ObjectMapper mapper) {
         Objects.requireNonNull(serviceUri, "serviceUri must not be null!");
-        Objects.requireNonNull(validator, "validator must not be null!");
         Objects.requireNonNull(lookup, "lookup must not be null!");
         Objects.requireNonNull(pathFactory, "pathFactory must not be null!");
         Objects.requireNonNull(mapper, "mapper must not be null!");
         this.serviceUri = serviceUri;
-        this.validator = validator;
         this.lookup = lookup;
         this.mapper = mapper;
         this.pathFactory = pathFactory;
@@ -94,9 +90,8 @@ public class ReadController {
 
     @GetMapping(value = "/**")
     public ResponseEntity<StreamingResponseBody> getObservations(HttpServletRequest request)
-        throws STAInvalidUrlException, STACRUDException {
+            throws STAInvalidUrlException, STACRUDException {
         RequestContext requestContext = RequestContext.create(serviceUri, request, pathFactory);
-        validator.validateRequestPath(requestContext);
 
         StaPath path = requestContext.getPath();
         SerializationContext serializationContext = SerializationContext.create(requestContext, mapper);
@@ -113,14 +108,14 @@ public class ReadController {
         serializationContext.register(serializer);
 
         return ResponseEntity.ok()
-            .contentType(MediaType.APPLICATION_JSON)
-            .body(getAndWriteToResponse(requestContext, serializationContext, serializer.getType()));
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(getAndWriteToResponse(requestContext, serializationContext, serializer.getType()));
     }
 
     private <T extends Identifiable> StreamingResponseBody getAndWriteToResponse(RequestContext requestContext,
-                                                                                 SerializationContext context,
-                                                                                 Class<T> type)
-        throws STACRUDException {
+            SerializationContext context,
+            Class<T> type)
+            throws STACRUDException {
         try {
             EntityService<T> entityService = getEntityService(type);
             Request request = requestContext.getRequest();
@@ -150,7 +145,7 @@ public class ReadController {
     }
 
     private <T extends Identifiable> StreamingResponseBody writeCollection(EntityPage<T> page,
-                                                                           SerializationContext context) {
+            SerializationContext context) {
         return outputStream -> {
             try (OutputStream out = new BufferedOutputStream(outputStream)) {
                 ObjectWriter writer = context.createWriter();
@@ -163,8 +158,8 @@ public class ReadController {
 
     private <T extends Identifiable> EntityService<T> getEntityService(Class<T> type) {
         return lookup.getService(type)
-            .orElseThrow(() -> new IllegalStateException("No service registered for collection '"
-                                                             + type.getSimpleName() + "'"));
+                .orElseThrow(() -> new IllegalStateException("No service registered for collection '"
+                        + type.getSimpleName() + "'"));
     }
 
 }
