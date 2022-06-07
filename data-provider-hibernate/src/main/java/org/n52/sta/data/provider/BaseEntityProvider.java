@@ -94,7 +94,7 @@ public abstract class BaseEntityProvider<T extends Identifiable> implements Enti
      * @param req Request
      * @param qs  QuerySpecifications of requested Entity Type
      * @param <E> Entity Type
-     * @return
+     * @return Specification to be used for filtering
      */
     protected <E> Specification<E> buildSpecification(Request req, BaseQuerySpecifications<E> qs) {
         // Parse QueryOptions

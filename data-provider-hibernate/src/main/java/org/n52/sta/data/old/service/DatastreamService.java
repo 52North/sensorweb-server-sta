@@ -27,10 +27,6 @@
  */
 package org.n52.sta.data.old.service;
 
-import java.util.UUID;
-
-import javax.persistence.EntityManager;
-
 import org.n52.series.db.beans.AbstractDatasetEntity;
 import org.n52.series.db.beans.AbstractFeatureEntity;
 import org.n52.series.db.beans.CategoryEntity;
@@ -54,6 +50,9 @@ import org.n52.sta.data.old.repositories.UnitRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+
+import javax.persistence.EntityManager;
+import java.util.UUID;
 
 // @Component
 // @DependsOn({ "springApplicationContext", "datastreamRepository" })
@@ -101,8 +100,8 @@ public class DatastreamService extends CommonDatastreamService<AbstractDatasetEn
         OfferingEntity offering = offeringService.createOrFetchOffering(datastream.getProcedure());
         AbstractDatasetEntity dataset = createDatasetSkeleton(shell,
                 datastream.getOMObservationType().getFormat(),
-                (isMobileFeatureEnabled
-                        && datastream.getThing().hasParameters())
+                isMobileFeatureEnabled
+                        && datastream.getThing().hasParameters()
                         && datastream.getThing()
                                 .getParameters()
                                 .stream()

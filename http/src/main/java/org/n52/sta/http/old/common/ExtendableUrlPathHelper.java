@@ -41,7 +41,7 @@ public class ExtendableUrlPathHelper extends UrlPathHelper {
     protected String getRemainingPath(String requestUri, String mapping, boolean ignoreCase) {
         int index1 = 0;
         int index2 = 0;
-        for (; (index1 < requestUri.length()) && (index2 < mapping.length()); index1++, index2++) {
+        for (; index1 < requestUri.length() && index2 < mapping.length(); index1++, index2++) {
             char c1 = requestUri.charAt(index1);
             char c2 = mapping.charAt(index2);
             if (c1 == ';') {
@@ -51,7 +51,7 @@ public class ExtendableUrlPathHelper extends UrlPathHelper {
                 }
                 c1 = requestUri.charAt(index1);
             }
-            if (c1 == c2 || (ignoreCase && (Character.toLowerCase(c1) == Character.toLowerCase(c2)))) {
+            if (c1 == c2 || ignoreCase && Character.toLowerCase(c1) == Character.toLowerCase(c2)) {
                 continue;
             }
             return null;

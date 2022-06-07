@@ -43,7 +43,8 @@ public class HistoricalLocationJsonSerializer extends StaBaseSerializer<Historic
     }
 
     @Override
-    public void serialize(HistoricalLocation value, JsonGenerator gen, SerializerProvider serializers) throws IOException {
+    public void serialize(HistoricalLocation value, JsonGenerator gen, SerializerProvider serializers)
+        throws IOException {
         gen.writeStartObject();
         String id = value.getId();
 

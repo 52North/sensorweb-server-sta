@@ -27,18 +27,6 @@
  */
 package org.n52.sta.data.old.service;
 
-import java.math.BigDecimal;
-import java.util.Collections;
-import java.util.Date;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
-import java.util.UUID;
-import java.util.stream.Collectors;
-
-import javax.persistence.EntityManager;
-import javax.persistence.criteria.Predicate;
-
 import org.hibernate.Hibernate;
 import org.hibernate.HibernateException;
 import org.hibernate.query.criteria.internal.CriteriaBuilderImpl;
@@ -84,6 +72,17 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.jpa.domain.Specification;
+
+import javax.persistence.EntityManager;
+import javax.persistence.criteria.Predicate;
+import java.math.BigDecimal;
+import java.util.Collections;
+import java.util.Date;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
+import java.util.UUID;
+import java.util.stream.Collectors;
 
 /**
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
@@ -742,8 +741,8 @@ public class ObservationService
             synchronized (getLock(dataset.getId().toString() + "Dataset")) {
                 LOGGER.debug("Updating First/Last/Geometry of of Dataset: {}", dataset.getId());
                 if (!dataset.isSetFirstValueAt()
-                        || (dataset.isSetFirstValueAt()
-                                && data.getSamplingTimeStart().before(dataset.getFirstValueAt()))) {
+                        || dataset.isSetFirstValueAt()
+                                && data.getSamplingTimeStart().before(dataset.getFirstValueAt())) {
                     dataset.setFirstValueAt(data.getSamplingTimeStart());
                     dataset.setFirstObservation(rawObservation.get());
                     if (data instanceof QuantityDataEntity) {
@@ -751,8 +750,8 @@ public class ObservationService
                     }
                 }
                 if (!dataset.isSetLastValueAt()
-                        || (dataset.isSetLastValueAt()
-                                && data.getSamplingTimeEnd().after(dataset.getLastValueAt()))) {
+                        || dataset.isSetLastValueAt()
+                                && data.getSamplingTimeEnd().after(dataset.getLastValueAt())) {
                     dataset.setLastValueAt(data.getSamplingTimeEnd());
                     dataset.setLastObservation(rawObservation.get());
                     if (data instanceof QuantityDataEntity) {
