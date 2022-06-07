@@ -32,6 +32,6 @@ import org.n52.sta.data.repositories.BaseRepository;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface FeatureOfInterestRepository extends BaseRepository<AbstractFeatureEntity<?>> {
+public interface FeatureOfInterestRepository extends BaseRepository<AbstractFeatureEntity> {
 
 }

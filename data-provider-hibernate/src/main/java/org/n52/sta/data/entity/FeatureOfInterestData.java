@@ -25,11 +25,8 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
-package org.n52.sta.data.entity;
 
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
+package org.n52.sta.data.entity;
 
 import org.locationtech.jts.geom.Geometry;
 import org.n52.series.db.beans.AbstractFeatureEntity;
@@ -37,6 +34,9 @@ import org.n52.series.db.beans.sta.StaFeatureEntity;
 import org.n52.sta.api.entity.FeatureOfInterest;
 import org.n52.sta.api.entity.Observation;
 import org.n52.sta.config.EntityPropertyMapping;
+
+import java.util.Map;
+import java.util.Set;
 
 public class FeatureOfInterestData extends StaData<StaFeatureEntity<?>> implements FeatureOfInterest {
 
@@ -74,10 +74,7 @@ public class FeatureOfInterestData extends StaData<StaFeatureEntity<?>> implemen
     }
 
     private static StaFeatureEntity<?> tryToCast(AbstractFeatureEntity<?> feature) {
-        Optional<StaFeatureEntity<?>> staFeature = feature instanceof StaFeatureEntity
-                ? Optional.of((StaFeatureEntity<?>) feature)
-                : Optional.empty();
-        return staFeature.orElseThrow(() -> new IllegalStateException("Entity is not a StaFeature"));
+        return feature instanceof StaFeatureEntity ? (StaFeatureEntity<?>) feature : new StaFeatureEntity(feature);
     }
 
 }

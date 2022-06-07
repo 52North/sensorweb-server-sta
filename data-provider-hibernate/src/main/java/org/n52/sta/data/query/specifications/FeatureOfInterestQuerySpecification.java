@@ -30,7 +30,7 @@ package org.n52.sta.data.query.specifications;
 
 import org.n52.series.db.beans.AbstractFeatureEntity;
 
-public class FeatureOfInterestQuerySpecification extends QuerySpecification<AbstractFeatureEntity<?>> {
+public class FeatureOfInterestQuerySpecification extends QuerySpecification<AbstractFeatureEntity> {
 
     public FeatureOfInterestQuerySpecification() {
         super();

@@ -27,13 +27,13 @@
  */
 package org.n52.sta.data.support;
 
-import org.n52.series.db.beans.sta.StaFeatureEntity;
+import org.n52.series.db.beans.AbstractFeatureEntity;
 import org.n52.shetland.filter.ExpandItem;
 
-public class FeatureOfInterestGraphBuilder extends GraphBuilder<StaFeatureEntity<?>> {
+public class FeatureOfInterestGraphBuilder extends GraphBuilder<AbstractFeatureEntity> {
 
-    protected FeatureOfInterestGraphBuilder(Class<StaFeatureEntity<?>> entityType) {
-        super(entityType);
+    public FeatureOfInterestGraphBuilder() {
+        super(AbstractFeatureEntity.class);
         addGraphText(GraphText.GRAPH_PARAMETERS);
         addGraphText(GraphText.GRAPH_FEATURETYPE);
     }
