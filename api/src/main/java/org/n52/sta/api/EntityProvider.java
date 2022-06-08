@@ -40,7 +40,7 @@ public interface EntityProvider<T extends Identifiable> {
     Optional<T> getEntity(Request request) throws ProviderException;
 
     default Optional<T> getEntity(String id) throws ProviderException {
-        return getEntity(Request.createRefRequest(id));
+        return getEntity(Request.createIdRequest(id));
     }
 
     EntityPage<T> getEntities(Request request) throws ProviderException;

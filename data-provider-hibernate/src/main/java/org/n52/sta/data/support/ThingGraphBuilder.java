@@ -38,8 +38,7 @@ public class ThingGraphBuilder extends GraphBuilder<PlatformEntity> {
     public ThingGraphBuilder(Request req) {
         super(PlatformEntity.class);
         // do not fetch anything when getting by reference
-        if (req.getPath()
-               .isRef()) {
+        if (req.getPath().isPresent() && req.getPath().get().isRef()) {
             return;
         }
 

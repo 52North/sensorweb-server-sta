@@ -1,4 +1,3 @@
-
 package org.n52.sta.api.path;
 
 import java.util.Collections;
@@ -32,35 +31,28 @@ public class Request {
     }
 
     /**
-     * A Request for an instance with $ref=id.
-     * <p>
-     * Creating any $ref-request does not require any path as instances are referencable by id. However, any
-     * call to {@link #getPath()} will result in an {@link IllegalStateException}.
+     * A Request for an instance with specified id.
      *
-     * @param id
-     *        the instance's id
+     * @param id the instance's id
      * @return a request to get an instance by its id
      */
-    public static Request createRefRequest(String id) {
-        QueryOptions query = QueryOptionsFactory.createQueryOptions(
-                                                                    Collections.singleton(new FilterFilter(
-                                                                                                           new ComparisonExpr(FilterConstants.ComparisonOperator.PropertyIsEqualTo,
-                                                                                                                              new MemberExpr("id"),
-                                                                                                                              new StringValueExpr(id)))));
+    public static Request createIdRequest(String id) {
+        QueryOptions query =
+                QueryOptionsFactory.createQueryOptions(
+                        Collections.singleton(new FilterFilter(
+                                new ComparisonExpr(FilterConstants.ComparisonOperator.PropertyIsEqualTo,
+                                                   new MemberExpr("id"),
+                                                   new StringValueExpr(id)))));
         return new Request(query);
     }
 
     /**
-     * The request path.
-     * <p>
-     * Illegal call, if the request has been created as $ref=id request via {@link #createRefRequest(String)}.
+     * The request path or Optional.empty() if not present.
      *
      * @return the request path
-     * @throws IllegalStateException
-     *         in case of any $ref=id request
      */
-    public ODataPath getPath() {
-        return path.orElseThrow(() -> new IllegalStateException("Request has been created without any path!"));
+    public Optional<ODataPath> getPath() {
+        return path;
     }
 
     public QueryOptions getQueryOptions() {

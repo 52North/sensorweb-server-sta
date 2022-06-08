@@ -37,8 +37,7 @@ public class FeatureOfInterestGraphBuilder extends GraphBuilder<AbstractFeatureE
     public FeatureOfInterestGraphBuilder(Request req) {
         super(AbstractFeatureEntity.class);
         // do not fetch anything when getting by reference
-        if (req.getPath()
-               .isRef()) {
+        if (req.getPath().isPresent() && req.getPath().get().isRef()) {
             return;
         }
         addGraphText(GraphText.GRAPH_PARAMETERS);

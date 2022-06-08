@@ -111,7 +111,9 @@ public abstract class BaseEntityProvider<T extends Identifiable> implements Enti
 
         // Parse Path if present
         Specification<E> pathSpec = null;
-        pathSpec = parsePath(req.getPath(), qs);
+        if (req.getPath().isPresent()) {
+            pathSpec = parsePath(req.getPath().get(), qs);
+        }
 
         return (pathSpec != null)
                 ? pathSpec.and(querySpec)
