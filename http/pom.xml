@@ -109,6 +109,15 @@
                     <excludes>**/org/n52/grammar/*.java</excludes>
                 </configuration>
             </plugin>
+            <plugin>
+                <groupId>net.revelc.code.formatter</groupId>
+                <artifactId>formatter-maven-plugin</artifactId>
+                <configuration>
+                    <excludes>
+                        <exclude>antlr4/</exclude>
+                    </excludes>
+                </configuration>
+            </plugin>
         </plugins>
     </build>
 </project>
