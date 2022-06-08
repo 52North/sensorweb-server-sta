@@ -21,6 +21,7 @@ buildNumber.properties
 */.settings/*
 *.factorypath
 
+# More eclipse stuff
 sensor-things-api-app/.settings/
 sensor-things-api-core/.settings/
 sensor-things-api-webapp/.settings/
@@ -33,3 +34,10 @@ sensor-things-api-app/console.log
 .idea/*
 *.iml
 *.checkstyle
+
+# NixOS utility
+/shell.nix
+/.envrc
+
+# Visual Studio Code files
+/.vscode/
