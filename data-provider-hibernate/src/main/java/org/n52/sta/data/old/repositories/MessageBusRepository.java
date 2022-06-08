@@ -25,6 +25,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
+
 package org.n52.sta.data.old.repositories;
 
 import java.io.Serializable;
@@ -88,7 +89,9 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
 
 public class MessageBusRepository<T, I extends Serializable>
-        extends SimpleJpaRepository<T, I> implements RepositoryConstants {
+        extends
+        SimpleJpaRepository<T, I> implements
+        RepositoryConstants {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MessageBusRepository.class);
 
@@ -113,12 +116,12 @@ public class MessageBusRepository<T, I extends Serializable>
 
     @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
     MessageBusRepository(JpaEntityInformation<T, Long> entityInformation,
-            EntityManager entityManager) {
+                         EntityManager entityManager) {
         super(entityInformation, entityManager);
         this.em = entityManager;
 
         EntityManagerFactory factory = (EntityManagerFactory) SpringApplicationContext
-                .getBean(EntityManagerFactory.class);
+                                                                                      .getBean(EntityManagerFactory.class);
         Assert.notNull(factory, "Could not autowire EntityManagerFactory!");
         this.databaseEm = factory.createEntityManager();
 
@@ -134,7 +137,7 @@ public class MessageBusRepository<T, I extends Serializable>
                 || this.entityClass.equals(ProcedureEntity.class)
                 || this.entityClass.equals(PhenomenonEntity.class)) {
             this.datastreamRepository = (DatastreamRepository) SpringApplicationContext
-                    .getBean(DatastreamRepository.class);
+                                                                                       .getBean(DatastreamRepository.class);
             Assert.notNull(this.datastreamRepository, "Could not autowire DatastreamRepository!");
         }
 
@@ -147,7 +150,8 @@ public class MessageBusRepository<T, I extends Serializable>
 
         ParameterExpression<String> params = criteriaBuilder.parameter(String.class);
         criteriaQuery.where(criteriaBuilder.equal(root.get(column), params));
-        return em.createQuery(criteriaQuery).setParameter(params, identifier);
+        return em.createQuery(criteriaQuery)
+                 .setParameter(params, identifier);
     }
 
     private HashMap<String, String> createEntityTypeToStaTypeMapping() {
@@ -179,7 +183,8 @@ public class MessageBusRepository<T, I extends Serializable>
             query.select(root.get(columnName));
         }
         try {
-            return Optional.of((String) em.createQuery(query).getSingleResult());
+            return Optional.of((String) em.createQuery(query)
+                                          .getSingleResult());
         } catch (NoResultException ex) {
             return Optional.empty();
         }
@@ -198,7 +203,8 @@ public class MessageBusRepository<T, I extends Serializable>
         if (columnName != null) {
             query.select(root.get(columnName));
         }
-        if (pageable.getSort().isSorted()) {
+        if (pageable.getSort()
+                    .isSorted()) {
             query.orderBy(QueryUtils.toOrders(pageable.getSort(), root, criteriaBuilder));
         }
 
@@ -225,7 +231,9 @@ public class MessageBusRepository<T, I extends Serializable>
         ParameterExpression<Long> params = criteriaBuilder.parameter(Long.class);
         criteriaQuery.where(criteriaBuilder.equal(root.get(ID), params));
 
-        return findByQuery(em.createQuery(criteriaQuery).setParameter(params, id), entityGraphs);
+        return findByQuery(em.createQuery(criteriaQuery)
+                             .setParameter(params, id),
+                           entityGraphs);
     }
 
     @Transactional
@@ -253,7 +261,8 @@ public class MessageBusRepository<T, I extends Serializable>
         criteriaQuery.select(criteriaBuilder.count(root));
         ParameterExpression<String> params = criteriaBuilder.parameter(String.class);
         criteriaQuery.where(criteriaBuilder.equal(root.get(STAIDENTIFIER), params));
-        TypedQuery<Long> query = em.createQuery(criteriaQuery).setParameter(params, identifier);
+        TypedQuery<Long> query = em.createQuery(criteriaQuery)
+                                   .setParameter(params, identifier);
 
         return query.getSingleResult() > 0;
     }
@@ -262,8 +271,9 @@ public class MessageBusRepository<T, I extends Serializable>
     @Override
     public <S extends T> S save(S newEntity) {
         String entityType = entityTypeToStaType.get(entityInformation.getEntityName());
-        final DTOTransformer<?, ?> transformer = new DTOTransformerImpl<>(config);
-        boolean intercept = mqttHandler.getWatchedEntityTypes().contains(entityType);
+        final DTOTransformer< ? , ? > transformer = new DTOTransformerImpl<>(config);
+        boolean intercept = mqttHandler.getWatchedEntityTypes()
+                                       .contains(entityType);
 
         if (entityInformation.isNew(newEntity)) {
             em.persist(newEntity);
@@ -288,9 +298,9 @@ public class MessageBusRepository<T, I extends Serializable>
                 em.flush();
                 StaDTO o = transformer.toDTO(newEntity, null);
                 this.mqttHandler.handleEvent(o,
-                        entityType,
-                        computeDifference(oldProperties, getPropertyMap(newEntity)),
-                        getRelatedCollections(entity));
+                                             entityType,
+                                             computeDifference(oldProperties, getPropertyMap(newEntity)),
+                                             getRelatedCollections(entity));
                 return entity;
             } else {
                 return em.merge(newEntity);
@@ -306,100 +316,109 @@ public class MessageBusRepository<T, I extends Serializable>
             ProcedureEntity entity = (ProcedureEntity) rawObject;
             if (entity.hasDatastreams()) {
                 collections.put(STAEntityDefinition.DATASTREAMS,
-                        entity.getDatasets()
-                                .stream()
-                                .map(AbstractDatasetEntity::getStaIdentifier)
-                                .collect(Collectors.toSet()));
+                                entity.getDatasets()
+                                      .stream()
+                                      .map(AbstractDatasetEntity::getStaIdentifier)
+                                      .collect(Collectors.toSet()));
             }
         } else if (rawObject instanceof LocationEntity) {
             LocationEntity entity = (LocationEntity) rawObject;
             if (entity.hasHistoricalLocations()) {
                 collections.put(STAEntityDefinition.HISTORICAL_LOCATIONS,
-                        entity.getHistoricalLocations()
-                                .stream()
-                                .map(HistoricalLocationEntity::getStaIdentifier)
-                                .collect(Collectors.toSet()));
+                                entity.getHistoricalLocations()
+                                      .stream()
+                                      .map(HistoricalLocationEntity::getStaIdentifier)
+                                      .collect(Collectors.toSet()));
             }
 
             if (entity.hasThings()) {
                 collections.put(STAEntityDefinition.THINGS,
-                        entity.getThings()
-                                .stream()
-                                .map(PlatformEntity::getStaIdentifier)
-                                .collect(Collectors.toSet()));
+                                entity.getThings()
+                                      .stream()
+                                      .map(PlatformEntity::getStaIdentifier)
+                                      .collect(Collectors.toSet()));
             }
         } else if (rawObject instanceof PlatformEntity) {
             PlatformEntity entity = (PlatformEntity) rawObject;
             if (entity.hasLocationEntities()) {
                 collections.put(
-                        STAEntityDefinition.LOCATIONS,
-                        entity.getLocations()
-                                .stream()
-                                .map(LocationEntity::getStaIdentifier)
-                                .collect(Collectors.toSet()));
+                                STAEntityDefinition.LOCATIONS,
+                                entity.getLocations()
+                                      .stream()
+                                      .map(LocationEntity::getStaIdentifier)
+                                      .collect(Collectors.toSet()));
             }
 
             if (entity.hasHistoricalLocations()) {
                 collections.put(
-                        STAEntityDefinition.HISTORICAL_LOCATIONS,
-                        entity.getHistoricalLocations()
-                                .stream()
-                                .map(HistoricalLocationEntity::getStaIdentifier)
-                                .collect(Collectors.toSet()));
+                                STAEntityDefinition.HISTORICAL_LOCATIONS,
+                                entity.getHistoricalLocations()
+                                      .stream()
+                                      .map(HistoricalLocationEntity::getStaIdentifier)
+                                      .collect(Collectors.toSet()));
             }
 
             if (entity.hasDatastreams()) {
                 collections.put(STAEntityDefinition.DATASTREAMS,
-                        entity.getDatasets()
-                                .stream()
-                                .map(AbstractDatasetEntity::getStaIdentifier)
-                                .collect(Collectors.toSet()));
+                                entity.getDatasets()
+                                      .stream()
+                                      .map(AbstractDatasetEntity::getStaIdentifier)
+                                      .collect(Collectors.toSet()));
             }
         } else if (rawObject instanceof AbstractDatasetEntity) {
             AbstractDatasetEntity entity = (AbstractDatasetEntity) rawObject;
 
             if (entity.hasThing()) {
                 collections.put(STAEntityDefinition.THINGS,
-                        Collections.singleton(entity.getThing().getStaIdentifier()));
+                                Collections.singleton(entity.getThing()
+                                                            .getStaIdentifier()));
             }
 
             if (entity.hasProcedure()) {
                 collections.put(STAEntityDefinition.SENSORS,
-                        Collections.singleton(entity.getProcedure().getStaIdentifier()));
+                                Collections.singleton(entity.getProcedure()
+                                                            .getStaIdentifier()));
             }
 
             if (entity.hasObservableProperty()) {
                 collections.put(STAEntityDefinition.OBSERVED_PROPERTIES,
-                        Collections.singleton(entity.getObservableProperty().getStaIdentifier()));
+                                Collections.singleton(entity.getObservableProperty()
+                                                            .getStaIdentifier()));
             }
         } else if (rawObject instanceof HistoricalLocationEntity) {
             HistoricalLocationEntity entity = (HistoricalLocationEntity) rawObject;
 
             if (entity.hasThing()) {
                 collections.put(STAEntityDefinition.THINGS,
-                        Collections.singleton(entity.getThing().getStaIdentifier()));
+                                Collections.singleton(entity.getThing()
+                                                            .getStaIdentifier()));
             }
 
             if (entity.hasLocationEntities()) {
                 collections.put(STAEntityDefinition.LOCATIONS,
-                        entity.getLocations()
-                                .stream()
-                                .map(LocationEntity::getStaIdentifier)
-                                .collect(Collectors.toSet()));
+                                entity.getLocations()
+                                      .stream()
+                                      .map(LocationEntity::getStaIdentifier)
+                                      .collect(Collectors.toSet()));
             }
-        } else if (rawObject instanceof DataEntity<?>) {
-            DataEntity<?> entity = (DataEntity<?>) rawObject;
+        } else if (rawObject instanceof DataEntity< ? >) {
+            DataEntity< ? > entity = (DataEntity< ? >) rawObject;
 
-            if (entity.getDataset() != null && entity.getDataset().getFeature() != null) {
+            if (entity.getDataset() != null
+                    && entity.getDataset()
+                             .getFeature() != null) {
                 collections.put(STAEntityDefinition.FEATURES_OF_INTEREST,
-                        Collections.singleton(entity.getDataset().getFeature().getStaIdentifier()));
+                                Collections.singleton(entity.getDataset()
+                                                            .getFeature()
+                                                            .getStaIdentifier()));
             }
 
             Optional<AbstractDatasetEntity> datastreamEntity = datastreamRepository
-                    .findOne(dQs.withObservationStaIdentifier(entity.getStaIdentifier()));
+                                                                                   .findOne(dQs.withObservationStaIdentifier(entity.getStaIdentifier()));
             if (datastreamEntity.isPresent()) {
                 collections.put(STAEntityDefinition.DATASTREAMS,
-                        Collections.singleton(datastreamEntity.get().getStaIdentifier()));
+                                Collections.singleton(datastreamEntity.get()
+                                                                      .getStaIdentifier()));
             } else {
                 LOGGER.debug("No Datastream associated with this Entity {}", entity.getStaIdentifier());
             }
@@ -409,13 +428,13 @@ public class MessageBusRepository<T, I extends Serializable>
             PhenomenonEntity entity = (PhenomenonEntity) rawObject;
 
             List<AbstractDatasetEntity> observations = datastreamRepository
-                    .findAll(dQs.withObservedPropertyStaIdentifier(entity.getStaIdentifier()));
+                                                                           .findAll(dQs.withObservedPropertyStaIdentifier(entity.getStaIdentifier()));
             collections.put(
-                    STAEntityDefinition.DATASTREAMS,
-                    observations
-                            .stream()
-                            .map(AbstractDatasetEntity::getStaIdentifier)
-                            .collect(Collectors.toSet()));
+                            STAEntityDefinition.DATASTREAMS,
+                            observations
+                                        .stream()
+                                        .map(AbstractDatasetEntity::getStaIdentifier)
+                                        .collect(Collectors.toSet()));
         } else {
             LOGGER.error("Error while computing related Collections: Could not identify Entity Type");
         }
@@ -446,11 +465,15 @@ public class MessageBusRepository<T, I extends Serializable>
             result.put(DESCRIPTION, ((ProcedureEntity) entity).getDescription());
             result.put(NAME, ((ProcedureEntity) entity).getName());
             result.put(METADATA, ((ProcedureEntity) entity).getDescriptionFile());
-            result.put(ENCODINGTYPE, ((ProcedureEntity) entity).getFormat().getFormat());
+            result.put(ENCODINGTYPE,
+                       ((ProcedureEntity) entity).getFormat()
+                                                 .getFormat());
         } else if (entity instanceof LocationEntity) {
             result.put(DESCRIPTION, ((LocationEntity) entity).getDescription());
             result.put(NAME, ((LocationEntity) entity).getName());
-            result.put(LOCATION, ((LocationEntity) entity).getGeometryEntity().getGeometry());
+            result.put(LOCATION,
+                       ((LocationEntity) entity).getGeometryEntity()
+                                                .getGeometry());
             result.put(ENCODINGTYPE, ((LocationEntity) entity).getLocationEncoding());
         } else if (entity instanceof PlatformEntity) {
             result.put(DESCRIPTION, ((PlatformEntity) entity).getDescription());
@@ -462,29 +485,32 @@ public class MessageBusRepository<T, I extends Serializable>
         } else if (entity instanceof AbstractDatasetEntity) {
             result.put(DESCRIPTION, ((AbstractDatasetEntity) entity).getDescription());
             result.put(NAME, ((AbstractDatasetEntity) entity).getName());
-            result.put(OBSERVATIONTYPE, ((AbstractDatasetEntity) entity).getOMObservationType().getFormat());
+            result.put(OBSERVATIONTYPE,
+                       ((AbstractDatasetEntity) entity).getOMObservationType()
+                                                       .getFormat());
             result.put(UOM, ((AbstractDatasetEntity) entity).getUnit());
             result.put(OBSERVEDAREA,
-                    (((AbstractDatasetEntity) entity).getGeometryEntity() != null)
-                            ? ((AbstractDatasetEntity) entity).getGeometryEntity().getGeometry()
-                            : null);
+                       (((AbstractDatasetEntity) entity).getGeometryEntity() != null)
+                               ? ((AbstractDatasetEntity) entity).getGeometryEntity()
+                                                                 .getGeometry()
+                               : null);
             result.put(SAMPLINGTIMESTART, ((AbstractDatasetEntity) entity).getSamplingTimeStart());
             result.put(SAMPLINGTIMEEND, ((AbstractDatasetEntity) entity).getSamplingTimeEnd());
             result.put(RESULTTIMESTART, ((AbstractDatasetEntity) entity).getResultTimeStart());
             result.put(RESULTTIMEEND, ((AbstractDatasetEntity) entity).getResultTimeEnd());
         } else if (entity instanceof HistoricalLocationEntity) {
             result.put(TIME, ((HistoricalLocationEntity) entity).getTime());
-        } else if (entity instanceof DataEntity<?>) {
-            result.put(SAMPLINGTIMESTART, ((DataEntity<?>) entity).getSamplingTimeStart());
-            result.put(SAMPLINGTIMEEND, ((DataEntity<?>) entity).getSamplingTimeEnd());
-            result.put(RESULTTIME, ((DataEntity<?>) entity).getResultTime());
-            result.put(VALIDTIMESTART, ((DataEntity<?>) entity).getValidTimeStart());
-            result.put(VALIDTIMEEND, ((DataEntity<?>) entity).getValidTimeEnd());
-            Set<ParameterEntity> parameters = ((DataEntity<?>) entity).hasParameters()
-                    ? new HashSet<>(((DataEntity<?>) entity).getParameters())
+        } else if (entity instanceof DataEntity< ? >) {
+            result.put(SAMPLINGTIMESTART, ((DataEntity< ? >) entity).getSamplingTimeStart());
+            result.put(SAMPLINGTIMEEND, ((DataEntity< ? >) entity).getSamplingTimeEnd());
+            result.put(RESULTTIME, ((DataEntity< ? >) entity).getResultTime());
+            result.put(VALIDTIMESTART, ((DataEntity< ? >) entity).getValidTimeStart());
+            result.put(VALIDTIMEEND, ((DataEntity< ? >) entity).getValidTimeEnd());
+            Set<ParameterEntity> parameters = ((DataEntity< ? >) entity).hasParameters()
+                    ? new HashSet<>(((DataEntity< ? >) entity).getParameters())
                     : new HashSet<>();
             result.put(PARAMETERS, parameters);
-            result.put(RESULT, ((DataEntity<?>) entity).getValue());
+            result.put(RESULT, ((DataEntity< ? >) entity).getValue());
             // TODO: implement difference map for "resultQuality"
         } else if (entity instanceof AbstractFeatureEntity) {
             result.put(NAME, ((AbstractFeatureEntity) entity).getName());
@@ -505,13 +531,13 @@ public class MessageBusRepository<T, I extends Serializable>
             Set<RootGraph<T>> roots = new HashSet<>();
             for (EntityGraphRepository.FetchGraph entityGraph : fetchGraphs) {
                 roots.add(GraphParser.parse(entityClass,
-                        entityGraph.value(),
-                        (SessionImplementor) em.getDelegate()));
+                                            entityGraph.value(),
+                                            (SessionImplementor) em.getDelegate()));
             }
             return EntityGraphs.merge(
-                    (EntityManager) em.getDelegate(),
-                    entityClass,
-                    roots.toArray(new RootGraph[] {}));
+                                      (EntityManager) em.getDelegate(),
+                                      entityClass,
+                                      roots.toArray(new RootGraph[] {}));
         } else {
             return null;
         }
@@ -531,7 +557,8 @@ public class MessageBusRepository<T, I extends Serializable>
 
     public Page<T> findAll(Specification<T> spec, Pageable pageable, EntityGraphRepository.FetchGraph... fetchGraphs) {
         TypedQuery<T> query = getQuery(spec, pageable, createEntityGraph(fetchGraphs));
-        return pageable.isUnpaged() ? new PageImpl<>(query.getResultList())
+        return pageable.isUnpaged()
+                ? new PageImpl<>(query.getResultList())
                 : readPage(query, getDomainClass(), pageable, spec);
     }
 
@@ -540,34 +567,31 @@ public class MessageBusRepository<T, I extends Serializable>
     }
 
     protected TypedQuery<T> getQuery(@Nullable Specification<T> spec,
-            Pageable pageable,
-            EntityGraph<T> entityGraph) {
+                                     Pageable pageable,
+                                     EntityGraph<T> entityGraph) {
 
-        Sort sort = pageable.isPaged() ? pageable.getSort() : Sort.unsorted();
+        Sort sort = pageable.isPaged()
+                ? pageable.getSort()
+                : Sort.unsorted();
         return getQuery(spec, getDomainClass(), sort, entityGraph);
     }
 
     /*
-     * private <S extends T> TypedQuery<S> getQuery(@Nullable Specification<S> spec,
-     * Class<S> domainClass,
-     * Pageable pageable,
-     * EntityGraph<S> entityGraph) {
-     *
-     * Sort sort = pageable.isPaged() ? pageable.getSort() : Sort.unsorted();
-     * return getQuery(spec, domainClass, sort, entityGraph);
-     * }
+     * private <S extends T> TypedQuery<S> getQuery(@Nullable Specification<S> spec, Class<S> domainClass,
+     * Pageable pageable, EntityGraph<S> entityGraph) { Sort sort = pageable.isPaged() ? pageable.getSort() :
+     * Sort.unsorted(); return getQuery(spec, domainClass, sort, entityGraph); }
      */
 
     private TypedQuery<T> getQuery(@Nullable Specification<T> spec,
-            Sort sort,
-            EntityGraph<T> entityGraph) {
+                                   Sort sort,
+                                   EntityGraph<T> entityGraph) {
         return getQuery(spec, getDomainClass(), sort, entityGraph);
     }
 
     private <S extends T> TypedQuery<S> getQuery(@Nullable Specification<S> spec,
-            Class<S> domainClass,
-            Sort sort,
-            EntityGraph<S> entityGraph) {
+                                                 Class<S> domainClass,
+                                                 Sort sort,
+                                                 EntityGraph<S> entityGraph) {
         CriteriaQuery<S> query = criteriaBuilder.createQuery(domainClass);
         Root<S> root = query.from(domainClass);
         if (spec != null) {
@@ -590,12 +614,13 @@ public class MessageBusRepository<T, I extends Serializable>
     }
 
     /**
-     * Saves an entity to the Datastore without intercepting for mqtt subscription
-     * checking.
-     * Used when Entity is saved multiple times during creation
+     * Saves an entity to the Datastore without intercepting for mqtt subscription checking. Used when Entity
+     * is saved multiple times during creation
      *
-     * @param entity Entity to be saved
-     * @param <S>    raw entity type
+     * @param entity
+     *        Entity to be saved
+     * @param <S>
+     *        raw entity type
      * @return saved entity.
      */
     @Transactional

@@ -25,6 +25,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
+
 package org.n52.sta.conformance;
 
 import java.io.IOException;
@@ -59,8 +60,8 @@ import org.testcontainers.junit.jupiter.Testcontainers;
  * Adapted from the official Test Suite <a href="https://github.com/opengeospatial/ets-sta10/">ets-sta10</a>
  *
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
- * @see <a href="http://docs.opengeospatial.org/is/15-078r6/15-078r6.html#54">
- * OGC SensorThings API Part 1: Sensing (15-078r6)</a>
+ * @see <a href="http://docs.opengeospatial.org/is/15-078r6/15-078r6.html#54"> OGC SensorThings API Part 1:
+ *      Sensing (15-078r6)</a>
  */
 @Testcontainers
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
@@ -72,33 +73,53 @@ public class ITConformance1 extends ConformanceTests implements TestUtil {
 
         // Create required test harness
         // Requires POST with deep insert to work.
-        postEntity(EntityType.THING, "{ \"description\": \"thing 1\", \"name\": \"thing name 1\", \"properties\": { " +
-            "\"reference\": \"first\" }, \"Locations\": [ { \"description\": \"location 1\", \"name\": \"location" +
-            " name 1\", \"location\": { \"type\": \"Point\", \"coordinates\": [ -117.05, 51.05 ] }, " +
-            "\"encodingType\": \"application/vnd.geo+json\" } ], \"Datastreams\": [ { \"unitOfMeasurement\": { " +
-            "\"name\": \"Lumen\", \"symbol\": \"lm\", \"definition\": \"http://www.qudt.org/qudt/owl/1.0" +
-            ".0/unit/Instances.html/Lumen\" }, \"description\": \"datastream 1\", \"name\": \"datastream name " +
-            "1\", \"observationType\": \"http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_Measurement\", " +
-            "\"ObservedProperty\": { \"name\": \"Luminous Flux\", \"definition\": \"http://www.qudt" +
-            ".org/qudt/owl/1.0.0/quantity/Instances.html/LuminousFlux\", \"description\": \"observedProperty 1\" " +
-            "}, \"Sensor\": { \"description\": \"sensor 1\", \"name\": \"sensor name 1\", \"encodingType\": " +
-            "\"application/pdf\", \"metadata\": \"Light flux sensor\" }, \"Observations\":[ { \"phenomenonTime\":" +
-            " \"2015-03-03T00:00:00Z\", \"result\": 3 }, { \"phenomenonTime\": \"2015-03-04T00:00:00Z\", " +
-            "\"result\": 4 } ] }, { \"unitOfMeasurement\": { \"name\": \"Centigrade\", \"symbol\": \"C\", " +
-            "\"definition\": \"http://www.qudt.org/qudt/owl/1.0.0/unit/Instances.html/Lumen\" }, \"description\":" +
-            " \"datastream 2\", \"name\": \"datastream name 2\", \"observationType\": \"http://www.opengis" +
-            ".net/def/observationType/OGC-OM/2.0/OM_Measurement\", \"ObservedProperty\": { \"name\": " +
-            "\"Tempretaure\", \"definition\": \"http://www.qudt.org/qudt/owl/1.0.0/quantity/Instances" +
-            ".html/Tempreture\", \"description\": \"observedProperty 2\" }, \"Sensor\": { \"description\": " +
-            "\"sensor 2\", \"name\": \"sensor name 2\", \"encodingType\": \"application/pdf\", \"metadata\": " +
-            "\"Tempreture sensor\" }, \"Observations\":[ { \"phenomenonTime\": \"2015-03-05T00:00:00Z\", " +
-            "\"result\": 5 }, { \"phenomenonTime\": \"2015-03-06T00:00:00Z\", \"result\": 6 } ] } ] }");
+        postEntity(EntityType.THING,
+                   "{ \"description\": \"thing 1\", \"name\": \"thing name 1\", \"properties\": { "
+                           +
+                           "\"reference\": \"first\" }, \"Locations\": [ { \"description\": \"location 1\", \"name\": \"location"
+                           +
+                           " name 1\", \"location\": { \"type\": \"Point\", \"coordinates\": [ -117.05, 51.05 ] }, "
+                           +
+                           "\"encodingType\": \"application/vnd.geo+json\" } ], \"Datastreams\": [ { \"unitOfMeasurement\": { "
+                           +
+                           "\"name\": \"Lumen\", \"symbol\": \"lm\", \"definition\": \"http://www.qudt.org/qudt/owl/1.0"
+                           +
+                           ".0/unit/Instances.html/Lumen\" }, \"description\": \"datastream 1\", \"name\": \"datastream name "
+                           +
+                           "1\", \"observationType\": \"http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_Measurement\", "
+                           +
+                           "\"ObservedProperty\": { \"name\": \"Luminous Flux\", \"definition\": \"http://www.qudt"
+                           +
+                           ".org/qudt/owl/1.0.0/quantity/Instances.html/LuminousFlux\", \"description\": \"observedProperty 1\" "
+                           +
+                           "}, \"Sensor\": { \"description\": \"sensor 1\", \"name\": \"sensor name 1\", \"encodingType\": "
+                           +
+                           "\"application/pdf\", \"metadata\": \"Light flux sensor\" }, \"Observations\":[ { \"phenomenonTime\":"
+                           +
+                           " \"2015-03-03T00:00:00Z\", \"result\": 3 }, { \"phenomenonTime\": \"2015-03-04T00:00:00Z\", "
+                           +
+                           "\"result\": 4 } ] }, { \"unitOfMeasurement\": { \"name\": \"Centigrade\", \"symbol\": \"C\", "
+                           +
+                           "\"definition\": \"http://www.qudt.org/qudt/owl/1.0.0/unit/Instances.html/Lumen\" }, \"description\":"
+                           +
+                           " \"datastream 2\", \"name\": \"datastream name 2\", \"observationType\": \"http://www.opengis"
+                           +
+                           ".net/def/observationType/OGC-OM/2.0/OM_Measurement\", \"ObservedProperty\": { \"name\": "
+                           +
+                           "\"Tempretaure\", \"definition\": \"http://www.qudt.org/qudt/owl/1.0.0/quantity/Instances"
+                           +
+                           ".html/Tempreture\", \"description\": \"observedProperty 2\" }, \"Sensor\": { \"description\": "
+                           +
+                           "\"sensor 2\", \"name\": \"sensor name 2\", \"encodingType\": \"application/pdf\", \"metadata\": "
+                           +
+                           "\"Tempreture sensor\" }, \"Observations\":[ { \"phenomenonTime\": \"2015-03-05T00:00:00Z\", "
+                           +
+                           "\"result\": 5 }, { \"phenomenonTime\": \"2015-03-06T00:00:00Z\", \"result\": 6 } ] } ] }");
     }
 
     /**
-     * This method is testing GET entities. It should return 200. Then the
-     * response entities are tested for control information, mandatory
-     * properties, and mandatory related entities.
+     * This method is testing GET entities. It should return 200. Then the response entities are tested for
+     * control information, mandatory properties, and mandatory related entities.
      */
     @Test
     public void testReadEntitiesAndCheckResponse() throws Exception {
@@ -122,8 +143,7 @@ public class ITConformance1 extends ConformanceTests implements TestUtil {
     }
 
     /**
-     * This method is testing GET when requesting a nonexistent entity. The
-     * response should be 404.
+     * This method is testing GET when requesting a nonexistent entity. The response should be 404.
      */
     @Test
     public void readNonexistentEntity() throws Exception {
@@ -138,9 +158,8 @@ public class ITConformance1 extends ConformanceTests implements TestUtil {
     }
 
     /**
-     * This method is testing GET for a specific entity with its id. It checks
-     * the control information, mandatory properties and mandatory related
-     * entities for the response entity.
+     * This method is testing GET for a specific entity with its id. It checks the control information,
+     * mandatory properties and mandatory related entities for the response entity.
      */
     @Test
     public void readEntityAndCheckResponse() throws Exception {
@@ -179,28 +198,43 @@ public class ITConformance1 extends ConformanceTests implements TestUtil {
     }
 
     /**
-     * This method is testing the resource paths based on specification to the
-     * specified level.
+     * This method is testing the resource paths based on specification to the specified level.
      */
     @Test
     public void checkResourcePaths() throws Exception {
         Set<JsonNode> response;
         response = readEntityWithEntityType(EntityType.THING);
-        checkRelatedEndpoints(EntityType.THING, ((JsonNode) response.toArray()[0]).get(idKey).asText());
+        checkRelatedEndpoints(EntityType.THING,
+                              ((JsonNode) response.toArray()[0]).get(idKey)
+                                                                .asText());
         response = readEntityWithEntityType(EntityType.LOCATION);
-        checkRelatedEndpoints(EntityType.LOCATION, ((JsonNode) response.toArray()[0]).get(idKey).asText());
+        checkRelatedEndpoints(EntityType.LOCATION,
+                              ((JsonNode) response.toArray()[0]).get(idKey)
+                                                                .asText());
         response = readEntityWithEntityType(EntityType.HISTORICAL_LOCATION);
-        checkRelatedEndpoints(EntityType.HISTORICAL_LOCATION, ((JsonNode) response.toArray()[0]).get(idKey).asText());
+        checkRelatedEndpoints(EntityType.HISTORICAL_LOCATION,
+                              ((JsonNode) response.toArray()[0]).get(idKey)
+                                                                .asText());
         response = readEntityWithEntityType(EntityType.DATASTREAM);
-        checkRelatedEndpoints(EntityType.DATASTREAM, ((JsonNode) response.toArray()[0]).get(idKey).asText());
+        checkRelatedEndpoints(EntityType.DATASTREAM,
+                              ((JsonNode) response.toArray()[0]).get(idKey)
+                                                                .asText());
         response = readEntityWithEntityType(EntityType.SENSOR);
-        checkRelatedEndpoints(EntityType.SENSOR, ((JsonNode) response.toArray()[0]).get(idKey).asText());
+        checkRelatedEndpoints(EntityType.SENSOR,
+                              ((JsonNode) response.toArray()[0]).get(idKey)
+                                                                .asText());
         response = readEntityWithEntityType(EntityType.OBSERVATION);
-        checkRelatedEndpoints(EntityType.OBSERVATION, ((JsonNode) response.toArray()[0]).get(idKey).asText());
+        checkRelatedEndpoints(EntityType.OBSERVATION,
+                              ((JsonNode) response.toArray()[0]).get(idKey)
+                                                                .asText());
         response = readEntityWithEntityType(EntityType.OBSERVED_PROPERTY);
-        checkRelatedEndpoints(EntityType.OBSERVED_PROPERTY, ((JsonNode) response.toArray()[0]).get(idKey).asText());
+        checkRelatedEndpoints(EntityType.OBSERVED_PROPERTY,
+                              ((JsonNode) response.toArray()[0]).get(idKey)
+                                                                .asText());
         response = readEntityWithEntityType(EntityType.FEATURE_OF_INTEREST);
-        checkRelatedEndpoints(EntityType.FEATURE_OF_INTEREST, ((JsonNode) response.toArray()[0]).get(idKey).asText());
+        checkRelatedEndpoints(EntityType.FEATURE_OF_INTEREST,
+                              ((JsonNode) response.toArray()[0]).get(idKey)
+                                                                .asText());
     }
 
     /**
@@ -220,20 +254,23 @@ public class ITConformance1 extends ConformanceTests implements TestUtil {
             JsonNode entity = entities.get(i);
             Assertions.assertNotNull(entity.get("name"));
             Assertions.assertNotNull(entity.get("url"));
-            String name = entity.get("name").asText();
-            String nameUrl = entity.get("url").asText();
+            String name = entity.get("name")
+                                .asText();
+            String nameUrl = entity.get("url")
+                                   .asText();
 
             if (EntityType.getByVal(name) == null) {
                 Assertions.fail(
-                    "There is a component in Service Root URI response that is not in SensorThings API : " + name);
+                                "There is a component in Service Root URI response that is not in SensorThings API : "
+                                        + name);
             } else {
                 Assertions.assertEquals(rootUrl + name,
                                         nameUrl,
                                         String.format(
-                                            "The URL for %s in Service Root URI is not compliant to SensorThings " +
-                                                "API.",
-                                            rootUrl + name)
-                );
+                                                      "The URL for %s in Service Root URI is not compliant to SensorThings "
+                                                              +
+                                                              "API.",
+                                                      rootUrl + name));
                 addedLinks.put(name, true);
             }
         }
@@ -243,13 +280,13 @@ public class ITConformance1 extends ConformanceTests implements TestUtil {
     }
 
     /**
-     * This helper method is testing property and property/$value for single
-     * entity of a given entity type
+     * This helper method is testing property and property/$value for single entity of a given entity type
      *
-     * @param entityType Entity type from EntityType enum list
+     * @param entityType
+     *        Entity type from EntityType enum list
      */
     void readPropertyOfEntityWithEntityType(EntityType entityType, STAEntityDefinition definition)
-        throws Exception {
+            throws Exception {
         JsonNode collection = getCollection(entityType);
         Assertions.assertNotNull(collection.get(value),
                                  "Could not get collection for EntityType: " + entityType.name());
@@ -257,19 +294,27 @@ public class ITConformance1 extends ConformanceTests implements TestUtil {
             Assertions.assertNotNull(entity.get("@iot.id"),
                                      "Could not read @iot.id from entity:" + entity.toPrettyString());
             for (String mandatoryProp : this.getEntityPropsMandatory(definition)) {
-                checkGetPropertyOfEntity(entityType, entity.get("@iot.id").asText(), mandatoryProp);
-                checkGetPropertyValueOfEntity(entityType, entity.get("@iot.id").asText(), mandatoryProp);
+                checkGetPropertyOfEntity(entityType,
+                                         entity.get("@iot.id")
+                                               .asText(),
+                                         mandatoryProp);
+                checkGetPropertyValueOfEntity(entityType,
+                                              entity.get("@iot.id")
+                                                    .asText(),
+                                              mandatoryProp);
             }
         }
     }
 
     /**
-     * This helper method sending GET request for requesting a property and
-     * check the response is 200.
+     * This helper method sending GET request for requesting a property and check the response is 200.
      *
-     * @param entityType Entity type from EntityType enum list
-     * @param id         The id of the entity
-     * @param property   The property to get requested
+     * @param entityType
+     *        Entity type from EntityType enum list
+     * @param id
+     *        The id of the entity
+     * @param property
+     *        The property to get requested
      */
     private void checkGetPropertyOfEntity(EntityType entityType, String id, String property) throws Exception {
         JsonNode entity = getEntityProperty(entityType, id, property);
@@ -277,17 +322,23 @@ public class ITConformance1 extends ConformanceTests implements TestUtil {
                                  "Reading property \"" + property + "\"of \"" + entityType + "\" fails.");
         Assertions.assertEquals(1,
                                 entity.size(),
-                                "The response for getting property " + property + " of Entity " + entityType +
-                                    " returns more properties!");
+                                "The response for getting property "
+                                        + property
+                                        + " of Entity "
+                                        + entityType
+                                        +
+                                        " returns more properties!");
     }
 
     /**
-     * This helper method sending GET request for requesting a property $value
-     * and check the response is 200.
+     * This helper method sending GET request for requesting a property $value and check the response is 200.
      *
-     * @param entityType Entity type from EntityType enum list
-     * @param id         The id of the entity
-     * @param property   The property to get requested
+     * @param entityType
+     *        Entity type from EntityType enum list
+     * @param id
+     *        The id of the entity
+     * @param property
+     *        The property to get requested
      */
     private void checkGetPropertyValueOfEntity(EntityType entityType, String id, String property) throws Exception {
         String response = getEntityValue(entityType, id, property);
@@ -298,9 +349,12 @@ public class ITConformance1 extends ConformanceTests implements TestUtil {
     /**
      * Checks that all related Endpoints return HTTP 200 OK
      *
-     * @param type Type of Source Entity
-     * @param id   Id of Source Entity
-     * @throws IOException if an error occurred
+     * @param type
+     *        Type of Source Entity
+     * @param id
+     *        Id of Source Entity
+     * @throws IOException
+     *         if an error occurred
      */
     void checkRelatedEndpoints(EntityType type, String id) throws IOException {
         Set<String> relatedEntityEndpointKeys = getRelatedEntityEndpointKeys(type);
@@ -310,50 +364,53 @@ public class ITConformance1 extends ConformanceTests implements TestUtil {
     }
 
     /**
-     * This method is checking the response for the request of Association Link.
-     * It confirms that it contains a list of selfLinks.
+     * This method is checking the response for the request of Association Link. It confirms that it contains
+     * a list of selfLinks.
      *
-     * @param response    The response for GET association link request
-     * @param entityTypes List of entity type from EntityType enum list for the
-     *                    chain
-     * @param ids         List of ids for teh chain
+     * @param response
+     *        The response for GET association link request
+     * @param entityTypes
+     *        List of entity type from EntityType enum list for the chain
+     * @param ids
+     *        List of ids for teh chain
      */
     private void checkAssociationLinks(String response, List<String> entityTypes, List<Long> ids) {
 
-        //        try {
-        //            Assert.assertTrue(response.indexOf(value) != -1,
-        //                              "The GET entities Association Link response does not match SensorThings API :
-        //                              missing " +
-        //                                      "\"value\" in response.: " +
-        //                                      entityTypes.toString() + ids.toString());
-        //            JSONArray value = new JSONObject(response.toString()).getJSONArray(value);
-        //            int count = 0;
-        //            for (int i = 0; i < value.length() && count < 2; i++) {
-        //                count++;
-        //                JSONObject obj = value.getJSONObject(i);
-        //                try {
-        //                    Assert.assertNotNull(obj.get(ControlInformation.SELF_LINK),
-        //                                         "The Association Link does not contain self-links.: " +
-        //                                                 entityTypes.toString() + ids.toString());
-        //                } catch (JSONException e) {
-        //                    Assert.fail("The Association Link does not contain self-links.: " + entityTypes
-        //                    .toString() +
-        //                                        ids.toString());
-        //                }
-        //                Assert.assertEquals(obj.length(), 1,
-        //                                    "The Association Link contains properties other than self-link.: " +
-        //                                            entityTypes.toString() + ids.toString());
-        //            }
-        //        } catch (JSONException e) {
-        //            e.printStackTrace();
-        //            Assert.fail("An Exception occurred during testing!:\n" + e.getMessage());
-        //        }
+        // try {
+        // Assert.assertTrue(response.indexOf(value) != -1,
+        // "The GET entities Association Link response does not match SensorThings API :
+        // missing " +
+        // "\"value\" in response.: " +
+        // entityTypes.toString() + ids.toString());
+        // JSONArray value = new JSONObject(response.toString()).getJSONArray(value);
+        // int count = 0;
+        // for (int i = 0; i < value.length() && count < 2; i++) {
+        // count++;
+        // JSONObject obj = value.getJSONObject(i);
+        // try {
+        // Assert.assertNotNull(obj.get(ControlInformation.SELF_LINK),
+        // "The Association Link does not contain self-links.: " +
+        // entityTypes.toString() + ids.toString());
+        // } catch (JSONException e) {
+        // Assert.fail("The Association Link does not contain self-links.: " + entityTypes
+        // .toString() +
+        // ids.toString());
+        // }
+        // Assert.assertEquals(obj.length(), 1,
+        // "The Association Link contains properties other than self-link.: " +
+        // entityTypes.toString() + ids.toString());
+        // }
+        // } catch (JSONException e) {
+        // e.printStackTrace();
+        // Assert.fail("An Exception occurred during testing!:\n" + e.getMessage());
+        // }
     }
 
     /**
      * This method is reading a specific entity and return it as a string.
      *
-     * @param entityType Entity type from EntityType enum list
+     * @param entityType
+     *        Entity type from EntityType enum list
      * @return The entity response as a string
      */
     Set<JsonNode> readEntityWithEntityType(EntityType entityType) throws Exception {
@@ -364,17 +421,20 @@ public class ITConformance1 extends ConformanceTests implements TestUtil {
         for (JsonNode entity : collection.get(value)) {
             Assertions.assertNotNull(entity.get("@iot.id"),
                                      "Could not read @iot.id from entity:" + entity.toPrettyString());
-            responses.add(getEntity(entityType, entity.get("@iot.id").asText()));
+            responses.add(getEntity(entityType,
+                                    entity.get("@iot.id")
+                                          .asText()));
         }
         return responses;
     }
 
     /**
-     * This helper method is the start point for checking the response for a
-     * collection in all aspects.
+     * This helper method is the start point for checking the response for a collection in all aspects.
      *
-     * @param entityType Entity type from EntityType enum list
-     * @param entity     The response of the GET request to be checked
+     * @param entityType
+     *        Entity type from EntityType enum list
+     * @param entity
+     *        The response of the GET request to be checked
      */
     void checkEntitiesAllAspectsForResponse(STAEntityDefinition entityType, JsonNode entity) {
         checkEntitiesControlInformation(entity);
@@ -402,11 +462,12 @@ public class ITConformance1 extends ConformanceTests implements TestUtil {
     }
 
     /**
-     * This helper method is the start point for checking the response for a
-     * specific entity in all aspects.
+     * This helper method is the start point for checking the response for a specific entity in all aspects.
      *
-     * @param entityType Entity type from EntityType enum list
-     * @param entity     The response of the GET request to be checked
+     * @param entityType
+     *        Entity type from EntityType enum list
+     * @param entity
+     *        The response of the GET request to be checked
      */
     private void checkEntityAllAspectsForResponse(STAEntityDefinition entityType, JsonNode entity) {
         checkEntityControlInformation(entity);
@@ -415,11 +476,12 @@ public class ITConformance1 extends ConformanceTests implements TestUtil {
     }
 
     /**
-     * This helper method is the start point for checking the response for a
-     * specific entity in all aspects.
+     * This helper method is the start point for checking the response for a specific entity in all aspects.
      *
-     * @param entityType Entity type from EntityType enum list
-     * @param entitySet  The response of the GET request to be checked
+     * @param entityType
+     *        Entity type from EntityType enum list
+     * @param entitySet
+     *        The response of the GET request to be checked
      */
     private void checkEntityAllAspectsForResponse(STAEntityDefinition entityType, Set<JsonNode> entitySet) {
         for (JsonNode entity : entitySet) {
@@ -430,10 +492,10 @@ public class ITConformance1 extends ConformanceTests implements TestUtil {
     }
 
     /**
-     * This helper method is checking the control information of the response
-     * for a collection
+     * This helper method is checking the control information of the response for a collection
      *
-     * @param response The response of the GET request to be checked
+     * @param response
+     *        The response of the GET request to be checked
      */
     private void checkEntitiesControlInformation(JsonNode response) {
         JsonNode entities = response.get(value);
@@ -444,10 +506,10 @@ public class ITConformance1 extends ConformanceTests implements TestUtil {
     }
 
     /**
-     * This helper method is checking the control information of the response
-     * for a specific entity
+     * This helper method is checking the control information of the response for a specific entity
      *
-     * @param entity The entity to be checked
+     * @param entity
+     *        The entity to be checked
      */
     private void checkEntityControlInformation(JsonNode entity) {
         Assertions.assertTrue(entity.has(StaConstants.AT_IOT_ID),
@@ -456,16 +518,18 @@ public class ITConformance1 extends ConformanceTests implements TestUtil {
                                  "The entity does not have mandatory control information :" + StaConstants.AT_IOT_ID);
 
         Assertions.assertTrue(entity.has(StaConstants.AT_IOT_SELFLINK),
-                              "The entity does not have mandatory control information :" +
-                                  StaConstants.AT_IOT_SELFLINK);
+                              "The entity does not have mandatory control information :"
+                                      +
+                                      StaConstants.AT_IOT_SELFLINK);
     }
 
     /**
-     * This helper method is checking the mandatory properties of the response
-     * for a collection
+     * This helper method is checking the mandatory properties of the response for a collection
      *
-     * @param mandatoryProperties List of mandatory properties
-     * @param response            The response of the GET request to be checked
+     * @param mandatoryProperties
+     *        List of mandatory properties
+     * @param response
+     *        The response of the GET request to be checked
      */
     private void checkEntitiesProperties(Set<String> mandatoryProperties, JsonNode response) {
         JsonNode entities = response.get(value);

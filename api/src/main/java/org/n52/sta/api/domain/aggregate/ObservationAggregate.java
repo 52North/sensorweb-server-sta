@@ -25,6 +25,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
+
 package org.n52.sta.api.domain.aggregate;
 
 import java.util.Map;
@@ -44,8 +45,9 @@ public class ObservationAggregate extends EntityAggregate<Observation> implement
         this(observation, domainService, null);
     }
 
-    public ObservationAggregate(Observation observation, DomainService<Observation> domainService,
-            EntityEditor<Observation> editor) {
+    public ObservationAggregate(Observation observation,
+                                DomainService<Observation> domainService,
+                                EntityEditor<Observation> editor) {
         super(observation, domainService, editor);
         this.observation = observation;
     }

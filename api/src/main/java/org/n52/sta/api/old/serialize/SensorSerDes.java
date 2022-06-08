@@ -25,6 +25,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
+
 package org.n52.sta.api.old.serialize;
 
 import java.io.IOException;
@@ -53,7 +54,6 @@ public class SensorSerDes {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SensorSerDes.class);
 
-
     @SuppressFBWarnings("EQ_DOESNT_OVERRIDE_EQUALS")
     public static class SensorDTOPatch implements EntityPatch<SensorDTO> {
 
@@ -69,7 +69,6 @@ public class SensorSerDes {
         }
     }
 
-
     public static class SensorSerializer extends AbstractSTASerializer<SensorDTO> {
 
         private static final long serialVersionUID = -2190624056257407974L;
@@ -82,36 +81,50 @@ public class SensorSerDes {
 
         @Override
         public void serialize(SensorDTO value, JsonGenerator gen, SerializerProvider serializers)
-            throws IOException {
+                throws IOException {
             gen.writeStartObject();
 
             // olingo @iot links
-            if (!value.hasSelectOption() || value.getFieldsToSerialize().contains(STAEntityDefinition.PROP_ID)) {
+            if (!value.hasSelectOption()
+                    || value.getFieldsToSerialize()
+                            .contains(STAEntityDefinition.PROP_ID)) {
                 writeId(gen, value.getId());
             }
-            if (!value.hasSelectOption() || value.getFieldsToSerialize().contains(STAEntityDefinition.PROP_SELF_LINK)) {
+            if (!value.hasSelectOption()
+                    || value.getFieldsToSerialize()
+                            .contains(STAEntityDefinition.PROP_SELF_LINK)) {
                 writeSelfLink(gen, value.getId());
             }
 
             // actual properties
-            if (!value.hasSelectOption() || value.getFieldsToSerialize().contains(STAEntityDefinition.PROP_NAME)) {
+            if (!value.hasSelectOption()
+                    || value.getFieldsToSerialize()
+                            .contains(STAEntityDefinition.PROP_NAME)) {
                 gen.writeStringField(STAEntityDefinition.PROP_NAME, value.getName());
             }
-            if (!value.hasSelectOption() ||
-                value.getFieldsToSerialize().contains(STAEntityDefinition.PROP_DESCRIPTION)) {
+            if (!value.hasSelectOption()
+                    ||
+                    value.getFieldsToSerialize()
+                         .contains(STAEntityDefinition.PROP_DESCRIPTION)) {
                 gen.writeStringField(STAEntityDefinition.PROP_DESCRIPTION, value.getDescription());
             }
-            if (!value.hasSelectOption() ||
-                value.getFieldsToSerialize().contains(STAEntityDefinition.PROP_ENCODINGTYPE)) {
+            if (!value.hasSelectOption()
+                    ||
+                    value.getFieldsToSerialize()
+                         .contains(STAEntityDefinition.PROP_ENCODINGTYPE)) {
                 gen.writeStringField(STAEntityDefinition.PROP_ENCODINGTYPE, value.getEncodingType());
             }
 
-            if (!value.hasSelectOption() || value.getFieldsToSerialize().contains(STAEntityDefinition.PROP_METADATA)) {
+            if (!value.hasSelectOption()
+                    || value.getFieldsToSerialize()
+                            .contains(STAEntityDefinition.PROP_METADATA)) {
                 gen.writeStringField(STAEntityDefinition.PROP_METADATA, value.getMetadata());
             }
 
-            if (!value.hasSelectOption() ||
-                value.getFieldsToSerialize().contains(STAEntityDefinition.PROP_PROPERTIES)) {
+            if (!value.hasSelectOption()
+                    ||
+                    value.getFieldsToSerialize()
+                         .contains(STAEntityDefinition.PROP_PROPERTIES)) {
                 if (value.getProperties() != null) {
                     gen.writeObjectField(STAEntityDefinition.PROP_PROPERTIES, value.getProperties());
                 }
@@ -119,8 +132,12 @@ public class SensorSerDes {
 
             // navigation properties
             for (String navigationProperty : SensorEntityDefinition.NAVIGATION_PROPERTIES) {
-                if (!value.hasSelectOption() || value.getFieldsToSerialize().contains(navigationProperty)) {
-                    if (!value.hasExpandOption() || value.getFieldsToExpand().get(navigationProperty) == null) {
+                if (!value.hasSelectOption()
+                        || value.getFieldsToSerialize()
+                                .contains(navigationProperty)) {
+                    if (!value.hasExpandOption()
+                            || value.getFieldsToExpand()
+                                    .get(navigationProperty) == null) {
                         writeNavigationProp(gen, navigationProperty, value.getId());
                     } else {
                         if (SensorEntityDefinition.DATASTREAMS.equals(navigationProperty)) {
@@ -142,7 +159,6 @@ public class SensorSerDes {
         }
     }
 
-
     public static class SensorDeserializer extends StdDeserializer<SensorDTO> {
 
         private static final long serialVersionUID = -6513819346703020350L;
@@ -157,14 +173,13 @@ public class SensorSerDes {
         public SensorDTO deserialize(JsonParser p, DeserializationContext ctxt) throws IOException {
             if (variableEncodingType) {
                 return p.readValueAs(JSONSensorVariableEncoding.class)
-                    .parseToDTO(JSONBase.EntityType.FULL);
+                        .parseToDTO(JSONBase.EntityType.FULL);
             } else {
                 return p.readValueAs(JSONSensor.class)
-                    .parseToDTO(JSONBase.EntityType.FULL);
+                        .parseToDTO(JSONBase.EntityType.FULL);
             }
         }
     }
-
 
     public static class SensorPatchDeserializer extends StdDeserializer<SensorDTOPatch> {
 
@@ -180,10 +195,10 @@ public class SensorSerDes {
         public SensorDTOPatch deserialize(JsonParser p, DeserializationContext ctxt) throws IOException {
             if (variableEncodingType) {
                 return new SensorDTOPatch(p.readValueAs(JSONSensorVariableEncoding.class)
-                                              .parseToDTO(JSONBase.EntityType.PATCH));
+                                           .parseToDTO(JSONBase.EntityType.PATCH));
             } else {
                 return new SensorDTOPatch(p.readValueAs(JSONSensor.class)
-                                              .parseToDTO(JSONBase.EntityType.PATCH));
+                                           .parseToDTO(JSONBase.EntityType.PATCH));
             }
         }
     }

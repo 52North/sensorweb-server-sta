@@ -25,6 +25,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
+
 package org.n52.sta.api.old;
 
 /**
@@ -35,8 +36,9 @@ public interface EntityServiceFactory {
     /**
      * Provides an entity data service for a entity type
      *
-     * @param name the name of the requested entity service
+     * @param name
+     *        the name of the requested entity service
      * @return the requested entity data service
      */
-    AbstractSensorThingsEntityService<?> getEntityService(String name);
+    AbstractSensorThingsEntityService< ? > getEntityService(String name);
 }

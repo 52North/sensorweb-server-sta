@@ -25,6 +25,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
+
 package org.n52.sta.data.provider;
 
 import org.n52.sta.config.DataProviderConfiguration;
@@ -37,6 +38,5 @@ import org.springframework.test.context.TestPropertySource;
 @Import(HibernateConfiguration.class)
 @TestPropertySource("classpath:/application.properties")
 public class DataProviderTestConfiguration extends DataProviderConfiguration {
-
 
 }

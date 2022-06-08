@@ -54,9 +54,12 @@ public class ObservationData<T> extends StaData<DataEntity<T>> implements Observ
     public Time getPhenomenonTime() {
         Date samplingTimeStart = data.getSamplingTimeStart();
         Date samplingTimeEnd = data.getSamplingTimeEnd();
-        Optional<DateTime> sStart = Optional.ofNullable(samplingTimeStart).map(TimeUtil::createDateTime);
-        Optional<DateTime> sEnd = Optional.ofNullable(samplingTimeEnd).map(TimeUtil::createDateTime);
-        return sStart.map(start -> TimeUtil.createTime(start, sEnd.orElse(null))).orElse(null);
+        Optional<DateTime> sStart = Optional.ofNullable(samplingTimeStart)
+                                            .map(TimeUtil::createDateTime);
+        Optional<DateTime> sEnd = Optional.ofNullable(samplingTimeEnd)
+                                          .map(TimeUtil::createDateTime);
+        return sStart.map(start -> TimeUtil.createTime(start, sEnd.orElse(null)))
+                     .orElse(null);
     }
 
     @Override
@@ -67,11 +70,13 @@ public class ObservationData<T> extends StaData<DataEntity<T>> implements Observ
     @Override
     public Object getResult() {
         Object value = data.getValue();
-        Class<? extends Object> type = value.getClass();
+        Class< ? extends Object> type = value.getClass();
         if (Collection.class.isAssignableFrom(type)) {
             @SuppressWarnings("unchecked")
-            Collection<DataEntity<?>> items = (Collection<DataEntity<?>>) value;
-            return items.stream().map(v -> new ObservationData<>(v, propertyMapping)).collect(Collectors.toSet());
+            Collection<DataEntity< ? >> items = (Collection<DataEntity< ? >>) value;
+            return items.stream()
+                        .map(v -> new ObservationData<>(v, propertyMapping))
+                        .collect(Collectors.toSet());
         } else {
             return value;
         }
@@ -102,11 +107,13 @@ public class ObservationData<T> extends StaData<DataEntity<T>> implements Observ
         if ("profile".equals(getValueType())) {
             String verticalFrom = propertyMapping.getVerticalFrom();
             if (verticalFrom != null) {
-                Optional.ofNullable(data.getVerticalFrom()).ifPresent(entity -> parameters.put(verticalFrom, entity));
+                Optional.ofNullable(data.getVerticalFrom())
+                        .ifPresent(entity -> parameters.put(verticalFrom, entity));
             }
             String verticalTo = propertyMapping.getVerticalTo();
             if (verticalTo != null) {
-                Optional.ofNullable(data.getVerticalTo()).ifPresent(entity -> parameters.put(verticalTo, entity));
+                Optional.ofNullable(data.getVerticalTo())
+                        .ifPresent(entity -> parameters.put(verticalTo, entity));
             }
         }
         return parameters;

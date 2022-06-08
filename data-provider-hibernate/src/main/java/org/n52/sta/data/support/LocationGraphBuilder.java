@@ -25,6 +25,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
+
 package org.n52.sta.data.support;
 
 import org.n52.series.db.beans.sta.LocationEntity;
@@ -37,7 +38,8 @@ public class LocationGraphBuilder extends GraphBuilder<LocationEntity> {
     public LocationGraphBuilder(Request req) {
         super(LocationEntity.class);
         // do not fetch anything when getting by reference
-        if (req.getPath().isRef()) {
+        if (req.getPath()
+               .isRef()) {
             return;
         }
         addGraphText(GraphText.GRAPH_PARAMETERS);
@@ -46,14 +48,14 @@ public class LocationGraphBuilder extends GraphBuilder<LocationEntity> {
     @Override
     public void addExpanded(ExpandItem expandItem) {
         switch (expandItem.getPath()) {
-            case StaConstants.HISTORICAL_LOCATIONS:
-                addGraphText(GraphText.GRAPH_HIST_LOCATIONS);
-                break;
-            case StaConstants.THINGS:
-                addGraphText(GraphText.GRAPH_PLATFORMS);
-                break;
-            default:
-                // no expand
+        case StaConstants.HISTORICAL_LOCATIONS:
+            addGraphText(GraphText.GRAPH_HIST_LOCATIONS);
+            break;
+        case StaConstants.THINGS:
+            addGraphText(GraphText.GRAPH_PLATFORMS);
+            break;
+        default:
+            // no expand
         }
     }
 

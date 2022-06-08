@@ -25,6 +25,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
+
 package org.n52.sta.http.serialize.in;
 
 import java.util.Collections;
@@ -111,7 +112,8 @@ abstract class StaNode implements Identifiable {
 
     protected <T> T getOrNull(String property, Function<JsonNode, T> asResult) {
         Optional<JsonNode> propertyNode = get(property);
-        return propertyNode.map(asResult::apply).orElse(null);
+        return propertyNode.map(asResult::apply)
+                           .orElse(null);
     }
 
     protected Optional<JsonNode> get(String property) {
@@ -123,7 +125,8 @@ abstract class StaNode implements Identifiable {
 
     protected Map<String, Object> toMap(String property) {
         Optional<JsonNode> objectNode = get(property);
-        return objectNode.map(this::toMap).orElse(Collections.emptyMap());
+        return objectNode.map(this::toMap)
+                         .orElse(Collections.emptyMap());
     }
 
     private Map<String, Object> toMap(JsonNode node) {
@@ -138,7 +141,8 @@ abstract class StaNode implements Identifiable {
     }
 
     protected <T> Set<T> toSet(JsonNode arrayNode, Function<JsonNode, T> nodeMapper) {
-        return toStream(arrayNode).map(nodeMapper).collect(Collectors.toSet());
+        return toStream(arrayNode).map(nodeMapper)
+                                  .collect(Collectors.toSet());
     }
 
     private Stream<JsonNode> toStream(JsonNode arrayNode) {

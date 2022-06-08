@@ -25,6 +25,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
+
 package org.n52.sta.conformance;
 
 import org.testcontainers.containers.PostgreSQLContainer;
@@ -41,7 +42,8 @@ public class STAPostgresContainer extends PostgreSQLContainer<STAPostgresContain
     private static STAPostgresContainer container;
 
     private STAPostgresContainer() {
-        super(DockerImageName.parse(IMAGE_VERSION).asCompatibleSubstituteFor("postgres"));
+        super(DockerImageName.parse(IMAGE_VERSION)
+                             .asCompatibleSubstituteFor("postgres"));
     }
 
     public static STAPostgresContainer instance() {
@@ -63,6 +65,6 @@ public class STAPostgresContainer extends PostgreSQLContainer<STAPostgresContain
 
     @Override
     public void stop() {
-        //do nothing, JVM handles shut down
+        // do nothing, JVM handles shut down
     }
 }

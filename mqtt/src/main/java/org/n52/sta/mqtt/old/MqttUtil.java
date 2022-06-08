@@ -25,6 +25,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
+
 package org.n52.sta.mqtt.old;
 
 import java.util.Collections;
@@ -58,6 +59,7 @@ public final class MqttUtil {
 
     /**
      * Maps olingo Types to Database types vice-versa..
+     *
      * @return Translation map from olingo Entities to raw Data Entities and vice-versa
      */
     static {

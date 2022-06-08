@@ -25,6 +25,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
+
 package org.n52.sta.plus.old.serialize;
 
 import java.io.IOException;
@@ -67,7 +68,6 @@ public class ProjectSerDes {
         }
     }
 
-
     public static class ProjectSerializer extends AbstractSTASerializer<ProjectDTO> {
 
         private static final long serialVersionUID = -1618289129123682794L;
@@ -82,59 +82,83 @@ public class ProjectSerDes {
         public void serialize(ProjectDTO project,
                               JsonGenerator gen,
                               SerializerProvider serializers)
-            throws IOException {
+                throws IOException {
             gen.writeStartObject();
 
             // olingo @iot links
-            if (!project.hasSelectOption() || project.getFieldsToSerialize().contains(STAEntityDefinition.PROP_ID)) {
+            if (!project.hasSelectOption()
+                    || project.getFieldsToSerialize()
+                              .contains(STAEntityDefinition.PROP_ID)) {
                 writeId(gen, project.getId());
             }
-            if (!project.hasSelectOption() ||
-                project.getFieldsToSerialize().contains(STAEntityDefinition.PROP_SELF_LINK)) {
+            if (!project.hasSelectOption()
+                    ||
+                    project.getFieldsToSerialize()
+                           .contains(STAEntityDefinition.PROP_SELF_LINK)) {
                 writeSelfLink(gen, project.getId());
             }
 
-            if (!project.hasSelectOption() || project.getFieldsToSerialize().contains(STAEntityDefinition.PROP_NAME)) {
+            if (!project.hasSelectOption()
+                    || project.getFieldsToSerialize()
+                              .contains(STAEntityDefinition.PROP_NAME)) {
                 gen.writeStringField(STAEntityDefinition.PROP_NAME, project.getName());
             }
-            if (!project.hasSelectOption() ||
-                project.getFieldsToSerialize().contains(STAEntityDefinition.PROP_DESCRIPTION)) {
+            if (!project.hasSelectOption()
+                    ||
+                    project.getFieldsToSerialize()
+                           .contains(STAEntityDefinition.PROP_DESCRIPTION)) {
                 gen.writeStringField(STAEntityDefinition.PROP_DESCRIPTION, project.getDescription());
             }
-            if (!project.hasSelectOption() ||
-                project.getFieldsToSerialize().contains(STAEntityDefinition.PROP_CLASSIFICATION)) {
+            if (!project.hasSelectOption()
+                    ||
+                    project.getFieldsToSerialize()
+                           .contains(STAEntityDefinition.PROP_CLASSIFICATION)) {
                 gen.writeStringField(STAEntityDefinition.PROP_CLASSIFICATION, project.getClassification());
             }
-            if (!project.hasSelectOption() ||
-                project.getFieldsToSerialize().contains(STAEntityDefinition.PROP_TERMS_OF_USE)) {
+            if (!project.hasSelectOption()
+                    ||
+                    project.getFieldsToSerialize()
+                           .contains(STAEntityDefinition.PROP_TERMS_OF_USE)) {
                 gen.writeStringField(STAEntityDefinition.PROP_TERMS_OF_USE, project.getTermsOfUse());
             }
-            if (!project.hasSelectOption() ||
-                project.getFieldsToSerialize().contains(STAEntityDefinition.PROP_PRIVACY_POLICY)) {
+            if (!project.hasSelectOption()
+                    ||
+                    project.getFieldsToSerialize()
+                           .contains(STAEntityDefinition.PROP_PRIVACY_POLICY)) {
                 gen.writeStringField(STAEntityDefinition.PROP_PRIVACY_POLICY, project.getPrivacyPolicy());
             }
-            if (!project.hasSelectOption() ||
-                project.getFieldsToSerialize().contains(STAEntityDefinition.PROP_CREATION_TIME)) {
+            if (!project.hasSelectOption()
+                    ||
+                    project.getFieldsToSerialize()
+                           .contains(STAEntityDefinition.PROP_CREATION_TIME)) {
                 if (project.getCreationTime() != null) {
                     gen.writeStringField(STAEntityDefinition.PROP_CREATION_TIME,
                                          DateTimeHelper.format(project.getCreationTime()));
                 }
             }
-            if (!project.hasSelectOption() || project.getFieldsToSerialize().contains(StaConstants.PROP_RUNTIME)) {
+            if (!project.hasSelectOption()
+                    || project.getFieldsToSerialize()
+                              .contains(StaConstants.PROP_RUNTIME)) {
                 if (project.getStartTime() != null) {
                     gen.writeStringField(StaConstants.PROP_RUNTIME, DateTimeHelper.format(project.getStartTime()));
                 }
             }
 
-            if (!project.hasSelectOption() ||
-                project.getFieldsToSerialize().contains(STAEntityDefinition.PROP_URL)) {
+            if (!project.hasSelectOption()
+                    ||
+                    project.getFieldsToSerialize()
+                           .contains(STAEntityDefinition.PROP_URL)) {
                 gen.writeStringField(STAEntityDefinition.PROP_URL, project.getUrl());
             }
 
-            if (!project.hasSelectOption() ||
-                project.getFieldsToSerialize().contains(STAEntityDefinition.DATASTREAMS)) {
-                if (!project.hasExpandOption() ||
-                    project.getFieldsToExpand().get(STAEntityDefinition.DATASTREAMS) == null) {
+            if (!project.hasSelectOption()
+                    ||
+                    project.getFieldsToSerialize()
+                           .contains(STAEntityDefinition.DATASTREAMS)) {
+                if (!project.hasExpandOption()
+                        ||
+                        project.getFieldsToExpand()
+                               .get(STAEntityDefinition.DATASTREAMS) == null) {
                     writeNavigationProp(gen, STAEntityDefinition.DATASTREAMS, project.getId());
                 } else {
                     gen.writeFieldName(STAEntityDefinition.DATASTREAMS);
@@ -147,7 +171,6 @@ public class ProjectSerDes {
         }
     }
 
-
     public static class ProjectDeserializer extends StdDeserializer<ProjectDTO> {
 
         private static final long serialVersionUID = 3942005672394573517L;
@@ -158,13 +181,14 @@ public class ProjectSerDes {
 
         @Override
         public ProjectDTO deserialize(JsonParser p, DeserializationContext ctxt) throws IOException {
-            return p.readValueAs(JSONProject.class).parseToDTO(JSONBase.EntityType.FULL);
+            return p.readValueAs(JSONProject.class)
+                    .parseToDTO(JSONBase.EntityType.FULL);
         }
     }
 
-
     public static class ProjectPatchDeserializer
-        extends StdDeserializer<ProjectDTOPatch> {
+            extends
+            StdDeserializer<ProjectDTOPatch> {
 
         private static final long serialVersionUID = -6355786322787893665L;
 
@@ -174,9 +198,9 @@ public class ProjectSerDes {
 
         @Override
         public ProjectDTOPatch deserialize(JsonParser p, DeserializationContext ctxt)
-            throws IOException {
+                throws IOException {
             return new ProjectDTOPatch(p.readValueAs(JSONProject.class)
-                                           .parseToDTO(JSONBase.EntityType.PATCH));
+                                        .parseToDTO(JSONBase.EntityType.PATCH));
         }
     }
 }

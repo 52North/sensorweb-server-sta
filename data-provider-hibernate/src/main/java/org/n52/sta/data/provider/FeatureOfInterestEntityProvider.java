@@ -58,12 +58,14 @@ public class FeatureOfInterestEntityProvider extends BaseEntityProvider<FeatureO
         this.featureOfInterestRepository = featureOfInterestRepository;
     }
 
-    @Override public boolean exists(String id) throws ProviderException {
+    @Override
+    public boolean exists(String id) throws ProviderException {
         assertIdentifier(id);
         return featureOfInterestRepository.existsByStaIdentifier(id);
     }
 
-    @Override public Optional<FeatureOfInterest> getEntity(Request req) throws ProviderException {
+    @Override
+    public Optional<FeatureOfInterest> getEntity(Request req) throws ProviderException {
         FeatureOfInterestGraphBuilder graphBuilder = new FeatureOfInterestGraphBuilder(req);
         addUnfilteredExpandItems(req.getQueryOptions(), graphBuilder);
 
@@ -72,7 +74,8 @@ public class FeatureOfInterestEntityProvider extends BaseEntityProvider<FeatureO
         return platform.map(entity -> new FeatureOfInterestData(entity, propertyMapping));
     }
 
-    @Override public EntityPage<FeatureOfInterest> getEntities(Request req) throws ProviderException {
+    @Override
+    public EntityPage<FeatureOfInterest> getEntities(Request req) throws ProviderException {
         Pageable pageable = StaPageRequest.create(req.getQueryOptions());
 
         FeatureOfInterestGraphBuilder graphBuilder = new FeatureOfInterestGraphBuilder(req);

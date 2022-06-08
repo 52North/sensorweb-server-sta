@@ -65,22 +65,28 @@ public abstract class BaseEntityProvider<T extends Identifiable> implements Enti
     /**
      * Creates an entity graph for unfiltered entity members.
      *
-     * @param <E>          the database entity type
-     * @param options      the OData query options
-     * @param graphBuilder the graph builder adding unfiltered expanded items
+     * @param <E>
+     *        the database entity type
+     * @param options
+     *        the OData query options
+     * @param graphBuilder
+     *        the graph builder adding unfiltered expanded items
      */
     protected <E> void addUnfilteredExpandItems(QueryOptions options, GraphBuilder<E> graphBuilder) {
         if (options.hasExpandFilter()) {
             ExpandFilter expand = options.getExpandFilter();
-            Streams.stream(expand.getItems()).forEach(graphBuilder::addUnfilteredExpandItem);
+            Streams.stream(expand.getItems())
+                   .forEach(graphBuilder::addUnfilteredExpandItem);
         }
     }
 
     /**
      * Assert that id is neither null or empty.
      *
-     * @param id the id
-     * @throws IllegalArgumentException if id is invalid
+     * @param id
+     *        the id
+     * @throws IllegalArgumentException
+     *         if id is invalid
      */
     protected void assertIdentifier(String id) {
         if (id == null || id.isEmpty()) {
@@ -91,9 +97,12 @@ public abstract class BaseEntityProvider<T extends Identifiable> implements Enti
     /**
      * Builds specification based on Request. Parses QueryOptions and Request-Path if present.
      *
-     * @param req Request
-     * @param qs  QuerySpecifications of requested Entity Type
-     * @param <E> Entity Type
+     * @param req
+     *        Request
+     * @param qs
+     *        QuerySpecifications of requested Entity Type
+     * @param <E>
+     *        Entity Type
      * @return Specification to be used for filtering
      */
     protected <E> Specification<E> buildSpecification(Request req, BaseQuerySpecifications<E> qs) {
@@ -104,34 +113,37 @@ public abstract class BaseEntityProvider<T extends Identifiable> implements Enti
         Specification<E> pathSpec = null;
         pathSpec = parsePath(req.getPath(), qs);
 
-        return (pathSpec != null) ? pathSpec.and(querySpec) : querySpec;
+        return (pathSpec != null)
+                ? pathSpec.and(querySpec)
+                : querySpec;
     }
 
     private <E> Specification<E> parsePath(ODataPath path, BaseQuerySpecifications<E> qs)
-        throws ProviderException {
+            throws ProviderException {
         Specification<E> specification = null;
         try {
             List<PathSegment> segments = path.getPathSegments();
 
             // Segment of requested Entity
             PathSegment current = segments.get(0);
-            if (current.getIdentifier().isPresent()) {
-                specification = qs.equalsStaIdentifier(current.getIdentifier().get());
+            if (current.getIdentifier()
+                       .isPresent()) {
+                specification = qs.equalsStaIdentifier(current.getIdentifier()
+                                                              .get());
             }
 
-            //TODO: implement handling of this
+            // TODO: implement handling of this
             if (segments.size() > 3) {
                 throw new SpecificationsException("navigation via >1 relations is not implemented yet!");
             }
 
             if (segments.size() > 1) {
                 current = segments.get(1);
-                BaseQuerySpecifications<?> bqs =
-                    QuerySpecificationFactory.createSpecification(current.getCollection());
+                BaseQuerySpecifications< ? > bqs = QuerySpecificationFactory.createSpecification(current.getCollection());
 
-                Specification<E> segmentSpec =
-                    qs.applyOnMember(current.getCollection(),
-                                         bqs.equalsStaIdentifier(current.getIdentifier().orElse(null)));
+                Specification<E> segmentSpec = qs.applyOnMember(current.getCollection(),
+                                                                bqs.equalsStaIdentifier(current.getIdentifier()
+                                                                                               .orElse(null)));
 
                 return segmentSpec;
             } else {
@@ -140,23 +152,13 @@ public abstract class BaseEntityProvider<T extends Identifiable> implements Enti
 
             // Iterate over preceding Segments and chain specifications
             /*
-            BaseQuerySpecifications<?> lastQS = qs;
-            Specification<?> stepSpec = specification;
-                for (int i = 1; i < segments.size(); i++) {
-                current = segments.get(i);
-
-                BaseQuerySpecifications<?> bqs =
-                        QuerySpecificationFactory.createSpecification(current.getCollection());
-
-                Specification<?> segmentSpec =
-                    lastQS.applyOnMember(current.getCollection(),
-                                         bqs.equalsStaIdentifier(current.getIdentifier().orElse(null)));
-
-                stepSpec = stepSpec.and(segmentSpec);
-                lastQS = bqs;
-                stepSpec = segmentSpec;
-            }
-            */
+             * BaseQuerySpecifications<?> lastQS = qs; Specification<?> stepSpec = specification; for (int i =
+             * 1; i < segments.size(); i++) { current = segments.get(i); BaseQuerySpecifications<?> bqs =
+             * QuerySpecificationFactory.createSpecification(current.getCollection()); Specification<?>
+             * segmentSpec = lastQS.applyOnMember(current.getCollection(),
+             * bqs.equalsStaIdentifier(current.getIdentifier().orElse(null))); stepSpec =
+             * stepSpec.and(segmentSpec); lastQS = bqs; stepSpec = segmentSpec; }
+             */
         } catch (SpecificationsException | STAInvalidFilterExpressionException e) {
             LOGGER.debug(e.getMessage());
             throw new ProviderException(e.getMessage());

@@ -25,6 +25,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
+
 package org.n52.sta.api.server;
 
 import java.util.List;
@@ -81,7 +82,6 @@ public interface ServerSettings {
             final EntitySet other = (EntitySet) obj;
             return Objects.equals(this.name, other.name);
         }
-
 
     }
 

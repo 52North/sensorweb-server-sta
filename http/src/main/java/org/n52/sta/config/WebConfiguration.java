@@ -55,7 +55,7 @@ public class WebConfiguration implements WebMvcConfigurer {
     @Override
     public void configureContentNegotiation(ContentNegotiationConfigurer configurer) {
         configurer.defaultContentType(MediaType.APPLICATION_JSON)
-            .ignoreAcceptHeader(true);
+                  .ignoreAcceptHeader(true);
     }
 
     @Bean
@@ -65,13 +65,16 @@ public class WebConfiguration implements WebMvcConfigurer {
 
     @Bean
     public Filter getCorsFilter(
-        @Value("${http.cors.allowOrigin:*}") String origin,
-        @Value("${http.cors.allowMethods:POST, GET, OPTIONS, DELETE, PATCH}") String methods,
-        @Value("${http.cors.maxAge:3600}") String maxAge,
-        @Value("${http.cors.allowHeaders:Access-Control-Allow-Headers," +
-            "Content-Type, Access-Control-Allow-Headers," +
-            "Authorization," +
-            "X-Requested-With}") String headers) {
+                                @Value("${http.cors.allowOrigin:*}") String origin,
+                                @Value("${http.cors.allowMethods:POST, GET, OPTIONS, DELETE, PATCH}") String methods,
+                                @Value("${http.cors.maxAge:3600}") String maxAge,
+                                @Value("${http.cors.allowHeaders:Access-Control-Allow-Headers,"
+                                        +
+                                        "Content-Type, Access-Control-Allow-Headers,"
+                                        +
+                                        "Authorization,"
+                                        +
+                                        "X-Requested-With}") String headers) {
         return new CorsFilter(origin, methods, maxAge, headers);
     }
 

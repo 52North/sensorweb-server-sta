@@ -25,6 +25,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
+
 package org.n52.sta.data.old.service;
 
 import org.n52.series.db.beans.FormatEntity;
@@ -49,7 +50,8 @@ public class FormatService {
     private final FormatRepository formatRepository;
 
     public FormatService(MutexFactory mutexFactory,
-                         FormatRepository formatRepository) throws STACRUDException {
+                         FormatRepository formatRepository)
+            throws STACRUDException {
         this.mutexFactory = mutexFactory;
         this.formatRepository = formatRepository;
 

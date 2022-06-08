@@ -66,17 +66,21 @@ public class ITRootResponseTest extends ConformanceTests {
     @Test
     public void rootResponseIsCorrect() throws IOException {
         HttpUriRequest request = new HttpGet(rootUrl);
-        HttpResponse response = HttpClientBuilder.create().build().execute(request);
+        HttpResponse response = HttpClientBuilder.create()
+                                                 .build()
+                                                 .execute(request);
 
         // Check Response MIME Type
-        String mimeType = ContentType.getOrDefault(response.getEntity()).getMimeType();
+        String mimeType = ContentType.getOrDefault(response.getEntity())
+                                     .getMimeType();
         Assertions.assertEquals(jsonMimeType, mimeType);
 
         // Check Response
-        JsonNode root = mapper.readTree(response.getEntity().getContent());
+        JsonNode root = mapper.readTree(response.getEntity()
+                                                .getContent());
         Assertions.assertTrue(root.hasNonNull("value"));
 
-        //TODO: expand tests to actually be useful
+        // TODO: expand tests to actually be useful
     }
 
 }

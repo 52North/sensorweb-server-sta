@@ -25,6 +25,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
+
 package org.n52.sta.api.domain.aggregate;
 
 import org.locationtech.jts.geom.Geometry;
@@ -48,8 +49,9 @@ public class DatastreamAggregate extends EntityAggregate<Datastream> implements 
         this(datastream, domainService, null);
     }
 
-    public DatastreamAggregate(Datastream datastream, DomainService<Datastream> domainService,
-            EntityEditor<Datastream> editor) {
+    public DatastreamAggregate(Datastream datastream,
+                               DomainService<Datastream> domainService,
+                               EntityEditor<Datastream> editor) {
         super(datastream, domainService, editor);
         this.datastream = datastream;
     }

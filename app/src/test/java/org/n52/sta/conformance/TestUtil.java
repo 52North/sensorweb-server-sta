@@ -25,6 +25,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
+
 package org.n52.sta.conformance;
 
 import java.util.HashMap;
@@ -74,57 +75,58 @@ public interface TestUtil {
 
     String MQTT_TOPIC_PREFIX = "v1.1/";
 
-    GeometryFactory factory =
-        new GeometryFactory(new PrecisionModel(PrecisionModel.FLOATING), 4326);
+    GeometryFactory factory = new GeometryFactory(new PrecisionModel(PrecisionModel.FLOATING), 4326);
 
-    HashMap<String, String> relatedEntityEndpoints = new HashMap<String, String>() {{
-        put(EntityType.THING.toString() + EntityType.DATASTREAM.toString(),
-            "Things(%s)/Datastreams");
-        put(EntityType.THING.toString() + EntityType.LOCATION.toString(),
-            "Things(%s)/Locations");
-        put(EntityType.THING.toString() + EntityType.HISTORICAL_LOCATION.toString(),
-            "Things(%s)/HistoricalLocations");
+    HashMap<String, String> relatedEntityEndpoints = new HashMap<String, String>() {
+        {
+            put(EntityType.THING.toString() + EntityType.DATASTREAM.toString(),
+                "Things(%s)/Datastreams");
+            put(EntityType.THING.toString() + EntityType.LOCATION.toString(),
+                "Things(%s)/Locations");
+            put(EntityType.THING.toString() + EntityType.HISTORICAL_LOCATION.toString(),
+                "Things(%s)/HistoricalLocations");
 
-        put(EntityType.LOCATION.toString() + EntityType.HISTORICAL_LOCATION.toString(),
-            "Locations(%s)/HistoricalLocations");
-        put(EntityType.LOCATION.toString() + EntityType.THING.toString(),
-            "Locations(%s)/Things");
+            put(EntityType.LOCATION.toString() + EntityType.HISTORICAL_LOCATION.toString(),
+                "Locations(%s)/HistoricalLocations");
+            put(EntityType.LOCATION.toString() + EntityType.THING.toString(),
+                "Locations(%s)/Things");
 
-        put(EntityType.HISTORICAL_LOCATION.toString() + EntityType.THING.toString(),
-            "HistoricalLocations(%s)/Thing");
-        put(EntityType.HISTORICAL_LOCATION.toString() + EntityType.LOCATION.toString(),
-            "HistoricalLocations(%s)/Locations");
+            put(EntityType.HISTORICAL_LOCATION.toString() + EntityType.THING.toString(),
+                "HistoricalLocations(%s)/Thing");
+            put(EntityType.HISTORICAL_LOCATION.toString() + EntityType.LOCATION.toString(),
+                "HistoricalLocations(%s)/Locations");
 
-        put(EntityType.DATASTREAM.toString() + EntityType.THING.toString(),
-            "Datastreams(%s)/Thing");
-        put(EntityType.DATASTREAM.toString() + EntityType.SENSOR.toString(),
-            "Datastreams(%s)/Sensor");
-        put(EntityType.DATASTREAM.toString() + EntityType.OBSERVED_PROPERTY.toString(),
-            "Datastreams(%s)/ObservedProperty");
-        put(EntityType.DATASTREAM.toString() + EntityType.OBSERVATION.toString(),
-            "Datastreams(%s)/Observations");
+            put(EntityType.DATASTREAM.toString() + EntityType.THING.toString(),
+                "Datastreams(%s)/Thing");
+            put(EntityType.DATASTREAM.toString() + EntityType.SENSOR.toString(),
+                "Datastreams(%s)/Sensor");
+            put(EntityType.DATASTREAM.toString() + EntityType.OBSERVED_PROPERTY.toString(),
+                "Datastreams(%s)/ObservedProperty");
+            put(EntityType.DATASTREAM.toString() + EntityType.OBSERVATION.toString(),
+                "Datastreams(%s)/Observations");
 
-        put(EntityType.SENSOR.toString() + EntityType.DATASTREAM.toString(),
-            "Sensors(%s)/Datastreams");
+            put(EntityType.SENSOR.toString() + EntityType.DATASTREAM.toString(),
+                "Sensors(%s)/Datastreams");
 
-        put(EntityType.OBSERVED_PROPERTY.toString() + EntityType.DATASTREAM.toString(),
-            "ObservedProperties(%s)/Datastreams");
+            put(EntityType.OBSERVED_PROPERTY.toString() + EntityType.DATASTREAM.toString(),
+                "ObservedProperties(%s)/Datastreams");
 
-        put(EntityType.OBSERVATION.toString() + EntityType.DATASTREAM.toString(),
-            "Observations(%s)/Datastream");
-        put(EntityType.OBSERVATION.toString() + EntityType.FEATURE_OF_INTEREST.toString(),
-            "Observations(%s)/FeatureOfInterest");
+            put(EntityType.OBSERVATION.toString() + EntityType.DATASTREAM.toString(),
+                "Observations(%s)/Datastream");
+            put(EntityType.OBSERVATION.toString() + EntityType.FEATURE_OF_INTEREST.toString(),
+                "Observations(%s)/FeatureOfInterest");
 
-        put(EntityType.FEATURE_OF_INTEREST.toString() + EntityType.OBSERVATION.toString(),
-            "FeaturesOfInterest(%s)/Observations");
+            put(EntityType.FEATURE_OF_INTEREST.toString() + EntityType.OBSERVATION.toString(),
+                "FeaturesOfInterest(%s)/Observations");
 
-    }};
+        }
+    };
 
     default Set<String> getRelatedEntityEndpointKeys(EntityType source) {
         return relatedEntityEndpoints.values()
-            .stream()
-            .filter((val) -> val.startsWith(source.val))
-            .collect(Collectors.toSet());
+                                     .stream()
+                                     .filter((val) -> val.startsWith(source.val))
+                                     .collect(Collectors.toSet());
     }
 
     default String getRelatedEntityEndpoint(EntityType source, EntityType target) {
@@ -132,29 +134,30 @@ public interface TestUtil {
     }
 
     default void compareJsonNodes(JsonNode reference, JsonNode actual) {
-        for (Iterator<Map.Entry<String, JsonNode>> it = reference.fields(); it.hasNext(); ) {
+        for (Iterator<Map.Entry<String, JsonNode>> it = reference.fields(); it.hasNext();) {
             Map.Entry<String, JsonNode> next = it.next();
             switch (next.getKey()) {
-                case "feature":
-                case "location":
-                    compareJsonNodesGeo(next.getKey(), next.getValue(), actual.get(next.getKey()));
-                    break;
-                case "validTime":
-                case "phenomenonTime":
-                case "resultTime":
-                    compareJsonNodesTime(next.getKey(), next.getValue(), actual.get(next.getKey()));
-                    break;
-                default:
-                    // Skip navigation links as they have different keys in response
-                    // e.g. "Things" vs "Things@iot.navigationLink"
-                    if (!Character.isUpperCase(next.getKey().charAt(0))) {
-                        if (Objects.equals(next.getKey(), "result")) {
-                            compareJsonNodesNumeric(next.getKey(), next.getValue(), actual.get(next.getKey()));
-                        } else {
-                            compareJsonNodesString(next.getKey(), next.getValue(), actual.get(next.getKey()));
-                        }
+            case "feature":
+            case "location":
+                compareJsonNodesGeo(next.getKey(), next.getValue(), actual.get(next.getKey()));
+                break;
+            case "validTime":
+            case "phenomenonTime":
+            case "resultTime":
+                compareJsonNodesTime(next.getKey(), next.getValue(), actual.get(next.getKey()));
+                break;
+            default:
+                // Skip navigation links as they have different keys in response
+                // e.g. "Things" vs "Things@iot.navigationLink"
+                if (!Character.isUpperCase(next.getKey()
+                                               .charAt(0))) {
+                    if (Objects.equals(next.getKey(), "result")) {
+                        compareJsonNodesNumeric(next.getKey(), next.getValue(), actual.get(next.getKey()));
+                    } else {
+                        compareJsonNodesString(next.getKey(), next.getValue(), actual.get(next.getKey()));
                     }
-                    break;
+                }
+                break;
             }
 
         }
@@ -162,33 +165,40 @@ public interface TestUtil {
 
     default void compareJsonNodesGeo(String fieldname, JsonNode referenceValue, JsonNode actualValue) {
         Assertions.assertNotNull(
-            referenceValue,
-            "Reference Entity is nonexistent!"
-        );
+                                 referenceValue,
+                                 "Reference Entity is nonexistent!");
         Assertions.assertNotNull(
-            actualValue,
-            "Actual Entity is nonexistent!"
-        );
+                                 actualValue,
+                                 "Actual Entity is nonexistent!");
         // GeoJson comparison
         GeoJsonReader reader = new GeoJsonReader(factory);
         try {
             Geometry referenceGeo, actualGeo;
-            if (referenceValue.get("type").asText().equals("Feature")) {
-                referenceGeo = reader.read(referenceValue.get("geometry").toString());
+            if (referenceValue.get("type")
+                              .asText()
+                              .equals("Feature")) {
+                referenceGeo = reader.read(referenceValue.get("geometry")
+                                                         .toString());
             } else {
                 referenceGeo = reader.read(referenceValue.toString());
             }
-            if (actualValue.get("type").asText().equals("Feature")) {
-                actualGeo = reader.read(actualValue.get("geometry").toString());
+            if (actualValue.get("type")
+                           .asText()
+                           .equals("Feature")) {
+                actualGeo = reader.read(actualValue.get("geometry")
+                                                   .toString());
             } else {
                 actualGeo = reader.read(actualValue.toString());
             }
             Assertions.assertTrue(
-                referenceGeo.equals(actualGeo),
-                "ERROR: Deep inserted " + fieldname + " is not created correctly."
-                    + "Reference: " + referenceValue.toPrettyString()
-                    + "Actual: " + actualValue.toPrettyString()
-            );
+                                  referenceGeo.equals(actualGeo),
+                                  "ERROR: Deep inserted "
+                                          + fieldname
+                                          + " is not created correctly."
+                                          + "Reference: "
+                                          + referenceValue.toPrettyString()
+                                          + "Actual: "
+                                          + actualValue.toPrettyString());
         } catch (ParseException e) {
             Assertions.fail("Could not parse to GeoJSON. Error was:" + e.getMessage());
         }
@@ -196,51 +206,53 @@ public interface TestUtil {
 
     default void compareJsonNodesTime(String fieldname, JsonNode reference, JsonNode actual) {
         Assertions.assertNotNull(
-            reference,
-            "Reference Entity is nonexistent!"
-        );
+                                 reference,
+                                 "Reference Entity is nonexistent!");
         Assertions.assertNotNull(
-            actual,
-            "Actual Entity is nonexistent!"
-        );
+                                 actual,
+                                 "Actual Entity is nonexistent!");
         String referenceTimeValue, actualTimeValue;
         // Time comparison
-        referenceTimeValue = reference.toString().replace("\"", "");
-        actualTimeValue = actual.toString().replace("\"", "");
+        referenceTimeValue = reference.toString()
+                                      .replace("\"", "");
+        actualTimeValue = actual.toString()
+                                .replace("\"", "");
         if (referenceTimeValue.equals("null")) {
             Assertions.assertEquals(
-                referenceTimeValue,
-                actualTimeValue,
-                "The " + fieldname + " should have been \""
-                    + "null"
-                    + "\" but it is now \""
-                    + actualTimeValue
-                    + "\"."
-            );
+                                    referenceTimeValue,
+                                    actualTimeValue,
+                                    "The "
+                                            + fieldname
+                                            + " should have been \""
+                                            + "null"
+                                            + "\" but it is now \""
+                                            + actualTimeValue
+                                            + "\".");
         } else {
-            DateTime referenceTime = ISODateTimeFormat.dateTimeParser().parseDateTime(referenceTimeValue);
-            DateTime actualTime = ISODateTimeFormat.dateTimeParser().parseDateTime(actualTimeValue);
+            DateTime referenceTime = ISODateTimeFormat.dateTimeParser()
+                                                      .parseDateTime(referenceTimeValue);
+            DateTime actualTime = ISODateTimeFormat.dateTimeParser()
+                                                   .parseDateTime(actualTimeValue);
             Assertions.assertEquals(
-                actualTime,
-                referenceTime,
-                "The " + fieldname + " should have been \""
-                    + referenceTime.toString()
-                    + "\" but it is now \""
-                    + actualTime.toString()
-                    + "\"."
-            );
+                                    actualTime,
+                                    referenceTime,
+                                    "The "
+                                            + fieldname
+                                            + " should have been \""
+                                            + referenceTime.toString()
+                                            + "\" but it is now \""
+                                            + actualTime.toString()
+                                            + "\".");
         }
     }
 
     default void compareJsonNodesNumeric(String fieldname, JsonNode reference, JsonNode actual) {
         Assertions.assertNotNull(
-            reference,
-            "Reference Entity is nonexistent!"
-        );
+                                 reference,
+                                 "Reference Entity is nonexistent!");
         Assertions.assertNotNull(
-            actual,
-            "Actual Entity is nonexistent!"
-        );
+                                 actual,
+                                 "Actual Entity is nonexistent!");
         // Number comparison
         Double referenceValue, actualValue;
         referenceValue = reference.asDouble();
@@ -253,23 +265,22 @@ public interface TestUtil {
 
     default void compareJsonNodesString(String fieldname, JsonNode reference, JsonNode actual) {
         Assertions.assertNotNull(
-            reference,
-            "Reference Entity is nonexistent!"
-        );
+                                 reference,
+                                 "Reference Entity is nonexistent!");
         Assertions.assertNotNull(
-            actual,
-            "Actual Entity is nonexistent!"
-        );
+                                 actual,
+                                 "Actual Entity is nonexistent!");
         // Simple String comparison
         String referenceValue, actualValue;
-        referenceValue = reference.toString().replace("\"", "");
-        actualValue = actual.toString().replace("\"", "");
+        referenceValue = reference.toString()
+                                  .replace("\"", "");
+        actualValue = actual.toString()
+                            .replace("\"", "");
 
         Assertions.assertEquals(
-            referenceValue,
-            actualValue,
-            "ERROR: Deep inserted " + fieldname + " is not created correctly."
-        );
+                                referenceValue,
+                                actualValue,
+                                "ERROR: Deep inserted " + fieldname + " is not created correctly.");
     }
 
     default String escape(String val) {
@@ -279,14 +290,14 @@ public interface TestUtil {
     default void assertEmptyResponse(JsonNode response) {
         if (response.has(countKey)) {
             Assertions.assertTrue(
-                0 == response.get(countKey).asDouble(),
-                "Entity count is not zero although it should be"
-            );
+                                  0 == response.get(countKey)
+                                               .asDouble(),
+                                  "Entity count is not zero although it should be");
         }
         Assertions.assertTrue(
-            response.get("value").isEmpty(),
-            "Entity is returned although it shouldn't"
-        );
+                              response.get("value")
+                                      .isEmpty(),
+                              "Entity is returned although it shouldn't");
     }
 
     default void assertResponseCount(JsonNode response, int iotCount, int valueCount) {
@@ -295,19 +306,22 @@ public interface TestUtil {
         }
         if (response.has(iotCount)) {
             Assertions.assertEquals(iotCount,
-                                    response.get("@iot.count").asDouble(),
+                                    response.get("@iot.count")
+                                            .asDouble(),
                                     "@iot.id count is not " + iotCount + " although it should be");
         }
         Assertions.assertFalse(
-            response.get("value").isEmpty(),
-            "Entity is not returned although it should"
-        );
-        Assertions.assertEquals(response.get("value").size(),
+                               response.get("value")
+                                       .isEmpty(),
+                               "Entity is not returned although it should");
+        Assertions.assertEquals(response.get("value")
+                                        .size(),
                                 valueCount,
                                 "value has invalid number of elements! Expected: "
-                                    + valueCount
-                                    + ", Actual: "
-                                    + response.get("value").size());
+                                        + valueCount
+                                        + ", Actual: "
+                                        + response.get("value")
+                                                  .size());
     }
 
     default void assertResponseCount(JsonNode response, int count) {

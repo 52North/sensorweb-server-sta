@@ -25,6 +25,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
+
 package org.n52.sta.data.old.service;
 
 import java.util.Optional;
@@ -72,7 +73,8 @@ import org.springframework.data.jpa.domain.Specification;
 // @DependsOn({ "springApplicationContext" })
 // @Transactional
 public class SensorService
-        extends CommonSTAServiceImpl<ProcedureRepository, SensorDTO, ProcedureEntity> {
+        extends
+        CommonSTAServiceImpl<ProcedureRepository, SensorDTO, ProcedureEntity> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SensorService.class);
 
@@ -86,11 +88,11 @@ public class SensorService
 
     @Autowired
     public SensorService(ProcedureRepository repository,
-            FormatRepository formatRepository,
-            ProcedureHistoryRepository procedureHistoryRepository,
-            DatastreamRepository datastreamRepository,
-            ProcedureParameterRepository parameterRepository,
-            EntityManager em) {
+                         FormatRepository formatRepository,
+                         ProcedureHistoryRepository procedureHistoryRepository,
+                         DatastreamRepository datastreamRepository,
+                         ProcedureParameterRepository parameterRepository,
+                         EntityManager em) {
         super(repository, em, ProcedureEntity.class);
         this.formatRepository = formatRepository;
         this.procedureHistoryRepository = procedureHistoryRepository;
@@ -104,27 +106,30 @@ public class SensorService
         if (expandOption != null) {
             for (ExpandItem expandItem : expandOption.getItems()) {
                 // We cannot handle nested $filter or $expand
-                if (expandItem.getQueryOptions().hasFilterFilter() || expandItem.getQueryOptions().hasExpandFilter()) {
+                if (expandItem.getQueryOptions()
+                              .hasFilterFilter()
+                        || expandItem.getQueryOptions()
+                                     .hasExpandFilter()) {
                     continue;
                 }
                 String expandProperty = expandItem.getPath();
                 if (SensorEntityDefinition.DATASTREAMS.equals(expandProperty)) {
                     return new EntityGraphRepository.FetchGraph[] {
-                            EntityGraphRepository.FetchGraph.FETCHGRAPH_FORMAT,
-                            EntityGraphRepository.FetchGraph.FETCHGRAPH_PROCEDUREHISTORY,
-                            EntityGraphRepository.FetchGraph.FETCHGRAPH_DATASETS,
-                            EntityGraphRepository.FetchGraph.FETCHGRAPH_PARAMETERS,
+                        EntityGraphRepository.FetchGraph.FETCHGRAPH_FORMAT,
+                        EntityGraphRepository.FetchGraph.FETCHGRAPH_PROCEDUREHISTORY,
+                        EntityGraphRepository.FetchGraph.FETCHGRAPH_DATASETS,
+                        EntityGraphRepository.FetchGraph.FETCHGRAPH_PARAMETERS,
                     };
                 }
                 throw new STAInvalidQueryException(String.format(INVALID_EXPAND_OPTION_SUPPLIED,
-                        expandProperty,
-                        StaConstants.SENSOR));
+                                                                 expandProperty,
+                                                                 StaConstants.SENSOR));
             }
         }
         return new EntityGraphRepository.FetchGraph[] {
-                EntityGraphRepository.FetchGraph.FETCHGRAPH_FORMAT,
-                EntityGraphRepository.FetchGraph.FETCHGRAPH_PROCEDUREHISTORY,
-                EntityGraphRepository.FetchGraph.FETCHGRAPH_PARAMETERS,
+            EntityGraphRepository.FetchGraph.FETCHGRAPH_FORMAT,
+            EntityGraphRepository.FetchGraph.FETCHGRAPH_PROCEDUREHISTORY,
+            EntityGraphRepository.FetchGraph.FETCHGRAPH_PARAMETERS,
         };
     }
 
@@ -133,20 +138,24 @@ public class SensorService
             throws STACRUDException, STAInvalidQueryException {
         for (ExpandItem expandItem : expandOption.getItems()) {
             // We have already handled $expand without filter and expand
-            if (!(expandItem.getQueryOptions().hasFilterFilter() || expandItem.getQueryOptions().hasExpandFilter())) {
+            if (!(expandItem.getQueryOptions()
+                            .hasFilterFilter()
+                    || expandItem.getQueryOptions()
+                                 .hasExpandFilter())) {
                 continue;
             }
             String expandProperty = expandItem.getPath();
             if (SensorEntityDefinition.DATASTREAMS.equals(expandProperty)) {
                 Page<AbstractDatasetEntity> datastreams = getDatastreamService()
-                        .getEntityCollectionByRelatedEntityRaw(entity.getStaIdentifier(),
-                                STAEntityDefinition.SENSORS,
-                                expandItem.getQueryOptions());
-                entity.setDatasets(datastreams.get().collect(Collectors.toSet()));
+                                                                                .getEntityCollectionByRelatedEntityRaw(entity.getStaIdentifier(),
+                                                                                                                       STAEntityDefinition.SENSORS,
+                                                                                                                       expandItem.getQueryOptions());
+                entity.setDatasets(datastreams.get()
+                                              .collect(Collectors.toSet()));
             } else {
                 throw new STAInvalidQueryException(String.format(INVALID_EXPAND_OPTION_SUPPLIED,
-                        expandProperty,
-                        StaConstants.SENSOR));
+                                                                 expandProperty,
+                                                                 StaConstants.SENSOR));
             }
         }
         return entity;
@@ -154,16 +163,16 @@ public class SensorService
 
     @Override
     protected Specification<ProcedureEntity> byRelatedEntityFilter(String relatedId,
-            String relatedType,
-            String ownId) {
+                                                                   String relatedType,
+                                                                   String ownId) {
         Specification<ProcedureEntity> filter;
         switch (relatedType) {
-            case STAEntityDefinition.DATASTREAMS: {
-                filter = sQS.withDatastreamStaIdentifier(relatedId);
-                break;
-            }
-            default:
-                throw new IllegalStateException(String.format(TRYING_TO_FILTER_BY_UNRELATED_TYPE, relatedType));
+        case STAEntityDefinition.DATASTREAMS: {
+            filter = sQS.withDatastreamStaIdentifier(relatedId);
+            break;
+        }
+        default:
+            throw new IllegalStateException(String.format(TRYING_TO_FILTER_BY_UNRELATED_TYPE, relatedType));
         }
 
         if (ownId != null) {
@@ -176,24 +185,27 @@ public class SensorService
     public ProcedureEntity createOrfetch(ProcedureEntity sensor) throws STACRUDException {
         if (sensor.getStaIdentifier() != null && !sensor.isSetName()) {
             Optional<ProcedureEntity> optionalEntity = getRepository().findByStaIdentifier(sensor.getStaIdentifier(),
-                    EntityGraphRepository.FetchGraph.FETCHGRAPH_FORMAT);
+                                                                                           EntityGraphRepository.FetchGraph.FETCHGRAPH_FORMAT);
             if (optionalEntity.isPresent()) {
                 return optionalEntity.get();
             } else {
                 throw new STACRUDException(String.format(NO_S_WITH_ID_S_FOUND,
-                        StaConstants.SENSOR,
-                        sensor.getStaIdentifier()));
+                                                         StaConstants.SENSOR,
+                                                         sensor.getStaIdentifier()));
             }
         }
         if (sensor.getStaIdentifier() == null) {
             if (getRepository().existsByName(sensor.getName())) {
                 Optional<ProcedureEntity> optional = getRepository()
-                        .findOne(sQS.withStaIdentifier(sensor.getStaIdentifier())
-                                .or(sQS.withName(sensor.getName())));
-                return optional.isPresent() ? optional.get() : null;
+                                                                    .findOne(sQS.withStaIdentifier(sensor.getStaIdentifier())
+                                                                                .or(sQS.withName(sensor.getName())));
+                return optional.isPresent()
+                        ? optional.get()
+                        : null;
             } else {
                 // Autogenerate Identifier
-                String uuid = UUID.randomUUID().toString();
+                String uuid = UUID.randomUUID()
+                                  .toString();
                 sensor.setIdentifier(uuid);
                 sensor.setStaIdentifier(uuid);
             }
@@ -223,13 +235,13 @@ public class SensorService
             }
             if (sensor.getParameters() != null) {
                 parameterRepository.saveAll(sensor.getParameters()
-                        .stream()
-                        .filter(t -> t instanceof ProcedureParameterEntity)
-                        .map(t -> {
-                            ((ProcedureParameterEntity) t).setProcedure(intermediateSave);
-                            return (ProcedureParameterEntity) t;
-                        })
-                        .collect(Collectors.toSet()));
+                                                  .stream()
+                                                  .filter(t -> t instanceof ProcedureParameterEntity)
+                                                  .map(t -> {
+                                                      ((ProcedureParameterEntity) t).setProcedure(intermediateSave);
+                                                      return (ProcedureParameterEntity) t;
+                                                  })
+                                                  .collect(Collectors.toSet()));
             }
 
             // Save with Interception as procedure is now linked to Datastream
@@ -252,9 +264,9 @@ public class SensorService
     private ProcedureEntity updateEntity(String id, ProcedureEntity entity) throws STACRUDException {
         synchronized (getLock(id)) {
             Optional<ProcedureEntity> existing = getRepository()
-                    .findByStaIdentifier(id,
-                            EntityGraphRepository.FetchGraph.FETCHGRAPH_FORMAT,
-                            EntityGraphRepository.FetchGraph.FETCHGRAPH_PROCEDUREHISTORY);
+                                                                .findByStaIdentifier(id,
+                                                                                     EntityGraphRepository.FetchGraph.FETCHGRAPH_FORMAT,
+                                                                                     EntityGraphRepository.FetchGraph.FETCHGRAPH_PROCEDUREHISTORY);
             if (existing.isPresent()) {
                 ProcedureEntity merged = merge(existing.get(), entity);
                 if (entity != null) {
@@ -295,9 +307,7 @@ public class SensorService
             existing.setDescriptionFile(toMerge.getDescriptionFile());
         }
         /*
-         * if (toMerge.isSetFormat()) {
-         * existing.setFormat(toMerge.getFormat());
-         * }
+         * if (toMerge.isSetFormat()) { existing.setFormat(toMerge.getFormat()); }
          */
 
         return existing;
@@ -312,10 +322,11 @@ public class SensorService
                     getDatastreamService().delete(ds.getStaIdentifier());
                 }
 
-                ProcedureEntity sensor = getRepository().findByStaIdentifier(identifier).get();
+                ProcedureEntity sensor = getRepository().findByStaIdentifier(identifier)
+                                                        .get();
                 if (sensor.hasParameters()) {
                     sensor.getParameters()
-                            .forEach(entity -> parameterRepository.delete((ProcedureParameterEntity) entity));
+                          .forEach(entity -> parameterRepository.delete((ProcedureParameterEntity) entity));
                 }
                 getRepository().deleteByStaIdentifier(identifier);
             } else {
@@ -337,16 +348,20 @@ public class SensorService
 
     private void checkFormat(ProcedureEntity mergedSensor, ProcedureEntity newSensor) throws STACRUDException {
         FormatEntity format;
-        synchronized (getLock(mergedSensor.getFormat().getFormat())) {
+        synchronized (getLock(mergedSensor.getFormat()
+                                          .getFormat())) {
             if (newSensor.getFormat() != null) {
-                if (!formatRepository.existsByFormat(newSensor.getFormat().getFormat())) {
+                if (!formatRepository.existsByFormat(newSensor.getFormat()
+                                                              .getFormat())) {
                     format = formatRepository.save(newSensor.getFormat());
                 } else {
-                    format = formatRepository.findByFormat(newSensor.getFormat().getFormat());
+                    format = formatRepository.findByFormat(newSensor.getFormat()
+                                                                    .getFormat());
                 }
                 mergedSensor.setFormat(format);
                 if (mergedSensor.hasProcedureHistory()) {
-                    mergedSensor.getProcedureHistory().forEach(pf -> pf.setFormat(format));
+                    mergedSensor.getProcedureHistory()
+                                .forEach(pf -> pf.setFormat(format));
                 }
             }
         }
@@ -357,10 +372,14 @@ public class SensorService
             if (procedureHistoryRepository != null) {
                 for (ProcedureHistoryEntity procedureHistory : sensor.getProcedureHistory()) {
                     procedureHistory.setProcedure(sensor);
-                    sensor.getProcedureHistory().add(procedureHistoryRepository.save(procedureHistory));
+                    sensor.getProcedureHistory()
+                          .add(procedureHistoryRepository.save(procedureHistory));
                 }
             } else {
-                sensor.setDescriptionFile(sensor.getProcedureHistory().iterator().next().getXml());
+                sensor.setDescriptionFile(sensor.getProcedureHistory()
+                                                .iterator()
+                                                .next()
+                                                .getXml());
             }
         }
     }

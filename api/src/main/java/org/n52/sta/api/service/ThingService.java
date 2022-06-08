@@ -25,6 +25,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
+
 package org.n52.sta.api.service;
 
 import org.n52.sta.api.EntityEditor;
@@ -62,8 +63,8 @@ public class ThingService implements EntityService<Thing>, EntityEditor<Thing> {
         Objects.requireNonNull(provider, "provider must not be null");
         this.thingProvider = provider;
         this.domainService = domainService == null
-                                     ? new DefaultDomainService<>(provider)
-                                     : domainService;
+                ? new DefaultDomainService<>(provider)
+                : domainService;
     }
 
     @Override
@@ -125,7 +126,7 @@ public class ThingService implements EntityService<Thing>, EntityEditor<Thing> {
 
     private Thing getOrThrow(String id) throws ProviderException {
         return domainService.getEntity(id)
-                .orElseThrow(() -> new ProviderException("Id '" + id + "' does not exist."));
+                            .orElseThrow(() -> new ProviderException("Id '" + id + "' does not exist."));
     }
 
 }

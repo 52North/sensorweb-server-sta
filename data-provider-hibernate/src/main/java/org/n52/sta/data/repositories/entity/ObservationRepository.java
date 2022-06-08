@@ -25,6 +25,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
+
 package org.n52.sta.data.repositories.entity;
 
 import java.util.Set;
@@ -34,7 +35,7 @@ import org.n52.sta.data.repositories.BaseRepository;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface ObservationRepository<T extends DataEntity<?>> extends BaseRepository<T> {
+public interface ObservationRepository<T extends DataEntity< ? >> extends BaseRepository<T> {
 
     DataEntity<T> findFirstByDataset_idOrderBySamplingTimeStartAsc(Long datasetIdentifier);
 

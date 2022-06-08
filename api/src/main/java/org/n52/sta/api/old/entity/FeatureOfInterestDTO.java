@@ -25,6 +25,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
+
 package org.n52.sta.api.old.entity;
 
 import java.util.Set;
@@ -35,7 +36,8 @@ import org.locationtech.jts.geom.Geometry;
 import org.n52.sta.api.old.dto.common.StaDTO;
 
 /**
- * Data Transfer Object for handling a FeatureOfInterest as specified in 18-088 OGC SensorThingsAPI Part I Section 8.2.8
+ * Data Transfer Object for handling a FeatureOfInterest as specified in 18-088 OGC SensorThingsAPI Part I
+ * Section 8.2.8
  *
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
  */

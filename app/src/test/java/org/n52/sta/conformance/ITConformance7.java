@@ -25,6 +25,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
+
 package org.n52.sta.conformance;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -47,8 +48,8 @@ import org.testcontainers.junit.jupiter.Testcontainers;
  * Implements Conformance Tests according to Section A.7 in OGC SensorThings API Part 1: Sensing (15-078r6)
  *
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
- * @see <a href="http://docs.opengeospatial.org/is/15-078r6/15-078r6.html#54">
- * OGC SensorThings API Part 1: Sensing (15-078r6)</a>
+ * @see <a href="http://docs.opengeospatial.org/is/15-078r6/15-078r6.html#54"> OGC SensorThings API Part 1:
+ *      Sensing (15-078r6)</a>
  */
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 @Testcontainers
@@ -62,7 +63,8 @@ public class ITConformance7 extends ConformanceTests {
         super(rootUrl);
     }
 
-    @AfterAll static void disconnectClient() throws MqttException {
+    @AfterAll
+    static void disconnectClient() throws MqttException {
         if (mqttClient.isConnected()) {
             mqttClient.disconnect();
             mqttClient.close();
@@ -81,127 +83,224 @@ public class ITConformance7 extends ConformanceTests {
         connectClient();
         // Create required test harness
         // Requires POST with deep insert to work.
-        postEntity(EntityType.THING, "{\n" +
-            "    \"description\": \"thing 1\",\n" +
-            "    \"name\": \"thing name 1\",\n" +
-            "    \"properties\": {\n" +
-            "        \"reference\": \"first\"\n" +
-            "    },\n" +
-            "    \"Locations\": [\n" +
-            "        {\n" +
-            "            \"description\": \"location 1\",\n" +
-            "            \"name\": \"location name 1\",\n" +
-            "            \"location\": {\n" +
-            "                \"type\": \"Point\",\n" +
-            "                \"coordinates\": [\n" +
-            "                    -117.05,\n" +
-            "                    51.05\n" +
-            "                ]\n" +
-            "            },\n" +
-            "            \"encodingType\": \"application/vnd.geo+json\"\n" +
-            "        }\n" +
-            "    ],\n" +
-            "    \"Datastreams\": [\n" +
-            "        {\n" +
-            "            \"@iot.id\": \"ITConformance7Datastream\",\n" +
-            "            \"unitOfMeasurement\": {\n" +
-            "                \"name\": \"Lumen\",\n" +
-            "                \"symbol\": \"lm\",\n" +
-            "                \"definition\": \"http://www.qudt.org/qudt/owl/1.0.0/unit/Instances.html/Lumen\"\n" +
-            "            },\n" +
-            "            \"description\": \"datastream 1\",\n" +
-            "            \"name\": \"datastream name 1\",\n" +
-            "            \"observationType\": \"http://www.opengis.net/def/observationType/OGC-OM/2" +
-            ".0/OM_Measurement\",\n" +
-            "            \"ObservedProperty\": {\n" +
-            "                \"name\": \"Luminous Flux\",\n" +
-            "                \"definition\": \"http://www.qudt.org/qudt/owl/1.0.0/quantity/Instances" +
-            ".html/LuminousFlux\",\n" +
-            "                \"description\": \"observedProperty 1\"\n" +
-            "            },\n" +
-            "            \"Sensor\": {\n" +
-            "                \"description\": \"sensor 1\",\n" +
-            "                \"name\": \"sensor name 1\",\n" +
-            "                \"encodingType\": \"application/pdf\",\n" +
-            "                \"metadata\": \"Light flux sensor\"\n" +
-            "            },\n" +
-            "            \"Observations\": [\n" +
-            "                {\n" +
-            "                    \"phenomenonTime\": \"2015-03-03T00:00:00Z\",\n" +
-            "                    \"result\": 3\n" +
-            "                },\n" +
-            "                {\n" +
-            "                    \"phenomenonTime\": \"2015-03-04T00:00:00Z\",\n" +
-            "                    \"result\": 4\n" +
-            "                }\n" +
-            "            ]\n" +
-            "        }\n" +
-            "    ]\n" +
-            "}");
+        postEntity(EntityType.THING,
+                   "{\n"
+                           +
+                           "    \"description\": \"thing 1\",\n"
+                           +
+                           "    \"name\": \"thing name 1\",\n"
+                           +
+                           "    \"properties\": {\n"
+                           +
+                           "        \"reference\": \"first\"\n"
+                           +
+                           "    },\n"
+                           +
+                           "    \"Locations\": [\n"
+                           +
+                           "        {\n"
+                           +
+                           "            \"description\": \"location 1\",\n"
+                           +
+                           "            \"name\": \"location name 1\",\n"
+                           +
+                           "            \"location\": {\n"
+                           +
+                           "                \"type\": \"Point\",\n"
+                           +
+                           "                \"coordinates\": [\n"
+                           +
+                           "                    -117.05,\n"
+                           +
+                           "                    51.05\n"
+                           +
+                           "                ]\n"
+                           +
+                           "            },\n"
+                           +
+                           "            \"encodingType\": \"application/vnd.geo+json\"\n"
+                           +
+                           "        }\n"
+                           +
+                           "    ],\n"
+                           +
+                           "    \"Datastreams\": [\n"
+                           +
+                           "        {\n"
+                           +
+                           "            \"@iot.id\": \"ITConformance7Datastream\",\n"
+                           +
+                           "            \"unitOfMeasurement\": {\n"
+                           +
+                           "                \"name\": \"Lumen\",\n"
+                           +
+                           "                \"symbol\": \"lm\",\n"
+                           +
+                           "                \"definition\": \"http://www.qudt.org/qudt/owl/1.0.0/unit/Instances.html/Lumen\"\n"
+                           +
+                           "            },\n"
+                           +
+                           "            \"description\": \"datastream 1\",\n"
+                           +
+                           "            \"name\": \"datastream name 1\",\n"
+                           +
+                           "            \"observationType\": \"http://www.opengis.net/def/observationType/OGC-OM/2"
+                           +
+                           ".0/OM_Measurement\",\n"
+                           +
+                           "            \"ObservedProperty\": {\n"
+                           +
+                           "                \"name\": \"Luminous Flux\",\n"
+                           +
+                           "                \"definition\": \"http://www.qudt.org/qudt/owl/1.0.0/quantity/Instances"
+                           +
+                           ".html/LuminousFlux\",\n"
+                           +
+                           "                \"description\": \"observedProperty 1\"\n"
+                           +
+                           "            },\n"
+                           +
+                           "            \"Sensor\": {\n"
+                           +
+                           "                \"description\": \"sensor 1\",\n"
+                           +
+                           "                \"name\": \"sensor name 1\",\n"
+                           +
+                           "                \"encodingType\": \"application/pdf\",\n"
+                           +
+                           "                \"metadata\": \"Light flux sensor\"\n"
+                           +
+                           "            },\n"
+                           +
+                           "            \"Observations\": [\n"
+                           +
+                           "                {\n"
+                           +
+                           "                    \"phenomenonTime\": \"2015-03-03T00:00:00Z\",\n"
+                           +
+                           "                    \"result\": 3\n"
+                           +
+                           "                },\n"
+                           +
+                           "                {\n"
+                           +
+                           "                    \"phenomenonTime\": \"2015-03-04T00:00:00Z\",\n"
+                           +
+                           "                    \"result\": 4\n"
+                           +
+                           "                }\n"
+                           +
+                           "            ]\n"
+                           +
+                           "        }\n"
+                           +
+                           "    ]\n"
+                           +
+                           "}");
 
-        postEntity(EntityType.FEATURE_OF_INTEREST, "{\n" +
-            "    \"@iot.id\": \"ITConformance7FOI\",\n" +
-            "    \"name\": \"ITConformance7\",\n" +
-            "    \"description\": \"ITConformance7 FOI\",\n" +
-            "    \"encodingType\": \"application/vnd.geo+json\",\n" +
-            "    \"feature\": {\n" +
-            "      \"type\": \"Feature\"," +
-            "      \"geometry\": {\n" +
-            "        \"type\": \"LineString\",\n" +
-            "        \"coordinates\": [\n" +
-            "          [0, 0.0], [52, 52]\n" +
-            "        ]\n" +
-            "      }\n" +
-            "    }\n" +
-            "}");
+        postEntity(EntityType.FEATURE_OF_INTEREST,
+                   "{\n"
+                           +
+                           "    \"@iot.id\": \"ITConformance7FOI\",\n"
+                           +
+                           "    \"name\": \"ITConformance7\",\n"
+                           +
+                           "    \"description\": \"ITConformance7 FOI\",\n"
+                           +
+                           "    \"encodingType\": \"application/vnd.geo+json\",\n"
+                           +
+                           "    \"feature\": {\n"
+                           +
+                           "      \"type\": \"Feature\","
+                           +
+                           "      \"geometry\": {\n"
+                           +
+                           "        \"type\": \"LineString\",\n"
+                           +
+                           "        \"coordinates\": [\n"
+                           +
+                           "          [0, 0.0], [52, 52]\n"
+                           +
+                           "        ]\n"
+                           +
+                           "      }\n"
+                           +
+                           "    }\n"
+                           +
+                           "}");
     }
 
     @Test
     public void postObservationDirect() throws Exception {
         init();
-        String observation = "{\n" +
-            "    \"phenomenonTime\": \"2019-03-10T17:45:09Z\",\n" +
-            "    \"resultTime\": \"2019-03-10T16:58:09Z\",\n" +
-            "    \"result\": 0.29,\n" +
-            "    \"parameters\": {\n" +
-            "        \"http://www.opengis.net/def/param-name/OGC-OM/2.0/samplingGeometry\": {\n" +
-            "            \"type\": \"Point\",\n" +
-            "            \"coordinates\": [\n" +
-            "                2,8466,\n" +
-            "                41.585\n" +
-            "            ]\n" +
-            "        }\n" +
-            "    },\n" +
-            "    \"Datastream\": {\n" +
-            "        \"@iot.id\": \"ITConformance7Datastream\"\n" +
-            "    },\n" +
-            "    \"FeatureOfInterest\": {\n" +
-            "        \"@iot.id\": \"ITConformance7FOI\"\n" +
-            "    }\n" +
-            "}";
+        String observation = "{\n"
+                +
+                "    \"phenomenonTime\": \"2019-03-10T17:45:09Z\",\n"
+                +
+                "    \"resultTime\": \"2019-03-10T16:58:09Z\",\n"
+                +
+                "    \"result\": 0.29,\n"
+                +
+                "    \"parameters\": {\n"
+                +
+                "        \"http://www.opengis.net/def/param-name/OGC-OM/2.0/samplingGeometry\": {\n"
+                +
+                "            \"type\": \"Point\",\n"
+                +
+                "            \"coordinates\": [\n"
+                +
+                "                2,8466,\n"
+                +
+                "                41.585\n"
+                +
+                "            ]\n"
+                +
+                "        }\n"
+                +
+                "    },\n"
+                +
+                "    \"Datastream\": {\n"
+                +
+                "        \"@iot.id\": \"ITConformance7Datastream\"\n"
+                +
+                "    },\n"
+                +
+                "    \"FeatureOfInterest\": {\n"
+                +
+                "        \"@iot.id\": \"ITConformance7FOI\"\n"
+                +
+                "    }\n"
+                +
+                "}";
         mqttClient.publish(MQTT_TOPIC_PREFIX + "Observations", observation.getBytes(), 1, false);
 
         JsonNode response = getCollection(EntityType.OBSERVATION);
         Assertions.assertTrue(response.has(value));
 
         assertResponseCount(
-            response,
-            3,
-            3
-        );
+                            response,
+                            3,
+                            3);
     }
 
     @Test
     public void postObservationRelatedDatastream() throws Exception {
         init();
-        String observation = "{\n" +
-            "    \"result\": 0.29,\n" +
-            "    \"phenomenonTime\": \"2019-03-10T17:45:09Z\",\n" +
-            "    \"resultTime\": \"2019-03-10T16:58:09Z\",\n" +
-            "    \"FeatureOfInterest\": {\n" +
-            "        \"@iot.id\": \"ITConformance7FOI\"\n" +
-            "    }\n" +
-            "}";
+        String observation = "{\n"
+                +
+                "    \"result\": 0.29,\n"
+                +
+                "    \"phenomenonTime\": \"2019-03-10T17:45:09Z\",\n"
+                +
+                "    \"resultTime\": \"2019-03-10T16:58:09Z\",\n"
+                +
+                "    \"FeatureOfInterest\": {\n"
+                +
+                "        \"@iot.id\": \"ITConformance7FOI\"\n"
+                +
+                "    }\n"
+                +
+                "}";
         mqttClient.publish(MQTT_TOPIC_PREFIX + "Datastreams(ITConformance7Datastream)/Observations",
                            observation.getBytes(),
                            1,
@@ -211,23 +310,29 @@ public class ITConformance7 extends ConformanceTests {
         Assertions.assertTrue(response.has(value));
 
         assertResponseCount(
-            response,
-            3,
-            3
-        );
+                            response,
+                            3,
+                            3);
     }
 
     @Test
     public void postObservationRelatedFOI() throws Exception {
         init();
-        String observation = "{\n" +
-            "    \"result\": 0.29,\n" +
-            "    \"phenomenonTime\": \"2019-03-10T17:45:09Z\",\n" +
-            "    \"resultTime\": \"2019-03-10T16:58:09Z\",\n" +
-            "    \"Datastream\": {\n" +
-            "        \"@iot.id\": \"ITConformance7Datastream\"\n" +
-            "    }\n" +
-            "}";
+        String observation = "{\n"
+                +
+                "    \"result\": 0.29,\n"
+                +
+                "    \"phenomenonTime\": \"2019-03-10T17:45:09Z\",\n"
+                +
+                "    \"resultTime\": \"2019-03-10T16:58:09Z\",\n"
+                +
+                "    \"Datastream\": {\n"
+                +
+                "        \"@iot.id\": \"ITConformance7Datastream\"\n"
+                +
+                "    }\n"
+                +
+                "}";
         mqttClient.publish(MQTT_TOPIC_PREFIX + "FeaturesOfInterest(ITConformance7FOI)/Observations",
                            observation.getBytes(),
                            1,
@@ -237,10 +342,9 @@ public class ITConformance7 extends ConformanceTests {
         Assertions.assertTrue(response.has(value));
 
         assertResponseCount(
-            response,
-            3,
-            3
-        );
+                            response,
+                            3,
+                            3);
     }
 
 }

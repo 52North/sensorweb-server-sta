@@ -67,7 +67,9 @@ public class MqttEntityCollectionSubscription extends AbstractMqttSubscription {
     private void init(Matcher mt) {
         // Root collection
         // E.g. /Things
-        if (!mt.pattern().pattern().contains(RequestUtils.GROUPNAME_SOURCE_IDENTIFIER)) {
+        if (!mt.pattern()
+               .pattern()
+               .contains(RequestUtils.GROUPNAME_SOURCE_IDENTIFIER)) {
             wantedEntityType = mt.group(1);
         } else {
             // Related collection
@@ -82,7 +84,8 @@ public class MqttEntityCollectionSubscription extends AbstractMqttSubscription {
         Assert.notNull(wantedEntityType, "Unable to parse topic. Could not extract wantedEntityType");
     }
 
-    @Override public QueryOptions getQueryOptions() {
+    @Override
+    public QueryOptions getQueryOptions() {
         return null;
     }
 
@@ -105,7 +108,8 @@ public class MqttEntityCollectionSubscription extends AbstractMqttSubscription {
         // Check if Entity belongs to collection of this Subscription
         if (collections != null) {
             for (Entry<String, Set<String>> collection : collections.entrySet()) {
-                if (collection.getKey().equals(sourceEntityType)) {
+                if (collection.getKey()
+                              .equals(sourceEntityType)) {
                     for (String id : collection.getValue()) {
                         if (id.equals(sourceId)) {
                             return true;

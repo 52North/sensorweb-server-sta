@@ -25,6 +25,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
+
 package org.n52.sta.data.old.query;
 
 import javax.persistence.criteria.Expression;
@@ -54,82 +55,85 @@ public class ObservedPropertyQuerySpecifications extends EntityQuerySpecificatio
         return (root, query, builder) -> {
             Subquery<PhenomenonEntity> sq = query.subquery(PhenomenonEntity.class);
             Root<AbstractDatasetEntity> datastream = sq.from(AbstractDatasetEntity.class);
-            Join<AbstractDatasetEntity, PhenomenonEntity> join =
-                datastream.join(AbstractDatasetEntity.PROPERTY_PHENOMENON);
+            Join<AbstractDatasetEntity, PhenomenonEntity> join = datastream.join(AbstractDatasetEntity.PROPERTY_PHENOMENON);
             sq.select(join)
-                .where(builder.equal(datastream.get(DescribableEntity.PROPERTY_STA_IDENTIFIER),
-                                     datastreamStaIdentifier));
-            return builder.in(root).value(sq);
+              .where(builder.equal(datastream.get(DescribableEntity.PROPERTY_STA_IDENTIFIER),
+                                   datastreamStaIdentifier));
+            return builder.in(root)
+                          .value(sq);
         };
     }
 
-    @Override protected Specification<PhenomenonEntity> handleRelatedPropertyFilter(String propertyName,
-                                                                                    Specification<?> propertyValue) {
+    @Override
+    protected Specification<PhenomenonEntity> handleRelatedPropertyFilter(String propertyName,
+                                                                          Specification< ? > propertyValue) {
         return (root, query, builder) -> {
             if (StaConstants.DATASTREAMS.equals(propertyName)) {
                 Subquery<PhenomenonEntity> sq = query.subquery(PhenomenonEntity.class);
                 Root<AbstractDatasetEntity> datastream = sq.from(AbstractDatasetEntity.class);
-                final Join<AbstractDatasetEntity, PhenomenonEntity> join =
-                    datastream.join(AbstractDatasetEntity.PROPERTY_PHENOMENON, JoinType.INNER);
+                final Join<AbstractDatasetEntity, PhenomenonEntity> join = datastream.join(AbstractDatasetEntity.PROPERTY_PHENOMENON,
+                                                                                           JoinType.INNER);
                 sq.select(join)
-                    .where(((Specification<AbstractDatasetEntity>) propertyValue).toPredicate(datastream,
-                                                                                              query,
-                                                                                              builder));
-                return builder.in(root).value(sq);
+                  .where(((Specification<AbstractDatasetEntity>) propertyValue).toPredicate(datastream,
+                                                                                            query,
+                                                                                            builder));
+                return builder.in(root)
+                              .value(sq);
             } else {
                 throw new RuntimeException("Could not find related property: " + propertyName);
             }
         };
     }
 
-    @Override protected Specification<PhenomenonEntity> handleDirectPropertyFilter(
-        String propertyName,
-        Expression<?> propertyValue,
-        FilterConstants.ComparisonOperator operator,
-        boolean switched) {
+    @Override
+    protected Specification<PhenomenonEntity> handleDirectPropertyFilter(
+                                                                         String propertyName,
+                                                                         Expression< ? > propertyValue,
+                                                                         FilterConstants.ComparisonOperator operator,
+                                                                         boolean switched) {
         return (Specification<PhenomenonEntity>) (root, query, builder) -> {
             try {
                 switch (propertyName) {
-                    case StaConstants.PROP_ID:
-                        return handleDirectStringPropertyFilter(root.get(PhenomenonEntity.STA_IDENTIFIER),
-                                                                propertyValue,
-                                                                operator,
-                                                                builder,
-                                                                false);
-                    case StaConstants.PROP_NAME:
-                        return handleDirectStringPropertyFilter(root.get(PhenomenonEntity.NAME),
-                                                                propertyValue,
-                                                                operator,
-                                                                builder,
-                                                                switched);
-                    case StaConstants.PROP_DESCRIPTION:
-                        return handleDirectStringPropertyFilter(root.get(PhenomenonEntity.DESCRIPTION),
-                                                                propertyValue,
-                                                                operator,
-                                                                builder,
-                                                                switched);
-                    case StaConstants.PROP_DEFINITION:
-                    case IDENTIFIER:
-                        return handleDirectStringPropertyFilter(root.get(PhenomenonEntity.IDENTIFIER),
-                                                                propertyValue,
-                                                                operator,
-                                                                builder,
-                                                                switched);
-                    default:
-                        // We are filtering on variable keys on properties
-                        if (propertyName.startsWith(StaConstants.PROP_PROPERTIES)) {
-                            return handleProperties(root,
-                                                    query,
-                                                    builder,
-                                                    propertyName,
-                                                    propertyValue,
-                                                    operator,
-                                                    switched,
-                                                    PhenomenonParameterEntity.PROP_PHENOMENON_ID,
-                                                    ParameterFactory.EntityType.PHENOMENON);
-                        } else {
-                            throw new RuntimeException(String.format(ERROR_GETTING_FILTER_NO_PROP, propertyName));
-                        }
+                case StaConstants.PROP_ID:
+                    return handleDirectStringPropertyFilter(root.get(PhenomenonEntity.STA_IDENTIFIER),
+                                                            propertyValue,
+                                                            operator,
+                                                            builder,
+                                                            false);
+                case StaConstants.PROP_NAME:
+                    return handleDirectStringPropertyFilter(root.get(PhenomenonEntity.NAME),
+                                                            propertyValue,
+                                                            operator,
+                                                            builder,
+                                                            switched);
+                case StaConstants.PROP_DESCRIPTION:
+                    return handleDirectStringPropertyFilter(root.get(PhenomenonEntity.DESCRIPTION),
+                                                            propertyValue,
+                                                            operator,
+                                                            builder,
+                                                            switched);
+                case StaConstants.PROP_DEFINITION:
+                case IDENTIFIER:
+                    return handleDirectStringPropertyFilter(root.get(PhenomenonEntity.IDENTIFIER),
+                                                            propertyValue,
+                                                            operator,
+                                                            builder,
+                                                            switched);
+                default:
+                    // We are filtering on variable keys on properties
+                    if (propertyName.startsWith(StaConstants.PROP_PROPERTIES)) {
+                        return handleProperties(root,
+                                                query,
+                                                builder,
+                                                propertyName,
+                                                propertyValue,
+                                                operator,
+                                                switched,
+                                                PhenomenonParameterEntity.PROP_PHENOMENON_ID,
+                                                ParameterFactory.EntityType.PHENOMENON);
+                    } else {
+                        throw new RuntimeException(String.format(ERROR_GETTING_FILTER_NO_PROP, propertyName));
+                    }
                 }
             } catch (STAInvalidFilterExpressionException e) {
                 throw new RuntimeException(e);
@@ -140,12 +144,12 @@ public class ObservedPropertyQuerySpecifications extends EntityQuerySpecificatio
     @Override
     public String checkPropertyName(String property) {
         switch (property) {
-            case StaConstants.PROP_DEFINITION:
-                return PhenomenonEntity.PROPERTY_IDENTIFIER;
-            case IDENTIFIER:
-                return PhenomenonEntity.STA_IDENTIFIER;
-            default:
-                return super.checkPropertyName(property);
+        case StaConstants.PROP_DEFINITION:
+            return PhenomenonEntity.PROPERTY_IDENTIFIER;
+        case IDENTIFIER:
+            return PhenomenonEntity.STA_IDENTIFIER;
+        default:
+            return super.checkPropertyName(property);
         }
     }
 

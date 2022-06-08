@@ -25,6 +25,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
+
 package org.n52.sta;
 
 import org.junit.jupiter.api.Test;
@@ -40,6 +41,6 @@ public class ApplicationTest {
 
     @Test
     public void test() {
-        //assertThat(context, is(not(nullValue())));
+        // assertThat(context, is(not(nullValue())));
     }
 }

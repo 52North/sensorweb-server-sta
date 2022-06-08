@@ -25,6 +25,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
+
 package org.n52.sta.api.old;
 
 import org.n52.shetland.oasis.odata.query.option.QueryOptions;
@@ -39,7 +40,8 @@ public interface AbstractSensorThingsEntityService<R extends StaDTO> {
     /**
      * Checks if an Entity with given id exists
      *
-     * @param id the id of the Entity
+     * @param id
+     *        the id of the Entity
      * @return true if an Entity with given id exists
      */
     boolean existsEntity(String id) throws STACRUDException;
@@ -47,70 +49,89 @@ public interface AbstractSensorThingsEntityService<R extends StaDTO> {
     /**
      * Gets the Entity with given id
      *
-     * @param id           the id of the Entity
-     * @param queryOptions query Options
+     * @param id
+     *        the id of the Entity
+     * @param queryOptions
+     *        query Options
      * @return ElementWithQueryOptions wrapping requested Entity
-     * @throws STACRUDException if an error occurred
+     * @throws STACRUDException
+     *         if an error occurred
      */
     R getEntity(String id, QueryOptions queryOptions) throws STACRUDException;
 
     /**
      * Requests the full EntityCollection
      *
-     * @param queryOptions {@link QueryOptions}
+     * @param queryOptions
+     *        {@link QueryOptions}
      * @return the full EntityCollection
-     * @throws STACRUDException if the queryOptions are invalid
+     * @throws STACRUDException
+     *         if the queryOptions are invalid
      */
     CollectionWrapper getEntityCollection(QueryOptions queryOptions) throws STACRUDException;
 
     /**
-     * Requests the Entity with given ownId that is related to a single Entity with
-     * given relatedId and
+     * Requests the Entity with given ownId that is related to a single Entity with given relatedId and
      * relatedType
      *
-     * @param relatedId    ID of the related Entity
-     * @param relatedType  EntityType of the related Entity
-     * @param ownId        ID of the requested Entity. Can be null.
-     * @param queryOptions {@link QueryOptions} used for serialization
+     * @param relatedId
+     *        ID of the related Entity
+     * @param relatedType
+     *        EntityType of the related Entity
+     * @param ownId
+     *        ID of the requested Entity. Can be null.
+     * @param queryOptions
+     *        {@link QueryOptions} used for serialization
      * @return Entity that matches
-     * @throws STACRUDException if an error occurred
+     * @throws STACRUDException
+     *         if an error occurred
      */
-    R getEntityByRelatedEntity(String relatedId, String relatedType, String ownId,
-            QueryOptions queryOptions) throws STACRUDException;
+    R getEntityByRelatedEntity(String relatedId,
+                               String relatedType,
+                               String ownId,
+                               QueryOptions queryOptions)
+            throws STACRUDException;
 
     /**
-     * Requests the EntityCollection that is related to a single Entity with the
-     * given ID and type
+     * Requests the EntityCollection that is related to a single Entity with the given ID and type
      *
-     * @param relatedId    the ID of the Entity the EntityCollection is related to
-     * @param relatedType  EntityType of the related Entity
-     * @param queryOptions {@link QueryOptions}
+     * @param relatedId
+     *        the ID of the Entity the EntityCollection is related to
+     * @param relatedType
+     *        EntityType of the related Entity
+     * @param queryOptions
+     *        {@link QueryOptions}
      * @return List of Entities that match
-     * @throws STACRUDException if the queryOptions are invalid
+     * @throws STACRUDException
+     *         if the queryOptions are invalid
      */
-    CollectionWrapper getEntityCollectionByRelatedEntity(String relatedId, String relatedType,
-            QueryOptions queryOptions) throws STACRUDException;
+    CollectionWrapper getEntityCollectionByRelatedEntity(String relatedId,
+                                                         String relatedType,
+                                                         QueryOptions queryOptions)
+            throws STACRUDException;
 
     /**
-     * Gets the Id on an Entity that is related to a single Entity with given
-     * relatedId and relatedType. May
-     * be overwritten by classes that use a different field for storing the
-     * identifier.
+     * Gets the Id on an Entity that is related to a single Entity with given relatedId and relatedType. May
+     * be overwritten by classes that use a different field for storing the identifier.
      *
-     * @param relatedId   ID of the related Entity
-     * @param relatedType EntityType of the related Entity
+     * @param relatedId
+     *        ID of the related Entity
+     * @param relatedType
+     *        EntityType of the related Entity
      * @return Id of the Entity. Null if no entity is present
      */
     String getEntityIdByRelatedEntity(String relatedId, String relatedType) throws STACRUDException;
 
     /**
-     * Checks if an entity with given ownId exists that relates to an entity with
-     * given relatedId and
+     * Checks if an entity with given ownId exists that relates to an entity with given relatedId and
      * relatedType
      *
-     * @param relatedId   ID of the related Entity
-     * @param relatedType EntityType of the related Entity
-     * @param ownId       ID of the requested Entity. Can be null.
+     * @param relatedId
+     *        ID of the related Entity
+     * @param relatedType
+     *        EntityType of the related Entity
+     * @param ownId
+     *        ID of the requested Entity. Can be null.
      * @return true if an Entity exists
      */
     boolean existsEntityByRelatedEntity(String relatedId, String relatedType, String ownId) throws STACRUDException;

@@ -25,6 +25,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
+
 package org.n52.sta.config;
 
 import org.n52.shetland.ogc.sta.StaConstants;
@@ -38,8 +39,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
 
 /**
- * Loads an alternate ObservationService Implementation provided by
- * {@link UfzAggregataObservationService}.
+ * Loads an alternate ObservationService Implementation provided by {@link UfzAggregataObservationService}.
  *
  * @see UfzAggregataObservationService
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
@@ -47,13 +47,14 @@ import org.springframework.context.annotation.Profile;
 @Configuration
 @Profile(StaConstants.UFZAGGREGATA)
 // @ComponentScan(excludeFilters = {
-//                 @ComponentScan.Filter(type = FilterType.REGEX, pattern = ".*service.ObservationService.*")
+// @ComponentScan.Filter(type = FilterType.REGEX, pattern = ".*service.ObservationService.*")
 // })
 public class UfzConfiguration {
 
-        @Bean
-        public ObservationService getObservationService(SerDesConfig serdesConfig, SensorService sensorService,
-                        @Value("${server.security.aggregataToken}") String aggregataToken) {
-                return new UfzAggregataObservationService(serdesConfig, sensorService, aggregataToken);
-        }
+    @Bean
+    public ObservationService getObservationService(SerDesConfig serdesConfig,
+                                                    SensorService sensorService,
+                                                    @Value("${server.security.aggregataToken}") String aggregataToken) {
+        return new UfzAggregataObservationService(serdesConfig, sensorService, aggregataToken);
+    }
 }

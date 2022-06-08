@@ -25,6 +25,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
+
 package org.n52.sta.http.old;
 
 import javax.servlet.http.HttpServletRequest;
@@ -38,11 +39,8 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 
 /**
- * Handles all requests to Entities and to Entity association links
- * e.g. /Things(52)
- * e.g. /Datastreams(52)/Thing
- * e.g. /Things(52)/$ref
- * e.g. /Datastreams(52)/Thing/$ref
+ * Handles all requests to Entities and to Entity association links e.g. /Things(52) e.g.
+ * /Datastreams(52)/Thing e.g. /Things(52)/$ref e.g. /Datastreams(52)/Thing/$ref
  *
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
  */
@@ -57,21 +55,21 @@ public class CoreEntityRequestHandler extends EntityRequestHandler implements Co
 
     @GetMapping(
         value = MAPPING_PREFIX + CoreRequestUtils.ENTITY_IDENTIFIED_DIRECTLY,
-        produces = "application/json"
-    )
+        produces = "application/json")
     public StaDTO readEntityDirect(@PathVariable String entity,
                                    @PathVariable String id,
-                                   HttpServletRequest request) throws Exception {
+                                   HttpServletRequest request)
+            throws Exception {
         return super.readEntityDirect(entity, id, request);
     }
 
     @GetMapping(
         value = MAPPING_PREFIX + CoreRequestUtils.ENTITY_IDENTIFIED_DIRECTLY + SLASHREF,
-        produces = "application/json"
-    )
+        produces = "application/json")
     public StaDTO readEntityRefDirect(@PathVariable String entity,
                                       @PathVariable String id,
-                                      HttpServletRequest request) throws Exception {
+                                      HttpServletRequest request)
+            throws Exception {
         return super.readEntityRefDirect(entity, id, request);
     }
 
@@ -81,11 +79,11 @@ public class CoreEntityRequestHandler extends EntityRequestHandler implements Co
             MAPPING_PREFIX + CoreRequestUtils.ENTITY_IDENTIFIED_BY_OBSERVATION_PATH_VARIABLE,
             MAPPING_PREFIX + CoreRequestUtils.ENTITY_IDENTIFIED_BY_HISTORICAL_LOCATION_PATH_VARIABLE
         },
-        produces = "application/json"
-    )
+        produces = "application/json")
     public StaDTO readRelatedEntity(@PathVariable String entity,
                                     @PathVariable String target,
-                                    HttpServletRequest request) throws Exception {
+                                    HttpServletRequest request)
+            throws Exception {
         return super.readRelatedEntity(entity, target, request);
     }
 
@@ -95,12 +93,11 @@ public class CoreEntityRequestHandler extends EntityRequestHandler implements Co
             MAPPING_PREFIX + CoreRequestUtils.ENTITY_IDENTIFIED_BY_OBSERVATION_PATH_VARIABLE + SLASHREF,
             MAPPING_PREFIX + CoreRequestUtils.ENTITY_IDENTIFIED_BY_HISTORICAL_LOCATION_PATH_VARIABLE + SLASHREF
         },
-        produces = "application/json"
-    )
+        produces = "application/json")
     public StaDTO readRelatedEntityRef(@PathVariable String entity,
                                        @PathVariable String target,
                                        HttpServletRequest request)
-        throws Exception {
+            throws Exception {
         return super.readRelatedEntityRef(entity, target, request);
     }
 }

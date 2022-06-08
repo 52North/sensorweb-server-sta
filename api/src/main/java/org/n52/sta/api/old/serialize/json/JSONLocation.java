@@ -25,6 +25,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
+
 package org.n52.sta.api.old.serialize.json;
 
 import java.util.Arrays;
@@ -47,7 +48,10 @@ import org.n52.sta.api.old.serialize.common.JSONBase;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 
 @SuppressWarnings("VisibilityModifier")
-@SuppressFBWarnings({ "NM_FIELD_NAMING_CONVENTION", "UWF_UNWRITTEN_PUBLIC_OR_PROTECTED_FIELD" })
+@SuppressFBWarnings({
+    "NM_FIELD_NAMING_CONVENTION",
+    "UWF_UNWRITTEN_PUBLIC_OR_PROTECTED_FIELD"
+})
 public class JSONLocation extends JSONBase.JSONwithIdNameDescription<Location> implements AbstractJSONEntity {
 
     private static final String COULD_NOT_PARSE = "Could not parse location to GeoJSON. Error was: ";
@@ -65,10 +69,8 @@ public class JSONLocation extends JSONBase.JSONwithIdNameDescription<Location> i
 
     private final String ENCODINGTYPE_GEOJSON = "application/geo+json";
     private final String ENCODINGTYPE_GEOJSON_ALT = "application/vnd.geo+json";
-    private final String INVALID_ENCODINGTYPE =
-        "Invalid encodingType supplied. Only GeoJSON (application/vnd.geo+json) is supported!";
-    private final GeometryFactory factory =
-        new GeometryFactory(new PrecisionModel(PrecisionModel.FLOATING), 4326);
+    private final String INVALID_ENCODINGTYPE = "Invalid encodingType supplied. Only GeoJSON (application/vnd.geo+json) is supported!";
+    private final GeometryFactory factory = new GeometryFactory(new PrecisionModel(PrecisionModel.FLOATING), 4326);
     private final String TYPE = "type";
     private final String GEOMETRY = "geometry";
     private final String COORDINATES = "coordinates";
@@ -79,23 +81,24 @@ public class JSONLocation extends JSONBase.JSONwithIdNameDescription<Location> i
         self = new Location();
     }
 
-    @Override protected void parseReferencedFrom() {
+    @Override
+    protected void parseReferencedFrom() {
         if (referencedFromType != null) {
             switch (referencedFromType) {
-                case "HistoricalLocations":
-                    assertIsNull(HistoricalLocations, INVALID_DUPLICATE_REFERENCE);
-                    this.HistoricalLocations = new JSONHistoricalLocation[1];
-                    this.HistoricalLocations[0] = new JSONHistoricalLocation();
-                    this.HistoricalLocations[0].identifier = referencedFromID;
-                    return;
-                case "Things":
-                    assertIsNull(Things, INVALID_DUPLICATE_REFERENCE);
-                    this.Things = new JSONThing[1];
-                    this.Things[0] = new JSONThing();
-                    this.Things[0].identifier = referencedFromID;
-                    return;
-                default:
-                    throw new IllegalArgumentException(INVALID_BACKREFERENCE);
+            case "HistoricalLocations":
+                assertIsNull(HistoricalLocations, INVALID_DUPLICATE_REFERENCE);
+                this.HistoricalLocations = new JSONHistoricalLocation[1];
+                this.HistoricalLocations[0] = new JSONHistoricalLocation();
+                this.HistoricalLocations[0].identifier = referencedFromID;
+                return;
+            case "Things":
+                assertIsNull(Things, INVALID_DUPLICATE_REFERENCE);
+                this.Things = new JSONThing[1];
+                this.Things[0] = new JSONThing();
+                this.Things[0].identifier = referencedFromID;
+                return;
+            default:
+                throw new IllegalArgumentException(INVALID_BACKREFERENCE);
             }
         }
     }
@@ -104,131 +107,137 @@ public class JSONLocation extends JSONBase.JSONwithIdNameDescription<Location> i
     public Location parseToDTO(JSONBase.EntityType type) {
         GeoJsonReader reader;
         switch (type) {
-            case FULL:
-                parseReferencedFrom();
-                assertNotNull(name, INVALID_INLINE_ENTITY_MISSING + "name");
-                assertNotNull(description, INVALID_INLINE_ENTITY_MISSING + "description");
-                assertNotNull(encodingType, INVALID_INLINE_ENTITY_MISSING + "encodingType");
-                assertNotNull(encodingType, INVALID_ENCODINGTYPE);
-                assertState(Objects.equals(encodingType, ENCODINGTYPE_GEOJSON) ||
-                                  Objects.equals(encodingType, ENCODINGTYPE_GEOJSON_ALT), INVALID_ENCODINGTYPE);
+        case FULL:
+            parseReferencedFrom();
+            assertNotNull(name, INVALID_INLINE_ENTITY_MISSING + "name");
+            assertNotNull(description, INVALID_INLINE_ENTITY_MISSING + "description");
+            assertNotNull(encodingType, INVALID_INLINE_ENTITY_MISSING + "encodingType");
+            assertNotNull(encodingType, INVALID_ENCODINGTYPE);
+            assertState(Objects.equals(encodingType, ENCODINGTYPE_GEOJSON)
+                    ||
+                    Objects.equals(encodingType, ENCODINGTYPE_GEOJSON_ALT), INVALID_ENCODINGTYPE);
 
-                assertNotNull(location, INVALID_INLINE_ENTITY_MISSING + "location");
-                //TODO: check what is actually allowed here.
+            assertNotNull(location, INVALID_INLINE_ENTITY_MISSING + "location");
+            // TODO: check what is actually allowed here.
+            if (location.has(GEOMETRY)) {
+                assertState("Feature".equals(location.get(TYPE)
+                                                     .asText()),
+                            INVALID_INLINE_ENTITY_MISSING + LOCATION_TYPE);
+                assertNotNull(location.get(GEOMETRY), INVALID_INLINE_ENTITY_MISSING + LOCATION_GEOM);
+            } else {
+                assertState("Point".equals(location.get(TYPE)
+                                                   .asText()),
+                            INVALID_INLINE_ENTITY_MISSING + LOCATION_TYPE);
+                assertNotNull(location.get(COORDINATES), INVALID_INLINE_ENTITY_MISSING + LOCATION_GEOM);
+            }
+            self.setId(identifier);
+            self.setName(name);
+            self.setDescription(description);
+
+            // This is already set by default
+            // self.setEncodingType(encodingType);
+
+            reader = new GeoJsonReader(factory);
+            try {
                 if (location.has(GEOMETRY)) {
-                    assertState("Feature".equals(location.get(TYPE).asText()),
-                                  INVALID_INLINE_ENTITY_MISSING + LOCATION_TYPE);
-                    assertNotNull(location.get(GEOMETRY), INVALID_INLINE_ENTITY_MISSING + LOCATION_GEOM);
+                    self.setGeometry(reader.read(location.get(GEOMETRY)
+                                                         .toString()));
                 } else {
-                    assertState("Point".equals(location.get(TYPE).asText()),
-                                  INVALID_INLINE_ENTITY_MISSING + LOCATION_TYPE);
-                    assertNotNull(location.get(COORDINATES), INVALID_INLINE_ENTITY_MISSING + LOCATION_GEOM);
+                    self.setGeometry(reader.read(location.toString()));
                 }
-                self.setId(identifier);
-                self.setName(name);
-                self.setDescription(description);
+            } catch (ParseException e) {
+                assertNotNull(null, COULD_NOT_PARSE + e.getMessage());
+            }
 
-                // This is already set by default
-                // self.setEncodingType(encodingType);
+            if (properties != null) {
+                self.setProperties(properties);
+            }
 
+            if (Things != null) {
+                self.setThings(Arrays.stream(Things)
+                                     .map(thing -> thing.parseToDTO(JSONBase.EntityType.FULL,
+                                                                    JSONBase.EntityType.REFERENCE))
+                                     .collect(Collectors.toSet()));
+            }
+            if (HistoricalLocations != null) {
+                self.setHistoricalLocations(Arrays.stream(HistoricalLocations)
+                                                  .map(loc -> loc.parseToDTO(JSONBase.EntityType.FULL,
+                                                                             JSONBase.EntityType.REFERENCE))
+                                                  .collect(Collectors.toSet()));
+            }
+
+            if (backReference != null) {
+                if (backReference instanceof JSONThing) {
+                    if (self.getThings() != null) {
+                        self.getThings()
+                            .add(((JSONThing) backReference).getEntity());
+                    } else {
+                        self.setThings(Collections.singleton(((JSONThing) backReference).getEntity()));
+                    }
+                } else {
+                    JSONHistoricalLocation backRef = (JSONHistoricalLocation) backReference;
+                    self.addHistoricalLocation(backRef.getEntity());
+                }
+            }
+            return self;
+
+        case PATCH:
+            parseReferencedFrom();
+            self.setId(identifier);
+            self.setName(name);
+            self.setDescription(description);
+
+            // This is already set by default
+            // self.setEncodingType(encodingType);
+
+            if (encodingType != null) {
+                assertState(
+                            encodingType.equals(ENCODINGTYPE_GEOJSON) || encodingType.equals(ENCODINGTYPE_GEOJSON_ALT),
+                            INVALID_ENCODINGTYPE);
+            }
+
+            if (location != null) {
                 reader = new GeoJsonReader(factory);
                 try {
                     if (location.has(GEOMETRY)) {
-                        self.setGeometry(reader.read(location.get(GEOMETRY).toString()));
+                        self.setGeometry(reader.read(location.get(GEOMETRY)
+                                                             .toString()));
                     } else {
                         self.setGeometry(reader.read(location.toString()));
                     }
                 } catch (ParseException e) {
                     assertNotNull(null, COULD_NOT_PARSE + e.getMessage());
                 }
+            }
 
-                if (properties != null) {
-                    self.setProperties(properties);
-                }
+            if (properties != null) {
+                self.setProperties(properties);
+            }
 
-                if (Things != null) {
-                    self.setThings(Arrays.stream(Things)
-                                       .map(thing -> thing.parseToDTO(JSONBase.EntityType.FULL,
-                                                                      JSONBase.EntityType.REFERENCE))
-                                       .collect(Collectors.toSet()));
-                }
-                if (HistoricalLocations != null) {
-                    self.setHistoricalLocations(Arrays.stream(HistoricalLocations)
-                                                    .map(loc -> loc.parseToDTO(JSONBase.EntityType.FULL,
-                                                                               JSONBase.EntityType.REFERENCE))
-                                                    .collect(Collectors.toSet()));
-                }
+            if (Things != null) {
+                self.setThings(Arrays.stream(Things)
+                                     .map(thing -> thing.parseToDTO(JSONBase.EntityType.REFERENCE))
+                                     .collect(Collectors.toSet()));
+            }
+            if (HistoricalLocations != null) {
+                self.setHistoricalLocations(Arrays.stream(HistoricalLocations)
+                                                  .map(loc -> loc.parseToDTO(JSONBase.EntityType.REFERENCE))
+                                                  .collect(Collectors.toSet()));
+            }
+            return self;
 
-                if (backReference != null) {
-                    if (backReference instanceof JSONThing) {
-                        if (self.getThings() != null) {
-                            self.getThings().add(((JSONThing) backReference).getEntity());
-                        } else {
-                            self.setThings(Collections.singleton(((JSONThing) backReference).getEntity()));
-                        }
-                    } else {
-                        JSONHistoricalLocation backRef = (JSONHistoricalLocation) backReference;
-                        self.addHistoricalLocation(backRef.getEntity());
-                    }
-                }
-                return self;
+        case REFERENCE:
+            assertIsNull(name, INVALID_REFERENCED_ENTITY);
+            assertIsNull(description, INVALID_REFERENCED_ENTITY);
+            assertIsNull(encodingType, INVALID_REFERENCED_ENTITY);
+            assertIsNull(location, INVALID_REFERENCED_ENTITY);
+            assertIsNull(properties, INVALID_REFERENCED_ENTITY);
+            assertIsNull(Things, INVALID_REFERENCED_ENTITY);
 
-            case PATCH:
-                parseReferencedFrom();
-                self.setId(identifier);
-                self.setName(name);
-                self.setDescription(description);
-
-                // This is already set by default
-                // self.setEncodingType(encodingType);
-
-                if (encodingType != null) {
-                    assertState(
-                        encodingType.equals(ENCODINGTYPE_GEOJSON) || encodingType.equals(ENCODINGTYPE_GEOJSON_ALT),
-                        INVALID_ENCODINGTYPE);
-                }
-
-                if (location != null) {
-                    reader = new GeoJsonReader(factory);
-                    try {
-                        if (location.has(GEOMETRY)) {
-                            self.setGeometry(reader.read(location.get(GEOMETRY).toString()));
-                        } else {
-                            self.setGeometry(reader.read(location.toString()));
-                        }
-                    } catch (ParseException e) {
-                        assertNotNull(null, COULD_NOT_PARSE + e.getMessage());
-                    }
-                }
-
-                if (properties != null) {
-                    self.setProperties(properties);
-                }
-
-                if (Things != null) {
-                    self.setThings(Arrays.stream(Things)
-                                       .map(thing -> thing.parseToDTO(JSONBase.EntityType.REFERENCE))
-                                       .collect(Collectors.toSet()));
-                }
-                if (HistoricalLocations != null) {
-                    self.setHistoricalLocations(Arrays.stream(HistoricalLocations)
-                                                    .map(loc -> loc.parseToDTO(JSONBase.EntityType.REFERENCE))
-                                                    .collect(Collectors.toSet()));
-                }
-                return self;
-
-            case REFERENCE:
-                assertIsNull(name, INVALID_REFERENCED_ENTITY);
-                assertIsNull(description, INVALID_REFERENCED_ENTITY);
-                assertIsNull(encodingType, INVALID_REFERENCED_ENTITY);
-                assertIsNull(location, INVALID_REFERENCED_ENTITY);
-                assertIsNull(properties, INVALID_REFERENCED_ENTITY);
-                assertIsNull(Things, INVALID_REFERENCED_ENTITY);
-
-                self.setId(identifier);
-                return self;
-            default:
-                return null;
+            self.setId(identifier);
+            return self;
+        default:
+            return null;
         }
     }
 }

@@ -25,6 +25,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
+
 package org.n52.sta.config;
 
 import java.util.Map;
@@ -107,7 +108,8 @@ public class ServerProperties {
         props.put("variableEncodingType", this.getVariableEncodingType());
         props.put("isMobile", this.getIsMobile());
         ObjectNode observationJSON = mapper.createObjectNode();
-        this.getObservation().forEach(observationJSON::put);
+        this.getObservation()
+            .forEach(observationJSON::put);
         props.set("observation", observationJSON);
         return props;
     }

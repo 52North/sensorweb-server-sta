@@ -25,6 +25,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
+
 package org.n52.sta.plus.old.serialize;
 
 import java.io.IOException;
@@ -65,7 +66,6 @@ public class ObservationGroupSerDes {
         }
     }
 
-
     public static class ObservationGroupSerializer extends AbstractSTASerializer<GroupDTO> {
 
         private static final long serialVersionUID = -1618289129123682794L;
@@ -78,37 +78,49 @@ public class ObservationGroupSerDes {
 
         @Override
         public void serialize(GroupDTO obsGroup, JsonGenerator gen, SerializerProvider serializers)
-            throws IOException {
+                throws IOException {
             gen.writeStartObject();
 
             // olingo @iot links
-            if (!obsGroup.hasSelectOption() || obsGroup.getFieldsToSerialize().contains(STAEntityDefinition.PROP_ID)) {
+            if (!obsGroup.hasSelectOption()
+                    || obsGroup.getFieldsToSerialize()
+                               .contains(STAEntityDefinition.PROP_ID)) {
                 writeId(gen, obsGroup.getId());
             }
-            if (!obsGroup.hasSelectOption() ||
-                obsGroup.getFieldsToSerialize().contains(STAEntityDefinition.PROP_SELF_LINK)) {
+            if (!obsGroup.hasSelectOption()
+                    ||
+                    obsGroup.getFieldsToSerialize()
+                            .contains(STAEntityDefinition.PROP_SELF_LINK)) {
                 writeSelfLink(gen, obsGroup.getId());
             }
 
-            if (!obsGroup.hasSelectOption() ||
-                obsGroup.getFieldsToSerialize().contains(STAEntityDefinition.PROP_NAME)) {
+            if (!obsGroup.hasSelectOption()
+                    ||
+                    obsGroup.getFieldsToSerialize()
+                            .contains(STAEntityDefinition.PROP_NAME)) {
                 gen.writeStringField(STAEntityDefinition.PROP_NAME, obsGroup.getName());
             }
 
-            if (!obsGroup.hasSelectOption() ||
-                obsGroup.getFieldsToSerialize().contains(STAEntityDefinition.PROP_DESCRIPTION)) {
+            if (!obsGroup.hasSelectOption()
+                    ||
+                    obsGroup.getFieldsToSerialize()
+                            .contains(STAEntityDefinition.PROP_DESCRIPTION)) {
                 gen.writeStringField(STAEntityDefinition.PROP_DESCRIPTION, obsGroup.getDescription());
             }
 
-            if (!obsGroup.hasSelectOption() ||
-                obsGroup.getFieldsToSerialize().contains(STAEntityDefinition.PROP_PROPERTIES)) {
+            if (!obsGroup.hasSelectOption()
+                    ||
+                    obsGroup.getFieldsToSerialize()
+                            .contains(STAEntityDefinition.PROP_PROPERTIES)) {
                 gen.writeObjectField(STAEntityDefinition.PROP_PROPERTIES, obsGroup.getProperties());
             }
 
             if (!obsGroup.hasSelectOption()
-                || obsGroup.getFieldsToSerialize().contains(STAEntityDefinition.RELATIONS)) {
+                    || obsGroup.getFieldsToSerialize()
+                               .contains(STAEntityDefinition.RELATIONS)) {
                 if (!obsGroup.hasExpandOption()
-                    || obsGroup.getFieldsToExpand().get(STAEntityDefinition.RELATIONS) == null) {
+                        || obsGroup.getFieldsToExpand()
+                                   .get(STAEntityDefinition.RELATIONS) == null) {
                     writeNavigationProp(gen,
                                         STAEntityDefinition.RELATIONS,
                                         obsGroup.getId());
@@ -121,9 +133,11 @@ public class ObservationGroupSerDes {
             }
 
             if (!obsGroup.hasSelectOption()
-                || obsGroup.getFieldsToSerialize().contains(STAEntityDefinition.LICENSE)) {
+                    || obsGroup.getFieldsToSerialize()
+                               .contains(STAEntityDefinition.LICENSE)) {
                 if (!obsGroup.hasExpandOption()
-                    || obsGroup.getFieldsToExpand().get(STAEntityDefinition.LICENSE) == null) {
+                        || obsGroup.getFieldsToExpand()
+                                   .get(STAEntityDefinition.LICENSE) == null) {
                     writeNavigationProp(gen,
                                         STAEntityDefinition.LICENSE,
                                         obsGroup.getId());
@@ -136,9 +150,11 @@ public class ObservationGroupSerDes {
             }
 
             if (!obsGroup.hasSelectOption()
-                || obsGroup.getFieldsToSerialize().contains(STAEntityDefinition.OBSERVATIONS)) {
+                    || obsGroup.getFieldsToSerialize()
+                               .contains(STAEntityDefinition.OBSERVATIONS)) {
                 if (!obsGroup.hasExpandOption()
-                    || obsGroup.getFieldsToExpand().get(STAEntityDefinition.OBSERVATIONS) == null) {
+                        || obsGroup.getFieldsToExpand()
+                                   .get(STAEntityDefinition.OBSERVATIONS) == null) {
                     writeNavigationProp(gen,
                                         STAEntityDefinition.OBSERVATIONS,
                                         obsGroup.getId());
@@ -154,7 +170,6 @@ public class ObservationGroupSerDes {
 
     }
 
-
     public static class ObservationGroupDeserializer extends StdDeserializer<GroupDTO> {
 
         private static final long serialVersionUID = 3942005672394573517L;
@@ -165,13 +180,14 @@ public class ObservationGroupSerDes {
 
         @Override
         public GroupDTO deserialize(JsonParser p, DeserializationContext ctxt) throws IOException {
-            return p.readValueAs(JSONGroup.class).parseToDTO(JSONBase.EntityType.FULL);
+            return p.readValueAs(JSONGroup.class)
+                    .parseToDTO(JSONBase.EntityType.FULL);
         }
     }
 
-
     public static class ObservationGroupPatchDeserializer
-        extends StdDeserializer<ObservationGroupDTOPatch> {
+            extends
+            StdDeserializer<ObservationGroupDTOPatch> {
 
         private static final long serialVersionUID = -6355786322787893665L;
 
@@ -181,7 +197,7 @@ public class ObservationGroupSerDes {
 
         @Override
         public ObservationGroupDTOPatch deserialize(JsonParser p, DeserializationContext ctxt)
-            throws IOException {
+                throws IOException {
             return new ObservationGroupDTOPatch(p.readValueAs(JSONGroup.class)
                                                  .parseToDTO(JSONBase.EntityType.PATCH));
         }

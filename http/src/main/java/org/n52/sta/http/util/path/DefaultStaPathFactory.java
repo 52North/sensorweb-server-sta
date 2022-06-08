@@ -1,3 +1,4 @@
+
 package org.n52.sta.http.util.path;
 
 import java.lang.reflect.Method;
@@ -25,7 +26,8 @@ public class DefaultStaPathFactory extends PathFactory {
 
         try {
             StaPathVisitor visitor = new StaPathVisitor();
-            Method firstRuleMethod = grammar.getClass().getDeclaredMethod("path");
+            Method firstRuleMethod = grammar.getClass()
+                                            .getDeclaredMethod("path");
             return ((ParserRuleContext) firstRuleMethod.invoke(grammar)).accept(visitor);
         } catch (Exception e) {
             throw new STAInvalidUrlException("Invalid URL: " + url);

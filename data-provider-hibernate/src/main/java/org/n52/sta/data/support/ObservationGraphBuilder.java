@@ -25,6 +25,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
+
 package org.n52.sta.data.support;
 
 import org.n52.series.db.beans.DataEntity;
@@ -36,7 +37,8 @@ public class ObservationGraphBuilder extends GraphBuilder<DataEntity> {
     public ObservationGraphBuilder(Request req) {
         super(DataEntity.class);
         // do not fetch anything when getting by reference
-        if (req.getPath().isRef()) {
+        if (req.getPath()
+               .isRef()) {
             return;
         }
         addGraphText(GraphText.GRAPH_PARAMETERS);

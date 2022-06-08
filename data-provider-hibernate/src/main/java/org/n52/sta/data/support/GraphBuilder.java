@@ -25,6 +25,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
+
 package org.n52.sta.data.support;
 
 import org.hibernate.engine.spi.SessionImplementor;
@@ -69,7 +70,7 @@ public abstract class GraphBuilder<T> {
 
             // TODO do this recursively by using dots
             // this may require some refactoring how the actual member/db-properties
-            // are  being mapped (currently via switch statements)
+            // are being mapped (currently via switch statements)
 
             // DISCUSS adding more entity graphs recursively is an
             // anti pattern as it makes the query bigger, and OData
@@ -88,7 +89,8 @@ public abstract class GraphBuilder<T> {
     /**
      * Builds an entity graph based on all entries added via addGraphText().
      *
-     * @param em the entity manager
+     * @param em
+     *        the entity manager
      * @return an entity graph or null when no members have been added.
      */
     @SuppressWarnings("unchecked")
@@ -111,7 +113,10 @@ public abstract class GraphBuilder<T> {
 
     protected boolean isNestedQueryOrExpand(ExpandItem expandItem) {
         return expandItem != null
-                && (expandItem.getQueryOptions().hasFilterFilter() || expandItem.getQueryOptions().hasExpandFilter());
+                && (expandItem.getQueryOptions()
+                              .hasFilterFilter()
+                        || expandItem.getQueryOptions()
+                                     .hasExpandFilter());
     }
 
     protected GraphBuilder<T> addGraphText(GraphText graphText) {
@@ -122,7 +127,8 @@ public abstract class GraphBuilder<T> {
     /**
      * Adds a text representation of a (sub-)graph.
      *
-     * @param graphText the textual graph representation
+     * @param graphText
+     *        the textual graph representation
      * @return this instance
      */
     protected GraphBuilder<T> addGraphText(String graphText) {
@@ -135,6 +141,5 @@ public abstract class GraphBuilder<T> {
         SessionImplementor provider = em.unwrap(SessionImplementor.class);
         return GraphParser.parse(entityType, path, provider);
     }
-
 
 }

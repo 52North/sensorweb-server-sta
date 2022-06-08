@@ -25,6 +25,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
+
 package org.n52.sta.plus.old.serialize.json;
 
 import java.util.HashSet;
@@ -48,7 +49,10 @@ import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
  */
 @SuppressWarnings("VisibilityModifier")
-@SuppressFBWarnings({"NM_FIELD_NAMING_CONVENTION", "UWF_UNWRITTEN_PUBLIC_OR_PROTECTED_FIELD"})
+@SuppressFBWarnings({
+    "NM_FIELD_NAMING_CONVENTION",
+    "UWF_UNWRITTEN_PUBLIC_OR_PROTECTED_FIELD"
+})
 public class JSONParty extends JSONBase.JSONwithId<Party> implements AbstractJSONEntity {
 
     public String authId;
@@ -65,25 +69,26 @@ public class JSONParty extends JSONBase.JSONwithId<Party> implements AbstractJSO
         self = new Party();
     }
 
-    @Override public Party parseToDTO(JSONBase.EntityType type) {
+    @Override
+    public Party parseToDTO(JSONBase.EntityType type) {
         switch (type) {
-            case FULL:
-                parseReferencedFrom();
-                assertNotNull(authId, INVALID_INLINE_ENTITY_MISSING + "authId");
-                assertNotNull(role, INVALID_INLINE_ENTITY_MISSING + "role");
+        case FULL:
+            parseReferencedFrom();
+            assertNotNull(authId, INVALID_INLINE_ENTITY_MISSING + "authId");
+            assertNotNull(role, INVALID_INLINE_ENTITY_MISSING + "role");
 
-                return createEntity();
-            case PATCH:
-                parseReferencedFrom();
-                return createEntity();
+            return createEntity();
+        case PATCH:
+            parseReferencedFrom();
+            return createEntity();
 
-            case REFERENCE:
-                assertIsNull(displayName, INVALID_REFERENCED_ENTITY);
-                assertIsNull(role, INVALID_REFERENCED_ENTITY);
-                self.setId(identifier);
-                return self;
-            default:
-                return null;
+        case REFERENCE:
+            assertIsNull(displayName, INVALID_REFERENCED_ENTITY);
+            assertIsNull(role, INVALID_REFERENCED_ENTITY);
+            self.setId(identifier);
+            return self;
+        default:
+            return null;
         }
     }
 

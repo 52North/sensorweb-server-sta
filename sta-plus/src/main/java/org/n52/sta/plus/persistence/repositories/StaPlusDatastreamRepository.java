@@ -25,6 +25,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
+
 package org.n52.sta.plus.persistence.repositories;
 
 import org.n52.series.db.beans.sta.plus.StaPlusDataset;
@@ -42,7 +43,8 @@ import org.springframework.transaction.annotation.Transactional;
 @Repository
 @Profile(StaConstants.STAPLUS)
 public interface StaPlusDatastreamRepository
-    extends NameRepository<StaPlusDataset>,
-            AggregateRepository<StaPlusDataset> {
+        extends
+        NameRepository<StaPlusDataset>,
+        AggregateRepository<StaPlusDataset> {
 
 }

@@ -25,6 +25,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
+
 package org.n52.sta.http.old;
 
 import javax.servlet.http.HttpServletRequest;
@@ -39,63 +40,63 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 
 /**
- * Handles all requests to Entity Collections and Entity Collections association
- * Links
- * e.g. /Things
- * e.g. /Datastreams(52)/Observations
- * e.g. /Things/$ref
- * e.g. /Datastreams(52)/Observations/$ref
+ * Handles all requests to Entity Collections and Entity Collections association Links e.g. /Things e.g.
+ * /Datastreams(52)/Observations e.g. /Things/$ref e.g. /Datastreams(52)/Observations/$ref
  *
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
  */
 public class CoreCollectionRequestHandler extends CollectionRequestHandler implements CoreRequestUtils {
 
     public CoreCollectionRequestHandler(
-            @Value("${server.config.service-root-url}") String rootUrl,
-            @Value("${server.feature.escapeId:true}") boolean escapeId,
-            EntityServiceFactory serviceRepository) {
+                                        @Value("${server.config.service-root-url}") String rootUrl,
+                                        @Value("${server.feature.escapeId:true}") boolean escapeId,
+                                        EntityServiceFactory serviceRepository) {
         super(rootUrl, escapeId, serviceRepository);
     }
 
     @GetMapping(value = "/{collectionName:" + BASE_COLLECTION_REGEX + "}", produces = "application/json")
     public CollectionWrapper readCollectionDirect(@PathVariable String collectionName,
-            HttpServletRequest request) throws STACRUDException {
+                                                  HttpServletRequest request)
+            throws STACRUDException {
         return super.readCollectionDirect(collectionName, request);
     }
 
     @GetMapping(value = "/{collectionName:" + BASE_COLLECTION_REGEX + "}" + SLASHREF, produces = "application/json")
     public CollectionWrapper readCollectionRefDirect(@PathVariable String collectionName,
-            HttpServletRequest request) throws STACRUDException {
+                                                     HttpServletRequest request)
+            throws STACRUDException {
         return super.readCollectionRefDirect(collectionName, request);
     }
 
     @GetMapping(value = {
-            MAPPING_PREFIX + COLLECTION_IDENTIFIED_BY_THING_PATH_VARIABLE,
-            MAPPING_PREFIX + COLLECTION_IDENTIFIED_BY_LOCATION_PATH_VARIABLE,
-            MAPPING_PREFIX + COLLECTION_IDENTIFIED_BY_OBSERVED_PROPERTY_PATH_VARIABLE,
-            MAPPING_PREFIX + COLLECTION_IDENTIFIED_BY_FEATURE_OF_INTEREST_PATH_VARIABLE,
-            MAPPING_PREFIX + COLLECTION_IDENTIFIED_BY_SENSOR_PATH_VARIABLE,
-            MAPPING_PREFIX + COLLECTION_IDENTIFIED_BY_DATASTREAM_PATH_VARIABLE,
-            MAPPING_PREFIX + COLLECTION_IDENTIFIED_BY_HIST_LOCATION_PATH_VARIABLE
+        MAPPING_PREFIX + COLLECTION_IDENTIFIED_BY_THING_PATH_VARIABLE,
+        MAPPING_PREFIX + COLLECTION_IDENTIFIED_BY_LOCATION_PATH_VARIABLE,
+        MAPPING_PREFIX + COLLECTION_IDENTIFIED_BY_OBSERVED_PROPERTY_PATH_VARIABLE,
+        MAPPING_PREFIX + COLLECTION_IDENTIFIED_BY_FEATURE_OF_INTEREST_PATH_VARIABLE,
+        MAPPING_PREFIX + COLLECTION_IDENTIFIED_BY_SENSOR_PATH_VARIABLE,
+        MAPPING_PREFIX + COLLECTION_IDENTIFIED_BY_DATASTREAM_PATH_VARIABLE,
+        MAPPING_PREFIX + COLLECTION_IDENTIFIED_BY_HIST_LOCATION_PATH_VARIABLE
     }, produces = "application/json")
     public CollectionWrapper readCollectionRelated(@PathVariable String entity,
-            @PathVariable String target,
-            HttpServletRequest request) throws Exception {
+                                                   @PathVariable String target,
+                                                   HttpServletRequest request)
+            throws Exception {
         return super.readCollectionRelated(entity, target, request);
     }
 
     @GetMapping(value = {
-            MAPPING_PREFIX + COLLECTION_IDENTIFIED_BY_THING_PATH_VARIABLE + SLASHREF,
-            MAPPING_PREFIX + COLLECTION_IDENTIFIED_BY_LOCATION_PATH_VARIABLE + SLASHREF,
-            MAPPING_PREFIX + COLLECTION_IDENTIFIED_BY_OBSERVED_PROPERTY_PATH_VARIABLE + SLASHREF,
-            MAPPING_PREFIX + COLLECTION_IDENTIFIED_BY_FEATURE_OF_INTEREST_PATH_VARIABLE + SLASHREF,
-            MAPPING_PREFIX + COLLECTION_IDENTIFIED_BY_SENSOR_PATH_VARIABLE + SLASHREF,
-            MAPPING_PREFIX + COLLECTION_IDENTIFIED_BY_DATASTREAM_PATH_VARIABLE + SLASHREF,
-            MAPPING_PREFIX + COLLECTION_IDENTIFIED_BY_HIST_LOCATION_PATH_VARIABLE + SLASHREF
+        MAPPING_PREFIX + COLLECTION_IDENTIFIED_BY_THING_PATH_VARIABLE + SLASHREF,
+        MAPPING_PREFIX + COLLECTION_IDENTIFIED_BY_LOCATION_PATH_VARIABLE + SLASHREF,
+        MAPPING_PREFIX + COLLECTION_IDENTIFIED_BY_OBSERVED_PROPERTY_PATH_VARIABLE + SLASHREF,
+        MAPPING_PREFIX + COLLECTION_IDENTIFIED_BY_FEATURE_OF_INTEREST_PATH_VARIABLE + SLASHREF,
+        MAPPING_PREFIX + COLLECTION_IDENTIFIED_BY_SENSOR_PATH_VARIABLE + SLASHREF,
+        MAPPING_PREFIX + COLLECTION_IDENTIFIED_BY_DATASTREAM_PATH_VARIABLE + SLASHREF,
+        MAPPING_PREFIX + COLLECTION_IDENTIFIED_BY_HIST_LOCATION_PATH_VARIABLE + SLASHREF
     }, produces = "application/json")
     public CollectionWrapper readCollectionRelatedRef(@PathVariable String entity,
-            @PathVariable String target,
-            HttpServletRequest request) throws Exception {
+                                                      @PathVariable String target,
+                                                      HttpServletRequest request)
+            throws Exception {
         return super.readCollectionRelatedRef(entity, target, request);
     }
 

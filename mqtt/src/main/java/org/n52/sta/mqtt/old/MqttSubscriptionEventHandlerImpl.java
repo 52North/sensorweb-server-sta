@@ -25,6 +25,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
+
 package org.n52.sta.mqtt.old;
 
 import java.util.HashMap;
@@ -65,23 +66,24 @@ import io.netty.handler.codec.mqtt.MqttQoS;
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
  */
 public class MqttSubscriptionEventHandlerImpl extends AbstractSTARequestHandler
-        implements MqttSubscriptionEventHandler, CoreRequestUtils {
+        implements
+        MqttSubscriptionEventHandler,
+        CoreRequestUtils {
 
     private static final String BASE_URL = "";
     private static final Logger LOGGER = LoggerFactory.getLogger(MqttSubscriptionEventHandlerImpl.class);
     private final MqttFixedHeader mqttFixedHeader = new MqttFixedHeader(
-            MqttMessageType.PUBLISH,
-            false,
-            MqttQoS.AT_LEAST_ONCE,
-            false,
-            0);
+                                                                        MqttMessageType.PUBLISH,
+                                                                        false,
+                                                                        MqttQoS.AT_LEAST_ONCE,
+                                                                        false,
+                                                                        0);
 
     private final ObjectMapper mapper;
     private Server mqttBroker;
     private Map<AbstractMqttSubscription, HashSet<String>> subscriptions = new HashMap<>();
     /*
-     * List of all Entity Types that are currently subscribed to. Used for
-     * fail-fast.
+     * List of all Entity Types that are currently subscribed to. Used for fail-fast.
      */
     private Set<String> watchedEntityTypes = new HashSet<>();
 
@@ -93,9 +95,9 @@ public class MqttSubscriptionEventHandlerImpl extends AbstractSTARequestHandler
     @Async
     @Override
     public void handleEvent(StaDTO rawObject,
-            String entityType,
-            Set<String> differenceMap,
-            Map<String, Set<String>> collections) {
+                            String entityType,
+                            Set<String> differenceMap,
+                            Map<String, Set<String>> collections) {
         try {
             // Invariant: As watchedEntityTypes contains rawObject->class
             // there is at least one subscription that matches.
@@ -121,9 +123,9 @@ public class MqttSubscriptionEventHandlerImpl extends AbstractSTARequestHandler
                         serializedCache.put(subscrip.getQueryOptions(), out);
                     }
                     MqttPublishMessage msg = new MqttPublishMessage(mqttFixedHeader,
-                            new MqttPublishVariableHeader(MQTT_PREFIX + topic,
-                                    52),
-                            out);
+                                                                    new MqttPublishVariableHeader(MQTT_PREFIX + topic,
+                                                                                                  52),
+                                                                    out);
                     mqttBroker.internalPublish(msg, INTERNAL_CLIENT_ID);
                     LOGGER.debug("Posted Message to Topic: {}", topic);
                 } else {
@@ -183,7 +185,9 @@ public class MqttSubscriptionEventHandlerImpl extends AbstractSTARequestHandler
         try {
             Matcher mt;
             // Delete possible leading slash and version information
-            String topic = (rawTopic.startsWith("/")) ? rawTopic.substring(1) : rawTopic;
+            String topic = (rawTopic.startsWith("/"))
+                    ? rawTopic.substring(1)
+                    : rawTopic;
             if (!topic.startsWith(MQTT_PREFIX)) {
                 throw new MqttHandlerException("Error while parsing MQTT topic. Missing Version information!");
             }

@@ -25,6 +25,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
+
 package org.n52.sta.data.old;
 
 import java.util.Arrays;
@@ -50,7 +51,7 @@ import org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter;
  */
 // @Configuration
 // @EnableJpaRepositories(repositoryBaseClass = MessageBusRepository.class, basePackages = {
-//         "org.n52.sta.data.vanilla.repositories" })
+// "org.n52.sta.data.vanilla.repositories" })
 // @EnableTransactionManagement
 // @ConfigurationProperties(prefix = "dao-postgres")
 public class DaoConfig {

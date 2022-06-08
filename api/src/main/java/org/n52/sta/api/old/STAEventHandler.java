@@ -25,6 +25,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
+
 package org.n52.sta.api.old;
 
 import java.util.Map;
@@ -42,10 +43,14 @@ public interface STAEventHandler {
     /**
      * Handles a Create/Update Event emitted by the Database.
      *
-     * @param entity             base entity
-     * @param entityType         java class name of entity
-     * @param differenceMap      names of properties that changed. null if all properties changed (e.g. new entity)
-     * @param relatedCollections List of related Collections
+     * @param entity
+     *        base entity
+     * @param entityType
+     *        java class name of entity
+     * @param differenceMap
+     *        names of properties that changed. null if all properties changed (e.g. new entity)
+     * @param relatedCollections
+     *        List of related Collections
      */
     void handleEvent(StaDTO entity,
                      String entityType,
@@ -53,7 +58,8 @@ public interface STAEventHandler {
                      Map<String, Set<String>> relatedCollections);
 
     /**
-     * Lists all Entity types that are monitored by this Handler. Directly matched with getJavaType().getName().
+     * Lists all Entity types that are monitored by this Handler. Directly matched with
+     * getJavaType().getName().
      *
      * @return Set of all watched Entity Types. Empty if Handler is inactive.
      */

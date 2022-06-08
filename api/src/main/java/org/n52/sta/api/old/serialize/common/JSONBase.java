@@ -25,6 +25,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
+
 package org.n52.sta.api.old.serialize.common;
 
 import java.util.Objects;
@@ -49,34 +50,33 @@ public class JSONBase {
         REFERENCE
     }
 
-
     public abstract static class JSONwithId<T> {
 
         @JsonProperty("@iot.id")
-        public String identifier = UUID.randomUUID().toString();
+        public String identifier = UUID.randomUUID()
+                                       .toString();
 
         /**
-         * Backreference to parent Entity used during nested deserialization
-         * Used for linking to parent Entities
+         * Backreference to parent Entity used during nested deserialization Used for linking to parent
+         * Entities
          */
         @JsonBackReference
         public Object backReference;
 
         /**
-         * Holds type of the referenced Collection in the URL.
-         * E.g. when POSTing on Datastreams(52)/Observations this will contain "Datastreams"
+         * Holds type of the referenced Collection in the URL. E.g. when POSTing on
+         * Datastreams(52)/Observations this will contain "Datastreams"
          */
         public String referencedFromType;
 
         /**
-         * Holds id of the referenced Collection in the URL.
-         * E.g. when POSTing on Datastreams(52)/Observations this will contain "52"
+         * Holds id of the referenced Collection in the URL. E.g. when POSTing on Datastreams(52)/Observations
+         * this will contain "52"
          */
         public String referencedFromID;
 
         /**
-         * Deals with linking to parent Objects during deep insert
-         * Used for dealing with nested inserts
+         * Deals with linking to parent Objects during deep insert Used for dealing with nested inserts
          */
         public T self;
 
@@ -91,8 +91,8 @@ public class JSONBase {
         }
 
         /**
-         * Parses referencedFromType and referencedFromID into the specific JSON Entities.
-         * Must be called before any validation is performed on the presence of related Entities!
+         * Parses referencedFromType and referencedFromID into the specific JSON Entities. Must be called
+         * before any validation is performed on the presence of related Entities!
          */
         protected void parseReferencedFrom() {
         }
@@ -108,10 +108,11 @@ public class JSONBase {
         }
 
         /**
-         * Creates and validates the Database Entity to conform to invariants defined in standard.
-         * What is validated is dictated by given type parameter
+         * Creates and validates the Database Entity to conform to invariants defined in standard. What is
+         * validated is dictated by given type parameter
          *
-         * @param type type of the entity
+         * @param type
+         *        type of the entity
          * @return created Entity
          */
         public abstract T parseToDTO(EntityType type);
@@ -119,8 +120,10 @@ public class JSONBase {
         /**
          * Used when multiple Entity Types are allowed.
          *
-         * @param type1 first type to check
-         * @param type2 second type to check
+         * @param type1
+         *        first type to check
+         * @param type2
+         *        second type to check
          * @return created entity
          */
         public T parseToDTO(EntityType type1, EntityType type2) {
@@ -144,58 +147,23 @@ public class JSONBase {
         }
 
         /*
-        @SuppressWarnings("unchecked")
-        protected HashSet<ParameterEntity<?>> convertParameters(JsonNode parameters,
-                                                                ParameterFactory.EntityType entityType) {
-            // parameters
-            if (parameters != null) {
-                HashSet<ParameterEntity<?>> parameterEntities = new HashSet<>();
-                // Check that structure is correct
-                Iterator<String> it = parameters.fieldNames();
-                while (it.hasNext()) {
-                    String key = it.next();
-                    JsonNode value = parameters.get(key);
-
-                    ParameterEntity parameterEntity;
-                    switch (value.getNodeType()) {
-                        case ARRAY:
-                            // fallthru
-                        case MISSING:
-                            // fallthru
-                        case NULL:
-                            // fallthru
-                        case OBJECT:
-                            // fallthru
-                        case POJO:
-                            parameterEntity = ParameterFactory.from(entityType, ParameterFactory.ValueType.JSON);
-                            parameterEntity.setValue(value.toString());
-                            break;
-                        case BINARY:
-                            // fallthru
-                        case BOOLEAN:
-                            parameterEntity = ParameterFactory.from(entityType, ParameterFactory.ValueType.BOOLEAN);
-                            parameterEntity.setValue(value.asBoolean());
-                            break;
-                        case NUMBER:
-                            parameterEntity = ParameterFactory.from(entityType, ParameterFactory.ValueType.QUANTITY);
-                            parameterEntity.setValue(BigDecimal.valueOf(value.asDouble()));
-                            break;
-                        case STRING:
-                            parameterEntity = ParameterFactory.from(entityType, ParameterFactory.ValueType.TEXT);
-                            parameterEntity.setValue(value.asText());
-                            break;
-                        default:
-                            throw new RuntimeException("Could not identify value type of parameters!");
-                    }
-                    parameterEntity.setName(key);
-                    parameterEntities.add(parameterEntity);
-                }
-                return parameterEntities;
-            } else {
-                return null;
-            }
-        }
-    */
+         * @SuppressWarnings("unchecked") protected HashSet<ParameterEntity<?>> convertParameters(JsonNode
+         * parameters, ParameterFactory.EntityType entityType) { // parameters if (parameters != null) {
+         * HashSet<ParameterEntity<?>> parameterEntities = new HashSet<>(); // Check that structure is correct
+         * Iterator<String> it = parameters.fieldNames(); while (it.hasNext()) { String key = it.next();
+         * JsonNode value = parameters.get(key); ParameterEntity parameterEntity; switch (value.getNodeType())
+         * { case ARRAY: // fallthru case MISSING: // fallthru case NULL: // fallthru case OBJECT: // fallthru
+         * case POJO: parameterEntity = ParameterFactory.from(entityType, ParameterFactory.ValueType.JSON);
+         * parameterEntity.setValue(value.toString()); break; case BINARY: // fallthru case BOOLEAN:
+         * parameterEntity = ParameterFactory.from(entityType, ParameterFactory.ValueType.BOOLEAN);
+         * parameterEntity.setValue(value.asBoolean()); break; case NUMBER: parameterEntity =
+         * ParameterFactory.from(entityType, ParameterFactory.ValueType.QUANTITY);
+         * parameterEntity.setValue(BigDecimal.valueOf(value.asDouble())); break; case STRING: parameterEntity
+         * = ParameterFactory.from(entityType, ParameterFactory.ValueType.TEXT);
+         * parameterEntity.setValue(value.asText()); break; default: throw new
+         * RuntimeException("Could not identify value type of parameters!"); } parameterEntity.setName(key);
+         * parameterEntities.add(parameterEntity); } return parameterEntities; } else { return null; } }
+         */
     }
 
     @SuppressFBWarnings("UWF_UNWRITTEN_PUBLIC_OR_PROTECTED_FIELD")
@@ -205,14 +173,12 @@ public class JSONBase {
         public String description;
     }
 
-
     @SuppressFBWarnings("UWF_UNWRITTEN_PUBLIC_OR_PROTECTED_FIELD")
     public abstract static class JSONwithIdNameDescriptionTime<T> extends JSONwithIdTime<T> {
 
         public String name;
         public String description;
     }
-
 
     public abstract static class JSONwithIdTime<T> extends JSONwithId<T> {
 
@@ -223,8 +189,10 @@ public class JSONBase {
         /**
          * Create {@link Time} from {@link DateTime}s
          *
-         * @param start Start {@link DateTime}
-         * @param end   End {@link DateTime}
+         * @param start
+         *        Start {@link DateTime}
+         * @param end
+         *        End {@link DateTime}
          * @return Resulting {@link Time}
          */
         protected Time createTime(DateTime start, DateTime end) {

@@ -25,16 +25,11 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
+
 package org.n52.sta.api.old.serialize;
 
 import java.io.IOException;
 import java.util.Collections;
-
-import com.fasterxml.jackson.core.JsonGenerator;
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.databind.DeserializationContext;
-import com.fasterxml.jackson.databind.SerializerProvider;
-import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
 
 import org.locationtech.jts.io.geojson.GeoJsonWriter;
 import org.n52.shetland.ogc.sta.model.LocationEntityDefinition;
@@ -47,10 +42,15 @@ import org.n52.sta.api.old.serialize.json.JSONLocation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.databind.DeserializationContext;
+import com.fasterxml.jackson.databind.SerializerProvider;
+import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
+
 public class LocationSerDes {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(LocationSerDes.class);
-
 
     public static class LocationDTOPatch implements EntityPatch<LocationDTO> {
 
@@ -65,7 +65,6 @@ public class LocationSerDes {
             return entity;
         }
     }
-
 
     public static class LocationSerializer extends AbstractSTASerializer<LocationDTO> {
 
@@ -82,42 +81,53 @@ public class LocationSerDes {
 
         @Override
         public void serialize(LocationDTO location, JsonGenerator gen, SerializerProvider serializers)
-            throws IOException {
+                throws IOException {
             gen.writeStartObject();
 
             // olingo @iot links
-            if (!location.hasSelectOption() || location.getFieldsToSerialize().contains(STAEntityDefinition.PROP_ID)) {
+            if (!location.hasSelectOption()
+                    || location.getFieldsToSerialize()
+                               .contains(STAEntityDefinition.PROP_ID)) {
                 writeId(gen, location.getId());
             }
-            if (!location.hasSelectOption() ||
-                location.getFieldsToSerialize().contains(STAEntityDefinition.PROP_SELF_LINK)) {
+            if (!location.hasSelectOption()
+                    ||
+                    location.getFieldsToSerialize()
+                            .contains(STAEntityDefinition.PROP_SELF_LINK)) {
                 writeSelfLink(gen, location.getId());
             }
 
             // actual properties
-            if (!location.hasSelectOption() ||
-                location.getFieldsToSerialize().contains(STAEntityDefinition.PROP_NAME)) {
+            if (!location.hasSelectOption()
+                    ||
+                    location.getFieldsToSerialize()
+                            .contains(STAEntityDefinition.PROP_NAME)) {
                 gen.writeStringField(STAEntityDefinition.PROP_NAME, location.getName());
             }
             if (!location.hasSelectOption()
-                || location.getFieldsToSerialize().contains(STAEntityDefinition.PROP_DESCRIPTION)) {
+                    || location.getFieldsToSerialize()
+                               .contains(STAEntityDefinition.PROP_DESCRIPTION)) {
                 gen.writeStringField(STAEntityDefinition.PROP_DESCRIPTION, location.getDescription());
             }
             if (!location.hasSelectOption()
-                || location.getFieldsToSerialize().contains(STAEntityDefinition.PROP_ENCODINGTYPE)) {
+                    || location.getFieldsToSerialize()
+                               .contains(STAEntityDefinition.PROP_ENCODINGTYPE)) {
                 // only write out encodingtype if there is a location present
                 if (location.getGeometry() != null) {
                     gen.writeStringField(STAEntityDefinition.PROP_ENCODINGTYPE, ENCODINGTYPE_GEOJSON);
                 }
             }
             if (!location.hasSelectOption()
-                || location.getFieldsToSerialize().contains(STAEntityDefinition.PROP_LOCATION)) {
+                    || location.getFieldsToSerialize()
+                               .contains(STAEntityDefinition.PROP_LOCATION)) {
 
                 gen.writeFieldName(STAEntityDefinition.PROP_LOCATION);
                 gen.writeRawValue(GEO_JSON_WRITER.write(location.getGeometry()));
             }
-            if (!location.hasSelectOption() ||
-                location.getFieldsToSerialize().contains(STAEntityDefinition.PROP_PROPERTIES)) {
+            if (!location.hasSelectOption()
+                    ||
+                    location.getFieldsToSerialize()
+                            .contains(STAEntityDefinition.PROP_PROPERTIES)) {
                 if (location.getProperties() != null) {
                     gen.writeObjectField(STAEntityDefinition.PROP_PROPERTIES, location.getProperties());
                 }
@@ -125,34 +135,37 @@ public class LocationSerDes {
 
             // navigation properties
             for (String navigationProperty : LocationEntityDefinition.NAVIGATION_PROPERTIES) {
-                if (!location.hasSelectOption() || location.getFieldsToSerialize().contains(navigationProperty)) {
-                    if (!location.hasExpandOption() || location.getFieldsToExpand().get(navigationProperty) == null) {
+                if (!location.hasSelectOption()
+                        || location.getFieldsToSerialize()
+                                   .contains(navigationProperty)) {
+                    if (!location.hasExpandOption()
+                            || location.getFieldsToExpand()
+                                       .get(navigationProperty) == null) {
                         writeNavigationProp(gen, navigationProperty, location.getId());
                     } else {
                         switch (navigationProperty) {
-                            case LocationEntityDefinition.THINGS:
-                                if (location.getThings() == null) {
-                                    writeNavigationProp(gen, navigationProperty, location.getId());
-                                } else {
-                                    gen.writeFieldName(navigationProperty);
-                                    writeNestedCollection(Collections.unmodifiableSet(location.getThings()),
-                                                          gen,
-                                                          serializers);
-                                }
-                                break;
-                            case LocationEntityDefinition.HISTORICAL_LOCATIONS:
-                                if (location.getHistoricalLocations() == null) {
-                                    writeNavigationProp(gen, navigationProperty, location.getId());
-                                } else {
-                                    gen.writeFieldName(navigationProperty);
-                                    writeNestedCollection(
-                                        Collections.unmodifiableSet(location.getHistoricalLocations()),
-                                        gen,
-                                        serializers);
-                                }
-                                break;
-                            default:
-                                throw new IllegalStateException("Unexpected value: " + navigationProperty);
+                        case LocationEntityDefinition.THINGS:
+                            if (location.getThings() == null) {
+                                writeNavigationProp(gen, navigationProperty, location.getId());
+                            } else {
+                                gen.writeFieldName(navigationProperty);
+                                writeNestedCollection(Collections.unmodifiableSet(location.getThings()),
+                                                      gen,
+                                                      serializers);
+                            }
+                            break;
+                        case LocationEntityDefinition.HISTORICAL_LOCATIONS:
+                            if (location.getHistoricalLocations() == null) {
+                                writeNavigationProp(gen, navigationProperty, location.getId());
+                            } else {
+                                gen.writeFieldName(navigationProperty);
+                                writeNestedCollection(Collections.unmodifiableSet(location.getHistoricalLocations()),
+                                                      gen,
+                                                      serializers);
+                            }
+                            break;
+                        default:
+                            throw new IllegalStateException("Unexpected value: " + navigationProperty);
                         }
                     }
                 }
@@ -160,7 +173,6 @@ public class LocationSerDes {
             gen.writeEndObject();
         }
     }
-
 
     public static class LocationDeserializer extends StdDeserializer<LocationDTO> {
 
@@ -173,10 +185,9 @@ public class LocationSerDes {
         @Override
         public LocationDTO deserialize(JsonParser p, DeserializationContext ctxt) throws IOException {
             return p.readValueAs(JSONLocation.class)
-                .parseToDTO(JSONBase.EntityType.FULL);
+                    .parseToDTO(JSONBase.EntityType.FULL);
         }
     }
-
 
     public static class LocationPatchDeserializer extends StdDeserializer<LocationDTOPatch> {
 
@@ -189,7 +200,7 @@ public class LocationSerDes {
         @Override
         public LocationDTOPatch deserialize(JsonParser p, DeserializationContext ctxt) throws IOException {
             return new LocationDTOPatch(p.readValueAs(JSONLocation.class)
-                                            .parseToDTO(JSONBase.EntityType.PATCH));
+                                         .parseToDTO(JSONBase.EntityType.PATCH));
         }
     }
 }

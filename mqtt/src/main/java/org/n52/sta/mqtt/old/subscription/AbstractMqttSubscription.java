@@ -25,6 +25,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
+
 package org.n52.sta.mqtt.old.subscription;
 
 import java.util.Map;
@@ -49,23 +50,27 @@ public abstract class AbstractMqttSubscription {
     }
 
     /**
-     * Returns the topic given entity should be posted to. null if the entity
-     * does not match this subscription.
-     *
-     * @param rawObject       Entity to be posted
-     * @param entityType      Type of Entity
-     * @param relatedEntities Map with EntityType-ID pairs for the related
-     *                        entities
-     * @param differenceMap   differenceMap names of properties that have changed.
-     *                        if null all properties have changed (new entity)
-     * @return Topic to be posted to. May be null if Entity does not match this
+     * Returns the topic given entity should be posted to. null if the entity does not match this
      * subscription.
+     *
+     * @param rawObject
+     *        Entity to be posted
+     * @param entityType
+     *        Type of Entity
+     * @param relatedEntities
+     *        Map with EntityType-ID pairs for the related entities
+     * @param differenceMap
+     *        differenceMap names of properties that have changed. if null all properties have changed (new
+     *        entity)
+     * @return Topic to be posted to. May be null if Entity does not match this subscription.
      */
     public String checkSubscription(StaDTO rawObject,
                                     String entityType,
                                     Map<String, Set<String>> relatedEntities,
                                     Set<String> differenceMap) {
-        return matches(rawObject, entityType, relatedEntities, differenceMap) ? topic : null;
+        return matches(rawObject, entityType, relatedEntities, differenceMap)
+                ? topic
+                : null;
     }
 
     public String getTopic() {
@@ -84,27 +89,29 @@ public abstract class AbstractMqttSubscription {
     @Override
     public boolean equals(Object other) {
         return other instanceof AbstractMqttSubscription
-            && ((AbstractMqttSubscription) other).getTopic().equals(this.topic);
+                && ((AbstractMqttSubscription) other).getTopic()
+                                                     .equals(this.topic);
     }
 
     @Override
     public String toString() {
         return new StringBuilder()
-            .append(this.getClass().getSimpleName())
-            .append("[")
-            .append("topic=")
-            .append(topic)
-            .append(",")
-            .append("sourceEntityType=")
-            .append(sourceEntityType)
-            .append(",")
-            .append("sourceId=")
-            .append(sourceId)
-            .append(",")
-            .append("wantedEntityType=")
-            .append(wantedEntityType)
-            .append("]")
-            .toString();
+                                  .append(this.getClass()
+                                              .getSimpleName())
+                                  .append("[")
+                                  .append("topic=")
+                                  .append(topic)
+                                  .append(",")
+                                  .append("sourceEntityType=")
+                                  .append(sourceEntityType)
+                                  .append(",")
+                                  .append("sourceId=")
+                                  .append(sourceId)
+                                  .append(",")
+                                  .append("wantedEntityType=")
+                                  .append(wantedEntityType)
+                                  .append("]")
+                                  .toString();
     }
 
     /**

@@ -25,6 +25,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
+
 package org.n52.sta.conformance;
 
 import java.util.Arrays;
@@ -53,27 +54,48 @@ public class ITExpand extends ConformanceTests implements TestUtil {
 
         // Create required test harness
         // Requires POST with deep insert to work.
-        postEntity(EntityType.THING, "{ \"description\": \"thing 1\", \"name\": \"thing name 1\", \"properties\": { " +
-            "\"reference\": \"first\" }, \"Locations\": [ { \"description\": \"location 1\", \"name\": \"location" +
-            " name 1\", \"location\": { \"type\": \"Point\", \"coordinates\": [ -117.05, 51.05 ] }, " +
-            "\"encodingType\": \"application/vnd.geo+json\" } ], \"Datastreams\": [ { \"unitOfMeasurement\": { " +
-            "\"name\": \"Lumen\", \"symbol\": \"lm\", \"definition\": \"http://www.qudt.org/qudt/owl/1.0" +
-            ".0/unit/Instances.html/Lumen\" }, \"description\": \"datastream 1\", \"name\": \"datastream name " +
-            "1\", \"observationType\": \"http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_Measurement\", " +
-            "\"ObservedProperty\": { \"name\": \"Luminous Flux\", \"definition\": \"http://www.qudt" +
-            ".org/qudt/owl/1.0.0/quantity/Instances.html/LuminousFlux\", \"description\": \"observedProperty 1\" " +
-            "}, \"Sensor\": { \"description\": \"sensor 1\", \"name\": \"sensor name 1\", \"encodingType\": " +
-            "\"application/pdf\", \"metadata\": \"Light flux sensor\" }, \"Observations\":[ { \"phenomenonTime\":" +
-            " \"2015-03-03T00:00:00Z\", \"result\": 3 }, { \"phenomenonTime\": \"2015-03-04T00:00:00Z\", " +
-            "\"result\": 4 } ] }, { \"unitOfMeasurement\": { \"name\": \"Centigrade\", \"symbol\": \"C\", " +
-            "\"definition\": \"http://www.qudt.org/qudt/owl/1.0.0/unit/Instances.html/Lumen\" }, \"description\":" +
-            " \"datastream 2\", \"name\": \"datastream name 2\", \"observationType\": \"http://www.opengis" +
-            ".net/def/observationType/OGC-OM/2.0/OM_Measurement\", \"ObservedProperty\": { \"name\": " +
-            "\"Tempretaure\", \"definition\": \"http://www.qudt.org/qudt/owl/1.0.0/quantity/Instances" +
-            ".html/Tempreture\", \"description\": \"observedProperty 2\" }, \"Sensor\": { \"description\": " +
-            "\"sensor 2\", \"name\": \"sensor name 2\", \"encodingType\": \"application/pdf\", \"metadata\": " +
-            "\"Tempreture sensor\" }, \"Observations\":[ { \"phenomenonTime\": \"2015-03-05T00:00:00Z\", " +
-            "\"result\": 5 }, { \"phenomenonTime\": \"2015-03-06T00:00:00Z\", \"result\": 6 } ] } ] }");
+        postEntity(EntityType.THING,
+                   "{ \"description\": \"thing 1\", \"name\": \"thing name 1\", \"properties\": { "
+                           +
+                           "\"reference\": \"first\" }, \"Locations\": [ { \"description\": \"location 1\", \"name\": \"location"
+                           +
+                           " name 1\", \"location\": { \"type\": \"Point\", \"coordinates\": [ -117.05, 51.05 ] }, "
+                           +
+                           "\"encodingType\": \"application/vnd.geo+json\" } ], \"Datastreams\": [ { \"unitOfMeasurement\": { "
+                           +
+                           "\"name\": \"Lumen\", \"symbol\": \"lm\", \"definition\": \"http://www.qudt.org/qudt/owl/1.0"
+                           +
+                           ".0/unit/Instances.html/Lumen\" }, \"description\": \"datastream 1\", \"name\": \"datastream name "
+                           +
+                           "1\", \"observationType\": \"http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_Measurement\", "
+                           +
+                           "\"ObservedProperty\": { \"name\": \"Luminous Flux\", \"definition\": \"http://www.qudt"
+                           +
+                           ".org/qudt/owl/1.0.0/quantity/Instances.html/LuminousFlux\", \"description\": \"observedProperty 1\" "
+                           +
+                           "}, \"Sensor\": { \"description\": \"sensor 1\", \"name\": \"sensor name 1\", \"encodingType\": "
+                           +
+                           "\"application/pdf\", \"metadata\": \"Light flux sensor\" }, \"Observations\":[ { \"phenomenonTime\":"
+                           +
+                           " \"2015-03-03T00:00:00Z\", \"result\": 3 }, { \"phenomenonTime\": \"2015-03-04T00:00:00Z\", "
+                           +
+                           "\"result\": 4 } ] }, { \"unitOfMeasurement\": { \"name\": \"Centigrade\", \"symbol\": \"C\", "
+                           +
+                           "\"definition\": \"http://www.qudt.org/qudt/owl/1.0.0/unit/Instances.html/Lumen\" }, \"description\":"
+                           +
+                           " \"datastream 2\", \"name\": \"datastream name 2\", \"observationType\": \"http://www.opengis"
+                           +
+                           ".net/def/observationType/OGC-OM/2.0/OM_Measurement\", \"ObservedProperty\": { \"name\": "
+                           +
+                           "\"Tempretaure\", \"definition\": \"http://www.qudt.org/qudt/owl/1.0.0/quantity/Instances"
+                           +
+                           ".html/Tempreture\", \"description\": \"observedProperty 2\" }, \"Sensor\": { \"description\": "
+                           +
+                           "\"sensor 2\", \"name\": \"sensor name 2\", \"encodingType\": \"application/pdf\", \"metadata\": "
+                           +
+                           "\"Tempreture sensor\" }, \"Observations\":[ { \"phenomenonTime\": \"2015-03-05T00:00:00Z\", "
+                           +
+                           "\"result\": 5 }, { \"phenomenonTime\": \"2015-03-06T00:00:00Z\", \"result\": 6 } ] } ] }");
     }
 
     @Test
@@ -107,12 +129,14 @@ public class ITExpand extends ConformanceTests implements TestUtil {
         JsonNode response = getCollection(type, "$expand=" + expanded);
         Assertions.assertTrue(response.has(value));
         for (JsonNode item : response.get(value)) {
-            if (item.get(expanded).isArray()) {
+            if (item.get(expanded)
+                    .isArray()) {
                 for (JsonNode node : item.get(expanded)) {
                     Assertions.assertTrue(node.has(idKey));
                 }
             } else {
-                Assertions.assertTrue(item.get(expanded).has(idKey));
+                Assertions.assertTrue(item.get(expanded)
+                                          .has(idKey));
             }
         }
     }
@@ -171,12 +195,14 @@ public class ITExpand extends ConformanceTests implements TestUtil {
             Assertions.assertTrue(response.has(value));
             for (JsonNode item : response.get(value)) {
                 for (int i = 0; i < length; i++) {
-                    if (item.get(expanded[i]).isArray()) {
+                    if (item.get(expanded[i])
+                            .isArray()) {
                         for (JsonNode jsonNode : item.get(expanded[i])) {
                             Assertions.assertTrue(jsonNode.has(idKey));
                         }
                     } else {
-                        Assertions.assertTrue(item.get(expanded[i]).has(idKey));
+                        Assertions.assertTrue(item.get(expanded[i])
+                                                  .has(idKey));
                     }
                 }
             }
@@ -211,16 +237,21 @@ public class ITExpand extends ConformanceTests implements TestUtil {
     }
 
     private void checkSingleExpandOnEntity(EntityType type, String expanded) throws Exception {
-        String id = getCollection(type).get(value).get(0).get(idKey).asText();
+        String id = getCollection(type).get(value)
+                                       .get(0)
+                                       .get(idKey)
+                                       .asText();
         JsonNode response = getEntity(type, id, "$expand=" + expanded);
         Assertions.assertTrue(response.has(idKey));
         Assertions.assertTrue(response.has(expanded));
-        if (response.get(expanded).isArray()) {
+        if (response.get(expanded)
+                    .isArray()) {
             for (JsonNode node : response.get(expanded)) {
                 Assertions.assertTrue(node.has(idKey));
             }
         } else {
-            Assertions.assertTrue(response.get(expanded).has(idKey));
+            Assertions.assertTrue(response.get(expanded)
+                                          .has(idKey));
         }
     }
 
@@ -273,15 +304,20 @@ public class ITExpand extends ConformanceTests implements TestUtil {
                 expand.append(",");
                 expand.append(expanded[i]);
             }
-            String id = getCollection(type).get(value).get(0).get(idKey).asText();
+            String id = getCollection(type).get(value)
+                                           .get(0)
+                                           .get(idKey)
+                                           .asText();
             JsonNode response = getEntity(type, id, "$expand=" + expand.toString());
             for (int i = 0; i < length; i++) {
-                if (response.get(expanded[i]).isArray()) {
+                if (response.get(expanded[i])
+                            .isArray()) {
                     for (JsonNode jsonNode : response.get(expanded[i])) {
                         Assertions.assertTrue(jsonNode.has(idKey));
                     }
                 } else {
-                    Assertions.assertTrue(response.get(expanded[i]).has(idKey));
+                    Assertions.assertTrue(response.get(expanded[i])
+                                                  .has(idKey));
                 }
             }
         }
@@ -352,7 +388,10 @@ public class ITExpand extends ConformanceTests implements TestUtil {
                 expand.append(expanded[i]);
                 expand.append(")");
             }
-            String id = getCollection(type).get(value).get(0).get(idKey).asText();
+            String id = getCollection(type).get(value)
+                                           .get(0)
+                                           .get(idKey)
+                                           .asText();
             JsonNode response = getEntity(type, id, "$expand=" + expand.toString());
             checkNested(response, expanded);
         }
@@ -366,7 +405,10 @@ public class ITExpand extends ConformanceTests implements TestUtil {
                 expand.append("/");
                 expand.append(expanded[i]);
             }
-            String id = getCollection(type).get(value).get(0).get(idKey).asText();
+            String id = getCollection(type).get(value)
+                                           .get(0)
+                                           .get(idKey)
+                                           .asText();
             JsonNode response = getEntity(type, id, "$expand=" + expand.toString());
             checkNested(response, expanded);
         }
@@ -374,13 +416,15 @@ public class ITExpand extends ConformanceTests implements TestUtil {
 
     private void checkNested(JsonNode obj, String... expand) {
         if (expand.length > 0) {
-            if (obj.get(expand[0]).isArray()) {
+            if (obj.get(expand[0])
+                   .isArray()) {
                 for (JsonNode jsonNode : obj.get(expand[0])) {
                     Assertions.assertTrue(jsonNode.has(idKey));
                     checkNested(jsonNode, Arrays.copyOfRange(expand, 1, expand.length));
                 }
             } else {
-                Assertions.assertTrue(obj.get(expand[0]).has(idKey));
+                Assertions.assertTrue(obj.get(expand[0])
+                                         .has(idKey));
                 checkNested(obj.get(expand[0]), Arrays.copyOfRange(expand, 1, expand.length));
             }
         }
@@ -451,7 +495,10 @@ public class ITExpand extends ConformanceTests implements TestUtil {
                 expand.append(expanded[i]);
                 expand.append(")");
             }
-            String id = getCollection(type).get(value).get(0).get(idKey).asText();
+            String id = getCollection(type).get(value)
+                                           .get(0)
+                                           .get(idKey)
+                                           .asText();
             JsonNode response = getEntity(type, id, "$expand=" + expand.toString());
             checkNested(response, expanded);
         }
@@ -465,7 +512,10 @@ public class ITExpand extends ConformanceTests implements TestUtil {
                 expand.append("/");
                 expand.append(expanded[i]);
             }
-            String id = getCollection(type).get(value).get(0).get(idKey).asText();
+            String id = getCollection(type).get(value)
+                                           .get(0)
+                                           .get(idKey)
+                                           .asText();
             JsonNode response = getEntity(type, id, "$expand=" + expand.toString());
             checkNested(response, expanded);
         }

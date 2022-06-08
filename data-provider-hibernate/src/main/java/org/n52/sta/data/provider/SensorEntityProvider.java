@@ -25,6 +25,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
+
 package org.n52.sta.data.provider;
 
 import org.n52.series.db.beans.ProcedureEntity;
@@ -73,7 +74,7 @@ public class SensorEntityProvider extends BaseEntityProvider<Sensor> {
     }
 
     @Override
-    public EntityPage<Sensor> getEntities(Request req)throws ProviderException {
+    public EntityPage<Sensor> getEntities(Request req) throws ProviderException {
         Pageable pageable = StaPageRequest.create(req.getQueryOptions());
 
         SensorGraphBuilder graphBuilder = new SensorGraphBuilder(req);

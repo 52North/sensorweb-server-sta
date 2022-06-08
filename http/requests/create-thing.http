@@ -1,0 +1,7 @@
+POST http://localhost:8080/v1.1/Things
+Content-Type: application/json
+
+{
+    "@iot.id" : "foobar",
+    "Datastreams": "baz"
+}

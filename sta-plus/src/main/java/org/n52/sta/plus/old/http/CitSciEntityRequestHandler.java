@@ -25,6 +25,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
+
 package org.n52.sta.plus.old.http;
 
 import javax.servlet.http.HttpServletRequest;
@@ -41,11 +42,8 @@ import org.springframework.web.bind.annotation.PathVariable;
 //import org.springframework.web.servlet.HandlerMapping;
 
 /**
- * Handles all requests to Entities and to Entity association links
- * e.g. /Things(52)
- * e.g. /Datastreams(52)/Thing
- * e.g. /Things(52)/$ref
- * e.g. /Datastreams(52)/Thing/$ref
+ * Handles all requests to Entities and to Entity association links e.g. /Things(52) e.g.
+ * /Datastreams(52)/Thing e.g. /Things(52)/$ref e.g. /Datastreams(52)/Thing/$ref
  *
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
  */
@@ -61,21 +59,21 @@ public class CitSciEntityRequestHandler extends EntityRequestHandler implements 
 
     @GetMapping(
         value = MAPPING_PREFIX + CitSciExtensionRequestUtils.ENTITY_IDENTIFIED_DIRECTLY,
-        produces = "application/json"
-    )
+        produces = "application/json")
     public StaDTO readEntityDirect(@PathVariable String entity,
                                    @PathVariable String id,
-                                   HttpServletRequest request) throws Exception {
+                                   HttpServletRequest request)
+            throws Exception {
         return super.readEntityDirect(entity, id, request);
     }
 
     @GetMapping(
         value = MAPPING_PREFIX + CitSciExtensionRequestUtils.ENTITY_IDENTIFIED_DIRECTLY + SLASHREF,
-        produces = "application/json"
-    )
+        produces = "application/json")
     public StaDTO readEntityRefDirect(@PathVariable String entity,
                                       @PathVariable String id,
-                                      HttpServletRequest request) throws Exception {
+                                      HttpServletRequest request)
+            throws Exception {
         return super.readEntityRefDirect(entity, id, request);
     }
 
@@ -85,14 +83,13 @@ public class CitSciEntityRequestHandler extends EntityRequestHandler implements 
             MAPPING_PREFIX + CitSciExtensionRequestUtils.ENTITY_IDENTIFIED_BY_DATASTREAM_PATH_VARIABLE,
             MAPPING_PREFIX + CitSciExtensionRequestUtils.ENTITY_IDENTIFIED_BY_OBSERVATION_PATH_VARIABLE
         },
-        produces = "application/json"
-    )
+        produces = "application/json")
     public StaDTO readRelatedEntity(@PathVariable String entity,
                                     @PathVariable String target,
                                     HttpServletRequest request)
-        throws Exception {
+            throws Exception {
         if (target.equals(StaConstants.SUBJECT) || target.equals(StaConstants.OBJECT)) {
-//            validateResource((String) request.getAttribute(HandlerMapping.LOOKUP_PATH));
+            // validateResource((String) request.getAttribute(HandlerMapping.LOOKUP_PATH));
 
             String[] split = splitId(entity);
             String sourceType = split[0];
@@ -100,10 +97,10 @@ public class CitSciEntityRequestHandler extends EntityRequestHandler implements 
 
             QueryOptions options = decodeQueryString(request);
             return serviceRepository.getEntityService(target)
-                .getEntityByRelatedEntity(sourceId,
-                                          target,
-                                          null,
-                                          options);
+                                    .getEntityByRelatedEntity(sourceId,
+                                                              target,
+                                                              null,
+                                                              options);
         } else {
             return super.readRelatedEntity(entity, target, request);
         }
@@ -112,18 +109,17 @@ public class CitSciEntityRequestHandler extends EntityRequestHandler implements 
     @GetMapping(
         value = {
             MAPPING_PREFIX
-                + CitSciExtensionRequestUtils.ENTITY_IDENTIFIED_BY_OBSERVATIONRELATION_PATH_VARIABLE
-                + SLASHREF,
+                    + CitSciExtensionRequestUtils.ENTITY_IDENTIFIED_BY_OBSERVATIONRELATION_PATH_VARIABLE
+                    + SLASHREF,
             MAPPING_PREFIX
-                + CitSciExtensionRequestUtils.ENTITY_IDENTIFIED_BY_DATASTREAM_PATH_VARIABLE
-                + SLASHREF
+                    + CitSciExtensionRequestUtils.ENTITY_IDENTIFIED_BY_DATASTREAM_PATH_VARIABLE
+                    + SLASHREF
         },
-        produces = "application/json"
-    )
+        produces = "application/json")
     public StaDTO readRelatedEntityRef(@PathVariable String entity,
                                        @PathVariable String target,
                                        HttpServletRequest request)
-        throws Exception {
+            throws Exception {
         return super.readRelatedEntityRef(entity, target, request);
     }
 }

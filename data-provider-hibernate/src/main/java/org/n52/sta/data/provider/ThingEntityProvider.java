@@ -67,7 +67,7 @@ public class ThingEntityProvider extends BaseEntityProvider<Thing> {
     @Override
     public Optional<Thing> getEntity(Request req) throws ProviderException {
         /**
-         /Datastreams(123)/Thing
+         * /Datastreams(123)/Thing
          */
         ThingGraphBuilder graphBuilder = new ThingGraphBuilder(req);
         addUnfilteredExpandItems(req.getQueryOptions(), graphBuilder);

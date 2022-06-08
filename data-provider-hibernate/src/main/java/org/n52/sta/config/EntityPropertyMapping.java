@@ -1,3 +1,4 @@
+
 package org.n52.sta.config;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;

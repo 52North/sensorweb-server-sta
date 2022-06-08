@@ -25,6 +25,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
+
 package org.n52.sta.api.old.serialize;
 
 import java.io.IOException;
@@ -52,7 +53,6 @@ public class ObservedPropertySerDes {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ObservedPropertySerDes.class);
 
-
     @SuppressFBWarnings("EQ_DOESNT_OVERRIDE_EQUALS")
     public static class ObservedPropertyDTOPatch implements EntityPatch<ObservedPropertyDTO> {
 
@@ -68,7 +68,6 @@ public class ObservedPropertySerDes {
         }
     }
 
-
     public static class ObservedPropertySerializer extends AbstractSTASerializer<ObservedPropertyDTO> {
 
         private static final long serialVersionUID = -393434867481235299L;
@@ -81,62 +80,77 @@ public class ObservedPropertySerDes {
 
         @Override
         public void serialize(
-                ObservedPropertyDTO value, JsonGenerator gen, SerializerProvider serializers)
-            throws IOException {
+                              ObservedPropertyDTO value,
+                              JsonGenerator gen,
+                              SerializerProvider serializers)
+                throws IOException {
             gen.writeStartObject();
 
             // olingo @iot links
-            if (!value.hasSelectOption() || value.getFieldsToSerialize().contains(STAEntityDefinition.PROP_ID)) {
+            if (!value.hasSelectOption()
+                    || value.getFieldsToSerialize()
+                            .contains(STAEntityDefinition.PROP_ID)) {
                 writeId(gen, value.getId());
             }
-            if (!value.hasSelectOption() || value.getFieldsToSerialize().contains(STAEntityDefinition.PROP_SELF_LINK)) {
+            if (!value.hasSelectOption()
+                    || value.getFieldsToSerialize()
+                            .contains(STAEntityDefinition.PROP_SELF_LINK)) {
                 writeSelfLink(gen, value.getId());
             }
 
-            if (!value.hasSelectOption() || value.getFieldsToSerialize().contains(STAEntityDefinition.PROP_NAME)) {
+            if (!value.hasSelectOption()
+                    || value.getFieldsToSerialize()
+                            .contains(STAEntityDefinition.PROP_NAME)) {
                 gen.writeStringField(STAEntityDefinition.PROP_NAME, value.getName());
             }
-            if (!value.hasSelectOption() ||
-                value.getFieldsToSerialize().contains(STAEntityDefinition.PROP_DESCRIPTION)) {
+            if (!value.hasSelectOption()
+                    ||
+                    value.getFieldsToSerialize()
+                         .contains(STAEntityDefinition.PROP_DESCRIPTION)) {
                 gen.writeStringField(STAEntityDefinition.PROP_DESCRIPTION, value.getDescription());
             }
-            if (!value.hasSelectOption() ||
-                value.getFieldsToSerialize().contains(STAEntityDefinition.PROP_DEFINITION)) {
+            if (!value.hasSelectOption()
+                    ||
+                    value.getFieldsToSerialize()
+                         .contains(STAEntityDefinition.PROP_DEFINITION)) {
                 gen.writeObjectField(STAEntityDefinition.PROP_DEFINITION, value.getDefinition());
             }
-            if (!value.hasSelectOption() ||
-                value.getFieldsToSerialize().contains(STAEntityDefinition.PROP_PROPERTIES)) {
+            if (!value.hasSelectOption()
+                    ||
+                    value.getFieldsToSerialize()
+                         .contains(STAEntityDefinition.PROP_PROPERTIES)) {
                 gen.writeObjectField(STAEntityDefinition.PROP_PROPERTIES, value.getProperties());
                 /*
-                if (obsProp.hasParameters()) {
-                    gen.writeObjectFieldStart(STAEntityDefinition.PROP_PROPERTIES);
-                    for (ParameterEntity<?> parameter : obsProp.getParameters()) {
-                        gen.writeObjectField(parameter.getName(), parameter.getValue());
-                    }
-                    gen.writeEndObject();
-                }
+                 * if (obsProp.hasParameters()) {
+                 * gen.writeObjectFieldStart(STAEntityDefinition.PROP_PROPERTIES); for (ParameterEntity<?>
+                 * parameter : obsProp.getParameters()) { gen.writeObjectField(parameter.getName(),
+                 * parameter.getValue()); } gen.writeEndObject(); }
                  */
             }
 
             // navigation properties
             for (String navigationProperty : ObservedPropertyEntityDefinition.NAVIGATION_PROPERTIES) {
-                if (!value.hasSelectOption() || value.getFieldsToSerialize().contains(navigationProperty)) {
-                    if (!value.hasExpandOption() || value.getFieldsToExpand().get(navigationProperty) == null) {
+                if (!value.hasSelectOption()
+                        || value.getFieldsToSerialize()
+                                .contains(navigationProperty)) {
+                    if (!value.hasExpandOption()
+                            || value.getFieldsToExpand()
+                                    .get(navigationProperty) == null) {
                         writeNavigationProp(gen, navigationProperty, value.getId());
                     } else {
                         switch (navigationProperty) {
-                            case ObservedPropertyEntityDefinition.DATASTREAMS:
-                                if (value.getDatastreams() == null) {
-                                    writeNavigationProp(gen, navigationProperty, value.getId());
-                                } else {
-                                    gen.writeFieldName(navigationProperty);
-                                    writeNestedCollection(Collections.unmodifiableSet(value.getDatastreams()),
-                                                          gen,
-                                                          serializers);
-                                }
-                                break;
-                            default:
-                                throw new IllegalStateException("Unexpected value: " + navigationProperty);
+                        case ObservedPropertyEntityDefinition.DATASTREAMS:
+                            if (value.getDatastreams() == null) {
+                                writeNavigationProp(gen, navigationProperty, value.getId());
+                            } else {
+                                gen.writeFieldName(navigationProperty);
+                                writeNestedCollection(Collections.unmodifiableSet(value.getDatastreams()),
+                                                      gen,
+                                                      serializers);
+                            }
+                            break;
+                        default:
+                            throw new IllegalStateException("Unexpected value: " + navigationProperty);
                         }
                     }
                 }
@@ -144,7 +158,6 @@ public class ObservedPropertySerDes {
             gen.writeEndObject();
         }
     }
-
 
     public static class ObservedPropertyDeserializer extends StdDeserializer<ObservedPropertyDTO> {
 
@@ -156,10 +169,10 @@ public class ObservedPropertySerDes {
 
         @Override
         public ObservedPropertyDTO deserialize(JsonParser p, DeserializationContext ctxt) throws IOException {
-            return p.readValueAs(JSONObservedProperty.class).parseToDTO(JSONBase.EntityType.FULL);
+            return p.readValueAs(JSONObservedProperty.class)
+                    .parseToDTO(JSONBase.EntityType.FULL);
         }
     }
-
 
     public static class ObservedPropertyPatchDeserializer extends StdDeserializer<ObservedPropertyDTOPatch> {
 
@@ -172,7 +185,7 @@ public class ObservedPropertySerDes {
         @Override
         public ObservedPropertyDTOPatch deserialize(JsonParser p, DeserializationContext ctxt) throws IOException {
             return new ObservedPropertyDTOPatch(p.readValueAs(JSONObservedProperty.class)
-                                                    .parseToDTO(JSONBase.EntityType.PATCH));
+                                                 .parseToDTO(JSONBase.EntityType.PATCH));
         }
     }
 }

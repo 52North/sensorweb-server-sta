@@ -25,6 +25,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
+
 package org.n52.sta.plus.persistence.repositories;
 
 import java.util.Set;
@@ -40,8 +41,10 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional
 @Profile(StaConstants.STAPLUS)
 @Repository
-public interface StaPlusObservationRepository<T extends StaPlusDataEntity<?>>
-    extends IdentifierRepository<T, Long>, StaIdentifierRepository<T> {
+public interface StaPlusObservationRepository<T extends StaPlusDataEntity< ? >>
+        extends
+        IdentifierRepository<T, Long>,
+        StaIdentifierRepository<T> {
 
     StaPlusDataEntity<T> findFirstByDataset_idOrderBySamplingTimeStartAsc(Long datasetIdentifier);
 

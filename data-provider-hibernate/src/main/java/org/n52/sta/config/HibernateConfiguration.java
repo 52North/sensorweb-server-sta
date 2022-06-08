@@ -25,6 +25,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
+
 package org.n52.sta.config;
 
 import java.util.Arrays;
@@ -52,9 +53,9 @@ public class HibernateConfiguration {
     // TODO https://www.airpair.com/java/posts/spring-streams-memory-efficiency
 
     @Bean
-    public EntityManagerFactory entityManagerFactory(
-            @Value("${database.jpa.persistence-location}") String persistenceXmlLocation,
-            DataSource datasource, JpaProperties properties) {
+    public EntityManagerFactory entityManagerFactory(@Value("${database.jpa.persistence-location}") String persistenceXmlLocation,
+                                                     DataSource datasource,
+                                                     JpaProperties properties) {
         LocalContainerEntityManagerFactoryBean emf = new LocalContainerEntityManagerFactoryBean();
         emf.setJpaVendorAdapter(new HibernateJpaVendorAdapter());
         emf.setJpaPropertyMap(addCustomTypes(properties));

@@ -25,6 +25,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
+
 package org.n52.sta.api;
 
 import org.n52.sta.api.entity.Identifiable;
@@ -39,17 +40,17 @@ import java.util.Set;
 
 public final class EntityServiceLookup {
 
-    private final Map<Class<? extends Identifiable>, EntityService<? extends Identifiable>> entityServicesByType;
+    private final Map<Class< ? extends Identifiable>, EntityService< ? extends Identifiable>> entityServicesByType;
 
     public EntityServiceLookup() {
         this.entityServicesByType = new HashMap<>();
     }
 
-    public boolean contains(Class<? extends Identifiable> type) {
+    public boolean contains(Class< ? extends Identifiable> type) {
         return entityServicesByType.containsKey(type);
     }
 
-    public Set<Class<?>> getRegisteredEntityTypes() {
+    public Set<Class< ? >> getRegisteredEntityTypes() {
         return new HashSet<>(entityServicesByType.keySet());
     }
 
@@ -58,7 +59,7 @@ public final class EntityServiceLookup {
         if (type == null) {
             return Optional.empty();
         }
-        EntityProvider<?> entityProvider = entityServicesByType.get(type);
+        EntityProvider< ? > entityProvider = entityServicesByType.get(type);
         return Optional.ofNullable((EntityService<T>) entityProvider);
     }
 

@@ -69,13 +69,22 @@ public class DatastreamJsonSerializer extends StaBaseSerializer<Datastream> {
             }
         });
 
-        writeMember(StaConstants.THING, id, gen, ThingJsonSerializer::new,
+        writeMember(StaConstants.THING,
+                    id,
+                    gen,
+                    ThingJsonSerializer::new,
                     serializer -> serializer.serialize(value.getThing(), gen, serializers));
 
-        writeMember(StaConstants.SENSOR, id, gen, SensorJsonSerializer::new,
+        writeMember(StaConstants.SENSOR,
+                    id,
+                    gen,
+                    SensorJsonSerializer::new,
                     serializer -> serializer.serialize(value.getSensor(), gen, serializers));
 
-        writeMember(StaConstants.OBSERVED_PROPERTY, id, gen, ObservedPropertyJsonSerializer::new,
+        writeMember(StaConstants.OBSERVED_PROPERTY,
+                    id,
+                    gen,
+                    ObservedPropertyJsonSerializer::new,
                     serializer -> serializer.serialize(value.getObservedProperty(), gen, serializers));
 
         gen.writeEndObject();

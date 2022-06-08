@@ -25,6 +25,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
+
 package org.n52.sta.data.old;
 
 import org.springframework.beans.factory.annotation.Value;
@@ -32,7 +33,7 @@ import org.springframework.beans.factory.annotation.Value;
 /**
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
  */
-//@Component
+// @Component
 public class SerDesConfig {
 
     private final String samplingGeometryMapping;
@@ -42,11 +43,11 @@ public class SerDesConfig {
     private final boolean includeDatastreamCategory;
 
     public SerDesConfig(
-            @Value("${server.feature.observation.samplingGeometry}") String samplingGeometryMapping,
-            @Value("${server.feature.observation.verticalFrom}") String verticalFromMapping,
-            @Value("${server.feature.observation.verticalTo}") String verticalToMapping,
-            @Value("${server.feature.observation.verticalFromTo}") String verticalFromToMapping,
-            @Value("${server.feature.includeDatastreamCategory:false}") boolean includeDatastreamCategory) {
+                        @Value("${server.feature.observation.samplingGeometry}") String samplingGeometryMapping,
+                        @Value("${server.feature.observation.verticalFrom}") String verticalFromMapping,
+                        @Value("${server.feature.observation.verticalTo}") String verticalToMapping,
+                        @Value("${server.feature.observation.verticalFromTo}") String verticalFromToMapping,
+                        @Value("${server.feature.includeDatastreamCategory:false}") boolean includeDatastreamCategory) {
         this.samplingGeometryMapping = samplingGeometryMapping;
         this.verticalFromMapping = verticalFromMapping;
         this.verticalToMapping = verticalToMapping;

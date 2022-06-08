@@ -1,3 +1,4 @@
+
 package org.n52.sta.http.util.path;
 
 import org.antlr.v4.runtime.BaseErrorListener;
@@ -10,7 +11,7 @@ public abstract class PathFactory {
 
     public abstract StaPath parse(String url) throws STAInvalidUrlException;
 
-    protected void replaceErrorListener(Recognizer<?, ?> recognizer) {
+    protected void replaceErrorListener(Recognizer< ? , ? > recognizer) {
         recognizer.removeErrorListeners();
         Vocabulary vocabulary = recognizer.getVocabulary();
         recognizer.addErrorListener(new CustomErrorListener(vocabulary));
@@ -25,15 +26,21 @@ public abstract class PathFactory {
         }
 
         @Override
-        public void syntaxError(Recognizer<?, ?> recognizer, Object offendingSymbol, int line,
-                                int charPositionInLine, String msg, RecognitionException e) {
+        public void syntaxError(Recognizer< ? , ? > recognizer,
+                                Object offendingSymbol,
+                                int line,
+                                int charPositionInLine,
+                                String msg,
+                                RecognitionException e) {
             String message = null;
             if (hasOffendingToken(e)) {
-                int tokenType = e.getOffendingToken().getType();
+                int tokenType = e.getOffendingToken()
+                                 .getType();
                 String tokenName = vocabulary.getDisplayName(tokenType);
                 message = String.format(
-                    "Failed to parse URL due to %s with offending token: %s", msg,
-                    tokenName);
+                                        "Failed to parse URL due to %s with offending token: %s",
+                                        msg,
+                                        tokenName);
             } else {
                 message = String.format("Failed to parse URL due to error: %s", msg);
             }

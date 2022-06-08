@@ -70,8 +70,8 @@ public class HistoricalLocationEntityProvider extends BaseEntityProvider<Histori
         HistoricalLocationGraphBuilder graphBuilder = new HistoricalLocationGraphBuilder();
         addUnfilteredExpandItems(req.getQueryOptions(), graphBuilder);
 
-        Specification<HistoricalLocationEntity> spec =
-            buildSpecification(req, new HistoricalLocationQuerySpecification());
+        Specification<HistoricalLocationEntity> spec = buildSpecification(req,
+                                                                          new HistoricalLocationQuerySpecification());
         Optional<HistoricalLocationEntity> platform = historicalLocationRepository.findOne(spec, graphBuilder);
         return platform.map(entity -> new HistoricalLocationData(entity, propertyMapping));
     }
@@ -84,8 +84,8 @@ public class HistoricalLocationEntityProvider extends BaseEntityProvider<Histori
         HistoricalLocationGraphBuilder graphBuilder = new HistoricalLocationGraphBuilder();
         addUnfilteredExpandItems(options, graphBuilder);
 
-        Specification<HistoricalLocationEntity> spec =
-            buildSpecification(req, new HistoricalLocationQuerySpecification());
+        Specification<HistoricalLocationEntity> spec = buildSpecification(req,
+                                                                          new HistoricalLocationQuerySpecification());
         Page<HistoricalLocationEntity> results = historicalLocationRepository.findAll(spec, pageable, graphBuilder);
         return new StaEntityPage<>(HistoricalLocation.class,
                                    results,

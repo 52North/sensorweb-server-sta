@@ -25,6 +25,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
+
 package org.n52.sta.data.old;
 
 import java.util.concurrent.Semaphore;
@@ -33,10 +34,9 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 /**
- * Semaphore controlling access to the Persistence Service Layer. The
- * Persistence Layer can currently only handle as
- * many running threads as there are database connections available, as each
- * thread uses a separate Transaction.
+ * Semaphore controlling access to the Persistence Service Layer. The Persistence Layer can currently only
+ * handle as many running threads as there are database connections available, as each thread uses a separate
+ * Transaction.
  *
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
  */

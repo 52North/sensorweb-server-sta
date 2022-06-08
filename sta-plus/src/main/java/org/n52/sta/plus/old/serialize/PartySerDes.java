@@ -25,6 +25,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
+
 package org.n52.sta.plus.old.serialize;
 
 import java.io.IOException;
@@ -52,7 +53,6 @@ public class PartySerDes {
 
     private static final String PROP_AUTH_ID = "authId";
 
-
     @SuppressFBWarnings("EQ_DOESNT_OVERRIDE_EQUALS")
     public static class PartyDTOPatch implements EntityPatch<Party> {
 
@@ -69,7 +69,6 @@ public class PartySerDes {
         }
     }
 
-
     public static class PartySerializer extends AbstractSTASerializer<Party> {
 
         private static final long serialVersionUID = -1618289129123682794L;
@@ -84,35 +83,53 @@ public class PartySerDes {
         public void serialize(Party party,
                               JsonGenerator gen,
                               SerializerProvider serializers)
-            throws IOException {
+                throws IOException {
             gen.writeStartObject();
 
             // olingo @iot links
-            if (!party.hasSelectOption() || party.getFieldsToSerialize().contains(STAEntityDefinition.PROP_ID)) {
+            if (!party.hasSelectOption()
+                    || party.getFieldsToSerialize()
+                            .contains(STAEntityDefinition.PROP_ID)) {
                 writeId(gen, party.getId());
             }
-            if (!party.hasSelectOption() || party.getFieldsToSerialize().contains(STAEntityDefinition.PROP_SELF_LINK)) {
+            if (!party.hasSelectOption()
+                    || party.getFieldsToSerialize()
+                            .contains(STAEntityDefinition.PROP_SELF_LINK)) {
                 writeSelfLink(gen, party.getId());
             }
 
-            if (!party.hasSelectOption() || party.getFieldsToSerialize().contains(PROP_AUTH_ID)) {
+            if (!party.hasSelectOption()
+                    || party.getFieldsToSerialize()
+                            .contains(PROP_AUTH_ID)) {
                 gen.writeStringField(PROP_AUTH_ID, party.getAuthId());
             }
-            if (!party.hasSelectOption() ||
-                party.getFieldsToSerialize().contains(STAEntityDefinition.PROP_DISPLAY_NAME)) {
+            if (!party.hasSelectOption()
+                    ||
+                    party.getFieldsToSerialize()
+                         .contains(STAEntityDefinition.PROP_DISPLAY_NAME)) {
                 gen.writeStringField(STAEntityDefinition.PROP_DISPLAY_NAME, party.getDisplayName());
             }
-            if (!party.hasSelectOption() ||
-                party.getFieldsToSerialize().contains(STAEntityDefinition.PROP_DESCRIPTION)) {
+            if (!party.hasSelectOption()
+                    ||
+                    party.getFieldsToSerialize()
+                         .contains(STAEntityDefinition.PROP_DESCRIPTION)) {
                 gen.writeStringField(STAEntityDefinition.PROP_DESCRIPTION, party.getDescription());
             }
-            if (!party.hasSelectOption() || party.getFieldsToSerialize().contains(STAEntityDefinition.PROP_ROLE)) {
-                gen.writeStringField(STAEntityDefinition.PROP_ROLE, party.getRole().name());
+            if (!party.hasSelectOption()
+                    || party.getFieldsToSerialize()
+                            .contains(STAEntityDefinition.PROP_ROLE)) {
+                gen.writeStringField(STAEntityDefinition.PROP_ROLE,
+                                     party.getRole()
+                                          .name());
             }
 
-            if (!party.hasSelectOption() || party.getFieldsToSerialize().contains(STAEntityDefinition.DATASTREAMS)) {
-                if (!party.hasExpandOption() ||
-                    party.getFieldsToExpand().get(STAEntityDefinition.DATASTREAMS) == null) {
+            if (!party.hasSelectOption()
+                    || party.getFieldsToSerialize()
+                            .contains(STAEntityDefinition.DATASTREAMS)) {
+                if (!party.hasExpandOption()
+                        ||
+                        party.getFieldsToExpand()
+                             .get(STAEntityDefinition.DATASTREAMS) == null) {
                     writeNavigationProp(gen, STAEntityDefinition.DATASTREAMS, party.getId());
                 } else {
                     gen.writeFieldName(STAEntityDefinition.DATASTREAMS);
@@ -122,9 +139,13 @@ public class PartySerDes {
                 }
             }
 
-            if (!party.hasSelectOption() || party.getFieldsToSerialize().contains(STAEntityDefinition.DATASTREAMS)) {
-                if (!party.hasExpandOption() ||
-                    party.getFieldsToExpand().get(STAEntityDefinition.DATASTREAMS) == null) {
+            if (!party.hasSelectOption()
+                    || party.getFieldsToSerialize()
+                            .contains(STAEntityDefinition.DATASTREAMS)) {
+                if (!party.hasExpandOption()
+                        ||
+                        party.getFieldsToExpand()
+                             .get(STAEntityDefinition.DATASTREAMS) == null) {
                     writeNavigationProp(gen, STAEntityDefinition.DATASTREAMS, party.getId());
                 } else {
                     gen.writeFieldName(STAEntityDefinition.DATASTREAMS);
@@ -138,7 +159,6 @@ public class PartySerDes {
 
     }
 
-
     public static class PartyDeserializer extends StdDeserializer<Party> {
 
         private static final long serialVersionUID = 3942005672394573517L;
@@ -149,13 +169,14 @@ public class PartySerDes {
 
         @Override
         public Party deserialize(JsonParser p, DeserializationContext ctxt) throws IOException {
-            return p.readValueAs(JSONParty.class).parseToDTO(JSONBase.EntityType.FULL);
+            return p.readValueAs(JSONParty.class)
+                    .parseToDTO(JSONBase.EntityType.FULL);
         }
     }
 
-
     public static class PartyPatchDeserializer
-        extends StdDeserializer<PartyDTOPatch> {
+            extends
+            StdDeserializer<PartyDTOPatch> {
 
         private static final long serialVersionUID = -6355786322787893665L;
 
@@ -165,9 +186,9 @@ public class PartySerDes {
 
         @Override
         public PartyDTOPatch deserialize(JsonParser p, DeserializationContext ctxt)
-            throws IOException {
+                throws IOException {
             return new PartyDTOPatch(p.readValueAs(JSONParty.class)
-                                         .parseToDTO(JSONBase.EntityType.PATCH));
+                                      .parseToDTO(JSONBase.EntityType.PATCH));
         }
     }
 }

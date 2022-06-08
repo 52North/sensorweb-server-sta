@@ -25,6 +25,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
+
 package org.n52.sta.data.old.common.service;
 
 import java.util.LinkedHashMap;
@@ -46,7 +47,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 // @Component
 public class CommonEntityServiceRepository implements EntityServiceFactory {
 
-    protected Map<String, CommonServiceFacade<?, ?>> entityServices = new LinkedHashMap<>();
+    protected Map<String, CommonServiceFacade< ? , ? >> entityServices = new LinkedHashMap<>();
 
     @Autowired
     private CommonServiceFacade.ThingServiceFacade thingServiceFacade;
@@ -99,33 +100,50 @@ public class CommonEntityServiceRepository implements EntityServiceFactory {
         entityServices.put(EntityTypes.FeaturesOfInterest.name(), featureOfInterestService);
 
         entityServices.forEach(
-                (t, e) -> e.getServiceImpl().setServiceRepository(this));
+                               (t, e) -> e.getServiceImpl()
+                                          .setServiceRepository(this));
     }
 
     /**
      * Provides an entity data service for a entity type
      *
-     * @param entityTypeName the type name of the requested entity service
+     * @param entityTypeName
+     *        the type name of the requested entity service
      * @return the requested entity data service
      */
     @Override
-    public AbstractSensorThingsEntityService<?> getEntityService(String entityTypeName) {
+    public AbstractSensorThingsEntityService< ? > getEntityService(String entityTypeName) {
         return entityServices.get(entityTypeName);
     }
 
     /**
      * Provides an entity data service for a entity type
      *
-     * @param entityTypeName the type of the requested entity service
+     * @param entityTypeName
+     *        the type of the requested entity service
      * @return the requested entity data service
      */
-    public CommonSTAServiceImpl<?, ?, ?> getEntityServiceRaw(String entityTypeName) {
-        return entityServices.get(entityTypeName).getServiceImpl();
+    public CommonSTAServiceImpl< ? , ? , ? > getEntityServiceRaw(String entityTypeName) {
+        return entityServices.get(entityTypeName)
+                             .getServiceImpl();
     }
 
     public enum EntityTypes {
-        Thing, Location, HistoricalLocation, Sensor, Datastream, Observation, ObservedProperty, FeatureOfInterest,
-        Things, Locations, HistoricalLocations, Sensors, Datastreams, Observations, ObservedProperties,
+        Thing,
+        Location,
+        HistoricalLocation,
+        Sensor,
+        Datastream,
+        Observation,
+        ObservedProperty,
+        FeatureOfInterest,
+        Things,
+        Locations,
+        HistoricalLocations,
+        Sensors,
+        Datastreams,
+        Observations,
+        ObservedProperties,
         FeaturesOfInterest
     }
 

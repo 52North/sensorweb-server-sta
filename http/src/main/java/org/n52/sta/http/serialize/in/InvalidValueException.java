@@ -1,3 +1,4 @@
+
 package org.n52.sta.http.serialize.in;
 
 public class InvalidValueException extends RuntimeException {

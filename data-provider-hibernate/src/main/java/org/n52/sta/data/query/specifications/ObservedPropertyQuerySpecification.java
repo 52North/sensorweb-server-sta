@@ -45,13 +45,14 @@ public class ObservedPropertyQuerySpecification extends QuerySpecification<Pheno
 
     private final class DatastreamFilter extends MemberFilterImpl<PhenomenonEntity> {
 
-        protected Specification<PhenomenonEntity> prepareQuery(Specification<?> specification) {
+        protected Specification<PhenomenonEntity> prepareQuery(Specification< ? > specification) {
             return (root, query, builder) -> {
                 EntityQuery memberQuery = createQuery(AbstractDatasetEntity.PROPERTY_PHENOMENON,
                                                       AbstractDatasetEntity.class);
-                Subquery<?> subquery = memberQuery.create(specification, query, builder);
+                Subquery< ? > subquery = memberQuery.create(specification, query, builder);
                 // 1..n
-                return builder.in(root.get(IdEntity.PROPERTY_ID)).value(subquery);
+                return builder.in(root.get(IdEntity.PROPERTY_ID))
+                              .value(subquery);
             };
         }
     }

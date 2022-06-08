@@ -25,6 +25,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
+
 package org.n52.sta.http.serialize.out;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -95,7 +96,8 @@ public class SerializationContext {
     /**
      * Registers specified serializer at the context's object mapper.
      *
-     * @param serializer the serializer to register
+     * @param serializer
+     *        the serializer to register
      */
     public <T extends Identifiable> void register(StaBaseSerializer<T> serializer) {
         SimpleModule module = new SimpleModule();
@@ -116,7 +118,8 @@ public class SerializationContext {
     }
 
     public boolean isSelected(String name) {
-        return selectFilter.map(selects -> selects.isEmpty() || selects.contains(name)).orElse(true);
+        return selectFilter.map(selects -> selects.isEmpty() || selects.contains(name))
+                           .orElse(true);
     }
 
     public boolean isExpanded(String member) {
@@ -124,11 +127,14 @@ public class SerializationContext {
             return false;
         }
         Set<ExpandItem> expands = expandFilter.get();
-        return Streams.stream(expands).anyMatch(item -> member.equals(item.getPath()));
+        return Streams.stream(expands)
+                      .anyMatch(item -> member.equals(item.getPath()));
     }
 
     public boolean isCounted() {
-        return queryOptions.hasCountFilter() && queryOptions.getCountFilter().getValue();
+        return queryOptions.hasCountFilter()
+                && queryOptions.getCountFilter()
+                               .getValue();
     }
 
     public Optional<QueryOptions> getQueryOptionsForExpanded(String member) {
@@ -136,8 +142,10 @@ public class SerializationContext {
             return Optional.empty();
         }
         Set<ExpandItem> expands = expandFilter.get();
-        return Streams.stream(expands).filter(item -> member.equals(item.getPath())).findFirst()
-                .map(ExpandItem::getQueryOptions);
+        return Streams.stream(expands)
+                      .filter(item -> member.equals(item.getPath()))
+                      .findFirst()
+                      .map(ExpandItem::getQueryOptions);
     }
 
     private Optional<Set<ExpandItem>> getExpands(QueryOptions queryOptions) {

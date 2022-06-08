@@ -25,6 +25,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
+
 package org.n52.sta.plus.persistence.service;
 
 import java.util.Optional;
@@ -56,13 +57,14 @@ import org.springframework.data.jpa.domain.Specification;
 // @Transactional
 // @Profile(StaConstants.STAPLUS)
 public class LicenseService
-        extends CommonSTAServiceImpl<LicenseRepository, LicenseDTO, LicenseEntity> {
+        extends
+        CommonSTAServiceImpl<LicenseRepository, LicenseDTO, LicenseEntity> {
 
     private static final LicenseQuerySpecifications lQS = new LicenseQuerySpecifications();
     private final EntityManager em;
 
     public LicenseService(LicenseRepository repository,
-            EntityManager em) {
+                          EntityManager em) {
         super(repository, em, LicenseEntity.class);
         this.em = em;
     }
@@ -73,19 +75,22 @@ public class LicenseService
         if (expandOption != null) {
             for (ExpandItem expandItem : expandOption.getItems()) {
                 // We cannot handle nested $filter or $expand
-                if (expandItem.getQueryOptions().hasFilterFilter() || expandItem.getQueryOptions().hasExpandFilter()) {
+                if (expandItem.getQueryOptions()
+                              .hasFilterFilter()
+                        || expandItem.getQueryOptions()
+                                     .hasExpandFilter()) {
                     continue;
                 }
                 String expandProperty = expandItem.getPath();
                 if (LicenseEntityDefinition.NAVIGATION_PROPERTIES.contains(expandProperty)) {
                     return new EntityGraphRepository.FetchGraph[] {
-                            EntityGraphRepository.FetchGraph.FETCHGRAPH_DATASETS,
+                        EntityGraphRepository.FetchGraph.FETCHGRAPH_DATASETS,
                     };
                 } else {
                     throw new STAInvalidQueryException(
-                            String.format(CommonSTAServiceImpl.INVALID_EXPAND_OPTION_SUPPLIED,
-                                    expandProperty,
-                                    StaConstants.LICENSE));
+                                                       String.format(CommonSTAServiceImpl.INVALID_EXPAND_OPTION_SUPPLIED,
+                                                                     expandProperty,
+                                                                     StaConstants.LICENSE));
                 }
             }
         }
@@ -98,7 +103,10 @@ public class LicenseService
         em.detach(entity);
         for (ExpandItem expandItem : expandOption.getItems()) {
             // We have already handled $expand without filter and expand
-            if (!(expandItem.getQueryOptions().hasFilterFilter() || expandItem.getQueryOptions().hasExpandFilter())) {
+            if (!(expandItem.getQueryOptions()
+                            .hasFilterFilter()
+                    || expandItem.getQueryOptions()
+                                 .hasExpandFilter())) {
                 continue;
             }
 
@@ -108,16 +116,15 @@ public class LicenseService
                 /*
                  * Page<AbstractDatasetEntity> datastreams = getDatastreamService()
                  * .getEntityCollectionByRelatedEntityRaw(entity.getStaIdentifier(),
-                 * STAEntityDefinition.LICENSES,
-                 * expandItem.getQueryOptions());
+                 * STAEntityDefinition.LICENSES, expandItem.getQueryOptions());
                  * entity.setDatasets(datastreams.get().collect(Collectors.toSet()));
                  */
                 return entity;
             } else {
                 throw new STAInvalidQueryException(
-                        String.format(CommonSTAServiceImpl.INVALID_EXPAND_OPTION_SUPPLIED,
-                                expandProperty,
-                                StaConstants.LICENSE));
+                                                   String.format(CommonSTAServiceImpl.INVALID_EXPAND_OPTION_SUPPLIED,
+                                                                 expandProperty,
+                                                                 StaConstants.LICENSE));
             }
         }
         return entity;
@@ -125,17 +132,17 @@ public class LicenseService
 
     @Override
     protected Specification<LicenseEntity> byRelatedEntityFilter(String relatedId,
-            String relatedType,
-            String ownId) {
+                                                                 String relatedType,
+                                                                 String ownId) {
         Specification<LicenseEntity> filter;
         switch (relatedType) {
-            case STAEntityDefinition.GROUPS:
-                filter = lQS.withObservationGroupStaIdentifier(relatedId);
-                break;
-            default:
-                throw new IllegalStateException(
-                        String.format(CommonSTAServiceImpl.TRYING_TO_FILTER_BY_UNRELATED_TYPE,
-                                relatedType));
+        case STAEntityDefinition.GROUPS:
+            filter = lQS.withObservationGroupStaIdentifier(relatedId);
+            break;
+        default:
+            throw new IllegalStateException(
+                                            String.format(CommonSTAServiceImpl.TRYING_TO_FILTER_BY_UNRELATED_TYPE,
+                                                          relatedType));
         }
 
         if (ownId != null) {
@@ -154,18 +161,19 @@ public class LicenseService
                 return optionalEntity.get();
             } else {
                 throw new STACRUDException(String.format(CommonSTAServiceImpl.NO_S_WITH_ID_S_FOUND,
-                        StaConstants.LICENSE,
-                        license.getStaIdentifier()));
+                                                         StaConstants.LICENSE,
+                                                         license.getStaIdentifier()));
             }
         } else if (license.getStaIdentifier() == null) {
             // Autogenerate Identifier
-            String uuid = UUID.randomUUID().toString();
+            String uuid = UUID.randomUUID()
+                              .toString();
             license.setStaIdentifier(uuid);
         }
         synchronized (getLock(license.getStaIdentifier())) {
             if (getRepository().existsByStaIdentifier(license.getStaIdentifier())) {
                 throw new STACRUDException(CommonSTAServiceImpl.IDENTIFIER_ALREADY_EXISTS,
-                        HTTPStatus.CONFLICT);
+                                           HTTPStatus.CONFLICT);
             } else {
                 // TODO: nested
                 getRepository().save(license);
@@ -182,10 +190,10 @@ public class LicenseService
             return updateEntity(id, entity);
         } else if (PUT.equals(method)) {
             throw new STACRUDException(CommonSTAServiceImpl.HTTP_PUT_IS_NOT_YET_SUPPORTED,
-                    HTTPStatus.NOT_IMPLEMENTED);
+                                       HTTPStatus.NOT_IMPLEMENTED);
         }
         throw new STACRUDException(CommonSTAServiceImpl.INVALID_HTTP_METHOD_FOR_UPDATING_ENTITY,
-                HTTPStatus.BAD_REQUEST);
+                                   HTTPStatus.BAD_REQUEST);
     }
 
     private LicenseEntity updateEntity(String id, LicenseEntity entity) throws STACRUDException {
@@ -196,7 +204,7 @@ public class LicenseService
                 return getRepository().save(merged);
             }
             throw new STACRUDException(CommonSTAServiceImpl.UNABLE_TO_UPDATE_ENTITY_NOT_FOUND,
-                    HTTPStatus.NOT_FOUND);
+                                       HTTPStatus.NOT_FOUND);
         }
     }
 
@@ -239,7 +247,7 @@ public class LicenseService
                 getRepository().deleteByStaIdentifier(id);
             } else {
                 throw new STACRUDException(CommonSTAServiceImpl.UNABLE_TO_DELETE_ENTITY_NOT_FOUND,
-                        HTTPStatus.NOT_FOUND);
+                                           HTTPStatus.NOT_FOUND);
             }
         }
     }

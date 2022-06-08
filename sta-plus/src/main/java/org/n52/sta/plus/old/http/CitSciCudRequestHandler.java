@@ -25,6 +25,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
+
 package org.n52.sta.plus.old.http;
 
 import java.io.IOException;
@@ -54,10 +55,13 @@ import org.springframework.web.bind.annotation.RequestBody;
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
  */
 // @RestController
-// @ConditionalOnProperty(value = "server.feature.http.read-only", havingValue = "false", matchIfMissing = true)
+// @ConditionalOnProperty(value = "server.feature.http.read-only", havingValue = "false", matchIfMissing =
+// true)
 // @Profile(StaConstants.STAPLUS)
 public class CitSciCudRequestHandler<T extends StaDTO>
-    extends CudRequestHandler implements CitSciExtensionRequestUtils {
+        extends
+        CudRequestHandler implements
+        CitSciExtensionRequestUtils {
 
     public CitSciCudRequestHandler(@Value("${server.config.service-root-url}") String rootUrl,
                                    @Value("${server.feature.escapeId:true}") boolean shouldEscapeId,
@@ -73,67 +77,76 @@ public class CitSciCudRequestHandler<T extends StaDTO>
         produces = "application/json")
     public StaDTO handlePostDirect(@PathVariable String collectionName,
                                    @RequestBody String body)
-        throws IOException, STACRUDException, STAInvalidUrlException {
+            throws IOException, STACRUDException, STAInvalidUrlException {
         return super.handlePostDirect(collectionName, body);
     }
 
     @PostMapping(
         value = {
-            RequestUtils.MAPPING_PREFIX +
-                CitSciExtensionRequestUtils.COLLECTION_IDENTIFIED_BY_OBSERVATION_GROUP_PATH_VARIABLE,
-            RequestUtils.MAPPING_PREFIX +
-                CitSciExtensionRequestUtils.COLLECTION_IDENTIFIED_BY_PARTY_PATH_VARIABLE,
-            RequestUtils.MAPPING_PREFIX +
-                CitSciExtensionRequestUtils.COLLECTION_IDENTIFIED_BY_PROJECT_PATH_VARIABLE,
-            RequestUtils.MAPPING_PREFIX +
-                CitSciExtensionRequestUtils.COLLECTION_IDENTIFIED_BY_LICENSE_PATH_VARIABLE
+            RequestUtils.MAPPING_PREFIX
+                    +
+                    CitSciExtensionRequestUtils.COLLECTION_IDENTIFIED_BY_OBSERVATION_GROUP_PATH_VARIABLE,
+            RequestUtils.MAPPING_PREFIX
+                    +
+                    CitSciExtensionRequestUtils.COLLECTION_IDENTIFIED_BY_PARTY_PATH_VARIABLE,
+            RequestUtils.MAPPING_PREFIX
+                    +
+                    CitSciExtensionRequestUtils.COLLECTION_IDENTIFIED_BY_PROJECT_PATH_VARIABLE,
+            RequestUtils.MAPPING_PREFIX
+                    +
+                    CitSciExtensionRequestUtils.COLLECTION_IDENTIFIED_BY_LICENSE_PATH_VARIABLE
         },
-        produces = "application/json"
-    )
+        produces = "application/json")
     public StaDTO handlePostRelated(@PathVariable String entity,
                                     @PathVariable String target,
                                     @RequestBody String body,
-                                    HttpServletRequest request) throws Exception {
+                                    HttpServletRequest request)
+            throws Exception {
         return super.handlePostRelated(entity, target, body, request);
     }
 
     @PatchMapping(
-        value = "**/{collectionName:" + CitSciExtensionRequestUtils.BASE_COLLECTION_REGEX + "}{id:" +
-            RequestUtils.IDENTIFIER_REGEX + "$}",
-        produces = "application/json"
-    )
+        value = "**/{collectionName:"
+                + CitSciExtensionRequestUtils.BASE_COLLECTION_REGEX
+                + "}{id:"
+                +
+                RequestUtils.IDENTIFIER_REGEX
+                + "$}",
+        produces = "application/json")
     public StaDTO handleDirectPatch(@PathVariable String collectionName,
                                     @PathVariable String id,
                                     @RequestBody String body,
                                     HttpServletRequest request)
-        throws Exception {
+            throws Exception {
         return super.handleDirectPatch(collectionName, id, body, request);
     }
 
     @PatchMapping(
         value = {
             RequestUtils.MAPPING_PREFIX
-                + CitSciExtensionRequestUtils.ENTITY_IDENTIFIED_BY_OBSERVATIONRELATION_PATH_VARIABLE
+                    + CitSciExtensionRequestUtils.ENTITY_IDENTIFIED_BY_OBSERVATIONRELATION_PATH_VARIABLE
         },
-        produces = "application/json"
-    )
+        produces = "application/json")
     public StaDTO handleRelatedPatch(@PathVariable String entity,
                                      @PathVariable String target,
                                      @RequestBody String body,
                                      HttpServletRequest request)
-        throws Exception {
+            throws Exception {
         return handleRelatedPatch(entity, target, body, request);
     }
 
     @DeleteMapping(
-        value = "**/{collectionName:" + CitSciExtensionRequestUtils.BASE_COLLECTION_REGEX + "}{id:" +
-            RequestUtils.IDENTIFIER_REGEX + "$}",
-        produces = "application/json"
-    )
+        value = "**/{collectionName:"
+                + CitSciExtensionRequestUtils.BASE_COLLECTION_REGEX
+                + "}{id:"
+                +
+                RequestUtils.IDENTIFIER_REGEX
+                + "$}",
+        produces = "application/json")
     public Object handleDelete(@PathVariable String collectionName,
                                @PathVariable String id,
                                HttpServletRequest request)
-        throws Exception {
+            throws Exception {
         return super.handleDelete(collectionName, id, request);
     }
 
@@ -141,13 +154,12 @@ public class CitSciCudRequestHandler<T extends StaDTO>
         value = {
 
         },
-        produces = "application/json"
-    )
+        produces = "application/json")
     public Object handleRelatedDelete(@PathVariable String entity,
                                       @PathVariable String target,
                                       @RequestBody String body,
                                       HttpServletRequest request)
-        throws Exception {
+            throws Exception {
         return super.handleRelatedDelete(entity, target, body, request);
     }
 

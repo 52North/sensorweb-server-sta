@@ -25,6 +25,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
+
 package org.n52.sta.http.util;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -70,16 +71,21 @@ public class ErrorHandler {
 
     @ExceptionHandler(value = STACRUDException.class)
     public ResponseEntity<Object> staCrudException(STACRUDException exception) {
-        String msg = createErrorMessage(exception.getClass().getName(), exception.getMessage());
+        String msg = createErrorMessage(exception.getClass()
+                                                 .getName(),
+                                        exception.getMessage());
         LOGGER.debug(msg, exception);
         return new ResponseEntity<>(msg,
                                     headers,
-                                    HttpStatus.valueOf(exception.getResponseStatus().getCode()));
+                                    HttpStatus.valueOf(exception.getResponseStatus()
+                                                                .getCode()));
     }
 
     @ExceptionHandler(value = STANotFoundException.class)
     public ResponseEntity<Object> staNotFoundException(STANotFoundException exception) {
-        String msg = createErrorMessage(exception.getClass().getName(), exception.getMessage());
+        String msg = createErrorMessage(exception.getClass()
+                                                 .getName(),
+                                        exception.getMessage());
         LOGGER.debug(msg, exception);
         return new ResponseEntity<>(msg,
                                     headers,
@@ -88,7 +94,9 @@ public class ErrorHandler {
 
     @ExceptionHandler(value = STAInvalidUrlException.class)
     public ResponseEntity<Object> staInvalidUrlException(STAInvalidUrlException exception) {
-        String msg = createErrorMessage(exception.getClass().getName(), exception.getMessage());
+        String msg = createErrorMessage(exception.getClass()
+                                                 .getName(),
+                                        exception.getMessage());
         LOGGER.debug(msg, exception);
         return new ResponseEntity<>(msg,
                                     headers,
@@ -100,7 +108,9 @@ public class ErrorHandler {
         InvalidValueException.class
     })
     public ResponseEntity<Object> staInvalidQuery(Exception exception) {
-        String msg = createErrorMessage(exception.getClass().getName(), exception.getMessage());
+        String msg = createErrorMessage(exception.getClass()
+                                                 .getName(),
+                                        exception.getMessage());
         LOGGER.debug(msg, exception);
         return new ResponseEntity<>(msg,
                                     headers,
@@ -109,7 +119,9 @@ public class ErrorHandler {
 
     @ExceptionHandler(value = MismatchedInputException.class)
     public ResponseEntity<Object> jacksonMismatchedInputException(MismatchedInputException exception) {
-        String msg = createErrorMessage(exception.getClass().getName(), exception.getMessage());
+        String msg = createErrorMessage(exception.getClass()
+                                                 .getName(),
+                                        exception.getMessage());
         LOGGER.debug(msg, exception);
         return new ResponseEntity<>(msg,
                                     headers,
@@ -118,7 +130,9 @@ public class ErrorHandler {
 
     @ExceptionHandler(value = STAInvalidFilterExpressionException.class)
     public ResponseEntity<Object> staInvalidFilterExpressionException(STAInvalidFilterExpressionException exception) {
-        String msg = createErrorMessage(exception.getClass().getName(), exception.getMessage());
+        String msg = createErrorMessage(exception.getClass()
+                                                 .getName(),
+                                        exception.getMessage());
         LOGGER.debug(msg, exception);
         return new ResponseEntity<>(msg,
                                     headers,
@@ -127,17 +141,21 @@ public class ErrorHandler {
 
     @ExceptionHandler(value = HttpMessageNotWritableException.class)
     public ResponseEntity<Object> staHttpMessageNotWritableException(HttpMessageNotWritableException exception) {
-        String msg = createErrorMessage(exception.getClass().getName(), exception.getMessage());
+        String msg = createErrorMessage(exception.getClass()
+                                                 .getName(),
+                                        exception.getMessage());
         LOGGER.debug(msg, exception);
         return new ResponseEntity<>(msg,
-                headers,
-                HttpStatus.BAD_REQUEST);
+                                    headers,
+                                    HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler(value = Exception.class)
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public void fallbackException(Exception exception) {
-        String msg = createErrorMessage(exception.getClass().getName(), exception.getMessage());
+        String msg = createErrorMessage(exception.getClass()
+                                                 .getName(),
+                                        exception.getMessage());
         LOGGER.error(msg, exception);
     }
 
@@ -146,7 +164,9 @@ public class ErrorHandler {
         ProviderException.class
     })
     public void fallbackRuntimeException(RuntimeException exception) {
-        String msg = createErrorMessage(exception.getClass().getName(), exception.getMessage());
+        String msg = createErrorMessage(exception.getClass()
+                                                 .getName(),
+                                        exception.getMessage());
         LOGGER.error(msg, exception);
     }
 

@@ -25,6 +25,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
+
 package org.n52.sta.api.old.dto;
 
 import java.util.HashMap;
@@ -69,12 +70,14 @@ public abstract class DtoEntity implements StaDTO {
             if (queryOptions.hasSelectFilter()) {
                 hasSelectOption = true;
                 fieldsToSerialize.clear();
-                fieldsToSerialize.addAll(queryOptions.getSelectFilter().getItems());
+                fieldsToSerialize.addAll(queryOptions.getSelectFilter()
+                                                     .getItems());
             }
             if (queryOptions.hasExpandFilter()) {
                 hasExpandOption = true;
                 fieldsToExpand.clear();
-                for (ExpandItem item : queryOptions.getExpandFilter().getItems()) {
+                for (ExpandItem item : queryOptions.getExpandFilter()
+                                                   .getItems()) {
                     fieldsToExpand.put(item.getPath(), item.getQueryOptions());
                     // Add expanded items to $select replacing implicit selection with explicit selection
                     if (hasSelectOption) {

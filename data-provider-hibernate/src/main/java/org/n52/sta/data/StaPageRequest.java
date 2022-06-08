@@ -25,6 +25,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
+
 package org.n52.sta.data;
 
 import java.util.Objects;
@@ -43,8 +44,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
 
 /**
- * Implements {@code AbstractPageRequest} to support offset and limit instead of
- * page and size.
+ * Implements {@code AbstractPageRequest} to support offset and limit instead of page and size.
  *
  * @author <a href="mailto:c.hollmann@52north.org">Carsten Hollmann</a>
  * @since 1.0.0
@@ -56,12 +56,14 @@ public final class StaPageRequest extends AbstractPageRequest {
     private final Sort sort;
 
     /**
-     * Creates a new {@link StaPageRequest} with sort parameters
-     * applied.
+     * Creates a new {@link StaPageRequest} with sort parameters applied.
      *
-     * @param offset zero-based offset index.
-     * @param limit  the size of the page to be returned.
-     * @param sort   can be null.
+     * @param offset
+     *        zero-based offset index.
+     * @param limit
+     *        the size of the page to be returned.
+     * @param sort
+     *        can be null.
      */
     private StaPageRequest(int offset, int limit, Sort sort) {
         super(offset, limit);
@@ -94,7 +96,8 @@ public final class StaPageRequest extends AbstractPageRequest {
 
     @Override
     public Pageable previous() {
-        return hasPrevious() ? new StaPageRequest((int) getOffset() - getPageSize(), getPageSize(), getSort())
+        return hasPrevious()
+                ? new StaPageRequest((int) getOffset() - getPageSize(), getPageSize(), getSort())
                 : this;
     }
 
@@ -140,12 +143,16 @@ public final class StaPageRequest extends AbstractPageRequest {
         }
 
         private int getLimit(QueryOptions queryOptions) {
-            return queryOptions.getTopFilter().getValue().intValue();
+            return queryOptions.getTopFilter()
+                               .getValue()
+                               .intValue();
         }
 
         private int getOffset(QueryOptions queryOptions) {
             Optional<SkipTopFilter> optionalSkip = Optional.ofNullable(queryOptions.getSkipFilter());
-            return optionalSkip.map(f -> f.getValue().intValue()).orElse(0);
+            return optionalSkip.map(f -> f.getValue()
+                                          .intValue())
+                               .orElse(0);
         }
 
         private Sort getSort(QueryOptions queryOptions) {
@@ -182,11 +189,11 @@ public final class StaPageRequest extends AbstractPageRequest {
 
         private Sort getResultSort(Sort.Direction direction) {
             return Sort.unsorted()
-                    .and(Sort.by(direction, DataEntity.PROPERTY_VALUE_BOOLEAN))
-                    .and(Sort.by(direction, DataEntity.PROPERTY_VALUE_CATEGORY))
-                    .and(Sort.by(direction, DataEntity.PROPERTY_VALUE_COUNT))
-                    .and(Sort.by(direction, DataEntity.PROPERTY_VALUE_TEXT))
-                    .and(Sort.by(direction, DataEntity.PROPERTY_VALUE_QUANTITY));
+                       .and(Sort.by(direction, DataEntity.PROPERTY_VALUE_BOOLEAN))
+                       .and(Sort.by(direction, DataEntity.PROPERTY_VALUE_CATEGORY))
+                       .and(Sort.by(direction, DataEntity.PROPERTY_VALUE_COUNT))
+                       .and(Sort.by(direction, DataEntity.PROPERTY_VALUE_TEXT))
+                       .and(Sort.by(direction, DataEntity.PROPERTY_VALUE_QUANTITY));
         }
 
     }

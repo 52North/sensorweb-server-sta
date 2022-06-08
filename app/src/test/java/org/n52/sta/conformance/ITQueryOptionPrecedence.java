@@ -25,6 +25,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
+
 package org.n52.sta.conformance;
 
 import java.io.IOException;
@@ -42,16 +43,8 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
 /**
- * Test precedence of query options.
- * Prior to applying any server-driven pagination:
- * 1. $filter
- * 2. $count
- * 3. $orderby
- * 4. $skip
- * 5. $top
- * After applying any server-driven pagination:
- * 6. $expand
- * 7. $select
+ * Test precedence of query options. Prior to applying any server-driven pagination: 1. $filter 2. $count 3.
+ * $orderby 4. $skip 5. $top After applying any server-driven pagination: 6. $expand 7. $select
  *
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
  */
@@ -71,8 +64,13 @@ public class ITQueryOptionPrecedence extends ConformanceTests implements TestUti
     private final String expandFilter = "$expand=Datastreams";
 
     private final String[] allFilters = {
-        countFilter, orderByFilter, selectFilter, skipFilter, topFilter,
-        filterFilter, expandFilter
+        countFilter,
+        orderByFilter,
+        selectFilter,
+        skipFilter,
+        topFilter,
+        filterFilter,
+        expandFilter
     };
 
     public ITQueryOptionPrecedence(@Value("${server.config.service-root-url}") String rootUrl) throws Exception {
@@ -80,32 +78,53 @@ public class ITQueryOptionPrecedence extends ConformanceTests implements TestUti
 
         // Create required test harness
         // Requires POST with deep insert to work.
-        postEntity(EntityType.THING, "{ \"description\": \"thing 1\", \"name\": \"thing name 1\", \"properties\": { " +
-            "\"reference\": \"first\" }, \"Locations\": [ { \"description\": \"location 1\", \"name\": \"location" +
-            " name 1\", \"location\": { \"type\": \"Point\", \"coordinates\": [ -117.05, 51.05 ] }, " +
-            "\"encodingType\": \"application/vnd.geo+json\" } ], \"Datastreams\": [ { \"unitOfMeasurement\": { " +
-            "\"name\": \"Lumen\", \"symbol\": \"lm\", \"definition\": \"http://www.qudt.org/qudt/owl/1.0" +
-            ".0/unit/Instances.html/Lumen\" }, \"description\": \"datastream 1\", \"name\": \"datastream name " +
-            "1\", \"observationType\": \"http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_Measurement\", " +
-            "\"ObservedProperty\": { \"name\": \"Luminous Flux\", \"definition\": \"http://www.qudt" +
-            ".org/qudt/owl/1.0.0/quantity/Instances.html/LuminousFlux\", \"description\": \"observedProperty 1\" " +
-            "}, \"Sensor\": { \"description\": \"sensor 1\", \"name\": \"sensor name 1\", \"encodingType\": " +
-            "\"application/pdf\", \"metadata\": \"Light flux sensor\" }, \"Observations\":[ { \"phenomenonTime\":" +
-            " \"2015-03-03T00:00:00Z\", \"result\": 3 }, { \"phenomenonTime\": \"2015-03-04T00:00:00Z\", " +
-            "\"result\": 4 } ] }, { \"unitOfMeasurement\": { \"name\": \"Centigrade\", \"symbol\": \"C\", " +
-            "\"definition\": \"http://www.qudt.org/qudt/owl/1.0.0/unit/Instances.html/Lumen\" }, \"description\":" +
-            " \"datastream 2\", \"name\": \"datastream name 2\", \"observationType\": \"http://www.opengis" +
-            ".net/def/observationType/OGC-OM/2.0/OM_Measurement\", \"ObservedProperty\": { \"name\": " +
-            "\"Tempretaure\", \"definition\": \"http://www.qudt.org/qudt/owl/1.0.0/quantity/Instances" +
-            ".html/Tempreture\", \"description\": \"observedProperty 2\" }, \"Sensor\": { \"description\": " +
-            "\"sensor 2\", \"name\": \"sensor name 2\", \"encodingType\": \"application/pdf\", \"metadata\": " +
-            "\"Tempreture sensor\" }, \"Observations\":[ { \"phenomenonTime\": \"2015-03-05T00:00:00Z\", " +
-            "\"result\": 5 }, { \"phenomenonTime\": \"2015-03-06T00:00:00Z\", \"result\": 6 } ] } ] }");
+        postEntity(EntityType.THING,
+                   "{ \"description\": \"thing 1\", \"name\": \"thing name 1\", \"properties\": { "
+                           +
+                           "\"reference\": \"first\" }, \"Locations\": [ { \"description\": \"location 1\", \"name\": \"location"
+                           +
+                           " name 1\", \"location\": { \"type\": \"Point\", \"coordinates\": [ -117.05, 51.05 ] }, "
+                           +
+                           "\"encodingType\": \"application/vnd.geo+json\" } ], \"Datastreams\": [ { \"unitOfMeasurement\": { "
+                           +
+                           "\"name\": \"Lumen\", \"symbol\": \"lm\", \"definition\": \"http://www.qudt.org/qudt/owl/1.0"
+                           +
+                           ".0/unit/Instances.html/Lumen\" }, \"description\": \"datastream 1\", \"name\": \"datastream name "
+                           +
+                           "1\", \"observationType\": \"http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_Measurement\", "
+                           +
+                           "\"ObservedProperty\": { \"name\": \"Luminous Flux\", \"definition\": \"http://www.qudt"
+                           +
+                           ".org/qudt/owl/1.0.0/quantity/Instances.html/LuminousFlux\", \"description\": \"observedProperty 1\" "
+                           +
+                           "}, \"Sensor\": { \"description\": \"sensor 1\", \"name\": \"sensor name 1\", \"encodingType\": "
+                           +
+                           "\"application/pdf\", \"metadata\": \"Light flux sensor\" }, \"Observations\":[ { \"phenomenonTime\":"
+                           +
+                           " \"2015-03-03T00:00:00Z\", \"result\": 3 }, { \"phenomenonTime\": \"2015-03-04T00:00:00Z\", "
+                           +
+                           "\"result\": 4 } ] }, { \"unitOfMeasurement\": { \"name\": \"Centigrade\", \"symbol\": \"C\", "
+                           +
+                           "\"definition\": \"http://www.qudt.org/qudt/owl/1.0.0/unit/Instances.html/Lumen\" }, \"description\":"
+                           +
+                           " \"datastream 2\", \"name\": \"datastream name 2\", \"observationType\": \"http://www.opengis"
+                           +
+                           ".net/def/observationType/OGC-OM/2.0/OM_Measurement\", \"ObservedProperty\": { \"name\": "
+                           +
+                           "\"Tempretaure\", \"definition\": \"http://www.qudt.org/qudt/owl/1.0.0/quantity/Instances"
+                           +
+                           ".html/Tempreture\", \"description\": \"observedProperty 2\" }, \"Sensor\": { \"description\": "
+                           +
+                           "\"sensor 2\", \"name\": \"sensor name 2\", \"encodingType\": \"application/pdf\", \"metadata\": "
+                           +
+                           "\"Tempreture sensor\" }, \"Observations\":[ { \"phenomenonTime\": \"2015-03-05T00:00:00Z\", "
+                           +
+                           "\"result\": 5 }, { \"phenomenonTime\": \"2015-03-06T00:00:00Z\", \"result\": 6 } ] } ] }");
     }
 
     /**
-     * Code taken from https://stackoverflow.com/a/14444037
-     * Licensed under MIT License as stated here: https://meta.stackexchange
+     * Code taken from https://stackoverflow.com/a/14444037 Licensed under MIT License as stated here:
+     * https://meta.stackexchange
      * .com/questions/271080/the-mit-license-clarity-on-using-code-on-stack-overflow-and-stack-exchange
      */
     private static void testPermutations(java.util.List<Integer> arr,
@@ -126,7 +145,8 @@ public class ITQueryOptionPrecedence extends ConformanceTests implements TestUti
         testPermutations(Arrays.asList(0, 1, 2, 3, 4, 5, 6), 0, (list) -> {
             StringBuilder filters = new StringBuilder();
             for (Integer integer : list) {
-                filters.append("&").append(allFilters[integer]);
+                filters.append("&")
+                       .append(allFilters[integer]);
             }
             logger.debug(filters.substring(1));
             try {

@@ -25,8 +25,8 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
-package org.n52.sta.api.old;
 
+package org.n52.sta.api.old;
 
 import java.util.List;
 
@@ -38,19 +38,19 @@ import org.n52.sta.api.old.dto.common.StaDTO;
 public class CollectionWrapper {
 
     /**
-     * Count of total entities. Value -1 indicates that $count=true was not included in the url and is therefore not
-     * returned by the API
+     * Count of total entities. Value -1 indicates that $count=true was not included in the url and is
+     * therefore not returned by the API
      */
     private final long totalEntityCount;
 
-    private final List<? extends StaDTO> entities;
+    private final List< ? extends StaDTO> entities;
 
     private final boolean hasNextPage;
 
     private String requestURL;
 
     public CollectionWrapper(long entityCount,
-                             List<? extends StaDTO> entity,
+                             List< ? extends StaDTO> entity,
                              boolean hasNextPage) {
         this.totalEntityCount = entityCount;
         this.entities = entity;
@@ -61,7 +61,7 @@ public class CollectionWrapper {
         return totalEntityCount;
     }
 
-    public List<? extends StaDTO> getEntities() {
+    public List< ? extends StaDTO> getEntities() {
         return entities;
     }
 

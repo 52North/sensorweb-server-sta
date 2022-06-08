@@ -25,6 +25,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
+
 package org.n52.sta.api.old.serialize;
 
 import java.io.IOException;
@@ -53,7 +54,6 @@ public class HistoricalLocationSerDes {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(HistoricalLocationSerDes.class);
 
-
     @SuppressFBWarnings("EQ_DOESNT_OVERRIDE_EQUALS")
     public static class HistoricalLocationDTOPatch implements EntityPatch<HistoricalLocationDTO> {
 
@@ -69,9 +69,9 @@ public class HistoricalLocationSerDes {
         }
     }
 
-
     public static class HistoricalLocationSerializer
-        extends AbstractSTASerializer<HistoricalLocationDTO> {
+            extends
+            AbstractSTASerializer<HistoricalLocationDTO> {
 
         private static final long serialVersionUID = 8651925159358792370L;
 
@@ -84,61 +84,78 @@ public class HistoricalLocationSerDes {
         @Override
         public void serialize(HistoricalLocationDTO histLoc,
                               JsonGenerator gen,
-                              SerializerProvider serializers) throws IOException {
+                              SerializerProvider serializers)
+                throws IOException {
             gen.writeStartObject();
             // The UML in Section 8.2 of the OGC STA v1.0 defines the relations as "Things"
             // The Definition in Section 8.2.3 of the OGC STA v1.0 defines the relations as "Thing"
             // We will allow both for now
-            if (histLoc.hasSelectOption() && histLoc.hasExpandOption() &&
-                histLoc.getFieldsToExpand().containsKey(STAEntityDefinition.THINGS)) {
-                histLoc.getFieldsToSerialize().add(STAEntityDefinition.THING);
+            if (histLoc.hasSelectOption()
+                    && histLoc.hasExpandOption()
+                    &&
+                    histLoc.getFieldsToExpand()
+                           .containsKey(STAEntityDefinition.THINGS)) {
+                histLoc.getFieldsToSerialize()
+                       .add(STAEntityDefinition.THING);
                 histLoc.getFieldsToExpand()
-                    .put(STAEntityDefinition.THING, histLoc.getFieldsToExpand().get(STAEntityDefinition.THINGS));
+                       .put(STAEntityDefinition.THING,
+                            histLoc.getFieldsToExpand()
+                                   .get(STAEntityDefinition.THINGS));
             }
 
             // olingo @iot links
-            if (!histLoc.hasSelectOption() || histLoc.getFieldsToSerialize().contains(STAEntityDefinition.PROP_ID)) {
+            if (!histLoc.hasSelectOption()
+                    || histLoc.getFieldsToSerialize()
+                              .contains(STAEntityDefinition.PROP_ID)) {
                 writeId(gen, histLoc.getId());
             }
-            if (!histLoc.hasSelectOption() ||
-                histLoc.getFieldsToSerialize().contains(STAEntityDefinition.PROP_SELF_LINK)) {
+            if (!histLoc.hasSelectOption()
+                    ||
+                    histLoc.getFieldsToSerialize()
+                           .contains(STAEntityDefinition.PROP_SELF_LINK)) {
                 writeSelfLink(gen, histLoc.getId());
             }
 
             // actual properties
-            if (!histLoc.hasSelectOption() || histLoc.getFieldsToSerialize().contains(STAEntityDefinition.PROP_TIME)) {
+            if (!histLoc.hasSelectOption()
+                    || histLoc.getFieldsToSerialize()
+                              .contains(STAEntityDefinition.PROP_TIME)) {
                 gen.writeStringField(STAEntityDefinition.PROP_TIME, DateTimeHelper.format(histLoc.getTime()));
             }
 
             // navigation properties
             for (String navigationProperty : HistoricalLocationEntityDefinition.NAVIGATION_PROPERTIES) {
-                if (!histLoc.hasSelectOption() || histLoc.getFieldsToSerialize().contains(navigationProperty)) {
-                    if (!histLoc.hasExpandOption() || histLoc.getFieldsToExpand().get(navigationProperty) == null) {
+                if (!histLoc.hasSelectOption()
+                        || histLoc.getFieldsToSerialize()
+                                  .contains(navigationProperty)) {
+                    if (!histLoc.hasExpandOption()
+                            || histLoc.getFieldsToExpand()
+                                      .get(navigationProperty) == null) {
                         writeNavigationProp(gen, navigationProperty, histLoc.getId());
                     } else {
                         switch (navigationProperty) {
-                            case HistoricalLocationEntityDefinition.THING:
-                                if (histLoc.getThing() == null) {
-                                    writeNavigationProp(gen, navigationProperty, histLoc.getId());
-                                } else {
-                                    gen.writeFieldName(navigationProperty);
-                                    writeNestedEntity(histLoc.getThing(),
+                        case HistoricalLocationEntityDefinition.THING:
+                            if (histLoc.getThing() == null) {
+                                writeNavigationProp(gen, navigationProperty, histLoc.getId());
+                            } else {
+                                gen.writeFieldName(navigationProperty);
+                                writeNestedEntity(histLoc.getThing(),
+                                                  gen,
+                                                  serializers);
+                            }
+                            break;
+                        case HistoricalLocationEntityDefinition.LOCATIONS:
+                            if (histLoc.getLocations() == null) {
+                                writeNavigationProp(gen, navigationProperty, histLoc.getId());
+                            } else {
+                                gen.writeFieldName(navigationProperty);
+                                writeNestedCollection(Collections.unmodifiableSet(histLoc.getLocations()),
                                                       gen,
                                                       serializers);
-                                }
-                                break;
-                            case HistoricalLocationEntityDefinition.LOCATIONS:
-                                if (histLoc.getLocations() == null) {
-                                    writeNavigationProp(gen, navigationProperty, histLoc.getId());
-                                } else {
-                                    gen.writeFieldName(navigationProperty);
-                                    writeNestedCollection(Collections.unmodifiableSet(histLoc.getLocations()),
-                                                          gen,
-                                                          serializers);
-                                }
-                                break;
-                            default:
-                                throw new IllegalStateException("Unexpected value: " + navigationProperty);
+                            }
+                            break;
+                        default:
+                            throw new IllegalStateException("Unexpected value: " + navigationProperty);
                         }
                     }
                 }
@@ -146,7 +163,6 @@ public class HistoricalLocationSerDes {
             gen.writeEndObject();
         }
     }
-
 
     public static class HistoricalLocationDeserializer extends StdDeserializer<HistoricalLocationDTO> {
 
@@ -158,10 +174,10 @@ public class HistoricalLocationSerDes {
 
         @Override
         public HistoricalLocationDTO deserialize(JsonParser p, DeserializationContext ctxt) throws IOException {
-            return p.readValueAs(JSONHistoricalLocation.class).parseToDTO(JSONBase.EntityType.FULL);
+            return p.readValueAs(JSONHistoricalLocation.class)
+                    .parseToDTO(JSONBase.EntityType.FULL);
         }
     }
-
 
     public static class HistoricalLocationPatchDeserializer extends StdDeserializer<HistoricalLocationDTOPatch> {
 
@@ -174,7 +190,7 @@ public class HistoricalLocationSerDes {
         @Override
         public HistoricalLocationDTOPatch deserialize(JsonParser p, DeserializationContext ctxt) throws IOException {
             return new HistoricalLocationDTOPatch(p.readValueAs(JSONHistoricalLocation.class)
-                                                      .parseToDTO(JSONBase.EntityType.PATCH));
+                                                   .parseToDTO(JSONBase.EntityType.PATCH));
         }
     }
 }

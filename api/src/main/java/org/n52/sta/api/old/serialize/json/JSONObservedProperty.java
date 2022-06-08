@@ -25,6 +25,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
+
 package org.n52.sta.api.old.serialize.json;
 
 import java.util.Arrays;
@@ -41,9 +42,13 @@ import org.n52.sta.api.old.serialize.common.JSONBase;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 
 @SuppressWarnings("VisibilityModifier")
-@SuppressFBWarnings({"NM_FIELD_NAMING_CONVENTION", "UWF_UNWRITTEN_PUBLIC_OR_PROTECTED_FIELD"})
+@SuppressFBWarnings({
+    "NM_FIELD_NAMING_CONVENTION",
+    "UWF_UNWRITTEN_PUBLIC_OR_PROTECTED_FIELD"
+})
 public class JSONObservedProperty extends JSONBase.JSONwithIdNameDescription<ObservedPropertyDTO>
-    implements AbstractJSONEntity {
+        implements
+        AbstractJSONEntity {
 
     // JSON Properties. Matched by Annotation or variable name
     public String definition;
@@ -59,60 +64,60 @@ public class JSONObservedProperty extends JSONBase.JSONwithIdNameDescription<Obs
     @Override
     public ObservedPropertyDTO parseToDTO(JSONBase.EntityType type) {
         switch (type) {
-            case FULL:
-                assertNotNull(name, INVALID_INLINE_ENTITY_MISSING + "name");
-                assertNotNull(description, INVALID_INLINE_ENTITY_MISSING + "description");
-                assertNotNull(definition, INVALID_INLINE_ENTITY_MISSING + "definition");
+        case FULL:
+            assertNotNull(name, INVALID_INLINE_ENTITY_MISSING + "name");
+            assertNotNull(description, INVALID_INLINE_ENTITY_MISSING + "description");
+            assertNotNull(definition, INVALID_INLINE_ENTITY_MISSING + "definition");
 
-                self.setId(identifier);
-                self.setDefinition(definition);
-                self.setName(name);
-                self.setDescription(description);
+            self.setId(identifier);
+            self.setDefinition(definition);
+            self.setName(name);
+            self.setDescription(description);
 
-                if (properties != null) {
-                    self.setProperties(properties);
-                }
+            if (properties != null) {
+                self.setProperties(properties);
+            }
 
-                if (Datastreams != null) {
-                    self.setDatastreams(Arrays.stream(Datastreams)
-                                            .map(ds -> ds.parseToDTO(JSONBase.EntityType.FULL,
-                                                                     JSONBase.EntityType.REFERENCE))
-                                            .collect(Collectors.toSet()));
-                }
-                // Deal with back reference during deep insert
-                if (backReference != null) {
-                    self.addDatastreams(((JSONDatastream) backReference).getEntity());
-                }
+            if (Datastreams != null) {
+                self.setDatastreams(Arrays.stream(Datastreams)
+                                          .map(ds -> ds.parseToDTO(JSONBase.EntityType.FULL,
+                                                                   JSONBase.EntityType.REFERENCE))
+                                          .collect(Collectors.toSet()));
+            }
+            // Deal with back reference during deep insert
+            if (backReference != null) {
+                self.addDatastreams(((JSONDatastream) backReference).getEntity());
+            }
 
-                return self;
-            case PATCH:
-                self.setId(identifier);
-                self.setDefinition(definition);
-                self.setName(name);
-                self.setDescription(description);
+            return self;
+        case PATCH:
+            self.setId(identifier);
+            self.setDefinition(definition);
+            self.setName(name);
+            self.setDescription(description);
 
-                if (properties != null) {
-                    self.setProperties(properties);
-                }
+            if (properties != null) {
+                self.setProperties(properties);
+            }
 
-                if (Datastreams != null) {
-                    self.setDatastreams(Arrays.stream(Datastreams)
-                                            .map(ds -> ds.parseToDTO(JSONBase.EntityType.REFERENCE))
-                                            .collect(Collectors.toSet()));
-                }
+            if (Datastreams != null) {
+                self.setDatastreams(Arrays.stream(Datastreams)
+                                          .map(ds -> ds.parseToDTO(JSONBase.EntityType.REFERENCE))
+                                          .collect(Collectors.toSet()));
+            }
 
-                return self;
-            case REFERENCE:
-                assertIsNull(name, INVALID_REFERENCED_ENTITY);
-                assertIsNull(description, INVALID_REFERENCED_ENTITY);
-                assertIsNull(definition, INVALID_REFERENCED_ENTITY);
-                assertIsNull(properties, INVALID_REFERENCED_ENTITY);
-                assertIsNull(Datastreams, INVALID_REFERENCED_ENTITY);
+            return self;
+        case REFERENCE:
+            assertIsNull(name, INVALID_REFERENCED_ENTITY);
+            assertIsNull(description, INVALID_REFERENCED_ENTITY);
+            assertIsNull(definition, INVALID_REFERENCED_ENTITY);
+            assertIsNull(properties, INVALID_REFERENCED_ENTITY);
+            assertIsNull(Datastreams, INVALID_REFERENCED_ENTITY);
 
-                self.setId(identifier);
-                return self;
-            default:
-                return null;
+            self.setId(identifier);
+            return self;
+        default:
+            return null;
         }
     }
 }

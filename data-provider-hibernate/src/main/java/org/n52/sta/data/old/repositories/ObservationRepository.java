@@ -25,6 +25,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
+
 package org.n52.sta.data.old.repositories;
 
 import java.util.Set;
@@ -37,8 +38,10 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional
 @DependsOn("DatastreamRepository")
 @Repository
-public interface ObservationRepository<T extends DataEntity<?>>
-        extends IdentifierRepository<T, Long>, StaIdentifierRepository<T> {
+public interface ObservationRepository<T extends DataEntity< ? >>
+        extends
+        IdentifierRepository<T, Long>,
+        StaIdentifierRepository<T> {
 
     DataEntity<T> findFirstByDataset_idOrderBySamplingTimeStartAsc(Long datasetIdentifier);
 

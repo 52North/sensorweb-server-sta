@@ -44,7 +44,7 @@ public class FeatureOfInterestJsonSerializer extends StaBaseSerializer<FeatureOf
 
     @Override
     public void serialize(FeatureOfInterest value, JsonGenerator gen, SerializerProvider serializers)
-        throws IOException {
+            throws IOException {
         gen.writeStartObject();
         String id = value.getId();
 

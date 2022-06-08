@@ -25,6 +25,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
+
 package org.n52.sta.plus.persistence.service;
 
 import javax.annotation.PostConstruct;
@@ -76,7 +77,19 @@ public class CitSciEntityServiceRepository extends CommonEntityServiceRepository
     }
 
     public enum StaPlusEntityTypes {
-        Group, Groups, Subject, Subjects, Object, Objects,
-        Relation, Relations, License, Licenses, Party, Parties, Project, Projects
+        Group,
+        Groups,
+        Subject,
+        Subjects,
+        Object,
+        Objects,
+        Relation,
+        Relations,
+        License,
+        Licenses,
+        Party,
+        Parties,
+        Project,
+        Projects
     }
 }

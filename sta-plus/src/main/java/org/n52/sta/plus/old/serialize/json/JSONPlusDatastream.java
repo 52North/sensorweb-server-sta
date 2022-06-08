@@ -25,6 +25,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
+
 package org.n52.sta.plus.old.serialize.json;
 
 import com.fasterxml.jackson.annotation.JsonManagedReference;
@@ -52,23 +53,23 @@ public class JSONPlusDatastream extends JSONDatastream {
     protected void parseReferencedFrom() {
         if (referencedFromType != null) {
             switch (referencedFromType) {
-                case StaConstants.SENSORS:
-                    assertIsNull(Sensor, INVALID_DUPLICATE_REFERENCE);
-                    this.Sensor = new JSONSensor();
-                    this.Sensor.identifier = referencedFromID;
-                    return;
-                case StaConstants.OBSERVED_PROPERTIES:
-                    assertIsNull(ObservedProperty, INVALID_DUPLICATE_REFERENCE);
-                    this.ObservedProperty = new JSONObservedProperty();
-                    this.ObservedProperty.identifier = referencedFromID;
-                    return;
-                case StaConstants.THINGS:
-                    assertIsNull(Thing, INVALID_DUPLICATE_REFERENCE);
-                    this.Thing = new JSONThing();
-                    this.Thing.identifier = referencedFromID;
-                    return;
-                default:
-                    throw new IllegalArgumentException(INVALID_BACKREFERENCE);
+            case StaConstants.SENSORS:
+                assertIsNull(Sensor, INVALID_DUPLICATE_REFERENCE);
+                this.Sensor = new JSONSensor();
+                this.Sensor.identifier = referencedFromID;
+                return;
+            case StaConstants.OBSERVED_PROPERTIES:
+                assertIsNull(ObservedProperty, INVALID_DUPLICATE_REFERENCE);
+                this.ObservedProperty = new JSONObservedProperty();
+                this.ObservedProperty.identifier = referencedFromID;
+                return;
+            case StaConstants.THINGS:
+                assertIsNull(Thing, INVALID_DUPLICATE_REFERENCE);
+                this.Thing = new JSONThing();
+                this.Thing.identifier = referencedFromID;
+                return;
+            default:
+                throw new IllegalArgumentException(INVALID_BACKREFERENCE);
             }
         }
     }
@@ -77,21 +78,12 @@ public class JSONPlusDatastream extends JSONDatastream {
         DatastreamDTO base = super.createPostEntity();
 
         /*
-         * if (Party != null) {
-         * self.setParty(org.n52.sta.api.dto.impl.citsci.Party.parseToDTO(JSONBase.
-         * EntityType.FULL,
-         * JSONBase.EntityType.REFERENCE));
-         * } else if (backReference instanceof JSONParty) {
-         * self.setParty(((JSONParty) backReference).self);
-         * }
-         *
-         * if (Project != null) {
-         * self.setProject(org.n52.sta.api.dto.impl.citsci.Project.parseToDTO(JSONBase.
-         * EntityType.FULL,
-         * JSONBase.EntityType.REFERENCE));
-         * } else if (backReference instanceof JSONProject) {
-         * self.setProject(((JSONProject) backReference).self);
-         * }
+         * if (Party != null) { self.setParty(org.n52.sta.api.dto.impl.citsci.Party.parseToDTO(JSONBase.
+         * EntityType.FULL, JSONBase.EntityType.REFERENCE)); } else if (backReference instanceof JSONParty) {
+         * self.setParty(((JSONParty) backReference).self); } if (Project != null) {
+         * self.setProject(org.n52.sta.api.dto.impl.citsci.Project.parseToDTO(JSONBase. EntityType.FULL,
+         * JSONBase.EntityType.REFERENCE)); } else if (backReference instanceof JSONProject) {
+         * self.setProject(((JSONProject) backReference).self); }
          */
 
         return self;
@@ -100,17 +92,10 @@ public class JSONPlusDatastream extends JSONDatastream {
     protected DatastreamDTO createPatchEntity() {
         super.createPatchEntity();
         /*
-         * if (Party != null) {
-         * self.setParty(org.n52.sta.api.dto.impl.citsci.Party.parseToDTO(JSONBase.
-         * EntityType.FULL,
-         * JSONBase.EntityType.REFERENCE));
-         * }
-         *
-         * if (Project != null) {
-         * self.setProject(org.n52.sta.api.dto.impl.citsci.Project.parseToDTO(JSONBase.
-         * EntityType.FULL,
-         * JSONBase.EntityType.REFERENCE));
-         * }
+         * if (Party != null) { self.setParty(org.n52.sta.api.dto.impl.citsci.Party.parseToDTO(JSONBase.
+         * EntityType.FULL, JSONBase.EntityType.REFERENCE)); } if (Project != null) {
+         * self.setProject(org.n52.sta.api.dto.impl.citsci.Project.parseToDTO(JSONBase. EntityType.FULL,
+         * JSONBase.EntityType.REFERENCE)); }
          */
         return self;
     }

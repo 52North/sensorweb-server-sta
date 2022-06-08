@@ -25,7 +25,10 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
+
 package org.n52.sta.config;
+
+import java.util.Optional;
 
 import org.n52.sta.api.EntityProvider;
 import org.n52.sta.api.EntityServiceLookup;
@@ -50,8 +53,6 @@ import org.n52.sta.api.service.ThingService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import java.util.Optional;
-
 @Configuration
 public class StaConfiguration {
 
@@ -61,11 +62,9 @@ public class StaConfiguration {
     }
 
     @Bean
-    public EntityService<Thing> getThingService(
-            EntityProvider<Thing> entityProvider,
-            Optional<DomainService<Thing>> thingDomainService,
-            EntityServiceLookup lookup) {
-
+    public EntityService<Thing> getThingService(EntityProvider<Thing> entityProvider,
+                                                Optional<DomainService<Thing>> thingDomainService,
+                                                EntityServiceLookup lookup) {
         ThingService service = thingDomainService.isPresent()
                 ? new ThingService(entityProvider, thingDomainService.get())
                 : new ThingService(entityProvider);
@@ -74,11 +73,9 @@ public class StaConfiguration {
     }
 
     @Bean
-    public EntityService<Datastream> getDatastreamService(
-            EntityProvider<Datastream> entityProvider,
-            Optional<DomainService<Datastream>> datastreamDomainService,
-            EntityServiceLookup lookup) {
-
+    public EntityService<Datastream> getDatastreamService(EntityProvider<Datastream> entityProvider,
+                                                          Optional<DomainService<Datastream>> datastreamDomainService,
+                                                          EntityServiceLookup lookup) {
         DatastreamService service = datastreamDomainService.isPresent()
                 ? new DatastreamService(entityProvider, datastreamDomainService.get())
                 : new DatastreamService(entityProvider);
@@ -87,79 +84,67 @@ public class StaConfiguration {
     }
 
     @Bean
-    public EntityService<Sensor> getSensorService(
-        EntityProvider<Sensor> entityProvider,
-        Optional<DomainService<Sensor>> sensorDomainService,
-        EntityServiceLookup lookup) {
-
+    public EntityService<Sensor> getSensorService(EntityProvider<Sensor> entityProvider,
+                                                  Optional<DomainService<Sensor>> sensorDomainService,
+                                                  EntityServiceLookup lookup) {
         SensorService service = sensorDomainService.isPresent()
-            ? new SensorService(entityProvider, sensorDomainService.get())
-            : new SensorService(entityProvider);
+                ? new SensorService(entityProvider, sensorDomainService.get())
+                : new SensorService(entityProvider);
         lookup.addEntityService(Sensor.class, service);
         return service;
     }
 
     @Bean
-    public EntityService<Location> getLocationService(
-        EntityProvider<Location> entityProvider,
-        Optional<DomainService<Location>> locationDomainService,
-        EntityServiceLookup lookup) {
-
+    public EntityService<Location> getLocationService(EntityProvider<Location> entityProvider,
+                                                      Optional<DomainService<Location>> locationDomainService,
+                                                      EntityServiceLookup lookup) {
         LocationService service = locationDomainService.isPresent()
-            ? new LocationService(entityProvider, locationDomainService.get())
-            : new LocationService(entityProvider);
+                ? new LocationService(entityProvider, locationDomainService.get())
+                : new LocationService(entityProvider);
         lookup.addEntityService(Location.class, service);
         return service;
     }
 
     @Bean
-    public EntityService<ObservedProperty> getObservedPropertyService(
-        EntityProvider<ObservedProperty> entityProvider,
-        Optional<DomainService<ObservedProperty>> observedPropertyDomainService,
-        EntityServiceLookup lookup) {
-
+    public EntityService<ObservedProperty> getObservedPropertyService(EntityProvider<ObservedProperty> entityProvider,
+                                                                      Optional<DomainService<ObservedProperty>> observedPropertyDomainService,
+                                                                      EntityServiceLookup lookup) {
         ObservedPropertyService service = observedPropertyDomainService.isPresent()
-            ? new ObservedPropertyService(entityProvider, observedPropertyDomainService.get())
-            : new ObservedPropertyService(entityProvider);
+                ? new ObservedPropertyService(entityProvider, observedPropertyDomainService.get())
+                : new ObservedPropertyService(entityProvider);
         lookup.addEntityService(ObservedProperty.class, service);
         return service;
     }
 
     @Bean
-    public EntityService<Observation> getObservationService(
-        EntityProvider<Observation> entityProvider,
-        Optional<DomainService<Observation>> observationDomainService,
-        EntityServiceLookup lookup) {
-
+    public EntityService<Observation> getObservationService(EntityProvider<Observation> entityProvider,
+                                                            Optional<DomainService<Observation>> observationDomainService,
+                                                            EntityServiceLookup lookup) {
         ObservationService service = observationDomainService.isPresent()
-            ? new ObservationService(entityProvider, observationDomainService.get())
-            : new ObservationService(entityProvider);
+                ? new ObservationService(entityProvider, observationDomainService.get())
+                : new ObservationService(entityProvider);
         lookup.addEntityService(Observation.class, service);
         return service;
     }
 
     @Bean
-    public EntityService<FeatureOfInterest> getFeatureOfInterestService(
-        EntityProvider<FeatureOfInterest> entityProvider,
-        Optional<DomainService<FeatureOfInterest>> featureOfInterestDomainService,
-        EntityServiceLookup lookup) {
-
+    public EntityService<FeatureOfInterest> getFeatureOfInterestService(EntityProvider<FeatureOfInterest> entityProvider,
+                                                                        Optional<DomainService<FeatureOfInterest>> featureOfInterestDomainService,
+                                                                        EntityServiceLookup lookup) {
         FeatureOfInterestService service = featureOfInterestDomainService.isPresent()
-            ? new FeatureOfInterestService(entityProvider, featureOfInterestDomainService.get())
-            : new FeatureOfInterestService(entityProvider);
+                ? new FeatureOfInterestService(entityProvider, featureOfInterestDomainService.get())
+                : new FeatureOfInterestService(entityProvider);
         lookup.addEntityService(FeatureOfInterest.class, service);
         return service;
     }
 
     @Bean
-    public EntityService<HistoricalLocation> getHistoricalLocationService(
-        EntityProvider<HistoricalLocation> entityProvider,
-        Optional<DomainService<HistoricalLocation>> historicalLocationDomainService,
-        EntityServiceLookup lookup) {
-
+    public EntityService<HistoricalLocation> getHistoricalLocationService(EntityProvider<HistoricalLocation> entityProvider,
+                                                                          Optional<DomainService<HistoricalLocation>> historicalLocationDomainService,
+                                                                          EntityServiceLookup lookup) {
         HistoricalLocationService service = historicalLocationDomainService.isPresent()
-            ? new HistoricalLocationService(entityProvider, historicalLocationDomainService.get())
-            : new HistoricalLocationService(entityProvider);
+                ? new HistoricalLocationService(entityProvider, historicalLocationDomainService.get())
+                : new HistoricalLocationService(entityProvider);
         lookup.addEntityService(HistoricalLocation.class, service);
         return service;
     }

@@ -25,6 +25,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
+
 package org.n52.sta.http.serialize.out;
 
 import com.fasterxml.jackson.core.JsonGenerator;
@@ -46,7 +47,7 @@ public class ObservationJsonSerializer extends StaBaseSerializer<Observation> {
     protected void serializeResult(Observation value, JsonGenerator gen, SerializerProvider serializers)
             throws IOException {
         Object result = value.getResult();
-        Class<? extends Object> type = result.getClass();
+        Class< ? extends Object> type = result.getClass();
         String valueType = value.getValueType();
         if ("quantity".equals(valueType) && BigDecimal.class.isAssignableFrom(type)) {
             BigDecimal quantity = (BigDecimal) result;
@@ -66,10 +67,11 @@ public class ObservationJsonSerializer extends StaBaseSerializer<Observation> {
                     gen.writeStartObject();
                     String id = item.getId();
 
-                    // TODO: is serializing this useful in any way if the individual observations are not available
+                    // TODO: is serializing this useful in any way if the individual observations are not
+                    // available
                     // via STA anyway?
-                    //writeProperty("id", n -> gen.writeStringField(StaConstants.AT_IOT_ID, id));
-                    //writeStringProperty(StaConstants.AT_IOT_SELFLINK, () -> createSelfLink(id), gen);
+                    // writeProperty("id", n -> gen.writeStringField(StaConstants.AT_IOT_ID, id));
+                    // writeStringProperty(StaConstants.AT_IOT_SELFLINK, () -> createSelfLink(id), gen);
                     writeObjectProperty(StaConstants.PROP_PARAMETERS, value::getParameters, gen);
                     serializeResult(item, gen, serializers);
                     gen.writeEndObject();
@@ -86,10 +88,11 @@ public class ObservationJsonSerializer extends StaBaseSerializer<Observation> {
                 for (Observation item : items) {
                     gen.writeStartObject();
                     String id = item.getId();
-                    // TODO: is serializing this useful in any way if the individual observations are not available
+                    // TODO: is serializing this useful in any way if the individual observations are not
+                    // available
                     // via STA anyway?
-                    //writeProperty("id", n -> gen.writeStringField(StaConstants.AT_IOT_ID, id));
-                    //writeStringProperty(StaConstants.AT_IOT_SELFLINK, () -> createSelfLink(id), gen);
+                    // writeProperty("id", n -> gen.writeStringField(StaConstants.AT_IOT_ID, id));
+                    // writeStringProperty(StaConstants.AT_IOT_SELFLINK, () -> createSelfLink(id), gen);
                     writeObjectProperty(StaConstants.PROP_PARAMETERS, value::getParameters, gen);
                     writeTimeProperty(StaConstants.PROP_PHENOMENON_TIME, value::getPhenomenonTime, gen);
                     serializeResult(item, gen, serializers);
@@ -122,11 +125,17 @@ public class ObservationJsonSerializer extends StaBaseSerializer<Observation> {
         }
 
         // entity members
-        writeMember(StaConstants.DATASTREAM, id, gen, DatastreamJsonSerializer::new,
-                serializer -> serializer.serialize(value.getDatastream(), gen, serializers));
+        writeMember(StaConstants.DATASTREAM,
+                    id,
+                    gen,
+                    DatastreamJsonSerializer::new,
+                    serializer -> serializer.serialize(value.getDatastream(), gen, serializers));
 
-        writeMember(StaConstants.FEATURES_OF_INTEREST, id, gen, FeatureOfInterestJsonSerializer::new,
-                serializer -> serializer.serialize(value.getFeatureOfInterest(), gen, serializers));
+        writeMember(StaConstants.FEATURES_OF_INTEREST,
+                    id,
+                    gen,
+                    FeatureOfInterestJsonSerializer::new,
+                    serializer -> serializer.serialize(value.getFeatureOfInterest(), gen, serializers));
 
         gen.writeEndObject();
     }

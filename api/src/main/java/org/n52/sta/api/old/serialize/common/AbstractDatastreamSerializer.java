@@ -25,6 +25,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
+
 package org.n52.sta.api.old.serialize.common;
 
 import java.io.IOException;
@@ -54,42 +55,58 @@ public class AbstractDatastreamSerializer<T extends DatastreamDTO> extends Abstr
     public void serialize(T datastream,
                           JsonGenerator gen,
                           SerializerProvider serializers)
-        throws IOException {
+            throws IOException {
 
         // olingo @iot links
-        if (!datastream.hasSelectOption() ||
-            datastream.getFieldsToSerialize().contains(STAEntityDefinition.PROP_ID)) {
+        if (!datastream.hasSelectOption()
+                ||
+                datastream.getFieldsToSerialize()
+                          .contains(STAEntityDefinition.PROP_ID)) {
             writeId(gen, datastream.getId());
         }
-        if (!datastream.hasSelectOption() ||
-            datastream.getFieldsToSerialize().contains(STAEntityDefinition.PROP_SELF_LINK)) {
+        if (!datastream.hasSelectOption()
+                ||
+                datastream.getFieldsToSerialize()
+                          .contains(STAEntityDefinition.PROP_SELF_LINK)) {
             writeSelfLink(gen, datastream.getId());
         }
 
         // actual properties
-        if (!datastream.hasSelectOption() ||
-            datastream.getFieldsToSerialize().contains(STAEntityDefinition.PROP_NAME)) {
+        if (!datastream.hasSelectOption()
+                ||
+                datastream.getFieldsToSerialize()
+                          .contains(STAEntityDefinition.PROP_NAME)) {
             gen.writeStringField(STAEntityDefinition.PROP_NAME, datastream.getName());
         }
-        if (!datastream.hasSelectOption() ||
-            datastream.getFieldsToSerialize().contains(STAEntityDefinition.PROP_DESCRIPTION)) {
+        if (!datastream.hasSelectOption()
+                ||
+                datastream.getFieldsToSerialize()
+                          .contains(STAEntityDefinition.PROP_DESCRIPTION)) {
             gen.writeStringField(STAEntityDefinition.PROP_DESCRIPTION, datastream.getDescription());
         }
 
-        if (!datastream.hasSelectOption() ||
-            datastream.getFieldsToSerialize().contains(STAEntityDefinition.PROP_OBSERVATION_TYPE)) {
+        if (!datastream.hasSelectOption()
+                ||
+                datastream.getFieldsToSerialize()
+                          .contains(STAEntityDefinition.PROP_OBSERVATION_TYPE)) {
             gen.writeObjectField(STAEntityDefinition.PROP_OBSERVATION_TYPE,
                                  datastream.getObservationType());
         }
-        if (!datastream.hasSelectOption() ||
-            datastream.getFieldsToSerialize().contains(STAEntityDefinition.PROP_UOM)) {
+        if (!datastream.hasSelectOption()
+                ||
+                datastream.getFieldsToSerialize()
+                          .contains(STAEntityDefinition.PROP_UOM)) {
             gen.writeObjectFieldStart(STAEntityDefinition.PROP_UOM);
             if (datastream.getUnitOfMeasurement() != null) {
-                gen.writeStringField(STAEntityDefinition.PROP_NAME, datastream.getUnitOfMeasurement().getName());
+                gen.writeStringField(STAEntityDefinition.PROP_NAME,
+                                     datastream.getUnitOfMeasurement()
+                                               .getName());
                 gen.writeStringField(STAEntityDefinition.PROP_SYMBOL,
-                                     datastream.getUnitOfMeasurement().getSymbol());
+                                     datastream.getUnitOfMeasurement()
+                                               .getSymbol());
                 gen.writeStringField(STAEntityDefinition.PROP_DEFINITION,
-                                     datastream.getUnitOfMeasurement().getDefinition());
+                                     datastream.getUnitOfMeasurement()
+                                               .getDefinition());
             } else {
                 gen.writeNullField(STAEntityDefinition.PROP_NAME);
                 gen.writeNullField(STAEntityDefinition.PROP_SYMBOL);
@@ -98,8 +115,10 @@ public class AbstractDatastreamSerializer<T extends DatastreamDTO> extends Abstr
             gen.writeEndObject();
         }
 
-        if (!datastream.hasSelectOption() ||
-            datastream.getFieldsToSerialize().contains(STAEntityDefinition.PROP_OBSERVED_AREA)) {
+        if (!datastream.hasSelectOption()
+                ||
+                datastream.getFieldsToSerialize()
+                          .contains(STAEntityDefinition.PROP_OBSERVED_AREA)) {
             if (datastream.getObservedArea() != null) {
                 gen.writeFieldName(STAEntityDefinition.PROP_OBSERVED_AREA);
                 gen.writeRawValue(GEO_JSON_WRITER.write(datastream.getObservedArea()));
@@ -108,8 +127,10 @@ public class AbstractDatastreamSerializer<T extends DatastreamDTO> extends Abstr
             }
         }
 
-        if (!datastream.hasSelectOption() ||
-            datastream.getFieldsToSerialize().contains(STAEntityDefinition.PROP_RESULT_TIME)) {
+        if (!datastream.hasSelectOption()
+                ||
+                datastream.getFieldsToSerialize()
+                          .contains(STAEntityDefinition.PROP_RESULT_TIME)) {
             if (datastream.getResultTime() != null) {
                 gen.writeStringField(STAEntityDefinition.PROP_RESULT_TIME,
                                      DateTimeHelper.format(datastream.getResultTime()));
@@ -117,69 +138,77 @@ public class AbstractDatastreamSerializer<T extends DatastreamDTO> extends Abstr
                 gen.writeNullField(STAEntityDefinition.PROP_RESULT_TIME);
             }
         }
-        if (!datastream.hasSelectOption() ||
-            datastream.getFieldsToSerialize().contains(STAEntityDefinition.PROP_PHENOMENON_TIME)) {
+        if (!datastream.hasSelectOption()
+                ||
+                datastream.getFieldsToSerialize()
+                          .contains(STAEntityDefinition.PROP_PHENOMENON_TIME)) {
             if (datastream.getPhenomenonTime() != null) {
                 gen.writeStringField(STAEntityDefinition.PROP_PHENOMENON_TIME,
                                      DateTimeHelper.format(datastream.getPhenomenonTime()));
             }
         }
 
-        if (!datastream.hasSelectOption() ||
-            datastream.getFieldsToSerialize().contains(STAEntityDefinition.PROP_PROPERTIES)) {
+        if (!datastream.hasSelectOption()
+                ||
+                datastream.getFieldsToSerialize()
+                          .contains(STAEntityDefinition.PROP_PROPERTIES)) {
             gen.writeObjectField(STAEntityDefinition.PROP_PROPERTIES, datastream.getProperties());
         }
 
         // navigation properties
         for (String navigationProperty : DatastreamEntityDefinition.NAVIGATION_PROPERTIES) {
-            if (!datastream.hasSelectOption() || datastream.getFieldsToSerialize().contains(navigationProperty)) {
-                if (!datastream.hasExpandOption() ||
-                    datastream.getFieldsToExpand().get(navigationProperty) == null) {
+            if (!datastream.hasSelectOption()
+                    || datastream.getFieldsToSerialize()
+                                 .contains(navigationProperty)) {
+                if (!datastream.hasExpandOption()
+                        ||
+                        datastream.getFieldsToExpand()
+                                  .get(navigationProperty) == null) {
                     writeNavigationProp(gen, navigationProperty, datastream.getId());
                 } else {
                     switch (navigationProperty) {
-                        case STAEntityDefinition.OBSERVATIONS:
-                            if (datastream.getObservations() == null) {
-                                writeNavigationProp(gen, navigationProperty, datastream.getId());
-                            } else {
-                                gen.writeFieldName(navigationProperty);
-                                writeNestedCollection(Collections.unmodifiableSet(datastream.getObservations()),
-                                                      gen,
-                                                      serializers);
-                            }
-                            break;
-                        case STAEntityDefinition.OBSERVED_PROPERTY:
-                            if (datastream.getObservedProperty() == null) {
-                                writeNavigationProp(gen, navigationProperty, datastream.getId());
-                            } else {
-                                gen.writeFieldName(navigationProperty);
-                                writeNestedEntity(datastream.getObservedProperty(),
+                    case STAEntityDefinition.OBSERVATIONS:
+                        if (datastream.getObservations() == null) {
+                            writeNavigationProp(gen, navigationProperty, datastream.getId());
+                        } else {
+                            gen.writeFieldName(navigationProperty);
+                            writeNestedCollection(Collections.unmodifiableSet(datastream.getObservations()),
                                                   gen,
                                                   serializers);
-                            }
-                            break;
-                        case STAEntityDefinition.THING:
-                            if (datastream.getThing() == null) {
-                                writeNavigationProp(gen, navigationProperty, datastream.getId());
-                            } else {
-                                gen.writeFieldName(navigationProperty);
-                                writeNestedEntity(datastream.getThing(),
-                                                  gen,
-                                                  serializers);
-                            }
-                            break;
-                        case STAEntityDefinition.SENSOR:
-                            if (datastream.getSensor() == null) {
-                                writeNavigationProp(gen, navigationProperty, datastream.getId());
-                            } else {
-                                gen.writeFieldName(navigationProperty);
-                                writeNestedEntity(datastream.getSensor(),
-                                                  gen,
-                                                  serializers);
-                            }
-                            break;
-                        default:
-                            throw new IllegalStateException("Unexpected value: " + navigationProperty);
+                        }
+                        break;
+                    case STAEntityDefinition.OBSERVED_PROPERTY:
+                        if (datastream.getObservedProperty() == null) {
+                            writeNavigationProp(gen, navigationProperty, datastream.getId());
+                        } else {
+                            gen.writeFieldName(navigationProperty);
+                            writeNestedEntity(datastream.getObservedProperty(),
+                                              gen,
+                                              serializers);
+                        }
+                        break;
+                    case STAEntityDefinition.THING:
+                        if (datastream.getThing() == null) {
+                            writeNavigationProp(gen, navigationProperty, datastream.getId());
+                        } else {
+                            gen.writeFieldName(navigationProperty);
+                            writeNestedEntity(datastream.getThing(),
+                                              gen,
+                                              serializers);
+                        }
+                        break;
+                    case STAEntityDefinition.SENSOR:
+                        if (datastream.getSensor() == null) {
+                            writeNavigationProp(gen, navigationProperty, datastream.getId());
+                        } else {
+                            gen.writeFieldName(navigationProperty);
+                            writeNestedEntity(datastream.getSensor(),
+                                              gen,
+                                              serializers);
+                        }
+                        break;
+                    default:
+                        throw new IllegalStateException("Unexpected value: " + navigationProperty);
                     }
                 }
             }

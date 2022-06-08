@@ -25,6 +25,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
+
 package org.n52.sta.api.old.serialize;
 
 import java.io.IOException;
@@ -53,7 +54,6 @@ public class FeatureOfInterestSerDes {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(FeatureOfInterestSerDes.class);
 
-
     @SuppressFBWarnings("EQ_DOESNT_OVERRIDE_EQUALS")
     public static class FeatureOfInterestDTOPatch implements EntityPatch<FeatureOfInterestDTO> {
 
@@ -70,9 +70,9 @@ public class FeatureOfInterestSerDes {
         }
     }
 
-
     public static class FeatureOfInterestSerializer
-        extends AbstractSTASerializer<FeatureOfInterestDTO> {
+            extends
+            AbstractSTASerializer<FeatureOfInterestDTO> {
 
         private static final String ENCODINGTYPE_GEOJSON = "application/vnd.geo+json";
 
@@ -88,62 +88,81 @@ public class FeatureOfInterestSerDes {
         @Override
         public void serialize(FeatureOfInterestDTO feature,
                               JsonGenerator gen,
-                              SerializerProvider serializers) throws IOException {
+                              SerializerProvider serializers)
+                throws IOException {
             gen.writeStartObject();
 
             // olingo @iot links
-            if (!feature.hasSelectOption() || feature.getFieldsToSerialize().contains(STAEntityDefinition.PROP_ID)) {
+            if (!feature.hasSelectOption()
+                    || feature.getFieldsToSerialize()
+                              .contains(STAEntityDefinition.PROP_ID)) {
                 writeId(gen, feature.getId());
             }
-            if (!feature.hasSelectOption() ||
-                feature.getFieldsToSerialize().contains(STAEntityDefinition.PROP_SELF_LINK)) {
+            if (!feature.hasSelectOption()
+                    ||
+                    feature.getFieldsToSerialize()
+                           .contains(STAEntityDefinition.PROP_SELF_LINK)) {
                 writeSelfLink(gen, feature.getId());
             }
 
             // actual properties
-            if (!feature.hasSelectOption() || feature.getFieldsToSerialize().contains(STAEntityDefinition.PROP_NAME)) {
+            if (!feature.hasSelectOption()
+                    || feature.getFieldsToSerialize()
+                              .contains(STAEntityDefinition.PROP_NAME)) {
                 gen.writeStringField(STAEntityDefinition.PROP_NAME, feature.getName());
             }
-            if (!feature.hasSelectOption() ||
-                feature.getFieldsToSerialize().contains(STAEntityDefinition.PROP_DESCRIPTION)) {
+            if (!feature.hasSelectOption()
+                    ||
+                    feature.getFieldsToSerialize()
+                           .contains(STAEntityDefinition.PROP_DESCRIPTION)) {
                 gen.writeStringField(STAEntityDefinition.PROP_DESCRIPTION, feature.getDescription());
             }
-            if (!feature.hasSelectOption() ||
-                feature.getFieldsToSerialize().contains(STAEntityDefinition.PROP_ENCODINGTYPE)) {
+            if (!feature.hasSelectOption()
+                    ||
+                    feature.getFieldsToSerialize()
+                           .contains(STAEntityDefinition.PROP_ENCODINGTYPE)) {
                 // only write out encodingtype if there is a location present
                 if (feature.getFeature() != null) {
                     gen.writeStringField(STAEntityDefinition.PROP_ENCODINGTYPE, ENCODINGTYPE_GEOJSON);
                 }
             }
-            if (!feature.hasSelectOption() ||
-                feature.getFieldsToSerialize().contains(STAEntityDefinition.PROP_FEATURE)) {
+            if (!feature.hasSelectOption()
+                    ||
+                    feature.getFieldsToSerialize()
+                           .contains(STAEntityDefinition.PROP_FEATURE)) {
                 gen.writeFieldName(STAEntityDefinition.PROP_FEATURE);
                 gen.writeRawValue(GEO_JSON_WRITER.write(feature.getFeature()));
             }
-            if (!feature.hasSelectOption() ||
-                feature.getFieldsToSerialize().contains(STAEntityDefinition.PROP_PROPERTIES)) {
+            if (!feature.hasSelectOption()
+                    ||
+                    feature.getFieldsToSerialize()
+                           .contains(STAEntityDefinition.PROP_PROPERTIES)) {
                 gen.writeObjectField(STAEntityDefinition.PROP_PROPERTIES, feature.getProperties());
             }
 
             // navigation properties
             for (String navigationProperty : FeatureOfInterestEntityDefinition.NAVIGATION_PROPERTIES) {
-                if (!feature.hasSelectOption() || feature.getFieldsToSerialize().contains(navigationProperty)) {
-                    if (!feature.hasExpandOption() || feature.getFieldsToExpand().get(navigationProperty) == null) {
+                if (!feature.hasSelectOption()
+                        || feature.getFieldsToSerialize()
+                                  .contains(navigationProperty)) {
+                    if (!feature.hasExpandOption()
+                            || feature.getFieldsToExpand()
+                                      .get(navigationProperty) == null) {
                         writeNavigationProp(gen, navigationProperty, feature.getId());
                     } else {
                         switch (navigationProperty) {
-                            case STAEntityDefinition.OBSERVATIONS:
-                                if (feature.getObservations() == null) {
-                                    writeNavigationProp(gen, navigationProperty, feature.getId());
-                                } else {
-                                    gen.writeFieldName(navigationProperty);
-                                    writeNestedCollection(Collections.unmodifiableSet(feature.getObservations()),
-                                                          gen,
-                                                          serializers);
-                                }
-                                break;
-                            default:
-                                throw new IllegalStateException("Unexpected value: " + navigationProperty);
+                        case STAEntityDefinition.OBSERVATIONS:
+                            if (feature.getObservations() == null) {
+                                writeNavigationProp(gen, navigationProperty, feature.getId());
+                            } else {
+                                gen.writeFieldName(navigationProperty);
+                                writeNestedCollection(Collections.unmodifiableSet(feature.getObservations()),
+                                                      gen,
+                                                      serializers);
+                            }
+                            break;
+                        default:
+                            throw new IllegalStateException("Unexpected value: " + navigationProperty);
                         }
                     }
                 }
@@ -151,7 +170,6 @@ public class FeatureOfInterestSerDes {
             gen.writeEndObject();
         }
     }
-
 
     public static class FeatureOfInterestDeserializer extends StdDeserializer<FeatureOfInterestDTO> {
 
@@ -163,10 +181,10 @@ public class FeatureOfInterestSerDes {
 
         @Override
         public FeatureOfInterestDTO deserialize(JsonParser p, DeserializationContext ctxt) throws IOException {
-            return p.readValueAs(JSONFeatureOfInterest.class).parseToDTO(JSONBase.EntityType.FULL);
+            return p.readValueAs(JSONFeatureOfInterest.class)
+                    .parseToDTO(JSONBase.EntityType.FULL);
         }
     }
-
 
     public static class FeatureOfInterestPatchDeserializer extends StdDeserializer<FeatureOfInterestDTOPatch> {
 
@@ -179,7 +197,7 @@ public class FeatureOfInterestSerDes {
         @Override
         public FeatureOfInterestDTOPatch deserialize(JsonParser p, DeserializationContext ctxt) throws IOException {
             return new FeatureOfInterestDTOPatch(p.readValueAs(JSONFeatureOfInterest.class)
-                                                     .parseToDTO(JSONBase.EntityType.PATCH));
+                                                  .parseToDTO(JSONBase.EntityType.PATCH));
         }
     }
 }

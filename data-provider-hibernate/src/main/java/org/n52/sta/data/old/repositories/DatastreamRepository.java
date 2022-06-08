@@ -25,6 +25,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
+
 package org.n52.sta.data.old.repositories;
 
 import org.n52.series.db.beans.AbstractDatasetEntity;
@@ -37,7 +38,8 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional
 @Repository
 public interface DatastreamRepository
-        extends NameRepository<AbstractDatasetEntity>,
+        extends
+        NameRepository<AbstractDatasetEntity>,
         StaIdentifierRepository<AbstractDatasetEntity>,
         AggregateRepository<AbstractDatasetEntity> {
 

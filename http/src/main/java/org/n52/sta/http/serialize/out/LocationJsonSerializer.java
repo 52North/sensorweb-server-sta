@@ -66,7 +66,10 @@ public class LocationJsonSerializer extends StaBaseSerializer<Location> {
         });
 
         String historicalLocations = StaConstants.HISTORICAL_LOCATIONS;
-        writeMemberCollection(historicalLocations, id, gen, HistoricalLocationJsonSerializer::new,
+        writeMemberCollection(historicalLocations,
+                              id,
+                              gen,
+                              HistoricalLocationJsonSerializer::new,
                               serializer -> {
                                   for (HistoricalLocation item : value.getHistoricalLocations()) {
                                       serializer.serialize(item, gen, serializers);

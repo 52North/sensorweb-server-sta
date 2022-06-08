@@ -1,3 +1,4 @@
+
 package org.n52.sta.data.query.specifications;
 
 import java.util.HashMap;
@@ -18,7 +19,7 @@ import org.springframework.data.jpa.domain.Specification;
 public abstract class QuerySpecification<T> implements BaseQuerySpecifications<T> {
 
     protected final Map<String, MemberFilter<T>> filterByMember;
-    protected final Map<String, PropertyComparator<T, ?>> entityPathByProperty;
+    protected final Map<String, PropertyComparator<T, ? >> entityPathByProperty;
 
     protected QuerySpecification() {
         this.filterByMember = new HashMap<>();
@@ -28,25 +29,28 @@ public abstract class QuerySpecification<T> implements BaseQuerySpecifications<T
     }
 
     @Override
-    public Specification<T> compareProperty(String property, FilterConstants.ComparisonOperator operator,
-                                            Expression<?> rightExpr) throws SpecificationsException {
+    public Specification<T> compareProperty(String property,
+                                            FilterConstants.ComparisonOperator operator,
+                                            Expression< ? > rightExpr)
+            throws SpecificationsException {
         assertAvailableProperty(property);
-        PropertyComparator<T, ?> comparator = entityPathByProperty.get(property);
+        PropertyComparator<T, ? > comparator = entityPathByProperty.get(property);
         return comparator.compareToRight(rightExpr, operator);
     }
 
     @Override
-    public Specification<T> compareProperty(Expression<?> leftExpr,
+    public Specification<T> compareProperty(Expression< ? > leftExpr,
                                             FilterConstants.ComparisonOperator operator,
-                                            String property) throws SpecificationsException {
+                                            String property)
+            throws SpecificationsException {
         assertAvailableProperty(property);
-        PropertyComparator<T, ?> comparator = entityPathByProperty.get(property);
+        PropertyComparator<T, ? > comparator = entityPathByProperty.get(property);
         return comparator.compareToLeft(leftExpr, operator);
     }
 
     @Override
-    public Specification<T> applyOnMember(String member, Specification<?> specification)
-        throws SpecificationsException {
+    public Specification<T> applyOnMember(String member, Specification< ? > specification)
+            throws SpecificationsException {
         assertAvailableMember(member);
         MemberFilter<T> filter = filterByMember.get(member);
         return filter.apply(specification);
@@ -69,36 +73,36 @@ public abstract class QuerySpecification<T> implements BaseQuerySpecifications<T
     }
 
     @Override
-    public <Y extends Comparable<? super Y>> Specification<T> compare(
-        Expression<? extends Y> left,
-        Expression<? extends Y> right,
-        FilterConstants.ComparisonOperator operator) {
+    public <Y extends Comparable< ? super Y>> Specification<T> compare(
+                                                                       Expression< ? extends Y> left,
+                                                                       Expression< ? extends Y> right,
+                                                                       FilterConstants.ComparisonOperator operator) {
         return (root, query, builder) -> compare(left, right, operator, builder);
     }
 
     @Override
-    public <Y extends Comparable<? super Y>> Predicate compare(
-        Expression<? extends Y> left,
-        Expression<? extends Y> right,
-        FilterConstants.ComparisonOperator operator,
-        CriteriaBuilder builder) {
+    public <Y extends Comparable< ? super Y>> Predicate compare(
+                                                                Expression< ? extends Y> left,
+                                                                Expression< ? extends Y> right,
+                                                                FilterConstants.ComparisonOperator operator,
+                                                                CriteriaBuilder builder) {
         switch (operator) {
-            case PropertyIsEqualTo:
-                return builder.equal(left, right);
-            case PropertyIsNotEqualTo:
-                return builder.notEqual(left, right);
-            case PropertyIsLessThan:
-                return builder.lessThan(left, right);
-            case PropertyIsLessThanOrEqualTo:
-                return builder.lessThanOrEqualTo(left, right);
-            case PropertyIsGreaterThan:
-                return builder.greaterThan(left, right);
-            case PropertyIsGreaterThanOrEqualTo:
-                return builder.greaterThanOrEqualTo(left, right);
-            case PropertyIsBetween:
-                // unsupported between
-            default:
-                return null;
+        case PropertyIsEqualTo:
+            return builder.equal(left, right);
+        case PropertyIsNotEqualTo:
+            return builder.notEqual(left, right);
+        case PropertyIsLessThan:
+            return builder.lessThan(left, right);
+        case PropertyIsLessThanOrEqualTo:
+            return builder.lessThanOrEqualTo(left, right);
+        case PropertyIsGreaterThan:
+            return builder.greaterThan(left, right);
+        case PropertyIsGreaterThanOrEqualTo:
+            return builder.greaterThanOrEqualTo(left, right);
+        case PropertyIsBetween:
+            // unsupported between
+        default:
+            return null;
         }
     }
 
@@ -125,14 +129,15 @@ public abstract class QuerySpecification<T> implements BaseQuerySpecifications<T
                 return null;
             }
             String property = DescribableEntity.PROPERTY_IDENTIFIER;
-            return builder.in(root.get(property)).value(values);
+            return builder.in(root.get(property))
+                          .value(values);
         };
     }
 
     @Override
-    public EntityQuery createQuery(String onMember, Class<?> ofEntity) {
+    public EntityQuery createQuery(String onMember, Class< ? > ofEntity) {
         return (specification, query, builder) -> {
-            PreparedSubquery<?> subquery = selectOnSubquery(onMember, ofEntity);
+            PreparedSubquery< ? > subquery = selectOnSubquery(onMember, ofEntity);
             return subquery.where(specification, query, builder);
         };
     }
@@ -146,7 +151,7 @@ public abstract class QuerySpecification<T> implements BaseQuerySpecifications<T
 
             Specification<E> where = (Specification<E>) specification;
             return subquery.select(member.get(property))
-                .where(where.toPredicate(member, query, builder));
+                           .where(where.toPredicate(member, query, builder));
         };
     }
 }

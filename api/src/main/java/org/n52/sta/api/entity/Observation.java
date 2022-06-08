@@ -25,6 +25,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
+
 package org.n52.sta.api.entity;
 
 import java.util.Map;
@@ -45,8 +46,7 @@ public interface Observation extends Identifiable {
      * It is currently unclear what this element actually contains.
      *
      * @return DQ_Element
-     * @see <a href=
-     *      "https://github.com/opengeospatial/sensorthings/issues/68">
+     * @see <a href= "https://github.com/opengeospatial/sensorthings/issues/68">
      *      https://github.com/opengeospatial/sensorthings/issues/68</a>
      */
     Object getResultQuality();

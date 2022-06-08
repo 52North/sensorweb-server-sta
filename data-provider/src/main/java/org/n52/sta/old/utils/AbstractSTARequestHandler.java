@@ -25,6 +25,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
+
 package org.n52.sta.old.utils;
 
 import org.n52.shetland.ogc.sta.exception.STACRUDException;
@@ -46,8 +47,8 @@ public abstract class AbstractSTARequestHandler implements RequestUtils {
     protected final String rootUrl;
 
     protected AbstractSTARequestHandler(String rootUrl,
-            boolean escapeId,
-            EntityServiceFactory serviceRepository) {
+                                        boolean escapeId,
+                                        EntityServiceFactory serviceRepository) {
         this.escapeId = escapeId;
         this.serviceRepository = serviceRepository;
         this.rootUrl = rootUrl;
@@ -56,23 +57,28 @@ public abstract class AbstractSTARequestHandler implements RequestUtils {
     /**
      * Validates a given Resource Path. Checks Syntax + Semantics
      *
-     * @param requestURI        URL to the Resource.
-     * @throws Exception if URL is not valid
+     * @param requestURI
+     *        URL to the Resource.
+     * @throws Exception
+     *         if URL is not valid
      */
-    protected void validateResource(StringBuffer requestURI)            throws Exception {
+    protected void validateResource(StringBuffer requestURI) throws Exception {
         validateResource(requestURI.toString());
     }
 
     /**
      * Validates a given Resource Path. Checks Syntax + Semantics
      *
-     * @param requestURI        URL to the Resource.
-     * @throws Exception if URL is not valid
+     * @param requestURI
+     *        URL to the Resource.
+     * @throws Exception
+     *         if URL is not valid
      */
-    protected void validateResource(String requestURI)            throws Exception {
+    protected void validateResource(String requestURI) throws Exception {
         String[] uriResources;
         if (requestURI.startsWith("/")) {
-            uriResources = requestURI.substring(1).split(SLASH);
+            uriResources = requestURI.substring(1)
+                                     .split(SLASH);
         } else {
             uriResources = requestURI.split(SLASH);
         }
@@ -91,25 +97,31 @@ public abstract class AbstractSTARequestHandler implements RequestUtils {
     /**
      * Validates whether an entity has given property.
      *
-     * @param entity   Name of the Entity to be checked
-     * @param property Property of the Entity
-     * @throws STAInvalidUrlException when the URL is invalid
+     * @param entity
+     *        Name of the Entity to be checked
+     * @param property
+     *        Property of the Entity
+     * @throws STAInvalidUrlException
+     *         when the URL is invalid
      */
     protected void validateProperty(String entity, String property) throws STAInvalidUrlException {
         STAEntityDefinition definition = STAEntityDefinition.definitions.get(entity);
 
-        if (!definition.getEntityPropsMandatory().contains(property) &&
-                !definition.getEntityPropsOptional().contains(property)) {
+        if (!definition.getEntityPropsMandatory()
+                       .contains(property)
+                &&
+                !definition.getEntityPropsOptional()
+                           .contains(property)) {
             throw new STAInvalidUrlException("Entity: " + entity + " does not have property: " + property);
         }
     }
 
     /**
-     * This function validates a given URI semantically by checking if all Entities
-     * referenced in the navigation
-     * exists. As URI is syntactically valid indices can be hard-coded.
+     * This function validates a given URI semantically by checking if all Entities referenced in the
+     * navigation exists. As URI is syntactically valid indices can be hard-coded.
      *
-     * @param uriResources      URI of the Request split by SLASH
+     * @param uriResources
+     *        URI of the Request split by SLASH
      * @return STAInvalidUrlException if URI is malformed
      */
     protected Exception validateURISemantic(String[] uriResources) throws STACRUDException {
@@ -123,7 +135,8 @@ public abstract class AbstractSTARequestHandler implements RequestUtils {
         sourceId = unescapeIdIfWanted(sourceId.replaceAll("%2F", "/"));
         String sourceType = sourceEntity[0];
 
-        if (!serviceRepository.getEntityService(sourceType).existsEntity(sourceId)) {
+        if (!serviceRepository.getEntityService(sourceType)
+                              .existsEntity(sourceId)) {
             return createNotFoundExceptionNoEntity(uriResources[0]);
         }
 
@@ -137,7 +150,7 @@ public abstract class AbstractSTARequestHandler implements RequestUtils {
                 // e.g. /Datastreams(1)/Thing/
                 // Getting id directly as it is needed for next iteration
                 targetId = serviceRepository.getEntityService(targetType)
-                        .getEntityIdByRelatedEntity(sourceId, sourceType);
+                                            .getEntityIdByRelatedEntity(sourceId, sourceType);
                 if (targetId == null) {
                     return createInvalidUrlExceptionNoEntityAssociated(uriResources[i], uriResources[i - 1]);
                 }
@@ -147,7 +160,7 @@ public abstract class AbstractSTARequestHandler implements RequestUtils {
                 // Only checking exists as Id is already known
                 targetId = targetEntity[1];
                 if (!serviceRepository.getEntityService(targetType)
-                        .existsEntityByRelatedEntity(sourceId, sourceType, targetId)) {
+                                      .existsEntityByRelatedEntity(sourceId, sourceType, targetId)) {
                     return createInvalidUrlExceptionNoEntityAssociated(uriResources[i], uriResources[i - 1]);
                 }
             }

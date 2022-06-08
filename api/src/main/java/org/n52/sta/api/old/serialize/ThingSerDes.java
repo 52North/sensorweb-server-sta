@@ -25,6 +25,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
+
 package org.n52.sta.api.old.serialize;
 
 import java.io.IOException;
@@ -60,7 +61,6 @@ public class ThingSerDes {
         }
     }
 
-
     public static class ThingSerializer extends AbstractSTASerializer<ThingDTO> {
 
         private static final long serialVersionUID = -1618289129123682794L;
@@ -73,69 +73,83 @@ public class ThingSerDes {
 
         @Override
         public void serialize(ThingDTO value, JsonGenerator gen, SerializerProvider serializers)
-            throws IOException {
+                throws IOException {
             gen.writeStartObject();
 
             // olingo @iot links
-            if (!value.hasSelectOption() || value.getFieldsToSerialize().contains(STAEntityDefinition.PROP_ID)) {
+            if (!value.hasSelectOption()
+                    || value.getFieldsToSerialize()
+                            .contains(STAEntityDefinition.PROP_ID)) {
                 writeId(gen, value.getId());
             }
-            if (!value.hasSelectOption() || value.getFieldsToSerialize().contains(STAEntityDefinition.PROP_SELF_LINK)) {
+            if (!value.hasSelectOption()
+                    || value.getFieldsToSerialize()
+                            .contains(STAEntityDefinition.PROP_SELF_LINK)) {
                 writeSelfLink(gen, value.getId());
             }
 
             // actual properties
-            if (!value.hasSelectOption() || value.getFieldsToSerialize().contains(STAEntityDefinition.PROP_NAME)) {
+            if (!value.hasSelectOption()
+                    || value.getFieldsToSerialize()
+                            .contains(STAEntityDefinition.PROP_NAME)) {
                 gen.writeStringField(STAEntityDefinition.PROP_NAME, value.getName());
             }
-            if (!value.hasSelectOption() ||
-                value.getFieldsToSerialize().contains(STAEntityDefinition.PROP_DESCRIPTION)) {
+            if (!value.hasSelectOption()
+                    ||
+                    value.getFieldsToSerialize()
+                         .contains(STAEntityDefinition.PROP_DESCRIPTION)) {
                 gen.writeStringField(STAEntityDefinition.PROP_DESCRIPTION, value.getDescription());
             }
-            if (!value.hasSelectOption() ||
-                value.getFieldsToSerialize().contains(STAEntityDefinition.PROP_PROPERTIES)) {
+            if (!value.hasSelectOption()
+                    ||
+                    value.getFieldsToSerialize()
+                         .contains(STAEntityDefinition.PROP_PROPERTIES)) {
                 gen.writeObjectField(STAEntityDefinition.PROP_PROPERTIES, value.getProperties());
             }
 
             // navigation properties
             for (String navigationProperty : ThingEntityDefinition.NAVIGATION_PROPERTIES) {
-                if (!value.hasSelectOption() || value.getFieldsToSerialize().contains(navigationProperty)) {
-                    if (!value.hasExpandOption() || value.getFieldsToExpand().get(navigationProperty) == null) {
+                if (!value.hasSelectOption()
+                        || value.getFieldsToSerialize()
+                                .contains(navigationProperty)) {
+                    if (!value.hasExpandOption()
+                            || value.getFieldsToExpand()
+                                    .get(navigationProperty) == null) {
                         writeNavigationProp(gen, navigationProperty, value.getId());
                     } else {
                         switch (navigationProperty) {
-                            case ThingEntityDefinition.DATASTREAMS:
-                                if (value.getDatastream() == null) {
-                                    writeNavigationProp(gen, navigationProperty, value.getId());
-                                } else {
-                                    gen.writeFieldName(navigationProperty);
-                                    writeNestedCollection(Collections.unmodifiableSet(value.getDatastream()),
-                                                          gen,
-                                                          serializers);
-                                }
-                                break;
-                            case ThingEntityDefinition.HISTORICAL_LOCATIONS:
-                                if (value.getHistoricalLocations() == null) {
-                                    writeNavigationProp(gen, navigationProperty, value.getId());
-                                } else {
-                                    gen.writeFieldName(navigationProperty);
-                                    writeNestedCollection(Collections.unmodifiableSet(value.getHistoricalLocations()),
-                                                          gen,
-                                                          serializers);
-                                }
-                                break;
-                            case ThingEntityDefinition.LOCATIONS:
-                                if (value.getLocations() == null) {
-                                    writeNavigationProp(gen, navigationProperty, value.getId());
-                                } else {
-                                    gen.writeFieldName(navigationProperty);
-                                    writeNestedCollection(Collections.unmodifiableSet(value.getLocations()),
-                                                          gen,
-                                                          serializers);
-                                }
-                                break;
-                            default:
-                                throw new IllegalStateException("Unexpected value: " + navigationProperty);
+                        case ThingEntityDefinition.DATASTREAMS:
+                            if (value.getDatastream() == null) {
+                                writeNavigationProp(gen, navigationProperty, value.getId());
+                            } else {
+                                gen.writeFieldName(navigationProperty);
+                                writeNestedCollection(Collections.unmodifiableSet(value.getDatastream()),
+                                                      gen,
+                                                      serializers);
+                            }
+                            break;
+                        case ThingEntityDefinition.HISTORICAL_LOCATIONS:
+                            if (value.getHistoricalLocations() == null) {
+                                writeNavigationProp(gen, navigationProperty, value.getId());
+                            } else {
+                                gen.writeFieldName(navigationProperty);
+                                writeNestedCollection(Collections.unmodifiableSet(value.getHistoricalLocations()),
+                                                      gen,
+                                                      serializers);
+                            }
+                            break;
+                        case ThingEntityDefinition.LOCATIONS:
+                            if (value.getLocations() == null) {
+                                writeNavigationProp(gen, navigationProperty, value.getId());
+                            } else {
+                                gen.writeFieldName(navigationProperty);
+                                writeNestedCollection(Collections.unmodifiableSet(value.getLocations()),
+                                                      gen,
+                                                      serializers);
+                            }
+                            break;
+                        default:
+                            throw new IllegalStateException("Unexpected value: " + navigationProperty);
                         }
                     }
                 }
@@ -144,7 +158,6 @@ public class ThingSerDes {
         }
 
     }
-
 
     public static class ThingDeserializer extends StdDeserializer<ThingDTO> {
 
@@ -157,10 +170,9 @@ public class ThingSerDes {
         @Override
         public ThingDTO deserialize(JsonParser p, DeserializationContext ctxt) throws IOException {
             return p.readValueAs(JSONThing.class)
-                .parseToDTO(JSONBase.EntityType.FULL);
+                    .parseToDTO(JSONBase.EntityType.FULL);
         }
     }
-
 
     public static class ThingPatchDeserializer extends StdDeserializer<ThingDTOPatch> {
 
@@ -173,7 +185,7 @@ public class ThingSerDes {
         @Override
         public ThingDTOPatch deserialize(JsonParser p, DeserializationContext ctxt) throws IOException {
             return new ThingDTOPatch(p.readValueAs(JSONThing.class)
-                                         .parseToDTO(JSONBase.EntityType.PATCH));
+                                      .parseToDTO(JSONBase.EntityType.PATCH));
         }
     }
 }

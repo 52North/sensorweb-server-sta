@@ -25,6 +25,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
+
 package org.n52.sta.data.old.repositories;
 
 import java.util.Optional;
@@ -39,19 +40,20 @@ public interface IdentifierRepository<T, I> extends EntityGraphRepository<T, I> 
     /**
      * Checks whether Entity with given id exists.
      *
-     * @param identifier Identifier of the Entity
+     * @param identifier
+     *        Identifier of the Entity
      * @return true if Entity exists. false otherwise
      */
     boolean existsByIdentifier(String identifier);
 
     /**
-     * Finds Entity by identifier. Fetches Entity and all related Entities given by
-     * EntityGraphs
+     * Finds Entity by identifier. Fetches Entity and all related Entities given by EntityGraphs
      *
-     * @param identifier      Identifier of the wanted Entity
-     * @param relatedEntities EntityGraphs describing related Entities to be
-     *                        fetched. All graphs are merged into one
-     *                        graph internally. may be null.
+     * @param identifier
+     *        Identifier of the wanted Entity
+     * @param relatedEntities
+     *        EntityGraphs describing related Entities to be fetched. All graphs are merged into one graph
+     *        internally. may be null.
      * @return Entity found in Database. Optional.empty() otherwise
      */
     Optional<T> findByIdentifier(String identifier, FetchGraph... relatedEntities);
@@ -59,7 +61,8 @@ public interface IdentifierRepository<T, I> extends EntityGraphRepository<T, I> 
     /**
      * Deletes Entity with given Identifier
      *
-     * @param identifier Identifier of the Entity
+     * @param identifier
+     *        Identifier of the Entity
      */
     void deleteByIdentifier(String identifier);
 }

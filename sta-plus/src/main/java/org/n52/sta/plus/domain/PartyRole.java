@@ -25,13 +25,16 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
+
 package org.n52.sta.plus.domain;
 
 public enum PartyRole {
-    INDIVIDUAL, INSTITUTION;
+    INDIVIDUAL,
+    INSTITUTION;
 
     @Override
     public String toString() {
-        return this.name().toLowerCase();
+        return this.name()
+                   .toLowerCase();
     }
 }

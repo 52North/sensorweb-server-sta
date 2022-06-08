@@ -58,7 +58,7 @@ public final class RequestContext {
     }
 
     public static RequestContext create(String serviceUri, HttpServletRequest request, PathFactory pathFactory)
-        throws STAInvalidUrlException {
+            throws STAInvalidUrlException {
         Objects.requireNonNull(request, "request must not be null");
         QueryOptions queryOptions = parseQueryOptions(request);
 
@@ -68,9 +68,10 @@ public final class RequestContext {
 
     private static QueryOptions parseQueryOptions(HttpServletRequest request) {
         String queryString = request.getQueryString();
-        return Optional.ofNullable(queryString).map(decodeQueryString())
-            .map(QueryOptionsFactory::createQueryOptions)
-            .orElse(QueryOptionsFactory.createEmpty());
+        return Optional.ofNullable(queryString)
+                       .map(decodeQueryString())
+                       .map(QueryOptionsFactory::createQueryOptions)
+                       .orElse(QueryOptionsFactory.createEmpty());
     }
 
     private static Function<String, String> decodeQueryString() {

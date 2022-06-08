@@ -25,6 +25,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
+
 package org.n52.sta.api.service;
 
 import org.n52.sta.api.EntityEditor;
@@ -59,7 +60,7 @@ public class ObservedPropertyService implements EntityService<ObservedProperty>,
     }
 
     public ObservedPropertyService(EntityProvider<ObservedProperty> provider,
-            DomainService<ObservedProperty> domainService) {
+                                   DomainService<ObservedProperty> domainService) {
         Objects.requireNonNull(provider, "provider must not be null");
         this.observedPropertyProvider = provider;
         this.domainService = domainService == null
@@ -78,7 +79,7 @@ public class ObservedPropertyService implements EntityService<ObservedProperty>,
     }
 
     @Override
-    public EntityPage<ObservedProperty> getEntities(Request req)throws ProviderException {
+    public EntityPage<ObservedProperty> getEntities(Request req) throws ProviderException {
         return domainService.getEntities(req);
     }
 
@@ -126,7 +127,7 @@ public class ObservedPropertyService implements EntityService<ObservedProperty>,
 
     private ObservedProperty getOrThrow(String id) throws ProviderException {
         return domainService.getEntity(id)
-                .orElseThrow(() -> new ProviderException("Id '" + id + "' does not exist."));
+                            .orElseThrow(() -> new ProviderException("Id '" + id + "' does not exist."));
     }
 
 }

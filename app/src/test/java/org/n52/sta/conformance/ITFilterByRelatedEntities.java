@@ -25,6 +25,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
+
 package org.n52.sta.conformance;
 
 import org.junit.jupiter.api.Test;
@@ -48,39 +49,68 @@ public class ITFilterByRelatedEntities extends ConformanceTests implements TestU
 
         // Create required test harness
         // Requires POST with deep insert to work.
-        postEntity(EntityType.THING, "{ \"description\": \"thing 1\", \"name\": \"thing name 1\", \"properties\": { " +
-            "\"reference\": \"first\" }, \"Locations\": [ { \"description\": \"location 1\", \"name\": \"location" +
-            " name 1\", \"location\": { \"type\": \"Point\", \"coordinates\": [ -117.05, 51.05 ] }, " +
-            "\"encodingType\": \"application/vnd.geo+json\" } ], \"Datastreams\": [ { \"unitOfMeasurement\": { " +
-            "\"name\": \"Lumen\", \"symbol\": \"lm\", \"definition\": \"http://www.qudt.org/qudt/owl/1.0" +
-            ".0/unit/Instances.html/Lumen\" }, \"description\": \"datastream 1\", \"name\": \"datastream name " +
-            "1\", \"observationType\": \"http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_Measurement\", " +
-            "\"ObservedProperty\": { \"name\": \"Luminous Flux\", \"definition\": \"http://www.qudt" +
-            ".org/qudt/owl/1.0.0/quantity/Instances.html/LuminousFlux\", \"description\": \"observedProperty 1\" " +
-            "}, \"Sensor\": { \"description\": \"sensor 1\", \"name\": \"sensor name 1\", \"encodingType\": " +
-            "\"application/pdf\", \"metadata\": \"Light flux sensor\" }, \"Observations\":[ { \"phenomenonTime\":" +
-            " \"2015-03-03T00:00:00Z\", \"result\": 3 }, { \"phenomenonTime\": \"2015-03-04T00:00:00Z\", " +
-            "\"result\": 4 } ] }, { \"unitOfMeasurement\": { \"name\": \"Centigrade\", \"symbol\": \"C\", " +
-            "\"definition\": \"http://www.qudt.org/qudt/owl/1.0.0/unit/Instances.html/Lumen\" }, \"description\":" +
-            " \"datastream 2\", \"name\": \"datastream name 2\", \"observationType\": \"http://www.opengis" +
-            ".net/def/observationType/OGC-OM/2.0/OM_Measurement\", \"ObservedProperty\": { \"name\": " +
-            "\"Tempretaure\", \"definition\": \"http://www.qudt.org/qudt/owl/1.0.0/quantity/Instances" +
-            ".html/Tempreture\", \"description\": \"observedProperty 2\" }, \"Sensor\": { \"description\": " +
-            "\"sensor 2\", \"name\": \"sensor name 2\", \"encodingType\": \"application/pdf\", \"metadata\": " +
-            "\"Tempreture sensor\" }, \"Observations\":[ { \"phenomenonTime\": \"2015-03-05T00:00:00Z\", " +
-            "\"result\": 5 }, { \"phenomenonTime\": \"2015-03-06T00:00:00Z\", \"result\": 6 } ] } ] }");
+        postEntity(EntityType.THING,
+                   "{ \"description\": \"thing 1\", \"name\": \"thing name 1\", \"properties\": { "
+                           +
+                           "\"reference\": \"first\" }, \"Locations\": [ { \"description\": \"location 1\", \"name\": \"location"
+                           +
+                           " name 1\", \"location\": { \"type\": \"Point\", \"coordinates\": [ -117.05, 51.05 ] }, "
+                           +
+                           "\"encodingType\": \"application/vnd.geo+json\" } ], \"Datastreams\": [ { \"unitOfMeasurement\": { "
+                           +
+                           "\"name\": \"Lumen\", \"symbol\": \"lm\", \"definition\": \"http://www.qudt.org/qudt/owl/1.0"
+                           +
+                           ".0/unit/Instances.html/Lumen\" }, \"description\": \"datastream 1\", \"name\": \"datastream name "
+                           +
+                           "1\", \"observationType\": \"http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_Measurement\", "
+                           +
+                           "\"ObservedProperty\": { \"name\": \"Luminous Flux\", \"definition\": \"http://www.qudt"
+                           +
+                           ".org/qudt/owl/1.0.0/quantity/Instances.html/LuminousFlux\", \"description\": \"observedProperty 1\" "
+                           +
+                           "}, \"Sensor\": { \"description\": \"sensor 1\", \"name\": \"sensor name 1\", \"encodingType\": "
+                           +
+                           "\"application/pdf\", \"metadata\": \"Light flux sensor\" }, \"Observations\":[ { \"phenomenonTime\":"
+                           +
+                           " \"2015-03-03T00:00:00Z\", \"result\": 3 }, { \"phenomenonTime\": \"2015-03-04T00:00:00Z\", "
+                           +
+                           "\"result\": 4 } ] }, { \"unitOfMeasurement\": { \"name\": \"Centigrade\", \"symbol\": \"C\", "
+                           +
+                           "\"definition\": \"http://www.qudt.org/qudt/owl/1.0.0/unit/Instances.html/Lumen\" }, \"description\":"
+                           +
+                           " \"datastream 2\", \"name\": \"datastream name 2\", \"observationType\": \"http://www.opengis"
+                           +
+                           ".net/def/observationType/OGC-OM/2.0/OM_Measurement\", \"ObservedProperty\": { \"name\": "
+                           +
+                           "\"Tempretaure\", \"definition\": \"http://www.qudt.org/qudt/owl/1.0.0/quantity/Instances"
+                           +
+                           ".html/Tempreture\", \"description\": \"observedProperty 2\" }, \"Sensor\": { \"description\": "
+                           +
+                           "\"sensor 2\", \"name\": \"sensor name 2\", \"encodingType\": \"application/pdf\", \"metadata\": "
+                           +
+                           "\"Tempreture sensor\" }, \"Observations\":[ { \"phenomenonTime\": \"2015-03-05T00:00:00Z\", "
+                           +
+                           "\"result\": 5 }, { \"phenomenonTime\": \"2015-03-06T00:00:00Z\", \"result\": 6 } ] } ] }");
     }
 
     @Test
     public void testFilterOnSingleNavigationDoesNotThrowError() throws Exception {
-        int thingCount = getCollection(EntityType.THING).get(value).size();
-        int locationCount = getCollection(EntityType.LOCATION).get(value).size();
-        int historicallocationCount = getCollection(EntityType.HISTORICAL_LOCATION).get(value).size();
-        int datastreamCount = getCollection(EntityType.DATASTREAM).get(value).size();
-        int sensorCount = getCollection(EntityType.SENSOR).get(value).size();
-        int observationCount = getCollection(EntityType.OBSERVATION).get(value).size();
-        int obspropCount = getCollection(EntityType.OBSERVED_PROPERTY).get(value).size();
-        int foiCount = getCollection(EntityType.FEATURE_OF_INTEREST).get(value).size();
+        int thingCount = getCollection(EntityType.THING).get(value)
+                                                        .size();
+        int locationCount = getCollection(EntityType.LOCATION).get(value)
+                                                              .size();
+        int historicallocationCount = getCollection(EntityType.HISTORICAL_LOCATION).get(value)
+                                                                                   .size();
+        int datastreamCount = getCollection(EntityType.DATASTREAM).get(value)
+                                                                  .size();
+        int sensorCount = getCollection(EntityType.SENSOR).get(value)
+                                                          .size();
+        int observationCount = getCollection(EntityType.OBSERVATION).get(value)
+                                                                    .size();
+        int obspropCount = getCollection(EntityType.OBSERVED_PROPERTY).get(value)
+                                                                      .size();
+        int foiCount = getCollection(EntityType.FEATURE_OF_INTEREST).get(value)
+                                                                    .size();
         assertEmptyResponse(getCollection(EntityType.THING, "$filter=Datastreams/id eq '52N'"));
         assertEmptyResponse(getCollection(EntityType.THING, "$filter=Locations/id eq '52N'"));
         assertEmptyResponse(getCollection(EntityType.THING, "$filter=HistoricalLocations/id eq '52N'"));
@@ -134,14 +164,22 @@ public class ITFilterByRelatedEntities extends ConformanceTests implements TestU
 
     @Test
     public void testFilterOnDoubleNavigationHasCorrectCount() throws Exception {
-        int thingCount = getCollection(EntityType.THING).get(value).size();
-        int locationCount = getCollection(EntityType.LOCATION).get(value).size();
-        int historicallocationCount = getCollection(EntityType.HISTORICAL_LOCATION).get(value).size();
-        int datastreamCount = getCollection(EntityType.DATASTREAM).get(value).size();
-        int sensorCount = getCollection(EntityType.SENSOR).get(value).size();
-        int observationCount = getCollection(EntityType.OBSERVATION).get(value).size();
-        int obspropCount = getCollection(EntityType.OBSERVED_PROPERTY).get(value).size();
-        int foiCount = getCollection(EntityType.FEATURE_OF_INTEREST).get(value).size();
+        int thingCount = getCollection(EntityType.THING).get(value)
+                                                        .size();
+        int locationCount = getCollection(EntityType.LOCATION).get(value)
+                                                              .size();
+        int historicallocationCount = getCollection(EntityType.HISTORICAL_LOCATION).get(value)
+                                                                                   .size();
+        int datastreamCount = getCollection(EntityType.DATASTREAM).get(value)
+                                                                  .size();
+        int sensorCount = getCollection(EntityType.SENSOR).get(value)
+                                                          .size();
+        int observationCount = getCollection(EntityType.OBSERVATION).get(value)
+                                                                    .size();
+        int obspropCount = getCollection(EntityType.OBSERVED_PROPERTY).get(value)
+                                                                      .size();
+        int foiCount = getCollection(EntityType.FEATURE_OF_INTEREST).get(value)
+                                                                    .size();
 
         assertEmptyResponse(getCollection(EntityType.THING, "$filter=Datastreams/Observations/id eq '52N'"));
         assertResponseCount(getCollection(EntityType.THING, "$filter=Datastreams/Observations/id ne '52N'"),

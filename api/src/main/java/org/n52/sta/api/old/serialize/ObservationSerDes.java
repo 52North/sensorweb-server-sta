@@ -25,6 +25,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
+
 package org.n52.sta.api.old.serialize;
 
 import java.io.IOException;
@@ -51,7 +52,6 @@ public class ObservationSerDes {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ObservationSerDes.class);
 
-
     @SuppressFBWarnings("EQ_DOESNT_OVERRIDE_EQUALS")
     public static class ObservationDTOPatch<T> implements EntityPatch<ObservationDTO> {
 
@@ -68,7 +68,6 @@ public class ObservationSerDes {
         }
     }
 
-
     public static class ObservationSerializer extends AbstractObservationSerializer<ObservationDTO> {
 
         private static final long serialVersionUID = -4575044340713191285L;
@@ -79,14 +78,14 @@ public class ObservationSerDes {
             this.entitySetName = ObservationEntityDefinition.ENTITY_SET_NAME;
         }
 
-        @Override public void serialize(ObservationDTO observation, JsonGenerator gen, SerializerProvider serializers)
-            throws IOException {
+        @Override
+        public void serialize(ObservationDTO observation, JsonGenerator gen, SerializerProvider serializers)
+                throws IOException {
             gen.writeStartObject();
             super.serialize(observation, gen, serializers);
             gen.writeEndObject();
         }
     }
-
 
     public static class ObservationDeserializer extends StdDeserializer<ObservationDTO> {
 
@@ -101,11 +100,10 @@ public class ObservationSerDes {
         @Override
         public ObservationDTO deserialize(JsonParser p, DeserializationContext ctxt) throws IOException {
             return p.readValueAs(JSONObservation.class)
-                //.parseParameters(parameterMapping)
-                .parseToDTO(JSONBase.EntityType.FULL);
+                    // .parseParameters(parameterMapping)
+                    .parseToDTO(JSONBase.EntityType.FULL);
         }
     }
-
 
     public static class ObservationPatchDeserializer extends StdDeserializer<ObservationDTOPatch> {
 
@@ -120,8 +118,8 @@ public class ObservationSerDes {
         @Override
         public ObservationDTOPatch deserialize(JsonParser p, DeserializationContext ctxt) throws IOException {
             return new ObservationDTOPatch(p.readValueAs(JSONObservation.class)
-                                               //.parseParameters(parameterMapping)
-                                               .parseToDTO(JSONBase.EntityType.PATCH));
+                                            // .parseParameters(parameterMapping)
+                                            .parseToDTO(JSONBase.EntityType.PATCH));
         }
     }
 }

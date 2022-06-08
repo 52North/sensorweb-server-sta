@@ -80,12 +80,12 @@ public class MqttPropertySubscription extends MqttEntitySubscription {
     public String toString() {
         String base = super.toString();
         return new StringBuilder()
-            .append(base)
-            .deleteCharAt(base.length() - 1)
-            .append(",watchedProperty=")
-            .append(watchedProperty)
-            .append("]")
-            .toString();
+                                  .append(base)
+                                  .deleteCharAt(base.length() - 1)
+                                  .append(",watchedProperty=")
+                                  .append(watchedProperty)
+                                  .append("]")
+                                  .toString();
     }
 
     @Override

@@ -25,6 +25,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
+
 package org.n52.sta.api.old.serialize.json;
 
 import java.util.Objects;
@@ -45,9 +46,13 @@ import org.n52.sta.api.old.serialize.common.JSONBase;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 
 @SuppressWarnings("VisibilityModifier")
-@SuppressFBWarnings({"NM_FIELD_NAMING_CONVENTION", "UWF_UNWRITTEN_PUBLIC_OR_PROTECTED_FIELD"})
+@SuppressFBWarnings({
+    "NM_FIELD_NAMING_CONVENTION",
+    "UWF_UNWRITTEN_PUBLIC_OR_PROTECTED_FIELD"
+})
 public class JSONFeatureOfInterest extends JSONBase.JSONwithIdNameDescription<FeatureOfInterestDTO>
-    implements AbstractJSONEntity {
+        implements
+        AbstractJSONEntity {
 
     private static final String COULD_NOT_PARSE = "Could not parse feature to GeoJSON. Error was: ";
     // JSON Properties. Matched by Annotation or variable name
@@ -61,10 +66,8 @@ public class JSONFeatureOfInterest extends JSONBase.JSONwithIdNameDescription<Fe
 
     private final String ENCODINGTYPE_GEOJSON = "application/vnd.geo+json";
     private final String ENCODINGTYPE_GEOJSON_ALT = "application/geo+json";
-    private final String INVALID_ENCODINGTYPE =
-        "Invalid encodingType supplied. Only GeoJSON (application/vnd.geo+json) is supported!";
-    private final GeometryFactory factory =
-        new GeometryFactory(new PrecisionModel(PrecisionModel.FLOATING), 4326);
+    private final String INVALID_ENCODINGTYPE = "Invalid encodingType supplied. Only GeoJSON (application/vnd.geo+json) is supported!";
+    private final GeometryFactory factory = new GeometryFactory(new PrecisionModel(PrecisionModel.FLOATING), 4326);
 
     private final String TYPE = "type";
     private final String GEOMETRY = "geometry";
@@ -83,98 +86,106 @@ public class JSONFeatureOfInterest extends JSONBase.JSONwithIdNameDescription<Fe
     @SuppressFBWarnings("RCN_REDUNDANT_NULLCHECK_WOULD_HAVE_BEEN_A_NPE")
     public FeatureOfInterestDTO parseToDTO(JSONBase.EntityType type) {
         switch (type) {
-            case FULL:
-                assertNotNull(name, INVALID_INLINE_ENTITY_MISSING + "name");
-                assertNotNull(description, INVALID_INLINE_ENTITY_MISSING + "description");
-                assertNotNull(feature, INVALID_INLINE_ENTITY_MISSING + "feature");
-                assertNotNull(feature.get(TYPE), INVALID_INLINE_ENTITY_MISSING + FEATURE_TYPE);
-                assertNotNull(encodingType, INVALID_ENCODINGTYPE);
-                assertState(Objects.equals(encodingType, ENCODINGTYPE_GEOJSON) ||
-                            Objects.equals(encodingType, ENCODINGTYPE_GEOJSON_ALT), INVALID_ENCODINGTYPE);
+        case FULL:
+            assertNotNull(name, INVALID_INLINE_ENTITY_MISSING + "name");
+            assertNotNull(description, INVALID_INLINE_ENTITY_MISSING + "description");
+            assertNotNull(feature, INVALID_INLINE_ENTITY_MISSING + "feature");
+            assertNotNull(feature.get(TYPE), INVALID_INLINE_ENTITY_MISSING + FEATURE_TYPE);
+            assertNotNull(encodingType, INVALID_ENCODINGTYPE);
+            assertState(Objects.equals(encodingType, ENCODINGTYPE_GEOJSON)
+                    ||
+                    Objects.equals(encodingType, ENCODINGTYPE_GEOJSON_ALT), INVALID_ENCODINGTYPE);
 
-                self.setId(identifier);
-                self.setName(name);
-                self.setDescription(description);
+            self.setId(identifier);
+            self.setName(name);
+            self.setDescription(description);
 
-                if (properties != null) {
-                    self.setProperties(properties);
+            if (properties != null) {
+                self.setProperties(properties);
+            }
+
+            if (feature != null) {
+                // TODO: check what is actually allowed here
+                GeoJsonReader reader = new GeoJsonReader(factory);
+                String geo;
+                if (FEATURE.equals(feature.get(TYPE)
+                                          .asText())) {
+                    assertNotNull(feature.get(GEOMETRY), INVALID_INLINE_ENTITY_MISSING + FEATURE_GEOM);
+                    geo = feature.get(GEOMETRY)
+                                 .toString();
+                } else {
+                    assertState(POINT.equals(feature.get(TYPE)
+                                                    .asText()),
+                                INVALID_INLINE_ENTITY_MISSING + FEATURE_TYPE);
+                    assertState(feature.has(COORDINATES), INVALID_INLINE_ENTITY_MISSING + FEATURE_COORDS);
+                    geo = feature.toString();
                 }
-
-                if (feature != null) {
-                    //TODO: check what is actually allowed here
-                    GeoJsonReader reader = new GeoJsonReader(factory);
-                    String geo;
-                    if (FEATURE.equals(feature.get(TYPE).asText())) {
-                        assertNotNull(feature.get(GEOMETRY), INVALID_INLINE_ENTITY_MISSING + FEATURE_GEOM);
-                        geo = feature.get(GEOMETRY).toString();
-                    } else {
-                        assertState(POINT.equals(feature.get(TYPE).asText()),
-                                     INVALID_INLINE_ENTITY_MISSING + FEATURE_TYPE);
-                        assertState(feature.has(COORDINATES), INVALID_INLINE_ENTITY_MISSING + FEATURE_COORDS);
-                        geo = feature.toString();
-                    }
-                    try {
-                        self.setFeature(reader.read(geo));
-                    } catch (ParseException e) {
-                        assertNotNull(null, COULD_NOT_PARSE + e.getMessage());
-                    }
+                try {
+                    self.setFeature(reader.read(geo));
+                } catch (ParseException e) {
+                    assertNotNull(null, COULD_NOT_PARSE + e.getMessage());
                 }
+            }
 
-                return self;
+            return self;
 
-            case PATCH:
-                self.setId(identifier);
-                self.setName(name);
-                self.setDescription(description);
+        case PATCH:
+            self.setId(identifier);
+            self.setName(name);
+            self.setDescription(description);
 
-                if (encodingType != null) {
-                    assertState(encodingType.equals(ENCODINGTYPE_GEOJSON) ||
-                                     Objects.equals(encodingType, ENCODINGTYPE_GEOJSON_ALT), INVALID_ENCODINGTYPE);
+            if (encodingType != null) {
+                assertState(encodingType.equals(ENCODINGTYPE_GEOJSON)
+                        ||
+                        Objects.equals(encodingType, ENCODINGTYPE_GEOJSON_ALT), INVALID_ENCODINGTYPE);
+            }
+
+            if (properties != null) {
+                self.setProperties(properties);
+            }
+
+            if (feature != null) {
+                // TODO: check what is actually allowed here
+                GeoJsonReader reader = new GeoJsonReader(factory);
+                String geo;
+                if (FEATURE.equals(feature.get(TYPE)
+                                          .asText())) {
+                    assertNotNull(feature.get(GEOMETRY), INVALID_INLINE_ENTITY_MISSING + FEATURE_GEOM);
+                    geo = feature.get(GEOMETRY)
+                                 .toString();
+                } else {
+                    assertState(POINT.equals(feature.get(TYPE)
+                                                    .asText()),
+                                INVALID_INLINE_ENTITY_MISSING + FEATURE_TYPE);
+                    assertState(feature.has(COORDINATES), INVALID_INLINE_ENTITY_MISSING + FEATURE_COORDS);
+                    geo = feature.toString();
                 }
-
-                if (properties != null) {
-                    self.setProperties(properties);
+                try {
+                    self.setFeature(reader.read(geo));
+                } catch (ParseException e) {
+                    assertNotNull(null, COULD_NOT_PARSE + e.getMessage());
                 }
+            }
 
-                if (feature != null) {
-                    //TODO: check what is actually allowed here
-                    GeoJsonReader reader = new GeoJsonReader(factory);
-                    String geo;
-                    if (FEATURE.equals(feature.get(TYPE).asText())) {
-                        assertNotNull(feature.get(GEOMETRY), INVALID_INLINE_ENTITY_MISSING + FEATURE_GEOM);
-                        geo = feature.get(GEOMETRY).toString();
-                    } else {
-                        assertState(POINT.equals(feature.get(TYPE).asText()),
-                                      INVALID_INLINE_ENTITY_MISSING + FEATURE_TYPE);
-                        assertState(feature.has(COORDINATES), INVALID_INLINE_ENTITY_MISSING + FEATURE_COORDS);
-                        geo = feature.toString();
-                    }
-                    try {
-                        self.setFeature(reader.read(geo));
-                    } catch (ParseException e) {
-                        assertNotNull(null, COULD_NOT_PARSE + e.getMessage());
-                    }
-                }
+            // TODO: handle nested observations
+            // if (backReference != null) {
+            // TODO: link feature to observations?
+            // throw new NotImplementedException();
+            // }
 
-                // TODO: handle nested observations
-                // if (backReference != null) {
-                // TODO: link feature to observations?
-                // throw new NotImplementedException();
-                // }
+            return self;
+        case REFERENCE:
+            assertIsNull(name, INVALID_REFERENCED_ENTITY);
+            assertIsNull(description, INVALID_REFERENCED_ENTITY);
+            assertIsNull(encodingType, INVALID_REFERENCED_ENTITY);
+            assertIsNull(feature, INVALID_REFERENCED_ENTITY);
+            assertIsNull(properties, INVALID_REFERENCED_ENTITY);
+            assertIsNull(Observations, INVALID_REFERENCED_ENTITY);
 
-                return self;
-            case REFERENCE:
-                assertIsNull(name, INVALID_REFERENCED_ENTITY);
-                assertIsNull(description, INVALID_REFERENCED_ENTITY);
-                assertIsNull(encodingType, INVALID_REFERENCED_ENTITY);
-                assertIsNull(feature, INVALID_REFERENCED_ENTITY);
-                assertIsNull(properties, INVALID_REFERENCED_ENTITY);
-                assertIsNull(Observations, INVALID_REFERENCED_ENTITY);
-
-                self.setId(identifier);
-                return self;
-            default:
-                return null;
+            self.setId(identifier);
+            return self;
+        default:
+            return null;
         }
     }
 }

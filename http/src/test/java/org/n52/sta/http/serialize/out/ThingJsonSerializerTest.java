@@ -25,6 +25,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
+
 package org.n52.sta.http.serialize.out;
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -67,10 +68,14 @@ public class ThingJsonSerializerTest {
         JsonNode parsedNode = serializeEntity(context, new ThingAdapter("foo"));
 
         assertTrue(parsedNode.has("@iot.id"));
-        assertThat(parsedNode.get("@iot.id").asText(), is("foo"));
+        assertThat(parsedNode.get("@iot.id")
+                             .asText(),
+                   is("foo"));
 
         assertTrue(parsedNode.has("@iot.selfLink"));
-        assertThat(parsedNode.get("@iot.selfLink").asText(), is("http://localhost/v1.1/Things(foo)"));
+        assertThat(parsedNode.get("@iot.selfLink")
+                             .asText(),
+                   is("http://localhost/v1.1/Things(foo)"));
     }
 
     @Test
@@ -82,7 +87,9 @@ public class ThingJsonSerializerTest {
         assertTrue(parsedNode.has("name"));
         assertFalse(parsedNode.has("description"));
 
-        assertThat(parsedNode.get("name").asText(), is("bar"));
+        assertThat(parsedNode.get("name")
+                             .asText(),
+                   is("bar"));
     }
 
     @Test
@@ -91,7 +98,8 @@ public class ThingJsonSerializerTest {
         JsonNode parsedNode = serializeEntity(context, new ThingAdapter("foo"));
 
         assertTrue(parsedNode.has("properties"));
-        assertTrue(parsedNode.get("properties").isEmpty());
+        assertTrue(parsedNode.get("properties")
+                             .isEmpty());
     }
 
     @Test
@@ -106,8 +114,12 @@ public class ThingJsonSerializerTest {
 
         assertTrue(parsedNode.has("properties"));
         JsonNode serializedProperties = parsedNode.get("properties");
-        assertThat(serializedProperties.get("foo").asText(), is("bar"));
-        assertThat(serializedProperties.get("bar").asInt(), is(42));
+        assertThat(serializedProperties.get("foo")
+                                       .asText(),
+                   is("bar"));
+        assertThat(serializedProperties.get("bar")
+                                       .asInt(),
+                   is(42));
     }
 
     @Test
@@ -131,7 +143,7 @@ public class ThingJsonSerializerTest {
         assertTrue(parsedNode.has("Datastreams@iot.navigationLink"));
         JsonNode datastreamsLink = parsedNode.get("Datastreams@iot.navigationLink");
         assertThat(datastreamsLink.asText(),
-                is("http://localhost/v1.1/Things(06aac1af-d925-4a6a-9df3-aa40067a210e)/Datastreams"));
+                   is("http://localhost/v1.1/Things(06aac1af-d925-4a6a-9df3-aa40067a210e)/Datastreams"));
     }
 
     @Test
@@ -144,7 +156,7 @@ public class ThingJsonSerializerTest {
         assertTrue(parsedNode.has("Datastreams@iot.navigationLink"));
         JsonNode datastreamsLink = parsedNode.get("Datastreams@iot.navigationLink");
         assertThat(datastreamsLink.asText(),
-                is("http://localhost/v1.1/Things(06aac1af-d925-4a6a-9df3-aa40067a210e)/Datastreams"));
+                   is("http://localhost/v1.1/Things(06aac1af-d925-4a6a-9df3-aa40067a210e)/Datastreams"));
     }
 
     private SerializationContext createEmptyContext() {
@@ -170,7 +182,8 @@ public class ThingJsonSerializerTest {
     }
 
     private InputStream readFromFile(String file) {
-        return getClass().getClassLoader().getResourceAsStream(file);
+        return getClass().getClassLoader()
+                         .getResourceAsStream(file);
     }
 
     private JsonNode serializeEntity(SerializationContext context, Thing thing) throws Exception {

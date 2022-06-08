@@ -25,6 +25,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
+
 package org.n52.sta.data.entity;
 
 import java.util.Map;
@@ -80,19 +81,22 @@ public class SensorData extends StaData<ProcedureEntity> implements Sensor {
     }
 
     private Optional<String> useLinkToFile(String file) {
-        return Optional.ofNullable(file).filter(f -> !f.isEmpty());
+        return Optional.ofNullable(file)
+                       .filter(f -> !f.isEmpty());
     }
 
     private Optional<String> getXml(ProcedureEntity entity) {
         Set<ProcedureHistoryEntity> history = entity.getProcedureHistory();
-        return findCurrentFrom(history).map(ProcedureHistoryEntity::getXml).findFirst();
+        return findCurrentFrom(history).map(ProcedureHistoryEntity::getXml)
+                                       .findFirst();
     }
 
     private Stream<ProcedureHistoryEntity> findCurrentFrom(Set<ProcedureHistoryEntity> history) {
-        return Streams.stream(history).filter(isLatest());
+        return Streams.stream(history)
+                      .filter(isLatest());
     }
 
-    private Predicate<? super ProcedureHistoryEntity> isLatest() {
+    private Predicate< ? super ProcedureHistoryEntity> isLatest() {
         return entity -> entity.getEndTime() == null;
     }
 

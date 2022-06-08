@@ -25,6 +25,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
+
 package org.n52.sta.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -62,8 +63,8 @@ public class VersionProperties {
         Map<String, String> result = new HashMap<>();
         // TODO make this configurable
         result.put("project.name", "52North SensorThingsAPI");
-//        result.put("project.version", buildProperties.getVersion());
-//        result.put("project.time", buildProperties.getTime().toString());
+        // result.put("project.version", buildProperties.getVersion());
+        // result.put("project.time", buildProperties.getTime().toString());
         result.put("git.builddate", buildTime);
         result.put("git.repository", repository);
         result.put("git.path", branch);

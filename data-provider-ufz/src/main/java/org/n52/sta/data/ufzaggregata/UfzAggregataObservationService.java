@@ -25,6 +25,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
+
 package org.n52.sta.data.ufzaggregata;
 
 import java.math.BigDecimal;
@@ -78,9 +79,8 @@ import org.springframework.http.MediaType;
 import org.springframework.web.client.RestTemplate;
 
 /**
- * Service connecting to the UFZ Aggregata API for retrieving Observations
- * Note: This only implements a subset of STA functionality. See Extension
- * documentation for details.
+ * Service connecting to the UFZ Aggregata API for retrieving Observations Note: This only implements a subset
+ * of STA functionality. See Extension documentation for details.
  *
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
  */
@@ -103,8 +103,8 @@ public class UfzAggregataObservationService extends ObservationService {
     private String baseUrl = "https://webapp.ufz.de/rdm/aggregata/lvl1";
 
     public UfzAggregataObservationService(SerDesConfig config,
-            SensorService sensorService,
-            @Value("${server.security.aggregataToken}") String aggregataToken) {
+                                          SensorService sensorService,
+                                          @Value("${server.security.aggregataToken}") String aggregataToken) {
         this.sensorService = sensorService;
         this.config = config;
         this.restTemplate = new RestTemplate();
@@ -128,21 +128,22 @@ public class UfzAggregataObservationService extends ObservationService {
         throw new STACRUDException(NOT_YET_IMPLEMENTED);
     }
 
-    public DataEntity<?> getEntityByIdRaw(Long id, QueryOptions queryOptions) throws STACRUDException {
+    public DataEntity< ? > getEntityByIdRaw(Long id, QueryOptions queryOptions) throws STACRUDException {
         throw new STACRUDException(NOT_YET_IMPLEMENTED);
     }
 
     @Override
-    public DataEntity<?> getEntityByRelatedEntityRaw(String relatedId,
-            String relatedType,
-            String ownId,
-            QueryOptions queryOptions) throws STACRUDException {
+    public DataEntity< ? > getEntityByRelatedEntityRaw(String relatedId,
+                                                       String relatedType,
+                                                       String ownId,
+                                                       QueryOptions queryOptions)
+            throws STACRUDException {
         throw new STACRUDException(NOT_YET_IMPLEMENTED);
     }
 
     public Page getEntityCollectionByRelatedEntityRaw(String relatedId,
-            String relatedType,
-            QueryOptions queryOptions)
+                                                      String relatedType,
+                                                      QueryOptions queryOptions)
             throws STACRUDException {
         try {
             throw new STACRUDException(NOT_YET_IMPLEMENTED);
@@ -157,37 +158,37 @@ public class UfzAggregataObservationService extends ObservationService {
     }
 
     @Override
-    protected DataEntity<?> fetchExpandEntitiesWithFilter(DataEntity<?> returned,
-            ExpandFilter expandOption)
+    protected DataEntity< ? > fetchExpandEntitiesWithFilter(DataEntity< ? > returned,
+                                                            ExpandFilter expandOption)
             throws STACRUDException, STAInvalidQueryException {
         throw new STACRUDException(NOT_YET_IMPLEMENTED);
     }
 
     @Override
-    public Specification<DataEntity<?>> byRelatedEntityFilter(String relatedId,
-            String relatedType,
-            String ownId) {
+    public Specification<DataEntity< ? >> byRelatedEntityFilter(String relatedId,
+                                                                String relatedType,
+                                                                String ownId) {
         throw new STAInvalidQueryError(NOT_YET_IMPLEMENTED);
     }
 
     @Override
-    public DataEntity<?> createOrfetch(DataEntity<?> entity) throws STACRUDException {
+    public DataEntity< ? > createOrfetch(DataEntity< ? > entity) throws STACRUDException {
         throw new STACRUDException(NOT_YET_IMPLEMENTED);
     }
 
     @Override
-    public DataEntity<?> updateEntity(String id, DataEntity<?> entity, String method)
+    public DataEntity< ? > updateEntity(String id, DataEntity< ? > entity, String method)
             throws STACRUDException {
         throw new STACRUDException(NOT_YET_IMPLEMENTED);
     }
 
     @Override
-    public DataEntity<?> createOrUpdate(DataEntity<?> entity) throws STACRUDException {
+    public DataEntity< ? > createOrUpdate(DataEntity< ? > entity) throws STACRUDException {
         throw new STACRUDException(NOT_YET_IMPLEMENTED);
     }
 
     @Override
-    public Specification<DataEntity<?>> getFilterPredicate(Class entityClass, QueryOptions queryOptions) {
+    public Specification<DataEntity< ? >> getFilterPredicate(Class entityClass, QueryOptions queryOptions) {
         throw new STAInvalidQueryError(NOT_YET_IMPLEMENTED);
     }
 
@@ -197,7 +198,7 @@ public class UfzAggregataObservationService extends ObservationService {
     }
 
     @Override
-    public DataEntity<?> merge(DataEntity<?> existing, DataEntity<?> toMerge)
+    public DataEntity< ? > merge(DataEntity< ? > existing, DataEntity< ? > toMerge)
             throws STACRUDException {
         throw new STACRUDException(NOT_YET_IMPLEMENTED);
     }
@@ -208,22 +209,23 @@ public class UfzAggregataObservationService extends ObservationService {
     }
 
     /**
-     * Handles updating the phenomenonTime field of the associated Datastream when
-     * Observation phenomenonTime is
-     * updated or deleted
+     * Handles updating the phenomenonTime field of the associated Datastream when Observation phenomenonTime
+     * is updated or deleted
      *
-     * @param datastreamEntity DatstreamEntity
-     * @param observation      ObservationEntity
+     * @param datastreamEntity
+     *        DatstreamEntity
+     * @param observation
+     *        ObservationEntity
      */
     protected void updateDatastreamPhenomenonTimeOnObservationUpdate(AbstractDatasetEntity datastreamEntity,
-            DataEntity<?> observation) {
+                                                                     DataEntity< ? > observation) {
         throw new STAInvalidQueryError(NOT_YET_IMPLEMENTED);
     }
 
     @Override
     public CollectionWrapper getEntityCollectionByRelatedEntity(String relatedId,
-            String relatedType,
-            QueryOptions queryOptions)
+                                                                String relatedType,
+                                                                QueryOptions queryOptions)
             throws STACRUDException {
         try {
             checkValidQueryOptions(queryOptions);
@@ -231,9 +233,9 @@ public class UfzAggregataObservationService extends ObservationService {
             if (relatedType.equals(StaConstants.DATASTREAMS)) {
 
                 ProcedureEntity sensor = sensorService.getEntityByRelatedEntityRaw(relatedId,
-                        relatedType,
-                        null,
-                        new QueryOptions(null));
+                                                                                   relatedType,
+                                                                                   null,
+                                                                                   new QueryOptions(null));
                 Matcher matcher = longNamePattern.matcher(sensor.getName());
                 String target;
                 if (matcher.matches()) {
@@ -242,21 +244,23 @@ public class UfzAggregataObservationService extends ObservationService {
                     throw new STACRUDException("Could not extract target from Sensor name: " + sensor.getName());
                 }
 
-                String[] split = sensor.getIdentifier().split(":");
+                String[] split = sensor.getIdentifier()
+                                       .split(":");
                 String sensorId = split[split.length - 2];
 
                 AggregataRequest aggregataRequest = createAggregataRequest(target, sensorId, queryOptions);
                 HttpEntity<String> request = new HttpEntity<>(objectMapper.writeValueAsString(aggregataRequest),
-                        headers);
+                                                              headers);
                 AggregataResponse[] response = restTemplate.postForObject(baseUrl + aggregataRequest.getPath(),
-                        request,
-                        AggregataResponse[].class);
+                                                                          request,
+                                                                          AggregataResponse[].class);
                 DTOTransformer transformer = new DTOTransformerImpl(config);
                 List<StaDTO> observations = new ArrayList<>();
                 for (List<BigDecimal> datapoint : response[0].getDatapoints()) {
                     QuantityDataEntity observation = new QuantityDataEntity();
                     BigDecimal value = datapoint.get(0);
-                    Date timestamp = new Date(datapoint.get(1).longValue());
+                    Date timestamp = new Date(datapoint.get(1)
+                                                       .longValue());
                     observation.setPhenomenonTimeStart(timestamp);
                     observation.setPhenomenonTimeEnd(timestamp);
                     observation.setValue(value);
@@ -274,14 +278,17 @@ public class UfzAggregataObservationService extends ObservationService {
     private AggregataRequest createAggregataRequest(String targetId, String sensorId, QueryOptions queryOptions) {
         AggregataRequest request = new AggregataRequest();
 
-        request.setMaxDataPoints(queryOptions.getTopFilter().getValue().intValue());
+        request.setMaxDataPoints(queryOptions.getTopFilter()
+                                             .getValue()
+                                             .intValue());
         request.setPath(SLASH + sensorId + "/query");
 
         Target target = new Target();
         target.setTarget(targetId);
         request.setTargets(Collections.singletonList(target));
 
-        BooleanBinaryExpr filter = (BooleanBinaryExpr) queryOptions.getFilterFilter().getFilter();
+        BooleanBinaryExpr filter = (BooleanBinaryExpr) queryOptions.getFilterFilter()
+                                                                   .getFilter();
         TimeValueExpr phenTimeStart = (TimeValueExpr) ((ComparisonExpr) filter.getLeft()).getRight();
         TimeValueExpr phenTimeEnd = (TimeValueExpr) ((ComparisonExpr) filter.getRight()).getRight();
         Range range = new Range();
@@ -297,9 +304,9 @@ public class UfzAggregataObservationService extends ObservationService {
 
     @JsonInclude(JsonInclude.Include.NON_NULL)
     @JsonPropertyOrder({
-            "range",
-            "targets",
-            "maxDataPoints"
+        "range",
+        "targets",
+        "maxDataPoints"
     })
     static class AggregataRequest {
 
@@ -353,8 +360,8 @@ public class UfzAggregataObservationService extends ObservationService {
 
     @JsonInclude(JsonInclude.Include.NON_NULL)
     @JsonPropertyOrder({
-            "from",
-            "to"
+        "from",
+        "to"
     })
     static class Range {
 
@@ -386,8 +393,8 @@ public class UfzAggregataObservationService extends ObservationService {
 
     @JsonInclude(JsonInclude.Include.NON_NULL)
     @JsonPropertyOrder({
-            "target",
-            "type"
+        "target",
+        "type"
     })
     static class Target {
 
@@ -414,8 +421,8 @@ public class UfzAggregataObservationService extends ObservationService {
 
     @JsonInclude(JsonInclude.Include.NON_NULL)
     @JsonPropertyOrder({
-            "target",
-            "datapoints"
+        "target",
+        "datapoints"
     })
     static class AggregataResponse {
 

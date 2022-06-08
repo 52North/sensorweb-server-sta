@@ -25,6 +25,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
+
 package org.n52.sta.api.service;
 
 import org.n52.sta.api.EntityEditor;
@@ -125,7 +126,7 @@ public class DatastreamService implements EntityService<Datastream>, EntityEdito
 
     private Datastream getOrThrow(String id) throws ProviderException {
         return domainService.getEntity(id)
-                .orElseThrow(() -> new ProviderException("Id '" + id + "' does not exist."));
+                            .orElseThrow(() -> new ProviderException("Id '" + id + "' does not exist."));
     }
 
 }

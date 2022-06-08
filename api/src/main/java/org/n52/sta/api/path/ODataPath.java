@@ -1,3 +1,4 @@
+
 package org.n52.sta.api.path;
 
 import java.util.List;

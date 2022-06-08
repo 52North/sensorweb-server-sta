@@ -25,8 +25,8 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
-package org.n52.sta.api.old.serialize.json;
 
+package org.n52.sta.api.old.serialize.json;
 
 /**
  * Extends the STA Standard spec by allowing more diverse encodingTypes (e.g. html links) for Sensors

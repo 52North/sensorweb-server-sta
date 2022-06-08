@@ -25,6 +25,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
+
 package org.n52.sta.api.old.entity;
 
 import java.util.Set;
@@ -34,7 +35,8 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.n52.sta.api.old.dto.common.StaDTO;
 
 /**
- * Data Transfer Object for handling an ObservedProperty as specified in 18-088 OGC SensorThingsAPI Part I Section 8.2.6
+ * Data Transfer Object for handling an ObservedProperty as specified in 18-088 OGC SensorThingsAPI Part I
+ * Section 8.2.6
  *
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
  */

@@ -25,6 +25,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
+
 package org.n52.sta.plus.old.http;
 
 import javax.servlet.http.HttpServletRequest;
@@ -41,11 +42,8 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 
 /**
- * Handles all requests to Entity Properties
- * e.g. /Things(52)/name
- * e.g. /Things(52)/name/$value
- * e.g. /Datastreams(52)/Thing/name
- * e.g. /Datastreams(52)/Thing/name/$value
+ * Handles all requests to Entity Properties e.g. /Things(52)/name e.g. /Things(52)/name/$value e.g.
+ * /Datastreams(52)/Thing/name e.g. /Datastreams(52)/Thing/name/$value
  *
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
  */
@@ -62,61 +60,46 @@ public class CitSciPropertyRequestHandler extends PropertyRequestHandler impleme
 
     @GetMapping(
         value = RequestUtils.MAPPING_PREFIX
-            + CitSciExtensionRequestUtils.ENTITY_IDENTIFIED_DIRECTLY
-            + RequestUtils.SLASH
-            + RequestUtils.PATH_PROPERTY,
-        produces = "application/json"
-    )
+                + CitSciExtensionRequestUtils.ENTITY_IDENTIFIED_DIRECTLY
+                + RequestUtils.SLASH
+                + RequestUtils.PATH_PROPERTY,
+        produces = "application/json")
     public StaDTO readEntityPropertyDirect(@PathVariable String entity,
                                            @PathVariable String id,
                                            @PathVariable String property,
-                                           HttpServletRequest request) throws Exception {
+                                           HttpServletRequest request)
+            throws Exception {
         return super.readEntityPropertyDirect(entity, id, property, request);
     }
 
     /*
-    @GetMapping(
-            value = {
-
-            },
-            produces = "application/json"
-    )
-    public ElementWithQueryOptions<?> readRelatedEntityProperty(@PathVariable String entity,
-                                                                @PathVariable String target,
-                                                                @PathVariable String property,
-                                                                HttpServletRequest request)
-            throws Exception {
-        return super.readRelatedEntityProperty(entity, target, property, request);
-    }
-    */
+     * @GetMapping( value = { }, produces = "application/json" ) public ElementWithQueryOptions<?>
+     * readRelatedEntityProperty(@PathVariable String entity,
+     * @PathVariable String target,
+     * @PathVariable String property, HttpServletRequest request) throws Exception { return
+     * super.readRelatedEntityProperty(entity, target, property, request); }
+     */
 
     @GetMapping(
         value = RequestUtils.MAPPING_PREFIX
-            + CitSciExtensionRequestUtils.ENTITY_IDENTIFIED_DIRECTLY
-            + RequestUtils.SLASH
-            + RequestUtils.PATH_PROPERTY
-            + RequestUtils.SLASHVALUE,
-        produces = "text/plain"
-    )
+                + CitSciExtensionRequestUtils.ENTITY_IDENTIFIED_DIRECTLY
+                + RequestUtils.SLASH
+                + RequestUtils.PATH_PROPERTY
+                + RequestUtils.SLASHVALUE,
+        produces = "text/plain")
     public String readEntityPropertyValueDirect(@PathVariable String entity,
                                                 @PathVariable String id,
                                                 @PathVariable String property,
-                                                HttpServletRequest request) throws Exception {
+                                                HttpServletRequest request)
+            throws Exception {
         return super.readEntityPropertyValueDirect(entity, id, property, request);
     }
 
     /*
-    @GetMapping(
-            value = {
-
-            },
-            produces = "text/plain"
-    )
-    public String readRelatedEntityPropertyValue(@PathVariable String entity,
-                                                 @PathVariable String target,
-                                                 @PathVariable String property,
-                                                 HttpServletRequest request) throws Exception {
-        return super.readRelatedEntityPropertyValue(entity, target, property, request);
-    }
-    */
+     * @GetMapping( value = { }, produces = "text/plain" ) public String
+     * readRelatedEntityPropertyValue(@PathVariable String entity,
+     * @PathVariable String target,
+     * @PathVariable String property, HttpServletRequest request) throws Exception { return
+     * super.readRelatedEntityPropertyValue(entity, target, property, request); }
+     */
 }

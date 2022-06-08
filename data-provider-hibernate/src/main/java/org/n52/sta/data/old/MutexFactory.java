@@ -25,6 +25,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
+
 package org.n52.sta.data.old;
 
 import org.n52.shetland.ogc.sta.exception.STACRUDException;
@@ -48,17 +49,22 @@ public class MutexFactory {
     }
 
     /**
-     * Gets a lock with given name from global lockMap. Name is unique per EntityType.
-     * Uses weak references so Map is automatically cleared by GC.
+     * Gets a lock with given name from global lockMap. Name is unique per EntityType. Uses weak references so
+     * Map is automatically cleared by GC.
      *
-     * @param key name of the lock
+     * @param key
+     *        name of the lock
      * @return Object used for holding the lock
-     * @throws STACRUDException If the lock can not be obtained.
+     * @throws STACRUDException
+     *         If the lock can not be obtained.
      */
     public synchronized Object getLock(String key) throws STACRUDException {
         if (key != null) {
             LOGGER.trace("Locking:" + key);
-            return this.lock.compute(key, (k, v) -> v == null ? new Object() : v);
+            return this.lock.compute(key,
+                                     (k, v) -> v == null
+                                             ? new Object()
+                                             : v);
         } else {
             throw new STACRUDException("Unable to obtain Lock. No name specified!");
         }

@@ -50,17 +50,17 @@ public class ThingEntityProviderTest {
     @Autowired
     private ThingEntityProvider provider;
 
-    //@Test
+    // @Test
     public void test1() {
         assertThat(context, is(not(Matchers.nullValue())));
     }
 
-    //@Test
+    // @Test
     public void test() {
         LOGGER.debug("Testing starts");
 
-        //        EntityPage<Thing> emptyPage = provider.getEntities();
-        //        assertThat(emptyPage.getTotalCount(), is(0));
+        // EntityPage<Thing> emptyPage = provider.getEntities();
+        // assertThat(emptyPage.getTotalCount(), is(0));
     }
 
 }

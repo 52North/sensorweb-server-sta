@@ -25,6 +25,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
+
 package org.n52.sta.mqtt.old;
 
 import java.nio.charset.Charset;
@@ -56,7 +57,9 @@ import io.moquette.interception.messages.InterceptPublishMessage;
  * @author <a href="mailto:s.drost@52north.org">Sebastian Drost</a>
  */
 public class MqttPublishMessageHandlerImpl extends AbstractSTARequestHandler
-        implements MqttPublishMessageHandler, CoreRequestUtils {
+        implements
+        MqttPublishMessageHandler,
+        CoreRequestUtils {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MqttPublishMessageHandlerImpl.class);
 
@@ -67,13 +70,13 @@ public class MqttPublishMessageHandlerImpl extends AbstractSTARequestHandler
     private final DTOMapper dtoMapper;
 
     public MqttPublishMessageHandlerImpl(
-            @Value("${server.feature.mqttPublishTopics:Observations}") List<String> publishTopics,
-            @Value("${server.feature.mqttReadOnly}") boolean readOnly,
-            @Value("${server.config.service-root-url}") String rootUrl,
-            @Value("${server.feature.escapeId:true}") boolean shouldEscapeId,
-            EntityServiceFactory serviceRepository,
-            ObjectMapper mapper,
-            DTOMapper dtoMapper) {
+                                         @Value("${server.feature.mqttPublishTopics:Observations}") List<String> publishTopics,
+                                         @Value("${server.feature.mqttReadOnly}") boolean readOnly,
+                                         @Value("${server.config.service-root-url}") String rootUrl,
+                                         @Value("${server.feature.escapeId:true}") boolean shouldEscapeId,
+                                         EntityServiceFactory serviceRepository,
+                                         ObjectMapper mapper,
+                                         DTOMapper dtoMapper) {
         super(rootUrl, shouldEscapeId, serviceRepository);
         this.mapper = mapper;
         this.readOnly = readOnly;
@@ -93,13 +96,16 @@ public class MqttPublishMessageHandlerImpl extends AbstractSTARequestHandler
     /**
      * Validates that topics only include STA collections
      *
-     * @param topics list of wanted topics
+     * @param topics
+     *        list of wanted topics
      */
     private boolean validateTopics(Set<String> topics) {
         boolean valid = true;
         for (String topic : topics) {
-            valid = Arrays.asList(STAEntityDefinition.CORECOLLECTIONS).contains(topic)
-                    || Arrays.asList(STAEntityDefinition.CITSCICOLLECTIONS).contains(topic);
+            valid = Arrays.asList(STAEntityDefinition.CORECOLLECTIONS)
+                          .contains(topic)
+                    || Arrays.asList(STAEntityDefinition.CITSCICOLLECTIONS)
+                             .contains(topic);
         }
         return valid;
     }
@@ -107,12 +113,18 @@ public class MqttPublishMessageHandlerImpl extends AbstractSTARequestHandler
     @Override
     public <T extends StaDTO> void processPublishMessage(InterceptPublishMessage msg) {
         try {
-            if (msg.getClientID().equals(INTERNAL_CLIENT_ID) || readOnly) {
+            if (msg.getClientID()
+                   .equals(INTERNAL_CLIENT_ID)
+                    || readOnly) {
                 return;
             }
             // This may only be a reference to Observation collection
             // Remove leading slash if present
-            String topic = (msg.getTopicName().startsWith("/")) ? msg.getTopicName().substring(1) : msg.getTopicName();
+            String topic = (msg.getTopicName()
+                               .startsWith("/"))
+                                       ? msg.getTopicName()
+                                            .substring(1)
+                                       : msg.getTopicName();
             if (!topic.startsWith("v1.1/")) {
                 throw new MqttHandlerException("Error while parsing MQTT topic. Missing Version information!");
             }
@@ -140,25 +152,29 @@ public class MqttPublishMessageHandlerImpl extends AbstractSTARequestHandler
                     String sourceType = reference[0];
                     String sourceId = reference[1].replace(")", "");
                     ObjectNode jsonBody = (ObjectNode) mapper
-                            .readTree(msg.getPayload().toString(Charset.defaultCharset()));
+                                                             .readTree(msg.getPayload()
+                                                                          .toString(Charset.defaultCharset()));
                     jsonBody.put(REFERENCED_FROM_TYPE, sourceType);
                     jsonBody.put(REFERENCED_FROM_ID, sourceId);
                     payload = jsonBody.toString();
                 } else {
-                    payload = msg.getPayload().toString(Charset.defaultCharset());
+                    payload = msg.getPayload()
+                                 .toString(Charset.defaultCharset());
                 }
 
                 Class<T> clazz = dtoMapper.collectionNameToClass(collection);
                 ((AbstractSensorThingsEntityService<T>) serviceRepository.getEntityService(collection))
-                        .create(mapper.readValue(payload, clazz));
+                                                                                                       .create(mapper.readValue(payload,
+                                                                                                                                clazz));
             } else {
                 throw new STAInvalidUrlException("Topic does not reference a Collection allowed for POSTing via mqtt");
             }
         } catch (Throwable e) {
             LOGGER.error("Creation of Entity {} on topic {} failed with Exception {}!",
-                    msg.getPayload().toString(StandardCharsets.UTF_8),
-                    msg.getTopicName(),
-                    e.getMessage());
+                         msg.getPayload()
+                            .toString(StandardCharsets.UTF_8),
+                         msg.getTopicName(),
+                         e.getMessage());
         }
     }
 }

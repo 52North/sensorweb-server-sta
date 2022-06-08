@@ -25,6 +25,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
+
 package org.n52.sta.conformance;
 
 import java.io.BufferedReader;
@@ -77,22 +78,27 @@ abstract class ConformanceTests implements TestUtil {
             System.out.println(body);
         }
 
-        HttpResponse response = HttpClientBuilder.create().build().execute(request);
+        HttpResponse response = HttpClientBuilder.create()
+                                                 .build()
+                                                 .execute(request);
 
         // Check Response MIME Type
-        String mimeType = ContentType.getOrDefault(response.getEntity()).getMimeType();
+        String mimeType = ContentType.getOrDefault(response.getEntity())
+                                     .getMimeType();
         Assertions.assertEquals(
-            jsonMimeType,
-            mimeType,
-            "Response has invalid MIME Type"
-        );
+                                jsonMimeType,
+                                mimeType,
+                                "Response has invalid MIME Type");
 
-        JsonNode result = mapper.readTree(response.getEntity().getContent());
+        JsonNode result = mapper.readTree(response.getEntity()
+                                                  .getContent());
         if (logger.isTraceEnabled()) {
             System.out.printf("RETURNED by Server: %s\n", request.getURI());
             System.out.println(result.toPrettyString());
         }
-        Assertions.assertEquals(200, response.getStatusLine().getStatusCode());
+        Assertions.assertEquals(200,
+                                response.getStatusLine()
+                                        .getStatusCode());
 
         return result;
     }
@@ -107,14 +113,24 @@ abstract class ConformanceTests implements TestUtil {
             System.out.println(body);
         }
 
-        HttpResponse response = HttpClientBuilder.create().build().execute(request);
+        HttpResponse response = HttpClientBuilder.create()
+                                                 .build()
+                                                 .execute(request);
         Assertions.assertTrue(
-            response.getStatusLine().getStatusCode() == 400 || response.getStatusLine().getStatusCode() == 409,
-            "Entity " + rootUrl + type.getVal() + " should not have been created but response Code  is: " +
-                response.getStatusLine().getStatusCode()
-        );
+                              response.getStatusLine()
+                                      .getStatusCode() == 400
+                                      || response.getStatusLine()
+                                                 .getStatusCode() == 409,
+                              "Entity "
+                                      + rootUrl
+                                      + type.getVal()
+                                      + " should not have been created but response Code  is: "
+                                      +
+                                      response.getStatusLine()
+                                              .getStatusCode());
 
-        JsonNode result = mapper.readTree(response.getEntity().getContent());
+        JsonNode result = mapper.readTree(response.getEntity()
+                                                  .getContent());
         if (logger.isTraceEnabled()) {
             System.out.printf("RETURNED by Server: %s\n", request.getURI());
             System.out.println(result.toPrettyString());
@@ -124,14 +140,16 @@ abstract class ConformanceTests implements TestUtil {
 
     protected JsonNode patchEntity(EntityType type, String body, String id) throws IOException {
         HttpPatch request = new HttpPatch(rootUrl
-                                              + type.getVal()
-                                              + "("
-                                              + id
-                                              + ")");
+                + type.getVal()
+                + "("
+                + id
+                + ")");
         request.setHeader("Content-Type", "application/json");
         request.setEntity(new StringEntity(body));
 
-        HttpResponse response = HttpClientBuilder.create().build().execute(request);
+        HttpResponse response = HttpClientBuilder.create()
+                                                 .build()
+                                                 .execute(request);
 
         if (logger.isTraceEnabled()) {
             System.out.printf("PATCHed to URL: %s\n", request.getURI());
@@ -139,118 +157,132 @@ abstract class ConformanceTests implements TestUtil {
         }
 
         // Check Response MIME Type
-        String mimeType = ContentType.getOrDefault(response.getEntity()).getMimeType();
+        String mimeType = ContentType.getOrDefault(response.getEntity())
+                                     .getMimeType();
         Assertions.assertEquals(jsonMimeType, mimeType);
 
-        JsonNode result = mapper.readTree(response.getEntity().getContent());
+        JsonNode result = mapper.readTree(response.getEntity()
+                                                  .getContent());
         if (logger.isTraceEnabled()) {
             System.out.printf("RETURNED by Server: %s\n", request.getURI());
             System.out.println(result.toPrettyString());
         }
-        int statusCode = response.getStatusLine().getStatusCode();
+        int statusCode = response.getStatusLine()
+                                 .getStatusCode();
         Assertions.assertEquals(
-            200,
-            statusCode,
-            "Error: PATCH does not work properly for " + request.getURI()
-        );
+                                200,
+                                statusCode,
+                                "Error: PATCH does not work properly for " + request.getURI());
         return result;
     }
 
     /**
-     * This method created the URL string for the entity with specific id and
-     * then PATCH invalid entity with urlParameters to that URL and confirms
-     * that the response is correct based on specification.
+     * This method created the URL string for the entity with specific id and then PATCH invalid entity with
+     * urlParameters to that URL and confirms that the response is correct based on specification.
      *
-     * @param type Entity type in from EntityType enum
-     * @param body The PATCH body (invalid)
-     * @param id   The id of requested entity
+     * @param type
+     *        Entity type in from EntityType enum
+     * @param body
+     *        The PATCH body (invalid)
+     * @param id
+     *        The id of requested entity
      */
     protected void patchInvalidEntity(EntityType type, String body, String id) throws IOException {
         HttpPatch request = new HttpPatch(rootUrl
-                                              + type.getVal()
-                                              + "("
-                                              + id
-                                              + ")");
+                + type.getVal()
+                + "("
+                + id
+                + ")");
         request.setHeader("Content-Type", "application/json");
         request.setEntity(new StringEntity(body));
 
-        HttpResponse response = HttpClientBuilder.create().build().execute(request);
+        HttpResponse response = HttpClientBuilder.create()
+                                                 .build()
+                                                 .execute(request);
 
         if (logger.isTraceEnabled()) {
             System.out.printf("PATCHed to URL: %s\n", request.getURI());
             System.out.println(body);
         }
 
-        int statusCode = response.getStatusLine().getStatusCode();
+        int statusCode = response.getStatusLine()
+                                 .getStatusCode();
 
         if (logger.isTraceEnabled()) {
             System.out.printf("RETURNED by Server: %s\n", request.getURI());
             System.out.println("Statuscode:" + statusCode);
         }
         Assertions.assertEquals(
-            400,
-            statusCode,
-            "Error: Patching related entities inline must be illegal for " + request.getURI()
-        );
+                                400,
+                                statusCode,
+                                "Error: Patching related entities inline must be illegal for " + request.getURI());
     }
 
     /**
-     * This method create the URL string for a nonexistent entity and send the
-     * DELETE request to that URL and confirm that the response is correct based
-     * on specification.
+     * This method create the URL string for a nonexistent entity and send the DELETE request to that URL and
+     * confirm that the response is correct based on specification.
      *
-     * @param type Entity type in from EntityType enum
+     * @param type
+     *        Entity type in from EntityType enum
      */
     protected void deleteNonexistentEntity(EntityType type) throws IOException {
         HttpDelete request = new HttpDelete(rootUrl
-                                                + type.getVal()
-                                                + "("
-                                                + "aaaaaa"
-                                                + ")");
+                + type.getVal()
+                + "("
+                + "aaaaaa"
+                + ")");
         request.setHeader("Content-Type", "application/json");
 
-        HttpResponse response = HttpClientBuilder.create().build().execute(request);
+        HttpResponse response = HttpClientBuilder.create()
+                                                 .build()
+                                                 .execute(request);
 
         if (logger.isTraceEnabled()) {
             System.out.printf("DELETEd to URL: %s\n", request.getURI());
         }
 
-        int statusCode = response.getStatusLine().getStatusCode();
+        int statusCode = response.getStatusLine()
+                                 .getStatusCode();
 
         if (logger.isTraceEnabled()) {
             System.out.printf("RETURNED by Server: %s\n", request.getURI());
             System.out.println("Statuscode:" + statusCode);
         }
         Assertions.assertEquals(
-            404,
-            statusCode,
-            "DELETE does not work properly for nonexistent " + request.getURI()
-        );
+                                404,
+                                statusCode,
+                                "DELETE does not work properly for nonexistent " + request.getURI());
     }
 
     protected void deleteEverythings() throws IOException, URISyntaxException {
         for (EntityType type : EntityType.values()) {
             for (JsonNode elem : getCollection(type).get("value")) {
-                deleteEntity(type, elem.get(idKey).asText(), false);
+                deleteEntity(type,
+                             elem.get(idKey)
+                                 .asText(),
+                             false);
             }
         }
     }
 
     protected void deleteEntity(EntityType type, String id, boolean canError) throws IOException {
         HttpDelete request = new HttpDelete(rootUrl
-                                                + type.getVal()
-                                                + "("
-                                                + id
-                                                + ")");
+                + type.getVal()
+                + "("
+                + id
+                + ")");
         request.setHeader("Content-Type", "application/json");
 
-        HttpResponse response = HttpClientBuilder.create().build().execute(request);
+        HttpResponse response = HttpClientBuilder.create()
+                                                 .build()
+                                                 .execute(request);
 
         if (logger.isTraceEnabled()) {
             System.out.printf("DELETEd to URL: %s\n", request.getURI());
         }
 
-        int statusCode = response.getStatusLine().getStatusCode();
+        int statusCode = response.getStatusLine()
+                                 .getStatusCode();
 
         if (logger.isTraceEnabled()) {
             System.out.printf("RETURNED by Server: %s\n", request.getURI());
@@ -258,16 +290,15 @@ abstract class ConformanceTests implements TestUtil {
         }
         if (!canError) {
             Assertions.assertEquals(
-                200,
-                statusCode,
-                "DELETE does not work properly for " + request.getURI()
-            );
+                                    200,
+                                    statusCode,
+                                    "DELETE does not work properly for " + request.getURI());
         }
     }
 
     protected JsonNode getEntity(EntityType type, String id, String queryOption) throws IOException {
         String query = URLEncoder.encode(queryOption, StandardCharsets.UTF_8.toString());
-        //String query = UriUtils.encode(queryOption, Charset.defaultCharset());
+        // String query = UriUtils.encode(queryOption, Charset.defaultCharset());
         return getEntity(type.getVal() + "(" + id + ")" + "?" + query);
     }
 
@@ -282,65 +313,96 @@ abstract class ConformanceTests implements TestUtil {
     protected JsonNode getEntity(String path) throws IOException {
         logger.trace("Requesting:" + rootUrl + path);
         HttpGet request = new HttpGet(rootUrl + path);
-        HttpResponse response = HttpClientBuilder.create().build().execute(request);
+        HttpResponse response = HttpClientBuilder.create()
+                                                 .build()
+                                                 .execute(request);
 
         // Check Response MIME Type
-        String mimeType = ContentType.getOrDefault(response.getEntity()).getMimeType();
+        String mimeType = ContentType.getOrDefault(response.getEntity())
+                                     .getMimeType();
         Assertions.assertEquals(jsonMimeType, mimeType, "Wrong MIME Type returned on path: " + path);
 
         Assertions.assertEquals(200,
-                                response.getStatusLine().getStatusCode(),
-                                "ERROR: Did not receive 200 OK for path: " + path
-                                    + " Instead received Status Code: " + response.getStatusLine().getStatusCode());
-        return mapper.readTree(response.getEntity().getContent());
+                                response.getStatusLine()
+                                        .getStatusCode(),
+                                "ERROR: Did not receive 200 OK for path: "
+                                        + path
+                                        + " Instead received Status Code: "
+                                        + response.getStatusLine()
+                                                  .getStatusCode());
+        return mapper.readTree(response.getEntity()
+                                       .getContent());
     }
 
     protected String getEntityValue(EntityType type, String id, String property) throws IOException {
         String url = type.getVal() + "(" + id + ")" + "/" + property + "/$value";
         HttpGet request = new HttpGet(rootUrl + url);
-        HttpResponse response = HttpClientBuilder.create().build().execute(request);
+        HttpResponse response = HttpClientBuilder.create()
+                                                 .build()
+                                                 .execute(request);
 
         // Check Response MIME Type
-        String mimeType = ContentType.getOrDefault(response.getEntity()).getMimeType();
+        String mimeType = ContentType.getOrDefault(response.getEntity())
+                                     .getMimeType();
         Assertions.assertEquals("text/plain", mimeType);
 
         Assertions.assertEquals(200,
-                                response.getStatusLine().getStatusCode(),
-                                "ERROR: Did not receive 200 OK for path: " + url
-                                    + " Instead received Status Code: " + response.getStatusLine().getStatusCode());
-        return new BufferedReader(new InputStreamReader(response.getEntity().getContent()))
-            .lines().collect(Collectors.joining(""));
+                                response.getStatusLine()
+                                        .getStatusCode(),
+                                "ERROR: Did not receive 200 OK for path: "
+                                        + url
+                                        + " Instead received Status Code: "
+                                        + response.getStatusLine()
+                                                  .getStatusCode());
+        return new BufferedReader(new InputStreamReader(response.getEntity()
+                                                                .getContent()))
+                                                                               .lines()
+                                                                               .collect(Collectors.joining(""));
     }
 
     protected JsonNode getRootResponse() throws IOException {
         HttpGet request = new HttpGet(rootUrl);
-        HttpResponse response = HttpClientBuilder.create().build().execute(request);
+        HttpResponse response = HttpClientBuilder.create()
+                                                 .build()
+                                                 .execute(request);
 
         // Check Response MIME Type
-        String mimeType = ContentType.getOrDefault(response.getEntity()).getMimeType();
+        String mimeType = ContentType.getOrDefault(response.getEntity())
+                                     .getMimeType();
         Assertions.assertEquals(jsonMimeType, mimeType);
 
         Assertions.assertEquals(200,
-                                response.getStatusLine().getStatusCode(),
-                                "ERROR: Did not receive 200 OK for path: " + rootUrl
-                                    + " Instead received Status Code: " + response.getStatusLine().getStatusCode());
-        return mapper.readTree(response.getEntity().getContent());
+                                response.getStatusLine()
+                                        .getStatusCode(),
+                                "ERROR: Did not receive 200 OK for path: "
+                                        + rootUrl
+                                        + " Instead received Status Code: "
+                                        + response.getStatusLine()
+                                                  .getStatusCode());
+        return mapper.readTree(response.getEntity()
+                                       .getContent());
     }
 
     protected void getNonExistentEntity(EntityType type) throws IOException {
         HttpGet request = new HttpGet(rootUrl + type.getVal() + "(aaaaaa)");
-        HttpResponse response = HttpClientBuilder.create().build().execute(request);
+        HttpResponse response = HttpClientBuilder.create()
+                                                 .build()
+                                                 .execute(request);
 
         // Check Response MIME Type
-        String mimeType = ContentType.getOrDefault(response.getEntity()).getMimeType();
+        String mimeType = ContentType.getOrDefault(response.getEntity())
+                                     .getMimeType();
         Assertions.assertEquals(jsonMimeType, mimeType);
 
         Assertions.assertEquals(404,
-                                response.getStatusLine().getStatusCode(),
+                                response.getStatusLine()
+                                        .getStatusCode(),
                                 "ERROR: Did not receive 404 NOT FOUND for path: "
-                                    + type.getVal()
-                                    + "(aaaaaa)"
-                                    + " Instead received Status Code: " + response.getStatusLine().getStatusCode());
+                                        + type.getVal()
+                                        + "(aaaaaa)"
+                                        + " Instead received Status Code: "
+                                        + response.getStatusLine()
+                                                  .getStatusCode());
     }
 
     protected JsonNode getCollection(EntityType type, String filters) throws IOException {
@@ -349,20 +411,28 @@ abstract class ConformanceTests implements TestUtil {
 
     protected JsonNode getCollection(String url, String filters) throws IOException {
         String query = URLEncoder.encode(filters, StandardCharsets.UTF_8.toString());
-        //String query = UriUtils.encode(filters, Charset.defaultCharset());
+        // String query = UriUtils.encode(filters, Charset.defaultCharset());
         logger.debug("GET Collection: " + url + "?" + query);
         HttpGet request = new HttpGet(url + "?" + query);
-        HttpResponse response = HttpClientBuilder.create().build().execute(request);
+        HttpResponse response = HttpClientBuilder.create()
+                                                 .build()
+                                                 .execute(request);
 
         // Check Response MIME Type
-        String mimeType = ContentType.getOrDefault(response.getEntity()).getMimeType();
+        String mimeType = ContentType.getOrDefault(response.getEntity())
+                                     .getMimeType();
         Assertions.assertEquals(jsonMimeType, mimeType);
 
         Assertions.assertEquals(200,
-                                response.getStatusLine().getStatusCode(),
-                                "ERROR: Did not receive 200 OK for path: " + url
-                                    + " Instead received Status Code: " + response.getStatusLine().getStatusCode());
-        return mapper.readTree(response.getEntity().getContent());
+                                response.getStatusLine()
+                                        .getStatusCode(),
+                                "ERROR: Did not receive 200 OK for path: "
+                                        + url
+                                        + " Instead received Status Code: "
+                                        + response.getStatusLine()
+                                                  .getStatusCode());
+        return mapper.readTree(response.getEntity()
+                                       .getContent());
     }
 
     protected JsonNode getCollection(EntityType type) throws IOException {
@@ -370,15 +440,17 @@ abstract class ConformanceTests implements TestUtil {
     }
 
     /**
-     * This helper method is checking the mandatory properties of the response
-     * for a specific entity
+     * This helper method is checking the mandatory properties of the response for a specific entity
      *
-     * @param mandatoryProperties List of mandatory properties
-     * @param response            The response of the GET request to be checked
+     * @param mandatoryProperties
+     *        List of mandatory properties
+     * @param response
+     *        The response of the GET request to be checked
      */
     protected void checkEntityProperties(Set<String> mandatoryProperties, JsonNode response) {
         if (response.has(value)) {
-            response.get(value).forEach(v -> checkObjectProperties(mandatoryProperties, v));
+            response.get(value)
+                    .forEach(v -> checkObjectProperties(mandatoryProperties, v));
         } else {
             checkObjectProperties(mandatoryProperties, response);
         }
@@ -391,29 +463,30 @@ abstract class ConformanceTests implements TestUtil {
             }
             Assertions.assertTrue(response.has(property),
                                   "Entity: "
-                                      + response.toPrettyString()
-                                      + " does not have mandatory property: "
-                                      + property);
+                                          + response.toPrettyString()
+                                          + " does not have mandatory property: "
+                                          + property);
             Assertions.assertNotNull(response.get(property),
                                      "Entity: "
-                                         + response.toPrettyString()
-                                         + " does not have mandatory property: "
-                                         + property);
+                                             + response.toPrettyString()
+                                             + " does not have mandatory property: "
+                                             + property);
         }
     }
 
     /**
      * Check the database is empty of certain entity types
      *
-     * @param entityTypes List of entity types
+     * @param entityTypes
+     *        List of entity types
      */
     protected void checkNotExisting(Iterable<EntityType> entityTypes) throws Exception {
         for (EntityType entityType : entityTypes) {
             JsonNode response = getEntity(entityType.getVal());
             Assertions.assertTrue(
-                response.get("value").isEmpty(),
-                "Entity with type: " + entityType.name() + " is created although it shouldn't"
-            );
+                                  response.get("value")
+                                          .isEmpty(),
+                                  "Entity with type: " + entityType.name() + " is created although it shouldn't");
         }
     }
 
@@ -421,9 +494,9 @@ abstract class ConformanceTests implements TestUtil {
         for (EntityType entityType : entityTypes) {
             JsonNode response = getEntity(entityType.getVal());
             Assertions.assertTrue(
-                !response.get("value").isEmpty(),
-                "No Entity with type: " + entityType.name() + " is present"
-            );
+                                  !response.get("value")
+                                           .isEmpty(),
+                                  "No Entity with type: " + entityType.name() + " is present");
         }
     }
 

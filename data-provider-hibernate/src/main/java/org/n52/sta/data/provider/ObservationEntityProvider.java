@@ -70,9 +70,8 @@ public class ObservationEntityProvider extends BaseEntityProvider<Observation> {
         ObservationGraphBuilder graphBuilder = new ObservationGraphBuilder(req);
         addUnfilteredExpandItems(req.getQueryOptions(), graphBuilder);
 
-        Specification<?> spec =
-            buildSpecification(req, new ObservationQuerySpecification());
-        Optional<DataEntity<?>> platform = observationRepository.findOne(spec, graphBuilder);
+        Specification< ? > spec = buildSpecification(req, new ObservationQuerySpecification());
+        Optional<DataEntity< ? >> platform = observationRepository.findOne(spec, graphBuilder);
         return platform.map(entity -> new ObservationData(entity, propertyMapping));
     }
 
@@ -84,9 +83,8 @@ public class ObservationEntityProvider extends BaseEntityProvider<Observation> {
         ObservationGraphBuilder graphBuilder = new ObservationGraphBuilder(req);
         addUnfilteredExpandItems(options, graphBuilder);
 
-        Specification<?> spec =
-            buildSpecification(req, new ObservationQuerySpecification());
-        Page<DataEntity<?>> results = observationRepository.findAll(spec, pageable, graphBuilder);
+        Specification< ? > spec = buildSpecification(req, new ObservationQuerySpecification());
+        Page<DataEntity< ? >> results = observationRepository.findAll(spec, pageable, graphBuilder);
         return new StaEntityPage<>(Observation.class, results, data -> new ObservationData(data, propertyMapping));
     }
 

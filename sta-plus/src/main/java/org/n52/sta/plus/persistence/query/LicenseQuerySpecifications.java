@@ -25,6 +25,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
+
 package org.n52.sta.plus.persistence.query;
 
 import javax.persistence.criteria.Expression;
@@ -49,68 +50,67 @@ public class LicenseQuerySpecifications extends EntityQuerySpecifications<Licens
         return (root, query, builder) -> {
             Subquery<GroupEntity> subquery = query.subquery(GroupEntity.class);
             Root<GroupEntity> obs = subquery.from(GroupEntity.class);
-            subquery.select(obs.get(GroupEntity.PROPERTY_LICENSE).get(DescribableEntity.PROPERTY_ID))
-                .where(builder.equal(obs.get(DescribableEntity.PROPERTY_STA_IDENTIFIER), identifier));
+            subquery.select(obs.get(GroupEntity.PROPERTY_LICENSE)
+                               .get(DescribableEntity.PROPERTY_ID))
+                    .where(builder.equal(obs.get(DescribableEntity.PROPERTY_STA_IDENTIFIER), identifier));
             return builder.equal(root.get(DescribableEntity.PROPERTY_ID), subquery);
         };
     }
 
     @Override
     protected Specification<LicenseEntity> handleRelatedPropertyFilter(String propertyName,
-                                                                       Specification<?> propertyValue) {
+                                                                       Specification< ? > propertyValue) {
         return (root, query, builder) -> {
             /*
-            if (StaConstants.DATASTREAMS.equals(propertyName)) {
-                Subquery<LicenseEntity> sq = query.subquery(LicenseEntity.class);
-                Root<AbstractDatasetEntity> datastream = sq.from(AbstractDatasetEntity.class);
-                sq.select(datastream.get(StaPlusDataEntity.PROPERTY_LICENSE))
-                    .where(((Specification<AbstractDatasetEntity>) propertyValue).toPredicate(datastream,
-                                                                                              query,
-                                                                                              builder));
-                return builder.in(root.get(AbstractDatasetEntity.PROPERTY_ID)).value(sq);
-            } else {
-                throw new RuntimeException("Could not find related property: " + propertyName);
-            }
-            */
+             * if (StaConstants.DATASTREAMS.equals(propertyName)) { Subquery<LicenseEntity> sq =
+             * query.subquery(LicenseEntity.class); Root<AbstractDatasetEntity> datastream =
+             * sq.from(AbstractDatasetEntity.class);
+             * sq.select(datastream.get(StaPlusDataEntity.PROPERTY_LICENSE))
+             * .where(((Specification<AbstractDatasetEntity>) propertyValue).toPredicate(datastream, query,
+             * builder)); return builder.in(root.get(AbstractDatasetEntity.PROPERTY_ID)).value(sq); } else {
+             * throw new RuntimeException("Could not find related property: " + propertyName); }
+             */
             throw new RuntimeException("Could not find related property: " + propertyName);
         };
     }
 
-    @Override protected Specification<LicenseEntity> handleDirectPropertyFilter(
-        String propertyName,
-        Expression<?> propertyValue,
-        FilterConstants.ComparisonOperator operator,
-        boolean switched) {
+    @Override
+    protected Specification<LicenseEntity> handleDirectPropertyFilter(
+                                                                      String propertyName,
+                                                                      Expression< ? > propertyValue,
+                                                                      FilterConstants.ComparisonOperator operator,
+                                                                      boolean switched) {
         return (Specification<LicenseEntity>) (root, query, builder) -> {
             try {
                 switch (propertyName) {
-                    case StaConstants.PROP_ID:
-                        return handleDirectStringPropertyFilter(root.get(LicenseEntity.STA_IDENTIFIER),
-                                                                propertyValue,
-                                                                operator,
-                                                                builder,
-                                                                false);
-                    case StaConstants.PROP_NAME:
-                        return handleDirectStringPropertyFilter(root.get(LicenseEntity.NAME),
-                                                                propertyValue,
-                                                                operator,
-                                                                builder,
-                                                                switched);
-                    case StaConstants.PROP_DEFINITION:
-                        return handleDirectStringPropertyFilter(root.get(LicenseEntity.PROPERTY_DEFINITION),
-                                                                propertyValue,
-                                                                operator,
-                                                                builder,
-                                                                switched);
-                    case StaConstants.PROP_LOGO:
-                        return handleDirectStringPropertyFilter(root.get(LicenseEntity.PROPERTY_LOGO),
-                                                                propertyValue,
-                                                                operator,
-                                                                builder,
-                                                                switched);
-                    default:
-                        throw new RuntimeException("Error getting filter for Property: \"" + propertyName
-                                                       + "\". No such property in Entity.");
+                case StaConstants.PROP_ID:
+                    return handleDirectStringPropertyFilter(root.get(LicenseEntity.STA_IDENTIFIER),
+                                                            propertyValue,
+                                                            operator,
+                                                            builder,
+                                                            false);
+                case StaConstants.PROP_NAME:
+                    return handleDirectStringPropertyFilter(root.get(LicenseEntity.NAME),
+                                                            propertyValue,
+                                                            operator,
+                                                            builder,
+                                                            switched);
+                case StaConstants.PROP_DEFINITION:
+                    return handleDirectStringPropertyFilter(root.get(LicenseEntity.PROPERTY_DEFINITION),
+                                                            propertyValue,
+                                                            operator,
+                                                            builder,
+                                                            switched);
+                case StaConstants.PROP_LOGO:
+                    return handleDirectStringPropertyFilter(root.get(LicenseEntity.PROPERTY_LOGO),
+                                                            propertyValue,
+                                                            operator,
+                                                            builder,
+                                                            switched);
+                default:
+                    throw new RuntimeException("Error getting filter for Property: \""
+                            + propertyName
+                            + "\". No such property in Entity.");
                 }
             } catch (STAInvalidFilterExpressionException e) {
                 throw new RuntimeException(e);

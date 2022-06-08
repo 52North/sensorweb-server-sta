@@ -25,6 +25,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
+
 package org.n52.sta.old.utils;
 
 import java.sql.Timestamp;
@@ -49,8 +50,10 @@ public class TimeUtil {
     /**
      * Create {@link Time} from {@link DateTime}s
      *
-     * @param start Start {@link DateTime}
-     * @param end   End {@link DateTime}
+     * @param start
+     *        Start {@link DateTime}
+     * @param end
+     *        End {@link DateTime}
      * @return Resulting {@link Time}
      */
     public static Time createTime(DateTime start, DateTime end) {

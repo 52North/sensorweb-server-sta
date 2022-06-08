@@ -25,6 +25,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
+
 package org.n52.sta.plus.old.serialize.json;
 
 import java.util.HashSet;
@@ -67,26 +68,26 @@ public class JSONPlusObservation extends JSONBase.JSONwithIdTime<PlusObservation
         PlusObservation observation = new PlusObservation(base.parseToDTO(type));
 
         switch (type) {
-            case FULL:
-                parseReferencedFrom();
-                completePostEntity(observation);
-                return observation;
-            case PATCH:
-                parseReferencedFrom();
-                completePatchEntity(observation);
-                return observation;
-            case REFERENCE:
-                // assertIsNull(phenomenonTime, INVALID_REFERENCED_ENTITY);
-                // assertIsNull(resultTime, INVALID_REFERENCED_ENTITY);
-                // assertIsNull(result, INVALID_REFERENCED_ENTITY);
-                // assertIsNull(resultTime, INVALID_REFERENCED_ENTITY);
-                // assertIsNull(resultQuality, INVALID_REFERENCED_ENTITY);
-                // assertIsNull(parameters, INVALID_REFERENCED_ENTITY);
-                // observation.setId(identifier);
-                // return observation;
-                throw new IllegalArgumentException("REFERENCE not implemented yet");
-            default:
-                return null;
+        case FULL:
+            parseReferencedFrom();
+            completePostEntity(observation);
+            return observation;
+        case PATCH:
+            parseReferencedFrom();
+            completePatchEntity(observation);
+            return observation;
+        case REFERENCE:
+            // assertIsNull(phenomenonTime, INVALID_REFERENCED_ENTITY);
+            // assertIsNull(resultTime, INVALID_REFERENCED_ENTITY);
+            // assertIsNull(result, INVALID_REFERENCED_ENTITY);
+            // assertIsNull(resultTime, INVALID_REFERENCED_ENTITY);
+            // assertIsNull(resultQuality, INVALID_REFERENCED_ENTITY);
+            // assertIsNull(parameters, INVALID_REFERENCED_ENTITY);
+            // observation.setId(identifier);
+            // return observation;
+            throw new IllegalArgumentException("REFERENCE not implemented yet");
+        default:
+            return null;
         }
     }
 
@@ -103,7 +104,7 @@ public class JSONPlusObservation extends JSONBase.JSONwithIdTime<PlusObservation
             Set<RelationDTO> subjects = new HashSet<>();
             for (JSONRelation sub : Subjects) {
                 subjects.add(sub.parseToDTO(JSONBase.EntityType.FULL,
-                        JSONBase.EntityType.REFERENCE));
+                                            JSONBase.EntityType.REFERENCE));
             }
             observation.setSubjects(subjects);
         }
@@ -112,7 +113,7 @@ public class JSONPlusObservation extends JSONBase.JSONwithIdTime<PlusObservation
             Set<RelationDTO> objects = new HashSet<>();
             for (JSONRelation obj : Objects) {
                 objects.add(obj.parseToDTO(JSONBase.EntityType.FULL,
-                        JSONBase.EntityType.REFERENCE));
+                                           JSONBase.EntityType.REFERENCE));
             }
             observation.setObjects(objects);
         }
@@ -121,14 +122,14 @@ public class JSONPlusObservation extends JSONBase.JSONwithIdTime<PlusObservation
             Set<GroupDTO> objects = new HashSet<>();
             for (JSONGroup obj : ObservationGroups) {
                 objects.add(obj.parseToDTO(JSONBase.EntityType.FULL,
-                        JSONBase.EntityType.REFERENCE));
+                                           JSONBase.EntityType.REFERENCE));
             }
             observation.setObservationGroups(objects);
         }
 
         if (License != null) {
             observation.setLicense(License.parseToDTO(JSONBase.EntityType.FULL,
-                    JSONBase.EntityType.REFERENCE));
+                                                      JSONBase.EntityType.REFERENCE));
         }
     }
 

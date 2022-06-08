@@ -25,6 +25,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
+
 package org.n52.sta.api.domain.service;
 
 import org.n52.sta.api.ProviderException;
@@ -51,6 +52,5 @@ public class ThingDomainService extends DomainServiceAdapter<Thing> {
 
         return exists;
     }
-
 
 }

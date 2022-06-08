@@ -25,6 +25,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
+
 package org.n52.sta.config;
 
 import org.n52.sta.data.provider.DatastreamEntityProvider;
@@ -88,7 +89,7 @@ public class DataProviderConfiguration {
     }
 
     @Bean
-    public ObservationEntityProvider observationEntityProvider(ObservationRepository<?> repository) {
+    public ObservationEntityProvider observationEntityProvider(ObservationRepository< ? > repository) {
         return new ObservationEntityProvider(repository, propertyMapping);
     }
 
@@ -99,9 +100,8 @@ public class DataProviderConfiguration {
 
     @Configuration
     @EnableJpaRepositories(
-            repositoryBaseClass = BaseRepositoryImpl.class,
-            basePackages = "org.n52.sta.data.repositories"
-    )
+        repositoryBaseClass = BaseRepositoryImpl.class,
+        basePackages = "org.n52.sta.data.repositories")
     public static class RepositoryConfig {
         // inject via annotations
     }

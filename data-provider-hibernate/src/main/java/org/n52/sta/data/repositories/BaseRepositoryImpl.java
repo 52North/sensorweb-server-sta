@@ -25,6 +25,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
+
 package org.n52.sta.data.repositories;
 
 import java.util.List;
@@ -53,11 +54,13 @@ import org.springframework.data.jpa.repository.support.JpaEntityInformation;
 import org.springframework.data.jpa.repository.support.SimpleJpaRepository;
 
 /**
- * Extends {@link SimpleJpaRepository} to provide dynamic fetchment of entity
- * members via {@link EntityGraph}.
+ * Extends {@link SimpleJpaRepository} to provide dynamic fetchment of entity members via {@link EntityGraph}.
  */
 public class BaseRepositoryImpl<T>
-        extends SimpleJpaRepository<T, Long> implements BaseRepository<T>, RepositoryConstants {
+        extends
+        SimpleJpaRepository<T, Long> implements
+        BaseRepository<T>,
+        RepositoryConstants {
 
     private final EntityManager em;
 
@@ -180,7 +183,9 @@ public class BaseRepositoryImpl<T>
         query.select(root.get(columnName));
         asPredicate(spec, root, query).ifPresent(query::where);
 
-        if (pageable != null && pageable.getSort().isSorted()) {
+        if (pageable != null
+                && pageable.getSort()
+                           .isSorted()) {
             query.orderBy(QueryUtils.toOrders(pageable.getSort(), root, criteriaBuilder));
         }
         return em.createQuery(query);
@@ -197,17 +202,17 @@ public class BaseRepositoryImpl<T>
     private void addEntityGraph(TypedQuery<T> query, EntityGraph<T> entityGraph) {
         if (entityGraph != null) {
             query.setHint("javax.persistence.fetchgraph", entityGraph);
-            //query.setHint("javax.persistence.loadgraph", entityGraph);
+            // query.setHint("javax.persistence.loadgraph", entityGraph);
         }
     }
 
-    private Optional<Predicate> asPredicate(Specification<T> spec, Root<T> root, CriteriaQuery<?> query) {
+    private Optional<Predicate> asPredicate(Specification<T> spec, Root<T> root, CriteriaQuery< ? > query) {
         return spec != null
                 ? Optional.ofNullable(spec.toPredicate(root, query, criteriaBuilder))
                 : Optional.empty();
     }
 
-    private interface ResolvableWhere<T>  {
+    private interface ResolvableWhere<T> {
         Predicate resolve(Root<T> root);
     }
 

@@ -25,6 +25,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
+
 package org.n52.sta.data.old.repositories;
 
 import java.util.List;
@@ -48,84 +49,101 @@ import org.springframework.lang.Nullable;
 public interface EntityGraphRepository<T, I> extends JpaSpecificationExecutor<T>, JpaRepository<T, I> {
 
     /**
-     * Gets content of columnName of entity that is specified by spec. Used for fetching only identifier instead of
-     * whole Entity
+     * Gets content of columnName of entity that is specified by spec. Used for fetching only identifier
+     * instead of whole Entity
      *
-     * @param spec       Specification of Entity
-     * @param columnName Name of Column
+     * @param spec
+     *        Specification of Entity
+     * @param columnName
+     *        Name of Column
      * @return Content of the column with columnName if spec matches. Optional.empty() otherwise
      */
     Optional<String> getColumn(Specification<T> spec, String columnName);
 
     /**
-     * Gets content of columnName of entity that is specified by spec. Used for fetching only identifier instead of
-     * whole Entity
+     * Gets content of columnName of entity that is specified by spec. Used for fetching only identifier
+     * instead of whole Entity
      *
-     * @param spec       Specification of Entity
-     * @param pageable   Pagination Specification
-     * @param columnName Name of Column
+     * @param spec
+     *        Specification of Entity
+     * @param pageable
+     *        Pagination Specification
+     * @param columnName
+     *        Name of Column
      * @return Content of the column with columnName if spec matches. Optional.empty() otherwise
      */
     List<String> getColumnList(Specification<T> spec, Pageable pageable, String columnName);
 
     /**
-     * Retrieves an entity by its id. Additionally fetches all related entities given by the provided EntityGraph.
-     * All provided Graphs are merged internally.
+     * Retrieves an entity by its id. Additionally fetches all related entities given by the provided
+     * EntityGraph. All provided Graphs are merged internally.
      *
-     * @param id          must not be {@literal null}.
-     * @param fetchGraphs string representation of EntityGraph.
+     * @param id
+     *        must not be {@literal null}.
+     * @param fetchGraphs
+     *        string representation of EntityGraph.
      * @return the entity with the given id or {@literal Optional#empty()} if none found.
-     * @throws IllegalArgumentException if {@literal id} is {@literal null}.
+     * @throws IllegalArgumentException
+     *         if {@literal id} is {@literal null}.
      */
     Optional<T> findById(Long id, FetchGraph... fetchGraphs);
 
     /**
-     * Returns a single entity matching the given {@link Specification} or {@link Optional#empty()} if none found.
-     * Additionally fetches all related entities given by the provided EntityGraph. All provided Graphs are merged
-     * internally.
+     * Returns a single entity matching the given {@link Specification} or {@link Optional#empty()} if none
+     * found. Additionally fetches all related entities given by the provided EntityGraph. All provided Graphs
+     * are merged internally.
      *
-     * @param spec        can be {@literal null}.
-     * @param fetchGraphs string representation of EntityGraph.
+     * @param spec
+     *        can be {@literal null}.
+     * @param fetchGraphs
+     *        string representation of EntityGraph.
      * @return Optional possibly wrapping the found entity.
-     * @throws org.springframework.dao.IncorrectResultSizeDataAccessException if more than one entity found.
+     * @throws org.springframework.dao.IncorrectResultSizeDataAccessException
+     *         if more than one entity found.
      */
     Optional<T> findOne(@Nullable Specification<T> spec, FetchGraph... fetchGraphs);
 
     /**
-     * Returns all entities matching the given {@link Specification}.
-     * Additionally fetches all related entities given by the provided EntityGraph. All provided Graphs are merged
-     * internally.
+     * Returns all entities matching the given {@link Specification}. Additionally fetches all related
+     * entities given by the provided EntityGraph. All provided Graphs are merged internally.
      *
-     * @param spec        can be {@literal null}.
-     * @param fetchGraphs string representation of EntityGraph.
+     * @param spec
+     *        can be {@literal null}.
+     * @param fetchGraphs
+     *        string representation of EntityGraph.
      * @return never {@literal null}.
      */
     List<T> findAll(@Nullable Specification<T> spec, FetchGraph... fetchGraphs);
 
     /**
-     * Returns a {@link Page} of entities matching the given {@link Specification}.
-     * Additionally fetches all related entities given by the provided EntityGraph. All provided Graphs are merged
-     * internally.
+     * Returns a {@link Page} of entities matching the given {@link Specification}. Additionally fetches all
+     * related entities given by the provided EntityGraph. All provided Graphs are merged internally.
      *
-     * @param spec        can be {@literal null}.
-     * @param pageable    must not be {@literal null}.
-     * @param fetchGraphs string representation of EntityGraph.
+     * @param spec
+     *        can be {@literal null}.
+     * @param pageable
+     *        must not be {@literal null}.
+     * @param fetchGraphs
+     *        string representation of EntityGraph.
      * @return never {@literal null}.
      */
     Page<T> findAll(@Nullable Specification<T> spec, Pageable pageable, FetchGraph... fetchGraphs);
 
     /**
-     * Returns all entities matching the given {@link Specification} and {@link Sort}. Additionally fetches all
-     * related entities given by the provided EntityGraph. All provided Graphs are merged internally.
+     * Returns all entities matching the given {@link Specification} and {@link Sort}. Additionally fetches
+     * all related entities given by the provided EntityGraph. All provided Graphs are merged internally.
      *
-     * @param spec        can be {@literal null}.
-     * @param sort        must not be {@literal null}.
-     * @param fetchGraphs string representation of EntityGraph.
+     * @param spec
+     *        can be {@literal null}.
+     * @param sort
+     *        must not be {@literal null}.
+     * @param fetchGraphs
+     *        string representation of EntityGraph.
      * @return never {@literal null}.
      */
     List<T> findAll(@Nullable Specification<T> spec, Sort sort, FetchGraph... fetchGraphs);
 
-    //TODO: expand if necessary
+    // TODO: expand if necessary
     enum FetchGraph {
         FETCHGRAPH_DEFAULT("identifier"),
         FETCHGRAPH_PLATFORMS("platforms(parameters)"),
@@ -146,7 +164,6 @@ public interface EntityGraphRepository<T, I> extends JpaSpecificationExecutor<T>
         FETCHGRAPH_DATASET_FIRSTLAST_OBSERVATION("dataset(firstObservation,lastObservation)"),
         FETCHGRAPH_PROCEDUREHISTORY("procedureHistory"),
         FETCHGRAPH_CATEGORY("category"),
-
 
         // STA CitSci Extension,
         FETCHGRAPH_LICENSE("license(parameters)"),

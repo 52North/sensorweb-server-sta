@@ -25,6 +25,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
+
 package org.n52.sta.plus.old.serialize;
 
 import java.io.IOException;
@@ -52,7 +53,6 @@ public class ObservationRelationSerDes {
 
     protected static final String NAMESPACE = "namespace";
 
-
     @SuppressFBWarnings("EQ_DOESNT_OVERRIDE_EQUALS")
     public static class ObservationRelationDTOPatch implements EntityPatch<RelationDTO> {
 
@@ -68,9 +68,9 @@ public class ObservationRelationSerDes {
         }
     }
 
-
     public static class ObservationRelationSerializer
-        extends AbstractSTASerializer<RelationDTO> {
+            extends
+            AbstractSTASerializer<RelationDTO> {
 
         private static final long serialVersionUID = -1618289129123682794L;
 
@@ -84,32 +84,44 @@ public class ObservationRelationSerDes {
         public void serialize(RelationDTO obsRelation,
                               JsonGenerator gen,
                               SerializerProvider serializers)
-            throws IOException {
+                throws IOException {
             gen.writeStartObject();
 
             // olingo @iot links
-            if (!obsRelation.hasSelectOption() ||
-                obsRelation.getFieldsToSerialize().contains(STAEntityDefinition.PROP_ID)) {
+            if (!obsRelation.hasSelectOption()
+                    ||
+                    obsRelation.getFieldsToSerialize()
+                               .contains(STAEntityDefinition.PROP_ID)) {
                 writeId(gen, obsRelation.getId());
             }
-            if (!obsRelation.hasSelectOption() ||
-                obsRelation.getFieldsToSerialize().contains(STAEntityDefinition.PROP_SELF_LINK)) {
+            if (!obsRelation.hasSelectOption()
+                    ||
+                    obsRelation.getFieldsToSerialize()
+                               .contains(STAEntityDefinition.PROP_SELF_LINK)) {
                 writeSelfLink(gen, obsRelation.getId());
             }
 
-            if (!obsRelation.hasSelectOption() ||
-                obsRelation.getFieldsToSerialize().contains(STAEntityDefinition.PROP_DESCRIPTION)) {
+            if (!obsRelation.hasSelectOption()
+                    ||
+                    obsRelation.getFieldsToSerialize()
+                               .contains(STAEntityDefinition.PROP_DESCRIPTION)) {
                 gen.writeStringField(STAEntityDefinition.PROP_DESCRIPTION, obsRelation.getDescription());
             }
-            if (!obsRelation.hasSelectOption() ||
-                obsRelation.getFieldsToSerialize().contains(STAEntityDefinition.PROP_ROLE)) {
+            if (!obsRelation.hasSelectOption()
+                    ||
+                    obsRelation.getFieldsToSerialize()
+                               .contains(STAEntityDefinition.PROP_ROLE)) {
                 gen.writeStringField(STAEntityDefinition.PROP_ROLE, obsRelation.getRole());
             }
 
-            if (!obsRelation.hasSelectOption() ||
-                obsRelation.getFieldsToSerialize().contains(StaConstants.SUBJECT)) {
-                if (!obsRelation.hasExpandOption() ||
-                    obsRelation.getFieldsToExpand().get(StaConstants.SUBJECT) == null) {
+            if (!obsRelation.hasSelectOption()
+                    ||
+                    obsRelation.getFieldsToSerialize()
+                               .contains(StaConstants.SUBJECT)) {
+                if (!obsRelation.hasExpandOption()
+                        ||
+                        obsRelation.getFieldsToExpand()
+                                   .get(StaConstants.SUBJECT) == null) {
                     writeNavigationProp(gen, StaConstants.SUBJECT, obsRelation.getId());
                 } else {
                     gen.writeFieldName(StaConstants.SUBJECT);
@@ -118,10 +130,14 @@ public class ObservationRelationSerDes {
                                       serializers);
                 }
             }
-            if (!obsRelation.hasSelectOption() ||
-                obsRelation.getFieldsToSerialize().contains(StaConstants.OBJECT)) {
-                if (!obsRelation.hasExpandOption() ||
-                    obsRelation.getFieldsToExpand().get(StaConstants.OBJECT) == null) {
+            if (!obsRelation.hasSelectOption()
+                    ||
+                    obsRelation.getFieldsToSerialize()
+                               .contains(StaConstants.OBJECT)) {
+                if (!obsRelation.hasExpandOption()
+                        ||
+                        obsRelation.getFieldsToExpand()
+                                   .get(StaConstants.OBJECT) == null) {
                     writeNavigationProp(gen, StaConstants.OBJECT, obsRelation.getId());
                 } else {
                     gen.writeFieldName(StaConstants.OBJECT);
@@ -131,10 +147,13 @@ public class ObservationRelationSerDes {
                 }
             }
 
-            if (!obsRelation.hasSelectOption() ||
-                obsRelation.getFieldsToSerialize().contains(STAEntityDefinition.GROUPS)) {
+            if (!obsRelation.hasSelectOption()
+                    ||
+                    obsRelation.getFieldsToSerialize()
+                               .contains(STAEntityDefinition.GROUPS)) {
                 if (!obsRelation.hasExpandOption()
-                    || obsRelation.getFieldsToExpand().get(STAEntityDefinition.GROUPS) == null) {
+                        || obsRelation.getFieldsToExpand()
+                                      .get(STAEntityDefinition.GROUPS) == null) {
                     writeNavigationProp(gen, STAEntityDefinition.GROUPS, obsRelation.getId());
                 } else {
                     if (obsRelation.getObservationGroups() != null) {
@@ -150,7 +169,6 @@ public class ObservationRelationSerDes {
 
     }
 
-
     public static class ObservationRelationDeserializer extends StdDeserializer<RelationDTO> {
 
         private static final long serialVersionUID = 3942005672394573517L;
@@ -161,13 +179,14 @@ public class ObservationRelationSerDes {
 
         @Override
         public RelationDTO deserialize(JsonParser p, DeserializationContext ctxt) throws IOException {
-            return p.readValueAs(JSONRelation.class).parseToDTO(JSONBase.EntityType.FULL);
+            return p.readValueAs(JSONRelation.class)
+                    .parseToDTO(JSONBase.EntityType.FULL);
         }
     }
 
-
     public static class ObservationRelationPatchDeserializer
-        extends StdDeserializer<ObservationRelationDTOPatch> {
+            extends
+            StdDeserializer<ObservationRelationDTOPatch> {
 
         private static final long serialVersionUID = -6355786322787893665L;
 
@@ -177,9 +196,9 @@ public class ObservationRelationSerDes {
 
         @Override
         public ObservationRelationDTOPatch deserialize(JsonParser p, DeserializationContext ctxt)
-            throws IOException {
+                throws IOException {
             return new ObservationRelationDTOPatch(p.readValueAs(JSONRelation.class)
-                                                       .parseToDTO(JSONBase.EntityType.PATCH));
+                                                    .parseToDTO(JSONBase.EntityType.PATCH));
         }
     }
 }

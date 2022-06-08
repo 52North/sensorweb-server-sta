@@ -25,6 +25,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
+
 package org.n52.sta.api.old.entity;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -33,8 +34,8 @@ import org.n52.shetland.ogc.gml.time.Time;
 import org.n52.sta.api.old.dto.common.StaDTO;
 
 /**
- * Data Transfer Object for handling an Observation as specified in 18-088 OGC
- * SensorThingsAPI Part I Section 8.2.7
+ * Data Transfer Object for handling an Observation as specified in 18-088 OGC SensorThingsAPI Part I Section
+ * 8.2.7
  *
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
  */
@@ -53,8 +54,7 @@ public interface ObservationDTO extends StaDTO {
     void setResult(Object result);
 
     /**
-     * It is currently unclear what this element actually contains, so it is
-     * omitted for now. See:
+     * It is currently unclear what this element actually contains, so it is omitted for now. See:
      * https://github.com/opengeospatial/sensorthings/issues/68
      *
      * @return DQ_Element

@@ -25,6 +25,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
+
 package org.n52.sta.plus.persistence.service;
 
 import java.util.Optional;
@@ -59,7 +60,8 @@ import org.springframework.data.jpa.domain.Specification;
 // @Transactional
 // @Profile(StaConstants.STAPLUS)
 public class ProjectService
-        extends CitSciSTAServiceImpl<ProjectRepository, ProjectDTO, ProjectEntity> {
+        extends
+        CitSciSTAServiceImpl<ProjectRepository, ProjectDTO, ProjectEntity> {
 
     private static final ProjectQuerySpecifications pQS = new ProjectQuerySpecifications();
 
@@ -73,18 +75,21 @@ public class ProjectService
         if (expandOption != null) {
             for (ExpandItem expandItem : expandOption.getItems()) {
                 // We cannot handle nested $filter or $expand
-                if (expandItem.getQueryOptions().hasFilterFilter() || expandItem.getQueryOptions().hasExpandFilter()) {
+                if (expandItem.getQueryOptions()
+                              .hasFilterFilter()
+                        || expandItem.getQueryOptions()
+                                     .hasExpandFilter()) {
                     continue;
                 }
                 String expandProperty = expandItem.getPath();
                 if (ProjectEntityDefinition.NAVIGATION_PROPERTIES.contains(expandProperty)) {
                     return new EntityGraphRepository.FetchGraph[] {
-                            EntityGraphRepository.FetchGraph.FETCHGRAPH_DATASETS,
+                        EntityGraphRepository.FetchGraph.FETCHGRAPH_DATASETS,
                     };
                 } else {
                     throw new STAInvalidQueryException(String.format(INVALID_EXPAND_OPTION_SUPPLIED,
-                            expandProperty,
-                            StaConstants.PROJECT));
+                                                                     expandProperty,
+                                                                     StaConstants.PROJECT));
                 }
             }
         }
@@ -96,21 +101,25 @@ public class ProjectService
             throws STACRUDException, STAInvalidQueryException {
         for (ExpandItem expandItem : expandOption.getItems()) {
             // We have already handled $expand without filter and expand
-            if (!(expandItem.getQueryOptions().hasFilterFilter() || expandItem.getQueryOptions().hasExpandFilter())) {
+            if (!(expandItem.getQueryOptions()
+                            .hasFilterFilter()
+                    || expandItem.getQueryOptions()
+                                 .hasExpandFilter())) {
                 continue;
             }
             String expandProperty = expandItem.getPath();
             if (ProjectEntityDefinition.NAVIGATION_PROPERTIES.contains(expandProperty)) {
                 Page<StaPlusDataset> datastreams = getDatastreamService()
-                        .getEntityCollectionByRelatedEntityRaw(entity.getStaIdentifier(),
-                                STAEntityDefinition.PROJECTS,
-                                expandItem.getQueryOptions());
-                entity.setDatastreams(datastreams.get().collect(Collectors.toSet()));
+                                                                         .getEntityCollectionByRelatedEntityRaw(entity.getStaIdentifier(),
+                                                                                                                STAEntityDefinition.PROJECTS,
+                                                                                                                expandItem.getQueryOptions());
+                entity.setDatastreams(datastreams.get()
+                                                 .collect(Collectors.toSet()));
                 return entity;
             } else {
                 throw new STAInvalidQueryException(String.format(INVALID_EXPAND_OPTION_SUPPLIED,
-                        expandProperty,
-                        StaConstants.PROJECT));
+                                                                 expandProperty,
+                                                                 StaConstants.PROJECT));
             }
         }
         return entity;
@@ -118,15 +127,15 @@ public class ProjectService
 
     @Override
     protected Specification<ProjectEntity> byRelatedEntityFilter(String relatedId,
-            String relatedType,
-            String ownId) {
+                                                                 String relatedType,
+                                                                 String ownId) {
         Specification<ProjectEntity> filter;
         switch (relatedType) {
-            case STAEntityDefinition.DATASTREAMS:
-                filter = pQS.withDatastreamStaIdentifier(relatedId);
-                break;
-            default:
-                throw new IllegalStateException(String.format(TRYING_TO_FILTER_BY_UNRELATED_TYPE, relatedType));
+        case STAEntityDefinition.DATASTREAMS:
+            filter = pQS.withDatastreamStaIdentifier(relatedId);
+            break;
+        default:
+            throw new IllegalStateException(String.format(TRYING_TO_FILTER_BY_UNRELATED_TYPE, relatedType));
         }
 
         if (ownId != null) {
@@ -145,12 +154,13 @@ public class ProjectService
                 return optionalEntity.get();
             } else {
                 throw new STACRUDException(String.format(NO_S_WITH_ID_S_FOUND,
-                        StaConstants.PROJECT,
-                        project.getStaIdentifier()));
+                                                         StaConstants.PROJECT,
+                                                         project.getStaIdentifier()));
             }
         } else if (project.getStaIdentifier() == null) {
             // Autogenerate Identifier
-            String uuid = UUID.randomUUID().toString();
+            String uuid = UUID.randomUUID()
+                              .toString();
             project.setStaIdentifier(uuid);
         }
         synchronized (getLock(project.getStaIdentifier())) {
@@ -214,10 +224,8 @@ public class ProjectService
             existing.setName(toMerge.getName());
         }
         /*
-         * if (toMerge.getRuntimeStart() != null) {
-         * existing.setRuntimeStart(toMerge.getRuntimeStart());
-         * }
-         * if (toMerge.getRuntimeEnd() != null)
+         * if (toMerge.getRuntimeStart() != null) { existing.setRuntimeStart(toMerge.getRuntimeStart()); } if
+         * (toMerge.getRuntimeEnd() != null)
          */
         if (toMerge.getDescription() != null) {
             existing.setDescription(toMerge.getDescription());
@@ -234,7 +242,8 @@ public class ProjectService
     public void delete(String id) throws STACRUDException {
         synchronized (getLock(id)) {
             if (getRepository().existsByStaIdentifier(id)) {
-                ProjectEntity project = getRepository().findByStaIdentifier(id).get();
+                ProjectEntity project = getRepository().findByStaIdentifier(id)
+                                                       .get();
                 // Delete related Datastreams
                 for (StaPlusAbstractDatasetEntity ds : project.getDatastreams()) {
                     getDatastreamService().delete(ds.getStaIdentifier());

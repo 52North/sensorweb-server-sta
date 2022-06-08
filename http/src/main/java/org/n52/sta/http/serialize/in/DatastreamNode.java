@@ -25,6 +25,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
+
 package org.n52.sta.http.serialize.in;
 
 import java.util.Map;
@@ -71,9 +72,12 @@ public class DatastreamNode extends StaNode implements Datastream {
     @Override
     public UnitOfMeasurement getUnitOfMeasurement() {
         return getOrNull(StaConstants.PROP_UOM, n -> {
-            String name = n.get("name").asText();
-            String symbol = n.get("symbol").asText();
-            String definition = n.get("definition").asText();
+            String name = n.get("name")
+                           .asText();
+            String symbol = n.get("symbol")
+                             .asText();
+            String definition = n.get("definition")
+                                 .asText();
             return new UnitOfMeasurement(symbol, name, definition);
         });
     }

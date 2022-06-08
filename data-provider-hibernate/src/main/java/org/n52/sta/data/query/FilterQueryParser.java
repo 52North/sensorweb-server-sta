@@ -69,13 +69,16 @@ public final class FilterQueryParser<T> {
             Optional<Specification<E>> defaultPredicate = specs.isStaEntity();
 
             Optional<Predicate> filterPredicate = Optional.ofNullable(options.getFilterFilter())
-                .map(filter -> (Expr) filter.getFilter())
-                .map(visitExpression(visitor));
+                                                          .map(filter -> (Expr) filter.getFilter())
+                                                          .map(visitExpression(visitor));
 
             if (filterPredicate.isPresent() && defaultPredicate.isPresent()) {
-                return builder.and(defaultPredicate.get().toPredicate(root, query, builder), filterPredicate.get());
+                return builder.and(defaultPredicate.get()
+                                                   .toPredicate(root, query, builder),
+                                   filterPredicate.get());
             } else if (defaultPredicate.isPresent()) {
-                return defaultPredicate.get().toPredicate(root, query, builder);
+                return defaultPredicate.get()
+                                       .toPredicate(root, query, builder);
             } else {
                 return filterPredicate.orElse(null);
             }
@@ -94,10 +97,10 @@ public final class FilterQueryParser<T> {
         };
     }
 
-    private static final class FilterQueryVisitor<T> implements ExprVisitor<Expression<?>, FilterQueryException> {
+    private static final class FilterQueryVisitor<T> implements ExprVisitor<Expression< ? >, FilterQueryException> {
 
         private final Root<T> root;
-        private final CriteriaQuery<?> query;
+        private final CriteriaQuery< ? > query;
         private final CriteriaBuilder criteriaBuilder;
         private final BaseQuerySpecifications<T> rootSpecification;
         private final QuerySpecificationFactory qsFactory;
@@ -112,18 +115,20 @@ public final class FilterQueryParser<T> {
 
         @Override
         public Predicate visitBooleanBinary(BooleanBinaryExpr expr) throws FilterQueryException {
-            Predicate left = (Predicate) expr.getLeft().accept(this);
-            Predicate right = (Predicate) expr.getRight().accept(this);
+            Predicate left = (Predicate) expr.getLeft()
+                                             .accept(this);
+            Predicate right = (Predicate) expr.getRight()
+                                              .accept(this);
             BinaryLogicOperator operator = expr.getOperator();
             return operator.equals(BinaryLogicOperator.And)
-                ? criteriaBuilder.and(left, right)
-                : criteriaBuilder.or(left, right);
+                    ? criteriaBuilder.and(left, right)
+                    : criteriaBuilder.or(left, right);
         }
 
         @Override
         public Predicate visitBooleanUnary(BooleanUnaryExpr expr) throws FilterQueryException {
             BooleanExpr operand = expr.getOperand();
-            Expression<?> result = operand.accept(this);
+            Expression< ? > result = operand.accept(this);
             return criteriaBuilder.not((Predicate) result);
         }
 
@@ -134,12 +139,12 @@ public final class FilterQueryParser<T> {
             Expr right = expr.getRight();
             ComparisonOperator operator = expr.getOperator();
             return left.isMember() || right.isMember()
-                ? compareMember(left, right, operator)
-                : compareNonMembers(left, right, operator);
+                    ? compareMember(left, right, operator)
+                    : compareNonMembers(left, right, operator);
         }
 
         private Predicate compareMember(Expr left, Expr right, ComparisonOperator operator)
-            throws FilterQueryException {
+                throws FilterQueryException {
             if (right.isMember()) {
                 String member = toMember(right);
                 if (isOnRoot(member)) {
@@ -159,26 +164,29 @@ public final class FilterQueryParser<T> {
             }
         }
 
-        private Predicate compareMemberOnLeft(String member, ComparisonOperator operator,
-                                              Expr right) throws FilterQueryException {
-            Expression<?> rightExpr = right.accept(this);
+        private Predicate compareMemberOnLeft(String member,
+                                              ComparisonOperator operator,
+                                              Expr right)
+                throws FilterQueryException {
+            Expression< ? > rightExpr = right.accept(this);
             return rootSpecification.compareProperty(member, operator, rightExpr)
-                .toPredicate(root, query, criteriaBuilder);
+                                    .toPredicate(root, query, criteriaBuilder);
         }
 
         private Predicate compareMemberOnRight(Expr left, ComparisonOperator operator, String member)
-            throws FilterQueryException {
-            Expression<?> leftExpr = left.accept(this);
+                throws FilterQueryException {
+            Expression< ? > leftExpr = left.accept(this);
             return rootSpecification.compareProperty(leftExpr, operator, member)
-                .toPredicate(root, query, criteriaBuilder);
+                                    .toPredicate(root, query, criteriaBuilder);
         }
 
         @SuppressWarnings("unchecked")
-        private <Y extends Comparable<? super Y>> Predicate compareNonMembers(Expr left, Expr right,
-                                                                              ComparisonOperator operator)
-            throws FilterQueryException {
-            Expression<? extends Y> leftExpr = (Expression<? extends Y>) left.accept(this);
-            Expression<? extends Y> rightExpr = (Expression<? extends Y>) right.accept(this);
+        private <Y extends Comparable< ? super Y>> Predicate compareNonMembers(Expr left,
+                                                                               Expr right,
+                                                                               ComparisonOperator operator)
+                throws FilterQueryException {
+            Expression< ? extends Y> leftExpr = (Expression< ? extends Y>) left.accept(this);
+            Expression< ? extends Y> rightExpr = (Expression< ? extends Y>) right.accept(this);
             return rootSpecification.compare(leftExpr, rightExpr, operator, criteriaBuilder);
         }
 
@@ -234,8 +242,8 @@ public final class FilterQueryParser<T> {
 
         private String toMember(Expr right) throws FilterQueryException {
             return right.asMember()
-                .map(MemberExpr::getValue)
-                .orElseThrow(() -> new FilterQueryException("no member found!"));
+                        .map(MemberExpr::getValue)
+                        .orElseThrow(() -> new FilterQueryException("no member found!"));
         }
 
     }

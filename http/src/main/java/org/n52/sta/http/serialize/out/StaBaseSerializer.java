@@ -25,6 +25,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
+
 package org.n52.sta.http.serialize.out;
 
 import java.io.IOException;
@@ -97,7 +98,9 @@ public abstract class StaBaseSerializer<T extends Identifiable> extends StdSeria
     }
 
     protected void writeTimeProperty(String name, Supplier<Time> value, JsonGenerator gen) throws IOException {
-        String time = Optional.ofNullable(value.get()).map(DateTimeHelper::format).orElse(null);
+        String time = Optional.ofNullable(value.get())
+                              .map(DateTimeHelper::format)
+                              .orElse(null);
         writeProperty(name, fieldName -> gen.writeObjectField(fieldName, time));
     }
 
@@ -108,11 +111,12 @@ public abstract class StaBaseSerializer<T extends Identifiable> extends StdSeria
     }
 
     protected <E extends Identifiable> void writeMemberCollection(
-            String member,
-            String parentId,
-            JsonGenerator gen,
-            Function<SerializationContext, StaBaseSerializer<E>> serializerFactory,
-            ThrowingMemberWriter<E> memberWriter) throws IOException {
+                                                                  String member,
+                                                                  String parentId,
+                                                                  JsonGenerator gen,
+                                                                  Function<SerializationContext, StaBaseSerializer<E>> serializerFactory,
+                                                                  ThrowingMemberWriter<E> memberWriter)
+            throws IOException {
         // wrap to write as array
         writeMemberInternal(member, parentId, gen, serializerFactory, serializer -> {
             gen.writeArrayFieldStart(member);
@@ -122,23 +126,26 @@ public abstract class StaBaseSerializer<T extends Identifiable> extends StdSeria
     }
 
     protected <E extends Identifiable> void writeMember(
-            String member,
-            String parentId,
-            JsonGenerator gen,
-            Function<SerializationContext, StaBaseSerializer<E>> serializerFactory,
-            ThrowingMemberWriter<E> memberWriter) throws IOException {
+                                                        String member,
+                                                        String parentId,
+                                                        JsonGenerator gen,
+                                                        Function<SerializationContext, StaBaseSerializer<E>> serializerFactory,
+                                                        ThrowingMemberWriter<E> memberWriter)
+            throws IOException {
         writeMemberInternal(member, parentId, gen, serializerFactory, memberWriter);
     }
 
     private <E extends Identifiable> void writeMemberInternal(String member,
-            String parentId,
-            JsonGenerator gen,
-            Function<SerializationContext, StaBaseSerializer<E>> serializerFactory,
-            ThrowingMemberWriter<E> memberWriter) throws IOException {
+                                                              String parentId,
+                                                              JsonGenerator gen,
+                                                              Function<SerializationContext, StaBaseSerializer<E>> serializerFactory,
+                                                              ThrowingMemberWriter<E> memberWriter)
+            throws IOException {
         if (context.isSelected(member)) {
             Optional<StaBaseSerializer<E>> serializer = context.getQueryOptionsForExpanded(member)
-                    .map(expandQueryOptions -> SerializationContext.create(context, expandQueryOptions))
-                    .map(serializerFactory::apply);
+                                                               .map(expandQueryOptions -> SerializationContext.create(context,
+                                                                                                                      expandQueryOptions))
+                                                               .map(serializerFactory::apply);
             if (serializer.isPresent()) {
                 memberWriter.writeIfSelected(serializer.get());
             } else {

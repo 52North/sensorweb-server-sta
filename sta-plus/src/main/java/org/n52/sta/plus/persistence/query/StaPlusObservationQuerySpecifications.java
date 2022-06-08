@@ -25,6 +25,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
+
 package org.n52.sta.plus.persistence.query;
 
 import javax.persistence.criteria.Expression;
@@ -40,48 +41,48 @@ import org.n52.sta.data.old.query.EntityQuerySpecifications;
 import org.n52.sta.data.old.query.ObservationQuerySpecifications;
 import org.springframework.data.jpa.domain.Specification;
 
-public class StaPlusObservationQuerySpecifications extends EntityQuerySpecifications<StaPlusDataEntity<?>> {
+public class StaPlusObservationQuerySpecifications extends EntityQuerySpecifications<StaPlusDataEntity< ? >> {
 
     private ObservationQuerySpecifications oQS = new ObservationQuerySpecifications();
 
-    public static Specification<StaPlusDataEntity<?>> withObservationGroupStaIdentifier(
-            final String obsGroupIdentifier) {
+    public static Specification<StaPlusDataEntity< ? >> withObservationGroupStaIdentifier(
+                                                                                          final String obsGroupIdentifier) {
         return (root, query, builder) -> {
             final Join<StaPlusDataEntity, GroupEntity> join = root.join(StaPlusDataEntity.PROPERTY_GROUPS,
-                    JoinType.INNER);
+                                                                        JoinType.INNER);
             return builder.equal(join.get(DescribableEntity.PROPERTY_STA_IDENTIFIER), obsGroupIdentifier);
         };
     }
 
-    public static Specification<StaPlusDataEntity<?>> withObservationRelationStaIdentifierAsSubject(
-            final String relationIdentifier) {
+    public static Specification<StaPlusDataEntity< ? >> withObservationRelationStaIdentifierAsSubject(
+                                                                                                      final String relationIdentifier) {
         return (root, query, builder) -> {
             final Join<StaPlusDataEntity, RelationEntity> join = root.join(StaPlusDataEntity.PROPERTY_SUBJECTS,
-                    JoinType.INNER);
+                                                                           JoinType.INNER);
             return builder.equal(join.get(DescribableEntity.PROPERTY_STA_IDENTIFIER), relationIdentifier);
         };
     }
 
-    public static Specification<StaPlusDataEntity<?>> withObservationRelationStaIdentifierAsObject(
-            final String relationIdentifier) {
+    public static Specification<StaPlusDataEntity< ? >> withObservationRelationStaIdentifierAsObject(
+                                                                                                     final String relationIdentifier) {
         return (root, query, builder) -> {
             final Join<StaPlusDataEntity, RelationEntity> join = root.join(StaPlusDataEntity.PROPERTY_OBJECTS,
-                    JoinType.INNER);
+                                                                           JoinType.INNER);
             return builder.equal(join.get(DescribableEntity.PROPERTY_STA_IDENTIFIER), relationIdentifier);
         };
     }
 
     @Override
-    protected Specification<StaPlusDataEntity<?>> handleRelatedPropertyFilter(String propertyName,
-            Specification<?> propertyValue) {
+    protected Specification<StaPlusDataEntity< ? >> handleRelatedPropertyFilter(String propertyName,
+                                                                                Specification< ? > propertyValue) {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    protected Specification<StaPlusDataEntity<?>> handleDirectPropertyFilter(String propertyName,
-            Expression<?> propertyValue,
-            FilterConstants.ComparisonOperator operator,
-            boolean switched) {
+    protected Specification<StaPlusDataEntity< ? >> handleDirectPropertyFilter(String propertyName,
+                                                                               Expression< ? > propertyValue,
+                                                                               FilterConstants.ComparisonOperator operator,
+                                                                               boolean switched) {
         throw new UnsupportedOperationException();
     }
 }

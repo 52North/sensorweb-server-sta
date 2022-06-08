@@ -25,6 +25,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
+
 package org.n52.sta.plus.old.http;
 
 import java.io.File;
@@ -62,7 +63,8 @@ import org.springframework.web.multipart.MultipartFile;
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
  */
 // @RestController
-// @ConditionalOnProperty(value = "server.feature.http.read-Only", havingValue = "false", matchIfMissing = true)
+// @ConditionalOnProperty(value = "server.feature.http.read-Only", havingValue = "false", matchIfMissing =
+// true)
 // @Profile(StaConstants.STAPLUS)
 public class CitSciMultipartObservationRequestHandler {
 
@@ -76,10 +78,10 @@ public class CitSciMultipartObservationRequestHandler {
     private final String rootUrl;
 
     public CitSciMultipartObservationRequestHandler(
-                                     @Value("${server.config.service-root-url}") String rootUrl,
-                                     @Value("${server.feature.blobUploadDir:/tmp/sta_blobs}") String uploadDirectory,
-                                     EntityServiceFactory serviceRepository,
-                                     ObjectMapper mapper) {
+                                                    @Value("${server.config.service-root-url}") String rootUrl,
+                                                    @Value("${server.feature.blobUploadDir:/tmp/sta_blobs}") String uploadDirectory,
+                                                    EntityServiceFactory serviceRepository,
+                                                    ObjectMapper mapper) {
         this.serviceRepository = serviceRepository;
         this.rootUrl = rootUrl;
         this.mapper = mapper;
@@ -103,7 +105,7 @@ public class CitSciMultipartObservationRequestHandler {
         produces = "application/json")
     public StaDTO handleFileUpload(@RequestPart("file") MultipartFile file,
                                    @RequestPart("body") String body)
-        throws IOException, STACRUDException {
+            throws IOException, STACRUDException {
 
         // TODO: error checking, better storage, better filename, refactor to not store if observation
         // persistence fails
@@ -120,12 +122,12 @@ public class CitSciMultipartObservationRequestHandler {
 
     private AbstractSensorThingsEntityService<PlusObservationDTO> getObservationRepository() {
         return (AbstractSensorThingsEntityService<PlusObservationDTO>) serviceRepository.getEntityService(
-            "Observation");
+                                                                                                          "Observation");
     }
 
     @GetMapping(FILES_ENDPOINT + "/{filename:.+}")
     @ResponseBody
-    public ResponseEntity<?> serveFile(@PathVariable String filename) throws STANotFoundException, IOException {
+    public ResponseEntity< ? > serveFile(@PathVariable String filename) throws STANotFoundException, IOException {
         Path pathToFile = uploadDirectory.resolve(filename);
         File fileToGet = pathToFile.toFile();
         if (!fileToGet.exists()) {
@@ -138,9 +140,9 @@ public class CitSciMultipartObservationRequestHandler {
                 : MediaType.parseMediaType(mediaType);
         LOGGER.debug("Serving file (MediaType: {}): {}", mediaType, fileToGet.getAbsoluteFile());
         return ResponseEntity.ok()
-            .contentType(parsedMediaType)
-            .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + SQ + filename + SQ)
-            .body(new FileSystemResource(fileToGet));
+                             .contentType(parsedMediaType)
+                             .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + SQ + filename + SQ)
+                             .body(new FileSystemResource(fileToGet));
     }
 
     @GetMapping(
@@ -160,8 +162,8 @@ public class CitSciMultipartObservationRequestHandler {
     }
 
     @PostMapping(FILES_ENDPOINT)
-    public ResponseEntity<?> uploadFile(@RequestPart("file") MultipartFile multipartFile)
-        throws IOException, URISyntaxException {
+    public ResponseEntity< ? > uploadFile(@RequestPart("file") MultipartFile multipartFile)
+            throws IOException, URISyntaxException {
 
         Path fileToUpload = uploadDirectory.resolve(multipartFile.getOriginalFilename());
         File file = fileToUpload.toFile();
@@ -171,7 +173,7 @@ public class CitSciMultipartObservationRequestHandler {
             multipartFile.transferTo(file);
             String location = createFileLocation(file);
             return ResponseEntity.created(new URI(location))
-                .build();
+                                 .build();
         }
     }
 
@@ -187,8 +189,8 @@ public class CitSciMultipartObservationRequestHandler {
             return "/";
         }
         return !withOrWithoutTrailingSlash.endsWith("/")
-            ? withOrWithoutTrailingSlash.concat("/")
-            : withOrWithoutTrailingSlash;
+                ? withOrWithoutTrailingSlash.concat("/")
+                : withOrWithoutTrailingSlash;
     }
 
 }

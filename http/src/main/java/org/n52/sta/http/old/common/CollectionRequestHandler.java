@@ -25,6 +25,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
+
 package org.n52.sta.http.old.common;
 
 import java.net.URLDecoder;
@@ -64,34 +65,37 @@ public abstract class CollectionRequestHandler<T extends RequestUtils> extends A
     }
 
     /**
-     * Matches all requests on Collections referenced directly
-     * e.g. /Datastreams
+     * Matches all requests on Collections referenced directly e.g. /Datastreams
      *
-     * @param collectionName name of the collection. Automatically set by Spring via @PathVariable
-     * @param request        Full request
+     * @param collectionName
+     *        name of the collection. Automatically set by Spring via @PathVariable
+     * @param request
+     *        Full request
      * @return CollectionWrapper Requested collection
      */
     public CollectionWrapper readCollectionDirect(@PathVariable String collectionName,
                                                   HttpServletRequest request)
-        throws STACRUDException {
+            throws STACRUDException {
         QueryOptions options = decodeQueryString(request);
         return serviceRepository
-            .getEntityService(collectionName)
-            .getEntityCollection(options)
-            .setRequestURL(rootUrl + collectionName);
+                                .getEntityService(collectionName)
+                                .getEntityCollection(options)
+                                .setRequestURL(rootUrl + collectionName);
     }
 
     /**
-     * Matches all requests on Collections referenced directly and addressing an association link
-     * e.g. /Datastreams/$ref
+     * Matches all requests on Collections referenced directly and addressing an association link e.g.
+     * /Datastreams/$ref
      *
-     * @param collectionName name of the collection. Automatically set by Spring via @PathVariable
-     * @param request        Full request
+     * @param collectionName
+     *        name of the collection. Automatically set by Spring via @PathVariable
+     * @param request
+     *        Full request
      * @return CollectionWrapper Requested collection
      */
     public CollectionWrapper readCollectionRefDirect(@PathVariable String collectionName,
                                                      HttpServletRequest request)
-        throws STACRUDException {
+            throws STACRUDException {
         HashSet<FilterClause> filters = new HashSet<>();
         String queryString = request.getQueryString();
         if (queryString != null) {
@@ -105,24 +109,27 @@ public abstract class CollectionRequestHandler<T extends RequestUtils> extends A
         // Overwrite select filter with filter only returning id
         filters.add(new SelectFilter(ID));
         return serviceRepository
-            .getEntityService(collectionName)
-            .getEntityCollection(QUERY_OPTIONS_FACTORY.createQueryOptions(filters))
-            .setRequestURL(rootUrl + collectionName);
+                                .getEntityService(collectionName)
+                                .getEntityCollection(QUERY_OPTIONS_FACTORY.createQueryOptions(filters))
+                                .setRequestURL(rootUrl + collectionName);
     }
 
     /**
-     * Matches all requests on Entities not referenced directly via id but via related entity.
-     * e.g. /Datastreams(52)/Thing
+     * Matches all requests on Entities not referenced directly via id but via related entity. e.g.
+     * /Datastreams(52)/Thing
      *
-     * @param entity  requested entity. Automatically set by Spring via @PathVariable
-     * @param target  related entity. Automatically set by Spring via @PathVariable
-     * @param request full request
+     * @param entity
+     *        requested entity. Automatically set by Spring via @PathVariable
+     * @param target
+     *        related entity. Automatically set by Spring via @PathVariable
+     * @param request
+     *        full request
      * @return CollectionWrapper Requested collection
      */
     public CollectionWrapper readCollectionRelated(@PathVariable String entity,
                                                    @PathVariable String target,
                                                    HttpServletRequest request)
-        throws Exception {
+            throws Exception {
         validateResource((String) request.getAttribute(HandlerMapping.LOOKUP_PATH));
 
         String[] split = splitId(entity);
@@ -131,25 +138,26 @@ public abstract class CollectionRequestHandler<T extends RequestUtils> extends A
 
         QueryOptions options = decodeQueryString(request);
         return serviceRepository.getEntityService(target)
-            .getEntityCollectionByRelatedEntity(sourceId,
-                                                sourceType,
-                                                options)
-            .setRequestURL(rootUrl + entity + "/" + target);
+                                .getEntityCollectionByRelatedEntity(sourceId,
+                                                                    sourceType,
+                                                                    options)
+                                .setRequestURL(rootUrl + entity + "/" + target);
     }
 
     /**
-     * Matches all requests on Entities not referenced directly via id but via referenced entity and addressing an
-     * association link
-     * e.g. /Datastreams(52)/Thing/$ref
+     * Matches all requests on Entities not referenced directly via id but via referenced entity and
+     * addressing an association link e.g. /Datastreams(52)/Thing/$ref
      *
-     * @param entity  composite of entity and referenced entity. Automatically set by Spring via @PathVariable
-     * @param request full request
+     * @param entity
+     *        composite of entity and referenced entity. Automatically set by Spring via @PathVariable
+     * @param request
+     *        full request
      * @return CollectionWrapper Requested collection
      */
     public CollectionWrapper readCollectionRelatedRef(@PathVariable String entity,
                                                       @PathVariable String target,
                                                       HttpServletRequest request)
-        throws Exception {
+            throws Exception {
         String lookupPath = (String) request.getAttribute(HandlerMapping.LOOKUP_PATH);
         validateResource(lookupPath.substring(0, lookupPath.length() - 5));
 
@@ -170,9 +178,9 @@ public abstract class CollectionRequestHandler<T extends RequestUtils> extends A
         // Overwrite select filter with filter only returning id
         filters.add(new SelectFilter(ID));
         return serviceRepository.getEntityService(target)
-            .getEntityCollectionByRelatedEntity(sourceId,
-                                                sourceType,
-                                                QUERY_OPTIONS_FACTORY.createQueryOptions(filters))
-            .setRequestURL(rootUrl + entity + "/" + target);
+                                .getEntityCollectionByRelatedEntity(sourceId,
+                                                                    sourceType,
+                                                                    QUERY_OPTIONS_FACTORY.createQueryOptions(filters))
+                                .setRequestURL(rootUrl + entity + "/" + target);
     }
 }

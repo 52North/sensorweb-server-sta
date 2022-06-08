@@ -25,6 +25,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
+
 package org.n52.sta.data.old.query;
 
 import javax.persistence.criteria.Expression;
@@ -42,9 +43,9 @@ import org.springframework.data.jpa.domain.Specification;
 public interface SpatialQuerySpecifications<T> {
 
     Specification<T> handleGeoSpatialPropertyFilter(
-        String propertyName,
-        String spatialFunctionName,
-        String... arguments);
+                                                    String propertyName,
+                                                    String spatialFunctionName,
+                                                    String... arguments);
 
     Expression<Float> handleGeospatial(GeoValueExpr expr,
                                        String spatialFunctionName,

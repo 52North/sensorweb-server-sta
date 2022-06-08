@@ -25,6 +25,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
+
 package org.n52.sta.old;
 
 import org.springframework.context.annotation.Bean;
@@ -33,7 +34,6 @@ import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
 import org.springframework.core.io.ClassPathResource;
 
 /**
- *
  * TODO: javadoc
  *
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
@@ -43,8 +43,7 @@ public class VersionInfoConfig {
 
     @Bean
     public static PropertySourcesPlaceholderConfigurer placeholderConfigurer() {
-        PropertySourcesPlaceholderConfigurer propsConfig
-            = new PropertySourcesPlaceholderConfigurer();
+        PropertySourcesPlaceholderConfigurer propsConfig = new PropertySourcesPlaceholderConfigurer();
         propsConfig.setLocation(new ClassPathResource("git.properties"));
         propsConfig.setIgnoreResourceNotFound(true);
         propsConfig.setIgnoreUnresolvablePlaceholders(true);

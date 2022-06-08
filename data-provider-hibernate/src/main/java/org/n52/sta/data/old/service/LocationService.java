@@ -25,6 +25,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
+
 package org.n52.sta.data.old.service;
 
 import java.util.HashSet;
@@ -75,7 +76,8 @@ import org.springframework.data.jpa.domain.Specification;
 // @DependsOn({ "springApplicationContext" })
 // @Transactional
 public class LocationService
-        extends CommonSTAServiceImpl<LocationRepository, LocationDTO, LocationEntity> {
+        extends
+        CommonSTAServiceImpl<LocationRepository, LocationDTO, LocationEntity> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(LocationService.class);
 
@@ -89,10 +91,10 @@ public class LocationService
     private final LocationParameterRepository parameterRepository;
 
     public LocationService(@Value("${server.feature.updateFOI:false}") boolean updateFOI,
-            LocationRepository repository,
-            LocationEncodingRepository locationEncodingRepository,
-            LocationParameterRepository parameterRepository,
-            EntityManager em) {
+                           LocationRepository repository,
+                           LocationEncodingRepository locationEncodingRepository,
+                           LocationParameterRepository parameterRepository,
+                           EntityManager em) {
         super(repository, em, LocationEntity.class);
         this.locationEncodingRepository = locationEncodingRepository;
         this.updateFOIFeatureEnabled = updateFOI;
@@ -107,20 +109,24 @@ public class LocationService
         if (expandOption != null) {
             for (ExpandItem expandItem : expandOption.getItems()) {
                 // We cannot handle nested $filter or $expand
-                if (expandItem.getQueryOptions().hasFilterFilter() || expandItem.getQueryOptions().hasExpandFilter()) {
+                if (expandItem.getQueryOptions()
+                              .hasFilterFilter()
+                        || expandItem.getQueryOptions()
+                                     .hasExpandFilter()) {
                     continue;
                 }
                 String expandProperty = expandItem.getPath();
                 switch (expandProperty) {
-                    case STAEntityDefinition.HISTORICAL_LOCATIONS:
-                        fetchGraphs.add(EntityGraphRepository.FetchGraph.FETCHGRAPH_HIST_LOCATIONS);
-                        break;
-                    case STAEntityDefinition.THINGS:
-                        fetchGraphs.add(EntityGraphRepository.FetchGraph.FETCHGRAPH_PLATFORMS);
-                        break;
-                    default:
-                        throw new STAInvalidQueryException(String.format(INVALID_EXPAND_OPTION_SUPPLIED, expandProperty,
-                                StaConstants.LOCATION));
+                case STAEntityDefinition.HISTORICAL_LOCATIONS:
+                    fetchGraphs.add(EntityGraphRepository.FetchGraph.FETCHGRAPH_HIST_LOCATIONS);
+                    break;
+                case STAEntityDefinition.THINGS:
+                    fetchGraphs.add(EntityGraphRepository.FetchGraph.FETCHGRAPH_PLATFORMS);
+                    break;
+                default:
+                    throw new STAInvalidQueryException(String.format(INVALID_EXPAND_OPTION_SUPPLIED,
+                                                                     expandProperty,
+                                                                     StaConstants.LOCATION));
                 }
             }
         }
@@ -132,28 +138,34 @@ public class LocationService
             throws STACRUDException, STAInvalidQueryException {
         for (ExpandItem expandItem : expandOption.getItems()) {
             // We have already handled $expand without filter and expand
-            if (!(expandItem.getQueryOptions().hasFilterFilter() || expandItem.getQueryOptions().hasExpandFilter())) {
+            if (!(expandItem.getQueryOptions()
+                            .hasFilterFilter()
+                    || expandItem.getQueryOptions()
+                                 .hasExpandFilter())) {
                 continue;
             }
             String expandProperty = expandItem.getPath();
             switch (expandProperty) {
-                case STAEntityDefinition.HISTORICAL_LOCATIONS:
-                    Page<HistoricalLocationEntity> hLocs = getHistoricalLocationService()
-                            .getEntityCollectionByRelatedEntityRaw(entity.getStaIdentifier(),
-                                    STAEntityDefinition.LOCATIONS,
-                                    expandItem.getQueryOptions());
-                    entity.setHistoricalLocations(hLocs.get().collect(Collectors.toSet()));
-                    break;
-                case STAEntityDefinition.THINGS:
-                    Page<PlatformEntity> things = getThingService().getEntityCollectionByRelatedEntityRaw(
-                            entity.getStaIdentifier(),
-                            STAEntityDefinition.LOCATIONS,
-                            expandItem.getQueryOptions());
-                    entity.setThings(things.get().collect(Collectors.toSet()));
-                    break;
-                default:
-                    throw new STAInvalidQueryException(String.format(INVALID_EXPAND_OPTION_SUPPLIED, expandProperty,
-                            StaConstants.LOCATION));
+            case STAEntityDefinition.HISTORICAL_LOCATIONS:
+                Page<HistoricalLocationEntity> hLocs = getHistoricalLocationService()
+                                                                                     .getEntityCollectionByRelatedEntityRaw(entity.getStaIdentifier(),
+                                                                                                                            STAEntityDefinition.LOCATIONS,
+                                                                                                                            expandItem.getQueryOptions());
+                entity.setHistoricalLocations(hLocs.get()
+                                                   .collect(Collectors.toSet()));
+                break;
+            case STAEntityDefinition.THINGS:
+                Page<PlatformEntity> things = getThingService().getEntityCollectionByRelatedEntityRaw(
+                                                                                                      entity.getStaIdentifier(),
+                                                                                                      STAEntityDefinition.LOCATIONS,
+                                                                                                      expandItem.getQueryOptions());
+                entity.setThings(things.get()
+                                       .collect(Collectors.toSet()));
+                break;
+            default:
+                throw new STAInvalidQueryException(String.format(INVALID_EXPAND_OPTION_SUPPLIED,
+                                                                 expandProperty,
+                                                                 StaConstants.LOCATION));
             }
         }
         return entity;
@@ -163,16 +175,16 @@ public class LocationService
     public Specification<LocationEntity> byRelatedEntityFilter(String relatedId, String relatedType, String ownId) {
         Specification<LocationEntity> filter;
         switch (relatedType) {
-            case STAEntityDefinition.HISTORICAL_LOCATIONS: {
-                filter = lQS.withHistoricalLocationStaIdentifier(relatedId);
-                break;
-            }
-            case STAEntityDefinition.THINGS: {
-                filter = lQS.withThingStaIdentifier(relatedId);
-                break;
-            }
-            default:
-                throw new IllegalStateException(String.format(TRYING_TO_FILTER_BY_UNRELATED_TYPE, relatedType));
+        case STAEntityDefinition.HISTORICAL_LOCATIONS: {
+            filter = lQS.withHistoricalLocationStaIdentifier(relatedId);
+            break;
+        }
+        case STAEntityDefinition.THINGS: {
+            filter = lQS.withThingStaIdentifier(relatedId);
+            break;
+        }
+        default:
+            throw new IllegalStateException(String.format(TRYING_TO_FILTER_BY_UNRELATED_TYPE, relatedType));
         }
 
         if (ownId != null) {
@@ -187,13 +199,13 @@ public class LocationService
         if (!location.isProcessed()) {
             if (location.getStaIdentifier() != null && !location.isSetName()) {
                 Optional<LocationEntity> optionalEntity = getRepository()
-                        .findByStaIdentifier(location.getStaIdentifier());
+                                                                         .findByStaIdentifier(location.getStaIdentifier());
                 if (optionalEntity.isPresent()) {
                     return optionalEntity.get();
                 } else {
                     throw new STACRUDException(String.format(NO_S_WITH_ID_S_FOUND,
-                            StaConstants.LOCATION,
-                            location.getStaIdentifier()));
+                                                             StaConstants.LOCATION,
+                                                             location.getStaIdentifier()));
                 }
             }
             if (location.getStaIdentifier() == null) {
@@ -202,7 +214,8 @@ public class LocationService
                     return optional.orElse(null);
                 } else {
                     // Autogenerate Identifier
-                    String uuid = UUID.randomUUID().toString();
+                    String uuid = UUID.randomUUID()
+                                      .toString();
                     location.setIdentifier(uuid);
                     location.setStaIdentifier(uuid);
                 }
@@ -216,13 +229,13 @@ public class LocationService
                 LocationEntity intermediateSave = getRepository().intermediateSave(location);
                 if (location.getParameters() != null) {
                     parameterRepository.saveAll(location.getParameters()
-                            .stream()
-                            .filter(t -> t instanceof LocationParameterEntity)
-                            .map(t -> {
-                                ((LocationParameterEntity) t).setLocation(intermediateSave);
-                                return (LocationParameterEntity) t;
-                            })
-                            .collect(Collectors.toSet()));
+                                                        .stream()
+                                                        .filter(t -> t instanceof LocationParameterEntity)
+                                                        .map(t -> {
+                                                            ((LocationParameterEntity) t).setLocation(intermediateSave);
+                                                            return (LocationParameterEntity) t;
+                                                        })
+                                                        .collect(Collectors.toSet()));
                 }
                 location = getRepository().save(location);
                 processThings(location);
@@ -244,9 +257,9 @@ public class LocationService
     private LocationEntity updateEntity(String id, LocationEntity entity) throws HibernateException, STACRUDException {
         synchronized (getLock(id)) {
             Optional<LocationEntity> existing = getRepository()
-                    .findByStaIdentifier(id,
-                            EntityGraphRepository.FetchGraph.FETCHGRAPH_HIST_LOCATIONS,
-                            EntityGraphRepository.FetchGraph.FETCHGRAPH_PLATFORMS);
+                                                               .findByStaIdentifier(id,
+                                                                                    EntityGraphRepository.FetchGraph.FETCHGRAPH_HIST_LOCATIONS,
+                                                                                    EntityGraphRepository.FetchGraph.FETCHGRAPH_PLATFORMS);
             if (existing.isPresent()) {
                 LocationEntity merged = merge(existing.get(), entity);
                 LocationEntity result = getRepository().save(merged);
@@ -291,14 +304,15 @@ public class LocationService
         synchronized (getLock(id)) {
             if (getRepository().existsByStaIdentifier(id)) {
                 LocationEntity location = getRepository()
-                        .findByStaIdentifier(id,
-                                EntityGraphRepository.FetchGraph.FETCHGRAPH_HIST_LOCATIONS,
-                                EntityGraphRepository.FetchGraph.FETCHGRAPH_PLATFORMSHISTLOCATION)
-                        .get();
+                                                         .findByStaIdentifier(id,
+                                                                              EntityGraphRepository.FetchGraph.FETCHGRAPH_HIST_LOCATIONS,
+                                                                              EntityGraphRepository.FetchGraph.FETCHGRAPH_PLATFORMSHISTLOCATION)
+                                                         .get();
                 for (PlatformEntity thing : location.getThings()) {
                     thing.setLocations(null);
                     if (location.getHistoricalLocations() != null) {
-                        thing.getHistoricalLocations().removeAll(location.getHistoricalLocations());
+                        thing.getHistoricalLocations()
+                             .removeAll(location.getHistoricalLocations());
                     }
                     getThingService().save(thing);
                 }
@@ -329,11 +343,14 @@ public class LocationService
         ExampleMatcher createEncodingTypeMatcher = createEncodingTypeMatcher();
         synchronized (getLock(locationEncoding.getFormat())) {
             if (!locationEncodingRepository
-                    .exists(createEncodingTypeExample(locationEncoding, createEncodingTypeMatcher))) {
+                                           .exists(createEncodingTypeExample(locationEncoding,
+                                                                             createEncodingTypeMatcher))) {
                 return locationEncodingRepository.save(locationEncoding);
             }
             return locationEncodingRepository
-                    .findOne(createEncodingTypeExample(locationEncoding, createEncodingTypeMatcher)).get();
+                                             .findOne(createEncodingTypeExample(locationEncoding,
+                                                                                createEncodingTypeMatcher))
+                                             .get();
         }
     }
 
@@ -342,7 +359,8 @@ public class LocationService
     }
 
     private ExampleMatcher createEncodingTypeMatcher() {
-        return ExampleMatcher.matching().withMatcher(ENCODINGTYPE, GenericPropertyMatchers.ignoreCase());
+        return ExampleMatcher.matching()
+                             .withMatcher(ENCODINGTYPE, GenericPropertyMatchers.ignoreCase());
     }
 
     private void processThings(LocationEntity location) throws STACRUDException {
@@ -365,17 +383,20 @@ public class LocationService
                         // Try to be more performant and not deserialize whole
                         // properties but only grep relevant parts
                         // via simple regex
-                        for (ParameterEntity<?> parameter : updated.getParameters()) {
-                            if (parameter instanceof TextParameterEntity &&
-                                    parameter.getName().equals("updateFOI")) {
+                        for (ParameterEntity< ? > parameter : updated.getParameters()) {
+                            if (parameter instanceof TextParameterEntity
+                                    &&
+                                    parameter.getName()
+                                             .equals("updateFOI")) {
                                 try {
                                     LOGGER.debug("Updating FOI with id: " + parameter.getValueAsString());
                                     FeatureOfInterestService foiService = getFeatureOfInterestService();
                                     foiService.updateFeatureOfInterestGeometry(parameter.getValueAsString(),
-                                            location.getGeometry());
+                                                                               location.getGeometry());
                                 } catch (Exception e) {
                                     LOGGER.error("Updating FOI failed as ID could not be extracted from properties!");
-                                    throw new STACRUDException("Could not extract FeatureOfInterest ID from " +
+                                    throw new STACRUDException("Could not extract FeatureOfInterest ID from "
+                                            +
                                             "Thing->properties!");
                                 }
                             }

@@ -25,6 +25,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
+
 package org.n52.sta.data.repositories.parameter;
 
 import org.n52.series.db.beans.parameter.observation.ObservationParameterEntity;
@@ -34,6 +35,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Transactional
 @Repository
-public interface ObservationParameterRepository extends JpaRepository<ObservationParameterEntity<?>, Long> {
+public interface ObservationParameterRepository extends JpaRepository<ObservationParameterEntity< ? >, Long> {
 
 }

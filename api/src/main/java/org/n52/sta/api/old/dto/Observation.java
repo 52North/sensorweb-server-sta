@@ -25,6 +25,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
+
 package org.n52.sta.api.old.dto;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -33,7 +34,6 @@ import org.n52.shetland.ogc.gml.time.Time;
 import org.n52.sta.api.old.entity.DatastreamDTO;
 import org.n52.sta.api.old.entity.FeatureOfInterestDTO;
 import org.n52.sta.api.old.entity.ObservationDTO;
-
 
 /**
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
@@ -44,7 +44,8 @@ public class Observation extends DtoEntity implements ObservationDTO {
 
     private Time resultTime;
 
-    //TODO: check if we can accept every possible object here or need to implement some kind of "serializableToJSON"
+    // TODO: check if we can accept every possible object here or need to implement some kind of
+    // "serializableToJSON"
     // interface
     private Object result;
 

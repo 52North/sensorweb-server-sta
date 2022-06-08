@@ -25,6 +25,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
+
 package org.n52.sta.plus.old.serialize.json;
 
 import java.util.HashSet;
@@ -44,9 +45,13 @@ import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
  */
 @SuppressWarnings("VisibilityModifier")
-@SuppressFBWarnings({"NM_FIELD_NAMING_CONVENTION", "UWF_UNWRITTEN_PUBLIC_OR_PROTECTED_FIELD"})
+@SuppressFBWarnings({
+    "NM_FIELD_NAMING_CONVENTION",
+    "UWF_UNWRITTEN_PUBLIC_OR_PROTECTED_FIELD"
+})
 public class JSONRelation extends JSONBase.JSONwithId<RelationDTO>
-    implements AbstractJSONEntity {
+        implements
+        AbstractJSONEntity {
 
     public String name;
     public String description;
@@ -66,27 +71,28 @@ public class JSONRelation extends JSONBase.JSONwithId<RelationDTO>
         self = new Relation();
     }
 
-    @Override public RelationDTO parseToDTO(JSONBase.EntityType type) {
+    @Override
+    public RelationDTO parseToDTO(JSONBase.EntityType type) {
         switch (type) {
-            case FULL:
-                parseReferencedFrom();
-                assertNotNull(role, INVALID_INLINE_ENTITY_MISSING + "role");
-                assertNotNull(Subject, INVALID_INLINE_ENTITY_MISSING + "subject");
+        case FULL:
+            parseReferencedFrom();
+            assertNotNull(role, INVALID_INLINE_ENTITY_MISSING + "role");
+            assertNotNull(Subject, INVALID_INLINE_ENTITY_MISSING + "subject");
 
-                return createEntity();
-            case PATCH:
-                parseReferencedFrom();
-                return createEntity();
+            return createEntity();
+        case PATCH:
+            parseReferencedFrom();
+            return createEntity();
 
-            case REFERENCE:
-                assertIsNull(ObservationGroups, INVALID_REFERENCED_ENTITY);
-                assertIsNull(Object, INVALID_REFERENCED_ENTITY);
-                assertIsNull(Subject, INVALID_REFERENCED_ENTITY);
-                assertIsNull(type, INVALID_REFERENCED_ENTITY);
-                self.setId(identifier);
-                return self;
-            default:
-                return null;
+        case REFERENCE:
+            assertIsNull(ObservationGroups, INVALID_REFERENCED_ENTITY);
+            assertIsNull(Object, INVALID_REFERENCED_ENTITY);
+            assertIsNull(Subject, INVALID_REFERENCED_ENTITY);
+            assertIsNull(type, INVALID_REFERENCED_ENTITY);
+            self.setId(identifier);
+            return self;
+        default:
+            return null;
         }
     }
 

@@ -25,6 +25,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
+
 package org.n52.sta.http;
 
 import org.junit.Test;
@@ -32,18 +33,13 @@ import org.junit.Test;
 public class STARequestUtilsTest {
 
     /*
-    @Test
-    public void identifiedByDatastreamRegex() {
-        Assertions.("Datastreams(?:\\()['\\-0-9a-zA-Z]+(?:\\))/(Sensor|ObservedProperty|Thing|Observations)",
-                     STARequestUtils.IDENTIFIED_BY_DATASTREAM_REGEX);
-    }
-
-    @Test
-    public void entityIdentifiedByDatastreamPath() {
-        assertEquals("{entity:Datastreams(?:\\()['\\-0-9a-zA-Z]+(?:\\))}/{target:Sensor|ObservedProperty|Thing}",
-                STARequestUtils.ENTITY_IDENTIFIED_BY_DATASTREAM_PATH_VARIABLE);
-    }
-    */
+     * @Test public void identifiedByDatastreamRegex() {
+     * Assertions.("Datastreams(?:\\()['\\-0-9a-zA-Z]+(?:\\))/(Sensor|ObservedProperty|Thing|Observations)",
+     * STARequestUtils.IDENTIFIED_BY_DATASTREAM_REGEX); }
+     * @Test public void entityIdentifiedByDatastreamPath() { assertEquals(
+     * "{entity:Datastreams(?:\\()['\\-0-9a-zA-Z]+(?:\\))}/{target:Sensor|ObservedProperty|Thing}",
+     * STARequestUtils.ENTITY_IDENTIFIED_BY_DATASTREAM_PATH_VARIABLE); }
+     */
 
     @Test
     public void test() {

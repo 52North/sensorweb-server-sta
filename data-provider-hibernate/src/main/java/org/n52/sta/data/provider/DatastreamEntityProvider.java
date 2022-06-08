@@ -69,8 +69,7 @@ public class DatastreamEntityProvider extends BaseEntityProvider<Datastream> {
         DatastreamGraphBuilder graphBuilder = new DatastreamGraphBuilder(req);
         addUnfilteredExpandItems(req.getQueryOptions(), graphBuilder);
 
-        Specification<AbstractDatasetEntity> spec =
-            buildSpecification(req, new DatastreamQuerySpecification());
+        Specification<AbstractDatasetEntity> spec = buildSpecification(req, new DatastreamQuerySpecification());
         Optional<AbstractDatasetEntity> datastream = datastreamRepository.findOne(spec, graphBuilder);
         return datastream.map(entity -> new DatastreamData(entity, propertyMapping));
     }
@@ -83,8 +82,7 @@ public class DatastreamEntityProvider extends BaseEntityProvider<Datastream> {
         DatastreamGraphBuilder graphBuilder = new DatastreamGraphBuilder(req);
         addUnfilteredExpandItems(options, graphBuilder);
 
-        Specification<AbstractDatasetEntity> spec =
-            buildSpecification(req, new DatastreamQuerySpecification());
+        Specification<AbstractDatasetEntity> spec = buildSpecification(req, new DatastreamQuerySpecification());
         Page<AbstractDatasetEntity> results = datastreamRepository.findAll(spec, pageable, graphBuilder);
         return new StaEntityPage<>(Datastream.class, results, entity -> new DatastreamData(entity, propertyMapping));
     }

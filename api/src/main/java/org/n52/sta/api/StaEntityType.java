@@ -25,11 +25,25 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
+
 package org.n52.sta.api;
 
 @SuppressWarnings("all")
 public enum StaEntityType {
-    Thing, Things, Location, Locations, HistoricalLocation, HistoricalLocations,
-    Sensor, Sensors, Datastream, Datastreams, Observation, Observations,
-    ObservedProperty, ObservedProperties, FeatureOfInterest, FeaturesOfInterest;
+    Thing,
+    Things,
+    Location,
+    Locations,
+    HistoricalLocation,
+    HistoricalLocations,
+    Sensor,
+    Sensors,
+    Datastream,
+    Datastreams,
+    Observation,
+    Observations,
+    ObservedProperty,
+    ObservedProperties,
+    FeatureOfInterest,
+    FeaturesOfInterest;
 }

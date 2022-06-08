@@ -25,6 +25,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
+
 package org.n52.sta.api.old.serialize;
 
 import java.io.IOException;
@@ -50,7 +51,6 @@ public class DatastreamSerDes {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DatastreamSerDes.class);
 
-
     @SuppressFBWarnings("EQ_DOESNT_OVERRIDE_EQUALS")
     public static class DatastreamDTOPatch implements EntityPatch<DatastreamDTO> {
 
@@ -65,7 +65,6 @@ public class DatastreamSerDes {
             return entity;
         }
     }
-
 
     public static class DatastreamSerializer extends AbstractDatastreamSerializer<DatastreamDTO> {
 
@@ -82,14 +81,13 @@ public class DatastreamSerDes {
         public void serialize(DatastreamDTO datastream,
                               JsonGenerator gen,
                               SerializerProvider serializers)
-            throws IOException {
+                throws IOException {
             gen.writeStartObject();
             super.serialize(datastream, gen, serializers);
             gen.writeEndObject();
         }
 
     }
-
 
     public static class DatastreamDeserializer extends StdDeserializer<DatastreamDTO> {
 
@@ -102,10 +100,9 @@ public class DatastreamSerDes {
         @Override
         public DatastreamDTO deserialize(JsonParser p, DeserializationContext ctxt) throws IOException {
             return p.readValueAs(JSONDatastream.class)
-                .parseToDTO(JSONBase.EntityType.FULL);
+                    .parseToDTO(JSONBase.EntityType.FULL);
         }
     }
-
 
     public static class DatastreamPatchDeserializer extends StdDeserializer<DatastreamDTOPatch> {
 
@@ -118,7 +115,7 @@ public class DatastreamSerDes {
         @Override
         public DatastreamDTOPatch deserialize(JsonParser p, DeserializationContext ctxt) throws IOException {
             return new DatastreamDTOPatch(p.readValueAs(JSONDatastream.class)
-                                              .parseToDTO(JSONBase.EntityType.PATCH));
+                                           .parseToDTO(JSONBase.EntityType.PATCH));
         }
     }
 }

@@ -25,6 +25,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
+
 package org.n52.sta.data.old.repositories;
 
 import org.n52.series.db.beans.DescribableEntity;
@@ -34,7 +35,8 @@ import org.springframework.transaction.annotation.Transactional;
 @NoRepositoryBean
 @Transactional
 public interface IdentifierNameRepository<T extends DescribableEntity>
-        extends IdentifierRepository<T, Long> {
+        extends
+        IdentifierRepository<T, Long> {
 
     boolean existsByName(String name);
 

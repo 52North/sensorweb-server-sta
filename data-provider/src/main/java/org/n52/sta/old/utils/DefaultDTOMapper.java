@@ -25,6 +25,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
+
 package org.n52.sta.old.utils;
 
 import org.n52.shetland.ogc.sta.StaConstants;
@@ -53,80 +54,80 @@ public class DefaultDTOMapper implements DTOMapper {
 
     public Class collectionNameToClass(String collectionName) throws STAInvalidUrlException {
         switch (collectionName) {
-            case StaConstants.THINGS:
-                return ThingDTO.class;
-            case StaConstants.LOCATIONS:
-                return LocationDTO.class;
-            case StaConstants.DATASTREAMS:
-                return DatastreamDTO.class;
-            case StaConstants.HISTORICAL_LOCATIONS:
-                return HistoricalLocationDTO.class;
-            case StaConstants.SENSORS:
-                return SensorDTO.class;
-            case StaConstants.OBSERVATIONS:
-                return ObservationDTO.class;
-            case StaConstants.OBSERVED_PROPERTIES:
-                return ObservedPropertyDTO.class;
-            case StaConstants.FEATURES_OF_INTEREST:
-                return FeatureOfInterestDTO.class;
-//            case StaConstants.GROUPS:
-//                return GroupDTO.class;
-//            case StaConstants.RELATIONS:
-//                return RelationDTO.class;
-//            case StaConstants.LICENSES:
-//                return LicenseDTO.class;
-//            case StaConstants.PROJECTS:
-//                return ProjectDTO.class;
-//            case StaConstants.PARTIES:
-//                return PartyDTO.class;
-            default:
-                throw new STAInvalidUrlException("could not resolve collectionName to entity");
+        case StaConstants.THINGS:
+            return ThingDTO.class;
+        case StaConstants.LOCATIONS:
+            return LocationDTO.class;
+        case StaConstants.DATASTREAMS:
+            return DatastreamDTO.class;
+        case StaConstants.HISTORICAL_LOCATIONS:
+            return HistoricalLocationDTO.class;
+        case StaConstants.SENSORS:
+            return SensorDTO.class;
+        case StaConstants.OBSERVATIONS:
+            return ObservationDTO.class;
+        case StaConstants.OBSERVED_PROPERTIES:
+            return ObservedPropertyDTO.class;
+        case StaConstants.FEATURES_OF_INTEREST:
+            return FeatureOfInterestDTO.class;
+        // case StaConstants.GROUPS:
+        // return GroupDTO.class;
+        // case StaConstants.RELATIONS:
+        // return RelationDTO.class;
+        // case StaConstants.LICENSES:
+        // return LicenseDTO.class;
+        // case StaConstants.PROJECTS:
+        // return ProjectDTO.class;
+        // case StaConstants.PARTIES:
+        // return PartyDTO.class;
+        default:
+            throw new STAInvalidUrlException("could not resolve collectionName to entity");
         }
     }
 
     public Class collectionNameToPatchClass(String collectionName) throws STAInvalidUrlException {
         switch (collectionName) {
-            case StaConstants.THINGS:
-            case StaConstants.THING:
-                return ThingSerDes.ThingDTOPatch.class;
-            case StaConstants.LOCATIONS:
-            case StaConstants.LOCATION:
-                return LocationSerDes.LocationDTOPatch.class;
-            case StaConstants.DATASTREAMS:
-            case StaConstants.DATASTREAM:
-                return DatastreamSerDes.DatastreamDTOPatch.class;
-            case StaConstants.HISTORICAL_LOCATIONS:
-            case StaConstants.HISTORICAL_LOCATION:
-                return HistoricalLocationSerDes.HistoricalLocationDTOPatch.class;
-            case StaConstants.SENSORS:
-            case StaConstants.SENSOR:
-                return SensorSerDes.SensorDTOPatch.class;
-            case StaConstants.OBSERVATIONS:
-            case StaConstants.OBSERVATION:
-                return ObservationSerDes.ObservationDTOPatch.class;
-            case StaConstants.OBSERVED_PROPERTIES:
-            case StaConstants.OBSERVED_PROPERTY:
-                return ObservedPropertySerDes.ObservedPropertyDTOPatch.class;
-            case StaConstants.FEATURES_OF_INTEREST:
-            case StaConstants.FEATURE_OF_INTEREST:
-                return FeatureOfInterestSerDes.FeatureOfInterestDTOPatch.class;
-//            case StaConstants.GROUP:
-//            case StaConstants.GROUPS:
-//                return ObservationGroupSerDes.ObservationGroupDTOPatch.class;
-//            case StaConstants.RELATIONS:
-//            case StaConstants.RELATION:
-//                return ObservationRelationSerDes.ObservationRelationDTOPatch.class;
-//            case StaConstants.LICENSES:
-//            case StaConstants.LICENSE:
-//                return LicenseSerDes.LicenseDTOPatch.class;
-//            case StaConstants.PROJECTS:
-//            case StaConstants.PROJECT:
-//                return ProjectSerDes.ProjectDTOPatch.class;
-//            case StaConstants.PARTIES:
-//            case StaConstants.PARTY:
-//                return PartySerDes.PartyDTOPatch.class;
-            default:
-                throw new STAInvalidUrlException("Could not resolve CollectionName to PatchEntity class!");
+        case StaConstants.THINGS:
+        case StaConstants.THING:
+            return ThingSerDes.ThingDTOPatch.class;
+        case StaConstants.LOCATIONS:
+        case StaConstants.LOCATION:
+            return LocationSerDes.LocationDTOPatch.class;
+        case StaConstants.DATASTREAMS:
+        case StaConstants.DATASTREAM:
+            return DatastreamSerDes.DatastreamDTOPatch.class;
+        case StaConstants.HISTORICAL_LOCATIONS:
+        case StaConstants.HISTORICAL_LOCATION:
+            return HistoricalLocationSerDes.HistoricalLocationDTOPatch.class;
+        case StaConstants.SENSORS:
+        case StaConstants.SENSOR:
+            return SensorSerDes.SensorDTOPatch.class;
+        case StaConstants.OBSERVATIONS:
+        case StaConstants.OBSERVATION:
+            return ObservationSerDes.ObservationDTOPatch.class;
+        case StaConstants.OBSERVED_PROPERTIES:
+        case StaConstants.OBSERVED_PROPERTY:
+            return ObservedPropertySerDes.ObservedPropertyDTOPatch.class;
+        case StaConstants.FEATURES_OF_INTEREST:
+        case StaConstants.FEATURE_OF_INTEREST:
+            return FeatureOfInterestSerDes.FeatureOfInterestDTOPatch.class;
+        // case StaConstants.GROUP:
+        // case StaConstants.GROUPS:
+        // return ObservationGroupSerDes.ObservationGroupDTOPatch.class;
+        // case StaConstants.RELATIONS:
+        // case StaConstants.RELATION:
+        // return ObservationRelationSerDes.ObservationRelationDTOPatch.class;
+        // case StaConstants.LICENSES:
+        // case StaConstants.LICENSE:
+        // return LicenseSerDes.LicenseDTOPatch.class;
+        // case StaConstants.PROJECTS:
+        // case StaConstants.PROJECT:
+        // return ProjectSerDes.ProjectDTOPatch.class;
+        // case StaConstants.PARTIES:
+        // case StaConstants.PARTY:
+        // return PartySerDes.PartyDTOPatch.class;
+        default:
+            throw new STAInvalidUrlException("Could not resolve CollectionName to PatchEntity class!");
         }
     }
 }

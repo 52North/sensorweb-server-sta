@@ -25,6 +25,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
+
 package org.n52.sta.data.old.repositories;
 
 import org.n52.series.db.beans.PhenomenonEntity;
@@ -36,6 +37,8 @@ import org.springframework.transaction.annotation.Transactional;
 @DependsOn("DatastreamRepository")
 @Repository
 public interface PhenomenonRepository
-        extends IdentifierNameRepository<PhenomenonEntity>, StaIdentifierRepository<PhenomenonEntity> {
+        extends
+        IdentifierNameRepository<PhenomenonEntity>,
+        StaIdentifierRepository<PhenomenonEntity> {
 
 }

@@ -25,6 +25,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
+
 package org.n52.sta.data.repositories.parameter;
 
 import org.n52.series.db.beans.parameter.procedure.ProcedureParameterEntity;
@@ -32,6 +33,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface ProcedureParameterRepository extends JpaRepository<ProcedureParameterEntity<?>, Long> {
+public interface ProcedureParameterRepository extends JpaRepository<ProcedureParameterEntity< ? >, Long> {
 
 }

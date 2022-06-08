@@ -25,6 +25,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
+
 package org.n52.sta.api.old.dto;
 
 import java.util.HashSet;
@@ -50,7 +51,8 @@ public class ObservedProperty extends DtoEntity implements ObservedPropertyDTO {
 
     private Set<DatastreamDTO> datastreams;
 
-    @Override public String getName() {
+    @Override
+    public String getName() {
         return name;
     }
 
@@ -58,7 +60,8 @@ public class ObservedProperty extends DtoEntity implements ObservedPropertyDTO {
         this.name = name;
     }
 
-    @Override public String getDescription() {
+    @Override
+    public String getDescription() {
         return description;
     }
 
@@ -66,7 +69,8 @@ public class ObservedProperty extends DtoEntity implements ObservedPropertyDTO {
         this.description = description;
     }
 
-    @Override public String getDefinition() {
+    @Override
+    public String getDefinition() {
         return definition;
     }
 
@@ -74,7 +78,8 @@ public class ObservedProperty extends DtoEntity implements ObservedPropertyDTO {
         this.definition = definition;
     }
 
-    @Override public ObjectNode getProperties() {
+    @Override
+    public ObjectNode getProperties() {
         return properties;
     }
 
@@ -82,7 +87,8 @@ public class ObservedProperty extends DtoEntity implements ObservedPropertyDTO {
         this.properties = properties;
     }
 
-    @Override public Set<DatastreamDTO> getDatastreams() {
+    @Override
+    public Set<DatastreamDTO> getDatastreams() {
         return datastreams;
     }
 
@@ -90,7 +96,8 @@ public class ObservedProperty extends DtoEntity implements ObservedPropertyDTO {
         this.datastreams = datastreams;
     }
 
-    @Override public void addDatastreams(DatastreamDTO datastream) {
+    @Override
+    public void addDatastreams(DatastreamDTO datastream) {
         if (this.datastreams == null) {
             this.datastreams = new HashSet<>();
         }

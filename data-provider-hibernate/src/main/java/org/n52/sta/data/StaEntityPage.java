@@ -25,6 +25,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
+
 package org.n52.sta.data;
 
 import java.util.Collection;
@@ -68,7 +69,9 @@ public class StaEntityPage<E, T> implements EntityPage<T> {
 
     @Override
     public Collection<T> getEntities() {
-        return Streams.stream(results).map(entityFactory).collect(Collectors.toList());
+        return Streams.stream(results)
+                      .map(entityFactory)
+                      .collect(Collectors.toList());
     }
 
 }

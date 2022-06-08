@@ -25,6 +25,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
+
 package org.n52.sta.plus.old.serialize;
 
 import java.io.IOException;
@@ -51,7 +52,6 @@ public class PlusDatastreamSerDes {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(PlusDatastreamSerDes.class);
 
-
     @SuppressFBWarnings("EQ_DOESNT_OVERRIDE_EQUALS")
     public static class PlusDatastreamDTOPatch implements EntityPatch<PlusDatastreamDTO> {
 
@@ -66,7 +66,6 @@ public class PlusDatastreamSerDes {
             return entity;
         }
     }
-
 
     public static class PlusDatastreamSerializer extends AbstractDatastreamSerializer<PlusDatastreamDTO> {
 
@@ -83,12 +82,14 @@ public class PlusDatastreamSerDes {
         public void serialize(PlusDatastreamDTO datastream,
                               JsonGenerator gen,
                               SerializerProvider serializers)
-            throws IOException {
+                throws IOException {
             gen.writeStartObject();
             super.serialize(datastream, gen, serializers);
 
-            if (!datastream.hasSelectOption() ||
-                datastream.getFieldsToSerialize().contains(STAEntityDefinition.PARTY)) {
+            if (!datastream.hasSelectOption()
+                    ||
+                    datastream.getFieldsToSerialize()
+                              .contains(STAEntityDefinition.PARTY)) {
                 if (datastream.getParty() == null) {
                     writeNavigationProp(gen, STAEntityDefinition.PARTY, datastream.getId());
                 } else {
@@ -98,8 +99,10 @@ public class PlusDatastreamSerDes {
                                       serializers);
                 }
             }
-            if (!datastream.hasSelectOption() ||
-                datastream.getFieldsToSerialize().contains(STAEntityDefinition.PROJECT)) {
+            if (!datastream.hasSelectOption()
+                    ||
+                    datastream.getFieldsToSerialize()
+                              .contains(STAEntityDefinition.PROJECT)) {
                 if (datastream.getParty() == null) {
                     writeNavigationProp(gen, STAEntityDefinition.PROJECT, datastream.getId());
                 } else {
@@ -113,10 +116,14 @@ public class PlusDatastreamSerDes {
             // navigation properties
             for (String navigationProperty : DatastreamEntityDefinition.NAVIGATION_PROPERTIES) {
                 if (STAEntityDefinition.PARTY.equals(navigationProperty)) {
-                    if (!datastream.hasSelectOption() ||
-                        datastream.getFieldsToSerialize().contains(navigationProperty)) {
-                        if (!datastream.hasExpandOption() ||
-                            datastream.getFieldsToExpand().get(navigationProperty) == null) {
+                    if (!datastream.hasSelectOption()
+                            ||
+                            datastream.getFieldsToSerialize()
+                                      .contains(navigationProperty)) {
+                        if (!datastream.hasExpandOption()
+                                ||
+                                datastream.getFieldsToExpand()
+                                          .get(navigationProperty) == null) {
                             writeNavigationProp(gen, navigationProperty, datastream.getId());
                         } else {
                             if (datastream.getParty() == null) {
@@ -137,7 +144,6 @@ public class PlusDatastreamSerDes {
 
     }
 
-
     public static class DatastreamDeserializer extends StdDeserializer<PlusDatastreamDTO> {
 
         private static final long serialVersionUID = 7491123624385588769L;
@@ -149,7 +155,7 @@ public class PlusDatastreamSerDes {
         @Override
         public PlusDatastreamDTO deserialize(JsonParser p, DeserializationContext ctxt) throws IOException {
             return (PlusDatastreamDTO) p.readValueAs(JSONPlusDatastream.class)
-                    .parseToDTO(JSONBase.EntityType.FULL);
+                                        .parseToDTO(JSONBase.EntityType.FULL);
         }
     }
 }

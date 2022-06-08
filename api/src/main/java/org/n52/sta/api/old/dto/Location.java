@@ -25,6 +25,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
+
 package org.n52.sta.api.old.dto;
 
 import java.util.HashSet;
@@ -51,7 +52,8 @@ public class Location extends DtoEntity implements LocationDTO {
     private Set<ThingDTO> things;
     private ObjectNode properties;
 
-    @Override public String getName() {
+    @Override
+    public String getName() {
         return name;
     }
 
@@ -59,7 +61,8 @@ public class Location extends DtoEntity implements LocationDTO {
         this.name = name;
     }
 
-    @Override public String getDescription() {
+    @Override
+    public String getDescription() {
         return description;
     }
 
@@ -71,7 +74,8 @@ public class Location extends DtoEntity implements LocationDTO {
         return "application/vnd.geo+json";
     }
 
-    @Override public Geometry getGeometry() {
+    @Override
+    public Geometry getGeometry() {
         return geometry;
     }
 
@@ -79,7 +83,8 @@ public class Location extends DtoEntity implements LocationDTO {
         this.geometry = geometry;
     }
 
-    @Override public ObjectNode getProperties() {
+    @Override
+    public ObjectNode getProperties() {
         return properties;
     }
 
@@ -87,14 +92,16 @@ public class Location extends DtoEntity implements LocationDTO {
         this.properties = properties;
     }
 
-    @Override public void addHistoricalLocation(HistoricalLocationDTO historicalLocation) {
+    @Override
+    public void addHistoricalLocation(HistoricalLocationDTO historicalLocation) {
         if (this.historicalLocations == null) {
             this.historicalLocations = new HashSet<>();
         }
         this.historicalLocations.add(historicalLocation);
     }
 
-    @Override public Set<HistoricalLocationDTO> getHistoricalLocations() {
+    @Override
+    public Set<HistoricalLocationDTO> getHistoricalLocations() {
         return historicalLocations;
     }
 
@@ -102,7 +109,8 @@ public class Location extends DtoEntity implements LocationDTO {
         this.historicalLocations = historicalLocations;
     }
 
-    @Override public Set<ThingDTO> getThings() {
+    @Override
+    public Set<ThingDTO> getThings() {
         return things;
     }
 

@@ -25,6 +25,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
+
 package org.n52.sta.plus.persistence.service;
 
 import java.util.UUID;
@@ -59,62 +60,46 @@ import org.springframework.transaction.annotation.Transactional;
 public class CitSciDatastreamService extends CommonDatastreamService<StaPlusDataset, StaPlusDatastreamRepository> {
 
     public CitSciDatastreamService(
-            StaPlusDatastreamRepository repository,
-            @Value("${server.feature.isMobile:false}") boolean isMobileFeatureEnabled,
-            @Value("${server.feature.includeDatastreamCategory:false}") boolean includeDatastreamCategory,
-            UnitRepository unitRepository,
-            CategoryRepository categoryRepository,
-            ObservationRepository observationRepository,
-            DatastreamParameterRepository parameterRepository,
-            OfferingService offeringService,
-            FormatService formatService,
-            EntityManager em) {
+                                   StaPlusDatastreamRepository repository,
+                                   @Value("${server.feature.isMobile:false}") boolean isMobileFeatureEnabled,
+                                   @Value("${server.feature.includeDatastreamCategory:false}") boolean includeDatastreamCategory,
+                                   UnitRepository unitRepository,
+                                   CategoryRepository categoryRepository,
+                                   ObservationRepository observationRepository,
+                                   DatastreamParameterRepository parameterRepository,
+                                   OfferingService offeringService,
+                                   FormatService formatService,
+                                   EntityManager em) {
         super(repository,
-                isMobileFeatureEnabled,
-                includeDatastreamCategory,
-                unitRepository,
-                categoryRepository,
-                observationRepository,
-                parameterRepository,
-                offeringService,
-                formatService,
-                em);
+              isMobileFeatureEnabled,
+              includeDatastreamCategory,
+              unitRepository,
+              categoryRepository,
+              observationRepository,
+              parameterRepository,
+              offeringService,
+              formatService,
+              em);
     }
 
     /*
-     * protected DatasetEntity createandSaveDataset(AbstractDatasetEntity
-     * datastream,
-     * AbstractFeatureEntity<?> feature,
-     * String staIdentifier) throws STACRUDException {
-     * if (datastream.getParty() != null) {
-     * datastream.setParty(getPartyService().createOrfetch(datastream.getParty()));
-     * }
-     *
-     * if (datastream.getProject() != null) {
-     * datastream.setProject(getProjectService().createOrfetch(datastream.getProject
-     * ()));
-     * }
-     *
-     * DatasetEntity saved = getRepository().save(createDataset(datastream, feature,
-     * staIdentifier));
-     * if (datastream.getParameters() != null) {
-     * parameterRepository.saveAll(datastream.getParameters()
-     * .stream()
-     * .filter(t -> t instanceof DatasetParameterEntity)
-     * .map(t -> {
-     * ((DatasetParameterEntity) t).setDataset(saved);
-     * return (DatasetParameterEntity) t;
-     * })
-     * .collect(Collectors.toSet()));
-     * }
-     * return saved;
-     * }
+     * protected DatasetEntity createandSaveDataset(AbstractDatasetEntity datastream, AbstractFeatureEntity<?>
+     * feature, String staIdentifier) throws STACRUDException { if (datastream.getParty() != null) {
+     * datastream.setParty(getPartyService().createOrfetch(datastream.getParty())); } if
+     * (datastream.getProject() != null) {
+     * datastream.setProject(getProjectService().createOrfetch(datastream.getProject ())); } DatasetEntity
+     * saved = getRepository().save(createDataset(datastream, feature, staIdentifier)); if
+     * (datastream.getParameters() != null) { parameterRepository.saveAll(datastream.getParameters() .stream()
+     * .filter(t -> t instanceof DatasetParameterEntity) .map(t -> { ((DatasetParameterEntity)
+     * t).setDataset(saved); return (DatasetParameterEntity) t; }) .collect(Collectors.toSet())); } return
+     * saved; }
      */
 
     @Override
     protected StaPlusDatasetEntity createDataset(AbstractDatasetEntity datastream,
-            AbstractFeatureEntity<?> feature,
-            String staIdentifier) throws STACRUDException {
+                                                 AbstractFeatureEntity< ? > feature,
+                                                 String staIdentifier)
+            throws STACRUDException {
         StaPlusDatasetEntity dataset = new StaPlusDatasetEntity();
         fillDataset(dataset, datastream, feature, staIdentifier);
         dataset.setParty(((StaPlusDatasetEntity) datastream).getParty());
@@ -123,16 +108,18 @@ public class CitSciDatastreamService extends CommonDatastreamService<StaPlusData
     }
 
     protected AbstractDatasetEntity fillDataset(StaPlusDatasetEntity dataset,
-            AbstractDatasetEntity datastream,
-            AbstractFeatureEntity<?> feature,
-            String staIdentifier) throws STACRUDException {
+                                                AbstractDatasetEntity datastream,
+                                                AbstractFeatureEntity< ? > feature,
+                                                String staIdentifier)
+            throws STACRUDException {
         CategoryEntity category = categoryRepository.findByIdentifier(CategoryService.DEFAULT_CATEGORY)
-                .orElseThrow(() -> new STACRUDException("Could not find default SOS Category!"));
+                                                    .orElseThrow(() -> new STACRUDException("Could not find default SOS Category!"));
         OfferingEntity offering = offeringService.createOrFetchOffering(datastream.getProcedure());
 
         // dataset.setObservationType(ObservationType.simple);
         // dataset.setValueType(ValueType.quantity);
-        dataset.setIdentifier(UUID.randomUUID().toString());
+        dataset.setIdentifier(UUID.randomUUID()
+                                  .toString());
         dataset.setStaIdentifier(staIdentifier);
         dataset.setName(datastream.getName());
         dataset.setDescription(datastream.getDescription());

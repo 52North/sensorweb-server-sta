@@ -1,12 +1,12 @@
+
 package org.n52.sta.api.path;
 
 import java.util.Objects;
 import java.util.Optional;
 
 /**
- * POJO holding Path Information
- * - http://example.org/v1.1/Datastreams(1)/Observations(1)/FeatureOfInterest
- * - http://example.org/v1.1/Datastreams(1)/Thing/Locations
+ * POJO holding Path Information - http://example.org/v1.1/Datastreams(1)/Observations(1)/FeatureOfInterest -
+ * http://example.org/v1.1/Datastreams(1)/Thing/Locations
  * SERVICE_ROOT_URI/ENTITY_SET_NAME(ID_OF_THE_ENTITY)/LINK_NAME
  * SERVICE_ROOT_URI/ENTITY_SET_NAME(KEY_OF_THE_ENTITY)/LINK_NAME/$ref
  *
@@ -47,9 +47,15 @@ public class PathSegment {
 
     @Override
     public String toString() {
-        return "{ collection='" + collection + '\'' +
-            ", identifier=" + identifier +
-            ", property=" + property +
-            '}';
+        return "{ collection="
+                + collection
+                +
+                ", identifier="
+                + identifier
+                +
+                ", property="
+                + property
+                +
+                "}";
     }
 }

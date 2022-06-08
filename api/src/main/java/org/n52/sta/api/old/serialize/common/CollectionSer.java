@@ -25,6 +25,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
+
 package org.n52.sta.api.old.serialize.common;
 
 import java.io.IOException;
@@ -59,18 +60,26 @@ public class CollectionSer extends StdSerializer<CollectionWrapper> {
             gen.writeNumberField("@iot.count", value.getTotalEntityCount());
         }
         // We have multiple pages
-        if (value.hasNextPage() && !value.getEntities().isEmpty()) {
-            QueryOptions queryOptions = value.getEntities().get(0).getQueryOptions();
-            long oldTop = queryOptions.getTopFilter().getValue();
-            long oldSkip = queryOptions.hasSkipFilter() ? queryOptions.getSkipFilter().getValue() : 0L;
+        if (value.hasNextPage()
+                && !value.getEntities()
+                         .isEmpty()) {
+            QueryOptions queryOptions = value.getEntities()
+                                             .get(0)
+                                             .getQueryOptions();
+            long oldTop = queryOptions.getTopFilter()
+                                      .getValue();
+            long oldSkip = queryOptions.hasSkipFilter()
+                    ? queryOptions.getSkipFilter()
+                                  .getValue()
+                    : 0L;
             // Replace old skip Filter with new one
             Set<FilterClause> allFilters = queryOptions.getAllFilters();
             allFilters.remove(queryOptions.getSkipFilter());
             allFilters.add(new SkipTopFilter(FilterConstants.SkipTopOperator.Skip, oldSkip + oldTop));
             gen.writeStringField("@iot.nextLink",
-                    value.getRequestURL()
-                            + "?"
-                            + new QueryOptions(allFilters).toString());
+                                 value.getRequestURL()
+                                         + "?"
+                                         + new QueryOptions(allFilters).toString());
         }
 
         gen.writeArrayFieldStart("value");

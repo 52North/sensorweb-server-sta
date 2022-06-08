@@ -38,7 +38,8 @@ public class DatastreamGraphBuilder extends GraphBuilder<AbstractDatasetEntity> 
     public DatastreamGraphBuilder(Request req) {
         super(AbstractDatasetEntity.class);
         // do not fetch anything when getting by reference
-        if (req.getPath().isRef()) {
+        if (req.getPath()
+               .isRef()) {
             return;
         }
 
@@ -51,18 +52,18 @@ public class DatastreamGraphBuilder extends GraphBuilder<AbstractDatasetEntity> 
     public void addExpanded(ExpandItem expandItem) {
         if (expandItem != null) {
             switch (expandItem.getPath()) {
-                case StaConstants.SENSOR:
-                    addGraphText(GraphText.GRAPH_PROCEDURE);
-                    break;
-                case StaConstants.THING:
-                    addGraphText(GraphText.GRAPH_PLATFORM);
-                    break;
-                case StaConstants.OBSERVED_PROPERTY:
-                    addGraphText(GraphText.GRAPH_PHENOMENON);
-                    break;
-                case StaConstants.OBSERVATIONS:
-                default:
-                    // no expand
+            case StaConstants.SENSOR:
+                addGraphText(GraphText.GRAPH_PROCEDURE);
+                break;
+            case StaConstants.THING:
+                addGraphText(GraphText.GRAPH_PLATFORM);
+                break;
+            case StaConstants.OBSERVED_PROPERTY:
+                addGraphText(GraphText.GRAPH_PHENOMENON);
+                break;
+            case StaConstants.OBSERVATIONS:
+            default:
+                // no expand
             }
         }
     }

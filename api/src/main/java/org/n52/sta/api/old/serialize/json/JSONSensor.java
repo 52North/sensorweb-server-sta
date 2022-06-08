@@ -25,6 +25,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
+
 package org.n52.sta.api.old.serialize.json;
 
 import java.util.Arrays;
@@ -41,7 +42,10 @@ import org.n52.sta.api.old.serialize.common.JSONBase;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 
 @SuppressWarnings("VisibilityModifier")
-@SuppressFBWarnings({"NM_FIELD_NAMING_CONVENTION", "UWF_UNWRITTEN_PUBLIC_OR_PROTECTED_FIELD"})
+@SuppressFBWarnings({
+    "NM_FIELD_NAMING_CONVENTION",
+    "UWF_UNWRITTEN_PUBLIC_OR_PROTECTED_FIELD"
+})
 public class JSONSensor extends JSONBase.JSONwithIdNameDescription<SensorDTO> implements AbstractJSONEntity {
 
     protected static final String INALID_ENCODING_TYPE = "Invalid encodingType supplied. Only SensorML or PDF allowed.";
@@ -64,67 +68,67 @@ public class JSONSensor extends JSONBase.JSONwithIdNameDescription<SensorDTO> im
     @Override
     public SensorDTO parseToDTO(JSONBase.EntityType type) {
         switch (type) {
-            case FULL:
-                assertNotNull(name, INVALID_INLINE_ENTITY_MISSING + "name");
-                assertNotNull(description, INVALID_INLINE_ENTITY_MISSING + "description");
-                assertNotNull(encodingType, INVALID_INLINE_ENTITY_MISSING + "encodingType");
-                assertNotNull(metadata, INVALID_INLINE_ENTITY_MISSING + "metadata");
-                self.setId(identifier);
-                self.setName(name);
-                self.setDescription(description);
-                self.setMetadata(metadata);
+        case FULL:
+            assertNotNull(name, INVALID_INLINE_ENTITY_MISSING + "name");
+            assertNotNull(description, INVALID_INLINE_ENTITY_MISSING + "description");
+            assertNotNull(encodingType, INVALID_INLINE_ENTITY_MISSING + "encodingType");
+            assertNotNull(metadata, INVALID_INLINE_ENTITY_MISSING + "metadata");
+            self.setId(identifier);
+            self.setName(name);
+            self.setDescription(description);
+            self.setMetadata(metadata);
 
+            handleEncodingType();
+
+            if (properties != null) {
+                self.setProperties(properties);
+            }
+
+            if (Datastreams != null) {
+                self.setDatastreams(Arrays.stream(Datastreams)
+                                          .map(ds -> ds.parseToDTO(JSONBase.EntityType.FULL,
+                                                                   JSONBase.EntityType.REFERENCE))
+                                          .collect(Collectors.toSet()));
+            }
+
+            // Deal with back reference during deep insert
+            if (backReference != null) {
+                self.addDatastream(((JSONDatastream) backReference).getEntity());
+            }
+
+            return self;
+        case PATCH:
+            self.setId(identifier);
+            self.setName(name);
+            self.setDescription(description);
+            self.setMetadata(metadata);
+
+            if (encodingType != null) {
                 handleEncodingType();
+            }
 
-                if (properties != null) {
-                    self.setProperties(properties);
-                }
+            if (properties != null) {
+                self.setProperties(properties);
+            }
 
-                if (Datastreams != null) {
-                    self.setDatastreams(Arrays.stream(Datastreams)
-                                            .map(ds -> ds.parseToDTO(JSONBase.EntityType.FULL,
-                                                                     JSONBase.EntityType.REFERENCE))
-                                            .collect(Collectors.toSet()));
-                }
+            if (Datastreams != null) {
+                self.setDatastreams(Arrays.stream(Datastreams)
+                                          .map(ds -> ds.parseToDTO(JSONBase.EntityType.REFERENCE))
+                                          .collect(Collectors.toSet()));
+            }
+            return self;
+        case REFERENCE:
+            assertIsNull(name, INVALID_REFERENCED_ENTITY);
+            assertIsNull(description, INVALID_REFERENCED_ENTITY);
+            assertIsNull(encodingType, INVALID_REFERENCED_ENTITY);
+            assertIsNull(metadata, INVALID_REFERENCED_ENTITY);
+            assertIsNull(properties, INVALID_REFERENCED_ENTITY);
+            assertIsNull(Datastreams, INVALID_REFERENCED_ENTITY);
 
-                // Deal with back reference during deep insert
-                if (backReference != null) {
-                    self.addDatastream(((JSONDatastream) backReference).getEntity());
-                }
-
-                return self;
-            case PATCH:
-                self.setId(identifier);
-                self.setName(name);
-                self.setDescription(description);
-                self.setMetadata(metadata);
-
-                if (encodingType != null) {
-                    handleEncodingType();
-                }
-
-                if (properties != null) {
-                    self.setProperties(properties);
-                }
-
-                if (Datastreams != null) {
-                    self.setDatastreams(Arrays.stream(Datastreams)
-                                            .map(ds -> ds.parseToDTO(JSONBase.EntityType.REFERENCE))
-                                            .collect(Collectors.toSet()));
-                }
-                return self;
-            case REFERENCE:
-                assertIsNull(name, INVALID_REFERENCED_ENTITY);
-                assertIsNull(description, INVALID_REFERENCED_ENTITY);
-                assertIsNull(encodingType, INVALID_REFERENCED_ENTITY);
-                assertIsNull(metadata, INVALID_REFERENCED_ENTITY);
-                assertIsNull(properties, INVALID_REFERENCED_ENTITY);
-                assertIsNull(Datastreams, INVALID_REFERENCED_ENTITY);
-
-                self.setId(identifier);
-                return self;
-            default:
-                return null;
+            self.setId(identifier);
+            return self;
+        default:
+            return null;
         }
     }
 

@@ -25,6 +25,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
+
 package org.n52.sta.plus.persistence.service;
 
 import java.util.Optional;
@@ -60,7 +61,8 @@ import org.springframework.data.jpa.domain.Specification;
 // @Transactional
 // @Profile(StaConstants.STAPLUS)
 public class PartyService
-        extends CitSciSTAServiceImpl<PartyRepository, PartyDTO, PartyEntity> {
+        extends
+        CitSciSTAServiceImpl<PartyRepository, PartyDTO, PartyEntity> {
 
     private static final PartyQuerySpecifications pQS = new PartyQuerySpecifications();
 
@@ -74,17 +76,21 @@ public class PartyService
         if (expandOption != null) {
             for (ExpandItem expandItem : expandOption.getItems()) {
                 // We cannot handle nested $filter or $expand
-                if (expandItem.getQueryOptions().hasFilterFilter() || expandItem.getQueryOptions().hasExpandFilter()) {
+                if (expandItem.getQueryOptions()
+                              .hasFilterFilter()
+                        || expandItem.getQueryOptions()
+                                     .hasExpandFilter()) {
                     continue;
                 }
                 String expandProperty = expandItem.getPath();
                 if (PartyEntityDefinition.NAVIGATION_PROPERTIES.contains(expandProperty)) {
                     return new EntityGraphRepository.FetchGraph[] {
-                            EntityGraphRepository.FetchGraph.FETCHGRAPH_DATASETS };
+                        EntityGraphRepository.FetchGraph.FETCHGRAPH_DATASETS
+                    };
                 } else {
                     throw new STAInvalidQueryException(String.format(INVALID_EXPAND_OPTION_SUPPLIED,
-                            expandProperty,
-                            StaConstants.PARTY));
+                                                                     expandProperty,
+                                                                     StaConstants.PARTY));
                 }
             }
         }
@@ -97,22 +103,26 @@ public class PartyService
         if (expandOption != null) {
             for (ExpandItem expandItem : expandOption.getItems()) {
                 // We have already handled $expand without filter and expand
-                if (!(expandItem.getQueryOptions().hasFilterFilter() ||
-                        expandItem.getQueryOptions().hasExpandFilter())) {
+                if (!(expandItem.getQueryOptions()
+                                .hasFilterFilter()
+                        ||
+                        expandItem.getQueryOptions()
+                                  .hasExpandFilter())) {
                     continue;
                 }
                 String expandProperty = expandItem.getPath();
                 if (PartyEntityDefinition.NAVIGATION_PROPERTIES.contains(expandProperty)) {
                     Page<StaPlusDatasetEntity> datastreams = getDatastreamService()
-                            .getEntityCollectionByRelatedEntityRaw(entity.getStaIdentifier(),
-                                    STAEntityDefinition.PARTIES,
-                                    expandItem.getQueryOptions());
-                    entity.setDatastreams(datastreams.get().collect(Collectors.toSet()));
+                                                                                   .getEntityCollectionByRelatedEntityRaw(entity.getStaIdentifier(),
+                                                                                                                          STAEntityDefinition.PARTIES,
+                                                                                                                          expandItem.getQueryOptions());
+                    entity.setDatastreams(datastreams.get()
+                                                     .collect(Collectors.toSet()));
                     break;
                 } else {
                     throw new STAInvalidQueryException(String.format(INVALID_EXPAND_OPTION_SUPPLIED,
-                            expandProperty,
-                            StaConstants.PARTY));
+                                                                     expandProperty,
+                                                                     StaConstants.PARTY));
                 }
             }
         }
@@ -121,15 +131,15 @@ public class PartyService
 
     @Override
     protected Specification<PartyEntity> byRelatedEntityFilter(String relatedId,
-            String relatedType,
-            String ownId) {
+                                                               String relatedType,
+                                                               String ownId) {
         Specification<PartyEntity> filter;
         switch (relatedType) {
-            case STAEntityDefinition.DATASTREAMS:
-                filter = pQS.withDatastreamStaIdentifier(relatedId);
-                break;
-            default:
-                throw new IllegalStateException(String.format(TRYING_TO_FILTER_BY_UNRELATED_TYPE, relatedType));
+        case STAEntityDefinition.DATASTREAMS:
+            filter = pQS.withDatastreamStaIdentifier(relatedId);
+            break;
+        default:
+            throw new IllegalStateException(String.format(TRYING_TO_FILTER_BY_UNRELATED_TYPE, relatedType));
         }
 
         if (ownId != null) {
@@ -148,12 +158,13 @@ public class PartyService
                 return optionalEntity.get();
             } else {
                 throw new STACRUDException(String.format(NO_S_WITH_ID_S_FOUND,
-                        StaConstants.PARTY,
-                        party.getStaIdentifier()));
+                                                         StaConstants.PARTY,
+                                                         party.getStaIdentifier()));
             }
         } else if (party.getStaIdentifier() == null) {
             // Autogenerate Identifier
-            String uuid = UUID.randomUUID().toString();
+            String uuid = UUID.randomUUID()
+                              .toString();
             party.setStaIdentifier(uuid);
         }
         synchronized (getLock(party.getStaIdentifier())) {
@@ -228,7 +239,8 @@ public class PartyService
     public void delete(String id) throws STACRUDException {
         synchronized (getLock(id)) {
             if (getRepository().existsByStaIdentifier(id)) {
-                PartyEntity party = getRepository().findByStaIdentifier(id).get();
+                PartyEntity party = getRepository().findByStaIdentifier(id)
+                                                   .get();
                 // Delete related Datastreams
                 for (StaPlusAbstractDatasetEntity ds : party.getDatastreams()) {
                     getDatastreamService().delete(ds.getStaIdentifier());

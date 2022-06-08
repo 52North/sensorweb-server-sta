@@ -25,6 +25,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
+
 package org.n52.sta.api.service;
 
 import org.n52.sta.api.EntityEditor;
@@ -59,7 +60,7 @@ public class HistoricalLocationService implements EntityService<HistoricalLocati
     }
 
     public HistoricalLocationService(EntityProvider<HistoricalLocation> provider,
-            DomainService<HistoricalLocation> domainService) {
+                                     DomainService<HistoricalLocation> domainService) {
         Objects.requireNonNull(provider, "provider must not be null");
         this.historicalLocationProvider = provider;
         this.domainService = domainService == null
@@ -78,7 +79,7 @@ public class HistoricalLocationService implements EntityService<HistoricalLocati
     }
 
     @Override
-    public EntityPage<HistoricalLocation> getEntities(Request req)throws ProviderException {
+    public EntityPage<HistoricalLocation> getEntities(Request req) throws ProviderException {
         return domainService.getEntities(req);
     }
 
@@ -126,7 +127,7 @@ public class HistoricalLocationService implements EntityService<HistoricalLocati
 
     private HistoricalLocation getOrThrow(String id) throws ProviderException {
         return domainService.getEntity(id)
-                .orElseThrow(() -> new ProviderException("Id '" + id + "' does not exist."));
+                            .orElseThrow(() -> new ProviderException("Id '" + id + "' does not exist."));
     }
 
 }

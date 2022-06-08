@@ -25,6 +25,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
+
 package org.n52.sta.data.old.repositories;
 
 import org.n52.series.db.beans.AbstractFeatureEntity;
@@ -33,7 +34,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Transactional
 @Repository
-public interface FeatureOfInterestRepository extends IdentifierNameRepository<AbstractFeatureEntity<?>>,
-        StaIdentifierRepository<AbstractFeatureEntity<?>> {
+public interface FeatureOfInterestRepository extends
+        IdentifierNameRepository<AbstractFeatureEntity< ? >>,
+        StaIdentifierRepository<AbstractFeatureEntity< ? >> {
 
 }

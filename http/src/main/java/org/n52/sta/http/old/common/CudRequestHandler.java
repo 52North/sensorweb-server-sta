@@ -25,6 +25,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
+
 package org.n52.sta.http.old.common;
 
 import java.io.IOException;
@@ -56,202 +57,207 @@ import org.springframework.web.servlet.HandlerMapping;
  */
 public abstract class CudRequestHandler<T extends StaDTO> extends AbstractSTARequestHandler {
 
-        private static final String COULD_NOT_FIND_RELATED_ENTITY = "Could not find related Entity!";
-        private final ObjectMapper mapper;
+    private static final String COULD_NOT_FIND_RELATED_ENTITY = "Could not find related Entity!";
+    private final ObjectMapper mapper;
 
-        private DTOMapper dtoMapper;
+    private DTOMapper dtoMapper;
 
-        public CudRequestHandler(String rootUrl,
-                        boolean shouldEscapeId,
-                        EntityServiceFactory serviceRepository,
-                        ObjectMapper mapper,
-                        DTOMapper dtoMapper) {
-                super(rootUrl, shouldEscapeId, serviceRepository);
-                this.mapper = mapper;
-        }
+    public CudRequestHandler(String rootUrl,
+                             boolean shouldEscapeId,
+                             EntityServiceFactory serviceRepository,
+                             ObjectMapper mapper,
+                             DTOMapper dtoMapper) {
+        super(rootUrl, shouldEscapeId, serviceRepository);
+        this.mapper = mapper;
+    }
 
-        /**
-         * Matches all POST requests on Collections referenced directly
-         * e.g. ../Datastreams
-         *
-         * @param collectionName name of entity. Automatically set by Spring
-         *                       via @PathVariable
-         * @param body           request Body. Automatically set by Spring
-         *                       via @RequestBody
-         */
-        @SuppressWarnings("unchecked")
-        public StaDTO handlePostDirect(String collectionName,
-                        String body)
-                        throws IOException, STACRUDException, STAInvalidUrlException {
-                Class<T> clazz = dtoMapper.collectionNameToClass(collectionName);
-                return ((AbstractSensorThingsEntityService<T>) serviceRepository.getEntityService(collectionName))
-                                .create(mapper.readValue(body, clazz));
-        }
+    /**
+     * Matches all POST requests on Collections referenced directly e.g. ../Datastreams
+     *
+     * @param collectionName
+     *        name of entity. Automatically set by Spring via @PathVariable
+     * @param body
+     *        request Body. Automatically set by Spring via @RequestBody
+     */
+    @SuppressWarnings("unchecked")
+    public StaDTO handlePostDirect(String collectionName,
+                                   String body)
+            throws IOException, STACRUDException, STAInvalidUrlException {
+        Class<T> clazz = dtoMapper.collectionNameToClass(collectionName);
+        return ((AbstractSensorThingsEntityService<T>) serviceRepository.getEntityService(collectionName))
+                                                                                                          .create(mapper.readValue(body,
+                                                                                                                                   clazz));
+    }
 
-        /**
-         * Matches all POST requests on Collections not referenced directly via id but
-         * via referenced entity.
-         * e.g. ../Datastreams(52)/Observations
-         *
-         * @param entity  name and id of related entity. Automatically set by Spring
-         *                via @PathVariable
-         * @param target  type of entity POSTed. Automatically set by Spring
-         *                via @PathVariable
-         * @param body    request Body. Automatically set by Spring via @RequestBody
-         * @param request full request
-         */
-        @SuppressWarnings("unchecked")
-        public StaDTO handlePostRelated(String entity,
-                        String target,
-                        String body,
-                        HttpServletRequest request)
-                        throws Exception {
-                String lookupPath = (String) request.getAttribute(HandlerMapping.LOOKUP_PATH);
-                validateResource(lookupPath);
+    /**
+     * Matches all POST requests on Collections not referenced directly via id but via referenced entity. e.g.
+     * ../Datastreams(52)/Observations
+     *
+     * @param entity
+     *        name and id of related entity. Automatically set by Spring via @PathVariable
+     * @param target
+     *        type of entity POSTed. Automatically set by Spring via @PathVariable
+     * @param body
+     *        request Body. Automatically set by Spring via @RequestBody
+     * @param request
+     *        full request
+     */
+    @SuppressWarnings("unchecked")
+    public StaDTO handlePostRelated(String entity,
+                                    String target,
+                                    String body,
+                                    HttpServletRequest request)
+            throws Exception {
+        String lookupPath = (String) request.getAttribute(HandlerMapping.LOOKUP_PATH);
+        validateResource(lookupPath);
 
-                // Add information about the related Entity to json payload to be used during
-                // deserialization
-                String[] split = splitId(entity);
-                String sourceType = split[0];
-                String sourceId = split[1];
-                ObjectNode jsonBody = (ObjectNode) mapper.readTree(body);
-                jsonBody.put(REFERENCED_FROM_TYPE, sourceType);
-                jsonBody.put(REFERENCED_FROM_ID, sourceId);
+        // Add information about the related Entity to json payload to be used during
+        // deserialization
+        String[] split = splitId(entity);
+        String sourceType = split[0];
+        String sourceId = split[1];
+        ObjectNode jsonBody = (ObjectNode) mapper.readTree(body);
+        jsonBody.put(REFERENCED_FROM_TYPE, sourceType);
+        jsonBody.put(REFERENCED_FROM_ID, sourceId);
 
-                Class<T> clazz = dtoMapper.collectionNameToClass(target);
-                return ((AbstractSensorThingsEntityService<T>) serviceRepository.getEntityService(target))
-                                .create(mapper.readValue(jsonBody.toString(), clazz));
-        }
+        Class<T> clazz = dtoMapper.collectionNameToClass(target);
+        return ((AbstractSensorThingsEntityService<T>) serviceRepository.getEntityService(target))
+                                                                                                  .create(mapper.readValue(jsonBody.toString(),
+                                                                                                                           clazz));
+    }
 
-        /**
-         * Matches all PATCH requests on Entities referenced directly via id
-         * e.g. ../Datastreams(52)
-         *
-         * @param collectionName name of entity. Automatically set by Spring
-         *                       via @PathVariable
-         * @param id             id of entity. Automatically set by Spring
-         *                       via @PathVariable
-         * @param request        full request
-         */
-        @SuppressWarnings("unchecked")
-        public StaDTO handleDirectPatch(@PathVariable String collectionName,
-                        @PathVariable String id,
-                        @RequestBody String body,
-                        HttpServletRequest request)
-                        throws Exception {
-                String lookupPath = (String) request.getAttribute(HandlerMapping.LOOKUP_PATH);
-                validateResource(lookupPath);
+    /**
+     * Matches all PATCH requests on Entities referenced directly via id e.g. ../Datastreams(52)
+     *
+     * @param collectionName
+     *        name of entity. Automatically set by Spring via @PathVariable
+     * @param id
+     *        id of entity. Automatically set by Spring via @PathVariable
+     * @param request
+     *        full request
+     */
+    @SuppressWarnings("unchecked")
+    public StaDTO handleDirectPatch(@PathVariable String collectionName,
+                                    @PathVariable String id,
+                                    @RequestBody String body,
+                                    HttpServletRequest request)
+            throws Exception {
+        String lookupPath = (String) request.getAttribute(HandlerMapping.LOOKUP_PATH);
+        validateResource(lookupPath);
 
-                Class<EntityPatch> clazz = dtoMapper.collectionNameToPatchClass(collectionName);
-                ObjectNode jsonBody = (ObjectNode) mapper.readTree(body);
-                String strippedId = unescapeIdIfWanted(id.substring(1, id.length() - 1));
-                jsonBody.put(StaConstants.AT_IOT_ID, strippedId);
-                return ((AbstractSensorThingsEntityService<T>) serviceRepository.getEntityService(collectionName))
-                                .update(
-                                                strippedId,
-                                                (T) ((mapper.readValue(jsonBody.toString(),
-                                                                clazz))).getEntity(),
-                                                HttpMethod.PATCH.toString());
-        }
+        Class<EntityPatch> clazz = dtoMapper.collectionNameToPatchClass(collectionName);
+        ObjectNode jsonBody = (ObjectNode) mapper.readTree(body);
+        String strippedId = unescapeIdIfWanted(id.substring(1, id.length() - 1));
+        jsonBody.put(StaConstants.AT_IOT_ID, strippedId);
+        return ((AbstractSensorThingsEntityService<T>) serviceRepository.getEntityService(collectionName))
+                                                                                                          .update(
+                                                                                                                  strippedId,
+                                                                                                                  (T) ((mapper.readValue(jsonBody.toString(),
+                                                                                                                                         clazz))).getEntity(),
+                                                                                                                  HttpMethod.PATCH.toString());
+    }
 
-        /**
-         * Matches all PATCH requests on Entities referenced via association with
-         * different Entity.
-         * e.g. /Datastreams(1)/Sensor
-         *
-         * @param entity  identifier of related. Automatically set by Spring
-         *                via @PathVariable
-         * @param target  name of entity. Automatically set by Spring via @PathVariable
-         * @param request full request
-         */
-        @SuppressWarnings("unchecked")
-        public StaDTO handleRelatedPatch(String entity,
-                        String target,
-                        String body,
-                        HttpServletRequest request)
-                        throws Exception {
-                String lookupPath = (String) request.getAttribute(HandlerMapping.LOOKUP_PATH);
-                validateResource(lookupPath);
+    /**
+     * Matches all PATCH requests on Entities referenced via association with different Entity. e.g.
+     * /Datastreams(1)/Sensor
+     *
+     * @param entity
+     *        identifier of related. Automatically set by Spring via @PathVariable
+     * @param target
+     *        name of entity. Automatically set by Spring via @PathVariable
+     * @param request
+     *        full request
+     */
+    @SuppressWarnings("unchecked")
+    public StaDTO handleRelatedPatch(String entity,
+                                     String target,
+                                     String body,
+                                     HttpServletRequest request)
+            throws Exception {
+        String lookupPath = (String) request.getAttribute(HandlerMapping.LOOKUP_PATH);
+        validateResource(lookupPath);
 
-                String[] split = splitId(entity);
-                String sourceType = split[0];
-                String sourceId = split[1];
+        String[] split = splitId(entity);
+        String sourceType = split[0];
+        String sourceId = split[1];
 
-                @SuppressWarnings("checkstyle:linelength")
-                AbstractSensorThingsEntityService<T> entityService = (AbstractSensorThingsEntityService<T>) serviceRepository
-                                .getEntityService(target);
+        @SuppressWarnings("checkstyle:linelength")
+        AbstractSensorThingsEntityService<T> entityService = (AbstractSensorThingsEntityService<T>) serviceRepository
+                                                                                                                     .getEntityService(target);
 
-                // Get Id from datastore
-                String entityId = entityService.getEntityIdByRelatedEntity(sourceId, sourceType);
-                Assert.notNull(entityId, COULD_NOT_FIND_RELATED_ENTITY);
+        // Get Id from datastore
+        String entityId = entityService.getEntityIdByRelatedEntity(sourceId, sourceType);
+        Assert.notNull(entityId, COULD_NOT_FIND_RELATED_ENTITY);
 
-                // Create Patch Entity
-                Class<EntityPatch> clazz = dtoMapper.collectionNameToPatchClass(target);
-                Assert.notNull(clazz, "Could not find Patch Class!");
+        // Create Patch Entity
+        Class<EntityPatch> clazz = dtoMapper.collectionNameToPatchClass(target);
+        Assert.notNull(clazz, "Could not find Patch Class!");
 
-                ObjectNode jsonBody = (ObjectNode) mapper.readTree(body);
-                jsonBody.put(StaConstants.AT_IOT_ID, entityId);
+        ObjectNode jsonBody = (ObjectNode) mapper.readTree(body);
+        jsonBody.put(StaConstants.AT_IOT_ID, entityId);
 
-                // Do update
-                return entityService.update(entityId,
-                                (T) ((mapper.readValue(jsonBody.toString(), clazz))).getEntity(),
-                                HttpMethod.PATCH.toString());
-        }
+        // Do update
+        return entityService.update(entityId,
+                                    (T) ((mapper.readValue(jsonBody.toString(), clazz))).getEntity(),
+                                    HttpMethod.PATCH.toString());
+    }
 
-        /**
-         * Matches all DELETE requests on Entities referenced directly via id
-         * e.g. ../Datastreams(52)
-         *
-         * @param collectionName name of entity. Automatically set by Spring
-         *                       via @PathVariable
-         * @param id             id of entity. Automatically set by Spring
-         *                       via @PathVariable
-         * @param request        full request
-         */
-        public Object handleDelete(String collectionName,
-                        String id,
-                        HttpServletRequest request)
-                        throws Exception {
-                String lookupPath = (String) request.getAttribute(HandlerMapping.LOOKUP_PATH);
-                validateResource(lookupPath);
-                serviceRepository.getEntityService(collectionName).delete(
-                                unescapeIdIfWanted(id.substring(1, id.length() - 1)));
-                return null;
-        }
+    /**
+     * Matches all DELETE requests on Entities referenced directly via id e.g. ../Datastreams(52)
+     *
+     * @param collectionName
+     *        name of entity. Automatically set by Spring via @PathVariable
+     * @param id
+     *        id of entity. Automatically set by Spring via @PathVariable
+     * @param request
+     *        full request
+     */
+    public Object handleDelete(String collectionName,
+                               String id,
+                               HttpServletRequest request)
+            throws Exception {
+        String lookupPath = (String) request.getAttribute(HandlerMapping.LOOKUP_PATH);
+        validateResource(lookupPath);
+        serviceRepository.getEntityService(collectionName)
+                         .delete(
+                                 unescapeIdIfWanted(id.substring(1, id.length() - 1)));
+        return null;
+    }
 
-        /**
-         * Matches all DELETE requests on Entities referenced via association with
-         * different Entity.
-         * e.g. /Datastreams(1)/Sensor
-         *
-         * @param entity  identifier of related. Automatically set by Spring
-         *                via @PathVariable
-         * @param target  name of entity. Automatically set by Spring via @PathVariable
-         * @param request full request
-         */
-        @SuppressWarnings("unchecked")
-        public Object handleRelatedDelete(String entity,
-                        String target,
-                        String body,
-                        HttpServletRequest request)
-                        throws Exception {
-                String lookupPath = (String) request.getAttribute(HandlerMapping.LOOKUP_PATH);
-                validateResource(lookupPath);
+    /**
+     * Matches all DELETE requests on Entities referenced via association with different Entity. e.g.
+     * /Datastreams(1)/Sensor
+     *
+     * @param entity
+     *        identifier of related. Automatically set by Spring via @PathVariable
+     * @param target
+     *        name of entity. Automatically set by Spring via @PathVariable
+     * @param request
+     *        full request
+     */
+    @SuppressWarnings("unchecked")
+    public Object handleRelatedDelete(String entity,
+                                      String target,
+                                      String body,
+                                      HttpServletRequest request)
+            throws Exception {
+        String lookupPath = (String) request.getAttribute(HandlerMapping.LOOKUP_PATH);
+        validateResource(lookupPath);
 
-                String[] split = splitId(entity);
-                String sourceType = split[0];
-                String sourceId = split[1];
+        String[] split = splitId(entity);
+        String sourceType = split[0];
+        String sourceId = split[1];
 
-                @SuppressWarnings("checkstyle:linelength")
-                AbstractSensorThingsEntityService<T> entityService = (AbstractSensorThingsEntityService<T>) serviceRepository
-                                .getEntityService(target);
+        @SuppressWarnings("checkstyle:linelength")
+        AbstractSensorThingsEntityService<T> entityService = (AbstractSensorThingsEntityService<T>) serviceRepository
+                                                                                                                     .getEntityService(target);
 
-                // Get Id from datastore
-                String entityId = entityService.getEntityIdByRelatedEntity(sourceId, sourceType);
-                Assert.notNull(entityId, COULD_NOT_FIND_RELATED_ENTITY);
+        // Get Id from datastore
+        String entityId = entityService.getEntityIdByRelatedEntity(sourceId, sourceType);
+        Assert.notNull(entityId, COULD_NOT_FIND_RELATED_ENTITY);
 
-                // Do update
-                entityService.delete(entityId);
-                return null;
-        }
+        // Do update
+        entityService.delete(entityId);
+        return null;
+    }
 }

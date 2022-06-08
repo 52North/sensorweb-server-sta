@@ -25,6 +25,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
+
 package org.n52.sta.plus.old.serialize.json;
 
 import java.util.HashSet;
@@ -48,9 +49,13 @@ import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
  */
 @SuppressWarnings("VisibilityModifier")
-@SuppressFBWarnings({"NM_FIELD_NAMING_CONVENTION", "UWF_UNWRITTEN_PUBLIC_OR_PROTECTED_FIELD"})
+@SuppressFBWarnings({
+    "NM_FIELD_NAMING_CONVENTION",
+    "UWF_UNWRITTEN_PUBLIC_OR_PROTECTED_FIELD"
+})
 public class JSONGroup extends JSONBase.JSONwithIdNameDescriptionTime<GroupDTO>
-    implements AbstractJSONEntity {
+        implements
+        AbstractJSONEntity {
 
     public String name;
     public String description;
@@ -75,26 +80,27 @@ public class JSONGroup extends JSONBase.JSONwithIdNameDescriptionTime<GroupDTO>
         self = new Group();
     }
 
-    @Override public GroupDTO parseToDTO(JSONBase.EntityType type) {
+    @Override
+    public GroupDTO parseToDTO(JSONBase.EntityType type) {
         switch (type) {
-            case FULL:
-                parseReferencedFrom();
-                assertNotNull(name, INVALID_INLINE_ENTITY_MISSING + "name");
-                assertNotNull(description, INVALID_INLINE_ENTITY_MISSING + "description");
+        case FULL:
+            parseReferencedFrom();
+            assertNotNull(name, INVALID_INLINE_ENTITY_MISSING + "name");
+            assertNotNull(description, INVALID_INLINE_ENTITY_MISSING + "description");
 
-                return createEntity();
-            case PATCH:
-                parseReferencedFrom();
-                return createEntity();
+            return createEntity();
+        case PATCH:
+            parseReferencedFrom();
+            return createEntity();
 
-            case REFERENCE:
-                assertIsNull(name, INVALID_REFERENCED_ENTITY);
-                assertIsNull(description, INVALID_REFERENCED_ENTITY);
-                assertIsNull(relations, INVALID_REFERENCED_ENTITY);
-                self.setId(identifier);
-                return self;
-            default:
-                return null;
+        case REFERENCE:
+            assertIsNull(name, INVALID_REFERENCED_ENTITY);
+            assertIsNull(description, INVALID_REFERENCED_ENTITY);
+            assertIsNull(relations, INVALID_REFERENCED_ENTITY);
+            self.setId(identifier);
+            return self;
+        default:
+            return null;
         }
     }
 
@@ -140,4 +146,3 @@ public class JSONGroup extends JSONBase.JSONwithIdNameDescriptionTime<GroupDTO>
         return self;
     }
 }
-

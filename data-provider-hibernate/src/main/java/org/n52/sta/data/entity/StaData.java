@@ -25,6 +25,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
+
 package org.n52.sta.data.entity;
 
 import java.util.Collection;
@@ -69,18 +70,23 @@ public class StaData<T extends DescribableEntity> implements Identifiable {
     }
 
     protected Time toTimeInterval(Date start, Date optionalEnd) {
-        Optional<DateTime> begin = Optional.ofNullable(start).map(TimeUtil::createDateTime);
-        Optional<DateTime> end = Optional.ofNullable(optionalEnd).map(TimeUtil::createDateTime);
-        return begin.map(b -> TimeUtil.createTime(b, end.orElse(null))).orElse(null);
+        Optional<DateTime> begin = Optional.ofNullable(start)
+                                           .map(TimeUtil::createDateTime);
+        Optional<DateTime> end = Optional.ofNullable(optionalEnd)
+                                         .map(TimeUtil::createDateTime);
+        return begin.map(b -> TimeUtil.createTime(b, end.orElse(null)))
+                    .orElse(null);
     }
 
     protected <E, U> Set<U> toSet(Collection<E> collection, Function<E, U> mapper) {
-        return Streams.stream(collection).map(mapper).collect(Collectors.toSet());
+        return Streams.stream(collection)
+                      .map(mapper)
+                      .collect(Collectors.toSet());
     }
 
-    protected Map<String, Object> toMap(Set<ParameterEntity<?>> parameters) {
+    protected Map<String, Object> toMap(Set<ParameterEntity< ? >> parameters) {
         return Streams.stream(parameters)
-                .collect(Collectors.toMap(ParameterEntity::getName, ParameterEntity::getValue));
+                      .collect(Collectors.toMap(ParameterEntity::getName, ParameterEntity::getValue));
     }
 
 }

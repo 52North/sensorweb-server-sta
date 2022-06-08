@@ -25,6 +25,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
+
 package org.n52.sta.http.old.common;
 
 import java.net.URLDecoder;
@@ -41,19 +42,16 @@ import org.n52.sta.old.utils.AbstractSTARequestHandler;
 import org.springframework.web.servlet.HandlerMapping;
 
 /**
- * Handles all requests to Entities and to Entity association links
- * e.g. /Things(52)
- * e.g. /Datastreams(52)/Thing
- * e.g. /Things(52)/$ref
- * e.g. /Datastreams(52)/Thing/$ref
+ * Handles all requests to Entities and to Entity association links e.g. /Things(52) e.g.
+ * /Datastreams(52)/Thing e.g. /Things(52)/$ref e.g. /Datastreams(52)/Thing/$ref
  *
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
  */
 public abstract class EntityRequestHandler extends AbstractSTARequestHandler {
 
     public EntityRequestHandler(String rootUrl,
-            boolean shouldEscapeId,
-            EntityServiceFactory serviceRepository) {
+                                boolean shouldEscapeId,
+                                EntityServiceFactory serviceRepository) {
         super(rootUrl, shouldEscapeId, serviceRepository);
     }
 
@@ -67,37 +65,43 @@ public abstract class EntityRequestHandler extends AbstractSTARequestHandler {
     }
 
     /**
-     * Matches all requests on Entities referenced directly via id
-     * e.g. /Datastreams(52)
+     * Matches all requests on Entities referenced directly via id e.g. /Datastreams(52)
      *
-     * @param entity  name of entity. Automatically set by Spring via @PathVariable
-     * @param id      id of entity. Automatically set by Spring via @PathVariable
-     * @param request full request
+     * @param entity
+     *        name of entity. Automatically set by Spring via @PathVariable
+     * @param id
+     *        id of entity. Automatically set by Spring via @PathVariable
+     * @param request
+     *        full request
      */
     public StaDTO readEntityDirect(String entity,
-            String id,
-            HttpServletRequest request) throws Exception {
+                                   String id,
+                                   HttpServletRequest request)
+            throws Exception {
         String lookupPath = (String) request.getAttribute(HandlerMapping.LOOKUP_PATH);
         validateResource(lookupPath);
 
         String entityId = unescapeIdIfWanted(id.substring(1, id.length() - 1));
         QueryOptions options = decodeQueryString(request);
         return serviceRepository.getEntityService(entity)
-                .getEntity(entityId, options);
+                                .getEntity(entityId, options);
     }
 
     /**
-     * Matches all requests on Entities referenced directly via id and addressing an
-     * association link
-     * e.g. /Datastreams(52)/$ref
+     * Matches all requests on Entities referenced directly via id and addressing an association link e.g.
+     * /Datastreams(52)/$ref
      *
-     * @param entity  name of entity. Automatically set by Spring via @PathVariable
-     * @param id      id of entity. Automatically set by Spring via @PathVariable
-     * @param request full request
+     * @param entity
+     *        name of entity. Automatically set by Spring via @PathVariable
+     * @param id
+     *        id of entity. Automatically set by Spring via @PathVariable
+     * @param request
+     *        full request
      */
     public StaDTO readEntityRefDirect(String entity,
-            String id,
-            HttpServletRequest request) throws Exception {
+                                      String id,
+                                      HttpServletRequest request)
+            throws Exception {
         String lookupPath = (String) request.getAttribute(HandlerMapping.LOOKUP_PATH);
 
         // '/$ref'
@@ -109,22 +113,22 @@ public abstract class EntityRequestHandler extends AbstractSTARequestHandler {
         // Overwrite select filter with filter only returning id
         filters.add(new SelectFilter(ID));
         return serviceRepository.getEntityService(entity)
-                .getEntity(entityId, QUERY_OPTIONS_FACTORY.createQueryOptions(filters));
+                                .getEntity(entityId, QUERY_OPTIONS_FACTORY.createQueryOptions(filters));
     }
 
     /**
-     * Matches all requests on Entities not referenced directly via id but via
-     * referenced entity
-     * e.g. /Datastreams(52)/Thing
+     * Matches all requests on Entities not referenced directly via id but via referenced entity e.g.
+     * /Datastreams(52)/Thing
      *
-     * @param entity  composite of entity and referenced entity. Automatically set
-     *                by Spring via @PathVariable
-     * @param request full request
+     * @param entity
+     *        composite of entity and referenced entity. Automatically set by Spring via @PathVariable
+     * @param request
+     *        full request
      * @return JSON String representing Entity
      */
     public StaDTO readRelatedEntity(String entity,
-            String target,
-            HttpServletRequest request)
+                                    String target,
+                                    HttpServletRequest request)
             throws Exception {
         String lookupPath = (String) request.getAttribute(HandlerMapping.LOOKUP_PATH);
         validateResource(lookupPath);
@@ -135,26 +139,25 @@ public abstract class EntityRequestHandler extends AbstractSTARequestHandler {
 
         QueryOptions options = decodeQueryString(request);
         return serviceRepository.getEntityService(target)
-                .getEntityByRelatedEntity(sourceId,
-                        sourceType,
-                        null,
-                        options);
+                                .getEntityByRelatedEntity(sourceId,
+                                                          sourceType,
+                                                          null,
+                                                          options);
     }
 
     /**
-     * Matches all requests on Entities not referenced directly via id but via
-     * referenced entity and addressing an
-     * association link
-     * e.g. /Datastreams(52)/Thing/$ref
+     * Matches all requests on Entities not referenced directly via id but via referenced entity and
+     * addressing an association link e.g. /Datastreams(52)/Thing/$ref
      *
-     * @param entity  composite of entity and referenced entity. Automatically set
-     *                by Spring via @PathVariable
-     * @param request full request
+     * @param entity
+     *        composite of entity and referenced entity. Automatically set by Spring via @PathVariable
+     * @param request
+     *        full request
      * @return JSON String representing Entity
      */
     public StaDTO readRelatedEntityRef(String entity,
-            String target,
-            HttpServletRequest request)
+                                       String target,
+                                       HttpServletRequest request)
             throws Exception {
         String lookupPath = (String) request.getAttribute(HandlerMapping.LOOKUP_PATH);
         validateResource(lookupPath.substring(0, lookupPath.length() - 5));
@@ -167,9 +170,9 @@ public abstract class EntityRequestHandler extends AbstractSTARequestHandler {
         // Overwrite select filter with filter only returning id
         filters.add(new SelectFilter(ID));
         return serviceRepository.getEntityService(target)
-                .getEntityByRelatedEntity(sourceId,
-                        sourceType,
-                        null,
-                        QUERY_OPTIONS_FACTORY.createQueryOptions(filters));
+                                .getEntityByRelatedEntity(sourceId,
+                                                          sourceType,
+                                                          null,
+                                                          QUERY_OPTIONS_FACTORY.createQueryOptions(filters));
     }
 }

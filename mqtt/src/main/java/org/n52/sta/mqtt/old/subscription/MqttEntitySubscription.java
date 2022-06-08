@@ -90,15 +90,16 @@ public class MqttEntitySubscription extends AbstractMqttSubscription {
     public String toString() {
         String base = super.toString();
         return new StringBuilder()
-            .append(base)
-            .deleteCharAt(base.length() - 1)
-            .append(",wantedIdentifier=")
-            .append(wantedIdentifier)
-            .append("]")
-            .toString();
+                                  .append(base)
+                                  .deleteCharAt(base.length() - 1)
+                                  .append(",wantedIdentifier=")
+                                  .append(wantedIdentifier)
+                                  .append("]")
+                                  .toString();
     }
 
-    @Override public QueryOptions getQueryOptions() {
+    @Override
+    public QueryOptions getQueryOptions() {
         return null;
     }
 
@@ -121,7 +122,8 @@ public class MqttEntitySubscription extends AbstractMqttSubscription {
             // Check if Entity belongs to collection of this Subscription
             if (collections != null) {
                 for (Map.Entry<String, Set<String>> collection : collections.entrySet()) {
-                    if (collection.getKey().equals(sourceEntityType)) {
+                    if (collection.getKey()
+                                  .equals(sourceEntityType)) {
                         for (String id : collection.getValue()) {
                             if (id.equals(sourceId)) {
                                 return true;

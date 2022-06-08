@@ -25,6 +25,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
+
 package org.n52.sta.data.old;
 
 import java.math.BigDecimal;
@@ -95,8 +96,7 @@ import org.springframework.util.Assert;
 // import org.n52.series.db.beans.SensorML20DataEntity;
 
 /**
- * Translates between STA DTO Entities and Entities used by the dao-postgres
- * module internally
+ * Translates between STA DTO Entities and Entities used by the dao-postgres module internally
  *
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
  */
@@ -115,47 +115,51 @@ public class DTOTransformerImpl<R extends StaDTO, S extends HibernateRelations.H
     }
 
     protected static String genKey(StaDTO dto) {
-        return dto.getId() + dto.getClass().getSimpleName();
+        return dto.getId()
+                + dto.getClass()
+                     .getSimpleName();
     }
 
     @Override
     @SuppressWarnings("unchecked")
     public R toDTO(Object raw, QueryOptions queryOptions) throws STAInvalidQueryError {
-        switch (raw.getClass().getSimpleName()) {
-            case "PlatformEntity": {
-                return (R) toThingDTO((PlatformEntity) raw, queryOptions);
-            }
-            case "LocationEntity": {
-                return (R) toLocationDTO((LocationEntity) raw, queryOptions);
-            }
-            case "HistoricalLocationEntity": {
-                return (R) toHistoricalLocationDTO((HistoricalLocationEntity) raw, queryOptions);
-            }
-            case "AbstractDatasetEntity":
-            case "DatasetEntity":
-            case "DatasetAggregationEntity": {
-                return (R) toDatastreamDTO((AbstractDatasetEntity) raw, queryOptions);
-            }
-            case "ProcedureEntity": {
-                return (R) toSensorDTO((ProcedureEntity) raw, queryOptions);
-            }
-            case "FeatureEntity": {
-                return (R) toFeatureOfInterestDTO(new StaFeatureEntity((FeatureEntity) raw), queryOptions);
-            }
-            case "StaFeatureEntity": {
-                return (R) toFeatureOfInterestDTO((StaFeatureEntity) raw, queryOptions);
-            }
-            case "PhenomenonEntity": {
-                return (R) toObservedPropertyDTO((PhenomenonEntity) raw, queryOptions);
-            }
+        switch (raw.getClass()
+                   .getSimpleName()) {
+        case "PlatformEntity": {
+            return (R) toThingDTO((PlatformEntity) raw, queryOptions);
+        }
+        case "LocationEntity": {
+            return (R) toLocationDTO((LocationEntity) raw, queryOptions);
+        }
+        case "HistoricalLocationEntity": {
+            return (R) toHistoricalLocationDTO((HistoricalLocationEntity) raw, queryOptions);
+        }
+        case "AbstractDatasetEntity":
+        case "DatasetEntity":
+        case "DatasetAggregationEntity": {
+            return (R) toDatastreamDTO((AbstractDatasetEntity) raw, queryOptions);
+        }
+        case "ProcedureEntity": {
+            return (R) toSensorDTO((ProcedureEntity) raw, queryOptions);
+        }
+        case "FeatureEntity": {
+            return (R) toFeatureOfInterestDTO(new StaFeatureEntity((FeatureEntity) raw), queryOptions);
+        }
+        case "StaFeatureEntity": {
+            return (R) toFeatureOfInterestDTO((StaFeatureEntity) raw, queryOptions);
+        }
+        case "PhenomenonEntity": {
+            return (R) toObservedPropertyDTO((PhenomenonEntity) raw, queryOptions);
+        }
 
-            default:
-                // As we have many different types we unwrap them all here
-                if (raw instanceof DataEntity) {
-                    return (R) toObservationDTO((DataEntity<?>) raw, queryOptions);
-                }
-                throw new STAInvalidQueryError(String.format("Could not parse entity %s to DTO. Unknown type!",
-                        raw.getClass().getName()));
+        default:
+            // As we have many different types we unwrap them all here
+            if (raw instanceof DataEntity) {
+                return (R) toObservationDTO((DataEntity< ? >) raw, queryOptions);
+            }
+            throw new STAInvalidQueryError(String.format("Could not parse entity %s to DTO. Unknown type!",
+                                                         raw.getClass()
+                                                            .getName()));
         }
     }
 
@@ -180,7 +184,8 @@ public class DTOTransformerImpl<R extends StaDTO, S extends HibernateRelations.H
             return (S) toLocationEntity((LocationDTO) type);
         } else {
             throw new STAInvalidQueryError(String.format("Could not parse entity %s to Database Entity!",
-                    type.getClass().getName()));
+                                                         type.getClass()
+                                                             .getName()));
         }
     }
 
@@ -190,15 +195,17 @@ public class DTOTransformerImpl<R extends StaDTO, S extends HibernateRelations.H
         } else {
             LocationEntity location = createLocationEntity(raw);
             if (raw.getThings() != null) {
-                location.setThings(raw.getThings().stream()
-                        .map(this::toPlatformEntity)
-                        .collect(Collectors.toSet()));
+                location.setThings(raw.getThings()
+                                      .stream()
+                                      .map(this::toPlatformEntity)
+                                      .collect(Collectors.toSet()));
             }
 
             if (raw.getHistoricalLocations() != null) {
-                location.setHistoricalLocations(raw.getHistoricalLocations().stream()
-                        .map(this::toHistoricalLocationEntity)
-                        .collect(Collectors.toSet()));
+                location.setHistoricalLocations(raw.getHistoricalLocations()
+                                                   .stream()
+                                                   .map(this::toHistoricalLocationEntity)
+                                                   .collect(Collectors.toSet()));
             }
             return location;
         }
@@ -219,7 +226,7 @@ public class DTOTransformerImpl<R extends StaDTO, S extends HibernateRelations.H
         return location;
     }
 
-    protected AbstractFeatureEntity<?> toAbstractFeatureEntity(FeatureOfInterestDTO raw) {
+    protected AbstractFeatureEntity< ? > toAbstractFeatureEntity(FeatureOfInterestDTO raw) {
         if (serialized.containsKey(genKey(raw))) {
             return (FeatureEntity) serialized.get(genKey(raw));
         } else {
@@ -249,9 +256,10 @@ public class DTOTransformerImpl<R extends StaDTO, S extends HibernateRelations.H
             PhenomenonEntity phenomenon = createPhenomenonEntity(raw);
 
             if (raw.getDatastreams() != null) {
-                phenomenon.setDatasets(raw.getDatastreams().stream()
-                        .map(this::toDatasetEntity)
-                        .collect(Collectors.toSet()));
+                phenomenon.setDatasets(raw.getDatastreams()
+                                          .stream()
+                                          .map(this::toDatasetEntity)
+                                          .collect(Collectors.toSet()));
             }
             return phenomenon;
         }
@@ -275,9 +283,10 @@ public class DTOTransformerImpl<R extends StaDTO, S extends HibernateRelations.H
             ProcedureEntity procedure = createProcedureEntity(raw);
 
             if (raw.getDatastreams() != null) {
-                procedure.setDatasets(raw.getDatastreams().stream()
-                        .map(this::toDatasetEntity)
-                        .collect(Collectors.toSet()));
+                procedure.setDatasets(raw.getDatastreams()
+                                         .stream()
+                                         .map(this::toDatasetEntity)
+                                         .collect(Collectors.toSet()));
             }
             return procedure;
         }
@@ -297,17 +306,20 @@ public class DTOTransformerImpl<R extends StaDTO, S extends HibernateRelations.H
         procedure.setParameters(convertParameters(raw.getProperties(), ParameterFactory.EntityType.PROCEDURE));
 
         if (raw.getEncodingType() != null) {
-            if (raw.getEncodingType().equalsIgnoreCase(STA_SENSORML_2)) {
+            if (raw.getEncodingType()
+                   .equalsIgnoreCase(STA_SENSORML_2)) {
                 procedure.setFormat(new FormatEntity().setFormat(SENSORML_2));
                 ProcedureHistoryEntity procedureHistoryEntity = new ProcedureHistoryEntity();
                 procedureHistoryEntity.setProcedure(procedure);
                 procedureHistoryEntity.setFormat(procedure.getFormat());
-                procedureHistoryEntity.setStartTime(DateTime.now().toDate());
+                procedureHistoryEntity.setStartTime(DateTime.now()
+                                                            .toDate());
                 procedureHistoryEntity.setXml(raw.getMetadata());
                 Set<ProcedureHistoryEntity> set = new LinkedHashSet<>();
                 set.add(procedureHistoryEntity);
                 procedure.setProcedureHistory(set);
-            } else if (raw.getEncodingType().equalsIgnoreCase(PDF)) {
+            } else if (raw.getEncodingType()
+                          .equalsIgnoreCase(PDF)) {
                 procedure.setFormat(new FormatEntity().setFormat(PDF));
                 procedure.setDescriptionFile(raw.getMetadata());
             }
@@ -327,9 +339,10 @@ public class DTOTransformerImpl<R extends StaDTO, S extends HibernateRelations.H
             }
 
             if (raw.getLocations() != null) {
-                histLoc.setLocations(raw.getLocations().stream()
-                        .map(this::toLocationEntity)
-                        .collect(Collectors.toSet()));
+                histLoc.setLocations(raw.getLocations()
+                                        .stream()
+                                        .map(this::toLocationEntity)
+                                        .collect(Collectors.toSet()));
             }
             return histLoc;
         }
@@ -343,14 +356,16 @@ public class DTOTransformerImpl<R extends StaDTO, S extends HibernateRelations.H
 
         Time parsed = raw.getTime();
         if (parsed instanceof TimeInstant) {
-            histLoc.setTime(((TimeInstant) parsed).getValue().toDate());
+            histLoc.setTime(((TimeInstant) parsed).getValue()
+                                                  .toDate());
         } else if (parsed instanceof TimePeriod) {
-            histLoc.setTime(((TimePeriod) parsed).getEnd().toDate());
+            histLoc.setTime(((TimePeriod) parsed).getEnd()
+                                                 .toDate());
         }
         return histLoc;
     }
 
-    protected DataEntity<?> toDataEntity(ObservationDTO raw) {
+    protected DataEntity< ? > toDataEntity(ObservationDTO raw) {
         if (serialized.containsKey(genKey(raw))) {
             return (BlobDataEntity) serialized.get(genKey(raw));
         } else {
@@ -374,29 +389,39 @@ public class DTOTransformerImpl<R extends StaDTO, S extends HibernateRelations.H
 
         Time phenomenonTime = raw.getPhenomenonTime();
         if (phenomenonTime instanceof TimeInstant) {
-            dataEntity.setSamplingTimeStart(((TimeInstant) phenomenonTime).getValue().toDate());
-            dataEntity.setSamplingTimeEnd(((TimeInstant) phenomenonTime).getValue().toDate());
+            dataEntity.setSamplingTimeStart(((TimeInstant) phenomenonTime).getValue()
+                                                                          .toDate());
+            dataEntity.setSamplingTimeEnd(((TimeInstant) phenomenonTime).getValue()
+                                                                        .toDate());
         } else if (phenomenonTime instanceof TimePeriod) {
-            dataEntity.setSamplingTimeStart(((TimePeriod) phenomenonTime).getStart().toDate());
-            dataEntity.setSamplingTimeEnd(((TimePeriod) phenomenonTime).getEnd().toDate());
+            dataEntity.setSamplingTimeStart(((TimePeriod) phenomenonTime).getStart()
+                                                                         .toDate());
+            dataEntity.setSamplingTimeEnd(((TimePeriod) phenomenonTime).getEnd()
+                                                                       .toDate());
         }
 
         if (raw.getResultTime() != null) {
-            dataEntity.setResultTime(((TimeInstant) raw.getResultTime()).getValue().toDate());
+            dataEntity.setResultTime(((TimeInstant) raw.getResultTime()).getValue()
+                                                                        .toDate());
         }
 
         Time validTime = raw.getValidTime();
         if (validTime instanceof TimeInstant) {
-            dataEntity.setValidTimeStart(((TimeInstant) validTime).getValue().toDate());
-            dataEntity.setValidTimeEnd(((TimeInstant) validTime).getValue().toDate());
+            dataEntity.setValidTimeStart(((TimeInstant) validTime).getValue()
+                                                                  .toDate());
+            dataEntity.setValidTimeEnd(((TimeInstant) validTime).getValue()
+                                                                .toDate());
         } else if (validTime instanceof TimePeriod) {
-            dataEntity.setValidTimeStart(((TimePeriod) validTime).getStart().toDate());
-            dataEntity.setValidTimeEnd(((TimePeriod) validTime).getEnd().toDate());
+            dataEntity.setValidTimeStart(((TimePeriod) validTime).getStart()
+                                                                 .toDate());
+            dataEntity.setValidTimeEnd(((TimePeriod) validTime).getEnd()
+                                                               .toDate());
         }
 
         // if (raw.getResult() instanceof ObjectNode)
         if (raw.getResult() != null) {
-            dataEntity.setValue(raw.getResult().toString());
+            dataEntity.setValue(raw.getResult()
+                                   .toString());
         }
 
         parseObservationParameters(dataEntity, raw);
@@ -420,9 +445,9 @@ public class DTOTransformerImpl<R extends StaDTO, S extends HibernateRelations.H
             }
             if (raw.getObservations() != null) {
                 dataset.setObservations(raw.getObservations()
-                        .stream()
-                        .map(this::toDataEntity)
-                        .collect(Collectors.toSet()));
+                                           .stream()
+                                           .map(this::toDataEntity)
+                                           .collect(Collectors.toSet()));
             }
 
             return dataset;
@@ -441,19 +466,26 @@ public class DTOTransformerImpl<R extends StaDTO, S extends HibernateRelations.H
 
         if (raw.getUnitOfMeasurement() != null) {
             UnitEntity unit = new UnitEntity();
-            unit.setLink(raw.getUnitOfMeasurement().getDefinition());
-            unit.setName(raw.getUnitOfMeasurement().getName());
-            unit.setSymbol(raw.getUnitOfMeasurement().getSymbol());
+            unit.setLink(raw.getUnitOfMeasurement()
+                            .getDefinition());
+            unit.setName(raw.getUnitOfMeasurement()
+                            .getName());
+            unit.setSymbol(raw.getUnitOfMeasurement()
+                              .getSymbol());
             dataset.setUnit(unit);
         }
 
         Time time = TimeUtil.parseTime(raw.getResultTime());
         if (time instanceof TimeInstant) {
-            dataset.setResultTimeStart(((TimeInstant) time).getValue().toDate());
-            dataset.setResultTimeEnd(((TimeInstant) time).getValue().toDate());
+            dataset.setResultTimeStart(((TimeInstant) time).getValue()
+                                                           .toDate());
+            dataset.setResultTimeEnd(((TimeInstant) time).getValue()
+                                                         .toDate());
         } else if (time instanceof TimePeriod) {
-            dataset.setResultTimeStart(((TimePeriod) time).getStart().toDate());
-            dataset.setResultTimeEnd(((TimePeriod) time).getEnd().toDate());
+            dataset.setResultTimeStart(((TimePeriod) time).getStart()
+                                                          .toDate());
+            dataset.setResultTimeEnd(((TimePeriod) time).getEnd()
+                                                        .toDate());
         }
 
         dataset.setParameters(convertParameters(raw.getProperties(), ParameterFactory.EntityType.DATASET));
@@ -468,23 +500,23 @@ public class DTOTransformerImpl<R extends StaDTO, S extends HibernateRelations.H
 
             if (raw.getDatastream() != null) {
                 platform.setDatasets(raw.getDatastream()
-                        .stream()
-                        .map(this::toDatasetEntity)
-                        .collect(Collectors.toSet()));
+                                        .stream()
+                                        .map(this::toDatasetEntity)
+                                        .collect(Collectors.toSet()));
             }
 
             if (raw.getLocations() != null) {
                 platform.setLocations(raw.getLocations()
-                        .stream()
-                        .map(this::toLocationEntity)
-                        .collect(Collectors.toSet()));
+                                         .stream()
+                                         .map(this::toLocationEntity)
+                                         .collect(Collectors.toSet()));
             }
 
             if (raw.getHistoricalLocations() != null) {
                 platform.setHistoricalLocations(raw.getHistoricalLocations()
-                        .stream()
-                        .map(this::toHistoricalLocationEntity)
-                        .collect(Collectors.toSet()));
+                                                   .stream()
+                                                   .map(this::toHistoricalLocationEntity)
+                                                   .collect(Collectors.toSet()));
             }
             return platform;
         }
@@ -505,36 +537,45 @@ public class DTOTransformerImpl<R extends StaDTO, S extends HibernateRelations.H
     protected DatastreamDTO toDatastreamDTO(AbstractDatasetEntity raw, QueryOptions queryOptions) {
         DatastreamDTO datastream = createDatastreamDTO(new Datastream(), raw, queryOptions);
 
-        if (datastream.getFieldsToExpand().containsKey(StaConstants.OBSERVED_PROPERTY)) {
+        if (datastream.getFieldsToExpand()
+                      .containsKey(StaConstants.OBSERVED_PROPERTY)) {
             datastream.setObservedProperty(
-                    toObservedPropertyDTO(raw.getPhenomenon(),
-                            datastream.getFieldsToExpand().get(StaConstants.OBSERVED_PROPERTY)));
+                                           toObservedPropertyDTO(raw.getPhenomenon(),
+                                                                 datastream.getFieldsToExpand()
+                                                                           .get(StaConstants.OBSERVED_PROPERTY)));
         }
-        if (datastream.getFieldsToExpand().containsKey(StaConstants.SENSOR)) {
+        if (datastream.getFieldsToExpand()
+                      .containsKey(StaConstants.SENSOR)) {
             datastream.setSensor(
-                    toSensorDTO(raw.getProcedure(),
-                            datastream.getFieldsToExpand().get(StaConstants.SENSOR)));
+                                 toSensorDTO(raw.getProcedure(),
+                                             datastream.getFieldsToExpand()
+                                                       .get(StaConstants.SENSOR)));
         }
-        if (datastream.getFieldsToExpand().containsKey(StaConstants.THING)) {
+        if (datastream.getFieldsToExpand()
+                      .containsKey(StaConstants.THING)) {
             datastream.setThing(
-                    toThingDTO(raw.getPlatform(),
-                            datastream.getFieldsToExpand().get(StaConstants.THING)));
+                                toThingDTO(raw.getPlatform(),
+                                           datastream.getFieldsToExpand()
+                                                     .get(StaConstants.THING)));
         }
 
-        if (datastream.getFieldsToExpand().containsKey(StaConstants.OBSERVATIONS)) {
+        if (datastream.getFieldsToExpand()
+                      .containsKey(StaConstants.OBSERVATIONS)) {
             datastream.setObservations(
-                    raw.getObservations().stream()
-                            .map(o -> toObservationDTO(o,
-                                    datastream.getFieldsToExpand().get(StaConstants.OBSERVATIONS)))
-                            .collect(Collectors.toSet()));
+                                       raw.getObservations()
+                                          .stream()
+                                          .map(o -> toObservationDTO(o,
+                                                                     datastream.getFieldsToExpand()
+                                                                               .get(StaConstants.OBSERVATIONS)))
+                                          .collect(Collectors.toSet()));
         }
 
         return datastream;
     }
 
     protected <T extends DatastreamDTO> T createDatastreamDTO(T datastream,
-            AbstractDatasetEntity raw,
-            QueryOptions queryOptions) {
+                                                              AbstractDatasetEntity raw,
+                                                              QueryOptions queryOptions) {
         datastream.setAndParseQueryOptions(queryOptions);
 
         datastream.setId(raw.getStaIdentifier());
@@ -542,53 +583,63 @@ public class DTOTransformerImpl<R extends StaDTO, S extends HibernateRelations.H
 
         if (raw.getSamplingTimeStart() != null) {
             datastream.setPhenomenonTime(TimeUtil.createTime(TimeUtil.createDateTime(raw.getSamplingTimeStart()),
-                    TimeUtil.createDateTime(raw.getSamplingTimeEnd())));
+                                                             TimeUtil.createDateTime(raw.getSamplingTimeEnd())));
         }
         datastream.setDescription(raw.getDescription());
         datastream.setObservedArea(raw.getGeometry());
-        datastream.setObservationType(raw.getOMObservationType().getFormat());
+        datastream.setObservationType(raw.getOMObservationType()
+                                         .getFormat());
         datastream.setProperties(parseProperties(raw));
 
         if (raw.getResultTimeStart() != null) {
             datastream.setResultTime(TimeUtil.createTime(TimeUtil.createDateTime(raw.getResultTimeStart()),
-                    TimeUtil.createDateTime(raw.getResultTimeEnd())));
+                                                         TimeUtil.createDateTime(raw.getResultTimeEnd())));
         }
 
         datastream.setUnitOfMeasurement(new DatastreamDTO.UnitOfMeasurement(
-                raw.getUnit().getSymbol(),
-                raw.getUnit().getName(),
-                raw.getUnit().getLink()));
+                                                                            raw.getUnit()
+                                                                               .getSymbol(),
+                                                                            raw.getUnit()
+                                                                               .getName(),
+                                                                            raw.getUnit()
+                                                                               .getLink()));
         return datastream;
     }
 
     protected ThingDTO toThingDTO(PlatformEntity platform, QueryOptions queryOptions) {
         ThingDTO thing = createThingDTO(platform, queryOptions);
 
-        if (thing.getFieldsToExpand().containsKey(StaConstants.DATASTREAMS)) {
+        if (thing.getFieldsToExpand()
+                 .containsKey(StaConstants.DATASTREAMS)) {
             thing.setDatastreams(platform.getDatasets()
-                    .stream()
-                    .map(o -> this.toDatastreamDTO(
-                            o,
-                            thing.getFieldsToExpand().get(StaConstants.DATASTREAMS)))
-                    .collect(Collectors.toSet()));
+                                         .stream()
+                                         .map(o -> this.toDatastreamDTO(
+                                                                        o,
+                                                                        thing.getFieldsToExpand()
+                                                                             .get(StaConstants.DATASTREAMS)))
+                                         .collect(Collectors.toSet()));
         }
 
-        if (thing.getFieldsToExpand().containsKey(StaConstants.LOCATIONS)) {
+        if (thing.getFieldsToExpand()
+                 .containsKey(StaConstants.LOCATIONS)) {
             thing.setLocations(platform.getLocations()
-                    .stream()
-                    .map(o -> this.toLocationDTO(
-                            o,
-                            thing.getFieldsToExpand().get(StaConstants.LOCATIONS)))
-                    .collect(Collectors.toSet()));
+                                       .stream()
+                                       .map(o -> this.toLocationDTO(
+                                                                    o,
+                                                                    thing.getFieldsToExpand()
+                                                                         .get(StaConstants.LOCATIONS)))
+                                       .collect(Collectors.toSet()));
         }
 
-        if (thing.getFieldsToExpand().containsKey(StaConstants.HISTORICAL_LOCATIONS)) {
+        if (thing.getFieldsToExpand()
+                 .containsKey(StaConstants.HISTORICAL_LOCATIONS)) {
             thing.setHistoricalLocations(platform.getHistoricalLocations()
-                    .stream()
-                    .map(o -> this.toHistoricalLocationDTO(
-                            o,
-                            thing.getFieldsToExpand().get(StaConstants.HISTORICAL_LOCATIONS)))
-                    .collect(Collectors.toSet()));
+                                                 .stream()
+                                                 .map(o -> this.toHistoricalLocationDTO(
+                                                                                        o,
+                                                                                        thing.getFieldsToExpand()
+                                                                                             .get(StaConstants.HISTORICAL_LOCATIONS)))
+                                                 .collect(Collectors.toSet()));
         }
         return thing;
     }
@@ -603,17 +654,20 @@ public class DTOTransformerImpl<R extends StaDTO, S extends HibernateRelations.H
         return thing;
     }
 
-    protected ObservationDTO toObservationDTO(DataEntity<?> raw, QueryOptions queryOptions) {
+    protected ObservationDTO toObservationDTO(DataEntity< ? > raw, QueryOptions queryOptions) {
         ObservationDTO observation = createObservationDTO(new Observation(), raw, queryOptions);
 
-        if (observation.getFieldsToExpand().containsKey(StaConstants.FEATURE_OF_INTEREST)) {
+        if (observation.getFieldsToExpand()
+                       .containsKey(StaConstants.FEATURE_OF_INTEREST)) {
             observation.setFeatureOfInterest(toFeatureOfInterestDTO(raw.getFeature(),
-                    observation.getFieldsToExpand()
-                            .get(StaConstants.FEATURE_OF_INTEREST)));
+                                                                    observation.getFieldsToExpand()
+                                                                               .get(StaConstants.FEATURE_OF_INTEREST)));
         }
-        if (observation.getFieldsToExpand().containsKey(StaConstants.DATASTREAM)) {
+        if (observation.getFieldsToExpand()
+                       .containsKey(StaConstants.DATASTREAM)) {
             observation.setDatastream(toDatastreamDTO(raw.getDataset(),
-                    observation.getFieldsToExpand().get(StaConstants.DATASTREAM)));
+                                                      observation.getFieldsToExpand()
+                                                                 .get(StaConstants.DATASTREAM)));
 
         }
 
@@ -621,18 +675,18 @@ public class DTOTransformerImpl<R extends StaDTO, S extends HibernateRelations.H
     }
 
     protected <T extends ObservationDTO> T createObservationDTO(T observation,
-            DataEntity<?> raw,
-            QueryOptions queryOptions) {
+                                                                DataEntity< ? > raw,
+                                                                QueryOptions queryOptions) {
         observation.setAndParseQueryOptions(queryOptions);
 
         observation.setId(raw.getStaIdentifier());
         observation.setResult(parseObservationResult(raw));
 
         observation.setPhenomenonTime(TimeUtil.createTime(TimeUtil.createDateTime(raw.getPhenomenonTimeStart()),
-                TimeUtil.createDateTime(raw.getPhenomenonTimeEnd())));
+                                                          TimeUtil.createDateTime(raw.getPhenomenonTimeEnd())));
         if (raw.getValidTimeStart() != null) {
             observation.setValidTime(TimeUtil.createTime(TimeUtil.createDateTime(raw.getValidTimeStart()),
-                    TimeUtil.createDateTime(raw.getValidTimeStart())));
+                                                         TimeUtil.createDateTime(raw.getValidTimeStart())));
         }
         if (raw.getResultTime() != null) {
             observation.setResultTime(new TimeInstant(raw.getResultTime()));
@@ -644,13 +698,14 @@ public class DTOTransformerImpl<R extends StaDTO, S extends HibernateRelations.H
     protected ObservedPropertyDTO toObservedPropertyDTO(PhenomenonEntity raw, QueryOptions queryOptions) {
         ObservedPropertyDTO observedProperty = createObservedPropertyDTO(raw, queryOptions);
 
-        if (observedProperty.getFieldsToExpand().containsKey(StaConstants.DATASTREAMS)) {
+        if (observedProperty.getFieldsToExpand()
+                            .containsKey(StaConstants.DATASTREAMS)) {
             observedProperty.setDatastreams(raw.getDatasets()
-                    .stream()
-                    .map(e -> toDatastreamDTO(e,
-                            observedProperty.getFieldsToExpand()
-                                    .get(StaConstants.DATASTREAMS)))
-                    .collect(Collectors.toSet()));
+                                               .stream()
+                                               .map(e -> toDatastreamDTO(e,
+                                                                         observedProperty.getFieldsToExpand()
+                                                                                         .get(StaConstants.DATASTREAMS)))
+                                               .collect(Collectors.toSet()));
         }
         return observedProperty;
     }
@@ -669,14 +724,15 @@ public class DTOTransformerImpl<R extends StaDTO, S extends HibernateRelations.H
     protected FeatureOfInterestDTO toFeatureOfInterestDTO(AbstractFeatureEntity raw, QueryOptions queryOptions) {
         FeatureOfInterestDTO featureOfInterest = createFeatureOfInterestDTO(raw, queryOptions);
 
-        if (featureOfInterest.getFieldsToExpand().containsKey(StaConstants.OBSERVATIONS)) {
+        if (featureOfInterest.getFieldsToExpand()
+                             .containsKey(StaConstants.OBSERVATIONS)) {
             if (raw instanceof StaFeatureEntity) {
                 featureOfInterest.setObservations((Set<ObservationDTO>) ((StaFeatureEntity) raw).getObservations()
-                        .stream()
-                        .map(e -> toObservationDTO((DataEntity<?>) e,
-                                featureOfInterest.getFieldsToExpand()
-                                        .get(StaConstants.OBSERVATIONS)))
-                        .collect(Collectors.toSet()));
+                                                                                                .stream()
+                                                                                                .map(e -> toObservationDTO((DataEntity< ? >) e,
+                                                                                                                           featureOfInterest.getFieldsToExpand()
+                                                                                                                                            .get(StaConstants.OBSERVATIONS)))
+                                                                                                .collect(Collectors.toSet()));
             }
         }
         return featureOfInterest;
@@ -698,13 +754,14 @@ public class DTOTransformerImpl<R extends StaDTO, S extends HibernateRelations.H
     protected SensorDTO toSensorDTO(ProcedureEntity raw, QueryOptions queryOptions) {
         SensorDTO sensor = createSensorDTO(raw, queryOptions);
 
-        if (sensor.getFieldsToExpand().containsKey(StaConstants.DATASTREAMS)) {
+        if (sensor.getFieldsToExpand()
+                  .containsKey(StaConstants.DATASTREAMS)) {
             sensor.setDatastreams(raw.getDatasets()
-                    .stream()
-                    .map(e -> toDatastreamDTO(e,
-                            sensor.getFieldsToExpand()
-                                    .get(StaConstants.DATASTREAMS)))
-                    .collect(Collectors.toSet()));
+                                     .stream()
+                                     .map(e -> toDatastreamDTO(e,
+                                                               sensor.getFieldsToExpand()
+                                                                     .get(StaConstants.DATASTREAMS)))
+                                     .collect(Collectors.toSet()));
         }
         return sensor;
     }
@@ -718,20 +775,26 @@ public class DTOTransformerImpl<R extends StaDTO, S extends HibernateRelations.H
         sensor.setProperties(parseProperties(raw));
         sensor.setDescription(raw.getDescription());
 
-        String format = raw.getFormat().getFormat();
+        String format = raw.getFormat()
+                           .getFormat();
         if (format.equalsIgnoreCase(SENSORML_2)) {
             format = STA_SENSORML_2;
         }
         sensor.setEncodingType(format);
 
         String metadata = "";
-        if (raw.getDescriptionFile() != null && !raw.getDescriptionFile().isEmpty()) {
+        if (raw.getDescriptionFile() != null
+                && !raw.getDescriptionFile()
+                       .isEmpty()) {
             metadata = raw.getDescriptionFile();
         } else if (raw.hasProcedureHistory()) {
-            Optional<ProcedureHistoryEntity> history = raw.getProcedureHistory().stream()
-                    .filter(h -> h.getEndTime() == null).findFirst();
+            Optional<ProcedureHistoryEntity> history = raw.getProcedureHistory()
+                                                          .stream()
+                                                          .filter(h -> h.getEndTime() == null)
+                                                          .findFirst();
             if (history.isPresent()) {
-                metadata = history.get().getXml();
+                metadata = history.get()
+                                  .getXml();
             }
         }
         sensor.setMetadata(metadata);
@@ -745,18 +808,22 @@ public class DTOTransformerImpl<R extends StaDTO, S extends HibernateRelations.H
         historicalLocation.setId(raw.getStaIdentifier());
         historicalLocation.setTime(new TimeInstant(raw.getTime()));
 
-        if (historicalLocation.getFieldsToExpand().containsKey(StaConstants.LOCATIONS)) {
+        if (historicalLocation.getFieldsToExpand()
+                              .containsKey(StaConstants.LOCATIONS)) {
             historicalLocation.setLocations(
-                    raw.getLocations()
-                            .stream()
-                            .map(e -> toLocationDTO(e,
-                                    historicalLocation.getFieldsToExpand().get(StaConstants.LOCATIONS)))
-                            .collect(Collectors.toSet()));
+                                            raw.getLocations()
+                                               .stream()
+                                               .map(e -> toLocationDTO(e,
+                                                                       historicalLocation.getFieldsToExpand()
+                                                                                         .get(StaConstants.LOCATIONS)))
+                                               .collect(Collectors.toSet()));
         }
 
-        if (historicalLocation.getFieldsToExpand().containsKey(StaConstants.THING)) {
+        if (historicalLocation.getFieldsToExpand()
+                              .containsKey(StaConstants.THING)) {
             historicalLocation.setThing(toThingDTO(raw.getThing(),
-                    historicalLocation.getFieldsToExpand().get(StaConstants.THING)));
+                                                   historicalLocation.getFieldsToExpand()
+                                                                     .get(StaConstants.THING)));
         }
         return historicalLocation;
     }
@@ -771,21 +838,25 @@ public class DTOTransformerImpl<R extends StaDTO, S extends HibernateRelations.H
         location.setName(raw.getName());
         location.setProperties(parseProperties(raw));
 
-        if (location.getFieldsToExpand().containsKey(StaConstants.HISTORICAL_LOCATIONS)) {
+        if (location.getFieldsToExpand()
+                    .containsKey(StaConstants.HISTORICAL_LOCATIONS)) {
             location.setHistoricalLocations(
-                    raw.getHistoricalLocations()
-                            .stream()
-                            .map(e -> toHistoricalLocationDTO(e,
-                                    location.getFieldsToExpand()
-                                            .get(StaConstants.HISTORICAL_LOCATIONS)))
-                            .collect(Collectors.toSet()));
+                                            raw.getHistoricalLocations()
+                                               .stream()
+                                               .map(e -> toHistoricalLocationDTO(e,
+                                                                                 location.getFieldsToExpand()
+                                                                                         .get(StaConstants.HISTORICAL_LOCATIONS)))
+                                               .collect(Collectors.toSet()));
         }
 
-        if (location.getFieldsToExpand().containsKey(StaConstants.THINGS)) {
+        if (location.getFieldsToExpand()
+                    .containsKey(StaConstants.THINGS)) {
             location.setThings(raw.getThings()
-                    .stream()
-                    .map(e -> toThingDTO(e, location.getFieldsToExpand().get(StaConstants.THINGS)))
-                    .collect(Collectors.toSet()));
+                                  .stream()
+                                  .map(e -> toThingDTO(e,
+                                                       location.getFieldsToExpand()
+                                                               .get(StaConstants.THINGS)))
+                                  .collect(Collectors.toSet()));
         }
         return location;
     }
@@ -799,15 +870,18 @@ public class DTOTransformerImpl<R extends StaDTO, S extends HibernateRelations.H
                 DatasetEntity ds = (DatasetEntity) raw;
                 final String categoryPrefix = "category";
                 properties.put(categoryPrefix + "Id",
-                        ds.getCategory().getId());
+                               ds.getCategory()
+                                 .getId());
                 properties.put(categoryPrefix + "Name",
-                        ds.getCategory().getName());
+                               ds.getCategory()
+                                 .getName());
                 properties.put(categoryPrefix + "Description",
-                        ds.getCategory().getDescription());
+                               ds.getCategory()
+                                 .getDescription());
             }
 
             // TODO: check if this is always properly formatting elements
-            for (ParameterEntity<?> parameter : raw.getParameters()) {
+            for (ParameterEntity< ? > parameter : raw.getParameters()) {
                 properties.put(parameter.getName(), parameter.getValueAsString());
             }
             return properties;
@@ -817,11 +891,11 @@ public class DTOTransformerImpl<R extends StaDTO, S extends HibernateRelations.H
     }
 
     @SuppressWarnings("unchecked")
-    protected HashSet<ParameterEntity<?>> convertParameters(ObjectNode parameters,
-            ParameterFactory.EntityType entityType) {
+    protected HashSet<ParameterEntity< ? >> convertParameters(ObjectNode parameters,
+                                                              ParameterFactory.EntityType entityType) {
         // parameters
         if (parameters != null) {
-            HashSet<ParameterEntity<?>> parameterEntities = new HashSet<>();
+            HashSet<ParameterEntity< ? >> parameterEntities = new HashSet<>();
             // Check that structure is correct
             Iterator<String> it = parameters.fieldNames();
             while (it.hasNext()) {
@@ -830,34 +904,34 @@ public class DTOTransformerImpl<R extends StaDTO, S extends HibernateRelations.H
 
                 ParameterEntity parameterEntity;
                 switch (value.getNodeType()) {
-                    case ARRAY:
-                        // fallthru
-                    case MISSING:
-                        // fallthru
-                    case NULL:
-                        // fallthru
-                    case OBJECT:
-                        // fallthru
-                    case POJO:
-                        parameterEntity = ParameterFactory.from(entityType, ParameterFactory.ValueType.JSON);
-                        parameterEntity.setValue(value.asText());
-                        break;
-                    case BINARY:
-                        // fallthru
-                    case BOOLEAN:
-                        parameterEntity = ParameterFactory.from(entityType, ParameterFactory.ValueType.BOOLEAN);
-                        parameterEntity.setValue(value.asBoolean());
-                        break;
-                    case NUMBER:
-                        parameterEntity = ParameterFactory.from(entityType, ParameterFactory.ValueType.QUANTITY);
-                        parameterEntity.setValue(BigDecimal.valueOf(value.asDouble()));
-                        break;
-                    case STRING:
-                        parameterEntity = ParameterFactory.from(entityType, ParameterFactory.ValueType.TEXT);
-                        parameterEntity.setValue(value.asText());
-                        break;
-                    default:
-                        throw new RuntimeException("Could not identify value type of parameters!");
+                case ARRAY:
+                    // fallthru
+                case MISSING:
+                    // fallthru
+                case NULL:
+                    // fallthru
+                case OBJECT:
+                    // fallthru
+                case POJO:
+                    parameterEntity = ParameterFactory.from(entityType, ParameterFactory.ValueType.JSON);
+                    parameterEntity.setValue(value.asText());
+                    break;
+                case BINARY:
+                    // fallthru
+                case BOOLEAN:
+                    parameterEntity = ParameterFactory.from(entityType, ParameterFactory.ValueType.BOOLEAN);
+                    parameterEntity.setValue(value.asBoolean());
+                    break;
+                case NUMBER:
+                    parameterEntity = ParameterFactory.from(entityType, ParameterFactory.ValueType.QUANTITY);
+                    parameterEntity.setValue(BigDecimal.valueOf(value.asDouble()));
+                    break;
+                case STRING:
+                    parameterEntity = ParameterFactory.from(entityType, ParameterFactory.ValueType.TEXT);
+                    parameterEntity.setValue(value.asText());
+                    break;
+                default:
+                    throw new RuntimeException("Could not identify value type of parameters!");
                 }
                 parameterEntity.setName(key);
                 parameterEntities.add(parameterEntity);
@@ -869,12 +943,14 @@ public class DTOTransformerImpl<R extends StaDTO, S extends HibernateRelations.H
     }
 
     protected void parseObservationParameters(DataEntity dataEntity,
-            ObservationDTO dto) {
+                                              ObservationDTO dto) {
         if (dto.getParameters() != null) {
-            Iterator<String> keyIt = dto.getParameters().fieldNames();
+            Iterator<String> keyIt = dto.getParameters()
+                                        .fieldNames();
             while (keyIt.hasNext()) {
                 String paramName = keyIt.next();
-                JsonNode jsonNode = dto.getParameters().get(paramName);
+                JsonNode jsonNode = dto.getParameters()
+                                       .get(paramName);
 
                 if (paramName.equals(config.getVerticalFromMapping())) {
                     // Add as verticalTo to enable interoperability with SOS
@@ -901,12 +977,12 @@ public class DTOTransformerImpl<R extends StaDTO, S extends HibernateRelations.H
 
                 // Additionally store as normal parameter
                 dataEntity.setParameters(convertParameters(dto.getParameters(),
-                        ParameterFactory.EntityType.OBSERVATION));
+                                                           ParameterFactory.EntityType.OBSERVATION));
             }
         }
     }
 
-    protected Object parseObservationResult(DataEntity<?> raw) {
+    protected Object parseObservationResult(DataEntity< ? > raw) {
         // TODO:
         // Handling of Profile/TrajectoryObservation
         // try {

@@ -25,6 +25,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
+
 package org.n52.sta.data.old.common;
 
 import org.n52.series.db.beans.AbstractDatasetEntity;
@@ -62,30 +63,29 @@ import org.n52.sta.data.old.service.SensorService;
 import org.n52.sta.data.old.service.ThingService;
 
 /**
- * Facade proxying actual Service implementations. Used to restrict the number
- * of parallel threads accessing the Data
- * Persistence Layer. This is necessary as each Thread uses a seperate Database
- * Transaction and therefore needs a
- * dedicated DatabaseConnection.
+ * Facade proxying actual Service implementations. Used to restrict the number of parallel threads accessing
+ * the Data Persistence Layer. This is necessary as each Thread uses a seperate Database Transaction and
+ * therefore needs a dedicated DatabaseConnection.
  *
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
  */
 public abstract class CommonServiceFacade<R extends StaDTO, S extends HibernateRelations.HasId>
-        implements AbstractSensorThingsEntityService<R> {
+        implements
+        AbstractSensorThingsEntityService<R> {
 
     protected final DaoSemaphore semaphore;
     protected final SerDesConfig config;
-    protected final CommonSTAServiceImpl<?, R, S> serviceImpl;
+    protected final CommonSTAServiceImpl< ? , R, S> serviceImpl;
 
-    public CommonServiceFacade(CommonSTAServiceImpl<?, R, S> serviceImpl,
-            DaoSemaphore semaphore,
-            SerDesConfig config) {
+    public CommonServiceFacade(CommonSTAServiceImpl< ? , R, S> serviceImpl,
+                               DaoSemaphore semaphore,
+                               SerDesConfig config) {
         this.serviceImpl = serviceImpl;
         this.semaphore = semaphore;
         this.config = config;
     }
 
-    public CommonSTAServiceImpl<?, ?, ?> getServiceImpl() {
+    public CommonSTAServiceImpl< ? , ? , ? > getServiceImpl() {
         return serviceImpl;
     }
 
@@ -133,9 +133,9 @@ public abstract class CommonServiceFacade<R extends StaDTO, S extends HibernateR
 
     @Override
     public R getEntityByRelatedEntity(String relatedId,
-            String relatedType,
-            String ownId,
-            QueryOptions queryOptions)
+                                      String relatedType,
+                                      String ownId,
+                                      QueryOptions queryOptions)
             throws STACRUDException {
         R result;
         try {
@@ -151,8 +151,8 @@ public abstract class CommonServiceFacade<R extends StaDTO, S extends HibernateR
 
     @Override
     public CollectionWrapper getEntityCollectionByRelatedEntity(String relatedId,
-            String relatedType,
-            QueryOptions queryOptions)
+                                                                String relatedType,
+                                                                QueryOptions queryOptions)
             throws STACRUDException {
         CollectionWrapper result;
         try {
@@ -235,86 +235,90 @@ public abstract class CommonServiceFacade<R extends StaDTO, S extends HibernateR
         }
     }
 
-    //@Component
+    // @Component
     public static class ThingServiceFacade extends CommonServiceFacade<ThingDTO, PlatformEntity> {
 
         ThingServiceFacade(ThingService serviceImpl,
-                DaoSemaphore semaphore,
-                SerDesConfig config) {
+                           DaoSemaphore semaphore,
+                           SerDesConfig config) {
             super(serviceImpl, semaphore, config);
         }
     }
 
-    //@Component
+    // @Component
     public static class LocationServiceFacade extends CommonServiceFacade<LocationDTO, LocationEntity> {
 
         LocationServiceFacade(LocationService serviceImpl,
-                DaoSemaphore semaphore,
-                SerDesConfig config) {
+                              DaoSemaphore semaphore,
+                              SerDesConfig config) {
             super(serviceImpl, semaphore, config);
         }
     }
 
-    //@Component
+    // @Component
     public static class HistoricalLocationServiceFacade
-            extends CommonServiceFacade<HistoricalLocationDTO, HistoricalLocationEntity> {
+            extends
+            CommonServiceFacade<HistoricalLocationDTO, HistoricalLocationEntity> {
 
         HistoricalLocationServiceFacade(HistoricalLocationService serviceImpl,
-                DaoSemaphore semaphore,
-                SerDesConfig config) {
+                                        DaoSemaphore semaphore,
+                                        SerDesConfig config) {
             super(serviceImpl, semaphore, config);
         }
     }
 
-    //@Component
+    // @Component
     public static class SensorServiceFacade extends CommonServiceFacade<SensorDTO, ProcedureEntity> {
 
         SensorServiceFacade(SensorService serviceImpl,
-                DaoSemaphore semaphore,
-                SerDesConfig config) {
+                            DaoSemaphore semaphore,
+                            SerDesConfig config) {
             super(serviceImpl, semaphore, config);
         }
     }
 
-    //@Component
+    // @Component
     public static class ObservedPropertyServiceFacade
-            extends CommonServiceFacade<ObservedPropertyDTO, PhenomenonEntity> {
+            extends
+            CommonServiceFacade<ObservedPropertyDTO, PhenomenonEntity> {
 
         ObservedPropertyServiceFacade(ObservedPropertyService serviceImpl,
-                DaoSemaphore semaphore,
-                SerDesConfig config) {
+                                      DaoSemaphore semaphore,
+                                      SerDesConfig config) {
             super(serviceImpl, semaphore, config);
         }
     }
 
-    //@Component
+    // @Component
     public static class ObservationServiceFacade
-            extends CommonServiceFacade<ObservationDTO, DataEntity<?>> {
+            extends
+            CommonServiceFacade<ObservationDTO, DataEntity< ? >> {
 
         ObservationServiceFacade(ObservationService serviceImpl,
-                DaoSemaphore semaphore,
-                SerDesConfig config) {
+                                 DaoSemaphore semaphore,
+                                 SerDesConfig config) {
             super(serviceImpl, semaphore, config);
         }
     }
 
-    //@Component
+    // @Component
     public static class DatastreamServiceFacade extends CommonServiceFacade<DatastreamDTO, AbstractDatasetEntity> {
 
         DatastreamServiceFacade(DatastreamService serviceImpl,
-                DaoSemaphore semaphore,
-                SerDesConfig config) {
+                                DaoSemaphore semaphore,
+                                SerDesConfig config) {
             super(serviceImpl, semaphore, config);
         }
     }
 
-    //@Component
+    // @Component
     public static class FeatureOfInterestServiceFacade
-            extends CommonServiceFacade<FeatureOfInterestDTO, AbstractFeatureEntity<?>> {
+            extends
+            CommonServiceFacade<FeatureOfInterestDTO, AbstractFeatureEntity< ? >> {
 
         FeatureOfInterestServiceFacade(FeatureOfInterestService serviceImpl,
-                DaoSemaphore semaphore,
-                SerDesConfig config) {
+                                       DaoSemaphore semaphore,
+                                       SerDesConfig config) {
             super(serviceImpl, semaphore, config);
         }
     }

@@ -53,16 +53,17 @@ public interface BaseQuerySpecifications<T> {
     /**
      * Creates an equals specification on the {@code name} property.
      *
-     * @param value the value to match the {@code name} property
+     * @param value
+     *        the value to match the {@code name} property
      * @return a specification including the equals expression
      */
     Specification<T> equalsName(String value);
 
     /**
-     * Creates an equals specification on the {@code staIdentifier}
-     * property.
+     * Creates an equals specification on the {@code staIdentifier} property.
      *
-     * @param value the value to match the {@code staIdentifier} property
+     * @param value
+     *        the value to match the {@code staIdentifier} property
      * @return a specification including the equals expression
      */
     Specification<T> equalsStaIdentifier(String value);
@@ -70,107 +71,115 @@ public interface BaseQuerySpecifications<T> {
     /**
      * Creates an {@literal IN} specification on the {@code staIdentifier} property.
      * <p>
-     * The specification matches all entities whose {@code staIdentifier}
-     * is contained in the specified value list.
+     * The specification matches all entities whose {@code staIdentifier} is contained in the specified value
+     * list.
      *
-     * @param values the value candidates matching the {@code staIdentifier} property
+     * @param values
+     *        the value candidates matching the {@code staIdentifier} property
      * @return a specification including the {@literal in} expression
      */
     Specification<T> equalsOneOfStaIdentifiers(String... values);
 
-    Specification<T> compareProperty(String property, ComparisonOperator operator, Expression<?> rightExpr)
-        throws SpecificationsException;
+    Specification<T> compareProperty(String property, ComparisonOperator operator, Expression< ? > rightExpr)
+            throws SpecificationsException;
 
-    Specification<T> compareProperty(Expression<?> leftExpr, ComparisonOperator operator, String property)
-        throws SpecificationsException;
+    Specification<T> compareProperty(Expression< ? > leftExpr, ComparisonOperator operator, String property)
+            throws SpecificationsException;
 
     /**
-     * Creates a specification that compares two expressions with the specified
-     * operator.
+     * Creates a specification that compares two expressions with the specified operator.
      * <p>
-     * Delegates to
-     * {@link #compare(Expression, Expression, ComparisonOperator, CriteriaBuilder)}.
+     * Delegates to {@link #compare(Expression, Expression, ComparisonOperator, CriteriaBuilder)}.
      *
-     * @param <Y>      the type of the expressions to compare
-     * @param left     the left expression
-     * @param right    the right expression
-     * @param operator the comparison operator
+     * @param <Y>
+     *        the type of the expressions to compare
+     * @param left
+     *        the left expression
+     * @param right
+     *        the right expression
+     * @param operator
+     *        the comparison operator
      * @return a specification comparing both expressions
-     * @see #compare(Expression, Expression, ComparisonOperator, CriteriaBuilder)
-     * for a list of supported operators
+     * @see #compare(Expression, Expression, ComparisonOperator, CriteriaBuilder) for a list of supported
+     *      operators
      */
-    <Y extends Comparable<? super Y>> Specification<T> compare(
-        Expression<? extends Y> left,
-        Expression<? extends Y> right,
-        FilterConstants.ComparisonOperator operator);
+    <Y extends Comparable< ? super Y>> Specification<T> compare(
+                                                                Expression< ? extends Y> left,
+                                                                Expression< ? extends Y> right,
+                                                                FilterConstants.ComparisonOperator operator);
 
     /**
-     * Creates a predicate that compares two expressions with the specified
-     * operator.
+     * Creates a predicate that compares two expressions with the specified operator.
      * <p>
-     * The following {@link FilterConstants.ComparisonOperator operators} are mapped
-     * to SQL:
+     * The following {@link FilterConstants.ComparisonOperator operators} are mapped to SQL:
      * <ul>
-     * <li>{@link FilterConstants.ComparisonOperator#PropertyIsEqualTo
-     * PropertyIsEqualTo }
-     * <li>{@link FilterConstants.ComparisonOperator#PropertyIsNotEqualTo
-     * PropertyIsNotEqualTo}
-     * <li>{@link FilterConstants.ComparisonOperator#PropertyIsLessThan
-     * PropertyIsLessThan}
-     * <li>{@link FilterConstants.ComparisonOperator#PropertyIsLessThanOrEqualTo
-     * PropertyIsLessThanOrEqualTo}
-     * <li>{@link FilterConstants.ComparisonOperator#PropertyIsGreaterThan
-     * PropertyIsGreaterThan}
+     * <li>{@link FilterConstants.ComparisonOperator#PropertyIsEqualTo PropertyIsEqualTo }
+     * <li>{@link FilterConstants.ComparisonOperator#PropertyIsNotEqualTo PropertyIsNotEqualTo}
+     * <li>{@link FilterConstants.ComparisonOperator#PropertyIsLessThan PropertyIsLessThan}
+     * <li>{@link FilterConstants.ComparisonOperator#PropertyIsLessThanOrEqualTo PropertyIsLessThanOrEqualTo}
+     * <li>{@link FilterConstants.ComparisonOperator#PropertyIsGreaterThan PropertyIsGreaterThan}
      * <li>{@link FilterConstants.ComparisonOperator#PropertyIsGreaterThanOrEqualTo
      * PropertyIsGreaterThanOrEqualTo}
      * </ul>
      * <p>
-     * The operator {@link FilterConstants.ComparisonOperator#PropertyIsBetween
-     * PropertyIsBetween} is not supported and null is returned.
+     * The operator {@link FilterConstants.ComparisonOperator#PropertyIsBetween PropertyIsBetween} is not
+     * supported and null is returned.
      *
-     * @param <Y>      the type of the expressions to compare
-     * @param left     the left expression
-     * @param right    the right expression
-     * @param operator the comparison operator
-     * @param builder  the criteria builder
+     * @param <Y>
+     *        the type of the expressions to compare
+     * @param left
+     *        the left expression
+     * @param right
+     *        the right expression
+     * @param operator
+     *        the comparison operator
+     * @param builder
+     *        the criteria builder
      * @return a predicate comparing both expressions, or null
      */
-    <Y extends Comparable<? super Y>> Predicate compare(
-        Expression<? extends Y> left,
-        Expression<? extends Y> right,
-        FilterConstants.ComparisonOperator operator,
-        CriteriaBuilder builder);
+    <Y extends Comparable< ? super Y>> Predicate compare(
+                                                         Expression< ? extends Y> left,
+                                                         Expression< ? extends Y> right,
+                                                         FilterConstants.ComparisonOperator operator,
+                                                         CriteriaBuilder builder);
 
     /**
      * Applies given specification on a member of the root entity.
      * <p>
-     * The {@code member} is not checked if available on the root entity.
-     * In case it is not available, an exception shall be thrown.
+     * The {@code member} is not checked if available on the root entity. In case it is not available, an
+     * exception shall be thrown.
      *
-     * @param member     a member of the root entity
-     * @param memberSpec the specification to be applied on the member
+     * @param member
+     *        a member of the root entity
+     * @param memberSpec
+     *        the specification to be applied on the member
      * @return a specification including the applied member specification
-     * @throws SpecificationsException in case the application fails.
+     * @throws SpecificationsException
+     *         in case the application fails.
      */
-    Specification<T> applyOnMember(String member, Specification<?> memberSpec) throws SpecificationsException;
+    Specification<T> applyOnMember(String member, Specification< ? > memberSpec) throws SpecificationsException;
 
     /**
      * Creates a query on the specified member of the specified type.
      *
-     * @param onMember the member's property
-     * @param ofEntity the member's type
+     * @param onMember
+     *        the member's property
+     * @param ofEntity
+     *        the member's type
      * @return a member query which can be used whithin a {@link Specification}
      */
-    EntityQuery createQuery(String onMember, Class<?> ofEntity);
+    EntityQuery createQuery(String onMember, Class< ? > ofEntity);
 
     /**
-     * Selects a property of a specified entity to perform a subquery on.
-     * The returned {@link PreparedSubquery} allows to apply a where clause
-     * before returning the actual {@link Subquery}.
+     * Selects a property of a specified entity to perform a subquery on. The returned
+     * {@link PreparedSubquery} allows to apply a where clause before returning the actual {@link Subquery}.
      *
-     * @param <E>        the entity's type of the subquery
-     * @param property   the property to select
-     * @param entityType the entity type
+     * @param <E>
+     *        the entity's type of the subquery
+     * @param property
+     *        the property to select
+     * @param entityType
+     *        the entity type
      * @return a prepared subquery
      */
     <E> PreparedSubquery<E> selectOnSubquery(String property, Class<E> entityType);
@@ -178,21 +187,19 @@ public interface BaseQuerySpecifications<T> {
     @FunctionalInterface
     interface MemberFilter<T> {
 
-        Specification<T> apply(Specification<?> memberSpecification);
+        Specification<T> apply(Specification< ? > memberSpecification);
     }
-
 
     // TODO get rid of this impl class?
     abstract class MemberFilterImpl<T> implements MemberFilter<T> {
 
-        public Specification<T> apply(Specification<?> specification) {
+        public Specification<T> apply(Specification< ? > specification) {
             return prepareQuery(specification);
         }
 
-        protected abstract Specification<T> prepareQuery(Specification<?> specification);
+        protected abstract Specification<T> prepareQuery(Specification< ? > specification);
 
     }
-
 
     @FunctionalInterface
     interface EntityQuery {
@@ -200,14 +207,16 @@ public interface BaseQuerySpecifications<T> {
         /**
          * Creates a subquery based on dynamic {@link Specification} parameters.
          *
-         * @param specification representing the where clause
-         * @param query         the criteria query
-         * @param builder       the criteria builder
+         * @param specification
+         *        representing the where clause
+         * @param query
+         *        the criteria query
+         * @param builder
+         *        the criteria builder
          * @return the member's subquery
          */
-        Subquery<?> create(Specification<?> specification, CriteriaQuery<?> query, CriteriaBuilder builder);
+        Subquery< ? > create(Specification< ? > specification, CriteriaQuery< ? > query, CriteriaBuilder builder);
     }
-
 
     @FunctionalInterface
     interface PreparedSubquery<E> {
@@ -215,12 +224,15 @@ public interface BaseQuerySpecifications<T> {
         /**
          * Creates a subquery with a where clause applied.
          *
-         * @param specification representing the where clause
-         * @param query         the criteria query
-         * @param builder       the criteria builder
+         * @param specification
+         *        representing the where clause
+         * @param query
+         *        the criteria query
+         * @param builder
+         *        the criteria builder
          * @return the subquery
          */
-        Subquery<E> where(Specification<?> specification, CriteriaQuery<?> query, CriteriaBuilder builder);
+        Subquery<E> where(Specification< ? > specification, CriteriaQuery< ? > query, CriteriaBuilder builder);
     }
 
 }

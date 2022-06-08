@@ -1,3 +1,4 @@
+
 package org.n52.sta.http.util.path;
 
 import java.util.ArrayList;
@@ -18,13 +19,13 @@ public class StaPath implements ODataPath {
 
     private final List<PathSegment> path;
 
-    private final Function<SerializationContext, StaBaseSerializer<?>> serializerFactory;
+    private final Function<SerializationContext, StaBaseSerializer< ? >> serializerFactory;
 
     private boolean isRef;
 
     public StaPath(PathType type,
                    PathSegment segment,
-                   Function<SerializationContext, StaBaseSerializer<?>> serializerFactory) {
+                   Function<SerializationContext, StaBaseSerializer< ? >> serializerFactory) {
         this.type = type;
         this.serializerFactory = serializerFactory;
         this.path = new ArrayList<>();
@@ -47,7 +48,7 @@ public class StaPath implements ODataPath {
         }
     }
 
-    public Function<SerializationContext, StaBaseSerializer<?>> getSerializerFactory() {
+    public Function<SerializationContext, StaBaseSerializer< ? >> getSerializerFactory() {
         return serializerFactory;
     }
 
@@ -64,12 +65,12 @@ public class StaPath implements ODataPath {
     public String toString() {
         StringBuilder builder = new StringBuilder();
         builder.append("StaPath {\ntype: ")
-            .append(type)
-            .append("\npath:\n");
+               .append(type)
+               .append("\npath:\n");
         for (PathSegment seg : path) {
             builder.append("    ")
-                .append(seg.toString())
-                .append("\n");
+                   .append(seg.toString())
+                   .append("\n");
         }
         builder.append("}");
         return builder.toString();

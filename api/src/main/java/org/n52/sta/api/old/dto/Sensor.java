@@ -25,6 +25,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
+
 package org.n52.sta.api.old.dto;
 
 import java.util.HashSet;
@@ -52,7 +53,8 @@ public class Sensor extends DtoEntity implements SensorDTO {
 
     private Set<DatastreamDTO> datastreams;
 
-    @Override public String getName() {
+    @Override
+    public String getName() {
         return name;
     }
 
@@ -60,7 +62,8 @@ public class Sensor extends DtoEntity implements SensorDTO {
         this.name = name;
     }
 
-    @Override public String getDescription() {
+    @Override
+    public String getDescription() {
         return description;
     }
 
@@ -68,7 +71,8 @@ public class Sensor extends DtoEntity implements SensorDTO {
         this.description = description;
     }
 
-    @Override public String getEncodingType() {
+    @Override
+    public String getEncodingType() {
         return encodingType;
     }
 
@@ -76,7 +80,8 @@ public class Sensor extends DtoEntity implements SensorDTO {
         this.encodingType = encodingType;
     }
 
-    @Override public String getMetadata() {
+    @Override
+    public String getMetadata() {
         return metadata;
     }
 
@@ -84,7 +89,8 @@ public class Sensor extends DtoEntity implements SensorDTO {
         this.metadata = metadata;
     }
 
-    @Override public ObjectNode getProperties() {
+    @Override
+    public ObjectNode getProperties() {
         return properties;
     }
 
@@ -92,7 +98,8 @@ public class Sensor extends DtoEntity implements SensorDTO {
         this.properties = properties;
     }
 
-    @Override public Set<DatastreamDTO> getDatastreams() {
+    @Override
+    public Set<DatastreamDTO> getDatastreams() {
         return datastreams;
     }
 
@@ -100,7 +107,8 @@ public class Sensor extends DtoEntity implements SensorDTO {
         this.datastreams = datastreams;
     }
 
-    @Override public void addDatastream(DatastreamDTO datastream) {
+    @Override
+    public void addDatastream(DatastreamDTO datastream) {
         if (this.datastreams == null) {
             this.datastreams = new HashSet<>();
         }

@@ -25,6 +25,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
+
 package org.n52.sta.api.service;
 
 import org.n52.sta.api.EntityEditor;
@@ -59,7 +60,7 @@ public class FeatureOfInterestService implements EntityService<FeatureOfInterest
     }
 
     public FeatureOfInterestService(EntityProvider<FeatureOfInterest> provider,
-            DomainService<FeatureOfInterest> domainService) {
+                                    DomainService<FeatureOfInterest> domainService) {
         Objects.requireNonNull(provider, "provider must not be null");
         this.featureOfInterestProvider = provider;
         this.domainService = domainService == null
@@ -78,7 +79,7 @@ public class FeatureOfInterestService implements EntityService<FeatureOfInterest
     }
 
     @Override
-    public EntityPage<FeatureOfInterest> getEntities(Request req)throws ProviderException {
+    public EntityPage<FeatureOfInterest> getEntities(Request req) throws ProviderException {
         return domainService.getEntities(req);
     }
 
@@ -126,7 +127,7 @@ public class FeatureOfInterestService implements EntityService<FeatureOfInterest
 
     private FeatureOfInterest getOrThrow(String id) throws ProviderException {
         return domainService.getEntity(id)
-                .orElseThrow(() -> new ProviderException("Id '" + id + "' does not exist."));
+                            .orElseThrow(() -> new ProviderException("Id '" + id + "' does not exist."));
     }
 
 }

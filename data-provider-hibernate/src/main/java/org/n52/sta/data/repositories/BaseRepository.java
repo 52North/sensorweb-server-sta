@@ -25,6 +25,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
+
 package org.n52.sta.data.repositories;
 
 import java.util.List;
@@ -43,11 +44,9 @@ import org.springframework.data.jpa.repository.support.SimpleJpaRepository;
 import org.springframework.data.repository.NoRepositoryBean;
 
 /**
- * Custom repository interface for extending {@link SimpleJpaRepository}.
- *
- * All repositories extending from this interface will get injected the
- * custom implementation of all methods, in particular those providing
- * an {@link EntityGraph} parameter.
+ * Custom repository interface for extending {@link SimpleJpaRepository}. All repositories extending from this
+ * interface will get injected the custom implementation of all methods, in particular those providing an
+ * {@link EntityGraph} parameter.
  *
  * @see BaseRepositoryImpl
  */
@@ -55,29 +54,28 @@ import org.springframework.data.repository.NoRepositoryBean;
 public interface BaseRepository<T> extends JpaSpecificationExecutor<T>, JpaRepository<T, Long> {
 
     /**
-     * Gets the property value of a single entity matching the given
-     * {@link Specification}.
+     * Gets the property value of a single entity matching the given {@link Specification}. Fetches the value
+     * of a single entity stored in column {@code columnName}.
      *
-     * Fetches the value of a single entity stored in column {@code columnName}.
-     *
-     * @param columnName The column name of the property
-     * @param spec       The query specification
-     * @return The value stored in column with columnName, Optional.empty()
-     *         otherwise
+     * @param columnName
+     *        The column name of the property
+     * @param spec
+     *        The query specification
+     * @return The value stored in column with columnName, Optional.empty() otherwise
      */
     Optional<String> getColumn(String columnName, Specification<T> spec);
 
     /**
-     * Gets the property values of all entities matching the given
-     * {@link Specification}.
+     * Gets the property values of all entities matching the given {@link Specification}. Fetches the values
+     * of all entities stored in column {@code columnName}.
      *
-     * Fetches the values of all entities stored in column {@code columnName}.
-     *
-     * @param columnName The column name of the property
-     * @param spec       The query specification
-     * @param pageable   The pagination information
-     * @return The list of values stored in column with columnName, Optional.empty()
-     *         otherwise
+     * @param columnName
+     *        The column name of the property
+     * @param spec
+     *        The query specification
+     * @param pageable
+     *        The pagination information
+     * @return The list of values stored in column with columnName, Optional.empty() otherwise
      */
     List<String> getColumnList(String columnName, Specification<T> spec, Pageable pageable);
 

@@ -47,29 +47,30 @@ public class HistoricalLocationQuerySpecification extends QuerySpecification<His
 
     private final class ThingFilter extends MemberFilterImpl<HistoricalLocationEntity> {
 
-        protected Specification<HistoricalLocationEntity> prepareQuery(Specification<?> specification) {
+        protected Specification<HistoricalLocationEntity> prepareQuery(Specification< ? > specification) {
             return (root, query, builder) -> {
 
                 EntityQuery memberQuery = createQuery(IdEntity.PROPERTY_ID, PlatformEntity.class);
-                Subquery<?> subquery = memberQuery.create(specification, query, builder);
+                Subquery< ? > subquery = memberQuery.create(specification, query, builder);
                 // m..n
-                Join<?, ?> join = root.join(HistoricalLocationEntity.PROPERTY_THING, JoinType.INNER);
-                return builder.in(join.get(IdEntity.PROPERTY_ID)).value(subquery);
+                Join< ? , ? > join = root.join(HistoricalLocationEntity.PROPERTY_THING, JoinType.INNER);
+                return builder.in(join.get(IdEntity.PROPERTY_ID))
+                              .value(subquery);
             };
         }
     }
 
-
     private final class LocationFilter extends MemberFilterImpl<HistoricalLocationEntity> {
 
-        protected Specification<HistoricalLocationEntity> prepareQuery(Specification<?> specification) {
+        protected Specification<HistoricalLocationEntity> prepareQuery(Specification< ? > specification) {
             return (root, query, builder) -> {
 
                 EntityQuery memberQuery = createQuery(IdEntity.PROPERTY_ID, HistoricalLocationEntity.class);
-                Subquery<?> subquery = memberQuery.create(specification, query, builder);
+                Subquery< ? > subquery = memberQuery.create(specification, query, builder);
                 // m..n
-                Join<?, ?> join = root.join(HistoricalLocationEntity.PROPERTY_LOCATIONS, JoinType.INNER);
-                return builder.in(join.get(IdEntity.PROPERTY_ID)).value(subquery);
+                Join< ? , ? > join = root.join(HistoricalLocationEntity.PROPERTY_LOCATIONS, JoinType.INNER);
+                return builder.in(join.get(IdEntity.PROPERTY_ID))
+                              .value(subquery);
             };
         }
     }

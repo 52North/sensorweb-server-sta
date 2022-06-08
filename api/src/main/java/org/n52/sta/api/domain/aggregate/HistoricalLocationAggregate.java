@@ -25,6 +25,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
+
 package org.n52.sta.api.domain.aggregate;
 
 import java.util.Set;
@@ -41,12 +42,13 @@ public class HistoricalLocationAggregate extends EntityAggregate<HistoricalLocat
     private final HistoricalLocation historicalLocation;
 
     public HistoricalLocationAggregate(HistoricalLocation historicalLocation,
-            DomainService<HistoricalLocation> domainService) {
+                                       DomainService<HistoricalLocation> domainService) {
         this(historicalLocation, domainService, null);
     }
 
     public HistoricalLocationAggregate(HistoricalLocation historicalLocation,
-            DomainService<HistoricalLocation> domainService, EntityEditor<HistoricalLocation> editor) {
+                                       DomainService<HistoricalLocation> domainService,
+                                       EntityEditor<HistoricalLocation> editor) {
         super(historicalLocation, domainService, editor);
         this.historicalLocation = historicalLocation;
     }

@@ -25,6 +25,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
+
 package org.n52.sta.http.old.common;
 
 import java.util.HashSet;
@@ -41,11 +42,8 @@ import org.n52.sta.old.utils.AbstractSTARequestHandler;
 import org.springframework.web.servlet.HandlerMapping;
 
 /**
- * Handles all requests to Entity Properties
- * e.g. /Things(52)/name
- * e.g. /Things(52)/name/$value
- * e.g. /Datastreams(52)/Thing/name
- * e.g. /Datastreams(52)/Thing/name/$value
+ * Handles all requests to Entity Properties e.g. /Things(52)/name e.g. /Things(52)/name/$value e.g.
+ * /Datastreams(52)/Thing/name e.g. /Datastreams(52)/Thing/name/$value
  *
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
  */
@@ -62,18 +60,22 @@ public abstract class PropertyRequestHandler extends AbstractSTARequestHandler {
     }
 
     /**
-     * Matches all requests for properties on Entities referenced directly via id
-     * e.g. /Datastreams(52)/name
+     * Matches all requests for properties on Entities referenced directly via id e.g. /Datastreams(52)/name
      *
-     * @param entity   type of entity. Automatically set by Spring via @PathVariable
-     * @param id       id of entity. Automatically set by Spring via @PathVariable
-     * @param property property to be returned. Automatically set by Spring via @PathVariable
-     * @param request  Full request object. Automatically set by Spring
+     * @param entity
+     *        type of entity. Automatically set by Spring via @PathVariable
+     * @param id
+     *        id of entity. Automatically set by Spring via @PathVariable
+     * @param property
+     *        property to be returned. Automatically set by Spring via @PathVariable
+     * @param request
+     *        Full request object. Automatically set by Spring
      */
     public StaDTO readEntityPropertyDirect(String entity,
                                            String id,
                                            String property,
-                                           HttpServletRequest request) throws Exception {
+                                           HttpServletRequest request)
+            throws Exception {
         String lookupPath = (String) request.getAttribute(HandlerMapping.LOOKUP_PATH);
         return readEntityPropertyDirect(entity, id, property, lookupPath);
     }
@@ -81,7 +83,8 @@ public abstract class PropertyRequestHandler extends AbstractSTARequestHandler {
     private StaDTO readEntityPropertyDirect(String entity,
                                             String id,
                                             String property,
-                                            String url) throws Exception {
+                                            String url)
+            throws Exception {
         validateResource(url.substring(0, url.length() - property.length() - 1));
         validateProperty(entity, property);
 
@@ -91,24 +94,28 @@ public abstract class PropertyRequestHandler extends AbstractSTARequestHandler {
         // Add select filter with filter only returning property
         filters.add(new SelectFilter(property));
         return serviceRepository.getEntityService(entity)
-            .getEntity(entityId, QUERY_OPTIONS_FACTORY.createQueryOptions(filters));
+                                .getEntity(entityId, QUERY_OPTIONS_FACTORY.createQueryOptions(filters));
     }
 
     /**
-     * Matches all requests for properties on Entities not referenced directly via id but via referenced entity
-     * e.g. /Datastreams(52)/Thing/name
+     * Matches all requests for properties on Entities not referenced directly via id but via referenced
+     * entity e.g. /Datastreams(52)/Thing/name
      *
-     * @param entity   Source Entity. Automatically set by Spring via @PathVariable
-     * @param target   Referenced Entity. Automatically set by Spring via @PathVariable
-     * @param property Property to be returned. Automatically set by Spring via @PathVariable
-     * @param request  Full request object. Automatically set by Spring
+     * @param entity
+     *        Source Entity. Automatically set by Spring via @PathVariable
+     * @param target
+     *        Referenced Entity. Automatically set by Spring via @PathVariable
+     * @param property
+     *        Property to be returned. Automatically set by Spring via @PathVariable
+     * @param request
+     *        Full request object. Automatically set by Spring
      * @return JSON Object with serialized property
      */
     public StaDTO readRelatedEntityProperty(String entity,
                                             String target,
                                             String property,
                                             HttpServletRequest request)
-        throws Exception {
+            throws Exception {
         String lookupPath = (String) request.getAttribute(HandlerMapping.LOOKUP_PATH);
         return readRelatedEntityProperty(entity, target, property, lookupPath);
     }
@@ -116,7 +123,8 @@ public abstract class PropertyRequestHandler extends AbstractSTARequestHandler {
     private StaDTO readRelatedEntityProperty(String entity,
                                              String target,
                                              String property,
-                                             String url) throws Exception {
+                                             String url)
+            throws Exception {
         validateResource(url.substring(0, url.length() - property.length() - 1));
 
         String[] split = splitId(entity);
@@ -129,51 +137,72 @@ public abstract class PropertyRequestHandler extends AbstractSTARequestHandler {
         filters.add(new SelectFilter(property));
 
         return serviceRepository.getEntityService(target)
-            .getEntityByRelatedEntity(sourceId,
-                                      sourceType,
-                                      null,
-                                      QUERY_OPTIONS_FACTORY.createQueryOptions(filters));
+                                .getEntityByRelatedEntity(sourceId,
+                                                          sourceType,
+                                                          null,
+                                                          QUERY_OPTIONS_FACTORY.createQueryOptions(filters));
     }
 
     /**
-     * Matches all requests for properties on Entities referenced directly via id
-     * e.g. /Datastreams(52)/name/$value
+     * Matches all requests for properties on Entities referenced directly via id e.g.
+     * /Datastreams(52)/name/$value
      *
-     * @param entity   type of entity. Automatically set by Spring via @PathVariable
-     * @param id       id of entity. Automatically set by Spring via @PathVariable
-     * @param property property to be returned. Automatically set by Spring via @PathVariable
-     * @param request  Full request object. Automatically set by Spring
+     * @param entity
+     *        type of entity. Automatically set by Spring via @PathVariable
+     * @param id
+     *        id of entity. Automatically set by Spring via @PathVariable
+     * @param property
+     *        property to be returned. Automatically set by Spring via @PathVariable
+     * @param request
+     *        Full request object. Automatically set by Spring
      */
     public String readEntityPropertyValueDirect(String entity,
                                                 String id,
                                                 String property,
-                                                HttpServletRequest request) throws Exception {
+                                                HttpServletRequest request)
+            throws Exception {
         String lookupPath = (String) request.getAttribute(HandlerMapping.LOOKUP_PATH);
-        StaDTO elementWithQueryOptions =
-            this.readEntityPropertyDirect(entity, id, property, lookupPath.substring(0, lookupPath.length() - 7));
-        return mapper.valueToTree(elementWithQueryOptions).fields().next().getValue().toString();
+        StaDTO elementWithQueryOptions = this.readEntityPropertyDirect(entity,
+                                                                       id,
+                                                                       property,
+                                                                       lookupPath.substring(0,
+                                                                                            lookupPath.length() - 7));
+        return mapper.valueToTree(elementWithQueryOptions)
+                     .fields()
+                     .next()
+                     .getValue()
+                     .toString();
     }
 
     /**
-     * Matches all requests for properties on Entities not referenced directly via id but via referenced entity
-     * e.g. /Datastreams(52)/Thing/name/$value
+     * Matches all requests for properties on Entities not referenced directly via id but via referenced
+     * entity e.g. /Datastreams(52)/Thing/name/$value
      *
-     * @param entity   Source Entity. Automatically set by Spring via @PathVariable
-     * @param target   Referenced Entity. Automatically set by Spring via @PathVariable
-     * @param property Property to be returned. Automatically set by Spring via @PathVariable
-     * @param request  Full request object. Automatically set by Spring
+     * @param entity
+     *        Source Entity. Automatically set by Spring via @PathVariable
+     * @param target
+     *        Referenced Entity. Automatically set by Spring via @PathVariable
+     * @param property
+     *        Property to be returned. Automatically set by Spring via @PathVariable
+     * @param request
+     *        Full request object. Automatically set by Spring
      * @return JSON Object with serialized property
      */
     public String readRelatedEntityPropertyValue(String entity,
                                                  String target,
                                                  String property,
-                                                 HttpServletRequest request) throws Exception {
+                                                 HttpServletRequest request)
+            throws Exception {
         String lookupPath = (String) request.getAttribute(HandlerMapping.LOOKUP_PATH);
-        StaDTO elementWithQueryOptions =
-            this.readRelatedEntityProperty(entity,
-                                           target,
-                                           property,
-                                           lookupPath.substring(0, lookupPath.length() - 7));
-        return mapper.valueToTree(elementWithQueryOptions).fields().next().getValue().toString();
+        StaDTO elementWithQueryOptions = this.readRelatedEntityProperty(entity,
+                                                                        target,
+                                                                        property,
+                                                                        lookupPath.substring(0,
+                                                                                             lookupPath.length() - 7));
+        return mapper.valueToTree(elementWithQueryOptions)
+                     .fields()
+                     .next()
+                     .getValue()
+                     .toString();
     }
 }

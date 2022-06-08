@@ -25,27 +25,22 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
+
 package org.n52.sta.api.old.serialize.common;
 
 public interface AbstractJSONEntity {
 
-    String INVALID_REFERENCED_ENTITY =
-        "Cannot parse as Reference: Only @iot.id may be present when referencing an existing entity!";
+    String INVALID_REFERENCED_ENTITY = "Cannot parse as Reference: Only @iot.id may be present when referencing an existing entity!";
 
-    String INVALID_INLINE_ENTITY_MISSING =
-        "Cannot parse Entity: Not all required properties present! Missing: ";
+    String INVALID_INLINE_ENTITY_MISSING = "Cannot parse Entity: Not all required properties present! Missing: ";
 
-    String INVALID_INLINE_ENTITY_INVALID_VALUE =
-        "Invalid Entity. Invalid Value: ";
+    String INVALID_INLINE_ENTITY_INVALID_VALUE = "Invalid Entity. Invalid Value: ";
 
-    String INVALID_BACKREFERENCE =
-        "Invalid nesting of Entities!";
+    String INVALID_BACKREFERENCE = "Invalid nesting of Entities!";
 
-    String INVALID_DUPLICATE_REFERENCE =
-        "Duplicate references to related Entity provided! Either specify reference to related Entity in JSON " +
+    String INVALID_DUPLICATE_REFERENCE = "Duplicate references to related Entity provided! Either specify reference to related Entity in JSON "
+            +
             "Payload OR inside Request URL";
-
-
 
     default void assertState(boolean state, String message) {
         if (!state) {

@@ -25,6 +25,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
+
 package org.n52.sta.old;
 
 import org.springframework.beans.BeansException;
@@ -36,12 +37,12 @@ import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 /**
  * Wrapper to always return a reference to the Spring Application Context from
  **/
-//@Component
+// @Component
 public class SpringApplicationContext implements ApplicationContextAware {
 
     private static ApplicationContext CONTEXT;
 
-    public static Object getBean(Class<?> bean) {
+    public static Object getBean(Class< ? > bean) {
         return CONTEXT.getBean(bean);
     }
 

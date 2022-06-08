@@ -25,6 +25,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
+
 package org.n52.sta.api.domain.event;
 
 import java.util.ArrayList;
@@ -34,7 +35,7 @@ public final class DomainEventService {
 
     private final List<DomainEventHandler> eventHandlers;
 
-    public DomainEventService()  {
+    public DomainEventService() {
         this.eventHandlers = new ArrayList<>();
     }
 

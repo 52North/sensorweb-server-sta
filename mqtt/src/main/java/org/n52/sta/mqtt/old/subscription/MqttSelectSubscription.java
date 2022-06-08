@@ -25,6 +25,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
+
 package org.n52.sta.mqtt.old.subscription;
 
 import java.util.Collections;
@@ -60,7 +61,9 @@ public class MqttSelectSubscription extends MqttEntityCollectionSubscription {
         QueryOptionsFactory qof = new QueryOptionsFactory();
         HashSet<FilterClause> filters = new HashSet<>();
         HashSet<String> filterItems = new HashSet<>();
-        Collections.addAll(filterItems, mt.group(RequestUtils.GROUPNAME_SELECT).split(","));
+        Collections.addAll(filterItems,
+                           mt.group(RequestUtils.GROUPNAME_SELECT)
+                             .split(","));
         filters.add(new SelectFilter(filterItems));
         queryOptions = qof.createQueryOptions(filters);
         LOGGER.debug(this.toString());
@@ -70,12 +73,12 @@ public class MqttSelectSubscription extends MqttEntityCollectionSubscription {
     public String toString() {
         String base = super.toString();
         return new StringBuilder()
-            .append(base)
-            .deleteCharAt(base.length() - 1)
-            .append(",selectOption=")
-            .append(selectOption)
-            .append("]")
-            .toString();
+                                  .append(base)
+                                  .deleteCharAt(base.length() - 1)
+                                  .append(",selectOption=")
+                                  .append(selectOption)
+                                  .append("]")
+                                  .toString();
     }
 
     public QueryOptions getQueryOptions() {

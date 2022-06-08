@@ -25,6 +25,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
+
 package org.n52.sta.data.query;
 
 import javax.persistence.criteria.CriteriaQuery;
@@ -36,25 +37,26 @@ final class FilterQueryRoot<T> {
 
     private Root<T> root;
 
-    private CriteriaQuery<?> query;
+    private CriteriaQuery< ? > query;
 
     private BaseQuerySpecifications<T> rootSpecifications;
 
-    FilterQueryRoot(Root<T> root, CriteriaQuery<?> query, BaseQuerySpecifications<T> rootSpecifications) {
+    FilterQueryRoot(Root<T> root, CriteriaQuery< ? > query, BaseQuerySpecifications<T> rootSpecifications) {
         this.root = root;
         this.query = query;
         this.rootSpecifications = rootSpecifications;
     }
 
-    boolean isRootAssignableFrom(Class<? extends T> clazz) {
-        return root.getJavaType().isAssignableFrom(clazz);
+    boolean isRootAssignableFrom(Class< ? extends T> clazz) {
+        return root.getJavaType()
+                   .isAssignableFrom(clazz);
     }
 
     Root<T> getRoot() {
         return root;
     }
 
-    CriteriaQuery<?> getCriteriaQuery() {
+    CriteriaQuery< ? > getCriteriaQuery() {
         return query;
     }
 

@@ -25,6 +25,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
+
 package org.n52.sta.plus.old.serialize;
 
 import java.io.IOException;
@@ -65,7 +66,6 @@ public class LicenseSerDes {
         }
     }
 
-
     public static class LicenseSerializer extends AbstractSTASerializer<LicenseDTO> {
 
         private static final long serialVersionUID = -1618289129123682794L;
@@ -80,37 +80,53 @@ public class LicenseSerDes {
         public void serialize(LicenseDTO license,
                               JsonGenerator gen,
                               SerializerProvider serializers)
-            throws IOException {
+                throws IOException {
             gen.writeStartObject();
 
             // olingo @iot links
-            if (!license.hasSelectOption() || license.getFieldsToSerialize().contains(STAEntityDefinition.PROP_ID)) {
+            if (!license.hasSelectOption()
+                    || license.getFieldsToSerialize()
+                              .contains(STAEntityDefinition.PROP_ID)) {
                 writeId(gen, license.getId());
             }
-            if (!license.hasSelectOption() ||
-                license.getFieldsToSerialize().contains(STAEntityDefinition.PROP_SELF_LINK)) {
+            if (!license.hasSelectOption()
+                    ||
+                    license.getFieldsToSerialize()
+                           .contains(STAEntityDefinition.PROP_SELF_LINK)) {
                 writeSelfLink(gen, license.getId());
             }
 
-            if (!license.hasSelectOption() || license.getFieldsToSerialize().contains(STAEntityDefinition.PROP_NAME)) {
+            if (!license.hasSelectOption()
+                    || license.getFieldsToSerialize()
+                              .contains(STAEntityDefinition.PROP_NAME)) {
                 gen.writeStringField(STAEntityDefinition.PROP_NAME, license.getName());
             }
-            if (!license.hasSelectOption() ||
-                license.getFieldsToSerialize().contains(STAEntityDefinition.PROP_DESCRIPTION)) {
+            if (!license.hasSelectOption()
+                    ||
+                    license.getFieldsToSerialize()
+                           .contains(STAEntityDefinition.PROP_DESCRIPTION)) {
                 gen.writeStringField(STAEntityDefinition.PROP_DESCRIPTION, license.getDescription());
             }
-            if (!license.hasSelectOption() ||
-                license.getFieldsToSerialize().contains(STAEntityDefinition.PROP_DEFINITION)) {
+            if (!license.hasSelectOption()
+                    ||
+                    license.getFieldsToSerialize()
+                           .contains(STAEntityDefinition.PROP_DEFINITION)) {
                 gen.writeStringField(STAEntityDefinition.PROP_DEFINITION, license.getDefinition());
             }
-            if (!license.hasSelectOption() || license.getFieldsToSerialize().contains(STAEntityDefinition.PROP_LOGO)) {
+            if (!license.hasSelectOption()
+                    || license.getFieldsToSerialize()
+                              .contains(STAEntityDefinition.PROP_LOGO)) {
                 gen.writeStringField(STAEntityDefinition.PROP_LOGO, license.getLogo());
             }
 
-            if (!license.hasSelectOption() ||
-                license.getFieldsToSerialize().contains(STAEntityDefinition.OBSERVATIONS)) {
-                if (!license.hasExpandOption() ||
-                    license.getFieldsToExpand().get(STAEntityDefinition.OBSERVATIONS) == null) {
+            if (!license.hasSelectOption()
+                    ||
+                    license.getFieldsToSerialize()
+                           .contains(STAEntityDefinition.OBSERVATIONS)) {
+                if (!license.hasExpandOption()
+                        ||
+                        license.getFieldsToExpand()
+                               .get(STAEntityDefinition.OBSERVATIONS) == null) {
                     writeNavigationProp(gen, STAEntityDefinition.OBSERVATIONS, license.getId());
                 } else {
                     gen.writeFieldName(STAEntityDefinition.OBSERVATIONS);
@@ -120,10 +136,14 @@ public class LicenseSerDes {
                 }
             }
 
-            if (!license.hasSelectOption() ||
-                license.getFieldsToSerialize().contains(STAEntityDefinition.GROUPS)) {
-                if (!license.hasExpandOption() ||
-                    license.getFieldsToExpand().get(STAEntityDefinition.GROUPS) == null) {
+            if (!license.hasSelectOption()
+                    ||
+                    license.getFieldsToSerialize()
+                           .contains(STAEntityDefinition.GROUPS)) {
+                if (!license.hasExpandOption()
+                        ||
+                        license.getFieldsToExpand()
+                               .get(STAEntityDefinition.GROUPS) == null) {
                     writeNavigationProp(gen, STAEntityDefinition.GROUPS, license.getId());
                 } else {
                     gen.writeFieldName(STAEntityDefinition.GROUPS);
@@ -138,7 +158,6 @@ public class LicenseSerDes {
 
     }
 
-
     public static class LicenseDeserializer extends StdDeserializer<LicenseDTO> {
 
         private static final long serialVersionUID = 3942005672394573517L;
@@ -149,13 +168,14 @@ public class LicenseSerDes {
 
         @Override
         public LicenseDTO deserialize(JsonParser p, DeserializationContext ctxt) throws IOException {
-            return p.readValueAs(JSONLicense.class).parseToDTO(JSONBase.EntityType.FULL);
+            return p.readValueAs(JSONLicense.class)
+                    .parseToDTO(JSONBase.EntityType.FULL);
         }
     }
 
-
     public static class LicensePatchDeserializer
-        extends StdDeserializer<LicenseDTOPatch> {
+            extends
+            StdDeserializer<LicenseDTOPatch> {
 
         private static final long serialVersionUID = -6355786322787893665L;
 
@@ -165,9 +185,9 @@ public class LicenseSerDes {
 
         @Override
         public LicenseDTOPatch deserialize(JsonParser p, DeserializationContext ctxt)
-            throws IOException {
+                throws IOException {
             return new LicenseDTOPatch(p.readValueAs(JSONLicense.class)
-                                           .parseToDTO(JSONBase.EntityType.PATCH));
+                                        .parseToDTO(JSONBase.EntityType.PATCH));
         }
     }
 }

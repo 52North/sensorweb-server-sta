@@ -25,6 +25,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
+
 package org.n52.sta.data.repositories.parameter;
 
 import org.n52.series.db.beans.parameter.dataset.DatasetParameterEntity;
@@ -34,6 +35,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Repository
 @Transactional
-public interface DatastreamParameterRepository extends JpaRepository<DatasetParameterEntity<?>, Long> {
+public interface DatastreamParameterRepository extends JpaRepository<DatasetParameterEntity< ? >, Long> {
 
 }

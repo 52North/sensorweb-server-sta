@@ -25,6 +25,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
+
 package org.n52.sta.plus.old.serialize.json;
 
 import java.util.HashSet;
@@ -46,7 +47,10 @@ import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
  */
 @SuppressWarnings("VisibilityModifier")
-@SuppressFBWarnings({"NM_FIELD_NAMING_CONVENTION", "UWF_UNWRITTEN_PUBLIC_OR_PROTECTED_FIELD"})
+@SuppressFBWarnings({
+    "NM_FIELD_NAMING_CONVENTION",
+    "UWF_UNWRITTEN_PUBLIC_OR_PROTECTED_FIELD"
+})
 public class JSONLicense extends JSONBase.JSONwithId<License> implements AbstractJSONEntity {
 
     public String name;
@@ -66,25 +70,26 @@ public class JSONLicense extends JSONBase.JSONwithId<License> implements Abstrac
         self = new License();
     }
 
-    @Override public License parseToDTO(JSONBase.EntityType type) {
+    @Override
+    public License parseToDTO(JSONBase.EntityType type) {
         switch (type) {
-            case FULL:
-                parseReferencedFrom();
-                assertNotNull(name, INVALID_INLINE_ENTITY_MISSING + "name");
-                assertNotNull(definition, INVALID_INLINE_ENTITY_MISSING + "definition");
+        case FULL:
+            parseReferencedFrom();
+            assertNotNull(name, INVALID_INLINE_ENTITY_MISSING + "name");
+            assertNotNull(definition, INVALID_INLINE_ENTITY_MISSING + "definition");
 
-                return createEntity();
-            case PATCH:
-                parseReferencedFrom();
-                return createEntity();
-            case REFERENCE:
-                assertIsNull(name, INVALID_REFERENCED_ENTITY);
-                assertIsNull(definition, INVALID_REFERENCED_ENTITY);
-                assertIsNull(logo, INVALID_REFERENCED_ENTITY);
-                self.setId(identifier);
-                return self;
-            default:
-                return null;
+            return createEntity();
+        case PATCH:
+            parseReferencedFrom();
+            return createEntity();
+        case REFERENCE:
+            assertIsNull(name, INVALID_REFERENCED_ENTITY);
+            assertIsNull(definition, INVALID_REFERENCED_ENTITY);
+            assertIsNull(logo, INVALID_REFERENCED_ENTITY);
+            self.setId(identifier);
+            return self;
+        default:
+            return null;
         }
     }
 
@@ -117,4 +122,3 @@ public class JSONLicense extends JSONBase.JSONwithId<License> implements Abstrac
         return self;
     }
 }
-

@@ -74,10 +74,10 @@ public class ReadController {
     private final PathFactory pathFactory;
 
     public ReadController(
-            @Value("${server.config.service-root-url}") String serviceUri,
-            EntityServiceLookup lookup,
-            PathFactory pathFactory,
-            ObjectMapper mapper) {
+                          @Value("${server.config.service-root-url}") String serviceUri,
+                          EntityServiceLookup lookup,
+                          PathFactory pathFactory,
+                          ObjectMapper mapper) {
         Objects.requireNonNull(serviceUri, "serviceUri must not be null!");
         Objects.requireNonNull(lookup, "lookup must not be null!");
         Objects.requireNonNull(pathFactory, "pathFactory must not be null!");
@@ -100,35 +100,36 @@ public class ReadController {
         if (path.isRef()) {
             serializationContext = SerializationContext.create(serializationContext,
                                                                new QueryOptions(Collections.singleton(
-                                                                   new SelectFilter(StaConstants.PROP_SELF_LINK)
-                                                               )));
+                                                                                                      new SelectFilter(StaConstants.PROP_SELF_LINK))));
         }
 
-        StaBaseSerializer<?> serializer = path.getSerializerFactory().apply(serializationContext);
+        StaBaseSerializer< ? > serializer = path.getSerializerFactory()
+                                                .apply(serializationContext);
         serializationContext.register(serializer);
 
         return ResponseEntity.ok()
-                .contentType(MediaType.APPLICATION_JSON)
-                .body(getAndWriteToResponse(requestContext, serializationContext, serializer.getType()));
+                             .contentType(MediaType.APPLICATION_JSON)
+                             .body(getAndWriteToResponse(requestContext, serializationContext, serializer.getType()));
     }
 
     private <T extends Identifiable> StreamingResponseBody getAndWriteToResponse(RequestContext requestContext,
-            SerializationContext context,
-            Class<T> type)
+                                                                                 SerializationContext context,
+                                                                                 Class<T> type)
             throws STACRUDException {
         try {
             EntityService<T> entityService = getEntityService(type);
             Request request = requestContext.getRequest();
-            switch (requestContext.getPath().getType()) {
-                case collection:
-                    EntityPage<T> collection = entityService.getEntities(request);
-                    return writeCollection(collection, context);
-                case entity:
-                case property:
-                    Optional<T> entity = entityService.getEntity(request);
-                    return writeEntity(entity.orElseThrow(() -> new STACRUDException("no such entity")), context);
-                default:
-                    throw new STACRUDException("not implemented!");
+            switch (requestContext.getPath()
+                                  .getType()) {
+            case collection:
+                EntityPage<T> collection = entityService.getEntities(request);
+                return writeCollection(collection, context);
+            case entity:
+            case property:
+                Optional<T> entity = entityService.getEntity(request);
+                return writeEntity(entity.orElseThrow(() -> new STACRUDException("no such entity")), context);
+            default:
+                throw new STACRUDException("not implemented!");
             }
         } catch (ProviderException e) {
             throw new STACRUDException(e.getLocalizedMessage());
@@ -145,7 +146,7 @@ public class ReadController {
     }
 
     private <T extends Identifiable> StreamingResponseBody writeCollection(EntityPage<T> page,
-            SerializationContext context) {
+                                                                           SerializationContext context) {
         return outputStream -> {
             try (OutputStream out = new BufferedOutputStream(outputStream)) {
                 ObjectWriter writer = context.createWriter();
@@ -158,8 +159,9 @@ public class ReadController {
 
     private <T extends Identifiable> EntityService<T> getEntityService(Class<T> type) {
         return lookup.getService(type)
-                .orElseThrow(() -> new IllegalStateException("No service registered for collection '"
-                        + type.getSimpleName() + "'"));
+                     .orElseThrow(() -> new IllegalStateException("No service registered for collection '"
+                             + type.getSimpleName()
+                             + "'"));
     }
 
 }

@@ -25,6 +25,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
+
 package org.n52.sta.data.support;
 
 import org.n52.series.db.beans.PlatformEntity;
@@ -37,7 +38,8 @@ public class ThingGraphBuilder extends GraphBuilder<PlatformEntity> {
     public ThingGraphBuilder(Request req) {
         super(PlatformEntity.class);
         // do not fetch anything when getting by reference
-        if (req.getPath().isRef()) {
+        if (req.getPath()
+               .isRef()) {
             return;
         }
 
@@ -48,17 +50,17 @@ public class ThingGraphBuilder extends GraphBuilder<PlatformEntity> {
     public void addExpanded(ExpandItem expandItem) {
         if (expandItem != null) {
             switch (expandItem.getPath()) {
-                case StaConstants.HISTORICAL_LOCATIONS:
-                    addGraphText(GraphText.GRAPH_HIST_LOCATIONS);
-                    break;
-                case StaConstants.DATASTREAMS:
-                    addGraphText(GraphText.GRAPH_DATASETS);
-                    break;
-                case StaConstants.LOCATIONS:
-                    addGraphText(GraphText.GRAPH_LOCATIONS);
-                    break;
-                default:
-                    // no expand
+            case StaConstants.HISTORICAL_LOCATIONS:
+                addGraphText(GraphText.GRAPH_HIST_LOCATIONS);
+                break;
+            case StaConstants.DATASTREAMS:
+                addGraphText(GraphText.GRAPH_DATASETS);
+                break;
+            case StaConstants.LOCATIONS:
+                addGraphText(GraphText.GRAPH_LOCATIONS);
+                break;
+            default:
+                // no expand
             }
         }
     }

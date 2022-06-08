@@ -25,6 +25,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
+
 package org.n52.sta.plus.data.dto;
 
 import java.util.HashMap;
@@ -41,7 +42,6 @@ import org.n52.sta.plus.data.entity.StaPlusLicense;
 public class StaPlusLicenseDto extends StaDto implements StaPlusLicense {
 
     private String name;
-
 
     private String description;
 

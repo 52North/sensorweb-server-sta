@@ -25,6 +25,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
+
 package org.n52.sta.data.repositories.parameter;
 
 import org.n52.series.db.beans.parameter.location.LocationParameterEntity;
@@ -34,6 +35,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Repository
 @Transactional
-public interface LocationParameterRepository extends JpaRepository<LocationParameterEntity<?>, Long> {
+public interface LocationParameterRepository extends JpaRepository<LocationParameterEntity< ? >, Long> {
 
 }

@@ -25,6 +25,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
+
 package org.n52.sta.plus.old.entity;
 
 import java.util.Set;
@@ -75,6 +76,7 @@ public interface PartyDTO extends StaDTO {
     void setRelations(Set<RelationDTO> relations);
 
     enum Role {
-        individual, institution;
+        individual,
+        institution;
     }
 }

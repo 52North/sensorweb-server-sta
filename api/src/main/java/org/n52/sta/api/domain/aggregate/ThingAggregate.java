@@ -25,6 +25,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
+
 package org.n52.sta.api.domain.aggregate;
 
 import org.n52.sta.api.EntityEditor;
@@ -77,7 +78,5 @@ public class ThingAggregate extends EntityAggregate<Thing> implements Thing {
     public Set<Datastream> getDatastreams() {
         return thing.getDatastreams();
     }
-
-
 
 }

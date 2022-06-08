@@ -25,6 +25,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
+
 package org.n52.sta.data.old.common;
 
 import java.util.Optional;
@@ -120,8 +121,8 @@ public abstract class CommonSTAServiceImpl<T extends StaIdentifierRepository<S>,
     }
 
     public CommonSTAServiceImpl(T repository,
-            EntityManager em,
-            Class entityClass) {
+                                EntityManager em,
+                                Class entityClass) {
         this.em = em;
         this.entityClass = entityClass;
         this.repository = repository;
@@ -132,14 +133,14 @@ public abstract class CommonSTAServiceImpl<T extends StaIdentifierRepository<S>,
     }
 
     /**
-     * Gets a lock with given name from global lockMap. Name is unique per
-     * EntityType.
-     * Uses weak references so Map is automatically cleared by GC.
-     * Used to lock Entities to avoid race conditions
+     * Gets a lock with given name from global lockMap. Name is unique per EntityType. Uses weak references so
+     * Map is automatically cleared by GC. Used to lock Entities to avoid race conditions
      *
-     * @param key name of the lock
+     * @param key
+     *        name of the lock
      * @return Object used for holding the lock
-     * @throws STACRUDException If the lock can not be aquired
+     * @throws STACRUDException
+     *         If the lock can not be aquired
      */
     protected Object getLock(String key) throws STACRUDException {
         if (key == null) {
@@ -155,10 +156,11 @@ public abstract class CommonSTAServiceImpl<T extends StaIdentifierRepository<S>,
 
     public R getEntity(String id, QueryOptions queryOptions) throws STACRUDException {
         try {
-            S entity = getRepository().findByStaIdentifier(id, createFetchGraph(queryOptions.getExpandFilter())).get();
+            S entity = getRepository().findByStaIdentifier(id, createFetchGraph(queryOptions.getExpandFilter()))
+                                      .get();
             if (queryOptions.hasExpandFilter()) {
                 return this.createWrapper(fetchExpandEntitiesWithFilter(entity, queryOptions.getExpandFilter()),
-                        queryOptions);
+                                          queryOptions);
             } else {
                 return this.createWrapper(entity, queryOptions);
             }
@@ -170,8 +172,8 @@ public abstract class CommonSTAServiceImpl<T extends StaIdentifierRepository<S>,
     public CollectionWrapper getEntityCollection(QueryOptions queryOptions) throws STACRUDException {
         try {
             Page<S> pages = getRepository().findAll(getFilterPredicate(entityClass, queryOptions),
-                    createPageableRequest(queryOptions),
-                    createFetchGraph(queryOptions.getExpandFilter()));
+                                                    createPageableRequest(queryOptions),
+                                                    createFetchGraph(queryOptions.getExpandFilter()));
             return createCollectionWrapperAndExpand(queryOptions, pages);
         } catch (RuntimeException | STAInvalidQueryException e) {
             throw new STACRUDException(e.getMessage(), e);
@@ -179,9 +181,9 @@ public abstract class CommonSTAServiceImpl<T extends StaIdentifierRepository<S>,
     }
 
     public R getEntityByRelatedEntity(String relatedId,
-            String relatedType,
-            String ownId,
-            QueryOptions queryOptions)
+                                      String relatedType,
+                                      String ownId,
+                                      QueryOptions queryOptions)
             throws STACRUDException {
         S entityByRelatedEntityRaw = getEntityByRelatedEntityRaw(relatedId, relatedType, ownId, queryOptions);
         if (entityByRelatedEntityRaw != null) {
@@ -192,25 +194,25 @@ public abstract class CommonSTAServiceImpl<T extends StaIdentifierRepository<S>,
     }
 
     public CollectionWrapper getEntityCollectionByRelatedEntity(String relatedId,
-            String relatedType,
-            QueryOptions queryOptions)
+                                                                String relatedType,
+                                                                QueryOptions queryOptions)
             throws STACRUDException {
         return createCollectionWrapperAndExpand(queryOptions,
-                getEntityCollectionByRelatedEntityRaw(relatedId,
-                        relatedType,
-                        queryOptions));
+                                                getEntityCollectionByRelatedEntityRaw(relatedId,
+                                                                                      relatedType,
+                                                                                      queryOptions));
     }
 
     public String getEntityIdByRelatedEntity(String relatedId, String relatedType) {
         Optional<String> entity = getRepository().getColumn(
-                this.byRelatedEntityFilter(relatedId, relatedType, null),
-                STAIDENTIFIER);
+                                                            this.byRelatedEntityFilter(relatedId, relatedType, null),
+                                                            STAIDENTIFIER);
         return entity.orElse(null);
     }
 
     public boolean existsEntityByRelatedEntity(String relatedId,
-            String relatedType,
-            String ownId) {
+                                               String relatedType,
+                                               String ownId) {
         return getRepository().count(byRelatedEntityFilter(relatedId, relatedType, ownId)) > 0;
     }
 
@@ -230,7 +232,8 @@ public abstract class CommonSTAServiceImpl<T extends StaIdentifierRepository<S>,
 
     public S getEntityByIdRaw(Long id, QueryOptions queryOptions) throws STACRUDException {
         try {
-            S entity = getRepository().findById(id, createFetchGraph(queryOptions.getExpandFilter())).get();
+            S entity = getRepository().findById(id, createFetchGraph(queryOptions.getExpandFilter()))
+                                      .get();
             if (queryOptions.hasExpandFilter()) {
                 return fetchExpandEntitiesWithFilter(entity, queryOptions.getExpandFilter());
             } else {
@@ -251,35 +254,42 @@ public abstract class CommonSTAServiceImpl<T extends StaIdentifierRepository<S>,
                     throw new RuntimeException(ex);
                 }
             });
-            long count = (queryOptions.hasCountFilter() && queryOptions.getCountFilter().getValue())
-                    ? expanded.getTotalElements()
-                    : -1;
-            boolean hasNext = expanded.getTotalElements() == queryOptions.getTopFilter().getValue();
+            long count = (queryOptions.hasCountFilter()
+                    && queryOptions.getCountFilter()
+                                   .getValue())
+                                           ? expanded.getTotalElements()
+                                           : -1;
+            boolean hasNext = expanded.getTotalElements() == queryOptions.getTopFilter()
+                                                                         .getValue();
             return new CollectionWrapper(count,
-                    expanded.map(e -> createWrapper(e, queryOptions))
-                            .getContent(),
-                    hasNext);
+                                         expanded.map(e -> createWrapper(e, queryOptions))
+                                                 .getContent(),
+                                         hasNext);
         } else {
-            long count = (queryOptions.hasCountFilter() && queryOptions.getCountFilter().getValue())
-                    ? pages.getTotalElements()
-                    : -1;
-            boolean hasNext = pages.getTotalElements() == queryOptions.getTopFilter().getValue();
+            long count = (queryOptions.hasCountFilter()
+                    && queryOptions.getCountFilter()
+                                   .getValue())
+                                           ? pages.getTotalElements()
+                                           : -1;
+            boolean hasNext = pages.getTotalElements() == queryOptions.getTopFilter()
+                                                                      .getValue();
             return new CollectionWrapper(count,
-                    pages.map(e -> createWrapper(e, queryOptions))
-                            .getContent(),
-                    hasNext);
+                                         pages.map(e -> createWrapper(e, queryOptions))
+                                              .getContent(),
+                                         hasNext);
         }
     }
 
     public S getEntityByRelatedEntityRaw(String relatedId,
-            String relatedType,
-            String ownId,
-            QueryOptions queryOptions)
+                                         String relatedType,
+                                         String ownId,
+                                         QueryOptions queryOptions)
             throws STACRUDException {
         try {
             Optional<S> elem = getRepository().findOne(byRelatedEntityFilter(relatedId, relatedType, ownId)
-                    .and(getFilterPredicate(entityClass, queryOptions)),
-                    createFetchGraph(queryOptions.getExpandFilter()));
+                                                                                                           .and(getFilterPredicate(entityClass,
+                                                                                                                                   queryOptions)),
+                                                       createFetchGraph(queryOptions.getExpandFilter()));
             if (elem.isPresent()) {
                 if (queryOptions.hasExpandFilter()) {
                     return fetchExpandEntitiesWithFilter(elem.get(), queryOptions.getExpandFilter());
@@ -295,25 +305,29 @@ public abstract class CommonSTAServiceImpl<T extends StaIdentifierRepository<S>,
     }
 
     /**
-     * Requests the EntityCollection that is related to a single Entity with the
-     * given ID and type
+     * Requests the EntityCollection that is related to a single Entity with the given ID and type
      *
-     * @param relatedId    the ID of the Entity the EntityCollection is related to
-     * @param relatedType  EntityType of the related Entity
-     * @param queryOptions {@link QueryOptions}
+     * @param relatedId
+     *        the ID of the Entity the EntityCollection is related to
+     * @param relatedType
+     *        EntityType of the related Entity
+     * @param queryOptions
+     *        {@link QueryOptions}
      * @return List of Entities that match
-     * @throws STACRUDException if the queryOptions are invalid
+     * @throws STACRUDException
+     *         if the queryOptions are invalid
      */
     public Page getEntityCollectionByRelatedEntityRaw(String relatedId,
-            String relatedType,
-            QueryOptions queryOptions)
+                                                      String relatedType,
+                                                      QueryOptions queryOptions)
             throws STACRUDException {
         try {
             Page<S> pages = getRepository()
-                    .findAll(byRelatedEntityFilter(relatedId, relatedType, null)
-                            .and(getFilterPredicate(entityClass, queryOptions)),
-                            createPageableRequest(queryOptions),
-                            createFetchGraph(queryOptions.getExpandFilter()));
+                                           .findAll(byRelatedEntityFilter(relatedId, relatedType, null)
+                                                                                                       .and(getFilterPredicate(entityClass,
+                                                                                                                               queryOptions)),
+                                                    createPageableRequest(queryOptions),
+                                                    createFetchGraph(queryOptions.getExpandFilter()));
             if (queryOptions.hasExpandFilter()) {
                 return pages.map(e -> {
                     try {
@@ -332,39 +346,43 @@ public abstract class CommonSTAServiceImpl<T extends StaIdentifierRepository<S>,
     }
 
     /**
-     * Creates a Fetchgraph for this Entity. Includes relations that need to be
-     * fetched by default as well as directly
-     * fetching $expanded Entities that are NOT filtered via $filter. As they are
-     * not filtered individually they
-     * can be fetched at the same time for all entities.
+     * Creates a Fetchgraph for this Entity. Includes relations that need to be fetched by default as well as
+     * directly fetching $expanded Entities that are NOT filtered via $filter. As they are not filtered
+     * individually they can be fetched at the same time for all entities.
      *
-     * @param expandOption Specification of the $expand parameter
+     * @param expandOption
+     *        Specification of the $expand parameter
      * @return FetchGraph fetching the required
-     * @throws STAInvalidQueryException if the query is invalid
+     * @throws STAInvalidQueryException
+     *         if the query is invalid
      */
     protected abstract EntityGraphRepository.FetchGraph[] createFetchGraph(ExpandFilter expandOption)
             throws STAInvalidQueryException;
 
     /**
-     * Fetches $expanded Entities that are filtered via $filter. An individual
-     * request is needed for each expanded
-     * Item as $filter needs to be evaluated.
+     * Fetches $expanded Entities that are filtered via $filter. An individual request is needed for each
+     * expanded Item as $filter needs to be evaluated.
      *
-     * @param entity       Base Entity
-     * @param expandOption Entities to be expanded
+     * @param entity
+     *        Base Entity
+     * @param expandOption
+     *        Entities to be expanded
      * @return Base Entity with embedded expanded parameters
-     * @throws STACRUDException         if an error occurred
-     * @throws STAInvalidQueryException if the query is invalid
+     * @throws STACRUDException
+     *         if an error occurred
+     * @throws STAInvalidQueryException
+     *         if the query is invalid
      */
     protected abstract S fetchExpandEntitiesWithFilter(S entity, ExpandFilter expandOption)
             throws STACRUDException, STAInvalidQueryException;
 
     /**
-     * Wraps the raw Entity into a Wrapper object to associate with QueryOptions
-     * used for this request
+     * Wraps the raw Entity into a Wrapper object to associate with QueryOptions used for this request
      *
-     * @param entity       entity
-     * @param queryOptions query options
+     * @param entity
+     *        entity
+     * @param queryOptions
+     *        query options
      * @return instance of ElementWithQueryOptions
      */
     @Transactional(rollbackFor = Exception.class)
@@ -373,22 +391,26 @@ public abstract class CommonSTAServiceImpl<T extends StaIdentifierRepository<S>,
     }
 
     /**
-     * Constructs Specification for for entity with given ownId and
-     * related entity with type relatedType and id relatedId.
+     * Constructs Specification for for entity with given ownId and related entity with type relatedType and
+     * id relatedId.
      *
-     * @param relatedId   Id of the Related Entity
-     * @param relatedType Type of the Related Entity
-     * @param ownId       Id of the Entity. Can be null
+     * @param relatedId
+     *        Id of the Related Entity
+     * @param relatedType
+     *        Type of the Related Entity
+     * @param ownId
+     *        Id of the Entity. Can be null
      * @return Optional&lt;ProcedureEntity&gt; Requested Entity
      */
     protected abstract Specification<S> byRelatedEntityFilter(String relatedId,
-            String relatedType,
-            String ownId);
+                                                              String relatedType,
+                                                              String ownId);
 
     /**
      * Query for the number of entities.
      *
-     * @param queryOptions {@link QueryOptions}
+     * @param queryOptions
+     *        {@link QueryOptions}
      * @return count of entities
      */
     public long getCount(QueryOptions queryOptions) {
@@ -407,13 +429,14 @@ public abstract class CommonSTAServiceImpl<T extends StaIdentifierRepository<S>,
     }
 
     /**
-     * Must be implemented by each Service individually as S is not known to have
-     * identifier here.
-     * Example Code to be pasted into each Service below
+     * Must be implemented by each Service individually as S is not known to have identifier here. Example
+     * Code to be pasted into each Service below
      *
-     * @param entity entity to be persisted or updated
+     * @param entity
+     *        entity to be persisted or updated
      * @return updated entity
-     * @throws STACRUDException if an error occurred
+     * @throws STACRUDException
+     *         if an error occurred
      */
 
     protected abstract S createOrUpdate(S entity) throws STACRUDException;
@@ -443,33 +466,47 @@ public abstract class CommonSTAServiceImpl<T extends StaIdentifierRepository<S>,
     /**
      * Create {@link PageRequest}
      *
-     * @param queryOptions {@link QueryOptions} to create {@link PageRequest}
+     * @param queryOptions
+     *        {@link QueryOptions} to create {@link PageRequest}
      * @return {@link PageRequest} of type {@link OffsetLimitBasedPageRequest}
      */
     protected OffsetLimitBasedPageRequest createPageableRequest(QueryOptions queryOptions) {
-        long offset = queryOptions.hasSkipFilter() ? queryOptions.getSkipFilter().getValue() : 0;
+        long offset = queryOptions.hasSkipFilter()
+                ? queryOptions.getSkipFilter()
+                              .getValue()
+                : 0;
         Sort sort;
         if (queryOptions.hasOrderByFilter()) {
             sort = Sort.unsorted();
-            for (OrderProperty sortProperty : queryOptions.getOrderByFilter().getSortProperties()) {
-                Sort.Direction direction = sortProperty.isSetSortOrder() &&
-                        sortProperty.getSortOrder().equals(FilterConstants.SortOrder.DESC) ? Sort.Direction.DESC
-                                : Sort.Direction.ASC;
-                sort = sort.and(sortProperty.getValueReference().equals(RESULT) ? handleResultSort(direction)
-                        : Sort.by(direction, checkPropertyName(sortProperty.getValueReference())));
+            for (OrderProperty sortProperty : queryOptions.getOrderByFilter()
+                                                          .getSortProperties()) {
+                Sort.Direction direction = sortProperty.isSetSortOrder()
+                        &&
+                        sortProperty.getSortOrder()
+                                    .equals(FilterConstants.SortOrder.DESC)
+                                            ? Sort.Direction.DESC
+                                            : Sort.Direction.ASC;
+                sort = sort.and(sortProperty.getValueReference()
+                                            .equals(RESULT)
+                                                    ? handleResultSort(direction)
+                                                    : Sort.by(direction,
+                                                              checkPropertyName(sortProperty.getValueReference())));
             }
         } else {
             sort = Sort.by(Sort.Direction.ASC, STAIDENTIFIER);
         }
         return new OffsetLimitBasedPageRequest((int) offset,
-                queryOptions.getTopFilter().getValue().intValue(),
-                sort);
+                                               queryOptions.getTopFilter()
+                                                           .getValue()
+                                                           .intValue(),
+                                               sort);
     }
 
     /**
      * Sort Observation->Result with different valueTypes.
      *
-     * @param direction sort direction. either ascending or descending
+     * @param direction
+     *        sort direction. either ascending or descending
      * @return Sort for results
      */
     private Sort handleResultSort(Sort.Direction direction) {
@@ -485,8 +522,10 @@ public abstract class CommonSTAServiceImpl<T extends StaIdentifierRepository<S>,
     /**
      * Constructs FilterPredicate based on given queryOptions.
      *
-     * @param entityClass  Class of the requested Entity
-     * @param queryOptions QueryOptions Object
+     * @param entityClass
+     *        Class of the requested Entity
+     * @param queryOptions
+     *        QueryOptions Object
      * @return Predicate based on FilterOption from queryOptions
      */
     public Specification<S> getFilterPredicate(Class entityClass, QueryOptions queryOptions) {
@@ -500,7 +539,7 @@ public abstract class CommonSTAServiceImpl<T extends StaIdentifierRepository<S>,
                 Expr filter = (Expr) filterOption.getFilter();
                 try {
                     HibernateSpatialCriteriaBuilderImpl staBuilder = new HibernateSpatialCriteriaBuilderImpl(
-                            (CriteriaBuilderImpl) builder);
+                                                                                                             (CriteriaBuilderImpl) builder);
                     return (Predicate) filter.accept(new FilterExprVisitor<S>(root, query, staBuilder));
                 } catch (STAInvalidQueryException e) {
                     throw new RuntimeException(e);
@@ -512,7 +551,8 @@ public abstract class CommonSTAServiceImpl<T extends StaIdentifierRepository<S>,
     /**
      * Translate STA property name to Database property name
      *
-     * @param property name of the property in STA
+     * @param property
+     *        name of the property in STA
      * @return name of the property in database
      */
     public String checkPropertyName(String property) {
@@ -524,7 +564,8 @@ public abstract class CommonSTAServiceImpl<T extends StaIdentifierRepository<S>,
     protected abstract void delete(String id) throws STACRUDException;
 
     protected <U extends HibernateRelations.HasIdentifier & HibernateRelations.HasStaIdentifier & HasName & HasDescription> void mergeIdentifierNameDescription(
-            U existing, U toMerge) {
+                                                                                                                                                                U existing,
+                                                                                                                                                                U toMerge) {
         if (toMerge.isSetIdentifier()) {
             existing.setIdentifier(toMerge.getIdentifier());
         }
@@ -540,21 +581,21 @@ public abstract class CommonSTAServiceImpl<T extends StaIdentifierRepository<S>,
     }
 
     protected void mergeName(HasName existing,
-            HasName toMerge) {
+                             HasName toMerge) {
         if (toMerge.isSetName()) {
             existing.setName(toMerge.getName());
         }
     }
 
     protected void mergeDescription(HasDescription existing,
-            HasDescription toMerge) {
+                                    HasDescription toMerge) {
         if (toMerge.isSetDescription()) {
             existing.setDescription(toMerge.getDescription());
         }
     }
 
     protected void mergeSamplingTime(HibernateRelations.HasPhenomenonTime existing,
-            HibernateRelations.HasPhenomenonTime toMerge) {
+                                     HibernateRelations.HasPhenomenonTime toMerge) {
         if (toMerge.hasSamplingTimeStart() && toMerge.hasSamplingTimeEnd()) {
             existing.setSamplingTimeStart(toMerge.getSamplingTimeStart());
             existing.setSamplingTimeEnd(toMerge.getSamplingTimeEnd());
@@ -562,7 +603,7 @@ public abstract class CommonSTAServiceImpl<T extends StaIdentifierRepository<S>,
     }
 
     protected void mergeDatastreams(HibernateRelations.HasAbstractDatasets existing,
-            HibernateRelations.HasAbstractDatasets toMerge)
+                                    HibernateRelations.HasAbstractDatasets toMerge)
             throws STACRUDException {
         if (toMerge.getDatasets() != null) {
             for (AbstractDatasetEntity datastream : toMerge.getDatasets()) {
@@ -576,41 +617,41 @@ public abstract class CommonSTAServiceImpl<T extends StaIdentifierRepository<S>,
 
     protected LocationService getLocationService() {
         return (LocationService) serviceRepository
-                .getEntityServiceRaw(CommonEntityServiceRepository.EntityTypes.Location.name());
+                                                  .getEntityServiceRaw(CommonEntityServiceRepository.EntityTypes.Location.name());
     }
 
     protected HistoricalLocationService getHistoricalLocationService() {
         return (HistoricalLocationService) serviceRepository
-                .getEntityServiceRaw(CommonEntityServiceRepository.EntityTypes.HistoricalLocation.name());
+                                                            .getEntityServiceRaw(CommonEntityServiceRepository.EntityTypes.HistoricalLocation.name());
     }
 
     protected DatastreamService getDatastreamService() {
         return (DatastreamService) serviceRepository
-                .getEntityServiceRaw(CommonEntityServiceRepository.EntityTypes.Datastream.name());
+                                                    .getEntityServiceRaw(CommonEntityServiceRepository.EntityTypes.Datastream.name());
     }
 
     protected FeatureOfInterestService getFeatureOfInterestService() {
         return (FeatureOfInterestService) serviceRepository
-                .getEntityServiceRaw(CommonEntityServiceRepository.EntityTypes.FeatureOfInterest.name());
+                                                           .getEntityServiceRaw(CommonEntityServiceRepository.EntityTypes.FeatureOfInterest.name());
     }
 
     protected ThingService getThingService() {
         return (ThingService) serviceRepository
-                .getEntityServiceRaw(CommonEntityServiceRepository.EntityTypes.Thing.name());
+                                               .getEntityServiceRaw(CommonEntityServiceRepository.EntityTypes.Thing.name());
     }
 
     protected SensorService getSensorService() {
         return (SensorService) serviceRepository
-                .getEntityServiceRaw(CommonEntityServiceRepository.EntityTypes.Sensor.name());
+                                                .getEntityServiceRaw(CommonEntityServiceRepository.EntityTypes.Sensor.name());
     }
 
     protected ObservedPropertyService getObservedPropertyService() {
         return (ObservedPropertyService) serviceRepository
-                .getEntityServiceRaw(CommonEntityServiceRepository.EntityTypes.ObservedProperty.name());
+                                                          .getEntityServiceRaw(CommonEntityServiceRepository.EntityTypes.ObservedProperty.name());
     }
 
     protected ObservationService getObservationService() {
         return (ObservationService) serviceRepository
-                .getEntityServiceRaw(CommonEntityServiceRepository.EntityTypes.Observation.name());
+                                                     .getEntityServiceRaw(CommonEntityServiceRepository.EntityTypes.Observation.name());
     }
 }

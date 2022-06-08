@@ -25,6 +25,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
+
 package org.n52.sta.plus.old.serialize.json;
 
 import java.util.HashSet;
@@ -47,7 +48,10 @@ import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
  */
 @SuppressWarnings("VisibilityModifier")
-@SuppressFBWarnings({"NM_FIELD_NAMING_CONVENTION", "UWF_UNWRITTEN_PUBLIC_OR_PROTECTED_FIELD"})
+@SuppressFBWarnings({
+    "NM_FIELD_NAMING_CONVENTION",
+    "UWF_UNWRITTEN_PUBLIC_OR_PROTECTED_FIELD"
+})
 public class JSONProject extends JSONBase.JSONwithIdNameDescriptionTime<ProjectDTO> implements AbstractJSONEntity {
 
     public String classification;
@@ -65,33 +69,34 @@ public class JSONProject extends JSONBase.JSONwithIdNameDescriptionTime<ProjectD
         self = new Project();
     }
 
-    @Override public ProjectDTO parseToDTO(JSONBase.EntityType type) {
+    @Override
+    public ProjectDTO parseToDTO(JSONBase.EntityType type) {
         switch (type) {
-            case FULL:
-                parseReferencedFrom();
-                assertNotNull(name, INVALID_INLINE_ENTITY_MISSING + "name");
-                assertNotNull(created, INVALID_INLINE_ENTITY_MISSING + "created");
-                assertNotNull(classification, INVALID_INLINE_ENTITY_MISSING + "classification");
-                assertNotNull(termsOfUse, INVALID_INLINE_ENTITY_MISSING + "termsOfUse");
+        case FULL:
+            parseReferencedFrom();
+            assertNotNull(name, INVALID_INLINE_ENTITY_MISSING + "name");
+            assertNotNull(created, INVALID_INLINE_ENTITY_MISSING + "created");
+            assertNotNull(classification, INVALID_INLINE_ENTITY_MISSING + "classification");
+            assertNotNull(termsOfUse, INVALID_INLINE_ENTITY_MISSING + "termsOfUse");
 
-                return createEntity();
-            case PATCH:
-                parseReferencedFrom();
-                return createEntity();
+            return createEntity();
+        case PATCH:
+            parseReferencedFrom();
+            return createEntity();
 
-            case REFERENCE:
-                assertIsNull(runtime, INVALID_REFERENCED_ENTITY);
-                assertIsNull(name, INVALID_REFERENCED_ENTITY);
-                assertIsNull(description, INVALID_REFERENCED_ENTITY);
-                assertIsNull(classification, INVALID_REFERENCED_ENTITY);
-                assertIsNull(privacyPolicy, INVALID_REFERENCED_ENTITY);
-                assertIsNull(created, INVALID_REFERENCED_ENTITY);
-                assertIsNull(termsOfUse, INVALID_REFERENCED_ENTITY);
-                assertIsNull(url, INVALID_REFERENCED_ENTITY);
-                self.setId(identifier);
-                return self;
-            default:
-                return null;
+        case REFERENCE:
+            assertIsNull(runtime, INVALID_REFERENCED_ENTITY);
+            assertIsNull(name, INVALID_REFERENCED_ENTITY);
+            assertIsNull(description, INVALID_REFERENCED_ENTITY);
+            assertIsNull(classification, INVALID_REFERENCED_ENTITY);
+            assertIsNull(privacyPolicy, INVALID_REFERENCED_ENTITY);
+            assertIsNull(created, INVALID_REFERENCED_ENTITY);
+            assertIsNull(termsOfUse, INVALID_REFERENCED_ENTITY);
+            assertIsNull(url, INVALID_REFERENCED_ENTITY);
+            self.setId(identifier);
+            return self;
+        default:
+            return null;
         }
     }
 

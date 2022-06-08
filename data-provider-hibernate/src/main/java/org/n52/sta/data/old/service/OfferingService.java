@@ -25,6 +25,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
+
 package org.n52.sta.data.old.service;
 
 import org.n52.series.db.beans.OfferingEntity;
@@ -50,7 +51,7 @@ public class OfferingService {
     private final OfferingRepository offeringRepository;
 
     public OfferingService(MutexFactory mutexFactory,
-            OfferingRepository offeringRepository) {
+                           OfferingRepository offeringRepository) {
         this.mutexFactory = mutexFactory;
         this.offeringRepository = offeringRepository;
     }
@@ -66,7 +67,8 @@ public class OfferingService {
                 offering.setDescription(procedure.getDescription());
                 return offeringRepository.save(offering);
             } else {
-                return offeringRepository.findByIdentifier(procedure.getIdentifier()).get();
+                return offeringRepository.findByIdentifier(procedure.getIdentifier())
+                                         .get();
             }
         }
     }

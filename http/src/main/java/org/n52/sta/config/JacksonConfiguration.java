@@ -25,6 +25,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
+
 package org.n52.sta.config;
 
 import java.util.ArrayList;
@@ -67,16 +68,15 @@ public class JacksonConfiguration {
 
     @Bean
     public ObjectMapper customMapper(
-        @Value("${server.config.service-root-url}") String rootUrl,
-        @Value("${server.feature.variableEncodingType:false}") boolean variableSensorEncodingTypeEnabled,
-        @Value("${server.feature.observation.samplingGeometry}") String samplingGeometryMapping,
-        @Value("${server.feature.observation.verticalFrom}") String verticalFromMapping,
-        @Value("${server.feature.observation.verticalTo}") String verticalToMapping,
-        @Value("${server.feature.observation.verticalFromTo}") String verticalFromToMapping,
-        @Value("${server.feature.implicitExpand:false}") boolean implicitExpand,
-        @Value("${server.feature.includeDatastreamCategory:false}") boolean includeDatastreamCategory,
-        Environment environment
-    ) {
+                                     @Value("${server.config.service-root-url}") String rootUrl,
+                                     @Value("${server.feature.variableEncodingType:false}") boolean variableSensorEncodingTypeEnabled,
+                                     @Value("${server.feature.observation.samplingGeometry}") String samplingGeometryMapping,
+                                     @Value("${server.feature.observation.verticalFrom}") String verticalFromMapping,
+                                     @Value("${server.feature.observation.verticalTo}") String verticalToMapping,
+                                     @Value("${server.feature.observation.verticalFromTo}") String verticalFromToMapping,
+                                     @Value("${server.feature.implicitExpand:false}") boolean implicitExpand,
+                                     @Value("${server.feature.includeDatastreamCategory:false}") boolean includeDatastreamCategory,
+                                     Environment environment) {
         Map<String, String> parameterMapping = new HashMap<>();
         parameterMapping.put("samplingGeometry", samplingGeometryMapping);
         parameterMapping.put("verticalFrom", verticalFromMapping);
@@ -92,28 +92,28 @@ public class JacksonConfiguration {
         SimpleSerializers serializers = new SimpleSerializers();
         serializers.addSerializer(new CollectionSer(CollectionWrapper.class));
         serializers.addSerializer(
-            new ThingSerDes.ThingSerializer(rootUrl,
-                                            activeProfiles));
-        serializers.addSerializer(
-            new LocationSerDes.LocationSerializer(rootUrl,
-                                                  activeProfiles));
-        serializers.addSerializer(
-            new SensorSerDes.SensorSerializer(rootUrl,
-                                              activeProfiles));
-        serializers.addSerializer(
-            new ObservationSerDes.ObservationSerializer(rootUrl,
-                                                        activeProfiles));
-        serializers.addSerializer(
-            new ObservedPropertySerDes.ObservedPropertySerializer(rootUrl,
+                                  new ThingSerDes.ThingSerializer(rootUrl,
                                                                   activeProfiles));
         serializers.addSerializer(
-            new FeatureOfInterestSerDes.FeatureOfInterestSerializer(rootUrl,
+                                  new LocationSerDes.LocationSerializer(rootUrl,
+                                                                        activeProfiles));
+        serializers.addSerializer(
+                                  new SensorSerDes.SensorSerializer(rootUrl,
                                                                     activeProfiles));
         serializers.addSerializer(
-            new HistoricalLocationSerDes.HistoricalLocationSerializer(rootUrl, activeProfiles));
+                                  new ObservationSerDes.ObservationSerializer(rootUrl,
+                                                                              activeProfiles));
         serializers.addSerializer(
-            new DatastreamSerDes.DatastreamSerializer(rootUrl,
-                                                      activeProfiles));
+                                  new ObservedPropertySerDes.ObservedPropertySerializer(rootUrl,
+                                                                                        activeProfiles));
+        serializers.addSerializer(
+                                  new FeatureOfInterestSerDes.FeatureOfInterestSerializer(rootUrl,
+                                                                                          activeProfiles));
+        serializers.addSerializer(
+                                  new HistoricalLocationSerDes.HistoricalLocationSerializer(rootUrl, activeProfiles));
+        serializers.addSerializer(
+                                  new DatastreamSerDes.DatastreamSerializer(rootUrl,
+                                                                            activeProfiles));
 
         SimpleDeserializers deserializers = new SimpleDeserializers();
         deserializers.addDeserializer(ThingDTO.class,
@@ -150,54 +150,54 @@ public class JacksonConfiguration {
         deserializers.addDeserializer(DatastreamSerDes.DatastreamDTOPatch.class,
                                       new DatastreamSerDes.DatastreamPatchDeserializer());
 
-//        for (String activeProfile : environment.getActiveProfiles()) {
-//            if (activeProfile.equals(StaConstants.STAPLUS)) {
-//                serializers.addSerializer(
-//                    new ObservationGroupSerDes.ObservationGroupSerializer(rootUrl,
-//                                                                          activeProfiles));
-//                serializers.addSerializer(
-//                    new ObservationRelationSerDes.ObservationRelationSerializer(rootUrl,
-//                                                                                activeProfiles));
-//                serializers.addSerializer(
-//                    new LicenseSerDes.LicenseSerializer(rootUrl,
-//                                                        activeProfiles));
-//                serializers.addSerializer(
-//                    new PartySerDes.PartySerializer(rootUrl,
-//                                                    activeProfiles));
-//                serializers.addSerializer(
-//                    new ProjectSerDes.ProjectSerializer(rootUrl,
-//                                                        activeProfiles));
-//
-//                deserializers.addDeserializer(GroupDTO.class,
-//                                              new ObservationGroupSerDes.ObservationGroupDeserializer());
-//                deserializers.addDeserializer(RelationDTO.class,
-//                                              new ObservationRelationSerDes.ObservationRelationDeserializer());
-//                deserializers.addDeserializer(LicenseDTO.class,
-//                                              new LicenseSerDes.LicenseDeserializer());
-//                deserializers.addDeserializer(PartyDTO.class,
-//                                              new PartySerDes.PartyDeserializer());
-//                deserializers.addDeserializer(ProjectDTO.class,
-//                                              new ProjectSerDes.ProjectDeserializer());
-//
-//                deserializers.addDeserializer(ObservationGroupSerDes.ObservationGroupDTOPatch.class,
-//                                              new ObservationGroupSerDes.ObservationGroupPatchDeserializer());
-//                deserializers.addDeserializer(ObservationRelationSerDes.ObservationRelationDTOPatch.class,
-//                                              new ObservationRelationSerDes.ObservationRelationPatchDeserializer());
-//                deserializers.addDeserializer(LicenseSerDes.LicenseDTOPatch.class,
-//                                              new LicenseSerDes.LicensePatchDeserializer());
-//                deserializers.addDeserializer(PartySerDes.PartyDTOPatch.class,
-//                                              new PartySerDes.PartyPatchDeserializer());
-//                deserializers.addDeserializer(ProjectSerDes.ProjectDTOPatch.class,
-//                                              new ProjectSerDes.ProjectPatchDeserializer());
-//            }
-//        }
+        // for (String activeProfile : environment.getActiveProfiles()) {
+        // if (activeProfile.equals(StaConstants.STAPLUS)) {
+        // serializers.addSerializer(
+        // new ObservationGroupSerDes.ObservationGroupSerializer(rootUrl,
+        // activeProfiles));
+        // serializers.addSerializer(
+        // new ObservationRelationSerDes.ObservationRelationSerializer(rootUrl,
+        // activeProfiles));
+        // serializers.addSerializer(
+        // new LicenseSerDes.LicenseSerializer(rootUrl,
+        // activeProfiles));
+        // serializers.addSerializer(
+        // new PartySerDes.PartySerializer(rootUrl,
+        // activeProfiles));
+        // serializers.addSerializer(
+        // new ProjectSerDes.ProjectSerializer(rootUrl,
+        // activeProfiles));
+        //
+        // deserializers.addDeserializer(GroupDTO.class,
+        // new ObservationGroupSerDes.ObservationGroupDeserializer());
+        // deserializers.addDeserializer(RelationDTO.class,
+        // new ObservationRelationSerDes.ObservationRelationDeserializer());
+        // deserializers.addDeserializer(LicenseDTO.class,
+        // new LicenseSerDes.LicenseDeserializer());
+        // deserializers.addDeserializer(PartyDTO.class,
+        // new PartySerDes.PartyDeserializer());
+        // deserializers.addDeserializer(ProjectDTO.class,
+        // new ProjectSerDes.ProjectDeserializer());
+        //
+        // deserializers.addDeserializer(ObservationGroupSerDes.ObservationGroupDTOPatch.class,
+        // new ObservationGroupSerDes.ObservationGroupPatchDeserializer());
+        // deserializers.addDeserializer(ObservationRelationSerDes.ObservationRelationDTOPatch.class,
+        // new ObservationRelationSerDes.ObservationRelationPatchDeserializer());
+        // deserializers.addDeserializer(LicenseSerDes.LicenseDTOPatch.class,
+        // new LicenseSerDes.LicensePatchDeserializer());
+        // deserializers.addDeserializer(PartySerDes.PartyDTOPatch.class,
+        // new PartySerDes.PartyPatchDeserializer());
+        // deserializers.addDeserializer(ProjectSerDes.ProjectDTOPatch.class,
+        // new ProjectSerDes.ProjectPatchDeserializer());
+        // }
+        // }
 
         module.setSerializers(serializers);
         module.setDeserializers(deserializers);
         modules.add(module);
         modules.add(new AfterburnerModule());
         return Jackson2ObjectMapperBuilder.json()
-            .modules(modules)
-            .build();
+                                          .modules(modules)
+                                          .build();
     }
 }

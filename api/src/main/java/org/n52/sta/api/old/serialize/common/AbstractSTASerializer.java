@@ -25,6 +25,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
+
 package org.n52.sta.api.old.serialize.common;
 
 import java.io.IOException;
@@ -66,24 +67,26 @@ public abstract class AbstractSTASerializer<T> extends StdSerializer<T> {
 
     protected void writeNestedEntity(Object expandedElement,
                                      JsonGenerator gen,
-                                     SerializerProvider serializers) throws IOException {
+                                     SerializerProvider serializers)
+            throws IOException {
         serializers.defaultSerializeValue(expandedElement, gen);
     }
 
-    protected void writeNestedCollection(Set<?> expandedElements,
+    protected void writeNestedCollection(Set< ? > expandedElements,
                                          JsonGenerator gen,
-                                         SerializerProvider serializers) throws IOException {
+                                         SerializerProvider serializers)
+            throws IOException {
         serializers.defaultSerializeValue(expandedElements, gen);
     }
 
-    protected void writeNestedCollectionOfType(Set<?> expandedElements,
-                                               Class<?> type,
+    protected void writeNestedCollectionOfType(Set< ? > expandedElements,
+                                               Class< ? > type,
                                                JsonGenerator gen,
-                                               SerializerProvider serializers) throws IOException {
-        serializers.defaultSerializeValue(
-            expandedElements
-                .stream()
-                .filter(type::isInstance)
-                .collect(Collectors.toSet()), gen);
+                                               SerializerProvider serializers)
+            throws IOException {
+        serializers.defaultSerializeValue(expandedElements.stream()
+                                                          .filter(type::isInstance)
+                                                          .collect(Collectors.toSet()),
+                                          gen);
     }
 }

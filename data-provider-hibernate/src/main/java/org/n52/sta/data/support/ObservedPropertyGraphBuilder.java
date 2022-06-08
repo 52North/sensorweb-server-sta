@@ -25,6 +25,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
+
 package org.n52.sta.data.support;
 
 import org.n52.series.db.beans.PhenomenonEntity;
@@ -37,7 +38,8 @@ public class ObservedPropertyGraphBuilder extends GraphBuilder<PhenomenonEntity>
     public ObservedPropertyGraphBuilder(Request req) {
         super(PhenomenonEntity.class);
         // do not fetch anything when getting by reference
-        if (req.getPath().isRef()) {
+        if (req.getPath()
+               .isRef()) {
             return;
         }
         addGraphText(GraphText.GRAPH_PARAMETERS);

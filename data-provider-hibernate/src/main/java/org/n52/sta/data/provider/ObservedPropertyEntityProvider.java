@@ -70,8 +70,7 @@ public class ObservedPropertyEntityProvider extends BaseEntityProvider<ObservedP
         ObservedPropertyGraphBuilder graphBuilder = new ObservedPropertyGraphBuilder(req);
         addUnfilteredExpandItems(req.getQueryOptions(), graphBuilder);
 
-        Specification<PhenomenonEntity> spec =
-            buildSpecification(req, new ObservedPropertyQuerySpecification());
+        Specification<PhenomenonEntity> spec = buildSpecification(req, new ObservedPropertyQuerySpecification());
         Optional<PhenomenonEntity> platform = observedPropertyRepository.findOne(spec, graphBuilder);
         return platform.map(entity -> new ObservedPropertyData(entity, propertyMapping));
     }
@@ -84,10 +83,10 @@ public class ObservedPropertyEntityProvider extends BaseEntityProvider<ObservedP
         ObservedPropertyGraphBuilder graphBuilder = new ObservedPropertyGraphBuilder(req);
         addUnfilteredExpandItems(options, graphBuilder);
 
-        Specification<PhenomenonEntity> spec =
-            buildSpecification(req, new ObservedPropertyQuerySpecification());
+        Specification<PhenomenonEntity> spec = buildSpecification(req, new ObservedPropertyQuerySpecification());
         Page<PhenomenonEntity> results = observedPropertyRepository.findAll(spec, pageable, graphBuilder);
-        return new StaEntityPage<>(ObservedProperty.class, results,
+        return new StaEntityPage<>(ObservedProperty.class,
+                                   results,
                                    entity -> new ObservedPropertyData(entity, propertyMapping));
     }
 

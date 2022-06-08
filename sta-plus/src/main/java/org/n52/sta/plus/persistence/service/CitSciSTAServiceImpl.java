@@ -25,6 +25,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
+
 package org.n52.sta.plus.persistence.service;
 
 import javax.persistence.EntityManager;
@@ -37,42 +38,43 @@ import org.n52.sta.data.old.repositories.StaIdentifierRepository;
 
 @SuppressWarnings("checkstyle:LineLength")
 public abstract class CitSciSTAServiceImpl<T extends StaIdentifierRepository<S>, R extends StaDTO, S extends HibernateRelations.HasId>
-        extends CommonSTAServiceImpl<T, R, S> {
+        extends
+        CommonSTAServiceImpl<T, R, S> {
 
     public CitSciSTAServiceImpl(T repository,
-            EntityManager em,
-            Class entityClass) {
+                                EntityManager em,
+                                Class entityClass) {
         super(repository, em, entityClass);
     }
 
     protected GroupService getObservationGroupService() {
         return (GroupService) serviceRepository.getEntityServiceRaw(
-                CitSciEntityServiceRepository.StaPlusEntityTypes.Group.name());
+                                                                    CitSciEntityServiceRepository.StaPlusEntityTypes.Group.name());
     }
 
     protected RelationService getObservationRelationService() {
         return (RelationService) serviceRepository
-                .getEntityServiceRaw(CitSciEntityServiceRepository.StaPlusEntityTypes.Relation.name());
+                                                  .getEntityServiceRaw(CitSciEntityServiceRepository.StaPlusEntityTypes.Relation.name());
     }
 
     protected LicenseService getLicenseService() {
         return (LicenseService) serviceRepository
-                .getEntityServiceRaw(CitSciEntityServiceRepository.StaPlusEntityTypes.License.name());
+                                                 .getEntityServiceRaw(CitSciEntityServiceRepository.StaPlusEntityTypes.License.name());
     }
 
     protected CitSciDatastreamService getStaPlusDatastreamService() {
         return (CitSciDatastreamService) serviceRepository
-                .getEntityServiceRaw(CommonEntityServiceRepository.EntityTypes.Datastream.name());
+                                                          .getEntityServiceRaw(CommonEntityServiceRepository.EntityTypes.Datastream.name());
     }
 
     protected PartyService getPartyService() {
         return (PartyService) serviceRepository
-                .getEntityServiceRaw(CitSciEntityServiceRepository.StaPlusEntityTypes.Party.name());
+                                               .getEntityServiceRaw(CitSciEntityServiceRepository.StaPlusEntityTypes.Party.name());
     }
 
     protected ProjectService getProjectService() {
         return (ProjectService) serviceRepository
-                .getEntityServiceRaw(CitSciEntityServiceRepository.StaPlusEntityTypes.Project.name());
+                                                 .getEntityServiceRaw(CitSciEntityServiceRepository.StaPlusEntityTypes.Project.name());
     }
 
 }

@@ -25,6 +25,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
+
 package org.n52.sta.mqtt.config;
 
 import java.util.List;
@@ -54,42 +55,54 @@ public class MqttConfiguration {
 
     @Bean(initMethod = "init", destroyMethod = "stopServer")
     public MqttBroker getMqttBroker(
-            @Value("${mqtt.broker.store.folder:}") String storePath,
-            @Value("${mqtt.broker.store.filename:52N-STA-MQTTBroker.h2}") String storeFilename,
-            @Value("${mqtt.broker.store.autosave-in-seconds:30}") String autosaveIntervalProperty,
-            @Value("${mqtt.broker.store.enabled}") Boolean persistenceEnabled,
-            @Value("${mqtt.broker.ws.enabled}") Boolean websocketEnabled,
-            @Value("${mqtt.broker.ws.port:8080}") String websocketPort,
-            @Value("${mqtt.broker.tcp.enabled}") Boolean plainTcpEnabled,
-            @Value("${mqtt.broker.tcp.port:1883}") String plainTcpPort,
-            MqttSubscriptionEventHandler subscriptionHandler,
-            MqttPublishMessageHandler publishHandler) {
+                                    @Value("${mqtt.broker.store.folder:}") String storePath,
+                                    @Value("${mqtt.broker.store.filename:52N-STA-MQTTBroker.h2}") String storeFilename,
+                                    @Value("${mqtt.broker.store.autosave-in-seconds:30}") String autosaveIntervalProperty,
+                                    @Value("${mqtt.broker.store.enabled}") Boolean persistenceEnabled,
+                                    @Value("${mqtt.broker.ws.enabled}") Boolean websocketEnabled,
+                                    @Value("${mqtt.broker.ws.port:8080}") String websocketPort,
+                                    @Value("${mqtt.broker.tcp.enabled}") Boolean plainTcpEnabled,
+                                    @Value("${mqtt.broker.tcp.port:1883}") String plainTcpPort,
+                                    MqttSubscriptionEventHandler subscriptionHandler,
+                                    MqttPublishMessageHandler publishHandler) {
 
-        return new MqttBroker(storePath, storeFilename, autosaveIntervalProperty, persistenceEnabled,
-                websocketEnabled, websocketPort, plainTcpEnabled, plainTcpPort, subscriptionHandler,
-                publishHandler);
+        return new MqttBroker(storePath,
+                              storeFilename,
+                              autosaveIntervalProperty,
+                              persistenceEnabled,
+                              websocketEnabled,
+                              websocketPort,
+                              plainTcpEnabled,
+                              plainTcpPort,
+                              subscriptionHandler,
+                              publishHandler);
     }
 
     @Bean
     public MqttSubscriptionEventHandler getMqttMessageHandler(
-            @Value("${server.config.service-root-url}") String rootUrl,
-            @Value("${server.feature.escapeId:true}") boolean shouldEscapeId,
-            ObjectMapper mapper) {
+                                                              @Value("${server.config.service-root-url}") String rootUrl,
+                                                              @Value("${server.feature.escapeId:true}") boolean shouldEscapeId,
+                                                              ObjectMapper mapper) {
         return new MqttSubscriptionEventHandlerImpl(rootUrl, shouldEscapeId, mapper);
     }
 
     @Bean
     public MqttPublishMessageHandler getMqttMessageHandler(
-            @Value("${mqtt.publication-topics:Observations}") List<String> publishTopics,
-            @Value("${mqtt.read-only}") boolean readOnly,
-            @Value("${server.config.service-root-url}") String rootUrl,
-            @Value("${server.feature.escapeId:true}") boolean escapeId,
-            EntityServiceFactory serviceRepository,
-            ObjectMapper mapper,
-            DTOMapper dtoMapper) {
+                                                           @Value("${mqtt.publication-topics:Observations}") List<String> publishTopics,
+                                                           @Value("${mqtt.read-only}") boolean readOnly,
+                                                           @Value("${server.config.service-root-url}") String rootUrl,
+                                                           @Value("${server.feature.escapeId:true}") boolean escapeId,
+                                                           EntityServiceFactory serviceRepository,
+                                                           ObjectMapper mapper,
+                                                           DTOMapper dtoMapper) {
 
-        return new MqttPublishMessageHandlerImpl(publishTopics, readOnly, rootUrl, escapeId,
-                serviceRepository, mapper, dtoMapper);
+        return new MqttPublishMessageHandlerImpl(publishTopics,
+                                                 readOnly,
+                                                 rootUrl,
+                                                 escapeId,
+                                                 serviceRepository,
+                                                 mapper,
+                                                 dtoMapper);
     }
 
 }
