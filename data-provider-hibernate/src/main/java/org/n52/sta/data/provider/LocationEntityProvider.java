@@ -67,9 +67,11 @@ public class LocationEntityProvider extends BaseEntityProvider<Location> {
     }
 
     @Override
-    public Optional<Location> getEntity(Request req) throws ProviderException {
-        LocationGraphBuilder graphBuilder = LocationGraphBuilder.createWith(req.getQueryOptions());
-        return getEntity(rootSpecification.buildSpecification(req), graphBuilder);
+    public Optional<Location> getEntity(Request request) throws ProviderException {
+        LocationGraphBuilder graphBuilder = request.isRefRequest()
+                ? LocationGraphBuilder.createEmpty()
+                : LocationGraphBuilder.createWith(request.getQueryOptions());
+        return getEntity(rootSpecification.buildSpecification(request), graphBuilder);
     }
 
     @Override
@@ -84,11 +86,14 @@ public class LocationEntityProvider extends BaseEntityProvider<Location> {
     }
 
     @Override
-    public EntityPage<Location> getEntities(Request req) throws ProviderException {
-        QueryOptions options = req.getQueryOptions();
+    public EntityPage<Location> getEntities(Request request) throws ProviderException {
+        QueryOptions options = request.getQueryOptions();
         Pageable pageable = StaPageRequest.create(options);
-        LocationGraphBuilder graphBuilder = LocationGraphBuilder.createWith(req.getQueryOptions());
-        Specification<LocationEntity> spec = rootSpecification.buildSpecification(req);
+
+        LocationGraphBuilder graphBuilder = request.isRefRequest()
+                ? LocationGraphBuilder.createEmpty()
+                : LocationGraphBuilder.createWith(request.getQueryOptions());
+        Specification<LocationEntity> spec = rootSpecification.buildSpecification(request);
         Page<LocationEntity> results = locationRepository.findAll(spec, pageable, graphBuilder);
         return new StaEntityPage<>(Location.class, results, entity -> new LocationData(entity, propertyMapping));
     }

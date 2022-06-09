@@ -68,9 +68,11 @@ public class FeatureOfInterestEntityProvider extends BaseEntityProvider<FeatureO
     }
 
     @Override
-    public Optional<FeatureOfInterest> getEntity(Request req) throws ProviderException {
-        FeatureOfInterestGraphBuilder graphBuilder = FeatureOfInterestGraphBuilder.createWith(req.getQueryOptions());
-        return getEntity(new FeatureOfInterestQuerySpecification().buildSpecification(req), graphBuilder);
+    public Optional<FeatureOfInterest> getEntity(Request request) throws ProviderException {
+        FeatureOfInterestGraphBuilder graphBuilder = request.isRefRequest()
+                ? FeatureOfInterestGraphBuilder.createEmpty()
+                : FeatureOfInterestGraphBuilder.createWith(request.getQueryOptions());
+        return getEntity(rootSpecification.buildSpecification(request), graphBuilder);
     }
 
     @Override
@@ -86,10 +88,14 @@ public class FeatureOfInterestEntityProvider extends BaseEntityProvider<FeatureO
     }
 
     @Override
-    public EntityPage<FeatureOfInterest> getEntities(Request req) throws ProviderException {
-        Pageable pageable = StaPageRequest.create(req.getQueryOptions());
-        FeatureOfInterestGraphBuilder graphBuilder = FeatureOfInterestGraphBuilder.createWith(req.getQueryOptions());
-        Specification<AbstractFeatureEntity> spec = new FeatureOfInterestQuerySpecification().buildSpecification(req);
+    public EntityPage<FeatureOfInterest> getEntities(Request request) throws ProviderException {
+        QueryOptions options = request.getQueryOptions();
+        Pageable pageable = StaPageRequest.create(options);
+
+        FeatureOfInterestGraphBuilder graphBuilder = request.isRefRequest()
+                ? FeatureOfInterestGraphBuilder.createEmpty()
+                : FeatureOfInterestGraphBuilder.createWith(request.getQueryOptions());
+        Specification<AbstractFeatureEntity> spec = rootSpecification.buildSpecification(request);
         Page<AbstractFeatureEntity> results = featureOfInterestRepository.findAll(spec, pageable, graphBuilder);
         return new StaEntityPage<>(FeatureOfInterest.class,
                                    results,

@@ -68,7 +68,9 @@ public class DatastreamEntityProvider extends BaseEntityProvider<Datastream> {
 
     @Override
     public Optional<Datastream> getEntity(Request request) throws ProviderException {
-        DatastreamGraphBuilder graphBuilder = DatastreamGraphBuilder.createWith(request.getQueryOptions());
+        DatastreamGraphBuilder graphBuilder = request.isRefRequest()
+                ? DatastreamGraphBuilder.createEmpty()
+                : DatastreamGraphBuilder.createWith(request.getQueryOptions());
         return getEntity(rootSpecification.buildSpecification(request), graphBuilder);
     }
 
@@ -85,12 +87,14 @@ public class DatastreamEntityProvider extends BaseEntityProvider<Datastream> {
     }
 
     @Override
-    public EntityPage<Datastream> getEntities(Request req) throws ProviderException {
-        QueryOptions options = req.getQueryOptions();
+    public EntityPage<Datastream> getEntities(Request request) throws ProviderException {
+        QueryOptions options = request.getQueryOptions();
         Pageable pageable = StaPageRequest.create(options);
 
-        DatastreamGraphBuilder graphBuilder = DatastreamGraphBuilder.createWith(options);
-        Specification<AbstractDatasetEntity> spec = rootSpecification.buildSpecification(req);
+        DatastreamGraphBuilder graphBuilder = request.isRefRequest()
+                ? DatastreamGraphBuilder.createEmpty()
+                : DatastreamGraphBuilder.createWith(options);
+        Specification<AbstractDatasetEntity> spec = rootSpecification.buildSpecification(request);
         Page<AbstractDatasetEntity> results = datastreamRepository.findAll(spec, pageable, graphBuilder);
         return new StaEntityPage<>(Datastream.class, results, entity -> new DatastreamData(entity, propertyMapping));
     }

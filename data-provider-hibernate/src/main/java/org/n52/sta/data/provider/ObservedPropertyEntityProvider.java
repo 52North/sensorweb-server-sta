@@ -68,9 +68,11 @@ public class ObservedPropertyEntityProvider extends BaseEntityProvider<ObservedP
     }
 
     @Override
-    public Optional<ObservedProperty> getEntity(Request req) throws ProviderException {
-        ObservedPropertyGraphBuilder graphBuilder = ObservedPropertyGraphBuilder.createWith(req.getQueryOptions());
-        return getEntity(rootSpecification.buildSpecification(req), graphBuilder);
+    public Optional<ObservedProperty> getEntity(Request request) throws ProviderException {
+        ObservedPropertyGraphBuilder graphBuilder = request.isRefRequest()
+                ? ObservedPropertyGraphBuilder.createEmpty()
+                : ObservedPropertyGraphBuilder.createWith(request.getQueryOptions());
+        return getEntity(rootSpecification.buildSpecification(request), graphBuilder);
     }
 
     @Override
@@ -86,12 +88,14 @@ public class ObservedPropertyEntityProvider extends BaseEntityProvider<ObservedP
     }
 
     @Override
-    public EntityPage<ObservedProperty> getEntities(Request req) throws ProviderException {
-        QueryOptions options = req.getQueryOptions();
+    public EntityPage<ObservedProperty> getEntities(Request request) throws ProviderException {
+        QueryOptions options = request.getQueryOptions();
         Pageable pageable = StaPageRequest.create(options);
 
-        ObservedPropertyGraphBuilder graphBuilder = ObservedPropertyGraphBuilder.createWith(req.getQueryOptions());
-        Specification<PhenomenonEntity> spec = rootSpecification.buildSpecification(req);
+        ObservedPropertyGraphBuilder graphBuilder = request.isRefRequest()
+                ? ObservedPropertyGraphBuilder.createEmpty()
+                : ObservedPropertyGraphBuilder.createWith(options);
+        Specification<PhenomenonEntity> spec = rootSpecification.buildSpecification(request);
         Page<PhenomenonEntity> results = observedPropertyRepository.findAll(spec, pageable, graphBuilder);
         return new StaEntityPage<>(ObservedProperty.class,
                                    results,

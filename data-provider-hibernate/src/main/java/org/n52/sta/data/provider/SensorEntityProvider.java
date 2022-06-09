@@ -67,9 +67,11 @@ public class SensorEntityProvider extends BaseEntityProvider<Sensor> {
     }
 
     @Override
-    public Optional<Sensor> getEntity(Request req) throws ProviderException {
-        SensorGraphBuilder graphBuilder = SensorGraphBuilder.createWith(req.getQueryOptions());
-        return getEntity(rootSpecification.buildSpecification(req), graphBuilder);
+    public Optional<Sensor> getEntity(Request request) throws ProviderException {
+        SensorGraphBuilder graphBuilder = request.isRefRequest()
+                ? SensorGraphBuilder.createEmpty()
+                : SensorGraphBuilder.createWith(request.getQueryOptions());
+        return getEntity(rootSpecification.buildSpecification(request), graphBuilder);
     }
 
     @Override
@@ -84,10 +86,14 @@ public class SensorEntityProvider extends BaseEntityProvider<Sensor> {
     }
 
     @Override
-    public EntityPage<Sensor> getEntities(Request req) throws ProviderException {
-        Pageable pageable = StaPageRequest.create(req.getQueryOptions());
-        SensorGraphBuilder graphBuilder = SensorGraphBuilder.createWith(req.getQueryOptions());
-        Specification<ProcedureEntity> spec = rootSpecification.buildSpecification(req);
+    public EntityPage<Sensor> getEntities(Request request) throws ProviderException {
+        QueryOptions options = request.getQueryOptions();
+        Pageable pageable = StaPageRequest.create(options);
+
+        SensorGraphBuilder graphBuilder = request.isRefRequest()
+                ? SensorGraphBuilder.createEmpty()
+                : SensorGraphBuilder.createWith(options);
+        Specification<ProcedureEntity> spec = rootSpecification.buildSpecification(request);
         Page<ProcedureEntity> results = sensorRepository.findAll(spec, pageable, graphBuilder);
         return new StaEntityPage<>(Sensor.class, results, entity -> new SensorData(entity, propertyMapping));
     }

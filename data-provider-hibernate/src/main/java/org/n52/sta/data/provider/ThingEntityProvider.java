@@ -67,9 +67,11 @@ public class ThingEntityProvider extends BaseEntityProvider<Thing> {
     }
 
     @Override
-    public Optional<Thing> getEntity(Request req) throws ProviderException {
-        ThingGraphBuilder graphBuilder = ThingGraphBuilder.createWith(req.getQueryOptions());
-        return extracted(rootSpecification.buildSpecification(req), graphBuilder);
+    public Optional<Thing> getEntity(Request request) throws ProviderException {
+        ThingGraphBuilder graphBuilder = request.isRefRequest()
+                ? ThingGraphBuilder.createEmpty()
+                : ThingGraphBuilder.createWith(request.getQueryOptions());
+        return extracted(rootSpecification.buildSpecification(request), graphBuilder);
     }
 
     @Override
@@ -84,12 +86,14 @@ public class ThingEntityProvider extends BaseEntityProvider<Thing> {
     }
 
     @Override
-    public EntityPage<Thing> getEntities(Request req) throws ProviderException {
-        QueryOptions options = req.getQueryOptions();
+    public EntityPage<Thing> getEntities(Request request) throws ProviderException {
+        QueryOptions options = request.getQueryOptions();
         Pageable pageable = StaPageRequest.create(options);
 
-        ThingGraphBuilder graphBuilder = ThingGraphBuilder.createWith(req.getQueryOptions());
-        Specification<PlatformEntity> spec = rootSpecification.buildSpecification(req);
+        ThingGraphBuilder graphBuilder = request.isRefRequest()
+                ? ThingGraphBuilder.createEmpty()
+                : ThingGraphBuilder.createWith(options);
+        Specification<PlatformEntity> spec = rootSpecification.buildSpecification(request);
         Page<PlatformEntity> results = thingRepository.findAll(spec, pageable, graphBuilder);
         return new StaEntityPage<>(Thing.class, results, entity -> new ThingData(entity, propertyMapping));
     }

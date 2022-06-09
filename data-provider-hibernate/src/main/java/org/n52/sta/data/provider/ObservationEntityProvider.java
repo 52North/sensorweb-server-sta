@@ -68,9 +68,11 @@ public class ObservationEntityProvider extends BaseEntityProvider<Observation> {
     }
 
     @Override
-    public Optional<Observation> getEntity(Request req) throws ProviderException {
-        ObservationGraphBuilder graphBuilder = ObservationGraphBuilder.createWith(req.getQueryOptions());
-        return getEntity(rootSpecification.buildSpecification(req), graphBuilder);
+    public Optional<Observation> getEntity(Request request) throws ProviderException {
+        ObservationGraphBuilder graphBuilder = request.isRefRequest()
+                ? ObservationGraphBuilder.createEmpty()
+                : ObservationGraphBuilder.createWith(request.getQueryOptions());
+        return getEntity(rootSpecification.buildSpecification(request), graphBuilder);
     }
 
     @Override
@@ -86,12 +88,14 @@ public class ObservationEntityProvider extends BaseEntityProvider<Observation> {
     }
 
     @Override
-    public EntityPage<Observation> getEntities(Request req) throws ProviderException {
-        QueryOptions options = req.getQueryOptions();
+    public EntityPage<Observation> getEntities(Request request) throws ProviderException {
+        QueryOptions options = request.getQueryOptions();
         Pageable pageable = StaPageRequest.create(options);
 
-        ObservationGraphBuilder graphBuilder = ObservationGraphBuilder.createWith(req.getQueryOptions());
-        Specification< ? > spec = rootSpecification.buildSpecification(req);
+        ObservationGraphBuilder graphBuilder = request.isRefRequest()
+                ? ObservationGraphBuilder.createEmpty()
+                : ObservationGraphBuilder.createWith(options);
+        Specification< ? > spec = rootSpecification.buildSpecification(request);
         Page<DataEntity< ? >> results = observationRepository.findAll(spec, pageable, graphBuilder);
         return new StaEntityPage<>(Observation.class, results, data -> new ObservationData(data, propertyMapping));
     }

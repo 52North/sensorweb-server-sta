@@ -68,9 +68,11 @@ public class HistoricalLocationEntityProvider extends BaseEntityProvider<Histori
     }
 
     @Override
-    public Optional<HistoricalLocation> getEntity(Request req) throws ProviderException {
-        HistoricalLocationGraphBuilder graphBuilder = HistoricalLocationGraphBuilder.createWith(req.getQueryOptions());
-        return getEntity(new HistoricalLocationQuerySpecification().buildSpecification(req), graphBuilder);
+    public Optional<HistoricalLocation> getEntity(Request request) throws ProviderException {
+        HistoricalLocationGraphBuilder graphBuilder = request.isRefRequest()
+                ? HistoricalLocationGraphBuilder.createEmpty()
+                : HistoricalLocationGraphBuilder.createWith(request.getQueryOptions());
+        return getEntity(rootSpecification.buildSpecification(request), graphBuilder);
     }
 
     @Override
@@ -79,20 +81,21 @@ public class HistoricalLocationEntityProvider extends BaseEntityProvider<Histori
         return getEntity(rootSpecification.buildSpecification(queryOptions), graphBuilder);
     }
 
-    private Optional<HistoricalLocation> getEntity(Specification<HistoricalLocationEntity> specification,
+    private Optional<HistoricalLocation> getEntity(Specification<HistoricalLocationEntity> spec,
                                                    HistoricalLocationGraphBuilder graphBuilder) {
-        Optional<HistoricalLocationEntity> datastream = historicalLocationRepository.findOne(specification,
-                                                                                             graphBuilder);
+        Optional<HistoricalLocationEntity> datastream = historicalLocationRepository.findOne(spec, graphBuilder);
         return datastream.map(entity -> new HistoricalLocationData(entity, propertyMapping));
     }
 
     @Override
-    public EntityPage<HistoricalLocation> getEntities(Request req) throws ProviderException {
-        QueryOptions options = req.getQueryOptions();
+    public EntityPage<HistoricalLocation> getEntities(Request request) throws ProviderException {
+        QueryOptions options = request.getQueryOptions();
         Pageable pageable = StaPageRequest.create(options);
 
-        HistoricalLocationGraphBuilder graphBuilder = HistoricalLocationGraphBuilder.createWith(req.getQueryOptions());
-        Specification<HistoricalLocationEntity> spec = new HistoricalLocationQuerySpecification().buildSpecification(req);
+        HistoricalLocationGraphBuilder graphBuilder = request.isRefRequest()
+                ? HistoricalLocationGraphBuilder.createEmpty()
+                : HistoricalLocationGraphBuilder.createWith(options);
+        Specification<HistoricalLocationEntity> spec = rootSpecification.buildSpecification(request);
         Page<HistoricalLocationEntity> results = historicalLocationRepository.findAll(spec, pageable, graphBuilder);
         return new StaEntityPage<>(HistoricalLocation.class,
                                    results,
