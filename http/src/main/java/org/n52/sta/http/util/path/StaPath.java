@@ -5,17 +5,17 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Function;
 
-import org.n52.sta.api.path.ODataPath;
 import org.n52.sta.api.path.PathSegment;
+import org.n52.sta.api.path.SelectPath;
 import org.n52.sta.http.serialize.out.SerializationContext;
 import org.n52.sta.http.serialize.out.StaBaseSerializer;
 
 /**
  * Holds a URI referencing an STA entity.
  */
-public class StaPath implements ODataPath {
+public class StaPath implements SelectPath {
 
-    private final ODataPath.PathType type;
+    private final SelectPath.PathType type;
 
     private final List<PathSegment> path;
 

@@ -28,23 +28,27 @@
 
 package org.n52.sta.data.support;
 
-import org.hibernate.engine.spi.SessionImplementor;
-import org.hibernate.graph.EntityGraphs;
-import org.hibernate.graph.GraphParser;
-import org.hibernate.graph.InvalidGraphException;
-import org.hibernate.graph.RootGraph;
-import org.n52.shetland.filter.ExpandItem;
-import org.n52.shetland.ogc.sta.exception.STAInvalidQueryError;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import javax.persistence.EntityGraph;
-import javax.persistence.EntityManager;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
+
+import javax.persistence.EntityGraph;
+import javax.persistence.EntityManager;
+
+import org.hibernate.engine.spi.SessionImplementor;
+import org.hibernate.graph.EntityGraphs;
+import org.hibernate.graph.GraphParser;
+import org.hibernate.graph.InvalidGraphException;
+import org.hibernate.graph.RootGraph;
+import org.n52.janmayen.stream.Streams;
+import org.n52.shetland.filter.ExpandFilter;
+import org.n52.shetland.filter.ExpandItem;
+import org.n52.shetland.oasis.odata.query.option.QueryOptions;
+import org.n52.shetland.ogc.sta.exception.STAInvalidQueryError;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public abstract class GraphBuilder<T> {
 
@@ -58,6 +62,20 @@ public abstract class GraphBuilder<T> {
         Objects.requireNonNull(entityType, "entityType must not be null");
         this.entityType = entityType;
         this.graphTexts = new HashSet<>();
+    }
+
+    /**
+     * Adds an entity graph for all unfiltered entity members.
+     *
+     * @param options
+     *        the OData query options
+     */
+    protected void addUnfilteredExpandItems(QueryOptions options) {
+        if (options.hasExpandFilter()) {
+            ExpandFilter expand = options.getExpandFilter();
+            Streams.stream(expand.getItems())
+                   .forEach(this::addUnfilteredExpandItem);
+        }
     }
 
     public abstract void addExpanded(ExpandItem expandItem);

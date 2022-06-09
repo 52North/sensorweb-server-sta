@@ -30,18 +30,27 @@ package org.n52.sta.data.support;
 
 import org.n52.series.db.beans.PhenomenonEntity;
 import org.n52.shetland.filter.ExpandItem;
+import org.n52.shetland.oasis.odata.query.option.QueryOptions;
 import org.n52.shetland.ogc.sta.StaConstants;
-import org.n52.sta.api.path.Request;
 
 public class ObservedPropertyGraphBuilder extends GraphBuilder<PhenomenonEntity> {
 
-    public ObservedPropertyGraphBuilder(Request req) {
+    public ObservedPropertyGraphBuilder() {
         super(PhenomenonEntity.class);
-        // do not fetch anything when getting by reference
-        if (req.getPath().isPresent() && req.getPath().get().isRef()) {
-            return;
-        }
+    }
+
+    private ObservedPropertyGraphBuilder(QueryOptions queryOptions) {
+        super(PhenomenonEntity.class);
         addGraphText(GraphText.GRAPH_PARAMETERS);
+        addUnfilteredExpandItems(queryOptions);
+    }
+
+    public static ObservedPropertyGraphBuilder createEmpty() {
+        return new ObservedPropertyGraphBuilder();
+    }
+
+    public static ObservedPropertyGraphBuilder createWith(QueryOptions queryOptions) {
+        return new ObservedPropertyGraphBuilder(queryOptions);
     }
 
     @Override

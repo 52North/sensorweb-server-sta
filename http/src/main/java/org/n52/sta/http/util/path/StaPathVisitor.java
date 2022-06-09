@@ -7,8 +7,8 @@ import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.tree.TerminalNode;
 import org.n52.grammar.StaPathGrammar;
 import org.n52.grammar.StaPathGrammarBaseVisitor;
-import org.n52.sta.api.path.ODataPath;
 import org.n52.sta.api.path.PathSegment;
+import org.n52.sta.api.path.SelectPath;
 import org.n52.sta.http.serialize.out.DatastreamJsonSerializer;
 import org.n52.sta.http.serialize.out.FeatureOfInterestJsonSerializer;
 import org.n52.sta.http.serialize.out.HistoricalLocationJsonSerializer;
@@ -54,14 +54,14 @@ public class StaPathVisitor extends StaPathGrammarBaseVisitor<StaPath> {
 
         // path ending with entity identified by Id
         if (ctx.getToken(StaPathGrammar.SLASH, 0) == null) {
-            return new StaPath(ODataPath.PathType.entity,
+            return new StaPath(SelectPath.PathType.entity,
                                new PathSegment(entity.getText(), identifier),
                                serializerFactory);
         } else {
             // path ending in property
             if (propertyCtx != null) {
                 return new StaPath(
-                                   ODataPath.PathType.property,
+                                   SelectPath.PathType.property,
                                    new PathSegment(entity.getText(),
                                                    identifier,
                                                    propertyCtx.getText()),
@@ -156,7 +156,7 @@ public class StaPathVisitor extends StaPathGrammarBaseVisitor<StaPath> {
     @Override
     public StaPath visitDatastreams(StaPathGrammar.DatastreamsContext ctx) {
         return new StaPath(
-                           ODataPath.PathType.collection,
+                           SelectPath.PathType.collection,
                            new PathSegment(ctx.DATASTREAMS()
                                               .getText()),
                            DatastreamJsonSerializer::new);
@@ -165,7 +165,7 @@ public class StaPathVisitor extends StaPathGrammarBaseVisitor<StaPath> {
     @Override
     public StaPath visitObservations(StaPathGrammar.ObservationsContext ctx) {
         return new StaPath(
-                           ODataPath.PathType.collection,
+                           SelectPath.PathType.collection,
                            new PathSegment(ctx.OBSERVATIONS()
                                               .getText()),
                            ObservationJsonSerializer::new);
@@ -174,7 +174,7 @@ public class StaPathVisitor extends StaPathGrammarBaseVisitor<StaPath> {
     @Override
     public StaPath visitThings(StaPathGrammar.ThingsContext ctx) {
         return new StaPath(
-                           ODataPath.PathType.collection,
+                           SelectPath.PathType.collection,
                            new PathSegment(ctx.THINGS()
                                               .getText()),
                            ThingJsonSerializer::new);
@@ -183,7 +183,7 @@ public class StaPathVisitor extends StaPathGrammarBaseVisitor<StaPath> {
     @Override
     public StaPath visitLocations(StaPathGrammar.LocationsContext ctx) {
         return new StaPath(
-                           ODataPath.PathType.collection,
+                           SelectPath.PathType.collection,
                            new PathSegment(ctx.LOCATIONS()
                                               .getText()),
                            LocationJsonSerializer::new);
@@ -192,7 +192,7 @@ public class StaPathVisitor extends StaPathGrammarBaseVisitor<StaPath> {
     @Override
     public StaPath visitHistoricalLocations(StaPathGrammar.HistoricalLocationsContext ctx) {
         return new StaPath(
-                           ODataPath.PathType.collection,
+                           SelectPath.PathType.collection,
                            new PathSegment(ctx.HISTORICAL_LOCATIONS()
                                               .getText()),
                            HistoricalLocationJsonSerializer::new);
@@ -201,7 +201,7 @@ public class StaPathVisitor extends StaPathGrammarBaseVisitor<StaPath> {
     @Override
     public StaPath visitSensors(StaPathGrammar.SensorsContext ctx) {
         return new StaPath(
-                           ODataPath.PathType.collection,
+                           SelectPath.PathType.collection,
                            new PathSegment(ctx.SENSORS()
                                               .getText()),
                            SensorJsonSerializer::new);
@@ -210,7 +210,7 @@ public class StaPathVisitor extends StaPathGrammarBaseVisitor<StaPath> {
     @Override
     public StaPath visitObservedProperties(StaPathGrammar.ObservedPropertiesContext ctx) {
         return new StaPath(
-                           ODataPath.PathType.collection,
+                           SelectPath.PathType.collection,
                            new PathSegment(ctx.OBSERVED_PROPERTIES()
                                               .getText()),
                            ObservedPropertyJsonSerializer::new);
@@ -219,7 +219,7 @@ public class StaPathVisitor extends StaPathGrammarBaseVisitor<StaPath> {
     @Override
     public StaPath visitFeaturesOfInterest(StaPathGrammar.FeaturesOfInterestContext ctx) {
         return new StaPath(
-                           ODataPath.PathType.collection,
+                           SelectPath.PathType.collection,
                            new PathSegment(ctx.FEATURES_OF_INTEREST()
                                               .getText()),
                            FeatureOfInterestJsonSerializer::new);

@@ -28,6 +28,9 @@
 
 package org.n52.sta.data.provider;
 
+import java.util.Objects;
+import java.util.Optional;
+
 import org.n52.series.db.beans.DataEntity;
 import org.n52.shetland.oasis.odata.query.option.QueryOptions;
 import org.n52.sta.api.EntityPage;
@@ -45,18 +48,17 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 
-import java.util.Objects;
-import java.util.Optional;
-
 public class ObservationEntityProvider extends BaseEntityProvider<Observation> {
 
     private final ObservationRepository observationRepository;
+    private final ObservationQuerySpecification rootSpecification;
 
     public ObservationEntityProvider(ObservationRepository observationRepository,
                                      EntityPropertyMapping propertyMapping) {
         super(propertyMapping);
         Objects.requireNonNull(observationRepository, "observationRepository must not be null!");
         this.observationRepository = observationRepository;
+        this.rootSpecification = new ObservationQuerySpecification();
     }
 
     @Override
@@ -67,10 +69,18 @@ public class ObservationEntityProvider extends BaseEntityProvider<Observation> {
 
     @Override
     public Optional<Observation> getEntity(Request req) throws ProviderException {
-        ObservationGraphBuilder graphBuilder = new ObservationGraphBuilder(req);
-        addUnfilteredExpandItems(req.getQueryOptions(), graphBuilder);
+        ObservationGraphBuilder graphBuilder = ObservationGraphBuilder.createWith(req.getQueryOptions());
+        return getEntity(rootSpecification.buildSpecification(req), graphBuilder);
+    }
 
-        Specification< ? > spec = buildSpecification(req, new ObservationQuerySpecification());
+    @Override
+    public Optional<Observation> getEntity(String id, QueryOptions queryOptions) throws ProviderException {
+        ObservationGraphBuilder graphBuilder = ObservationGraphBuilder.createEmpty();
+        return getEntity(rootSpecification.buildSpecification(queryOptions), graphBuilder);
+    }
+
+    private Optional<Observation> getEntity(Specification<DataEntity< ? >> spec,
+                                            ObservationGraphBuilder graphBuilder) {
         Optional<DataEntity< ? >> platform = observationRepository.findOne(spec, graphBuilder);
         return platform.map(entity -> new ObservationData(entity, propertyMapping));
     }
@@ -80,10 +90,8 @@ public class ObservationEntityProvider extends BaseEntityProvider<Observation> {
         QueryOptions options = req.getQueryOptions();
         Pageable pageable = StaPageRequest.create(options);
 
-        ObservationGraphBuilder graphBuilder = new ObservationGraphBuilder(req);
-        addUnfilteredExpandItems(options, graphBuilder);
-
-        Specification< ? > spec = buildSpecification(req, new ObservationQuerySpecification());
+        ObservationGraphBuilder graphBuilder = ObservationGraphBuilder.createWith(req.getQueryOptions());
+        Specification< ? > spec = rootSpecification.buildSpecification(req);
         Page<DataEntity< ? >> results = observationRepository.findAll(spec, pageable, graphBuilder);
         return new StaEntityPage<>(Observation.class, results, data -> new ObservationData(data, propertyMapping));
     }

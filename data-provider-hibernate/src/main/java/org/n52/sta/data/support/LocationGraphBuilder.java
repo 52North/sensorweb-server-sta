@@ -30,18 +30,27 @@ package org.n52.sta.data.support;
 
 import org.n52.series.db.beans.sta.LocationEntity;
 import org.n52.shetland.filter.ExpandItem;
+import org.n52.shetland.oasis.odata.query.option.QueryOptions;
 import org.n52.shetland.ogc.sta.StaConstants;
-import org.n52.sta.api.path.Request;
 
 public class LocationGraphBuilder extends GraphBuilder<LocationEntity> {
 
-    public LocationGraphBuilder(Request req) {
+    private LocationGraphBuilder() {
         super(LocationEntity.class);
-        // do not fetch anything when getting by reference
-        if (req.getPath().isPresent() && req.getPath().get().isRef()) {
-            return;
-        }
+    }
+
+    private LocationGraphBuilder(QueryOptions queryOptions) {
+        super(LocationEntity.class);
         addGraphText(GraphText.GRAPH_PARAMETERS);
+        addUnfilteredExpandItems(queryOptions);
+    }
+
+    public static LocationGraphBuilder createEmpty() {
+        return new LocationGraphBuilder();
+    }
+
+    public static LocationGraphBuilder createWith(QueryOptions queryOptions) {
+        return new LocationGraphBuilder(queryOptions);
     }
 
     @Override

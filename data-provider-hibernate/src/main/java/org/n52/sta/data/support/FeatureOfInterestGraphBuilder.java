@@ -30,18 +30,27 @@ package org.n52.sta.data.support;
 
 import org.n52.series.db.beans.AbstractFeatureEntity;
 import org.n52.shetland.filter.ExpandItem;
-import org.n52.sta.api.path.Request;
+import org.n52.shetland.oasis.odata.query.option.QueryOptions;
 
 public class FeatureOfInterestGraphBuilder extends GraphBuilder<AbstractFeatureEntity> {
 
-    public FeatureOfInterestGraphBuilder(Request req) {
+    private FeatureOfInterestGraphBuilder() {
         super(AbstractFeatureEntity.class);
-        // do not fetch anything when getting by reference
-        if (req.getPath().isPresent() && req.getPath().get().isRef()) {
-            return;
-        }
+    }
+
+    private FeatureOfInterestGraphBuilder(QueryOptions queryOptions) {
+        super(AbstractFeatureEntity.class);
         addGraphText(GraphText.GRAPH_PARAMETERS);
         addGraphText(GraphText.GRAPH_FEATURETYPE);
+        addUnfilteredExpandItems(queryOptions);
+    }
+
+    public static FeatureOfInterestGraphBuilder createEmpty() {
+        return new FeatureOfInterestGraphBuilder();
+    }
+
+    public static FeatureOfInterestGraphBuilder createWith(QueryOptions queryOptions) {
+        return new FeatureOfInterestGraphBuilder(queryOptions);
     }
 
     @Override

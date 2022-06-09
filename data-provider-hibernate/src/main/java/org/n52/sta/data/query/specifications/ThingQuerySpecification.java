@@ -28,6 +28,10 @@
 
 package org.n52.sta.data.query.specifications;
 
+import javax.persistence.criteria.Join;
+import javax.persistence.criteria.JoinType;
+import javax.persistence.criteria.Subquery;
+
 import org.n52.series.db.beans.AbstractDatasetEntity;
 import org.n52.series.db.beans.DescribableEntity;
 import org.n52.series.db.beans.HibernateRelations.HasDescription;
@@ -39,10 +43,6 @@ import org.n52.series.db.beans.sta.LocationEntity;
 import org.n52.shetland.ogc.sta.StaConstants;
 import org.springframework.data.jpa.domain.Specification;
 
-import javax.persistence.criteria.Join;
-import javax.persistence.criteria.JoinType;
-import javax.persistence.criteria.Subquery;
-
 public class ThingQuerySpecification extends QuerySpecification<PlatformEntity> {
 
     public ThingQuerySpecification() {
@@ -52,10 +52,10 @@ public class ThingQuerySpecification extends QuerySpecification<PlatformEntity> 
         this.filterByMember.put(StaConstants.LOCATIONS, new LocationsFilter());
 
         this.entityPathByProperty.put(StaConstants.PROP_ID,
-                                      createStringComparator(DescribableEntity.PROPERTY_STA_IDENTIFIER));
-        this.entityPathByProperty.put(StaConstants.PROP_NAME, createStringComparator(HasName.PROPERTY_NAME));
+                                      new PropertyComparator<>(DescribableEntity.PROPERTY_STA_IDENTIFIER));
+        this.entityPathByProperty.put(StaConstants.PROP_NAME, new PropertyComparator<>(HasName.PROPERTY_NAME));
         this.entityPathByProperty.put(StaConstants.PROP_DESCRIPTION,
-                                      createStringComparator(HasDescription.PROPERTY_DESCRIPTION));
+                                      new PropertyComparator<>(HasDescription.PROPERTY_DESCRIPTION));
     }
 
     /*

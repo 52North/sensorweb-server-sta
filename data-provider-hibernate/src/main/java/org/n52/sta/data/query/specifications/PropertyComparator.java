@@ -110,8 +110,7 @@ class PropertyComparator<R, T extends Comparable< ? super T>> {
      * @see #compare(Expression, ComparisonOperator, Expression, CriteriaBuilder) for a list of supported
      *      operators
      */
-    Specification<T> compare(
-                             Expression< ? > left,
+    Specification<T> compare(Expression< ? > left,
                              FilterConstants.ComparisonOperator operator,
                              Expression< ? > right) {
         return (root, query, builder) -> compare(left, operator, right, builder);
@@ -149,13 +148,11 @@ class PropertyComparator<R, T extends Comparable< ? super T>> {
      * @throws ClassCastException
      *         if the comparison types do not match
      */
-    <Y extends Comparable< ? super Y>> Predicate compare(
-                                                         Expression< ? > leftExpr,
+    <Y extends Comparable< ? super Y>> Predicate compare(Expression< ? > leftExpr,
                                                          ComparisonOperator operator,
                                                          Expression< ? > rightExpr,
                                                          CriteriaBuilder builder)
             throws SpecificationsException {
-
         Expression<Y> left = castToComparable(leftExpr);
         Expression<Y> right = castToComparable(rightExpr);
         switch (operator) {

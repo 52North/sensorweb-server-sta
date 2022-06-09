@@ -28,6 +28,9 @@
 
 package org.n52.sta.data.provider;
 
+import java.util.Objects;
+import java.util.Optional;
+
 import org.n52.series.db.beans.sta.HistoricalLocationEntity;
 import org.n52.shetland.oasis.odata.query.option.QueryOptions;
 import org.n52.sta.api.EntityPage;
@@ -45,18 +48,17 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 
-import java.util.Objects;
-import java.util.Optional;
-
 public class HistoricalLocationEntityProvider extends BaseEntityProvider<HistoricalLocation> {
 
     private final HistoricalLocationRepository historicalLocationRepository;
+    private final HistoricalLocationQuerySpecification rootSpecification;
 
     public HistoricalLocationEntityProvider(HistoricalLocationRepository historicalLocationRepository,
                                             EntityPropertyMapping propertyMapping) {
         super(propertyMapping);
         Objects.requireNonNull(historicalLocationRepository, "historicalLocationRepository must not be null");
         this.historicalLocationRepository = historicalLocationRepository;
+        this.rootSpecification = new HistoricalLocationQuerySpecification();
     }
 
     @Override
@@ -67,13 +69,21 @@ public class HistoricalLocationEntityProvider extends BaseEntityProvider<Histori
 
     @Override
     public Optional<HistoricalLocation> getEntity(Request req) throws ProviderException {
-        HistoricalLocationGraphBuilder graphBuilder = new HistoricalLocationGraphBuilder();
-        addUnfilteredExpandItems(req.getQueryOptions(), graphBuilder);
+        HistoricalLocationGraphBuilder graphBuilder = HistoricalLocationGraphBuilder.createWith(req.getQueryOptions());
+        return getEntity(new HistoricalLocationQuerySpecification().buildSpecification(req), graphBuilder);
+    }
 
-        Specification<HistoricalLocationEntity> spec = buildSpecification(req,
-                                                                          new HistoricalLocationQuerySpecification());
-        Optional<HistoricalLocationEntity> platform = historicalLocationRepository.findOne(spec, graphBuilder);
-        return platform.map(entity -> new HistoricalLocationData(entity, propertyMapping));
+    @Override
+    public Optional<HistoricalLocation> getEntity(String id, QueryOptions queryOptions) throws ProviderException {
+        HistoricalLocationGraphBuilder graphBuilder = HistoricalLocationGraphBuilder.createEmpty();
+        return getEntity(rootSpecification.buildSpecification(queryOptions), graphBuilder);
+    }
+
+    private Optional<HistoricalLocation> getEntity(Specification<HistoricalLocationEntity> specification,
+                                                   HistoricalLocationGraphBuilder graphBuilder) {
+        Optional<HistoricalLocationEntity> datastream = historicalLocationRepository.findOne(specification,
+                                                                                             graphBuilder);
+        return datastream.map(entity -> new HistoricalLocationData(entity, propertyMapping));
     }
 
     @Override
@@ -81,11 +91,8 @@ public class HistoricalLocationEntityProvider extends BaseEntityProvider<Histori
         QueryOptions options = req.getQueryOptions();
         Pageable pageable = StaPageRequest.create(options);
 
-        HistoricalLocationGraphBuilder graphBuilder = new HistoricalLocationGraphBuilder();
-        addUnfilteredExpandItems(options, graphBuilder);
-
-        Specification<HistoricalLocationEntity> spec = buildSpecification(req,
-                                                                          new HistoricalLocationQuerySpecification());
+        HistoricalLocationGraphBuilder graphBuilder = HistoricalLocationGraphBuilder.createWith(req.getQueryOptions());
+        Specification<HistoricalLocationEntity> spec = new HistoricalLocationQuerySpecification().buildSpecification(req);
         Page<HistoricalLocationEntity> results = historicalLocationRepository.findAll(spec, pageable, graphBuilder);
         return new StaEntityPage<>(HistoricalLocation.class,
                                    results,

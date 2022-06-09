@@ -30,6 +30,7 @@ package org.n52.sta.api;
 
 import java.util.Optional;
 
+import org.n52.shetland.oasis.odata.query.option.QueryOptions;
 import org.n52.sta.api.entity.Identifiable;
 import org.n52.sta.api.path.Request;
 
@@ -39,9 +40,7 @@ public interface EntityProvider<T extends Identifiable> {
 
     Optional<T> getEntity(Request request) throws ProviderException;
 
-    default Optional<T> getEntity(String id) throws ProviderException {
-        return getEntity(Request.createIdRequest(id));
-    }
+    Optional<T> getEntity(String id, QueryOptions queryOptions) throws ProviderException;
 
     EntityPage<T> getEntities(Request request) throws ProviderException;
 

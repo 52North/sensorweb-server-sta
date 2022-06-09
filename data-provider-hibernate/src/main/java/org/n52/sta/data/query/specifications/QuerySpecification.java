@@ -2,7 +2,9 @@
 package org.n52.sta.data.query.specifications;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.Expression;
@@ -12,11 +14,23 @@ import javax.persistence.criteria.Subquery;
 
 import org.n52.series.db.beans.DescribableEntity;
 import org.n52.series.db.beans.HibernateRelations;
+import org.n52.shetland.oasis.odata.query.option.QueryOptions;
 import org.n52.shetland.ogc.filter.FilterConstants;
 import org.n52.shetland.ogc.sta.StaConstants;
+import org.n52.shetland.ogc.sta.exception.STAInvalidFilterExpressionException;
+import org.n52.sta.api.ProviderException;
+import org.n52.sta.api.path.PathSegment;
+import org.n52.sta.api.path.Request;
+import org.n52.sta.api.path.SelectPath;
+import org.n52.sta.data.query.FilterQueryParser;
+import org.n52.sta.data.query.QuerySpecificationFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.data.jpa.domain.Specification;
 
 public abstract class QuerySpecification<T> implements BaseQuerySpecifications<T> {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(QuerySpecification.class);
 
     protected final Map<String, MemberFilter<T>> filterByMember;
     protected final Map<String, PropertyComparator<T, ? >> entityPathByProperty;
@@ -25,7 +39,72 @@ public abstract class QuerySpecification<T> implements BaseQuerySpecifications<T
         this.filterByMember = new HashMap<>();
         this.entityPathByProperty = new HashMap<>();
         this.entityPathByProperty.put(StaConstants.PROP_ID,
-                                      createStringComparator(DescribableEntity.PROPERTY_STA_IDENTIFIER));
+                                      new PropertyComparator<>(DescribableEntity.PROPERTY_STA_IDENTIFIER));
+    }
+
+    public Specification<T> buildSpecification(QueryOptions queryOptions) {
+        return FilterQueryParser.parse(queryOptions, this);
+    }
+
+    /**
+     * Builds specification based on Request. Parses QueryOptions and Request-Path if present.
+     *
+     * @param req
+     *        Request
+     * @return Specification to be used for filtering
+     */
+    public Specification<T> buildSpecification(Request req) {
+        Optional<SelectPath> path = req.getPath();
+        QueryOptions queryOptions = req.getQueryOptions();
+        Specification<T> querySpec = buildSpecification(queryOptions);
+        return path.map(p -> querySpec.and(parsePath(p)))
+                   .orElse(querySpec);
+    }
+
+    private Specification<T> parsePath(SelectPath path) throws ProviderException {
+        Specification<T> specification = null;
+        try {
+            List<PathSegment> segments = path.getPathSegments();
+
+            // Segment of requested Entity
+            PathSegment current = segments.get(0);
+            if (current.getIdentifier()
+                       .isPresent()) {
+                specification = equalsStaIdentifier(current.getIdentifier()
+                                                           .get());
+            }
+
+            // TODO: implement handling of this
+            if (segments.size() > 3) {
+                throw new SpecificationsException("navigation via >1 relations is not implemented yet!");
+            }
+
+            if (segments.size() > 1) {
+                current = segments.get(1);
+                BaseQuerySpecifications< ? > bqs = QuerySpecificationFactory.createSpecification(current.getCollection());
+
+                Specification<T> segmentSpec = applyOnMember(current.getCollection(),
+                                                             bqs.equalsStaIdentifier(current.getIdentifier()
+                                                                                            .orElse(null)));
+
+                return segmentSpec;
+            } else {
+                return specification;
+            }
+
+            // Iterate over preceding Segments and chain specifications
+            /*
+             * BaseQuerySpecifications<?> lastQS = qs; Specification<?> stepSpec = specification; for (int i =
+             * 1; i < segments.size(); i++) { current = segments.get(i); BaseQuerySpecifications<?> bqs =
+             * QuerySpecificationFactory.createSpecification(current.getCollection()); Specification<?>
+             * segmentSpec = lastQS.applyOnMember(current.getCollection(),
+             * bqs.equalsStaIdentifier(current.getIdentifier().orElse(null))); stepSpec =
+             * stepSpec.and(segmentSpec); lastQS = bqs; stepSpec = segmentSpec; }
+             */
+        } catch (SpecificationsException | STAInvalidFilterExpressionException e) {
+            LOGGER.debug(e.getMessage());
+            throw new ProviderException(e.getMessage());
+        }
     }
 
     @Override
@@ -68,21 +147,15 @@ public abstract class QuerySpecification<T> implements BaseQuerySpecifications<T
         }
     }
 
-    protected PropertyComparator<T, String> createStringComparator(String entityPath) {
-        return new PropertyComparator<>(entityPath);
-    }
-
     @Override
-    public <Y extends Comparable< ? super Y>> Specification<T> compare(
-                                                                       Expression< ? extends Y> left,
+    public <Y extends Comparable< ? super Y>> Specification<T> compare(Expression< ? extends Y> left,
                                                                        Expression< ? extends Y> right,
                                                                        FilterConstants.ComparisonOperator operator) {
         return (root, query, builder) -> compare(left, right, operator, builder);
     }
 
     @Override
-    public <Y extends Comparable< ? super Y>> Predicate compare(
-                                                                Expression< ? extends Y> left,
+    public <Y extends Comparable< ? super Y>> Predicate compare(Expression< ? extends Y> left,
                                                                 Expression< ? extends Y> right,
                                                                 FilterConstants.ComparisonOperator operator,
                                                                 CriteriaBuilder builder) {

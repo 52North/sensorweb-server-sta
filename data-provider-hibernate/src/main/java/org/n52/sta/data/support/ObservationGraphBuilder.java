@@ -30,17 +30,26 @@ package org.n52.sta.data.support;
 
 import org.n52.series.db.beans.DataEntity;
 import org.n52.shetland.filter.ExpandItem;
-import org.n52.sta.api.path.Request;
+import org.n52.shetland.oasis.odata.query.option.QueryOptions;
 
 public class ObservationGraphBuilder extends GraphBuilder<DataEntity> {
 
-    public ObservationGraphBuilder(Request req) {
+    private ObservationGraphBuilder() {
         super(DataEntity.class);
-        // do not fetch anything when getting by reference
-        if (req.getPath().isPresent() && req.getPath().get().isRef()) {
-            return;
-        }
+    }
+
+    private ObservationGraphBuilder(QueryOptions queryOptions) {
+        super(DataEntity.class);
         addGraphText(GraphText.GRAPH_PARAMETERS);
+        addUnfilteredExpandItems(queryOptions);
+    }
+
+    public static ObservationGraphBuilder createEmpty() {
+        return new ObservationGraphBuilder();
+    }
+
+    public static ObservationGraphBuilder createWith(QueryOptions queryOptions) {
+        return new ObservationGraphBuilder(queryOptions);
     }
 
     @Override

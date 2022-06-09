@@ -30,19 +30,27 @@ package org.n52.sta.data.support;
 
 import org.n52.series.db.beans.PlatformEntity;
 import org.n52.shetland.filter.ExpandItem;
+import org.n52.shetland.oasis.odata.query.option.QueryOptions;
 import org.n52.shetland.ogc.sta.StaConstants;
-import org.n52.sta.api.path.Request;
 
 public class ThingGraphBuilder extends GraphBuilder<PlatformEntity> {
 
-    public ThingGraphBuilder(Request req) {
+    private ThingGraphBuilder() {
         super(PlatformEntity.class);
-        // do not fetch anything when getting by reference
-        if (req.getPath().isPresent() && req.getPath().get().isRef()) {
-            return;
-        }
+    }
 
+    private ThingGraphBuilder(QueryOptions queryOptions) {
+        super(PlatformEntity.class);
         addGraphText(GraphText.GRAPH_PARAMETERS);
+        addUnfilteredExpandItems(queryOptions);
+    }
+
+    public static ThingGraphBuilder createEmpty() {
+        return new ThingGraphBuilder();
+    }
+
+    public static ThingGraphBuilder createWith(QueryOptions queryOptions) {
+        return new ThingGraphBuilder(queryOptions);
     }
 
     @Override
@@ -63,4 +71,5 @@ public class ThingGraphBuilder extends GraphBuilder<PlatformEntity> {
             }
         }
     }
+
 }

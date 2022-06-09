@@ -28,6 +28,10 @@
 
 package org.n52.sta.api.service;
 
+import java.util.Objects;
+import java.util.Optional;
+
+import org.n52.shetland.oasis.odata.query.option.QueryOptions;
 import org.n52.sta.api.EntityEditor;
 import org.n52.sta.api.EntityPage;
 import org.n52.sta.api.EntityProvider;
@@ -39,11 +43,9 @@ import org.n52.sta.api.domain.service.DefaultDomainService;
 import org.n52.sta.api.domain.service.DomainService;
 import org.n52.sta.api.entity.Thing;
 import org.n52.sta.api.path.Request;
+import org.n52.svalbard.odata.core.QueryOptionsFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.Objects;
-import java.util.Optional;
 
 public class ThingService implements EntityService<Thing>, EntityEditor<Thing> {
 
@@ -75,6 +77,11 @@ public class ThingService implements EntityService<Thing>, EntityEditor<Thing> {
     @Override
     public Optional<Thing> getEntity(Request req) throws ProviderException {
         return domainService.getEntity(req);
+    }
+
+    @Override
+    public Optional<Thing> getEntity(String id, QueryOptions queryOptions) throws ProviderException {
+        return domainService.getEntity(id, queryOptions);
     }
 
     @Override
@@ -125,7 +132,7 @@ public class ThingService implements EntityService<Thing>, EntityEditor<Thing> {
     }
 
     private Thing getOrThrow(String id) throws ProviderException {
-        return domainService.getEntity(id)
+        return domainService.getEntity(id, QueryOptionsFactory.createEmpty())
                             .orElseThrow(() -> new ProviderException("Id '" + id + "' does not exist."));
     }
 

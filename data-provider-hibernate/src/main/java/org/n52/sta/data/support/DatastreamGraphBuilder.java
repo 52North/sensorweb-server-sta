@@ -30,21 +30,29 @@ package org.n52.sta.data.support;
 
 import org.n52.series.db.beans.AbstractDatasetEntity;
 import org.n52.shetland.filter.ExpandItem;
+import org.n52.shetland.oasis.odata.query.option.QueryOptions;
 import org.n52.shetland.ogc.sta.StaConstants;
-import org.n52.sta.api.path.Request;
 
 public class DatastreamGraphBuilder extends GraphBuilder<AbstractDatasetEntity> {
 
-    public DatastreamGraphBuilder(Request req) {
+    private DatastreamGraphBuilder() {
         super(AbstractDatasetEntity.class);
-        // do not fetch anything when getting by reference
-        if (req.getPath().isPresent() && req.getPath().get().isRef()) {
-            return;
-        }
+    }
 
+    private DatastreamGraphBuilder(QueryOptions queryOptions) {
+        super(AbstractDatasetEntity.class);
         addGraphText(GraphText.GRAPH_PARAMETERS);
         addGraphText(GraphText.GRAPH_OM_OBS_TYPE);
         addGraphText(GraphText.GRAPH_UOM);
+        addUnfilteredExpandItems(queryOptions);
+    }
+
+    public static DatastreamGraphBuilder createEmpty() {
+        return new DatastreamGraphBuilder();
+    }
+
+    public static DatastreamGraphBuilder createWith(QueryOptions queryOptions) {
+        return new DatastreamGraphBuilder(queryOptions);
     }
 
     @Override

@@ -28,6 +28,9 @@
 
 package org.n52.sta.data.provider;
 
+import java.util.Objects;
+import java.util.Optional;
+
 import org.n52.series.db.beans.sta.LocationEntity;
 import org.n52.shetland.oasis.odata.query.option.QueryOptions;
 import org.n52.sta.api.EntityPage;
@@ -45,17 +48,16 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 
-import java.util.Objects;
-import java.util.Optional;
-
 public class LocationEntityProvider extends BaseEntityProvider<Location> {
 
     private final LocationRepository locationRepository;
+    private final LocationQuerySpecification rootSpecification;
 
     public LocationEntityProvider(LocationRepository locationRepository, EntityPropertyMapping propertyMapping) {
         super(propertyMapping);
         Objects.requireNonNull(locationRepository, "locationRepository must not be null");
         this.locationRepository = locationRepository;
+        this.rootSpecification = new LocationQuerySpecification();
     }
 
     @Override
@@ -66,10 +68,17 @@ public class LocationEntityProvider extends BaseEntityProvider<Location> {
 
     @Override
     public Optional<Location> getEntity(Request req) throws ProviderException {
-        LocationGraphBuilder graphBuilder = new LocationGraphBuilder(req);
-        addUnfilteredExpandItems(req.getQueryOptions(), graphBuilder);
+        LocationGraphBuilder graphBuilder = LocationGraphBuilder.createWith(req.getQueryOptions());
+        return getEntity(rootSpecification.buildSpecification(req), graphBuilder);
+    }
 
-        Specification<LocationEntity> spec = buildSpecification(req, new LocationQuerySpecification());
+    @Override
+    public Optional<Location> getEntity(String id, QueryOptions queryOptions) throws ProviderException {
+        LocationGraphBuilder graphBuilder = LocationGraphBuilder.createEmpty();
+        return getEntity(rootSpecification.buildSpecification(queryOptions), graphBuilder);
+    }
+
+    private Optional<Location> getEntity(Specification<LocationEntity> spec, LocationGraphBuilder graphBuilder) {
         Optional<LocationEntity> platform = locationRepository.findOne(spec, graphBuilder);
         return platform.map(entity -> new LocationData(entity, propertyMapping));
     }
@@ -78,11 +87,8 @@ public class LocationEntityProvider extends BaseEntityProvider<Location> {
     public EntityPage<Location> getEntities(Request req) throws ProviderException {
         QueryOptions options = req.getQueryOptions();
         Pageable pageable = StaPageRequest.create(options);
-
-        LocationGraphBuilder graphBuilder = new LocationGraphBuilder(req);
-        addUnfilteredExpandItems(options, graphBuilder);
-
-        Specification<LocationEntity> spec = buildSpecification(req, new LocationQuerySpecification());
+        LocationGraphBuilder graphBuilder = LocationGraphBuilder.createWith(req.getQueryOptions());
+        Specification<LocationEntity> spec = rootSpecification.buildSpecification(req);
         Page<LocationEntity> results = locationRepository.findAll(spec, pageable, graphBuilder);
         return new StaEntityPage<>(Location.class, results, entity -> new LocationData(entity, propertyMapping));
     }

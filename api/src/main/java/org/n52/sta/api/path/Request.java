@@ -1,3 +1,4 @@
+
 package org.n52.sta.api.path;
 
 import java.util.Collections;
@@ -14,12 +15,12 @@ import org.n52.svalbard.odata.core.expr.bool.ComparisonExpr;
 
 public class Request {
 
-    private final Optional<ODataPath> path;
+    private final Optional<SelectPath> selectPath;
     private final QueryOptions queryOptions;
 
-    public Request(ODataPath path, QueryOptions queryOptions) {
-        Objects.requireNonNull(path, "path must not be null!");
-        this.path = Optional.of(path);
+    public Request(SelectPath selectPath, QueryOptions queryOptions) {
+        Objects.requireNonNull(selectPath, "selectPath must not be null!");
+        this.selectPath = Optional.of(selectPath);
         this.queryOptions = queryOptions == null
                 ? QueryOptionsFactory.createEmpty()
                 : queryOptions;
@@ -27,22 +28,22 @@ public class Request {
 
     private Request(QueryOptions queryOptions) {
         this.queryOptions = queryOptions;
-        this.path = Optional.empty();
+        this.selectPath = Optional.empty();
     }
 
     /**
      * A Request for an instance with specified id.
      *
-     * @param id the instance's id
+     * @param id
+     *        the instance's id
      * @return a request to get an instance by its id
      */
     public static Request createIdRequest(String id) {
-        QueryOptions query =
-                QueryOptionsFactory.createQueryOptions(
-                        Collections.singleton(new FilterFilter(
-                                new ComparisonExpr(FilterConstants.ComparisonOperator.PropertyIsEqualTo,
-                                                   new MemberExpr("id"),
-                                                   new StringValueExpr(id)))));
+        QueryOptions query = QueryOptionsFactory.createQueryOptions(
+                                                                    Collections.singleton(new FilterFilter(
+                                                                                                           new ComparisonExpr(FilterConstants.ComparisonOperator.PropertyIsEqualTo,
+                                                                                                                              new MemberExpr("id"),
+                                                                                                                              new StringValueExpr(id)))));
         return new Request(query);
     }
 
@@ -51,8 +52,8 @@ public class Request {
      *
      * @return the request path
      */
-    public Optional<ODataPath> getPath() {
-        return path;
+    public Optional<SelectPath> getPath() {
+        return selectPath;
     }
 
     public QueryOptions getQueryOptions() {

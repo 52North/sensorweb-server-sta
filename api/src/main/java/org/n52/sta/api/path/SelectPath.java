@@ -1,8 +1,9 @@
+
 package org.n52.sta.api.path;
 
 import java.util.List;
 
-public interface ODataPath {
+public interface SelectPath {
 
     boolean isRef();
 

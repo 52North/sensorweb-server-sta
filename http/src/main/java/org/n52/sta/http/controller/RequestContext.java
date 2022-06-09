@@ -98,7 +98,8 @@ public final class RequestContext {
 
     public StaPath getPath() {
         // We are inside an actual RequestContext so Path is always present
-        return (StaPath) request.getPath().get();
+        return (StaPath) request.getPath()
+                                .get();
     }
 
 }

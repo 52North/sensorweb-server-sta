@@ -28,6 +28,15 @@
 
 package org.n52.sta.data.query;
 
+import java.util.Optional;
+import java.util.function.Function;
+
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Expression;
+import javax.persistence.criteria.Predicate;
+import javax.persistence.criteria.Root;
+
 import org.n52.shetland.oasis.odata.query.option.QueryOptions;
 import org.n52.shetland.ogc.filter.FilterConstants.BinaryLogicOperator;
 import org.n52.shetland.ogc.filter.FilterConstants.ComparisonOperator;
@@ -49,15 +58,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.jpa.domain.Specification;
 
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Expression;
-import javax.persistence.criteria.Predicate;
-import javax.persistence.criteria.Root;
-import java.util.Optional;
-import java.util.function.Function;
-
-public final class FilterQueryParser<T> {
+public final class FilterQueryParser {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(FilterQueryParser.class);
 
@@ -89,7 +90,7 @@ public final class FilterQueryParser<T> {
         return expression -> {
             try {
                 return (Predicate) expression.accept(visitor);
-            } catch (Throwable e) {
+            } catch (Exception e) {
                 String filter = expression.toODataString();
                 LOGGER.debug("Could not create predicate from expression: '" + filter, e);
                 throw new RuntimeException("Invalid filter expression!");
@@ -153,7 +154,7 @@ public final class FilterQueryParser<T> {
                     // TODO
                     return null;
                 }
-            } else {
+            } else if (left.isMember()) {
                 String member = toMember(left);
                 if (isOnRoot(member)) {
                     return compareMemberOnLeft(member, operator, right);
@@ -161,6 +162,8 @@ public final class FilterQueryParser<T> {
                     // TODO
                     return null;
                 }
+            } else {
+                return compareNonMembers(left, right, operator);
             }
         }
 

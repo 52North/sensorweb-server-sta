@@ -28,7 +28,11 @@
 
 package org.n52.sta.data.provider;
 
+import java.util.Objects;
+import java.util.Optional;
+
 import org.n52.series.db.beans.AbstractFeatureEntity;
+import org.n52.shetland.oasis.odata.query.option.QueryOptions;
 import org.n52.sta.api.EntityPage;
 import org.n52.sta.api.ProviderException;
 import org.n52.sta.api.entity.FeatureOfInterest;
@@ -44,18 +48,17 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 
-import java.util.Objects;
-import java.util.Optional;
-
 public class FeatureOfInterestEntityProvider extends BaseEntityProvider<FeatureOfInterest> {
 
     private final FeatureOfInterestRepository featureOfInterestRepository;
+    private final FeatureOfInterestQuerySpecification rootSpecification;
 
     public FeatureOfInterestEntityProvider(FeatureOfInterestRepository featureOfInterestRepository,
                                            EntityPropertyMapping propertyMapping) {
         super(propertyMapping);
         Objects.requireNonNull(featureOfInterestRepository, "featureOfInterestRepository must not be null");
         this.featureOfInterestRepository = featureOfInterestRepository;
+        this.rootSpecification = new FeatureOfInterestQuerySpecification();
     }
 
     @Override
@@ -66,22 +69,27 @@ public class FeatureOfInterestEntityProvider extends BaseEntityProvider<FeatureO
 
     @Override
     public Optional<FeatureOfInterest> getEntity(Request req) throws ProviderException {
-        FeatureOfInterestGraphBuilder graphBuilder = new FeatureOfInterestGraphBuilder(req);
-        addUnfilteredExpandItems(req.getQueryOptions(), graphBuilder);
+        FeatureOfInterestGraphBuilder graphBuilder = FeatureOfInterestGraphBuilder.createWith(req.getQueryOptions());
+        return getEntity(new FeatureOfInterestQuerySpecification().buildSpecification(req), graphBuilder);
+    }
 
-        Specification<AbstractFeatureEntity> spec = buildSpecification(req, new FeatureOfInterestQuerySpecification());
-        Optional<AbstractFeatureEntity> platform = featureOfInterestRepository.findOne(spec, graphBuilder);
-        return platform.map(entity -> new FeatureOfInterestData(entity, propertyMapping));
+    @Override
+    public Optional<FeatureOfInterest> getEntity(String id, QueryOptions queryOptions) throws ProviderException {
+        FeatureOfInterestGraphBuilder graphBuilder = FeatureOfInterestGraphBuilder.createEmpty();
+        return getEntity(rootSpecification.buildSpecification(queryOptions), graphBuilder);
+    }
+
+    private Optional<FeatureOfInterest> getEntity(Specification<AbstractFeatureEntity> specification,
+                                                  FeatureOfInterestGraphBuilder graphBuilder) {
+        Optional<AbstractFeatureEntity> datastream = featureOfInterestRepository.findOne(specification, graphBuilder);
+        return datastream.map(entity -> new FeatureOfInterestData(entity, propertyMapping));
     }
 
     @Override
     public EntityPage<FeatureOfInterest> getEntities(Request req) throws ProviderException {
         Pageable pageable = StaPageRequest.create(req.getQueryOptions());
-
-        FeatureOfInterestGraphBuilder graphBuilder = new FeatureOfInterestGraphBuilder(req);
-        addUnfilteredExpandItems(req.getQueryOptions(), graphBuilder);
-
-        Specification<AbstractFeatureEntity> spec = buildSpecification(req, new FeatureOfInterestQuerySpecification());
+        FeatureOfInterestGraphBuilder graphBuilder = FeatureOfInterestGraphBuilder.createWith(req.getQueryOptions());
+        Specification<AbstractFeatureEntity> spec = new FeatureOfInterestQuerySpecification().buildSpecification(req);
         Page<AbstractFeatureEntity> results = featureOfInterestRepository.findAll(spec, pageable, graphBuilder);
         return new StaEntityPage<>(FeatureOfInterest.class,
                                    results,

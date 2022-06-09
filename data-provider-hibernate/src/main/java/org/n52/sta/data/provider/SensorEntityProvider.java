@@ -28,7 +28,11 @@
 
 package org.n52.sta.data.provider;
 
+import java.util.Objects;
+import java.util.Optional;
+
 import org.n52.series.db.beans.ProcedureEntity;
+import org.n52.shetland.oasis.odata.query.option.QueryOptions;
 import org.n52.sta.api.EntityPage;
 import org.n52.sta.api.ProviderException;
 import org.n52.sta.api.entity.Sensor;
@@ -44,17 +48,16 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 
-import java.util.Objects;
-import java.util.Optional;
-
 public class SensorEntityProvider extends BaseEntityProvider<Sensor> {
 
     private final ProcedureRepository sensorRepository;
+    private final SensorQuerySpecification rootSpecification;
 
     public SensorEntityProvider(ProcedureRepository sensorRepository, EntityPropertyMapping propertyMapping) {
         super(propertyMapping);
         Objects.requireNonNull(sensorRepository, "sensorRepository must not be null");
         this.sensorRepository = sensorRepository;
+        this.rootSpecification = new SensorQuerySpecification();
     }
 
     @Override
@@ -65,10 +68,17 @@ public class SensorEntityProvider extends BaseEntityProvider<Sensor> {
 
     @Override
     public Optional<Sensor> getEntity(Request req) throws ProviderException {
-        SensorGraphBuilder graphBuilder = new SensorGraphBuilder(req);
-        addUnfilteredExpandItems(req.getQueryOptions(), graphBuilder);
+        SensorGraphBuilder graphBuilder = SensorGraphBuilder.createWith(req.getQueryOptions());
+        return getEntity(rootSpecification.buildSpecification(req), graphBuilder);
+    }
 
-        Specification<ProcedureEntity> spec = buildSpecification(req, new SensorQuerySpecification());
+    @Override
+    public Optional<Sensor> getEntity(String id, QueryOptions queryOptions) throws ProviderException {
+        SensorGraphBuilder graphBuilder = SensorGraphBuilder.createEmpty();
+        return getEntity(rootSpecification.buildSpecification(queryOptions), graphBuilder);
+    }
+
+    private Optional<Sensor> getEntity(Specification<ProcedureEntity> spec, SensorGraphBuilder graphBuilder) {
         Optional<ProcedureEntity> platform = sensorRepository.findOne(spec, graphBuilder);
         return platform.map(entity -> new SensorData(entity, propertyMapping));
     }
@@ -76,11 +86,8 @@ public class SensorEntityProvider extends BaseEntityProvider<Sensor> {
     @Override
     public EntityPage<Sensor> getEntities(Request req) throws ProviderException {
         Pageable pageable = StaPageRequest.create(req.getQueryOptions());
-
-        SensorGraphBuilder graphBuilder = new SensorGraphBuilder(req);
-        addUnfilteredExpandItems(req.getQueryOptions(), graphBuilder);
-
-        Specification<ProcedureEntity> spec = buildSpecification(req, new SensorQuerySpecification());
+        SensorGraphBuilder graphBuilder = SensorGraphBuilder.createWith(req.getQueryOptions());
+        Specification<ProcedureEntity> spec = rootSpecification.buildSpecification(req);
         Page<ProcedureEntity> results = sensorRepository.findAll(spec, pageable, graphBuilder);
         return new StaEntityPage<>(Sensor.class, results, entity -> new SensorData(entity, propertyMapping));
     }

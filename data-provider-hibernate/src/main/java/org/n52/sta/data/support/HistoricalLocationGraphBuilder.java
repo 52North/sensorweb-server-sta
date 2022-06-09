@@ -30,12 +30,26 @@ package org.n52.sta.data.support;
 
 import org.n52.series.db.beans.sta.HistoricalLocationEntity;
 import org.n52.shetland.filter.ExpandItem;
+import org.n52.shetland.oasis.odata.query.option.QueryOptions;
 import org.n52.shetland.ogc.sta.StaConstants;
 
 public class HistoricalLocationGraphBuilder extends GraphBuilder<HistoricalLocationEntity> {
 
-    public HistoricalLocationGraphBuilder() {
+    private HistoricalLocationGraphBuilder() {
         super(HistoricalLocationEntity.class);
+    }
+
+    private HistoricalLocationGraphBuilder(QueryOptions queryOptions) {
+        super(HistoricalLocationEntity.class);
+        addUnfilteredExpandItems(queryOptions);
+    }
+
+    public static HistoricalLocationGraphBuilder createEmpty() {
+        return new HistoricalLocationGraphBuilder();
+    }
+
+    public static HistoricalLocationGraphBuilder createWith(QueryOptions queryOptions) {
+        return new HistoricalLocationGraphBuilder(queryOptions);
     }
 
     @Override

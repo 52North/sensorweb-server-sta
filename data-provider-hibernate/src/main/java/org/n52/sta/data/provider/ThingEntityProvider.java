@@ -28,6 +28,9 @@
 
 package org.n52.sta.data.provider;
 
+import java.util.Objects;
+import java.util.Optional;
+
 import org.n52.series.db.beans.PlatformEntity;
 import org.n52.shetland.oasis.odata.query.option.QueryOptions;
 import org.n52.sta.api.EntityPage;
@@ -45,17 +48,16 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 
-import java.util.Objects;
-import java.util.Optional;
-
 public class ThingEntityProvider extends BaseEntityProvider<Thing> {
 
     private final ThingRepository thingRepository;
+    private final ThingQuerySpecification rootSpecification;
 
     public ThingEntityProvider(ThingRepository thingRepository, EntityPropertyMapping propertyMapping) {
         super(propertyMapping);
         Objects.requireNonNull(thingRepository, "thingRepository must not be null");
         this.thingRepository = thingRepository;
+        this.rootSpecification = new ThingQuerySpecification();
     }
 
     @Override
@@ -66,13 +68,17 @@ public class ThingEntityProvider extends BaseEntityProvider<Thing> {
 
     @Override
     public Optional<Thing> getEntity(Request req) throws ProviderException {
-        /**
-         * /Datastreams(123)/Thing
-         */
-        ThingGraphBuilder graphBuilder = new ThingGraphBuilder(req);
-        addUnfilteredExpandItems(req.getQueryOptions(), graphBuilder);
+        ThingGraphBuilder graphBuilder = ThingGraphBuilder.createWith(req.getQueryOptions());
+        return extracted(rootSpecification.buildSpecification(req), graphBuilder);
+    }
 
-        Specification<PlatformEntity> spec = buildSpecification(req, new ThingQuerySpecification());
+    @Override
+    public Optional<Thing> getEntity(String id, QueryOptions queryOptions) throws ProviderException {
+        ThingGraphBuilder graphBuilder = ThingGraphBuilder.createEmpty();
+        return extracted(rootSpecification.buildSpecification(queryOptions), graphBuilder);
+    }
+
+    private Optional<Thing> extracted(Specification<PlatformEntity> spec, ThingGraphBuilder graphBuilder) {
         Optional<PlatformEntity> platform = thingRepository.findOne(spec, graphBuilder);
         return platform.map(entity -> new ThingData(entity, propertyMapping));
     }
@@ -82,10 +88,8 @@ public class ThingEntityProvider extends BaseEntityProvider<Thing> {
         QueryOptions options = req.getQueryOptions();
         Pageable pageable = StaPageRequest.create(options);
 
-        ThingGraphBuilder graphBuilder = new ThingGraphBuilder(req);
-        addUnfilteredExpandItems(options, graphBuilder);
-
-        Specification<PlatformEntity> spec = buildSpecification(req, new ThingQuerySpecification());
+        ThingGraphBuilder graphBuilder = ThingGraphBuilder.createWith(req.getQueryOptions());
+        Specification<PlatformEntity> spec = rootSpecification.buildSpecification(req);
         Page<PlatformEntity> results = thingRepository.findAll(spec, pageable, graphBuilder);
         return new StaEntityPage<>(Thing.class, results, entity -> new ThingData(entity, propertyMapping));
     }
