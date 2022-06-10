@@ -50,7 +50,7 @@ import org.springframework.data.jpa.domain.Specification;
 /**
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
  */
-
+@SuppressWarnings("checkstyle:linelength")
 public abstract class EntityQuerySpecifications<T> {
 
     protected static final String SENSOR = "Sensor";
@@ -76,40 +76,43 @@ public abstract class EntityQuerySpecifications<T> {
      * Gets Entity-specific Filter for relation with given name.
      *
      * @param propertyName
-     *        Name of the relation to be filtered on
+     *                      Name of the relation to be filtered on
      * @param propertyValue
-     *        supposed Value of the property
+     *                      supposed Value of the property
      * @return Specification evaluating to true if Entity is not to be filtered out
      * @throws STAInvalidFilterExpressionException
-     *         if an error occurs
+     *                                             if an error occurs
      */
     public Specification<T> getFilterForRelation(String propertyName,
-                                                 Specification< ? > propertyValue)
+            Specification<?> propertyValue)
             throws STAInvalidFilterExpressionException {
         return handleRelatedPropertyFilter(propertyName, propertyValue);
     }
 
     /**
-     * Gets Entity-specific Filter for property with given name. Filters may not accept all BinaryOperators,
+     * Gets Entity-specific Filter for property with given name. Filters may not
+     * accept all BinaryOperators,
      * as they may not be defined for the datatype of the property.
      *
      * @param propertyName
-     *        Name of the property to be filtered on
+     *                      Name of the property to be filtered on
      * @param propertyValue
-     *        supposed Value of the property
+     *                      supposed Value of the property
      * @param operator
-     *        Operator to be used for comparing propertyValue and actual Value
+     *                      Operator to be used for comparing propertyValue and
+     *                      actual Value
      * @param switched
-     *        true if Expression adheres to template: value, operator, name. False otherwise (Template name,
-     *        operator, value)
+     *                      true if Expression adheres to template: value, operator,
+     *                      name. False otherwise (Template name,
+     *                      operator, value)
      * @return Specification evaluating to true if Entity is not to be filtered out
      * @throws STAInvalidFilterExpressionException
-     *         if an error occurs
+     *                                             if an error occurs
      */
     public Specification<T> getFilterForProperty(String propertyName,
-                                                 Expression< ? > propertyValue,
-                                                 FilterConstants.ComparisonOperator operator,
-                                                 boolean switched)
+            Expression<?> propertyValue,
+            FilterConstants.ComparisonOperator operator,
+            boolean switched)
             throws STAInvalidFilterExpressionException {
         return handleDirectPropertyFilter(propertyName, propertyValue, operator, switched);
     }
@@ -124,60 +127,60 @@ public abstract class EntityQuerySpecifications<T> {
 
     public Specification<T> withStaIdentifier(final List<String> identifiers) {
         return (root, query, builder) -> builder.in(root.get(DescribableEntity.PROPERTY_STA_IDENTIFIER))
-                                                .value(identifiers);
+                .value(identifiers);
     }
 
     // Wrapper
     @SuppressWarnings("unchecked")
     protected Predicate handleDirectStringPropertyFilter(Path<String> stringPath,
-                                                         Expression< ? > propertyValue,
-                                                         FilterConstants.ComparisonOperator operator,
-                                                         CriteriaBuilder builder,
-                                                         boolean switched)
+            Expression<?> propertyValue,
+            FilterConstants.ComparisonOperator operator,
+            CriteriaBuilder builder,
+            boolean switched)
             throws STAInvalidFilterExpressionException {
         if (propertyValue.getJavaType()
-                         .equals(String.class)) {
+                .equals(String.class)) {
             return this.handleStringFilter(stringPath, (Expression<String>) propertyValue, operator, builder, switched);
         } else {
             throw new STAInvalidFilterExpressionException(
-                                                          INVALID_DATATYPE_CANNOT_CAST
-                                                                  + propertyValue.getJavaType()
-                                                                  + " to String.class");
+                    INVALID_DATATYPE_CANNOT_CAST
+                            + propertyValue.getJavaType()
+                            + " to String.class");
         }
     }
 
     @SuppressWarnings("unchecked")
-    protected <K extends Comparable< ? super K>> Predicate handleDirectNumberPropertyFilter(
-                                                                                            Path<K> numberPath,
-                                                                                            Expression< ? > propertyValue,
-                                                                                            FilterConstants.ComparisonOperator operator,
-                                                                                            CriteriaBuilder builder)
+    protected <K extends Comparable<? super K>> Predicate handleDirectNumberPropertyFilter(
+            Path<K> numberPath,
+            Expression<?> propertyValue,
+            FilterConstants.ComparisonOperator operator,
+            CriteriaBuilder builder)
             throws STAInvalidFilterExpressionException {
         return this.handleComparableFilter(numberPath, (Expression<K>) propertyValue, operator, builder);
     }
 
     @SuppressWarnings("unchecked")
     protected Predicate handleDirectDateTimePropertyFilter(Path<Date> time,
-                                                           Expression< ? > propertyValue,
-                                                           FilterConstants.ComparisonOperator operator,
-                                                           CriteriaBuilder builder)
+            Expression<?> propertyValue,
+            FilterConstants.ComparisonOperator operator,
+            CriteriaBuilder builder)
             throws STAInvalidFilterExpressionException {
         if (propertyValue.getJavaType()
-                         .equals(Date.class)) {
+                .equals(Date.class)) {
             return this.handleComparableFilter(time, (Expression<Date>) propertyValue, operator, builder);
         } else {
             throw new STAInvalidFilterExpressionException(
-                                                          INVALID_DATATYPE_CANNOT_CAST
-                                                                  + propertyValue.getJavaType()
-                                                                  + " to Date.class");
+                    INVALID_DATATYPE_CANNOT_CAST
+                            + propertyValue.getJavaType()
+                            + " to Date.class");
         }
     }
 
     private Predicate handleStringFilter(Path<String> left,
-                                         Expression<String> right,
-                                         FilterConstants.ComparisonOperator operatorKind,
-                                         CriteriaBuilder builder,
-                                         boolean switched)
+            Expression<String> right,
+            FilterConstants.ComparisonOperator operatorKind,
+            CriteriaBuilder builder,
+            boolean switched)
             throws STAInvalidFilterExpressionException {
         FilterConstants.ComparisonOperator operator = switched
                 ? reverseOperator(operatorKind)
@@ -185,29 +188,29 @@ public abstract class EntityQuerySpecifications<T> {
         return handleComparableFilter(left, right, operator, builder);
     }
 
-    private <K extends Comparable< ? super K>> Predicate handleComparableFilter(
-                                                                                Expression<K> left,
-                                                                                Expression<K> right,
-                                                                                FilterConstants.ComparisonOperator operator,
-                                                                                CriteriaBuilder builder)
+    private <K extends Comparable<? super K>> Predicate handleComparableFilter(
+            Expression<K> left,
+            Expression<K> right,
+            FilterConstants.ComparisonOperator operator,
+            CriteriaBuilder builder)
             throws STAInvalidFilterExpressionException {
 
         switch (operator) {
-        case PropertyIsEqualTo:
-            return builder.equal(left, right);
-        case PropertyIsNotEqualTo:
-            return builder.notEqual(left, right);
-        case PropertyIsLessThan:
-            return builder.lessThan(left, right);
-        case PropertyIsLessThanOrEqualTo:
-            return builder.lessThanOrEqualTo(left, right);
-        case PropertyIsGreaterThan:
-            return builder.greaterThan(left, right);
-        case PropertyIsGreaterThanOrEqualTo:
-            return builder.greaterThanOrEqualTo(left, right);
-        default:
-            throw new STAInvalidFilterExpressionException(
-                                                          String.format(ERROR_TEMPLATE, operator.toString()));
+            case PropertyIsEqualTo:
+                return builder.equal(left, right);
+            case PropertyIsNotEqualTo:
+                return builder.notEqual(left, right);
+            case PropertyIsLessThan:
+                return builder.lessThan(left, right);
+            case PropertyIsLessThanOrEqualTo:
+                return builder.lessThanOrEqualTo(left, right);
+            case PropertyIsGreaterThan:
+                return builder.greaterThan(left, right);
+            case PropertyIsGreaterThanOrEqualTo:
+                return builder.greaterThanOrEqualTo(left, right);
+            default:
+                throw new STAInvalidFilterExpressionException(
+                        String.format(ERROR_TEMPLATE, operator.toString()));
         }
     }
 
@@ -215,64 +218,64 @@ public abstract class EntityQuerySpecifications<T> {
      * Reverses an operator if this operator is easily revertible.
      *
      * @param operator
-     *        to be reversed
+     *                 to be reversed
      * @return String representation of reversed Operator
      */
     private FilterConstants.ComparisonOperator reverseOperator(FilterConstants.ComparisonOperator operator) {
         switch (operator) {
-        case PropertyIsLessThan:
-            return FilterConstants.ComparisonOperator.PropertyIsGreaterThanOrEqualTo;
-        case PropertyIsLessThanOrEqualTo:
-            return FilterConstants.ComparisonOperator.PropertyIsGreaterThan;
-        case PropertyIsGreaterThan:
-            return FilterConstants.ComparisonOperator.PropertyIsLessThanOrEqualTo;
-        case PropertyIsGreaterThanOrEqualTo:
-            return FilterConstants.ComparisonOperator.PropertyIsLessThan;
-        default:
-            return operator;
+            case PropertyIsLessThan:
+                return FilterConstants.ComparisonOperator.PropertyIsGreaterThanOrEqualTo;
+            case PropertyIsLessThanOrEqualTo:
+                return FilterConstants.ComparisonOperator.PropertyIsGreaterThan;
+            case PropertyIsGreaterThan:
+                return FilterConstants.ComparisonOperator.PropertyIsLessThanOrEqualTo;
+            case PropertyIsGreaterThanOrEqualTo:
+                return FilterConstants.ComparisonOperator.PropertyIsLessThan;
+            default:
+                return operator;
         }
     }
 
     protected abstract Specification<T> handleRelatedPropertyFilter(String propertyName,
-                                                                    Specification< ? > propertyValue);
+            Specification<?> propertyValue);
 
     protected abstract Specification<T> handleDirectPropertyFilter(String propertyName,
-                                                                   Expression< ? > propertyValue,
-                                                                   FilterConstants.ComparisonOperator operator,
-                                                                   boolean switched);
+            Expression<?> propertyValue,
+            FilterConstants.ComparisonOperator operator,
+            boolean switched);
 
-    protected Predicate handleProperties(Root< ? > root,
-                                         CriteriaQuery< ? > query,
-                                         CriteriaBuilder builder,
-                                         String propertyName,
-                                         Expression< ? > propertyValue,
-                                         FilterConstants.ComparisonOperator operator,
-                                         boolean switched,
-                                         String referenceName,
-                                         ParameterFactory.EntityType entityType)
+    protected Predicate handleProperties(Root<?> root,
+            CriteriaQuery<?> query,
+            CriteriaBuilder builder,
+            String propertyName,
+            Expression<?> propertyValue,
+            FilterConstants.ComparisonOperator operator,
+            boolean switched,
+            String referenceName,
+            ParameterFactory.EntityType entityType)
             throws STAInvalidFilterExpressionException {
         String key = propertyName.substring(11);
         if (propertyValue.getJavaType()
-                         .isAssignableFrom(String.class)) {
-            Class< ? extends ParameterEntity> clazz = ParameterFactory.from(entityType, ParameterFactory.ValueType.TEXT)
-                                                                      .getClass();
-            Subquery< ? > subquery = query.subquery(clazz);
-            Root< ? > param = subquery.from(clazz);
+                .isAssignableFrom(String.class)) {
+            Class<? extends ParameterEntity> clazz = ParameterFactory.from(entityType, ParameterFactory.ValueType.TEXT)
+                    .getClass();
+            Subquery<?> subquery = query.subquery(clazz);
+            Root<?> param = subquery.from(clazz);
             subquery.select(param.get(referenceName))
                     .where(builder.and(
-                                       builder.equal(param.get(ParameterEntity.NAME), key),
-                                       handleDirectStringPropertyFilter(param.get(HibernateRelations.HasValue.VALUE),
-                                                                        propertyValue,
-                                                                        operator,
-                                                                        builder,
-                                                                        switched)));
+                            builder.equal(param.get(ParameterEntity.NAME), key),
+                            handleDirectStringPropertyFilter(param.get(HibernateRelations.HasValue.VALUE),
+                                    propertyValue,
+                                    operator,
+                                    builder,
+                                    switched)));
             return builder.in(root.get(DescribableEntity.PROPERTY_ID))
-                          .value(subquery);
+                    .value(subquery);
         } else {
             throw new STAInvalidFilterExpressionException(
-                                                          String.format(ERROR_GETTING_FILTER_NO_PROP_OR_WRONG_TYPE,
-                                                                        key,
-                                                                        "String"));
+                    String.format(ERROR_GETTING_FILTER_NO_PROP_OR_WRONG_TYPE,
+                            key,
+                            "String"));
         }
     }
 
@@ -280,7 +283,7 @@ public abstract class EntityQuerySpecifications<T> {
      * Translate STA property name to Database property name
      *
      * @param property
-     *        name of the property in STA
+     *                 name of the property in STA
      * @return name of the property in database
      */
     public String checkPropertyName(String property) {

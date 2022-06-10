@@ -46,6 +46,7 @@ import org.n52.shetland.ogc.sta.exception.STAInvalidQueryException;
 import org.n52.shetland.ogc.sta.model.ProjectEntityDefinition;
 import org.n52.shetland.ogc.sta.model.STAEntityDefinition;
 import org.n52.sta.data.old.repositories.EntityGraphRepository;
+import org.n52.sta.data.old.service.DatastreamService;
 import org.n52.sta.plus.old.entity.ProjectDTO;
 import org.n52.sta.plus.persistence.query.ProjectQuerySpecifications;
 import org.n52.sta.plus.persistence.repositories.ProjectRepository;
@@ -97,6 +98,7 @@ public class ProjectService
     }
 
     @Override
+    @SuppressWarnings("checkstyle:linelength")
     protected ProjectEntity fetchExpandEntitiesWithFilter(ProjectEntity entity, ExpandFilter expandOption)
             throws STACRUDException, STAInvalidQueryException {
         for (ExpandItem expandItem : expandOption.getItems()) {
@@ -109,10 +111,10 @@ public class ProjectService
             }
             String expandProperty = expandItem.getPath();
             if (ProjectEntityDefinition.NAVIGATION_PROPERTIES.contains(expandProperty)) {
-                Page<StaPlusDataset> datastreams = getDatastreamService()
-                                                                         .getEntityCollectionByRelatedEntityRaw(entity.getStaIdentifier(),
-                                                                                                                STAEntityDefinition.PROJECTS,
-                                                                                                                expandItem.getQueryOptions());
+                DatastreamService datastreamService = getDatastreamService();
+                Page<StaPlusDataset> datastreams = datastreamService.getEntityCollectionByRelatedEntityRaw(entity.getStaIdentifier(),
+                                                                                                           STAEntityDefinition.PROJECTS,
+                                                                                                           expandItem.getQueryOptions());
                 entity.setDatastreams(datastreams.get()
                                                  .collect(Collectors.toSet()));
                 return entity;
@@ -127,15 +129,15 @@ public class ProjectService
 
     @Override
     protected Specification<ProjectEntity> byRelatedEntityFilter(String relatedId,
-                                                                 String relatedType,
-                                                                 String ownId) {
+            String relatedType,
+            String ownId) {
         Specification<ProjectEntity> filter;
         switch (relatedType) {
-        case STAEntityDefinition.DATASTREAMS:
-            filter = pQS.withDatastreamStaIdentifier(relatedId);
-            break;
-        default:
-            throw new IllegalStateException(String.format(TRYING_TO_FILTER_BY_UNRELATED_TYPE, relatedType));
+            case STAEntityDefinition.DATASTREAMS:
+                filter = pQS.withDatastreamStaIdentifier(relatedId);
+                break;
+            default:
+                throw new IllegalStateException(String.format(TRYING_TO_FILTER_BY_UNRELATED_TYPE, relatedType));
         }
 
         if (ownId != null) {

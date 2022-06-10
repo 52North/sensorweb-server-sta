@@ -36,9 +36,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
-
 import org.n52.shetland.ogc.sta.exception.STAInvalidUrlException;
 import org.n52.shetland.ogc.sta.model.STAEntityDefinition;
 import org.n52.sta.api.old.AbstractSensorThingsEntityService;
@@ -51,11 +48,15 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+
 import io.moquette.interception.messages.InterceptPublishMessage;
 
 /**
  * @author <a href="mailto:s.drost@52north.org">Sebastian Drost</a>
  */
+@SuppressWarnings("checkstyle:linelength")
 public class MqttPublishMessageHandlerImpl extends AbstractSTARequestHandler
         implements
         MqttPublishMessageHandler,

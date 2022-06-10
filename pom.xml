@@ -282,6 +282,11 @@
                         <compilerSource>1.9</compilerSource>
                         <compilerCompliance>1.9</compilerCompliance>
                         <compilerTargetPlatform>1.9</compilerTargetPlatform>
+                        <excludes>
+                            <exclude>
+                                **/old/
+                            </exclude>
+                        </excludes>
                     </configuration>
                 </plugin>
                 <plugin>

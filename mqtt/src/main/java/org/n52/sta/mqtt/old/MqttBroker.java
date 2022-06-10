@@ -59,6 +59,7 @@ import io.moquette.interception.messages.InterceptUnsubscribeMessage;
 /**
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
  */
+@SuppressWarnings("checkstyle:linelength")
 public class MqttBroker {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MqttBroker.class);

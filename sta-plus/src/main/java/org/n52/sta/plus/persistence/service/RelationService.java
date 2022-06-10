@@ -59,6 +59,7 @@ import org.springframework.data.jpa.domain.Specification;
 // @DependsOn({ "springApplicationContext" })
 // @Transactional
 // @Profile(StaConstants.STAPLUS)
+@SuppressWarnings("checkstyle:linelength")
 public class RelationService
         extends
         CitSciSTAServiceImpl<ObservationRelationRepository, RelationDTO, RelationEntity> {
@@ -84,18 +85,18 @@ public class RelationService
                 }
                 String expandProperty = expandItem.getPath();
                 switch (expandProperty) {
-                case STAEntityDefinition.GROUP:
-                    fetchGraphs.add(EntityGraphRepository.FetchGraph.FETCHGRAPH_OBSERVATION_GROUP);
-                    break;
-                case STAEntityDefinition.OBSERVATION:
-                    fetchGraphs.add(EntityGraphRepository.FetchGraph.FETCHGRAPH_OBSERVATION);
+                    case STAEntityDefinition.GROUP:
+                        fetchGraphs.add(EntityGraphRepository.FetchGraph.FETCHGRAPH_OBSERVATION_GROUP);
+                        break;
+                    case STAEntityDefinition.OBSERVATION:
+                        fetchGraphs.add(EntityGraphRepository.FetchGraph.FETCHGRAPH_OBSERVATION);
 
-                    break;
-                default:
-                    throw new STAInvalidQueryException(
-                                                       String.format(INVALID_EXPAND_OPTION_SUPPLIED,
-                                                                     expandProperty,
-                                                                     StaConstants.RELATION));
+                        break;
+                    default:
+                        throw new STAInvalidQueryException(
+                                                           String.format(INVALID_EXPAND_OPTION_SUPPLIED,
+                                                                         expandProperty,
+                                                                         StaConstants.RELATION));
                 }
             }
         }
@@ -104,7 +105,7 @@ public class RelationService
 
     @Override
     protected RelationEntity fetchExpandEntitiesWithFilter(RelationEntity entity,
-                                                           ExpandFilter expandOption)
+            ExpandFilter expandOption)
             throws STACRUDException, STAInvalidQueryException {
         for (ExpandItem expandItem : expandOption.getItems()) {
             // We have already handled $expand without filter and expand
@@ -117,25 +118,25 @@ public class RelationService
 
             String expandProperty = expandItem.getPath();
             switch (expandProperty) {
-            case STAEntityDefinition.GROUPS:
-                Page<GroupEntity> groups = getObservationGroupService()
-                                                                       .getEntityCollectionByRelatedEntityRaw(entity.getStaIdentifier(),
-                                                                                                              STAEntityDefinition.RELATIONS,
-                                                                                                              expandItem.getQueryOptions());
-                entity.setGroups(groups.get()
-                                       .collect(Collectors.toSet()));
-                break;
-            /*
-             * case STAEntityDefinition.SUBJECTS: entity.setSubject(getObservationService()
-             * .getEntityByIdRaw(entity.getSubject().getId(), expandItem.getQueryOptions())); break; case
-             * STAEntityDefinition.OBJECTS: entity.setObject(getObservationService()
-             * .getEntityByIdRaw(entity.getObject().getId(), expandItem.getQueryOptions())); break;
-             */
-            default:
-                throw new STAInvalidQueryException(
-                                                   String.format(INVALID_EXPAND_OPTION_SUPPLIED,
-                                                                 expandProperty,
-                                                                 StaConstants.RELATION));
+                case STAEntityDefinition.GROUPS:
+                    Page<GroupEntity> groups = getObservationGroupService()
+                                                                           .getEntityCollectionByRelatedEntityRaw(entity.getStaIdentifier(),
+                                                                                                                  STAEntityDefinition.RELATIONS,
+                                                                                                                  expandItem.getQueryOptions());
+                    entity.setGroups(groups.get()
+                                           .collect(Collectors.toSet()));
+                    break;
+                /*
+                 * case STAEntityDefinition.SUBJECTS: entity.setSubject(getObservationService()
+                 * .getEntityByIdRaw(entity.getSubject().getId(), expandItem.getQueryOptions())); break; case
+                 * STAEntityDefinition.OBJECTS: entity.setObject(getObservationService()
+                 * .getEntityByIdRaw(entity.getObject().getId(), expandItem.getQueryOptions())); break;
+                 */
+                default:
+                    throw new STAInvalidQueryException(
+                                                       String.format(INVALID_EXPAND_OPTION_SUPPLIED,
+                                                                     expandProperty,
+                                                                     StaConstants.RELATION));
             }
         }
         return entity;
@@ -143,23 +144,23 @@ public class RelationService
 
     @Override
     protected Specification<RelationEntity> byRelatedEntityFilter(String relatedId,
-                                                                  String relatedType,
-                                                                  String ownId) {
+            String relatedType,
+            String ownId) {
         Specification<RelationEntity> filter;
         switch (relatedType) {
-        case STAEntityDefinition.GROUPS:
-            filter = orQS.withGroupStaIdentifier(relatedId);
-            break;
-        case STAEntityDefinition.SUBJECTS:
-            filter = orQS.withSubjectStaIdentifier(relatedId);
-            break;
-        case STAEntityDefinition.OBJECTS:
-            filter = orQS.withObjectStaIdentifier(relatedId);
-            break;
-        default:
-            throw new IllegalStateException(
-                                            String.format(TRYING_TO_FILTER_BY_UNRELATED_TYPE,
-                                                          relatedType));
+            case STAEntityDefinition.GROUPS:
+                filter = orQS.withGroupStaIdentifier(relatedId);
+                break;
+            case STAEntityDefinition.SUBJECTS:
+                filter = orQS.withSubjectStaIdentifier(relatedId);
+                break;
+            case STAEntityDefinition.OBJECTS:
+                filter = orQS.withObjectStaIdentifier(relatedId);
+                break;
+            default:
+                throw new IllegalStateException(
+                                                String.format(TRYING_TO_FILTER_BY_UNRELATED_TYPE,
+                                                              relatedType));
         }
 
         if (ownId != null) {

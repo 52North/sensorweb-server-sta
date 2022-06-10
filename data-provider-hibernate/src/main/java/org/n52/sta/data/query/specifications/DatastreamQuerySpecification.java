@@ -30,6 +30,7 @@ package org.n52.sta.data.query.specifications;
 
 import java.util.Optional;
 
+import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 import javax.persistence.criteria.Subquery;
 
@@ -56,53 +57,13 @@ public class DatastreamQuerySpecification extends QuerySpecification<AbstractDat
         // TODO: ideally we should check for datasetType == not_initialized, but it is
         // not exposed in the abstract class
         // checking for platform == null as a workaround
-        return Optional.of(
-                           (root, query, builder) -> builder.and(
-                                                                 root.get(AbstractDatasetEntity.PROPERTY_PLATFORM)
-                                                                     .isNotNull(),
-                                                                 builder.isNull(root.get(AbstractDatasetEntity.PROPERTY_AGGREGATION))));
-    }
-
-    private final class SensorFilter extends MemberFilterImpl<AbstractDatasetEntity> {
-
-        protected Specification<AbstractDatasetEntity> prepareQuery(Specification< ? > specification) {
-            return (root, query, builder) -> {
-                EntityQuery memberQuery = createQuery(IdEntity.PROPERTY_ID,
-                                                      ProcedureEntity.class);
-                Subquery< ? > subquery = memberQuery.create(specification, query, builder);
-                // n..1
-                return builder.in(subquery)
-                              .value(root.get(AbstractDatasetEntity.PROPERTY_PROCEDURE));
-            };
-        }
-    }
-
-    private final class ObservedPropertyFilter extends MemberFilterImpl<AbstractDatasetEntity> {
-
-        protected Specification<AbstractDatasetEntity> prepareQuery(Specification< ? > specification) {
-            return (root, query, builder) -> {
-                EntityQuery memberQuery = createQuery(IdEntity.PROPERTY_ID,
-                                                      PhenomenonEntity.class);
-                Subquery< ? > subquery = memberQuery.create(specification, query, builder);
-                // n..1
-                return builder.in(subquery)
-                              .value(root.get(AbstractDatasetEntity.PROPERTY_PHENOMENON));
-            };
-        }
-    }
-
-    private final class ThingFilter extends MemberFilterImpl<AbstractDatasetEntity> {
-
-        protected Specification<AbstractDatasetEntity> prepareQuery(Specification< ? > specification) {
-            return (root, query, builder) -> {
-                EntityQuery memberQuery = createQuery(IdEntity.PROPERTY_ID,
-                                                      PlatformEntity.class);
-                Subquery< ? > subquery = memberQuery.create(specification, query, builder);
-                // n..1
-                return builder.in(subquery)
-                              .value(root.get(AbstractDatasetEntity.PROPERTY_PLATFORM));
-            };
-        }
+        Specification<AbstractDatasetEntity> isDatastreamRoot = (root, query, builder) -> {
+            Predicate hasPlatform = root.get(AbstractDatasetEntity.PROPERTY_PLATFORM)
+                                        .isNotNull();
+            Predicate isNotAggregate = builder.isNull(root.get(AbstractDatasetEntity.PROPERTY_AGGREGATION));
+            return builder.and(hasPlatform, isNotAggregate);
+        };
+        return Optional.of(isDatastreamRoot);
     }
 
     private MemberFilter<AbstractDatasetEntity> createObservationFilter() {
@@ -149,6 +110,48 @@ public class DatastreamQuerySpecification extends QuerySpecification<AbstractDat
                 return builder.or(builder.equal(root.get(IdEntity.PROPERTY_ID), sq),
                                   builder.equal(root.get(IdEntity.PROPERTY_ID), subquery));
 
+            };
+        }
+    }
+
+    private final class SensorFilter extends MemberFilterImpl<AbstractDatasetEntity> {
+
+        protected Specification<AbstractDatasetEntity> prepareQuery(Specification< ? > specification) {
+            return (root, query, builder) -> {
+                EntityQuery memberQuery = createQuery(IdEntity.PROPERTY_ID,
+                                                      ProcedureEntity.class);
+                Subquery< ? > subquery = memberQuery.create(specification, query, builder);
+                // n..1
+                return builder.in(subquery)
+                              .value(root.get(AbstractDatasetEntity.PROPERTY_PROCEDURE));
+            };
+        }
+    }
+
+    private final class ObservedPropertyFilter extends MemberFilterImpl<AbstractDatasetEntity> {
+
+        protected Specification<AbstractDatasetEntity> prepareQuery(Specification< ? > specification) {
+            return (root, query, builder) -> {
+                EntityQuery memberQuery = createQuery(IdEntity.PROPERTY_ID,
+                                                      PhenomenonEntity.class);
+                Subquery< ? > subquery = memberQuery.create(specification, query, builder);
+                // n..1
+                return builder.in(subquery)
+                              .value(root.get(AbstractDatasetEntity.PROPERTY_PHENOMENON));
+            };
+        }
+    }
+
+    private final class ThingFilter extends MemberFilterImpl<AbstractDatasetEntity> {
+
+        protected Specification<AbstractDatasetEntity> prepareQuery(Specification< ? > specification) {
+            return (root, query, builder) -> {
+                EntityQuery memberQuery = createQuery(IdEntity.PROPERTY_ID,
+                                                      PlatformEntity.class);
+                Subquery< ? > subquery = memberQuery.create(specification, query, builder);
+                // n..1
+                return builder.in(subquery)
+                              .value(root.get(AbstractDatasetEntity.PROPERTY_PLATFORM));
             };
         }
     }

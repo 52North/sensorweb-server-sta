@@ -120,6 +120,7 @@ import org.springframework.util.Assert;
  *
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
  */
+@SuppressWarnings("checkstyle:linelength")
 public class StaPlusDTOTransformerImpl<R extends StaDTO, S extends HibernateRelations.HasId>
         extends
         DTOTransformerImpl<R, S> {
@@ -139,24 +140,24 @@ public class StaPlusDTOTransformerImpl<R extends StaDTO, S extends HibernateRela
     public R toDTO(Object raw, QueryOptions queryOptions) throws STAInvalidQueryError {
         switch (raw.getClass()
                    .getSimpleName()) {
-        case "LicenseEntity": {
-            return (R) toLicenseDTO((LicenseEntity) raw, queryOptions);
-        }
-        case "RelationEntity": {
-            return (R) toObsRelDTO((RelationEntity) raw, queryOptions);
-        }
-        case "GroupEntity": {
-            return (R) toObsGroupDTO((GroupEntity) raw, queryOptions);
-        }
-        case "PartyEntity": {
-            return (R) toPartyDTO((PartyEntity) raw, queryOptions);
-        }
-        case "ProjectEntity": {
-            return (R) toProjectDTO((ProjectEntity) raw, queryOptions);
-        }
+            case "LicenseEntity": {
+                return (R) toLicenseDTO((LicenseEntity) raw, queryOptions);
+            }
+            case "RelationEntity": {
+                return (R) toObsRelDTO((RelationEntity) raw, queryOptions);
+            }
+            case "GroupEntity": {
+                return (R) toObsGroupDTO((GroupEntity) raw, queryOptions);
+            }
+            case "PartyEntity": {
+                return (R) toPartyDTO((PartyEntity) raw, queryOptions);
+            }
+            case "ProjectEntity": {
+                return (R) toProjectDTO((ProjectEntity) raw, queryOptions);
+            }
 
-        default:
-            return super.toDTO(raw, queryOptions);
+            default:
+                return super.toDTO(raw, queryOptions);
         }
     }
 
@@ -587,8 +588,8 @@ public class StaPlusDTOTransformerImpl<R extends StaDTO, S extends HibernateRela
     }
 
     protected <T extends DatastreamDTO> T createDatastreamDTO(T datastream,
-                                                              AbstractDatasetEntity raw,
-                                                              QueryOptions queryOptions) {
+            AbstractDatasetEntity raw,
+            QueryOptions queryOptions) {
         datastream.setAndParseQueryOptions(queryOptions);
 
         datastream.setId(raw.getStaIdentifier());
@@ -718,8 +719,8 @@ public class StaPlusDTOTransformerImpl<R extends StaDTO, S extends HibernateRela
     }
 
     protected <T extends PlusObservationDTO> T createObservationDTO(T observation,
-                                                                    DataEntity< ? > raw,
-                                                                    QueryOptions queryOptions) {
+            DataEntity< ? > raw,
+            QueryOptions queryOptions) {
         observation.setAndParseQueryOptions(queryOptions);
 
         observation.setId(raw.getStaIdentifier());
@@ -1181,7 +1182,7 @@ public class StaPlusDTOTransformerImpl<R extends StaDTO, S extends HibernateRela
 
     @SuppressWarnings("unchecked")
     protected HashSet<ParameterEntity< ? >> convertParameters(ObjectNode parameters,
-                                                              ParameterFactory.EntityType entityType) {
+            ParameterFactory.EntityType entityType) {
         // parameters
         if (parameters != null) {
             HashSet<ParameterEntity< ? >> parameterEntities = new HashSet<>();
@@ -1193,34 +1194,34 @@ public class StaPlusDTOTransformerImpl<R extends StaDTO, S extends HibernateRela
 
                 ParameterEntity parameterEntity;
                 switch (value.getNodeType()) {
-                case ARRAY:
-                    // fallthru
-                case MISSING:
-                    // fallthru
-                case NULL:
-                    // fallthru
-                case OBJECT:
-                    // fallthru
-                case POJO:
-                    parameterEntity = ParameterFactory.from(entityType, ParameterFactory.ValueType.JSON);
-                    parameterEntity.setValue(value.asText());
-                    break;
-                case BINARY:
-                    // fallthru
-                case BOOLEAN:
-                    parameterEntity = ParameterFactory.from(entityType, ParameterFactory.ValueType.BOOLEAN);
-                    parameterEntity.setValue(value.asBoolean());
-                    break;
-                case NUMBER:
-                    parameterEntity = ParameterFactory.from(entityType, ParameterFactory.ValueType.QUANTITY);
-                    parameterEntity.setValue(BigDecimal.valueOf(value.asDouble()));
-                    break;
-                case STRING:
-                    parameterEntity = ParameterFactory.from(entityType, ParameterFactory.ValueType.TEXT);
-                    parameterEntity.setValue(value.asText());
-                    break;
-                default:
-                    throw new RuntimeException("Could not identify value type of parameters!");
+                    case ARRAY:
+                        // fallthru
+                    case MISSING:
+                        // fallthru
+                    case NULL:
+                        // fallthru
+                    case OBJECT:
+                        // fallthru
+                    case POJO:
+                        parameterEntity = ParameterFactory.from(entityType, ParameterFactory.ValueType.JSON);
+                        parameterEntity.setValue(value.asText());
+                        break;
+                    case BINARY:
+                        // fallthru
+                    case BOOLEAN:
+                        parameterEntity = ParameterFactory.from(entityType, ParameterFactory.ValueType.BOOLEAN);
+                        parameterEntity.setValue(value.asBoolean());
+                        break;
+                    case NUMBER:
+                        parameterEntity = ParameterFactory.from(entityType, ParameterFactory.ValueType.QUANTITY);
+                        parameterEntity.setValue(BigDecimal.valueOf(value.asDouble()));
+                        break;
+                    case STRING:
+                        parameterEntity = ParameterFactory.from(entityType, ParameterFactory.ValueType.TEXT);
+                        parameterEntity.setValue(value.asText());
+                        break;
+                    default:
+                        throw new RuntimeException("Could not identify value type of parameters!");
                 }
                 parameterEntity.setName(key);
                 parameterEntities.add(parameterEntity);
@@ -1232,7 +1233,7 @@ public class StaPlusDTOTransformerImpl<R extends StaDTO, S extends HibernateRela
     }
 
     protected void parseObservationParameters(DataEntity dataEntity,
-                                              ObservationDTO dto) {
+            ObservationDTO dto) {
         if (dto.getParameters() != null) {
             Iterator<String> keyIt = dto.getParameters()
                                         .fieldNames();

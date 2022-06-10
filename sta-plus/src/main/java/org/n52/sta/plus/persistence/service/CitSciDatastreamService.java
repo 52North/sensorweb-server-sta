@@ -57,6 +57,7 @@ import org.springframework.transaction.annotation.Transactional;
 // @DependsOn({ "springApplicationContext", "datastreamRepository" })
 // @Profile(StaConstants.STAPLUS)
 @Transactional
+@SuppressWarnings("checkstyle:linelength")
 public class CitSciDatastreamService extends CommonDatastreamService<StaPlusDataset, StaPlusDatastreamRepository> {
 
     public CitSciDatastreamService(
@@ -97,8 +98,8 @@ public class CitSciDatastreamService extends CommonDatastreamService<StaPlusData
 
     @Override
     protected StaPlusDatasetEntity createDataset(AbstractDatasetEntity datastream,
-                                                 AbstractFeatureEntity< ? > feature,
-                                                 String staIdentifier)
+            AbstractFeatureEntity< ? > feature,
+            String staIdentifier)
             throws STACRUDException {
         StaPlusDatasetEntity dataset = new StaPlusDatasetEntity();
         fillDataset(dataset, datastream, feature, staIdentifier);
@@ -108,9 +109,9 @@ public class CitSciDatastreamService extends CommonDatastreamService<StaPlusData
     }
 
     protected AbstractDatasetEntity fillDataset(StaPlusDatasetEntity dataset,
-                                                AbstractDatasetEntity datastream,
-                                                AbstractFeatureEntity< ? > feature,
-                                                String staIdentifier)
+            AbstractDatasetEntity datastream,
+            AbstractFeatureEntity< ? > feature,
+            String staIdentifier)
             throws STACRUDException {
         CategoryEntity category = categoryRepository.findByIdentifier(CategoryService.DEFAULT_CATEGORY)
                                                     .orElseThrow(() -> new STACRUDException("Could not find default SOS Category!"));

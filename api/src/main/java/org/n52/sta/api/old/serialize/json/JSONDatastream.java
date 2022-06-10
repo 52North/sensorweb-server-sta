@@ -33,10 +33,6 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import com.fasterxml.jackson.annotation.JsonManagedReference;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
-
 import org.locationtech.jts.geom.GeometryFactory;
 import org.locationtech.jts.geom.PrecisionModel;
 import org.locationtech.jts.io.ParseException;
@@ -50,7 +46,14 @@ import org.n52.sta.api.old.entity.ObservationDTO;
 import org.n52.sta.api.old.serialize.common.AbstractJSONEntity;
 import org.n52.sta.api.old.serialize.common.JSONBase;
 
-@SuppressWarnings("VisibilityModifier")
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+
+@SuppressWarnings({
+    "VisibilityModifier",
+    "checkstyle:linelength"
+})
 public class JSONDatastream extends JSONBase.JSONwithIdNameDescriptionTime<DatastreamDTO>
         implements
         AbstractJSONEntity {

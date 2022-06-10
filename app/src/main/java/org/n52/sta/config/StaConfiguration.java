@@ -63,8 +63,8 @@ public class StaConfiguration {
 
     @Bean
     public EntityService<Thing> getThingService(EntityProvider<Thing> entityProvider,
-                                                Optional<DomainService<Thing>> thingDomainService,
-                                                EntityServiceLookup lookup) {
+            Optional<DomainService<Thing>> thingDomainService,
+            EntityServiceLookup lookup) {
         ThingService service = thingDomainService.isPresent()
                 ? new ThingService(entityProvider, thingDomainService.get())
                 : new ThingService(entityProvider);
@@ -74,8 +74,8 @@ public class StaConfiguration {
 
     @Bean
     public EntityService<Datastream> getDatastreamService(EntityProvider<Datastream> entityProvider,
-                                                          Optional<DomainService<Datastream>> datastreamDomainService,
-                                                          EntityServiceLookup lookup) {
+            Optional<DomainService<Datastream>> datastreamDomainService,
+            EntityServiceLookup lookup) {
         DatastreamService service = datastreamDomainService.isPresent()
                 ? new DatastreamService(entityProvider, datastreamDomainService.get())
                 : new DatastreamService(entityProvider);
@@ -85,8 +85,8 @@ public class StaConfiguration {
 
     @Bean
     public EntityService<Sensor> getSensorService(EntityProvider<Sensor> entityProvider,
-                                                  Optional<DomainService<Sensor>> sensorDomainService,
-                                                  EntityServiceLookup lookup) {
+            Optional<DomainService<Sensor>> sensorDomainService,
+            EntityServiceLookup lookup) {
         SensorService service = sensorDomainService.isPresent()
                 ? new SensorService(entityProvider, sensorDomainService.get())
                 : new SensorService(entityProvider);
@@ -96,8 +96,7 @@ public class StaConfiguration {
 
     @Bean
     public EntityService<Location> getLocationService(EntityProvider<Location> entityProvider,
-                                                      Optional<DomainService<Location>> locationDomainService,
-                                                      EntityServiceLookup lookup) {
+            Optional<DomainService<Location>> locationDomainService, EntityServiceLookup lookup) {
         LocationService service = locationDomainService.isPresent()
                 ? new LocationService(entityProvider, locationDomainService.get())
                 : new LocationService(entityProvider);
@@ -107,8 +106,7 @@ public class StaConfiguration {
 
     @Bean
     public EntityService<ObservedProperty> getObservedPropertyService(EntityProvider<ObservedProperty> entityProvider,
-                                                                      Optional<DomainService<ObservedProperty>> observedPropertyDomainService,
-                                                                      EntityServiceLookup lookup) {
+            Optional<DomainService<ObservedProperty>> observedPropertyDomainService, EntityServiceLookup lookup) {
         ObservedPropertyService service = observedPropertyDomainService.isPresent()
                 ? new ObservedPropertyService(entityProvider, observedPropertyDomainService.get())
                 : new ObservedPropertyService(entityProvider);
@@ -118,8 +116,8 @@ public class StaConfiguration {
 
     @Bean
     public EntityService<Observation> getObservationService(EntityProvider<Observation> entityProvider,
-                                                            Optional<DomainService<Observation>> observationDomainService,
-                                                            EntityServiceLookup lookup) {
+            Optional<DomainService<Observation>> observationDomainService,
+            EntityServiceLookup lookup) {
         ObservationService service = observationDomainService.isPresent()
                 ? new ObservationService(entityProvider, observationDomainService.get())
                 : new ObservationService(entityProvider);
@@ -128,9 +126,10 @@ public class StaConfiguration {
     }
 
     @Bean
-    public EntityService<FeatureOfInterest> getFeatureOfInterestService(EntityProvider<FeatureOfInterest> entityProvider,
-                                                                        Optional<DomainService<FeatureOfInterest>> featureOfInterestDomainService,
-                                                                        EntityServiceLookup lookup) {
+    public EntityService<FeatureOfInterest> getFeatureOfInterestService(
+            EntityProvider<FeatureOfInterest> entityProvider,
+            Optional<DomainService<FeatureOfInterest>> featureOfInterestDomainService,
+            EntityServiceLookup lookup) {
         FeatureOfInterestService service = featureOfInterestDomainService.isPresent()
                 ? new FeatureOfInterestService(entityProvider, featureOfInterestDomainService.get())
                 : new FeatureOfInterestService(entityProvider);
@@ -139,9 +138,10 @@ public class StaConfiguration {
     }
 
     @Bean
-    public EntityService<HistoricalLocation> getHistoricalLocationService(EntityProvider<HistoricalLocation> entityProvider,
-                                                                          Optional<DomainService<HistoricalLocation>> historicalLocationDomainService,
-                                                                          EntityServiceLookup lookup) {
+    public EntityService<HistoricalLocation> getHistoricalLocationService(
+            EntityProvider<HistoricalLocation> entityProvider,
+            Optional<DomainService<HistoricalLocation>> historicalLocationDomainService,
+            EntityServiceLookup lookup) {
         HistoricalLocationService service = historicalLocationDomainService.isPresent()
                 ? new HistoricalLocationService(entityProvider, historicalLocationDomainService.get())
                 : new HistoricalLocationService(entityProvider);

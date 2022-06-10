@@ -34,14 +34,15 @@ import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
-import com.fasterxml.jackson.core.JsonGenerator;
-import com.fasterxml.jackson.databind.ser.std.StdSerializer;
-
 import org.locationtech.jts.geom.Geometry;
+import org.n52.shetland.oasis.odata.query.option.QueryOptions;
 import org.n52.shetland.ogc.gml.time.Time;
 import org.n52.shetland.ogc.sta.StaConstants;
 import org.n52.shetland.util.DateTimeHelper;
 import org.n52.sta.api.entity.Identifiable;
+
+import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.databind.ser.std.StdSerializer;
 
 public abstract class StaBaseSerializer<T extends Identifiable> extends StdSerializer<T> implements StaSerializer<T> {
 
@@ -110,12 +111,11 @@ public abstract class StaBaseSerializer<T extends Identifiable> extends StdSeria
         }
     }
 
-    protected <E extends Identifiable> void writeMemberCollection(
-                                                                  String member,
-                                                                  String parentId,
-                                                                  JsonGenerator gen,
-                                                                  Function<SerializationContext, StaBaseSerializer<E>> serializerFactory,
-                                                                  ThrowingMemberWriter<E> memberWriter)
+    protected <E extends Identifiable> void writeMemberCollection(String member,
+            String parentId,
+            JsonGenerator gen,
+            Function<SerializationContext, StaBaseSerializer<E>> serializerFactory,
+            ThrowingMemberWriter<E> memberWriter)
             throws IOException {
         // wrap to write as array
         writeMemberInternal(member, parentId, gen, serializerFactory, serializer -> {
@@ -125,33 +125,36 @@ public abstract class StaBaseSerializer<T extends Identifiable> extends StdSeria
         });
     }
 
-    protected <E extends Identifiable> void writeMember(
-                                                        String member,
-                                                        String parentId,
-                                                        JsonGenerator gen,
-                                                        Function<SerializationContext, StaBaseSerializer<E>> serializerFactory,
-                                                        ThrowingMemberWriter<E> memberWriter)
+    protected <E extends Identifiable> void writeMember(String member,
+            String parentId,
+            JsonGenerator gen,
+            Function<SerializationContext, StaBaseSerializer<E>> serializerFactory,
+            ThrowingMemberWriter<E> memberWriter)
             throws IOException {
         writeMemberInternal(member, parentId, gen, serializerFactory, memberWriter);
     }
 
     private <E extends Identifiable> void writeMemberInternal(String member,
-                                                              String parentId,
-                                                              JsonGenerator gen,
-                                                              Function<SerializationContext, StaBaseSerializer<E>> serializerFactory,
-                                                              ThrowingMemberWriter<E> memberWriter)
+            String parentId,
+            JsonGenerator gen,
+            Function<SerializationContext, StaBaseSerializer<E>> serializerFactory,
+            ThrowingMemberWriter<E> memberWriter)
             throws IOException {
         if (context.isSelected(member)) {
-            Optional<StaBaseSerializer<E>> serializer = context.getQueryOptionsForExpanded(member)
-                                                               .map(expandQueryOptions -> SerializationContext.create(context,
-                                                                                                                      expandQueryOptions))
-                                                               .map(serializerFactory::apply);
+            Optional<StaBaseSerializer<E>> serializer = createSerializer(member, serializerFactory);
             if (serializer.isPresent()) {
                 memberWriter.writeIfSelected(serializer.get());
             } else {
                 writeNavLink(member, parentId, gen);
             }
         }
+    }
+
+    private <E extends Identifiable> Optional<StaBaseSerializer<E>> createSerializer(String member,
+            Function<SerializationContext, StaBaseSerializer<E>> serializerFactory) {
+        Optional<QueryOptions> queryOptions = context.getQueryOptionsForExpanded(member);
+        return queryOptions.map(expandQueryOptions -> SerializationContext.create(context, expandQueryOptions))
+                           .map(serializerFactory::apply);
     }
 
     private void writeNavLink(String member, String parentId, JsonGenerator gen) throws IOException {

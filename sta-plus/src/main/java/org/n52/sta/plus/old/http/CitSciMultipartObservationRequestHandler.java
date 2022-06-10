@@ -66,6 +66,7 @@ import org.springframework.web.multipart.MultipartFile;
 // @ConditionalOnProperty(value = "server.feature.http.read-Only", havingValue = "false", matchIfMissing =
 // true)
 // @Profile(StaConstants.STAPLUS)
+@SuppressWarnings("checkstyle:linelength")
 public class CitSciMultipartObservationRequestHandler {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CitSciMultipartObservationRequestHandler.class);

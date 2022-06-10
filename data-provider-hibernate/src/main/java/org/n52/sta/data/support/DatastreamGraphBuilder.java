@@ -33,7 +33,7 @@ import org.n52.shetland.filter.ExpandItem;
 import org.n52.shetland.oasis.odata.query.option.QueryOptions;
 import org.n52.shetland.ogc.sta.StaConstants;
 
-public class DatastreamGraphBuilder extends GraphBuilder<AbstractDatasetEntity> {
+public final class DatastreamGraphBuilder extends GraphBuilder<AbstractDatasetEntity> {
 
     private DatastreamGraphBuilder() {
         super(AbstractDatasetEntity.class);

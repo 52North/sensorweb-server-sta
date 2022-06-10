@@ -32,7 +32,7 @@ import org.n52.series.db.beans.AbstractFeatureEntity;
 import org.n52.shetland.filter.ExpandItem;
 import org.n52.shetland.oasis.odata.query.option.QueryOptions;
 
-public class FeatureOfInterestGraphBuilder extends GraphBuilder<AbstractFeatureEntity> {
+public final class FeatureOfInterestGraphBuilder extends GraphBuilder<AbstractFeatureEntity> {
 
     private FeatureOfInterestGraphBuilder() {
         super(AbstractFeatureEntity.class);

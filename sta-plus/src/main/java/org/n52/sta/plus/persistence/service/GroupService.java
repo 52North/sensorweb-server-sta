@@ -63,6 +63,7 @@ import org.springframework.data.jpa.domain.Specification;
 // @DependsOn({ "springApplicationContext" })
 // @Transactional
 // @Profile(StaConstants.STAPLUS)
+@SuppressWarnings("checkstyle:linelength")
 public class GroupService
         extends
         CitSciSTAServiceImpl<GroupRepository, GroupDTO, GroupEntity> {
@@ -94,14 +95,14 @@ public class GroupService
                 }
                 String expandProperty = expandItem.getPath();
                 switch (expandProperty) {
-                case GroupEntityDefinition.RELATIONS:
-                    fetchGraphs.add(EntityGraphRepository.FetchGraph.FETCHGRAPH_RELATIONS);
-                    break;
-                default:
-                    throw new STAInvalidQueryException(
-                                                       String.format(CommonSTAServiceImpl.INVALID_EXPAND_OPTION_SUPPLIED,
-                                                                     expandProperty,
-                                                                     StaConstants.GROUP));
+                    case GroupEntityDefinition.RELATIONS:
+                        fetchGraphs.add(EntityGraphRepository.FetchGraph.FETCHGRAPH_RELATIONS);
+                        break;
+                    default:
+                        String message = String.format(CommonSTAServiceImpl.INVALID_EXPAND_OPTION_SUPPLIED,
+                                                       expandProperty,
+                                                       StaConstants.GROUP);
+                        throw new STAInvalidQueryException(message);
                 }
             }
         }
@@ -110,7 +111,7 @@ public class GroupService
 
     @Override
     protected GroupEntity fetchExpandEntitiesWithFilter(GroupEntity entity,
-                                                        ExpandFilter expandOption)
+            ExpandFilter expandOption)
             throws STACRUDException, STAInvalidQueryException {
         for (ExpandItem expandItem : expandOption.getItems()) {
             // We have already handled $expand without filter and expand
@@ -122,24 +123,24 @@ public class GroupService
             }
             String expandProperty = expandItem.getPath();
             switch (expandProperty) {
-            case GroupEntityDefinition.RELATIONS:
-                Page<RelationEntity> obsRelations = getObservationRelationService()
-                                                                                   .getEntityCollectionByRelatedEntityRaw(entity.getStaIdentifier(),
-                                                                                                                          STAEntityDefinition.GROUPS,
-                                                                                                                          expandItem.getQueryOptions());
-                entity.setRelations(obsRelations.get()
-                                                .collect(Collectors.toSet()));
-                break;
-            case GroupEntityDefinition.LICENSES:
-                entity.setLicense(getLicenseService().getEntityByIdRaw(entity.getLicense()
-                                                                             .getId(),
-                                                                       expandItem.getQueryOptions()));
-                break;
-            default:
-                throw new STAInvalidQueryException(
-                                                   String.format(CommonSTAServiceImpl.INVALID_EXPAND_OPTION_SUPPLIED,
-                                                                 expandProperty,
-                                                                 StaConstants.GROUP));
+                case GroupEntityDefinition.RELATIONS:
+                    Page<RelationEntity> obsRelations = getObservationRelationService()
+                                                                                       .getEntityCollectionByRelatedEntityRaw(entity.getStaIdentifier(),
+                                                                                                                              STAEntityDefinition.GROUPS,
+                                                                                                                              expandItem.getQueryOptions());
+                    entity.setRelations(obsRelations.get()
+                                                    .collect(Collectors.toSet()));
+                    break;
+                case GroupEntityDefinition.LICENSES:
+                    entity.setLicense(getLicenseService().getEntityByIdRaw(entity.getLicense()
+                                                                                 .getId(),
+                                                                           expandItem.getQueryOptions()));
+                    break;
+                default:
+                    throw new STAInvalidQueryException(
+                                                       String.format(CommonSTAServiceImpl.INVALID_EXPAND_OPTION_SUPPLIED,
+                                                                     expandProperty,
+                                                                     StaConstants.GROUP));
             }
         }
         return entity;
@@ -147,23 +148,23 @@ public class GroupService
 
     @Override
     protected Specification<GroupEntity> byRelatedEntityFilter(String relatedId,
-                                                               String relatedType,
-                                                               String ownId) {
+            String relatedType,
+            String ownId) {
         Specification<GroupEntity> filter;
         switch (relatedType) {
-        case STAEntityDefinition.RELATIONS:
-            filter = ObservationGroupQuerySpecifications.withRelationStaIdentifier(relatedId);
-            break;
-        case STAEntityDefinition.LICENSES:
-            filter = ObservationGroupQuerySpecifications.withLicenseStaIdentifier(relatedId);
-            break;
-        case STAEntityDefinition.OBSERVATIONS:
-            filter = ObservationGroupQuerySpecifications.withObservationStaIdentifier(relatedId);
-            break;
-        default:
-            throw new IllegalStateException(
-                                            String.format(TRYING_TO_FILTER_BY_UNRELATED_TYPE,
-                                                          relatedType));
+            case STAEntityDefinition.RELATIONS:
+                filter = ObservationGroupQuerySpecifications.withRelationStaIdentifier(relatedId);
+                break;
+            case STAEntityDefinition.LICENSES:
+                filter = ObservationGroupQuerySpecifications.withLicenseStaIdentifier(relatedId);
+                break;
+            case STAEntityDefinition.OBSERVATIONS:
+                filter = ObservationGroupQuerySpecifications.withObservationStaIdentifier(relatedId);
+                break;
+            default:
+                throw new IllegalStateException(
+                                                String.format(TRYING_TO_FILTER_BY_UNRELATED_TYPE,
+                                                              relatedType));
         }
 
         if (ownId != null) {
@@ -220,15 +221,15 @@ public class GroupService
 
                     if (obsGroup.getParameters() != null) {
                         GroupEntity finalObsGroup = obsGroup;
-                        parameterRepository.saveAll(obsGroup.getParameters()
-                                                            .stream()
-                                                            .filter(o -> o instanceof ObservationGroupParameterEntity)
-                                                            .map(t -> {
-                                                                ((ObservationGroupParameterEntity) t).setObsGroup(
-                                                                                                                  finalObsGroup);
-                                                                return (ObservationGroupParameterEntity) t;
-                                                            })
-                                                            .collect(Collectors.toSet()));
+                        Set<ObservationGroupParameterEntity> parameters = obsGroup.getParameters()
+                                                                                  .stream()
+                                                                                  .filter(o -> o instanceof ObservationGroupParameterEntity)
+                                                                                  .map(t -> {
+                                                                                      ((ObservationGroupParameterEntity) t).setObsGroup(finalObsGroup);
+                                                                                      return (ObservationGroupParameterEntity) t;
+                                                                                  })
+                                                                                  .collect(Collectors.toSet());
+                        parameterRepository.saveAll(parameters);
                         obsGroup.setParameters(obsGroup.getParameters());
                     }
                 }
@@ -326,7 +327,7 @@ public class GroupService
     }
 
     private void mergeObservationRelations(GroupEntity existing,
-                                           GroupEntity toMerge) {
+            GroupEntity toMerge) {
 
         /*
          * if (existing.getEntities() == null) { existing.setEntities(toMerge.getEntities()); } else { if

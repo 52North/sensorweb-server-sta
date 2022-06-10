@@ -28,6 +28,10 @@
 
 package org.n52.sta.data.old.service;
 
+import java.util.UUID;
+
+import javax.persistence.EntityManager;
+
 import org.n52.series.db.beans.AbstractDatasetEntity;
 import org.n52.series.db.beans.AbstractFeatureEntity;
 import org.n52.series.db.beans.CategoryEntity;
@@ -52,9 +56,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 
-import javax.persistence.EntityManager;
-import java.util.UUID;
-
 // @Component
 // @DependsOn({ "springApplicationContext", "datastreamRepository" })
 // @Transactional
@@ -63,59 +64,59 @@ public class DatastreamService extends CommonDatastreamService<AbstractDatasetEn
     private static final Logger LOGGER = LoggerFactory.getLogger(DatastreamService.class);
 
     public DatastreamService(
-                             DatastreamRepository repository,
-                             @Value("${server.feature.isMobile:false}") boolean isMobileFeatureEnabled,
-                             @Value("${server.feature.includeDatastreamCategory:false}") boolean includeDatastreamCategory,
-                             UnitRepository unitRepository,
-                             CategoryRepository categoryRepository,
-                             ObservationRepository observationRepository,
-                             DatastreamParameterRepository parameterRepository,
-                             OfferingService offeringService,
-                             FormatService formatService,
-                             EntityManager em) {
+            DatastreamRepository repository,
+            @Value("${server.feature.isMobile:false}") boolean isMobileFeatureEnabled,
+            @Value("${server.feature.includeDatastreamCategory:false}") boolean includeDatastreamCategory,
+            UnitRepository unitRepository,
+            CategoryRepository categoryRepository,
+            ObservationRepository observationRepository,
+            DatastreamParameterRepository parameterRepository,
+            OfferingService offeringService,
+            FormatService formatService,
+            EntityManager em) {
         super(repository,
-              isMobileFeatureEnabled,
-              includeDatastreamCategory,
-              unitRepository,
-              categoryRepository,
-              observationRepository,
-              parameterRepository,
-              offeringService,
-              formatService,
-              em);
+                isMobileFeatureEnabled,
+                includeDatastreamCategory,
+                unitRepository,
+                categoryRepository,
+                observationRepository,
+                parameterRepository,
+                offeringService,
+                formatService,
+                em);
     }
 
     @Override
     protected Dataset createDataset(AbstractDatasetEntity datastream,
-                                    AbstractFeatureEntity< ? > feature,
-                                    String staIdentifier)
+            AbstractFeatureEntity<?> feature,
+            String staIdentifier)
             throws STACRUDException {
         return (Dataset) fillDataset(new DatasetEntity(), datastream, feature, staIdentifier);
     }
 
     private AbstractDatasetEntity fillDataset(DatasetEntity shell,
-                                              AbstractDatasetEntity datastream,
-                                              AbstractFeatureEntity< ? > feature,
-                                              String staIdentifier)
+            AbstractDatasetEntity datastream,
+            AbstractFeatureEntity<?> feature,
+            String staIdentifier)
             throws STACRUDException {
         CategoryEntity category = categoryRepository.findByIdentifier(CategoryService.DEFAULT_CATEGORY)
-                                                    .orElseThrow(() -> new STACRUDException("Could not find default SOS Category!"));
+                .orElseThrow(() -> new STACRUDException("Could not find default SOS Category!"));
         OfferingEntity offering = offeringService.createOrFetchOffering(datastream.getProcedure());
         AbstractDatasetEntity dataset = createDatasetSkeleton(shell,
-                                                              datastream.getOMObservationType()
-                                                                        .getFormat(),
-                                                              isMobileFeatureEnabled
-                                                                      && datastream.getThing()
-                                                                                   .hasParameters()
-                                                                      && datastream.getThing()
-                                                                                   .getParameters()
-                                                                                   .stream()
-                                                                                   .filter(p -> p instanceof BooleanParameterEntity)
-                                                                                   .filter(p -> p.getName()
-                                                                                                 .equals("isMobile"))
-                                                                                   .anyMatch(p -> ((ParameterEntity<Boolean>) p).getValue()));
+                datastream.getOMObservationType()
+                        .getFormat(),
+                isMobileFeatureEnabled
+                        && datastream.getThing()
+                                .hasParameters()
+                        && datastream.getThing()
+                                .getParameters()
+                                .stream()
+                                .filter(p -> p instanceof BooleanParameterEntity)
+                                .filter(p -> p.getName()
+                                        .equals("isMobile"))
+                                .anyMatch(p -> ((ParameterEntity<Boolean>) p).getValue()));
         dataset.setIdentifier(UUID.randomUUID()
-                                  .toString());
+                .toString());
         dataset.setStaIdentifier(staIdentifier);
         dataset.setName(datastream.getName());
         dataset.setDescription(datastream.getDescription());
@@ -147,18 +148,18 @@ public class DatastreamService extends CommonDatastreamService<AbstractDatasetEn
             dataset.setDatasetType(DatasetType.timeseries);
         }
         switch (observationType) {
-        case OmConstants.OBS_TYPE_MEASUREMENT:
-            return dataset.setValueType(ValueType.quantity);
-        case OmConstants.OBS_TYPE_CATEGORY_OBSERVATION:
-            return dataset.setValueType(ValueType.category);
-        case OmConstants.OBS_TYPE_COUNT_OBSERVATION:
-            return dataset.setValueType(ValueType.count);
-        case OmConstants.OBS_TYPE_TEXT_OBSERVATION:
-            return dataset.setValueType(ValueType.text);
-        case OmConstants.OBS_TYPE_TRUTH_OBSERVATION:
-            return dataset.setValueType(ValueType.bool);
-        default:
-            return dataset;
+            case OmConstants.OBS_TYPE_MEASUREMENT:
+                return dataset.setValueType(ValueType.quantity);
+            case OmConstants.OBS_TYPE_CATEGORY_OBSERVATION:
+                return dataset.setValueType(ValueType.category);
+            case OmConstants.OBS_TYPE_COUNT_OBSERVATION:
+                return dataset.setValueType(ValueType.count);
+            case OmConstants.OBS_TYPE_TEXT_OBSERVATION:
+                return dataset.setValueType(ValueType.text);
+            case OmConstants.OBS_TYPE_TRUTH_OBSERVATION:
+                return dataset.setValueType(ValueType.bool);
+            default:
+                return dataset;
         }
     }
 

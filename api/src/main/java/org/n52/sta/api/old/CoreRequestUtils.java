@@ -36,6 +36,7 @@ import org.n52.shetland.ogc.sta.exception.STAInvalidUrlException;
 /**
  * Constants used by STA Core for handling Requests.
  */
+@SuppressWarnings("checkstyle:linelength")
 public interface CoreRequestUtils extends RequestUtils {
 
     String BASE_COLLECTION_REGEX_NAMED_GROUPS = WANTED_NAME_GROUP_START

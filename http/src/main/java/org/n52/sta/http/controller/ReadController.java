@@ -30,15 +30,11 @@ package org.n52.sta.http.controller;
 
 import java.io.BufferedOutputStream;
 import java.io.OutputStream;
-import java.util.Collections;
 import java.util.Objects;
 import java.util.Optional;
 
 import javax.servlet.http.HttpServletRequest;
 
-import org.n52.shetland.filter.SelectFilter;
-import org.n52.shetland.oasis.odata.query.option.QueryOptions;
-import org.n52.shetland.ogc.sta.StaConstants;
 import org.n52.shetland.ogc.sta.exception.STACRUDException;
 import org.n52.shetland.ogc.sta.exception.STAInvalidUrlException;
 import org.n52.sta.api.EntityPage;
@@ -96,12 +92,13 @@ public class ReadController {
         StaPath path = requestContext.getPath();
         SerializationContext serializationContext = SerializationContext.create(requestContext, mapper);
 
+        // TODO is this even necessary?
         // Use $ref serialization-context
-        if (path.isRef()) {
-            serializationContext = SerializationContext.create(serializationContext,
-                                                               new QueryOptions(Collections.singleton(
-                                                                                                      new SelectFilter(StaConstants.PROP_SELF_LINK))));
-        }
+        // if (path.isRef()) {
+        // serializationContext = SerializationContext.create(serializationContext,
+        // new QueryOptions(Collections.singleton(
+        // new SelectFilter(StaConstants.PROP_SELF_LINK))));
+        // }
 
         StaBaseSerializer< ? > serializer = path.getSerializerFactory()
                                                 .apply(serializationContext);

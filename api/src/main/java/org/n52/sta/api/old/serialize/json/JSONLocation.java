@@ -33,10 +33,6 @@ import java.util.Collections;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
-import com.fasterxml.jackson.annotation.JsonManagedReference;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
-
 import org.locationtech.jts.geom.GeometryFactory;
 import org.locationtech.jts.geom.PrecisionModel;
 import org.locationtech.jts.io.ParseException;
@@ -45,9 +41,16 @@ import org.n52.sta.api.old.dto.Location;
 import org.n52.sta.api.old.serialize.common.AbstractJSONEntity;
 import org.n52.sta.api.old.serialize.common.JSONBase;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 
-@SuppressWarnings("VisibilityModifier")
+@SuppressWarnings({
+    "VisibilityModifier",
+    "checkstyle:linelength"
+})
 @SuppressFBWarnings({
     "NM_FIELD_NAMING_CONVENTION",
     "UWF_UNWRITTEN_PUBLIC_OR_PROTECTED_FIELD"

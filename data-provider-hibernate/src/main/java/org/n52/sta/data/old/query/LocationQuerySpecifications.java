@@ -28,6 +28,11 @@
 
 package org.n52.sta.data.old.query;
 
+import javax.persistence.criteria.Expression;
+import javax.persistence.criteria.Join;
+import javax.persistence.criteria.Root;
+import javax.persistence.criteria.Subquery;
+
 import org.n52.series.db.beans.DescribableEntity;
 import org.n52.series.db.beans.FormatEntity;
 import org.n52.series.db.beans.PlatformEntity;
@@ -43,11 +48,6 @@ import org.n52.sta.data.old.util.HibernateSpatialCriteriaBuilder;
 import org.n52.svalbard.odata.core.expr.GeoValueExpr;
 import org.springframework.data.jpa.domain.Specification;
 
-import javax.persistence.criteria.Expression;
-import javax.persistence.criteria.Join;
-import javax.persistence.criteria.Root;
-import javax.persistence.criteria.Subquery;
-
 /**
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
  */
@@ -59,12 +59,12 @@ public class LocationQuerySpecifications extends EntityQuerySpecifications<Locat
             Subquery<LocationEntity> sq = query.subquery(LocationEntity.class);
             Root<HistoricalLocationEntity> historicalLoc = sq.from(HistoricalLocationEntity.class);
             Join<HistoricalLocationEntity, LocationEntity> joinFeature = historicalLoc
-                                                                                      .join(HistoricalLocationEntity.PROPERTY_LOCATIONS);
+                    .join(HistoricalLocationEntity.PROPERTY_LOCATIONS);
             sq.select(joinFeature)
-              .where(builder.equal(historicalLoc.get(DescribableEntity.PROPERTY_STA_IDENTIFIER),
-                                   historicalLocationIdentifier));
+                    .where(builder.equal(historicalLoc.get(DescribableEntity.PROPERTY_STA_IDENTIFIER),
+                            historicalLocationIdentifier));
             return builder.in(root)
-                          .value(sq);
+                    .value(sq);
         };
     }
 
@@ -74,74 +74,75 @@ public class LocationQuerySpecifications extends EntityQuerySpecifications<Locat
             Root<PlatformEntity> platform = sq.from(PlatformEntity.class);
             Join<PlatformEntity, LocationEntity> joinFeature = platform.join(PlatformEntity.PROPERTY_LOCATIONS);
             sq.select(joinFeature)
-              .where(builder.equal(platform.get(DescribableEntity.PROPERTY_STA_IDENTIFIER), thingIdentifier));
+                    .where(builder.equal(platform.get(DescribableEntity.PROPERTY_STA_IDENTIFIER), thingIdentifier));
             return builder.in(root)
-                          .value(sq);
+                    .value(sq);
         };
     }
 
     /**
-     * Copies the arguments provided in arguments to the database function call. If too many arguments are
+     * Copies the arguments provided in arguments to the database function call. If
+     * too many arguments are
      * provided they are discarded silently.
      *
      * @param spatialFunctionName
-     *        name of the function to be called
+     *                            name of the function to be called
      * @param arguments
-     *        arguments of the function
+     *                            arguments of the function
      * @return Specification of LocationEntity matching
      */
     @Override
     public Specification<LocationEntity> handleGeoSpatialPropertyFilter(
-                                                                        String propertyName,
-                                                                        String spatialFunctionName,
-                                                                        String... arguments) {
+            String propertyName,
+            String spatialFunctionName,
+            String... arguments) {
         return (Specification<LocationEntity>) (root, query, builder) -> {
             if (!StaConstants.PROP_LOCATION.equals(propertyName)) {
                 throw new RuntimeException("Could not find property: " + propertyName);
             }
             if (builder instanceof HibernateSpatialCriteriaBuilder) {
                 switch (spatialFunctionName) {
-                case ODataConstants.SpatialFunctions.ST_EQUALS:
-                    return ((HibernateSpatialCriteriaBuilder) builder).st_equals(
-                                                                                 root.get(LocationEntity.PROPERTY_GEOMETRY_ENTITY),
-                                                                                 arguments[0]);
-                case ODataConstants.SpatialFunctions.ST_DISJOINT:
-                    return ((HibernateSpatialCriteriaBuilder) builder).st_disjoint(
-                                                                                   root.get(LocationEntity.PROPERTY_GEOMETRY_ENTITY),
-                                                                                   arguments[0]);
-                case ODataConstants.SpatialFunctions.ST_TOUCHES:
-                    return ((HibernateSpatialCriteriaBuilder) builder).st_touches(
-                                                                                  root.get(LocationEntity.PROPERTY_GEOMETRY_ENTITY),
-                                                                                  arguments[0]);
-                case ODataConstants.SpatialFunctions.ST_WITHIN:
-                    return ((HibernateSpatialCriteriaBuilder) builder).st_within(
-                                                                                 root.get(LocationEntity.PROPERTY_GEOMETRY_ENTITY),
-                                                                                 arguments[0]);
-                case ODataConstants.SpatialFunctions.ST_OVERLAPS:
-                    return ((HibernateSpatialCriteriaBuilder) builder).st_overlaps(
-                                                                                   root.get(LocationEntity.PROPERTY_GEOMETRY_ENTITY),
-                                                                                   arguments[0]);
-                case ODataConstants.SpatialFunctions.ST_CROSSES:
-                    return ((HibernateSpatialCriteriaBuilder) builder).st_crosses(
-                                                                                  root.get(LocationEntity.PROPERTY_GEOMETRY_ENTITY),
-                                                                                  arguments[0]);
-                case ODataConstants.GeoFunctions.GEO_INTERSECTS:
-                    // fallthru
-                case ODataConstants.SpatialFunctions.ST_INTERSECTS:
-                    return ((HibernateSpatialCriteriaBuilder) builder).st_intersects(
-                                                                                     root.get(LocationEntity.PROPERTY_GEOMETRY_ENTITY),
-                                                                                     arguments[0]);
-                case ODataConstants.SpatialFunctions.ST_CONTAINS:
-                    return ((HibernateSpatialCriteriaBuilder) builder).st_contains(
-                                                                                   root.get(LocationEntity.PROPERTY_GEOMETRY_ENTITY),
-                                                                                   arguments[0]);
-                case ODataConstants.SpatialFunctions.ST_RELATE:
-                    return ((HibernateSpatialCriteriaBuilder) builder).st_relate(
-                                                                                 root.get(LocationEntity.PROPERTY_GEOMETRY_ENTITY),
-                                                                                 arguments[0],
-                                                                                 arguments[1]);
-                default:
-                    throw new RuntimeException("Could not find function: " + spatialFunctionName);
+                    case ODataConstants.SpatialFunctions.ST_EQUALS:
+                        return ((HibernateSpatialCriteriaBuilder) builder).st_equals(
+                                root.get(LocationEntity.PROPERTY_GEOMETRY_ENTITY),
+                                arguments[0]);
+                    case ODataConstants.SpatialFunctions.ST_DISJOINT:
+                        return ((HibernateSpatialCriteriaBuilder) builder).st_disjoint(
+                                root.get(LocationEntity.PROPERTY_GEOMETRY_ENTITY),
+                                arguments[0]);
+                    case ODataConstants.SpatialFunctions.ST_TOUCHES:
+                        return ((HibernateSpatialCriteriaBuilder) builder).st_touches(
+                                root.get(LocationEntity.PROPERTY_GEOMETRY_ENTITY),
+                                arguments[0]);
+                    case ODataConstants.SpatialFunctions.ST_WITHIN:
+                        return ((HibernateSpatialCriteriaBuilder) builder).st_within(
+                                root.get(LocationEntity.PROPERTY_GEOMETRY_ENTITY),
+                                arguments[0]);
+                    case ODataConstants.SpatialFunctions.ST_OVERLAPS:
+                        return ((HibernateSpatialCriteriaBuilder) builder).st_overlaps(
+                                root.get(LocationEntity.PROPERTY_GEOMETRY_ENTITY),
+                                arguments[0]);
+                    case ODataConstants.SpatialFunctions.ST_CROSSES:
+                        return ((HibernateSpatialCriteriaBuilder) builder).st_crosses(
+                                root.get(LocationEntity.PROPERTY_GEOMETRY_ENTITY),
+                                arguments[0]);
+                    case ODataConstants.GeoFunctions.GEO_INTERSECTS:
+                        // fallthru
+                    case ODataConstants.SpatialFunctions.ST_INTERSECTS:
+                        return ((HibernateSpatialCriteriaBuilder) builder).st_intersects(
+                                root.get(LocationEntity.PROPERTY_GEOMETRY_ENTITY),
+                                arguments[0]);
+                    case ODataConstants.SpatialFunctions.ST_CONTAINS:
+                        return ((HibernateSpatialCriteriaBuilder) builder).st_contains(
+                                root.get(LocationEntity.PROPERTY_GEOMETRY_ENTITY),
+                                arguments[0]);
+                    case ODataConstants.SpatialFunctions.ST_RELATE:
+                        return ((HibernateSpatialCriteriaBuilder) builder).st_relate(
+                                root.get(LocationEntity.PROPERTY_GEOMETRY_ENTITY),
+                                arguments[0],
+                                arguments[1]);
+                    default:
+                        throw new RuntimeException("Could not find function: " + spatialFunctionName);
                 }
             } else {
                 throw new RuntimeException("Invalid QuerySpecificationBuilder supplied! Spatial support not present!");
@@ -151,31 +152,31 @@ public class LocationQuerySpecifications extends EntityQuerySpecifications<Locat
 
     @Override
     public Expression<Float> handleGeospatial(GeoValueExpr expr,
-                                              String spatialFunctionName,
-                                              String argument,
-                                              HibernateSpatialCriteriaBuilder builder,
-                                              Root root) {
+            String spatialFunctionName,
+            String argument,
+            HibernateSpatialCriteriaBuilder builder,
+            Root root) {
         if (StaConstants.PROP_LOCATION.equals(expr.getGeometry())) {
             switch (spatialFunctionName) {
-            case ODataConstants.GeoFunctions.GEO_DISTANCE:
-                return builder.st_distance(
-                                           root.get(LocationEntity.PROPERTY_GEOMETRY_ENTITY),
-                                           argument);
-            case ODataConstants.GeoFunctions.GEO_LENGTH:
-                return builder.st_length(root.get(LocationEntity.PROPERTY_GEOMETRY_ENTITY));
-            default:
-                break;
+                case ODataConstants.GeoFunctions.GEO_DISTANCE:
+                    return builder.st_distance(
+                            root.get(LocationEntity.PROPERTY_GEOMETRY_ENTITY),
+                            argument);
+                case ODataConstants.GeoFunctions.GEO_LENGTH:
+                    return builder.st_length(root.get(LocationEntity.PROPERTY_GEOMETRY_ENTITY));
+                default:
+                    break;
             }
         } else {
             switch (spatialFunctionName) {
-            case ODataConstants.GeoFunctions.GEO_DISTANCE:
-                return builder.st_distance(
-                                           expr.getGeometry(),
-                                           argument);
-            case ODataConstants.GeoFunctions.GEO_LENGTH:
-                return builder.st_length(expr.getGeometry());
-            default:
-                break;
+                case ODataConstants.GeoFunctions.GEO_DISTANCE:
+                    return builder.st_distance(
+                            expr.getGeometry(),
+                            argument);
+                case ODataConstants.GeoFunctions.GEO_LENGTH:
+                    return builder.st_length(expr.getGeometry());
+                default:
+                    break;
             }
         }
         throw new RuntimeException("Could not find spatial function: " + spatialFunctionName);
@@ -183,30 +184,30 @@ public class LocationQuerySpecifications extends EntityQuerySpecifications<Locat
 
     @Override
     protected Specification<LocationEntity> handleRelatedPropertyFilter(String propertyName,
-                                                                        Specification< ? > propertyValue) {
+            Specification<?> propertyValue) {
         return (root, query, builder) -> {
             if (StaConstants.THINGS.equals(propertyName)) {
                 Subquery<LocationEntity> sq = query.subquery(LocationEntity.class);
                 Root<PlatformEntity> thing = sq.from(PlatformEntity.class);
                 Join<PlatformEntity, LocationEntity> join = thing.join(PlatformEntity.PROPERTY_LOCATIONS);
                 sq.select(join)
-                  .where(((Specification<PlatformEntity>) propertyValue).toPredicate(thing,
-                                                                                     query,
-                                                                                     builder));
+                        .where(((Specification<PlatformEntity>) propertyValue).toPredicate(thing,
+                                query,
+                                builder));
                 return builder.in(root)
-                              .value(sq);
+                        .value(sq);
             } else if (StaConstants.HISTORICAL_LOCATIONS.equals(propertyName)) {
                 Subquery<LocationEntity> sq = query.subquery(LocationEntity.class);
                 Root<HistoricalLocationEntity> historicalLocation = sq.from(HistoricalLocationEntity.class);
                 Join<HistoricalLocationEntity, LocationEntity> joinFeature = historicalLocation
-                                                                                               .join(HistoricalLocationEntity.PROPERTY_LOCATIONS);
+                        .join(HistoricalLocationEntity.PROPERTY_LOCATIONS);
                 sq.select(joinFeature)
-                  .where(((Specification<HistoricalLocationEntity>) propertyValue).toPredicate(
-                                                                                               historicalLocation,
-                                                                                               query,
-                                                                                               builder));
+                        .where(((Specification<HistoricalLocationEntity>) propertyValue).toPredicate(
+                                historicalLocation,
+                                query,
+                                builder));
                 return builder.in(root)
-                              .value(sq);
+                        .value(sq);
             } else {
                 throw new RuntimeException("Could not find related property: " + propertyName);
             }
@@ -215,53 +216,53 @@ public class LocationQuerySpecifications extends EntityQuerySpecifications<Locat
 
     @Override
     protected Specification<LocationEntity> handleDirectPropertyFilter(
-                                                                       String propertyName,
-                                                                       Expression< ? > propertyValue,
-                                                                       FilterConstants.ComparisonOperator operator,
-                                                                       boolean switched) {
+            String propertyName,
+            Expression<?> propertyValue,
+            FilterConstants.ComparisonOperator operator,
+            boolean switched) {
         return (Specification<LocationEntity>) (root, query, builder) -> {
             try {
                 switch (propertyName) {
-                case StaConstants.PROP_ID:
-                    return handleDirectStringPropertyFilter(root.get(LocationEntity.STA_IDENTIFIER),
-                                                            propertyValue,
-                                                            operator,
-                                                            builder,
-                                                            false);
-                case StaConstants.PROP_NAME:
-                    return handleDirectStringPropertyFilter(root.get(LocationEntity.NAME),
-                                                            propertyValue,
-                                                            operator,
-                                                            builder,
-                                                            switched);
-                case StaConstants.PROP_DESCRIPTION:
-                    return handleDirectStringPropertyFilter(root.get(LocationEntity.DESCRIPTION),
-                                                            propertyValue,
-                                                            operator,
-                                                            builder,
-                                                            switched);
-                case StaConstants.PROP_ENCODINGTYPE:
-                    Join<LocationEntity, FormatEntity> join = root.join(LocationEntity.PROPERTY_LOCATION_ENCODING);
-                    return handleDirectStringPropertyFilter(join.get(FormatEntity.FORMAT),
-                                                            propertyValue,
-                                                            operator,
-                                                            builder,
-                                                            switched);
-                default:
-                    // We are filtering on variable keys on properties
-                    if (propertyName.startsWith(StaConstants.PROP_PROPERTIES)) {
-                        return handleProperties(root,
-                                                query,
-                                                builder,
-                                                propertyName,
-                                                propertyValue,
-                                                operator,
-                                                switched,
-                                                LocationParameterEntity.PROP_LOCATION_ID,
-                                                ParameterFactory.EntityType.LOCATION);
-                    } else {
-                        throw new RuntimeException(String.format(ERROR_GETTING_FILTER_NO_PROP, propertyName));
-                    }
+                    case StaConstants.PROP_ID:
+                        return handleDirectStringPropertyFilter(root.get(LocationEntity.STA_IDENTIFIER),
+                                propertyValue,
+                                operator,
+                                builder,
+                                false);
+                    case StaConstants.PROP_NAME:
+                        return handleDirectStringPropertyFilter(root.get(LocationEntity.NAME),
+                                propertyValue,
+                                operator,
+                                builder,
+                                switched);
+                    case StaConstants.PROP_DESCRIPTION:
+                        return handleDirectStringPropertyFilter(root.get(LocationEntity.DESCRIPTION),
+                                propertyValue,
+                                operator,
+                                builder,
+                                switched);
+                    case StaConstants.PROP_ENCODINGTYPE:
+                        Join<LocationEntity, FormatEntity> join = root.join(LocationEntity.PROPERTY_LOCATION_ENCODING);
+                        return handleDirectStringPropertyFilter(join.get(FormatEntity.FORMAT),
+                                propertyValue,
+                                operator,
+                                builder,
+                                switched);
+                    default:
+                        // We are filtering on variable keys on properties
+                        if (propertyName.startsWith(StaConstants.PROP_PROPERTIES)) {
+                            return handleProperties(root,
+                                    query,
+                                    builder,
+                                    propertyName,
+                                    propertyValue,
+                                    operator,
+                                    switched,
+                                    LocationParameterEntity.PROP_LOCATION_ID,
+                                    ParameterFactory.EntityType.LOCATION);
+                        } else {
+                            throw new RuntimeException(String.format(ERROR_GETTING_FILTER_NO_PROP, propertyName));
+                        }
                 }
             } catch (STAInvalidFilterExpressionException e) {
                 throw new RuntimeException(e);

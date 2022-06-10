@@ -81,11 +81,14 @@ public abstract class QuerySpecification<T> implements BaseQuerySpecifications<T
 
             if (segments.size() > 1) {
                 current = segments.get(1);
-                BaseQuerySpecifications< ? > bqs = QuerySpecificationFactory.createSpecification(current.getCollection());
+                String currentCollection = current.getCollection();
+                BaseQuerySpecifications< ? > bqs = QuerySpecificationFactory.createSpecification(currentCollection);
 
-                Specification<T> segmentSpec = applyOnMember(current.getCollection(),
-                                                             bqs.equalsStaIdentifier(current.getIdentifier()
-                                                                                            .orElse(null)));
+                String id = current.getIdentifier()
+                                   .orElse(null);
+                Specification< ? > equalsStaIdentifier = bqs.equalsStaIdentifier(id);
+                Specification<T> segmentSpec = applyOnMember(currentCollection,
+                                                             equalsStaIdentifier);
 
                 return segmentSpec;
             } else {

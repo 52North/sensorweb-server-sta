@@ -33,7 +33,7 @@ import org.n52.shetland.filter.ExpandItem;
 import org.n52.shetland.oasis.odata.query.option.QueryOptions;
 import org.n52.shetland.ogc.sta.StaConstants;
 
-public class ThingGraphBuilder extends GraphBuilder<PlatformEntity> {
+public final class ThingGraphBuilder extends GraphBuilder<PlatformEntity> {
 
     private ThingGraphBuilder() {
         super(PlatformEntity.class);

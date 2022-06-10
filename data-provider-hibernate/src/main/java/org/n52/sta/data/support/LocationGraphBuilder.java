@@ -33,7 +33,7 @@ import org.n52.shetland.filter.ExpandItem;
 import org.n52.shetland.oasis.odata.query.option.QueryOptions;
 import org.n52.shetland.ogc.sta.StaConstants;
 
-public class LocationGraphBuilder extends GraphBuilder<LocationEntity> {
+public final class LocationGraphBuilder extends GraphBuilder<LocationEntity> {
 
     private LocationGraphBuilder() {
         super(LocationEntity.class);

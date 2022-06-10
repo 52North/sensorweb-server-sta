@@ -47,6 +47,7 @@ import org.springframework.data.jpa.domain.Specification;
 /**
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
  */
+@SuppressWarnings("checkstyle:linelength")
 public class SensorQuerySpecifications extends EntityQuerySpecifications<ProcedureEntity> {
 
     public Specification<ProcedureEntity> withDatastreamStaIdentifier(final String datastreamIdentifier) {

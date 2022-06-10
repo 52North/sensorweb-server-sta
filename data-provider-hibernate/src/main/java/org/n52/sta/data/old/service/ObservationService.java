@@ -28,6 +28,18 @@
 
 package org.n52.sta.data.old.service;
 
+import java.math.BigDecimal;
+import java.util.Collections;
+import java.util.Date;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
+import java.util.UUID;
+import java.util.stream.Collectors;
+
+import javax.persistence.EntityManager;
+import javax.persistence.criteria.Predicate;
+
 import org.hibernate.Hibernate;
 import org.hibernate.HibernateException;
 import org.hibernate.query.criteria.internal.CriteriaBuilderImpl;
@@ -74,23 +86,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.jpa.domain.Specification;
 
-import javax.persistence.EntityManager;
-import javax.persistence.criteria.Predicate;
-import java.math.BigDecimal;
-import java.util.Collections;
-import java.util.Date;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
-import java.util.UUID;
-import java.util.stream.Collectors;
-
 /**
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
  */
 // @Component
 // @DependsOn({ "springApplicationContext" })
 // @Transactional
+@SuppressWarnings("checkstyle:linelength")
 public class ObservationService
         extends
         CommonSTAServiceImpl<ObservationRepository<DataEntity< ? >>, ObservationDTO, DataEntity< ? >> {

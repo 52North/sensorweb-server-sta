@@ -31,12 +31,6 @@ package org.n52.sta.api.old.serialize;
 import java.io.IOException;
 import java.util.Map;
 
-import com.fasterxml.jackson.core.JsonGenerator;
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.databind.DeserializationContext;
-import com.fasterxml.jackson.databind.SerializerProvider;
-import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
-
 import org.n52.shetland.ogc.sta.model.ObservationEntityDefinition;
 import org.n52.sta.api.old.dto.common.EntityPatch;
 import org.n52.sta.api.old.entity.ObservationDTO;
@@ -45,6 +39,12 @@ import org.n52.sta.api.old.serialize.common.JSONBase;
 import org.n52.sta.api.old.serialize.json.JSONObservation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.databind.DeserializationContext;
+import com.fasterxml.jackson.databind.SerializerProvider;
+import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 
@@ -118,8 +118,8 @@ public class ObservationSerDes {
         @Override
         public ObservationDTOPatch deserialize(JsonParser p, DeserializationContext ctxt) throws IOException {
             return new ObservationDTOPatch(p.readValueAs(JSONObservation.class)
-                                            // .parseParameters(parameterMapping)
-                                            .parseToDTO(JSONBase.EntityType.PATCH));
+                    // .parseParameters(parameterMapping)
+                    .parseToDTO(JSONBase.EntityType.PATCH));
         }
     }
 }

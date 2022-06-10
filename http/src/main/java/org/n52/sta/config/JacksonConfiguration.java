@@ -32,13 +32,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.fasterxml.jackson.databind.Module;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.module.SimpleDeserializers;
-import com.fasterxml.jackson.databind.module.SimpleModule;
-import com.fasterxml.jackson.databind.module.SimpleSerializers;
-import com.fasterxml.jackson.module.afterburner.AfterburnerModule;
-
 import org.n52.sta.api.old.CollectionWrapper;
 import org.n52.sta.api.old.entity.DatastreamDTO;
 import org.n52.sta.api.old.entity.FeatureOfInterestDTO;
@@ -63,12 +56,19 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.Environment;
 import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
 
+import com.fasterxml.jackson.databind.Module;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.module.SimpleDeserializers;
+import com.fasterxml.jackson.databind.module.SimpleModule;
+import com.fasterxml.jackson.databind.module.SimpleSerializers;
+import com.fasterxml.jackson.module.afterburner.AfterburnerModule;
+
 @Configuration
+@SuppressWarnings("checkstyle:linelength")
 public class JacksonConfiguration {
 
     @Bean
-    public ObjectMapper customMapper(
-                                     @Value("${server.config.service-root-url}") String rootUrl,
+    public ObjectMapper customMapper(@Value("${server.config.service-root-url}") String rootUrl,
                                      @Value("${server.feature.variableEncodingType:false}") boolean variableSensorEncodingTypeEnabled,
                                      @Value("${server.feature.observation.samplingGeometry}") String samplingGeometryMapping,
                                      @Value("${server.feature.observation.verticalFrom}") String verticalFromMapping,
@@ -91,29 +91,14 @@ public class JacksonConfiguration {
         // Register Serializers/Deserializers for STA Core Entities
         SimpleSerializers serializers = new SimpleSerializers();
         serializers.addSerializer(new CollectionSer(CollectionWrapper.class));
-        serializers.addSerializer(
-                                  new ThingSerDes.ThingSerializer(rootUrl,
-                                                                  activeProfiles));
-        serializers.addSerializer(
-                                  new LocationSerDes.LocationSerializer(rootUrl,
-                                                                        activeProfiles));
-        serializers.addSerializer(
-                                  new SensorSerDes.SensorSerializer(rootUrl,
-                                                                    activeProfiles));
-        serializers.addSerializer(
-                                  new ObservationSerDes.ObservationSerializer(rootUrl,
-                                                                              activeProfiles));
-        serializers.addSerializer(
-                                  new ObservedPropertySerDes.ObservedPropertySerializer(rootUrl,
-                                                                                        activeProfiles));
-        serializers.addSerializer(
-                                  new FeatureOfInterestSerDes.FeatureOfInterestSerializer(rootUrl,
-                                                                                          activeProfiles));
-        serializers.addSerializer(
-                                  new HistoricalLocationSerDes.HistoricalLocationSerializer(rootUrl, activeProfiles));
-        serializers.addSerializer(
-                                  new DatastreamSerDes.DatastreamSerializer(rootUrl,
-                                                                            activeProfiles));
+        serializers.addSerializer(new ThingSerDes.ThingSerializer(rootUrl, activeProfiles));
+        serializers.addSerializer(new LocationSerDes.LocationSerializer(rootUrl, activeProfiles));
+        serializers.addSerializer(new SensorSerDes.SensorSerializer(rootUrl, activeProfiles));
+        serializers.addSerializer(new ObservationSerDes.ObservationSerializer(rootUrl, activeProfiles));
+        serializers.addSerializer(new ObservedPropertySerDes.ObservedPropertySerializer(rootUrl, activeProfiles));
+        serializers.addSerializer(new FeatureOfInterestSerDes.FeatureOfInterestSerializer(rootUrl, activeProfiles));
+        serializers.addSerializer(new HistoricalLocationSerDes.HistoricalLocationSerializer(rootUrl, activeProfiles));
+        serializers.addSerializer(new DatastreamSerDes.DatastreamSerializer(rootUrl, activeProfiles));
 
         SimpleDeserializers deserializers = new SimpleDeserializers();
         deserializers.addDeserializer(ThingDTO.class,

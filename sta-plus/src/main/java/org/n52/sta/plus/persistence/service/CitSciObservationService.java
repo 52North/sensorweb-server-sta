@@ -51,26 +51,25 @@ public class CitSciObservationService extends ObservationService {
 
     @Override
     protected DataEntity castToConcreteObservationType(DataEntity< ? > observation,
-                                                       DatasetEntity dataset)
+            DatasetEntity dataset)
             throws STACRUDException {
         DataEntity data = null;
         Object value = observation.getValue();
         switch (dataset.getOMObservationType()
                        .getFormat()) {
-        case OmConstants.OBS_TYPE_MEASUREMENT:
-            StaPlusQuantityDataEntity quantityObservationEntity = new StaPlusQuantityDataEntity();
-            if (value.equals("NaN") || value.equals("Inf") || value.equals("-Inf")) {
-                quantityObservationEntity.setValue(null);
-            } else {
-                quantityObservationEntity.setValue(BigDecimal.valueOf(Double.parseDouble((String) value)));
-            }
-            data = quantityObservationEntity;
-            break;
-        default:
-            throw new STACRUDException(
-                                       "Unable to handle OMObservation with type: "
-                                               + dataset.getOMObservationType()
-                                                        .getFormat());
+            case OmConstants.OBS_TYPE_MEASUREMENT:
+                StaPlusQuantityDataEntity quantityObservationEntity = new StaPlusQuantityDataEntity();
+                if (value.equals("NaN") || value.equals("Inf") || value.equals("-Inf")) {
+                    quantityObservationEntity.setValue(null);
+                } else {
+                    quantityObservationEntity.setValue(BigDecimal.valueOf(Double.parseDouble((String) value)));
+                }
+                data = quantityObservationEntity;
+                break;
+            default:
+                throw new STACRUDException("Unable to handle OMObservation with type: "
+                        + dataset.getOMObservationType()
+                                 .getFormat());
         }
         return fillConcreteObservationType(data, observation, dataset);
     }
@@ -104,8 +103,8 @@ public class CitSciObservationService extends ObservationService {
 
     @Override
     protected DataEntity< ? > fillConcreteObservationType(DataEntity< ? > data,
-                                                          DataEntity< ? > observation,
-                                                          DatasetEntity dataset)
+            DataEntity< ? > observation,
+            DatasetEntity dataset)
             throws STACRUDException {
         StaPlusDataEntity< ? > plusData = (StaPlusDataEntity< ? >) super.fillConcreteObservationType(data,
                                                                                                      observation,
@@ -118,12 +117,12 @@ public class CitSciObservationService extends ObservationService {
     }
 
     private LicenseService getLicenseService() {
-        return (LicenseService) serviceRepository
-                                                 .getEntityServiceRaw(CitSciEntityServiceRepository.StaPlusEntityTypes.License.name());
+        String license = CitSciEntityServiceRepository.StaPlusEntityTypes.License.name();
+        return (LicenseService) serviceRepository.getEntityServiceRaw(license);
     }
 
     private RelationService getObservationRelationService() {
-        return (RelationService) serviceRepository
-                                                  .getEntityServiceRaw(CitSciEntityServiceRepository.StaPlusEntityTypes.Relation.name());
+        String relation = CitSciEntityServiceRepository.StaPlusEntityTypes.Relation.name();
+        return (RelationService) serviceRepository.getEntityServiceRaw(relation);
     }
 }

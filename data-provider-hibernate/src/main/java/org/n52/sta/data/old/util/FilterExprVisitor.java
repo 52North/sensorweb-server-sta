@@ -28,6 +28,15 @@
 
 package org.n52.sta.data.old.util;
 
+import java.util.Date;
+import java.util.function.BiFunction;
+
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Expression;
+import javax.persistence.criteria.Predicate;
+import javax.persistence.criteria.Root;
+
 import org.n52.series.db.beans.DataEntity;
 import org.n52.shetland.oasis.odata.ODataConstants;
 import org.n52.shetland.ogc.filter.FilterConstants;
@@ -52,22 +61,16 @@ import org.n52.svalbard.odata.core.expr.bool.ComparisonExpr;
 import org.n52.svalbard.odata.core.expr.temporal.TimeValueExpr;
 import org.springframework.data.jpa.domain.Specification;
 
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Expression;
-import javax.persistence.criteria.Predicate;
-import javax.persistence.criteria.Root;
-import java.util.Date;
-import java.util.function.BiFunction;
-
 /**
- * Visitor visiting svalbard.odata.Expr and parsing it into javax.expression to be used in database access.
- * Not all methods return predicate (e.g. internal ones return concrete types) so abstract Expression&lt;?&gt;
+ * Visitor visiting svalbard.odata.Expr and parsing it into javax.expression to
+ * be used in database access.
+ * Not all methods return predicate (e.g. internal ones return concrete types)
+ * so abstract Expression&lt;?&gt;
  * is used.
  *
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
  */
-public final class FilterExprVisitor<T> implements ExprVisitor<Expression< ? >, STAInvalidQueryException> {
+public final class FilterExprVisitor<T> implements ExprVisitor<Expression<?>, STAInvalidQueryException> {
 
     private static final String ERROR_NOT_IMPLEMENTED = "not implemented yet!";
     private static final String ERROR_NOT_EVALUABLE = "Could not evaluate Methodcall to: ";
@@ -87,25 +90,25 @@ public final class FilterExprVisitor<T> implements ExprVisitor<Expression< ? >, 
         this.query = query;
         this.root = root;
         this.rootQS = QuerySpecificationFactory.getSpecification(root.getJavaType()
-                                                                     .getSimpleName());
+                .getSimpleName());
     }
 
     /**
      * Visit a boolean binary expression.
      *
      * @param expr
-     *        the expression
+     *             the expression
      * @return the result of the visit
      * @throws STAInvalidQueryException
-     *         if the visit fails
+     *                                  if the visit fails
      */
     @SuppressWarnings("unchecked")
     @Override
     public Predicate visitBooleanBinary(BooleanBinaryExpr expr) throws STAInvalidQueryException {
         Expression<Boolean> left = (Expression<Boolean>) expr.getLeft()
-                                                             .accept(this);
+                .accept(this);
         Expression<Boolean> right = (Expression<Boolean>) expr.getRight()
-                                                              .accept(this);
+                .accept(this);
 
         if (expr.getOperator()
                 .equals(FilterConstants.BinaryLogicOperator.And)) {
@@ -119,27 +122,27 @@ public final class FilterExprVisitor<T> implements ExprVisitor<Expression< ? >, 
      * Visit a boolean unary expression.
      *
      * @param expr
-     *        the expression
+     *             the expression
      * @return the result of the visit
      * @throws STAInvalidQueryException
-     *         if the visit fails
+     *                                  if the visit fails
      */
     @SuppressWarnings("unchecked")
     @Override
     public Predicate visitBooleanUnary(BooleanUnaryExpr expr) throws STAInvalidQueryException {
         // Only 'not' exists as unary boolean expression
         return builder.not((Expression<Boolean>) expr.getOperand()
-                                                     .accept(this));
+                .accept(this));
     }
 
     /**
      * Visit a comparison expression.
      *
      * @param expr
-     *        the expression
+     *             the expression
      * @return the result of the visit
      * @throws STAInvalidQueryException
-     *         if the visit fails
+     *                                  if the visit fails
      */
     @Override
     public Predicate visitComparison(ComparisonExpr expr) throws STAInvalidQueryException {
@@ -151,25 +154,25 @@ public final class FilterExprVisitor<T> implements ExprVisitor<Expression< ? >, 
      * Visit a method call expression.
      *
      * @param expr
-     *        the expression
+     *             the expression
      * @return the result of the visit
      * @throws STAInvalidQueryException
-     *         if the visit fails
+     *                                  if the visit fails
      */
     @Override
-    public Expression< ? > visitMethodCall(MethodCallExpr expr) throws STAInvalidQueryException {
+    public Expression<?> visitMethodCall(MethodCallExpr expr) throws STAInvalidQueryException {
         switch (expr.getParameters()
-                    .size()) {
-        case 0:
-            return visitMethodCallNullary(expr);
-        case 1:
-            return visitMethodCallUnary(expr);
-        case 2:
-            return visitMethodCallBinary(expr);
-        case 3:
-            return visitMethodCallTernary(expr);
-        default:
-            throw new STAInvalidQueryException(ERROR_NOT_EVALUABLE + expr.getName());
+                .size()) {
+            case 0:
+                return visitMethodCallNullary(expr);
+            case 1:
+                return visitMethodCallUnary(expr);
+            case 2:
+                return visitMethodCallBinary(expr);
+            case 3:
+                return visitMethodCallTernary(expr);
+            default:
+                throw new STAInvalidQueryException(ERROR_NOT_EVALUABLE + expr.getName());
         }
     }
 
@@ -177,20 +180,21 @@ public final class FilterExprVisitor<T> implements ExprVisitor<Expression< ? >, 
      * Visit a member expression.
      *
      * @param expr
-     *        the expression
+     *             the expression
      * @return the result of the visit
      * @throws STAInvalidQueryException
-     *         if the visit fails
+     *                                  if the visit fails
      */
     @Override
-    public Expression< ? > visitMember(MemberExpr expr) throws STAInvalidQueryException {
-        // Add special handling for Observation as they have stored their "value" attribute distributed
+    public Expression<?> visitMember(MemberExpr expr) throws STAInvalidQueryException {
+        // Add special handling for Observation as they have stored their "value"
+        // attribute distributed
         // over several different columns
         if (root.getJavaType()
                 .isAssignableFrom(DataEntity.class)
                 &&
                 expr.getValue()
-                    .equals(StaConstants.PROP_RESULT)) {
+                        .equals(StaConstants.PROP_RESULT)) {
             return null;
         } else {
             return root.get(expr.getValue());
@@ -201,10 +205,10 @@ public final class FilterExprVisitor<T> implements ExprVisitor<Expression< ? >, 
      * Visit a value expression.
      *
      * @param expr
-     *        the expression
+     *             the expression
      * @return the result of the visit
      * @throws STAInvalidQueryException
-     *         if the visit fails
+     *                                  if the visit fails
      */
     @Override
     public Expression<String> visitString(StringValueExpr expr) throws STAInvalidQueryException {
@@ -215,36 +219,36 @@ public final class FilterExprVisitor<T> implements ExprVisitor<Expression< ? >, 
      * Visit a arithmetic expression.
      *
      * @param expr
-     *        the expression
+     *             the expression
      * @return the result of the visit
      * @throws STAInvalidQueryException
-     *         if the visit fails
+     *                                  if the visit fails
      */
     @SuppressWarnings("unchecked")
     @Override
-    public Expression< ? extends Number> visitSimpleArithmetic(SimpleArithmeticExpr expr)
+    public Expression<? extends Number> visitSimpleArithmetic(SimpleArithmeticExpr expr)
             throws STAInvalidQueryException {
-        Expression< ? extends Number> left = (Expression< ? extends Number>) expr.getLeft()
-                                                                                 .accept(this);
-        Expression< ? extends Number> right = (Expression< ? extends Number>) expr.getRight()
-                                                                                  .accept(this);
+        Expression<? extends Number> left = (Expression<? extends Number>) expr.getLeft()
+                .accept(this);
+        Expression<? extends Number> right = (Expression<? extends Number>) expr.getRight()
+                .accept(this);
         switch (expr.getOperator()) {
-        case Add:
-            return builder.sum(left, right);
-        case Sub:
-            return builder.diff(left, right);
-        case Mul:
-            return builder.prod(left, right);
-        case Div:
-            return builder.quot(left, right);
-        case Mod:
-            return builder.mod((Expression<Integer>) left,
-                               (Expression<Integer>) right);
-        default:
-            throw new STAInvalidQueryException(
-                                               "Could not parse ArithmeticExpr. Could not identify Operator:"
-                                                       + expr.getOperator()
-                                                             .name());
+            case Add:
+                return builder.sum(left, right);
+            case Sub:
+                return builder.diff(left, right);
+            case Mul:
+                return builder.prod(left, right);
+            case Div:
+                return builder.quot(left, right);
+            case Mod:
+                return builder.mod((Expression<Integer>) left,
+                        (Expression<Integer>) right);
+            default:
+                throw new STAInvalidQueryException(
+                        "Could not parse ArithmeticExpr. Could not identify Operator:"
+                                + expr.getOperator()
+                                        .name());
         }
     }
 
@@ -252,10 +256,10 @@ public final class FilterExprVisitor<T> implements ExprVisitor<Expression< ? >, 
      * Visit a time expression.
      *
      * @param expr
-     *        the expression
+     *             the expression
      * @return the result of the visit
      * @throws STAInvalidQueryException
-     *         if the visit fails
+     *                                  if the visit fails
      */
     @Override
     public Expression<Date> visitTime(TimeValueExpr expr) throws STAInvalidQueryException {
@@ -264,7 +268,7 @@ public final class FilterExprVisitor<T> implements ExprVisitor<Expression< ? >, 
             return root.get(rootQS.checkPropertyName((String) expr.getTime()));
         } else {
             return builder.literal(((TimeInstant) expr.getTime()).getValue()
-                                                                 .toDate());
+                    .toDate());
         }
     }
 
@@ -272,10 +276,10 @@ public final class FilterExprVisitor<T> implements ExprVisitor<Expression< ? >, 
      * Visit a geometry expression.
      *
      * @param expr
-     *        the expression
+     *             the expression
      * @return the result of the visit
      * @throws STAInvalidQueryException
-     *         if the visit fails
+     *                                  if the visit fails
      */
     @Override
     public Expression<String> visitGeometry(GeoValueExpr expr) throws STAInvalidQueryException {
@@ -286,50 +290,51 @@ public final class FilterExprVisitor<T> implements ExprVisitor<Expression< ? >, 
      * Visit a number expression.
      *
      * @param expr
-     *        the expression
+     *             the expression
      * @return the result of the visit
      * @throws STAInvalidQueryException
-     *         if the visit fails
+     *                                  if the visit fails
      */
     @Override
-    public Expression< ? extends Number> visitNumeric(NumericValueExpr expr) throws STAInvalidQueryException {
+    public Expression<? extends Number> visitNumeric(NumericValueExpr expr) throws STAInvalidQueryException {
         return builder.literal(expr.getValue());
     }
 
     @SuppressWarnings("unchecked")
-    private <Y extends Comparable< ? super Y>> Predicate visitComparisonExpr(ComparisonExpr expr)
+    private <Y extends Comparable<? super Y>> Predicate visitComparisonExpr(ComparisonExpr expr)
             throws STAInvalidQueryException {
 
         // Let Queryspecifications handle Expressions involving members
         if (expr.getRight()
                 .isMember()
                 || expr.getLeft()
-                       .isMember()) {
+                        .isMember()) {
             return evaluateMemberComparison(expr, expr.getOperator());
         } else {
-            // Handle abstract + literal expression (everything not involving members) ourselves
-            Expression< ? extends Y> left = (Expression< ? extends Y>) expr.getLeft()
-                                                                           .accept(this);
-            Expression< ? extends Y> right = (Expression< ? extends Y>) expr.getRight()
-                                                                            .accept(this);
+            // Handle abstract + literal expression (everything not involving members)
+            // ourselves
+            Expression<? extends Y> left = (Expression<? extends Y>) expr.getLeft()
+                    .accept(this);
+            Expression<? extends Y> right = (Expression<? extends Y>) expr.getRight()
+                    .accept(this);
             switch (expr.getOperator()) {
-            case PropertyIsEqualTo:
-                return builder.equal(left, right);
-            case PropertyIsNotEqualTo:
-                return builder.notEqual(left, right);
-            case PropertyIsLessThan:
-                return builder.lessThan(left, right);
-            case PropertyIsGreaterThan:
-                return builder.greaterThan(left, right);
-            case PropertyIsLessThanOrEqualTo:
-                return builder.lessThanOrEqualTo(left, right);
-            case PropertyIsGreaterThanOrEqualTo:
-                return builder.greaterThanOrEqualTo(left, right);
-            default:
-                throw new STAInvalidQueryException(
-                                                   "Invalid Operator. Could not parse: "
-                                                           + expr.getOperator()
-                                                                 .name());
+                case PropertyIsEqualTo:
+                    return builder.equal(left, right);
+                case PropertyIsNotEqualTo:
+                    return builder.notEqual(left, right);
+                case PropertyIsLessThan:
+                    return builder.lessThan(left, right);
+                case PropertyIsGreaterThan:
+                    return builder.greaterThan(left, right);
+                case PropertyIsLessThanOrEqualTo:
+                    return builder.lessThanOrEqualTo(left, right);
+                case PropertyIsGreaterThanOrEqualTo:
+                    return builder.greaterThanOrEqualTo(left, right);
+                default:
+                    throw new STAInvalidQueryException(
+                            "Invalid Operator. Could not parse: "
+                                    + expr.getOperator()
+                                            .name());
             }
         }
     }
@@ -339,53 +344,53 @@ public final class FilterExprVisitor<T> implements ExprVisitor<Expression< ? >, 
         if (expr.getRight()
                 .isMember()
                 && expr.getLeft()
-                       .isMember()) {
+                        .isMember()) {
             throw new STAInvalidQueryException("comparison of two member variables not implemented yet");
         } else if (expr.getRight()
-                       .isMember()) {
+                .isMember()) {
             if (expr.getRight()
                     .asMember()
                     .get()
                     .getValue()
                     .contains(SLASH)) {
                 return convertToForeignExpression(expr.getRight()
-                                                      .asMember()
-                                                      .get()
-                                                      .getValue(),
-                                                  expr.getLeft()
-                                                      .accept(this),
-                                                  operator);
+                        .asMember()
+                        .get()
+                        .getValue(),
+                        expr.getLeft()
+                                .accept(this),
+                        operator);
             } else {
                 return rootQS.getFilterForProperty(expr.getRight()
-                                                       .asMember()
-                                                       .get()
-                                                       .getValue(),
-                                                   expr.getLeft()
-                                                       .accept(this),
-                                                   operator,
-                                                   false)
-                             .toPredicate(root, query, builder);
+                        .asMember()
+                        .get()
+                        .getValue(),
+                        expr.getLeft()
+                                .accept(this),
+                        operator,
+                        false)
+                        .toPredicate(root, query, builder);
             }
         } else if (expr.getLeft()
-                       .isMember()) {
+                .isMember()) {
             String leftValue = expr.getLeft()
-                                   .asMember()
-                                   .get()
-                                   .getValue();
+                    .asMember()
+                    .get()
+                    .getValue();
             if (leftValue.contains(SLASH)
                     && !leftValue.startsWith(StaConstants.PROP_PROPERTIES)
                     && !leftValue.startsWith(StaConstants.PROP_PARAMETERS)) {
                 return convertToForeignExpression(leftValue,
-                                                  expr.getRight()
-                                                      .accept(this),
-                                                  operator);
+                        expr.getRight()
+                                .accept(this),
+                        operator);
             } else {
                 return rootQS.getFilterForProperty(leftValue,
-                                                   expr.getRight()
-                                                       .accept(this),
-                                                   operator,
-                                                   false)
-                             .toPredicate(root, query, builder);
+                        expr.getRight()
+                                .accept(this),
+                        operator,
+                        false)
+                        .toPredicate(root, query, builder);
             }
         } else {
             // This should never happen!
@@ -396,200 +401,205 @@ public final class FilterExprVisitor<T> implements ExprVisitor<Expression< ? >, 
     }
 
     /**
-     * Converts a Filter on related Properties to a chain of Expressions on nested Entities e.g.
+     * Converts a Filter on related Properties to a chain of Expressions on nested
+     * Entities e.g.
      * Things/Datastreams/Sensor/id eq '52N'
      *
      * @param path
-     *        Path to the property of a related entity
+     *                 Path to the property of a related entity
      * @param value
-     *        value of the property
+     *                 value of the property
      * @param operator
-     *        operator to be used
+     *                 operator to be used
      * @return Expression specifying the entity
      * @throws STAInvalidFilterExpressionException
-     *         if the filter is invalid
+     *                                             if the filter is invalid
      */
     private Predicate convertToForeignExpression(String path,
-                                                 Expression< ? > value,
-                                                 FilterConstants.ComparisonOperator operator)
+            Expression<?> value,
+            FilterConstants.ComparisonOperator operator)
             throws STAInvalidQueryException {
         String[] resources = path.split(SLASH);
         String lastResource = resources[resources.length - 2];
 
         // Get filter on Entity
-        EntityQuerySpecifications< ? > stepQS;
+        EntityQuerySpecifications<?> stepQS;
         if (lastResource.equals(StaConstants.PROP_PROPERTIES) || lastResource.equals(StaConstants.PROP_PARAMETERS)) {
             stepQS = rootQS;
         } else {
             stepQS = QuerySpecificationFactory.getSpecification(lastResource);
         }
 
-        Specification< ? > filter = stepQS.getFilterForProperty(resources[resources.length - 1],
-                                                                value,
-                                                                operator,
-                                                                false);
+        Specification<?> filter = stepQS.getFilterForProperty(resources[resources.length - 1],
+                value,
+                operator,
+                false);
         return resolveForeignExpression(resources, filter);
     }
 
     /**
-     * Resolves a filter on a spatial property of an related entity. Needs special handling as relation link
-     * is nested inside the spatial function call. e.g. /Things?$filter=st_equals(Locations/location,
+     * Resolves a filter on a spatial property of an related entity. Needs special
+     * handling as relation link
+     * is nested inside the spatial function call. e.g.
+     * /Things?$filter=st_equals(Locations/location,
      * geography'POINT(52 52)')
      *
      * @param path
-     *        Path to the property of a related entity
+     *                     Path to the property of a related entity
      * @param functionName
-     *        name of the function to be used
+     *                     name of the function to be used
      * @param value
-     *        arguments of the function
+     *                     arguments of the function
      * @return Expression specifying the entity
      * @throws STAInvalidFilterExpressionException
-     *         if the filter is invalid
+     *                                             if the filter is invalid
      */
     private Predicate convertToForeignSpatialExpression(String path,
-                                                        String functionName,
-                                                        String... value)
+            String functionName,
+            String... value)
             throws STAInvalidQueryException {
         String[] resources = path.split(SLASH);
-        EntityQuerySpecifications< ? > stepQS;
+        EntityQuerySpecifications<?> stepQS;
         // Get filter on Entity
         String lastResource = resources[resources.length - 2];
         stepQS = QuerySpecificationFactory.getSpecification(lastResource);
 
-        Specification< ? > filter;
+        Specification<?> filter;
         if (stepQS instanceof SpatialQuerySpecifications) {
             filter = ((SpatialQuerySpecifications) stepQS).handleGeoSpatialPropertyFilter(
-                                                                                          resources[resources.length
-                                                                                                  - 1],
-                                                                                          functionName,
-                                                                                          value);
+                    resources[resources.length
+                            - 1],
+                    functionName,
+                    value);
             return resolveForeignExpression(resources, filter);
         } else {
             throw new STAInvalidFilterExpressionException(
-                                                          ERROR_NOT_SPATIAL + resources[resources.length - 1]);
+                    ERROR_NOT_SPATIAL + resources[resources.length - 1]);
         }
     }
 
-    private Predicate resolveForeignExpression(String[] resources, Specification< ? > rawFilter)
+    private Predicate resolveForeignExpression(String[] resources, Specification<?> rawFilter)
             throws STAInvalidQueryException {
-        EntityQuerySpecifications< ? > stepQS;
-        Specification< ? > filter = rawFilter;
+        EntityQuerySpecifications<?> stepQS;
+        Specification<?> filter = rawFilter;
         for (int i = resources.length - 3; i >= 0; i--) {
             // Get QuerySpecifications for subQuery
             stepQS = QuerySpecificationFactory.getSpecification(resources[i]);
             // Get new IdQuery based on Filter
-            Specification< ? > expr = stepQS.getFilterForRelation(resources[i + 1], filter);
+            Specification<?> expr = stepQS.getFilterForRelation(resources[i + 1], filter);
             filter = expr;
         }
 
         // Filter by Id on main Query
         return rootQS.getFilterForRelation(resources[0], filter)
-                     .toPredicate(root, query, builder);
+                .toPredicate(root, query, builder);
     }
 
-    private Expression< ? > visitMethodCallNullary(MethodCallExpr expr) throws STAInvalidQueryException {
+    private Expression<?> visitMethodCallNullary(MethodCallExpr expr) throws STAInvalidQueryException {
         switch (expr.getName()) {
-        case ODataConstants.DateAndTimeFunctions.NOW:
-            return builder.currentTimestamp();
-        case ODataConstants.DateAndTimeFunctions.MINDATETIME:
-            return builder.literal(new Date(0L));
-        case ODataConstants.DateAndTimeFunctions.MAXDATETIME:
-            return builder.literal(new Date(Long.MAX_VALUE));
-        default:
-            throw new STAInvalidQueryException(ERROR_NOT_EVALUABLE + expr.getName());
+            case ODataConstants.DateAndTimeFunctions.NOW:
+                return builder.currentTimestamp();
+            case ODataConstants.DateAndTimeFunctions.MINDATETIME:
+                return builder.literal(new Date(0L));
+            case ODataConstants.DateAndTimeFunctions.MAXDATETIME:
+                return builder.literal(new Date(Long.MAX_VALUE));
+            default:
+                throw new STAInvalidQueryException(ERROR_NOT_EVALUABLE + expr.getName());
         }
     }
 
     @SuppressWarnings("unchecked")
-    private Expression< ? > visitMethodCallUnary(MethodCallExpr expr) throws STAInvalidQueryException {
-        Expression< ? > param = expr.getParameters()
-                                    .get(0)
-                                    .accept(this);
+    private Expression<?> visitMethodCallUnary(MethodCallExpr expr) throws STAInvalidQueryException {
+        Expression<?> param = expr.getParameters()
+                .get(0)
+                .accept(this);
         switch (expr.getName()) {
-        // String Functions
-        case ODataConstants.StringFunctions.LENGTH:
-            return builder.length((Expression<String>) param);
-        case ODataConstants.StringFunctions.TOLOWER:
-            return builder.lower((Expression<String>) param);
-        case ODataConstants.StringFunctions.TOUPPER:
-            return builder.upper((Expression<String>) param);
-        case ODataConstants.StringFunctions.TRIM:
-            return builder.trim((Expression<String>) param);
-        // DateTime Functions
-        case ODataConstants.DateAndTimeFunctions.YEAR:
-            return builder.function("YEAR", Integer.class, param);
-        case ODataConstants.DateAndTimeFunctions.MONTH:
-            return builder.function("MONTH", Integer.class, param);
-        case ODataConstants.DateAndTimeFunctions.DAY:
-            return builder.function("DAY", Integer.class, param);
-        case ODataConstants.DateAndTimeFunctions.HOUR:
-            return builder.function("HOUR", Integer.class, param);
-        case ODataConstants.DateAndTimeFunctions.MINUTE:
-            return builder.function("MINUTE", Integer.class, param);
-        case ODataConstants.DateAndTimeFunctions.SECOND:
-            return builder.function("SECOND", Integer.class, param);
-        case ODataConstants.DateAndTimeFunctions.FRACTIONALSECONDS:
-            return builder.function("DATEPART",
-                                    Integer.class,
-                                    builder.literal("millisecond"),
-                                    param);
-        case ODataConstants.DateAndTimeFunctions.DATE:
-            // fallthru
-        case ODataConstants.DateAndTimeFunctions.TIME:
-            throw new STAInvalidQueryException(ERROR_NOT_IMPLEMENTED);
-        // Math Functions
-        case ODataConstants.ArithmeticFunctions.ROUND:
-            return builder.function("ROUND", Integer.class, param);
-        case ODataConstants.ArithmeticFunctions.FLOOR:
-            return builder.function("FLOOR", Integer.class, param);
-        case ODataConstants.ArithmeticFunctions.CEILING:
-            return builder.function("CEIL", Integer.class, param);
-        case ODataConstants.GeoFunctions.GEO_LENGTH:
-            if (rootQS instanceof SpatialQuerySpecifications) {
-                return ((SpatialQuerySpecifications) rootQS).handleGeospatial(
-                                                                              expr.getParameters()
-                                                                                  .get(0)
-                                                                                  .asGeometry()
-                                                                                  .get(),
-                                                                              expr.getName(),
-                                                                              null,
-                                                                              (HibernateSpatialCriteriaBuilder) builder,
-                                                                              root);
-            } else {
-                throw new STAInvalidQueryException(ERROR_NOT_SPATIAL);
-            }
-        default:
-            throw new STAInvalidQueryException(ERROR_NOT_EVALUABLE + expr.getName());
+            // String Functions
+            case ODataConstants.StringFunctions.LENGTH:
+                return builder.length((Expression<String>) param);
+            case ODataConstants.StringFunctions.TOLOWER:
+                return builder.lower((Expression<String>) param);
+            case ODataConstants.StringFunctions.TOUPPER:
+                return builder.upper((Expression<String>) param);
+            case ODataConstants.StringFunctions.TRIM:
+                return builder.trim((Expression<String>) param);
+            // DateTime Functions
+            case ODataConstants.DateAndTimeFunctions.YEAR:
+                return builder.function("YEAR", Integer.class, param);
+            case ODataConstants.DateAndTimeFunctions.MONTH:
+                return builder.function("MONTH", Integer.class, param);
+            case ODataConstants.DateAndTimeFunctions.DAY:
+                return builder.function("DAY", Integer.class, param);
+            case ODataConstants.DateAndTimeFunctions.HOUR:
+                return builder.function("HOUR", Integer.class, param);
+            case ODataConstants.DateAndTimeFunctions.MINUTE:
+                return builder.function("MINUTE", Integer.class, param);
+            case ODataConstants.DateAndTimeFunctions.SECOND:
+                return builder.function("SECOND", Integer.class, param);
+            case ODataConstants.DateAndTimeFunctions.FRACTIONALSECONDS:
+                return builder.function("DATEPART",
+                        Integer.class,
+                        builder.literal("millisecond"),
+                        param);
+            case ODataConstants.DateAndTimeFunctions.DATE:
+                // fallthru
+            case ODataConstants.DateAndTimeFunctions.TIME:
+                throw new STAInvalidQueryException(ERROR_NOT_IMPLEMENTED);
+            // Math Functions
+            case ODataConstants.ArithmeticFunctions.ROUND:
+                return builder.function("ROUND", Integer.class, param);
+            case ODataConstants.ArithmeticFunctions.FLOOR:
+                return builder.function("FLOOR", Integer.class, param);
+            case ODataConstants.ArithmeticFunctions.CEILING:
+                return builder.function("CEIL", Integer.class, param);
+            case ODataConstants.GeoFunctions.GEO_LENGTH:
+                if (rootQS instanceof SpatialQuerySpecifications) {
+                    return ((SpatialQuerySpecifications) rootQS).handleGeospatial(
+                            expr.getParameters()
+                                    .get(0)
+                                    .asGeometry()
+                                    .get(),
+                            expr.getName(),
+                            null,
+                            (HibernateSpatialCriteriaBuilder) builder,
+                            root);
+                } else {
+                    throw new STAInvalidQueryException(ERROR_NOT_SPATIAL);
+                }
+            default:
+                throw new STAInvalidQueryException(ERROR_NOT_EVALUABLE + expr.getName());
         }
     }
 
     /**
-     * wraps function evaluation to handle function on Observation->value or Observation->parameters->value as
+     * wraps function evaluation to handle function on Observation->value or
+     * Observation->parameters->value as
      * the value is split over multiple columns
      *
      * @param firstParam
-     *        first argument, description to fkt
+     *                    first argument, description to fkt
      * @param secondParam
-     *        second argument to fkt
+     *                    second argument to fkt
      * @param fkt
-     *        function to be used for check
+     *                    function to be used for check
      * @return evaluated Predicate
      */
-    private <P, Q, S extends Expression< ? >> S evalFuncOnMember(Expression<P> firstParam,
-                                                                 Expression<Q> secondParam,
-                                                                 BiFunction<Expression<P>, Expression<Q>, S> fkt)
+    private <P, Q, S extends Expression<?>> S evalFuncOnMember(Expression<P> firstParam,
+            Expression<Q> secondParam,
+            BiFunction<Expression<P>, Expression<Q>, S> fkt)
             throws STAInvalidQueryException {
         if (firstParam != null) {
             return fkt.apply(firstParam, secondParam);
         } else {
             if (secondParam.getJavaType()
-                           .isAssignableFrom(String.class)) {
-                // We could not resolve firstParam to a value, so we are filtering on Observation->result
+                    .isAssignableFrom(String.class)) {
+                // We could not resolve firstParam to a value, so we are filtering on
+                // Observation->result
                 return (S) builder.concat(
-                                          fkt.apply(root.get(DataEntity.PROPERTY_VALUE_CATEGORY), secondParam),
-                                          fkt.apply(root.get(DataEntity.PROPERTY_VALUE_TEXT), secondParam));
+                        fkt.apply(root.get(DataEntity.PROPERTY_VALUE_CATEGORY), secondParam),
+                        fkt.apply(root.get(DataEntity.PROPERTY_VALUE_TEXT), secondParam));
             } else if (secondParam.getJavaType()
-                                  .isAssignableFrom(Double.class)) {
+                    .isAssignableFrom(Double.class)) {
                 return (S) fkt.apply(root.get(DataEntity.PROPERTY_VALUE_QUANTITY), secondParam);
             } else {
                 throw new STAInvalidQueryException("Could not evaluate function call on Observation->result. Result "
@@ -600,214 +610,214 @@ public final class FilterExprVisitor<T> implements ExprVisitor<Expression< ? >, 
     }
 
     @SuppressWarnings("unchecked")
-    private Expression< ? > visitMethodCallBinary(MethodCallExpr expr) throws STAInvalidQueryException {
-        Expression< ? > secondParam;
+    private Expression<?> visitMethodCallBinary(MethodCallExpr expr) throws STAInvalidQueryException {
+        Expression<?> secondParam;
         switch (expr.getName()) {
-        // String Functions
-        case ODataConstants.StringFunctions.ENDSWITH:
-            String rawSecondPar = expr.getParameters()
-                                      .get(1)
-                                      .toString();
-            return this.<String, String, Expression<Boolean>> evalFuncOnMember(
-                                                                               (Expression<String>) expr.getParameters()
-                                                                                                        .get(0)
-                                                                                                        .accept(this),
-                                                                               builder.literal(DOLLAR
-                                                                                       + rawSecondPar.substring(1,
-                                                                                                                rawSecondPar.length()
-                                                                                                                        - 1)),
-                                                                               builder::like);
-        case ODataConstants.StringFunctions.STARTSWITH:
-            String rawSecondParam = expr.getParameters()
+            // String Functions
+            case ODataConstants.StringFunctions.ENDSWITH:
+                String rawSecondPar = expr.getParameters()
+                        .get(1)
+                        .toString();
+                return this.<String, String, Expression<Boolean>>evalFuncOnMember(
+                        (Expression<String>) expr.getParameters()
+                                .get(0)
+                                .accept(this),
+                        builder.literal(DOLLAR
+                                + rawSecondPar.substring(1,
+                                        rawSecondPar.length()
+                                                - 1)),
+                        builder::like);
+            case ODataConstants.StringFunctions.STARTSWITH:
+                String rawSecondParam = expr.getParameters()
+                        .get(1)
+                        .toString();
+                return this.<String, String, Expression<Boolean>>evalFuncOnMember(
+                        (Expression<String>) expr.getParameters()
+                                .get(0)
+                                .accept(this),
+                        builder.literal(rawSecondParam.substring(1,
+                                rawSecondParam.length()
+                                        - 1)
+                                + DOLLAR),
+                        builder::like);
+            case ODataConstants.StringFunctions.SUBSTRINGOF:
+                String rawFirstP = expr.getParameters()
+                        .get(0)
+                        .toString();
+                return this.<String, String, Expression<Boolean>>evalFuncOnMember(
+                        (Expression<String>) expr.getParameters()
+                                .get(1)
+                                .accept(this),
+                        builder.literal(DOLLAR
+                                + rawFirstP.substring(1,
+                                        rawFirstP.length()
+                                                - 1)
+                                + DOLLAR),
+                        builder::like);
+            case ODataConstants.StringFunctions.INDEXOF:
+                secondParam = expr.getParameters()
+                        .get(1)
+                        .accept(this);
+                return this.<String, String, Expression<Integer>>evalFuncOnMember(
+                        (Expression<String>) expr.getParameters()
+                                .get(0)
+                                .accept(this),
+                        (Expression<String>) secondParam,
+                        builder::locate);
+            case ODataConstants.StringFunctions.SUBSTRING:
+                secondParam = expr.getParameters()
+                        .get(1)
+                        .accept(this);
+                return this.<String, Integer, Expression<String>>evalFuncOnMember(
+                        (Expression<String>) expr.getParameters()
+                                .get(0)
+                                .accept(this),
+                        (Expression<Integer>) secondParam,
+                        builder::substring);
+            case ODataConstants.StringFunctions.CONCAT:
+                secondParam = expr.getParameters()
+                        .get(1)
+                        .accept(this);
+                return this.<String, String, Expression<String>>evalFuncOnMember(
+                        (Expression<String>) expr.getParameters()
+                                .get(0)
+                                .accept(this),
+                        (Expression<String>) secondParam,
+                        builder::concat);
+            // Geospatial Functions + Spatial Relationship Functions
+            case ODataConstants.GeoFunctions.GEO_DISTANCE:
+                if (rootQS instanceof SpatialQuerySpecifications) {
+                    return ((SpatialQuerySpecifications) rootQS).handleGeospatial(
+                            expr.getParameters()
+                                    .get(0)
+                                    .asGeometry()
+                                    .get(),
+                            expr.getName(),
+                            expr.getParameters()
+                                    .get(1)
+                                    .asGeometry()
+                                    .get()
+                                    .getGeometry(),
+                            (HibernateSpatialCriteriaBuilder) builder,
+                            root);
+                } else {
+                    throw new STAInvalidQueryException(ERROR_NOT_SPATIAL);
+                }
+            case ODataConstants.GeoFunctions.GEO_INTERSECTS:
+                // fallthru
+            case ODataConstants.SpatialFunctions.ST_EQUALS:
+                // fallthru
+            case ODataConstants.SpatialFunctions.ST_DISJOINT:
+                // fallthru
+            case ODataConstants.SpatialFunctions.ST_TOUCHES:
+                // fallthru
+            case ODataConstants.SpatialFunctions.ST_WITHIN:
+                // fallthru
+            case ODataConstants.SpatialFunctions.ST_OVERLAPS:
+                // fallthru
+            case ODataConstants.SpatialFunctions.ST_CROSSES:
+                // fallthru
+            case ODataConstants.SpatialFunctions.ST_INTERSECTS:
+                // fallthru
+            case ODataConstants.SpatialFunctions.ST_CONTAINS:
+                if (expr.getParameters()
+                        .get(0)
+                        .asGeometry()
+                        .get()
+                        .getGeometry()
+                        .contains(SLASH)) {
+                    return convertToForeignSpatialExpression(
+                            expr.getParameters()
+                                    .get(0)
+                                    .asGeometry()
+                                    .get()
+                                    .getGeometry(),
+                            expr.getName(),
+                            expr.getParameters()
+                                    .get(1)
+                                    .asGeometry()
+                                    .get()
+                                    .getGeometry());
+                } else {
+                    if (rootQS instanceof SpatialQuerySpecifications) {
+                        return ((SpatialQuerySpecifications) rootQS).handleGeoSpatialPropertyFilter(
+                                expr.getParameters()
+                                        .get(0)
+                                        .asGeometry()
+                                        .get()
+                                        .getGeometry(),
+                                expr.getName(),
+                                expr.getParameters()
                                         .get(1)
-                                        .toString();
-            return this.<String, String, Expression<Boolean>> evalFuncOnMember(
-                                                                               (Expression<String>) expr.getParameters()
-                                                                                                        .get(0)
-                                                                                                        .accept(this),
-                                                                               builder.literal(rawSecondParam.substring(1,
-                                                                                                                        rawSecondParam.length()
-                                                                                                                                - 1)
-                                                                                       + DOLLAR),
-                                                                               builder::like);
-        case ODataConstants.StringFunctions.SUBSTRINGOF:
-            String rawFirstP = expr.getParameters()
-                                   .get(0)
-                                   .toString();
-            return this.<String, String, Expression<Boolean>> evalFuncOnMember(
-                                                                               (Expression<String>) expr.getParameters()
-                                                                                                        .get(1)
-                                                                                                        .accept(this),
-                                                                               builder.literal(DOLLAR
-                                                                                       + rawFirstP.substring(1,
-                                                                                                             rawFirstP.length()
-                                                                                                                     - 1)
-                                                                                       + DOLLAR),
-                                                                               builder::like);
-        case ODataConstants.StringFunctions.INDEXOF:
-            secondParam = expr.getParameters()
-                              .get(1)
-                              .accept(this);
-            return this.<String, String, Expression<Integer>> evalFuncOnMember(
-                                                                               (Expression<String>) expr.getParameters()
-                                                                                                        .get(0)
-                                                                                                        .accept(this),
-                                                                               (Expression<String>) secondParam,
-                                                                               builder::locate);
-        case ODataConstants.StringFunctions.SUBSTRING:
-            secondParam = expr.getParameters()
-                              .get(1)
-                              .accept(this);
-            return this.<String, Integer, Expression<String>> evalFuncOnMember(
-                                                                               (Expression<String>) expr.getParameters()
-                                                                                                        .get(0)
-                                                                                                        .accept(this),
-                                                                               (Expression<Integer>) secondParam,
-                                                                               builder::substring);
-        case ODataConstants.StringFunctions.CONCAT:
-            secondParam = expr.getParameters()
-                              .get(1)
-                              .accept(this);
-            return this.<String, String, Expression<String>> evalFuncOnMember(
-                                                                              (Expression<String>) expr.getParameters()
-                                                                                                       .get(0)
-                                                                                                       .accept(this),
-                                                                              (Expression<String>) secondParam,
-                                                                              builder::concat);
-        // Geospatial Functions + Spatial Relationship Functions
-        case ODataConstants.GeoFunctions.GEO_DISTANCE:
-            if (rootQS instanceof SpatialQuerySpecifications) {
-                return ((SpatialQuerySpecifications) rootQS).handleGeospatial(
-                                                                              expr.getParameters()
-                                                                                  .get(0)
-                                                                                  .asGeometry()
-                                                                                  .get(),
-                                                                              expr.getName(),
-                                                                              expr.getParameters()
-                                                                                  .get(1)
-                                                                                  .asGeometry()
-                                                                                  .get()
-                                                                                  .getGeometry(),
-                                                                              (HibernateSpatialCriteriaBuilder) builder,
-                                                                              root);
-            } else {
-                throw new STAInvalidQueryException(ERROR_NOT_SPATIAL);
-            }
-        case ODataConstants.GeoFunctions.GEO_INTERSECTS:
-            // fallthru
-        case ODataConstants.SpatialFunctions.ST_EQUALS:
-            // fallthru
-        case ODataConstants.SpatialFunctions.ST_DISJOINT:
-            // fallthru
-        case ODataConstants.SpatialFunctions.ST_TOUCHES:
-            // fallthru
-        case ODataConstants.SpatialFunctions.ST_WITHIN:
-            // fallthru
-        case ODataConstants.SpatialFunctions.ST_OVERLAPS:
-            // fallthru
-        case ODataConstants.SpatialFunctions.ST_CROSSES:
-            // fallthru
-        case ODataConstants.SpatialFunctions.ST_INTERSECTS:
-            // fallthru
-        case ODataConstants.SpatialFunctions.ST_CONTAINS:
-            if (expr.getParameters()
-                    .get(0)
-                    .asGeometry()
-                    .get()
-                    .getGeometry()
-                    .contains(SLASH)) {
-                return convertToForeignSpatialExpression(
-                                                         expr.getParameters()
-                                                             .get(0)
-                                                             .asGeometry()
-                                                             .get()
-                                                             .getGeometry(),
-                                                         expr.getName(),
-                                                         expr.getParameters()
-                                                             .get(1)
-                                                             .asGeometry()
-                                                             .get()
-                                                             .getGeometry());
-            } else {
-                if (rootQS instanceof SpatialQuerySpecifications) {
-                    return ((SpatialQuerySpecifications) rootQS).handleGeoSpatialPropertyFilter(
-                                                                                                expr.getParameters()
-                                                                                                    .get(0)
-                                                                                                    .asGeometry()
-                                                                                                    .get()
-                                                                                                    .getGeometry(),
-                                                                                                expr.getName(),
-                                                                                                expr.getParameters()
-                                                                                                    .get(1)
-                                                                                                    .asGeometry()
-                                                                                                    .get()
-                                                                                                    .getGeometry())
-                                                                .toPredicate(root, query, builder);
-                } else {
-                    throw new STAInvalidQueryException(ERROR_NOT_SPATIAL);
+                                        .asGeometry()
+                                        .get()
+                                        .getGeometry())
+                                .toPredicate(root, query, builder);
+                    } else {
+                        throw new STAInvalidQueryException(ERROR_NOT_SPATIAL);
+                    }
                 }
-            }
-        default:
-            throw new STAInvalidQueryException(ERROR_NOT_EVALUABLE + expr.getName());
+            default:
+                throw new STAInvalidQueryException(ERROR_NOT_EVALUABLE + expr.getName());
         }
     }
 
-    private Expression< ? > visitMethodCallTernary(MethodCallExpr expr) throws STAInvalidQueryException {
+    private Expression<?> visitMethodCallTernary(MethodCallExpr expr) throws STAInvalidQueryException {
         switch (expr.getName()) {
-        case ODataConstants.SpatialFunctions.ST_RELATE:
-            if (expr.getParameters()
-                    .get(0)
-                    .asGeometry()
-                    .get()
-                    .getGeometry()
-                    .contains(SLASH)) {
-                return convertToForeignSpatialExpression(
-                                                         expr.getParameters()
-                                                             .get(0)
-                                                             .asGeometry()
-                                                             .get()
-                                                             .getGeometry(),
-                                                         expr.getName(),
-                                                         expr.getParameters()
-                                                             .get(1)
-                                                             .asGeometry()
-                                                             .get()
-                                                             .getGeometry(),
-                                                         expr.getParameters()
-                                                             .get(2)
-                                                             .asGeometry()
-                                                             .get()
-                                                             .getGeometry());
-            } else {
-                if (rootQS instanceof SpatialQuerySpecifications) {
-                    return ((SpatialQuerySpecifications) rootQS).handleGeoSpatialPropertyFilter(
-                                                                                                expr.getParameters()
-                                                                                                    .get(0)
-                                                                                                    .asGeometry()
-                                                                                                    .get()
-                                                                                                    .getGeometry(),
-                                                                                                expr.getName(),
-                                                                                                expr.getParameters()
-                                                                                                    .get(1)
-                                                                                                    .asGeometry()
-                                                                                                    .get()
-                                                                                                    .getGeometry(),
-                                                                                                expr.getParameters()
-                                                                                                    .get(2)
-                                                                                                    .asGeometry()
-                                                                                                    .get()
-                                                                                                    .getGeometry())
-                                                                .toPredicate(root, query, builder);
+            case ODataConstants.SpatialFunctions.ST_RELATE:
+                if (expr.getParameters()
+                        .get(0)
+                        .asGeometry()
+                        .get()
+                        .getGeometry()
+                        .contains(SLASH)) {
+                    return convertToForeignSpatialExpression(
+                            expr.getParameters()
+                                    .get(0)
+                                    .asGeometry()
+                                    .get()
+                                    .getGeometry(),
+                            expr.getName(),
+                            expr.getParameters()
+                                    .get(1)
+                                    .asGeometry()
+                                    .get()
+                                    .getGeometry(),
+                            expr.getParameters()
+                                    .get(2)
+                                    .asGeometry()
+                                    .get()
+                                    .getGeometry());
                 } else {
-                    throw new STAInvalidQueryException(ERROR_NOT_SPATIAL);
+                    if (rootQS instanceof SpatialQuerySpecifications) {
+                        return ((SpatialQuerySpecifications) rootQS).handleGeoSpatialPropertyFilter(
+                                expr.getParameters()
+                                        .get(0)
+                                        .asGeometry()
+                                        .get()
+                                        .getGeometry(),
+                                expr.getName(),
+                                expr.getParameters()
+                                        .get(1)
+                                        .asGeometry()
+                                        .get()
+                                        .getGeometry(),
+                                expr.getParameters()
+                                        .get(2)
+                                        .asGeometry()
+                                        .get()
+                                        .getGeometry())
+                                .toPredicate(root, query, builder);
+                    } else {
+                        throw new STAInvalidQueryException(ERROR_NOT_SPATIAL);
+                    }
                 }
-            }
-        default:
-            throw new STAInvalidQueryException(ERROR_NOT_EVALUABLE + expr.getName());
+            default:
+                throw new STAInvalidQueryException(ERROR_NOT_EVALUABLE + expr.getName());
         }
     }
 
-    private Expression< ? extends Number> visitNumericExpr(Expr expr) throws STAInvalidQueryException {
-        return (Expression< ? extends Number>) expr.accept(this);
+    private Expression<? extends Number> visitNumericExpr(Expr expr) throws STAInvalidQueryException {
+        return (Expression<? extends Number>) expr.accept(this);
     }
 }

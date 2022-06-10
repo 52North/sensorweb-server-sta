@@ -36,6 +36,7 @@ import org.n52.sta.api.old.RequestUtils;
 /**
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
  */
+@SuppressWarnings("checkstyle:linelength")
 public interface CitSciExtensionRequestUtils extends RequestUtils {
 
     String BASE_COLLECTION_REGEX = GROUPS

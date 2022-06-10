@@ -82,9 +82,9 @@ public class ObservedPropertyService
 
     @Autowired
     public ObservedPropertyService(PhenomenonRepository repository,
-                                   DatastreamRepository datastreamRepository,
-                                   PhenomenonParameterRepository parameterRepository,
-                                   EntityManager em) {
+            DatastreamRepository datastreamRepository,
+            PhenomenonParameterRepository parameterRepository,
+            EntityManager em) {
         super(repository, em, PhenomenonEntity.class);
         this.datastreamRepository = datastreamRepository;
         this.parameterRepository = parameterRepository;
@@ -94,7 +94,7 @@ public class ObservedPropertyService
      * Checks if an Entity with given id exists
      *
      * @param id
-     *        the id of the Entity
+     *           the id of the Entity
      * @return true if an Entity with given id exists
      */
     @Override
@@ -105,12 +105,12 @@ public class ObservedPropertyService
     @Override
     public boolean existsEntityByRelatedEntity(String relatedId, String relatedType, String ownId) {
         switch (relatedType) {
-        case STAEntityDefinition.DATASTREAMS: {
-            return getRepository().findOne(byRelatedEntityFilter(relatedId, relatedType, ownId))
-                                  .isPresent();
-        }
-        default:
-            return false;
+            case STAEntityDefinition.DATASTREAMS: {
+                return getRepository().findOne(byRelatedEntityFilter(relatedId, relatedType, ownId))
+                        .isPresent();
+            }
+            default:
+                return false;
         }
     }
 
@@ -121,25 +121,25 @@ public class ObservedPropertyService
             for (ExpandItem expandItem : expandOption.getItems()) {
                 // We cannot handle nested $filter or $expand
                 if (expandItem.getQueryOptions()
-                              .hasFilterFilter()
+                        .hasFilterFilter()
                         || expandItem.getQueryOptions()
-                                     .hasExpandFilter()) {
+                                .hasExpandFilter()) {
                     continue;
                 }
                 String expandProperty = expandItem.getPath();
                 if (ObservedPropertyEntityDefinition.DATASTREAMS.equals(expandProperty)) {
                     return new EntityGraphRepository.FetchGraph[] {
-                        EntityGraphRepository.FetchGraph.FETCHGRAPH_DATASETS,
-                        EntityGraphRepository.FetchGraph.FETCHGRAPH_PARAMETERS,
+                            EntityGraphRepository.FetchGraph.FETCHGRAPH_DATASETS,
+                            EntityGraphRepository.FetchGraph.FETCHGRAPH_PARAMETERS,
                     };
                 }
                 throw new STAInvalidQueryException(String.format(INVALID_EXPAND_OPTION_SUPPLIED,
-                                                                 expandProperty,
-                                                                 StaConstants.OBSERVED_PROPERTY));
+                        expandProperty,
+                        StaConstants.OBSERVED_PROPERTY));
             }
         }
         return new EntityGraphRepository.FetchGraph[] {
-            EntityGraphRepository.FetchGraph.FETCHGRAPH_PARAMETERS
+                EntityGraphRepository.FetchGraph.FETCHGRAPH_PARAMETERS
         };
     }
 
@@ -149,23 +149,23 @@ public class ObservedPropertyService
         for (ExpandItem expandItem : expandOption.getItems()) {
             // We have already handled $expand without filter and expand
             if (!(expandItem.getQueryOptions()
-                            .hasFilterFilter()
+                    .hasFilterFilter()
                     || expandItem.getQueryOptions()
-                                 .hasExpandFilter())) {
+                            .hasExpandFilter())) {
                 continue;
             }
             String expandProperty = expandItem.getPath();
             if (ObservedPropertyEntityDefinition.DATASTREAMS.equals(expandProperty)) {
                 Page<AbstractDatasetEntity> datastreams = getDatastreamService()
-                                                                                .getEntityCollectionByRelatedEntityRaw(entity.getStaIdentifier(),
-                                                                                                                       STAEntityDefinition.OBSERVED_PROPERTIES,
-                                                                                                                       expandItem.getQueryOptions());
+                        .getEntityCollectionByRelatedEntityRaw(entity.getStaIdentifier(),
+                                STAEntityDefinition.OBSERVED_PROPERTIES,
+                                expandItem.getQueryOptions());
                 entity.setDatasets(datastreams.get()
-                                              .collect(Collectors.toSet()));
+                        .collect(Collectors.toSet()));
             } else {
                 throw new STAInvalidQueryException(String.format(INVALID_EXPAND_OPTION_SUPPLIED,
-                                                                 expandProperty,
-                                                                 StaConstants.OBSERVED_PROPERTY));
+                        expandProperty,
+                        StaConstants.OBSERVED_PROPERTY));
             }
         }
         return entity;
@@ -173,16 +173,16 @@ public class ObservedPropertyService
 
     @Override
     public Specification<PhenomenonEntity> byRelatedEntityFilter(String relatedId,
-                                                                 String relatedType,
-                                                                 String ownId) {
+            String relatedType,
+            String ownId) {
         Specification<PhenomenonEntity> filter;
         switch (relatedType) {
-        case STAEntityDefinition.DATASTREAMS: {
-            filter = oQS.withDatastreamStaIdentifier(relatedId);
-            break;
-        }
-        default:
-            throw new IllegalStateException(String.format(TRYING_TO_FILTER_BY_UNRELATED_TYPE, relatedType));
+            case STAEntityDefinition.DATASTREAMS: {
+                filter = oQS.withDatastreamStaIdentifier(relatedId);
+                break;
+            }
+            default:
+                throw new IllegalStateException(String.format(TRYING_TO_FILTER_BY_UNRELATED_TYPE, relatedType));
         }
         if (ownId != null) {
             filter = filter.and(oQS.withStaIdentifier(ownId));
@@ -194,34 +194,34 @@ public class ObservedPropertyService
     public PhenomenonEntity createOrfetch(PhenomenonEntity observableProperty) throws STACRUDException {
         if (observableProperty.getStaIdentifier() != null && !observableProperty.isSetName()) {
             Optional<PhenomenonEntity> optionalEntity = getRepository()
-                                                                       .findByStaIdentifier(observableProperty.getStaIdentifier());
+                    .findByStaIdentifier(observableProperty.getStaIdentifier());
             if (optionalEntity.isPresent()) {
                 return optionalEntity.get();
             } else {
                 throw new STACRUDException(String.format(NO_S_WITH_ID_S_FOUND,
-                                                         StaConstants.OBSERVED_PROPERTY,
-                                                         observableProperty.getStaIdentifier()));
+                        StaConstants.OBSERVED_PROPERTY,
+                        observableProperty.getStaIdentifier()));
             }
         }
 
         if (observableProperty.getStaIdentifier() == null) {
             if (getRepository().existsByName(observableProperty.getName())) {
                 Optional<PhenomenonEntity> optional = getRepository()
-                                                                     .findOne(oQS.withName(observableProperty.getName()));
+                        .findOne(oQS.withName(observableProperty.getName()));
                 return optional.isPresent()
                         ? optional.get()
                         : null;
             } else {
                 // Autogenerate Identifier
                 observableProperty.setStaIdentifier(UUID.randomUUID()
-                                                        .toString());
+                        .toString());
             }
         }
         synchronized (getLock(observableProperty.getStaIdentifier())) {
             // Check for duplicate definition
             if (getRepository().existsByIdentifier(observableProperty.getIdentifier())) {
                 throw new STACRUDException("Observed Property with given Definition already exists!",
-                                           HTTPStatus.CONFLICT);
+                        HTTPStatus.CONFLICT);
             }
             if (getRepository().existsByStaIdentifier(observableProperty.getStaIdentifier())) {
                 throw new STACRUDException(IDENTIFIER_ALREADY_EXISTS, HTTPStatus.CONFLICT);
@@ -229,13 +229,13 @@ public class ObservedPropertyService
             PhenomenonEntity intermediateSave = getRepository().intermediateSave(observableProperty);
             if (observableProperty.getParameters() != null) {
                 parameterRepository.saveAll(observableProperty.getParameters()
-                                                              .stream()
-                                                              .filter(t -> t instanceof PhenomenonParameterEntity)
-                                                              .map(t -> {
-                                                                  ((PhenomenonParameterEntity) t).setPhenomenon(intermediateSave);
-                                                                  return (PhenomenonParameterEntity) t;
-                                                              })
-                                                              .collect(Collectors.toSet()));
+                        .stream()
+                        .filter(t -> t instanceof PhenomenonParameterEntity)
+                        .map(t -> {
+                            ((PhenomenonParameterEntity) t).setPhenomenon(intermediateSave);
+                            return (PhenomenonParameterEntity) t;
+                        })
+                        .collect(Collectors.toSet()));
             }
             return getRepository().save(observableProperty);
         }
@@ -292,7 +292,7 @@ public class ObservedPropertyService
             if (getRepository().existsByStaIdentifier(id)) {
                 // delete datastreams
                 for (AbstractDatasetEntity datastreamEntity : datastreamRepository
-                                                                                  .findAll(dQS.withObservedPropertyStaIdentifier(id))) {
+                        .findAll(dQS.withObservedPropertyStaIdentifier(id))) {
                     getDatastreamService().delete(datastreamEntity.getStaIdentifier());
                 }
                 getRepository().deleteByStaIdentifier(id);

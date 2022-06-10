@@ -87,10 +87,11 @@ public class LicenseService
                         EntityGraphRepository.FetchGraph.FETCHGRAPH_DATASETS,
                     };
                 } else {
+                    String message = String.format(CommonSTAServiceImpl.INVALID_EXPAND_OPTION_SUPPLIED,
+                                                   expandProperty,
+                                                   StaConstants.LICENSE);
                     throw new STAInvalidQueryException(
-                                                       String.format(CommonSTAServiceImpl.INVALID_EXPAND_OPTION_SUPPLIED,
-                                                                     expandProperty,
-                                                                     StaConstants.LICENSE));
+                                                       message);
                 }
             }
         }
@@ -132,17 +133,17 @@ public class LicenseService
 
     @Override
     protected Specification<LicenseEntity> byRelatedEntityFilter(String relatedId,
-                                                                 String relatedType,
-                                                                 String ownId) {
+            String relatedType,
+            String ownId) {
         Specification<LicenseEntity> filter;
         switch (relatedType) {
-        case STAEntityDefinition.GROUPS:
-            filter = lQS.withObservationGroupStaIdentifier(relatedId);
-            break;
-        default:
-            throw new IllegalStateException(
-                                            String.format(CommonSTAServiceImpl.TRYING_TO_FILTER_BY_UNRELATED_TYPE,
-                                                          relatedType));
+            case STAEntityDefinition.GROUPS:
+                filter = lQS.withObservationGroupStaIdentifier(relatedId);
+                break;
+            default:
+                throw new IllegalStateException(
+                                                String.format(CommonSTAServiceImpl.TRYING_TO_FILTER_BY_UNRELATED_TYPE,
+                                                              relatedType));
         }
 
         if (ownId != null) {

@@ -30,8 +30,6 @@ package org.n52.sta.mqtt.config;
 
 import java.util.List;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-
 import org.n52.sta.api.old.EntityServiceFactory;
 import org.n52.sta.mqtt.old.MqttBroker;
 import org.n52.sta.mqtt.old.MqttPublishMessageHandler;
@@ -45,17 +43,19 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 @Configuration
 @ConfigurationProperties(prefix = "server.feature")
 @ConditionalOnProperty(name = "server.feature.mqtt.enabled", havingValue = "true", matchIfMissing = false)
+@SuppressWarnings("checkstyle:linelength")
 public class MqttConfiguration {
 
     @Value("mqtt.enabled:false")
     private boolean mqttEnabled;
 
     @Bean(initMethod = "init", destroyMethod = "stopServer")
-    public MqttBroker getMqttBroker(
-                                    @Value("${mqtt.broker.store.folder:}") String storePath,
+    public MqttBroker getMqttBroker(@Value("${mqtt.broker.store.folder:}") String storePath,
                                     @Value("${mqtt.broker.store.filename:52N-STA-MQTTBroker.h2}") String storeFilename,
                                     @Value("${mqtt.broker.store.autosave-in-seconds:30}") String autosaveIntervalProperty,
                                     @Value("${mqtt.broker.store.enabled}") Boolean persistenceEnabled,
@@ -79,16 +79,14 @@ public class MqttConfiguration {
     }
 
     @Bean
-    public MqttSubscriptionEventHandler getMqttMessageHandler(
-                                                              @Value("${server.config.service-root-url}") String rootUrl,
+    public MqttSubscriptionEventHandler getMqttMessageHandler(@Value("${server.config.service-root-url}") String rootUrl,
                                                               @Value("${server.feature.escapeId:true}") boolean shouldEscapeId,
                                                               ObjectMapper mapper) {
         return new MqttSubscriptionEventHandlerImpl(rootUrl, shouldEscapeId, mapper);
     }
 
     @Bean
-    public MqttPublishMessageHandler getMqttMessageHandler(
-                                                           @Value("${mqtt.publication-topics:Observations}") List<String> publishTopics,
+    public MqttPublishMessageHandler getMqttMessageHandler(@Value("${mqtt.publication-topics:Observations}") List<String> publishTopics,
                                                            @Value("${mqtt.read-only}") boolean readOnly,
                                                            @Value("${server.config.service-root-url}") String rootUrl,
                                                            @Value("${server.feature.escapeId:true}") boolean escapeId,

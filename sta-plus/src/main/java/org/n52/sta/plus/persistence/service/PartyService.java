@@ -60,6 +60,7 @@ import org.springframework.data.jpa.domain.Specification;
 // @DependsOn({ "springApplicationContext" })
 // @Transactional
 // @Profile(StaConstants.STAPLUS)
+@SuppressWarnings("checkstyle:linelength")
 public class PartyService
         extends
         CitSciSTAServiceImpl<PartyRepository, PartyDTO, PartyEntity> {
@@ -131,15 +132,15 @@ public class PartyService
 
     @Override
     protected Specification<PartyEntity> byRelatedEntityFilter(String relatedId,
-                                                               String relatedType,
-                                                               String ownId) {
+            String relatedType,
+            String ownId) {
         Specification<PartyEntity> filter;
         switch (relatedType) {
-        case STAEntityDefinition.DATASTREAMS:
-            filter = pQS.withDatastreamStaIdentifier(relatedId);
-            break;
-        default:
-            throw new IllegalStateException(String.format(TRYING_TO_FILTER_BY_UNRELATED_TYPE, relatedType));
+            case STAEntityDefinition.DATASTREAMS:
+                filter = pQS.withDatastreamStaIdentifier(relatedId);
+                break;
+            default:
+                throw new IllegalStateException(String.format(TRYING_TO_FILTER_BY_UNRELATED_TYPE, relatedType));
         }
 
         if (ownId != null) {

@@ -53,6 +53,7 @@ public class HibernateConfiguration {
     // TODO https://www.airpair.com/java/posts/spring-streams-memory-efficiency
 
     @Bean
+    @SuppressWarnings("checkstyle:linelength")
     public EntityManagerFactory entityManagerFactory(@Value("${database.jpa.persistence-location}") String persistenceXmlLocation,
                                                      DataSource datasource,
                                                      JpaProperties properties) {

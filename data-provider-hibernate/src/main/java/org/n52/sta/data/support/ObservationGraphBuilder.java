@@ -32,7 +32,7 @@ import org.n52.series.db.beans.DataEntity;
 import org.n52.shetland.filter.ExpandItem;
 import org.n52.shetland.oasis.odata.query.option.QueryOptions;
 
-public class ObservationGraphBuilder extends GraphBuilder<DataEntity> {
+public final class ObservationGraphBuilder extends GraphBuilder<DataEntity> {
 
     private ObservationGraphBuilder() {
         super(DataEntity.class);
