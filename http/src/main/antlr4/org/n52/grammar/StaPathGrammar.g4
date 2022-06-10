@@ -25,7 +25,7 @@ parser grammar StaPathGrammar;
 options { tokenVocab = StaPathLexer; }
 
 path
-   : SLASH resource (SLASH REF)? EOF
+   : SLASH resource (SLASH | (SLASH REF))? EOF
    ;
 
 resource
