@@ -38,7 +38,7 @@ public class Request {
      * A Request for an instance with specified id.
      *
      * @param id
-     *           the instance's id
+     *        the instance's id
      * @return a request to get an instance by its id
      */
     public static Request createIdRequest(String id) {
@@ -65,7 +65,8 @@ public class Request {
     }
 
     public boolean isRefRequest() {
-        return selectPath.map(SelectPath::isRef).orElse(false);
+        return selectPath.map(SelectPath::isRef)
+                         .orElse(false);
     }
 
 }
