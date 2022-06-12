@@ -1,5 +1,7 @@
 @startuml SensorThings API, API Entities
 
+' TODO review diagram
+
 package "service" as pkg_service {
     interface "StaEntityService" <T>
     class "ThingEntityService" as thing_service <Thing>

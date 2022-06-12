@@ -1,5 +1,7 @@
 @startuml SensorThings API, API
 
+' TODO review diagram
+
 node "sta" as sta {
 }
 

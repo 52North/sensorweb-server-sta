@@ -1,0 +1,42 @@
+@startuml SensorThings API, Parsing Path and Query
+
+package "arctic-sea:janmayen" {
+    interface "STAQueryOptionsGrammarBaseVisitor" as as_query_grammar_visitor
+    note right of as_query_grammar_visitor : generated from g4-file
+
+    class "QueryOptionsFactory" as as_query_factory
+    class "QueryOptions" as as_query_grammar_visitor
+    class "STAQueryOptionVisitor" as as_query_visitor
+
+    as_query_visitor ..|> as_query_grammar_visitor : implements
+    as_query_visitor <.. as_query_factory : uses
+    as_query_factory ..> as_query_grammar_visitor : creates
+}
+
+package "SensorThings API" {
+    interface "StaPathGrammarBaseVisitor" as sta_path_grammar_visitor
+    note top of sta_path_grammar_visitor : generated from g4-file
+    
+    abstract class "PathFactory" as sta_path_factory
+    interface "StaPath" as sta_path
+    class "StaPathVisitor" as sta_path_visitor
+
+    class "RequestContext" as sta_request_context
+}
+
+sta_path_grammar_visitor ..|> sta_path_visitor : implements
+sta_path_factory ..> sta_path_visitor : uses
+sta_path_factory ..> sta_path : creates
+
+sta_request_context ..> as_query_factory : uses
+sta_request_context ..> sta_path_factory : uses
+sta_request_context --> as_query_grammar_visitor
+sta_request_context --> sta_path
+
+'interface "Specification" as specification
+'class "FilterQueryParser" as sta_filter_query_parser
+'as_query_factory <.. sta_filter_query_parser : uses
+'class "FilterQueryVisitor" as sta_filter_query_visitor
+'sta_filter_query_parser ..> sta_filter_query_visitor : uses
+'sta_filter_query_visitor ..> specification : creates
+@enduml

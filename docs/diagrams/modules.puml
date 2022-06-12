@@ -1,4 +1,4 @@
-@startuml Modules and Dependencies
+@startuml SensorThings API, Modules and Dependencies
 
 node app
 node sta <<infrastructure layer>> {

@@ -1,5 +1,7 @@
 @startuml 52n SensorThings API, DAO Packages
 
+' TODO review diagram
+
 package "javax.persistence.*" as javax_persistence #dd7766 {
     interface "EntityManager" as em
     interface "CriteriaBuilder" as criteria_builder
@@ -49,7 +51,7 @@ package repositories as pkg_repos_base {
 }
 
 package entity as entity {
-    interface "DataStream" as ds_entity
+    interface "Datastream" as ds_entity
     interface "EntityProvider" as entity_provider <T>
     class "DataStreamEntityProvider" as ds_provider
 }

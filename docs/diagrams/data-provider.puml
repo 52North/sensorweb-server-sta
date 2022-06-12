@@ -1,0 +1,60 @@
+@startuml 52n SensorThings API, Data Provider (Datastream)
+
+package service {
+    interface "EntityService<T>" as api_entity_service
+    class "DatastreamService<AbstractDatasetEntity>" as api_ds_service
+
+     api_entity_service <|.. api_ds_service
+
+}
+
+package domain {
+    interface "Datastream" as api_ds
+    interface "EntityProvider<T>" as api_entity_provider
+    interface "EntityEditor<T>" as api_entity_editor
+
+    interface "DomainService<T>" as domain_domain_service {
+        void sendDomainEvent(DomainEvent<T> e)
+    }
+    abstract class "DomainServiceAdapter<T>" as domain_domain_service_adapter
+    abstract class "EntityAggregate<T>" as domain_entity_aggregate {
+        T save()
+        T save(T old)
+        T delete()
+    }
+    class "DatastreamAggregate" as domain_ds_aggregate
+
+    domain_domain_service --|> api_entity_provider
+    domain_entity_aggregate ---> api_entity_editor
+
+    domain_domain_service_adapter ..|> domain_domain_service
+    domain_domain_service_adapter --> api_entity_provider
+}
+
+package dao {
+    abstract class "BaseEntityProvider" as dao_base_entity_provider
+    class "DatastreamEntityProvider" as dao_ds_entity_provider
+
+'     class "DatastreamRepository" as dao_ds_repo
+'     class "DatastreamData" as dao_ds_data
+
+'     class "DatastreamQuerySpecification" as dao_ds_query_spec
+'     class "DatastreamGraphBuilder" as dao_ds_graph_builder
+
+    api_entity_provider <|.. dao_base_entity_provider
+    dao_base_entity_provider <|-- dao_ds_entity_provider
+'     dao_ds_data ..|> api_ds
+}
+
+
+api_entity_provider <|-- api_entity_service
+domain_domain_service <-- api_ds_service
+api_entity_editor <|.. api_ds_service
+api_entity_editor <-- api_ds_service
+
+domain_entity_aggregate --> domain_domain_service
+domain_ds_aggregate --|> domain_entity_aggregate
+api_ds <|.. domain_ds_aggregate
+
+
+@enduml
