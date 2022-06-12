@@ -69,8 +69,7 @@ public class ReadController {
 
     private final PathFactory pathFactory;
 
-    public ReadController(
-                          @Value("${server.config.service-root-url}") String serviceUri,
+    public ReadController(@Value("${server.config.service-root-url}") String serviceUri,
                           EntityServiceLookup lookup,
                           PathFactory pathFactory,
                           ObjectMapper mapper) {
@@ -110,23 +109,23 @@ public class ReadController {
     }
 
     private <T extends Identifiable> StreamingResponseBody getAndWriteToResponse(RequestContext requestContext,
-                                                                                 SerializationContext context,
-                                                                                 Class<T> type)
+            SerializationContext context,
+            Class<T> type)
             throws STACRUDException {
         try {
             EntityService<T> entityService = getEntityService(type);
             Request request = requestContext.getRequest();
             switch (requestContext.getPath()
                                   .getType()) {
-            case collection:
-                EntityPage<T> collection = entityService.getEntities(request);
-                return writeCollection(collection, context);
-            case entity:
-            case property:
-                Optional<T> entity = entityService.getEntity(request);
-                return writeEntity(entity.orElseThrow(() -> new STACRUDException("no such entity")), context);
-            default:
-                throw new STACRUDException("not implemented!");
+                case collection:
+                    EntityPage<T> collection = entityService.getEntities(request);
+                    return writeCollection(collection, context);
+                case entity:
+                case property:
+                    Optional<T> entity = entityService.getEntity(request);
+                    return writeEntity(entity.orElseThrow(() -> new STACRUDException("no such entity")), context);
+                default:
+                    throw new STACRUDException("not implemented!");
             }
         } catch (ProviderException e) {
             throw new STACRUDException(e.getLocalizedMessage());
@@ -143,7 +142,7 @@ public class ReadController {
     }
 
     private <T extends Identifiable> StreamingResponseBody writeCollection(EntityPage<T> page,
-                                                                           SerializationContext context) {
+            SerializationContext context) {
         return outputStream -> {
             try (OutputStream out = new BufferedOutputStream(outputStream)) {
                 ObjectWriter writer = context.createWriter();
