@@ -87,22 +87,10 @@ public class ReadController {
     public ResponseEntity<StreamingResponseBody> getObservations(HttpServletRequest request)
             throws STAInvalidUrlException, STACRUDException {
         RequestContext requestContext = RequestContext.create(serviceUri, request, pathFactory);
-
-        StaPath path = requestContext.getPath();
         SerializationContext serializationContext = SerializationContext.create(requestContext, mapper);
-
-        // TODO is this even necessary?
-        // Use $ref serialization-context
-        // if (path.isRef()) {
-        // serializationContext = SerializationContext.create(serializationContext,
-        // new QueryOptions(Collections.singleton(
-        // new SelectFilter(StaConstants.PROP_SELF_LINK))));
-        // }
-
-        StaBaseSerializer< ? > serializer = path.getSerializerFactory()
-                                                .apply(serializationContext);
-        serializationContext.register(serializer);
-
+        
+        StaPath path = requestContext.getPath();
+        StaBaseSerializer< ? > serializer = path.createSerializer(serializationContext);
         return ResponseEntity.ok()
                              .contentType(MediaType.APPLICATION_JSON)
                              .body(getAndWriteToResponse(requestContext, serializationContext, serializer.getType()));
@@ -110,13 +98,13 @@ public class ReadController {
 
     private <T extends Identifiable> StreamingResponseBody getAndWriteToResponse(RequestContext requestContext,
             SerializationContext context,
-            Class<T> type)
+            Class<T> entityType)
             throws STACRUDException {
         try {
-            EntityService<T> entityService = getEntityService(type);
+            StaPath path = requestContext.getPath();
+            EntityService<T> entityService = getEntityService(entityType);
             Request request = requestContext.getRequest();
-            switch (requestContext.getPath()
-                                  .getType()) {
+            switch (path.getPathType()) {
                 case collection:
                     EntityPage<T> collection = entityService.getEntities(request);
                     return writeCollection(collection, context);

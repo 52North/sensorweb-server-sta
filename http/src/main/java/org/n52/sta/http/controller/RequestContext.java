@@ -31,13 +31,16 @@ package org.n52.sta.http.controller;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
+import java.util.Collections;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Function;
 
 import javax.servlet.http.HttpServletRequest;
 
+import org.n52.shetland.filter.SelectFilter;
 import org.n52.shetland.oasis.odata.query.option.QueryOptions;
+import org.n52.shetland.ogc.sta.StaConstants;
 import org.n52.shetland.ogc.sta.exception.STAInvalidUrlException;
 import org.n52.sta.api.path.Request;
 import org.n52.sta.api.path.SelectPath;
@@ -63,8 +66,15 @@ public final class RequestContext {
         Objects.requireNonNull(request, "request must not be null");
         Objects.requireNonNull(pathFactory, "pathFactory must not be null");
         StaPath path = parsePath(request, pathFactory);
-        QueryOptions queryOptions = parseQueryOptions(request);
+        QueryOptions queryOptions = path.isRef()
+                ? createRefQueryOptions()
+                : parseQueryOptions(request);
         return new RequestContext(serviceUri, path, queryOptions);
+    }
+
+    private static QueryOptions createRefQueryOptions() {
+        SelectFilter refFilterClause = new SelectFilter(StaConstants.PROP_SELF_LINK);
+        return new QueryOptions(Collections.singleton(refFilterClause));
     }
 
     private static QueryOptions parseQueryOptions(HttpServletRequest request) {

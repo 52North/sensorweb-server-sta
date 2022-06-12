@@ -7,7 +7,7 @@ public interface SelectPath {
 
     boolean isRef();
 
-    PathType getType();
+    PathType getPathType();
 
     List<PathSegment> getPathSegments();
 

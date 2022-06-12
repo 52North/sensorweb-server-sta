@@ -15,41 +15,43 @@ import org.n52.sta.http.serialize.out.StaBaseSerializer;
  */
 public class StaPath implements SelectPath {
 
-    private final SelectPath.PathType type;
+    private final SelectPath.PathType pathType;
 
-    private final List<PathSegment> path;
+    private final List<PathSegment> pathSegments;
 
     private final Function<SerializationContext, StaBaseSerializer< ? >> serializerFactory;
 
     private boolean isRef;
 
-    public StaPath(PathType type,
-                   PathSegment segment,
+    public StaPath(PathType pathType,
+                   PathSegment pathSegment,
                    Function<SerializationContext, StaBaseSerializer< ? >> serializerFactory) {
-        this.type = type;
+        this.pathType = pathType;
         this.serializerFactory = serializerFactory;
-        this.path = new ArrayList<>();
-        this.path.add(segment);
+        this.pathSegments = new ArrayList<>();
+        this.pathSegments.add(pathSegment);
     }
 
     @Override
-    public PathType getType() {
-        return type;
+    public PathType getPathType() {
+        return pathType;
     }
 
     @Override
     public List<PathSegment> getPathSegments() {
-        return path;
+        return pathSegments;
     }
 
     void addPathSegment(PathSegment pathSegment) {
         if (pathSegment != null) {
-            path.add(pathSegment);
+            pathSegments.add(pathSegment);
         }
     }
-
-    public Function<SerializationContext, StaBaseSerializer< ? >> getSerializerFactory() {
-        return serializerFactory;
+    
+    public StaBaseSerializer< ? > createSerializer(SerializationContext serializationContext) {
+        StaBaseSerializer< ? > serializer = serializerFactory.apply(serializationContext);
+        serializationContext.register(serializer);
+        return serializer;
     }
 
     @Override
@@ -65,9 +67,9 @@ public class StaPath implements SelectPath {
     public String toString() {
         StringBuilder builder = new StringBuilder();
         builder.append("StaPath {\ntype: ")
-               .append(type)
+               .append(pathType)
                .append("\npath:\n");
-        for (PathSegment seg : path) {
+        for (PathSegment seg : pathSegments) {
             builder.append("    ")
                    .append(seg.toString())
                    .append("\n");
