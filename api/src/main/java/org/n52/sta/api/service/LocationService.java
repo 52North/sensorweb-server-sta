@@ -51,19 +51,16 @@ public class LocationService implements EntityService<Location>, EntityEditor<Lo
 
     private static final Logger LOGGER = LoggerFactory.getLogger(LocationService.class);
 
-    private final EntityProvider<Location> locationProvider;
-
     private final DomainService<Location> domainService;
 
     private Optional<EntityEditor<Location>> locationEditor;
 
     public LocationService(EntityProvider<Location> provider) {
-        this(provider, new DefaultDomainService<>(provider));
+        this(provider, null);
     }
 
     public LocationService(EntityProvider<Location> provider, DomainService<Location> domainService) {
         Objects.requireNonNull(provider, "provider must not be null");
-        this.locationProvider = provider;
         this.domainService = domainService == null
                 ? new DefaultDomainService<>(provider)
                 : domainService;

@@ -51,19 +51,16 @@ public class DatastreamService implements EntityService<Datastream>, EntityEdito
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DatastreamService.class);
 
-    private final EntityProvider<Datastream> datastreamProvider;
-
     private final DomainService<Datastream> domainService;
 
     private Optional<EntityEditor<Datastream>> datastreamEditor;
 
     public DatastreamService(EntityProvider<Datastream> provider) {
-        this(provider, new DefaultDomainService<>(provider));
+        this(provider, null);
     }
 
     public DatastreamService(EntityProvider<Datastream> provider, DomainService<Datastream> domainService) {
         Objects.requireNonNull(provider, "provider must not be null");
-        this.datastreamProvider = provider;
         this.domainService = domainService == null
                 ? new DefaultDomainService<>(provider)
                 : domainService;

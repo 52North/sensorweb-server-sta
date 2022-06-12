@@ -51,19 +51,16 @@ public class ThingService implements EntityService<Thing>, EntityEditor<Thing> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ThingService.class);
 
-    private final EntityProvider<Thing> thingProvider;
-
     private final DomainService<Thing> domainService;
 
     private Optional<EntityEditor<Thing>> thingEditor;
 
     public ThingService(EntityProvider<Thing> provider) {
-        this(provider, new DefaultDomainService<>(provider));
+        this(provider, null);
     }
 
     public ThingService(EntityProvider<Thing> provider, DomainService<Thing> domainService) {
         Objects.requireNonNull(provider, "provider must not be null");
-        this.thingProvider = provider;
         this.domainService = domainService == null
                 ? new DefaultDomainService<>(provider)
                 : domainService;

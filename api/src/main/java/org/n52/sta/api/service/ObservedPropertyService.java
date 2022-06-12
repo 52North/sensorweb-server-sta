@@ -51,20 +51,17 @@ public class ObservedPropertyService implements EntityService<ObservedProperty>,
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ObservedPropertyService.class);
 
-    private final EntityProvider<ObservedProperty> observedPropertyProvider;
-
     private final DomainService<ObservedProperty> domainService;
 
     private Optional<EntityEditor<ObservedProperty>> observedPropertyEditor;
 
     public ObservedPropertyService(EntityProvider<ObservedProperty> provider) {
-        this(provider, new DefaultDomainService<>(provider));
+        this(provider, null);
     }
 
     public ObservedPropertyService(EntityProvider<ObservedProperty> provider,
                                    DomainService<ObservedProperty> domainService) {
         Objects.requireNonNull(provider, "provider must not be null");
-        this.observedPropertyProvider = provider;
         this.domainService = domainService == null
                 ? new DefaultDomainService<>(provider)
                 : domainService;

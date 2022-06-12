@@ -51,19 +51,16 @@ public class SensorService implements EntityService<Sensor>, EntityEditor<Sensor
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SensorService.class);
 
-    private final EntityProvider<Sensor> sensorProvider;
-
     private final DomainService<Sensor> domainService;
 
     private Optional<EntityEditor<Sensor>> sensorEditor;
 
     public SensorService(EntityProvider<Sensor> provider) {
-        this(provider, new DefaultDomainService<>(provider));
+        this(provider, null);
     }
 
     public SensorService(EntityProvider<Sensor> provider, DomainService<Sensor> domainService) {
         Objects.requireNonNull(provider, "provider must not be null");
-        this.sensorProvider = provider;
         this.domainService = domainService == null
                 ? new DefaultDomainService<>(provider)
                 : domainService;

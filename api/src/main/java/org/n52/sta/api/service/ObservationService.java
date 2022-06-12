@@ -51,19 +51,16 @@ public class ObservationService implements EntityService<Observation>, EntityEdi
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ObservationService.class);
 
-    private final EntityProvider<Observation> observationProvider;
-
     private final DomainService<Observation> domainService;
 
     private Optional<EntityEditor<Observation>> observationEditor;
 
     public ObservationService(EntityProvider<Observation> provider) {
-        this(provider, new DefaultDomainService<>(provider));
+        this(provider, null);
     }
 
     public ObservationService(EntityProvider<Observation> provider, DomainService<Observation> domainService) {
         Objects.requireNonNull(provider, "provider must not be null");
-        this.observationProvider = provider;
         this.domainService = domainService == null
                 ? new DefaultDomainService<>(provider)
                 : domainService;

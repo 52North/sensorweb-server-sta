@@ -51,20 +51,17 @@ public class FeatureOfInterestService implements EntityService<FeatureOfInterest
 
     private static final Logger LOGGER = LoggerFactory.getLogger(FeatureOfInterestService.class);
 
-    private final EntityProvider<FeatureOfInterest> featureOfInterestProvider;
-
     private final DomainService<FeatureOfInterest> domainService;
 
     private Optional<EntityEditor<FeatureOfInterest>> featureOfInterestEditor;
 
     public FeatureOfInterestService(EntityProvider<FeatureOfInterest> provider) {
-        this(provider, new DefaultDomainService<>(provider));
+        this(provider, null);
     }
 
     public FeatureOfInterestService(EntityProvider<FeatureOfInterest> provider,
                                     DomainService<FeatureOfInterest> domainService) {
         Objects.requireNonNull(provider, "provider must not be null");
-        this.featureOfInterestProvider = provider;
         this.domainService = domainService == null
                 ? new DefaultDomainService<>(provider)
                 : domainService;

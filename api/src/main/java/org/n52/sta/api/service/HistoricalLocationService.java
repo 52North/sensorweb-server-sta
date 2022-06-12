@@ -51,20 +51,17 @@ public class HistoricalLocationService implements EntityService<HistoricalLocati
 
     private static final Logger LOGGER = LoggerFactory.getLogger(HistoricalLocationService.class);
 
-    private final EntityProvider<HistoricalLocation> historicalLocationProvider;
-
     private final DomainService<HistoricalLocation> domainService;
 
     private Optional<EntityEditor<HistoricalLocation>> historicalLocationEditor;
 
     public HistoricalLocationService(EntityProvider<HistoricalLocation> provider) {
-        this(provider, new DefaultDomainService<>(provider));
+        this(provider, null);
     }
 
     public HistoricalLocationService(EntityProvider<HistoricalLocation> provider,
                                      DomainService<HistoricalLocation> domainService) {
         Objects.requireNonNull(provider, "provider must not be null");
-        this.historicalLocationProvider = provider;
         this.domainService = domainService == null
                 ? new DefaultDomainService<>(provider)
                 : domainService;
