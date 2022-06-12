@@ -90,7 +90,7 @@ public class ThingService implements EntityService<Thing>, EntityEditor<Thing> {
     }
 
     @Override
-    public Thing create(Thing entity) throws ProviderException {
+    public Thing save(Thing entity) throws ProviderException {
         try {
             return createAggregate(entity).save();
         } catch (AggregateException e) {

@@ -91,7 +91,7 @@ public class ObservedPropertyService implements EntityService<ObservedProperty>,
     }
 
     @Override
-    public ObservedProperty create(ObservedProperty entity) throws ProviderException {
+    public ObservedProperty save(ObservedProperty entity) throws ProviderException {
         try {
             return createAggregate(entity).save();
         } catch (AggregateException e) {

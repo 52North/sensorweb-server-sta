@@ -90,7 +90,7 @@ public class LocationService implements EntityService<Location>, EntityEditor<Lo
     }
 
     @Override
-    public Location create(Location entity) throws ProviderException {
+    public Location save(Location entity) throws ProviderException {
         try {
             return createAggregate(entity).save();
         } catch (AggregateException e) {

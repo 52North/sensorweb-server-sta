@@ -30,7 +30,7 @@ package org.n52.sta.api;
 
 public interface EntityEditor<T> {
 
-    T create(T entity) throws ProviderException;
+    T save(T entity) throws ProviderException;
 
     T update(T entity) throws ProviderException;
 

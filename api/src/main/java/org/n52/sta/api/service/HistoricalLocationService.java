@@ -91,7 +91,7 @@ public class HistoricalLocationService implements EntityService<HistoricalLocati
     }
 
     @Override
-    public HistoricalLocation create(HistoricalLocation entity) throws ProviderException {
+    public HistoricalLocation save(HistoricalLocation entity) throws ProviderException {
         try {
             return createAggregate(entity).save();
         } catch (AggregateException e) {

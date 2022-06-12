@@ -67,7 +67,7 @@ public abstract class EntityAggregate<T extends Identifiable> {
         EntityEditor<T> editor = optionalEditor.get();
 
         T newEntity = oldEntity == null
-                ? editor.create(entity)
+                ? editor.save(entity)
                 : editor.update(entity);
 
         DomainEvent<T> updatedEvent = new EntityUpdateEvent<>(oldEntity, newEntity);

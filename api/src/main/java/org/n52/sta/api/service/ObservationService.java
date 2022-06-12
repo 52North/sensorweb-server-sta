@@ -90,7 +90,7 @@ public class ObservationService implements EntityService<Observation>, EntityEdi
     }
 
     @Override
-    public Observation create(Observation entity) throws ProviderException {
+    public Observation save(Observation entity) throws ProviderException {
         try {
             return createAggregate(entity).save();
         } catch (AggregateException e) {

@@ -90,7 +90,7 @@ public class SensorService implements EntityService<Sensor>, EntityEditor<Sensor
     }
 
     @Override
-    public Sensor create(Sensor entity) throws ProviderException {
+    public Sensor save(Sensor entity) throws ProviderException {
         try {
             return createAggregate(entity).save();
         } catch (AggregateException e) {

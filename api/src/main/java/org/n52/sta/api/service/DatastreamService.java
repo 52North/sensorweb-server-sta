@@ -90,7 +90,7 @@ public class DatastreamService implements EntityService<Datastream>, EntityEdito
     }
 
     @Override
-    public Datastream create(Datastream entity) throws ProviderException {
+    public Datastream save(Datastream entity) throws ProviderException {
         try {
             return createAggregate(entity).save();
         } catch (AggregateException e) {

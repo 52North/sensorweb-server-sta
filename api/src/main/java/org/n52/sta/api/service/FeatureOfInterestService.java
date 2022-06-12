@@ -91,7 +91,7 @@ public class FeatureOfInterestService implements EntityService<FeatureOfInterest
     }
 
     @Override
-    public FeatureOfInterest create(FeatureOfInterest entity) throws ProviderException {
+    public FeatureOfInterest save(FeatureOfInterest entity) throws ProviderException {
         try {
             return createAggregate(entity).save();
         } catch (AggregateException e) {
