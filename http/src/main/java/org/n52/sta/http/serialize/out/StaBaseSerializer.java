@@ -46,6 +46,8 @@ import com.fasterxml.jackson.databind.ser.std.StdSerializer;
 
 public abstract class StaBaseSerializer<T extends Identifiable> extends StdSerializer<T> implements StaSerializer<T> {
 
+    private static final long serialVersionUID = 7340054774987440965L;
+
     private static final String ENCODINGTYPE_GEOJSON = "application/vnd.geo+json";
 
     private final String serviceUri;
@@ -62,7 +64,6 @@ public abstract class StaBaseSerializer<T extends Identifiable> extends StdSeria
         this.serviceUri = removeTrailingSlash(context.getServiceUri());
         this.collectionName = collectionName;
         this.context = context;
-        context.register(this);
     }
 
     private static String removeTrailingSlash(String serviceUri) {
