@@ -7,6 +7,15 @@ import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.tree.TerminalNode;
 import org.n52.grammar.StaPathGrammar;
 import org.n52.grammar.StaPathGrammarBaseVisitor;
+import org.n52.sta.api.entity.Datastream;
+import org.n52.sta.api.entity.FeatureOfInterest;
+import org.n52.sta.api.entity.HistoricalLocation;
+import org.n52.sta.api.entity.Identifiable;
+import org.n52.sta.api.entity.Location;
+import org.n52.sta.api.entity.Observation;
+import org.n52.sta.api.entity.ObservedProperty;
+import org.n52.sta.api.entity.Sensor;
+import org.n52.sta.api.entity.Thing;
 import org.n52.sta.api.path.PathSegment;
 import org.n52.sta.api.path.SelectPath;
 import org.n52.sta.http.serialize.out.DatastreamJsonSerializer;
@@ -20,12 +29,11 @@ import org.n52.sta.http.serialize.out.SerializationContext;
 import org.n52.sta.http.serialize.out.StaBaseSerializer;
 import org.n52.sta.http.serialize.out.ThingJsonSerializer;
 
-public class StaPathVisitor extends StaPathGrammarBaseVisitor<StaPath> {
+public class StaPathVisitor extends StaPathGrammarBaseVisitor<StaPath< ? extends Identifiable>> {
 
     @Override
-    public StaPath visitPath(StaPathGrammar.PathContext ctx) {
-        StaPath path = this.visitResource(ctx.resource());
-        // path ending in $ref
+    public StaPath< ? extends Identifiable> visitPath(StaPathGrammar.PathContext ctx) {
+        StaPath< ? extends Identifiable> path = this.visitResource(ctx.resource());
         if (ctx.getToken(StaPathGrammar.REF, 0) != null) {
             path.setRef(true);
         }
@@ -33,15 +41,16 @@ public class StaPathVisitor extends StaPathGrammarBaseVisitor<StaPath> {
     }
 
     @Override
-    public StaPath visitResource(StaPathGrammar.ResourceContext ctx) {
+    public StaPath< ? extends Identifiable> visitResource(StaPathGrammar.ResourceContext ctx) {
         return ctx.getChild(0)
                   .accept(this);
     }
 
-    private StaPath parseEntity(int ttEntity,
-                                ParserRuleContext propertyCtx,
-                                ParserRuleContext ctx,
-                                Function<SerializationContext, StaBaseSerializer< ? >> serializerFactory) {
+    private <T extends Identifiable> StaPath<T> parseEntity(int ttEntity,
+            ParserRuleContext propertyCtx,
+            ParserRuleContext ctx,
+            Function<SerializationContext, StaBaseSerializer<T>> serializerFactory,
+            Class<T> entityType) {
         TerminalNode entity = ctx.getToken(ttEntity, 0);
 
         // Parse optional Identifier
@@ -54,174 +63,184 @@ public class StaPathVisitor extends StaPathGrammarBaseVisitor<StaPath> {
 
         // path ending with entity identified by Id
         if (ctx.getToken(StaPathGrammar.SLASH, 0) == null) {
-            return new StaPath(SelectPath.PathType.entity,
-                               new PathSegment(entity.getText(), identifier),
-                               serializerFactory);
+            return new StaPath<>(SelectPath.PathType.entity,
+                                 new PathSegment(entity.getText(), identifier),
+                                 serializerFactory,
+                                 entityType);
         } else {
             // path ending in property
             if (propertyCtx != null) {
-                return new StaPath(
-                                   SelectPath.PathType.property,
-                                   new PathSegment(entity.getText(),
-                                                   identifier,
-                                                   propertyCtx.getText()),
-                                   serializerFactory);
+                return new StaPath<>(SelectPath.PathType.property,
+                                     new PathSegment(entity.getText(),
+                                                     identifier,
+                                                     propertyCtx.getText()),
+                                     serializerFactory,
+                                     entityType);
             }
 
             // path does not end here but continues. Delegate to next segment
-            StaPath path = identifier != null
+            StaPath< ? extends Identifiable> path = identifier != null
                     ? this.visit(ctx.getChild(3))
                     : this.visit(ctx.getChild(2));
             path.addPathSegment(new PathSegment(entity.getText(), identifier));
-            return path;
+
+            return (StaPath<T>) path;
         }
     }
 
     @Override
-    public StaPath visitDatastream(StaPathGrammar.DatastreamContext ctx) {
+    public StaPath<Datastream> visitDatastream(StaPathGrammar.DatastreamContext ctx) {
         return parseEntity((ctx.DATASTREAM() != null)
                 ? StaPathGrammar.DATASTREAM
                 : StaPathGrammar.DATASTREAMS,
                            ctx.datastreamProperty(),
                            ctx,
-                           DatastreamJsonSerializer::new);
+                           DatastreamJsonSerializer::new,
+                           Datastream.class);
     }
 
     @Override
-    public StaPath visitObservation(StaPathGrammar.ObservationContext ctx) {
+    public StaPath<Observation> visitObservation(StaPathGrammar.ObservationContext ctx) {
         return parseEntity(StaPathGrammar.OBSERVATIONS,
                            ctx.observationProperty(),
                            ctx,
-                           ObservationJsonSerializer::new);
+                           ObservationJsonSerializer::new,
+                           Observation.class);
     }
 
     @Override
-    public StaPath visitThing(StaPathGrammar.ThingContext ctx) {
+    public StaPath<Thing> visitThing(StaPathGrammar.ThingContext ctx) {
         return parseEntity((ctx.THING() != null)
                 ? StaPathGrammar.THING
                 : StaPathGrammar.THINGS,
                            ctx.thingProperty(),
                            ctx,
-                           ThingJsonSerializer::new);
+                           ThingJsonSerializer::new,
+                           Thing.class);
     }
 
     @Override
-    public StaPath visitLocation(StaPathGrammar.LocationContext ctx) {
+    public StaPath<Location> visitLocation(StaPathGrammar.LocationContext ctx) {
         return parseEntity(StaPathGrammar.LOCATIONS,
                            ctx.locationProperty(),
                            ctx,
-                           LocationJsonSerializer::new);
+                           LocationJsonSerializer::new,
+                           Location.class);
     }
 
     @Override
-    public StaPath visitHistoricalLocation(StaPathGrammar.HistoricalLocationContext ctx) {
+    public StaPath<HistoricalLocation> visitHistoricalLocation(StaPathGrammar.HistoricalLocationContext ctx) {
         return parseEntity(StaPathGrammar.HISTORICAL_LOCATIONS,
                            ctx.historicalLocationProperty(),
                            ctx,
-                           HistoricalLocationJsonSerializer::new);
+                           HistoricalLocationJsonSerializer::new,
+                           HistoricalLocation.class);
     }
 
     @Override
-    public StaPath visitSensor(StaPathGrammar.SensorContext ctx) {
+    public StaPath<Sensor> visitSensor(StaPathGrammar.SensorContext ctx) {
         return parseEntity((ctx.SENSOR() != null)
                 ? StaPathGrammar.SENSOR
                 : StaPathGrammar.SENSORS,
                            ctx.sensorProperty(),
                            ctx,
-                           SensorJsonSerializer::new);
+                           SensorJsonSerializer::new,
+                           Sensor.class);
     }
 
     @Override
-    public StaPath visitObservedProperty(StaPathGrammar.ObservedPropertyContext ctx) {
+    public StaPath<ObservedProperty> visitObservedProperty(StaPathGrammar.ObservedPropertyContext ctx) {
         return parseEntity(
                            (ctx.OBSERVED_PROPERTY() != null)
                                    ? StaPathGrammar.OBSERVED_PROPERTY
                                    : StaPathGrammar.OBSERVED_PROPERTIES,
                            ctx.observedPropertyProperty(),
                            ctx,
-                           ObservedPropertyJsonSerializer::new);
+                           ObservedPropertyJsonSerializer::new,
+                           ObservedProperty.class);
     }
 
     @Override
-    public StaPath visitFeatureOfInterest(StaPathGrammar.FeatureOfInterestContext ctx) {
+    public StaPath<FeatureOfInterest> visitFeatureOfInterest(StaPathGrammar.FeatureOfInterestContext ctx) {
         return parseEntity(
                            (ctx.FEATURE_OF_INTEREST() != null)
                                    ? StaPathGrammar.FEATURE_OF_INTEREST
                                    : StaPathGrammar.FEATURES_OF_INTEREST,
                            ctx.featureOfInterestProperty(),
                            ctx,
-                           FeatureOfInterestJsonSerializer::new);
+                           FeatureOfInterestJsonSerializer::new,
+                           FeatureOfInterest.class);
     }
 
     @Override
-    public StaPath visitDatastreams(StaPathGrammar.DatastreamsContext ctx) {
-        return new StaPath(
-                           SelectPath.PathType.collection,
-                           new PathSegment(ctx.DATASTREAMS()
-                                              .getText()),
-                           DatastreamJsonSerializer::new);
+    public StaPath<Datastream> visitDatastreams(StaPathGrammar.DatastreamsContext ctx) {
+        TerminalNode segment = ctx.DATASTREAMS();
+        return new StaPath<>(SelectPath.PathType.collection,
+                             new PathSegment(segment.getText()),
+                             DatastreamJsonSerializer::new,
+                             Datastream.class);
     }
 
     @Override
-    public StaPath visitObservations(StaPathGrammar.ObservationsContext ctx) {
-        return new StaPath(
-                           SelectPath.PathType.collection,
-                           new PathSegment(ctx.OBSERVATIONS()
-                                              .getText()),
-                           ObservationJsonSerializer::new);
+    public StaPath<Observation> visitObservations(StaPathGrammar.ObservationsContext ctx) {
+        TerminalNode segment = ctx.OBSERVATIONS();
+        return new StaPath<>(SelectPath.PathType.collection,
+                             new PathSegment(segment.getText()),
+                             ObservationJsonSerializer::new,
+                             Observation.class);
     }
 
     @Override
-    public StaPath visitThings(StaPathGrammar.ThingsContext ctx) {
-        return new StaPath(
-                           SelectPath.PathType.collection,
-                           new PathSegment(ctx.THINGS()
-                                              .getText()),
-                           ThingJsonSerializer::new);
+    public StaPath<Thing> visitThings(StaPathGrammar.ThingsContext ctx) {
+        TerminalNode segment = ctx.THINGS();
+        return new StaPath<>(SelectPath.PathType.collection,
+                             new PathSegment(segment.getText()),
+                             ThingJsonSerializer::new,
+                             Thing.class);
     }
 
     @Override
-    public StaPath visitLocations(StaPathGrammar.LocationsContext ctx) {
-        return new StaPath(
-                           SelectPath.PathType.collection,
-                           new PathSegment(ctx.LOCATIONS()
-                                              .getText()),
-                           LocationJsonSerializer::new);
+    public StaPath<Location> visitLocations(StaPathGrammar.LocationsContext ctx) {
+        TerminalNode segment = ctx.LOCATIONS();
+        return new StaPath<>(SelectPath.PathType.collection,
+                             new PathSegment(segment.getText()),
+                             LocationJsonSerializer::new,
+                             Location.class);
     }
 
     @Override
-    public StaPath visitHistoricalLocations(StaPathGrammar.HistoricalLocationsContext ctx) {
-        return new StaPath(
-                           SelectPath.PathType.collection,
-                           new PathSegment(ctx.HISTORICAL_LOCATIONS()
-                                              .getText()),
-                           HistoricalLocationJsonSerializer::new);
+    public StaPath<HistoricalLocation> visitHistoricalLocations(StaPathGrammar.HistoricalLocationsContext ctx) {
+        TerminalNode segment = ctx.HISTORICAL_LOCATIONS();
+        return new StaPath<>(SelectPath.PathType.collection,
+                             new PathSegment(segment.getText()),
+                             HistoricalLocationJsonSerializer::new,
+                             HistoricalLocation.class);
     }
 
     @Override
-    public StaPath visitSensors(StaPathGrammar.SensorsContext ctx) {
-        return new StaPath(
-                           SelectPath.PathType.collection,
-                           new PathSegment(ctx.SENSORS()
-                                              .getText()),
-                           SensorJsonSerializer::new);
+    public StaPath<Sensor> visitSensors(StaPathGrammar.SensorsContext ctx) {
+        TerminalNode segment = ctx.SENSORS();
+        return new StaPath<>(SelectPath.PathType.collection,
+                             new PathSegment(segment.getText()),
+                             SensorJsonSerializer::new,
+                             Sensor.class);
     }
 
     @Override
-    public StaPath visitObservedProperties(StaPathGrammar.ObservedPropertiesContext ctx) {
-        return new StaPath(
-                           SelectPath.PathType.collection,
-                           new PathSegment(ctx.OBSERVED_PROPERTIES()
-                                              .getText()),
-                           ObservedPropertyJsonSerializer::new);
+    public StaPath<ObservedProperty> visitObservedProperties(StaPathGrammar.ObservedPropertiesContext ctx) {
+        TerminalNode segment = ctx.OBSERVED_PROPERTIES();
+        return new StaPath<>(SelectPath.PathType.collection,
+                             new PathSegment(segment.getText()),
+                             ObservedPropertyJsonSerializer::new,
+                             ObservedProperty.class);
     }
 
     @Override
-    public StaPath visitFeaturesOfInterest(StaPathGrammar.FeaturesOfInterestContext ctx) {
-        return new StaPath(
-                           SelectPath.PathType.collection,
-                           new PathSegment(ctx.FEATURES_OF_INTEREST()
-                                              .getText()),
-                           FeatureOfInterestJsonSerializer::new);
+    public StaPath<FeatureOfInterest> visitFeaturesOfInterest(StaPathGrammar.FeaturesOfInterestContext ctx) {
+        TerminalNode segment = ctx.FEATURES_OF_INTEREST();
+        return new StaPath<>(SelectPath.PathType.collection,
+                             new PathSegment(segment.getText()),
+                             FeatureOfInterestJsonSerializer::new,
+                             FeatureOfInterest.class);
     }
 }

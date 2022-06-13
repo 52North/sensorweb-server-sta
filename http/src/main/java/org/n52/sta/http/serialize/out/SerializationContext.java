@@ -38,6 +38,7 @@ import org.n52.shetland.filter.SelectFilter;
 import org.n52.shetland.oasis.odata.query.option.QueryOptions;
 import org.n52.sta.api.entity.Identifiable;
 import org.n52.sta.http.controller.RequestContext;
+import org.n52.sta.http.util.path.StaPath;
 
 import java.util.Objects;
 import java.util.Optional;
@@ -83,13 +84,19 @@ public class SerializationContext {
         ObjectMapper mapper = mapperConfig.copy();
         String serviceUri = requestContext.getServiceUri();
         QueryOptions queryOptions = requestContext.getQueryOptions();
-        return new SerializationContext(serviceUri, queryOptions, mapper);
+        SerializationContext context = new SerializationContext(serviceUri, queryOptions, mapper);
+
+        // jackson registration register serialization context
+        StaPath< ? extends Identifiable> path = requestContext.getPath();
+        StaBaseSerializer< ? extends Identifiable> serializer = path.createSerializer(context);
+        context.register(serializer);
+        return context;
     }
 
-    public static SerializationContext create(SerializationContext otherContext, QueryOptions queryOptions) {
-        Objects.requireNonNull(otherContext, "otherContext must not be null");
-        ObjectMapper mapper = otherContext.mapper;
-        String serviceUri = otherContext.serviceUri;
+    public static SerializationContext createInternal(SerializationContext context, QueryOptions queryOptions) {
+        Objects.requireNonNull(context, "context must not be null");
+        ObjectMapper mapper = context.mapper;
+        String serviceUri = context.serviceUri;
         return new SerializationContext(serviceUri, queryOptions, mapper);
     }
 

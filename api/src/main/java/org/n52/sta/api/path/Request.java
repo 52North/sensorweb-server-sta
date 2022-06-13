@@ -11,6 +11,7 @@ import org.n52.shetland.oasis.odata.query.option.QueryOptions;
 import org.n52.shetland.ogc.filter.FilterClause;
 import org.n52.shetland.ogc.filter.FilterConstants;
 import org.n52.shetland.ogc.filter.FilterConstants.ComparisonOperator;
+import org.n52.sta.api.entity.Identifiable;
 import org.n52.svalbard.odata.core.QueryOptionsFactory;
 import org.n52.svalbard.odata.core.expr.MemberExpr;
 import org.n52.svalbard.odata.core.expr.StringValueExpr;
@@ -18,10 +19,10 @@ import org.n52.svalbard.odata.core.expr.bool.ComparisonExpr;
 
 public class Request {
 
-    private final Optional<SelectPath> selectPath;
+    private final Optional<SelectPath< ? extends Identifiable>> selectPath;
     private final QueryOptions queryOptions;
 
-    public Request(SelectPath selectPath, QueryOptions queryOptions) {
+    public Request(SelectPath< ? extends Identifiable> selectPath, QueryOptions queryOptions) {
         Objects.requireNonNull(selectPath, "selectPath must not be null!");
         this.selectPath = Optional.of(selectPath);
         this.queryOptions = queryOptions == null
@@ -56,7 +57,7 @@ public class Request {
      *
      * @return the request path
      */
-    public Optional<SelectPath> getPath() {
+    public Optional<SelectPath< ? extends Identifiable>> getPath() {
         return selectPath;
     }
 

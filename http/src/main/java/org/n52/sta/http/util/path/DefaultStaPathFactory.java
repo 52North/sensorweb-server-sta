@@ -13,11 +13,12 @@ import org.antlr.v4.runtime.TokenStream;
 import org.n52.grammar.StaPathGrammar;
 import org.n52.grammar.StaPathLexer;
 import org.n52.shetland.ogc.sta.exception.STAInvalidUrlException;
+import org.n52.sta.api.entity.Identifiable;
 
 public class DefaultStaPathFactory extends PathFactory {
 
     @Override
-    public StaPath parse(String url) throws STAInvalidUrlException {
+    public StaPath< ? extends Identifiable> parse(String url) throws STAInvalidUrlException {
         CodePointCharStream charStream = CharStreams.fromString(url.trim());
         Lexer lexer = new StaPathLexer(charStream);
         TokenStream tokenStream = new CommonTokenStream(lexer);

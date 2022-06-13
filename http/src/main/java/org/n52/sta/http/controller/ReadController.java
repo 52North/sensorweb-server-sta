@@ -45,7 +45,6 @@ import org.n52.sta.api.path.Request;
 import org.n52.sta.api.service.EntityService;
 import org.n52.sta.http.serialize.out.CollectionNode;
 import org.n52.sta.http.serialize.out.SerializationContext;
-import org.n52.sta.http.serialize.out.StaBaseSerializer;
 import org.n52.sta.http.util.path.PathFactory;
 import org.n52.sta.http.util.path.StaPath;
 import org.springframework.beans.factory.annotation.Value;
@@ -84,33 +83,28 @@ public class ReadController {
     }
 
     @GetMapping(value = "/**")
-    public ResponseEntity<StreamingResponseBody> getObservations(HttpServletRequest request)
+    public ResponseEntity<StreamingResponseBody> handleGetRequest(HttpServletRequest request)
             throws STAInvalidUrlException, STACRUDException {
         RequestContext requestContext = RequestContext.create(serviceUri, request, pathFactory);
         SerializationContext serializationContext = SerializationContext.create(requestContext, mapper);
-        
-        StaPath path = requestContext.getPath();
-        StaBaseSerializer< ? > serializer = path.createSerializer(serializationContext);
         return ResponseEntity.ok()
                              .contentType(MediaType.APPLICATION_JSON)
-                             .body(getAndWriteToResponse(requestContext, serializationContext, serializer.getType()));
+                             .body(getAndWriteToResponse(requestContext, serializationContext));
     }
 
-    private <T extends Identifiable> StreamingResponseBody getAndWriteToResponse(RequestContext requestContext,
-            SerializationContext context,
-            Class<T> entityType)
+    private StreamingResponseBody getAndWriteToResponse(RequestContext requestContext, SerializationContext context)
             throws STACRUDException {
         try {
-            StaPath path = requestContext.getPath();
-            EntityService<T> entityService = getEntityService(entityType);
+            StaPath< ? extends Identifiable> path = requestContext.getPath();
+            EntityService< ? extends Identifiable> entityService = getEntityService(path.getEntityType());
             Request request = requestContext.getRequest();
             switch (path.getPathType()) {
                 case collection:
-                    EntityPage<T> collection = entityService.getEntities(request);
+                    EntityPage< ? extends Identifiable> collection = entityService.getEntities(request);
                     return writeCollection(collection, context);
                 case entity:
                 case property:
-                    Optional<T> entity = entityService.getEntity(request);
+                    Optional< ? extends Identifiable> entity = entityService.getEntity(request);
                     return writeEntity(entity.orElseThrow(() -> new STACRUDException("no such entity")), context);
                 default:
                     throw new STACRUDException("not implemented!");
@@ -143,7 +137,7 @@ public class ReadController {
 
     private <T extends Identifiable> EntityService<T> getEntityService(Class<T> type) {
         return lookup.getService(type)
-                     .orElseThrow(() -> new IllegalStateException("No service registered for collection '"
+                     .orElseThrow(() -> new IllegalStateException("No service registered for type '"
                              + type.getSimpleName()
                              + "'"));
     }

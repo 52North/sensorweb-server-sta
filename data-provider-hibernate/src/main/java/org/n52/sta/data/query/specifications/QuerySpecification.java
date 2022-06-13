@@ -19,6 +19,7 @@ import org.n52.shetland.ogc.filter.FilterConstants;
 import org.n52.shetland.ogc.sta.StaConstants;
 import org.n52.shetland.ogc.sta.exception.STAInvalidFilterExpressionException;
 import org.n52.sta.api.ProviderException;
+import org.n52.sta.api.entity.Identifiable;
 import org.n52.sta.api.path.PathSegment;
 import org.n52.sta.api.path.Request;
 import org.n52.sta.api.path.SelectPath;
@@ -54,18 +55,17 @@ public abstract class QuerySpecification<T> implements BaseQuerySpecifications<T
      * @return Specification to be used for filtering
      */
     public Specification<T> buildSpecification(Request req) {
-        Optional<SelectPath> path = req.getPath();
+        Optional<SelectPath< ? extends Identifiable>> path = req.getPath();
         QueryOptions queryOptions = req.getQueryOptions();
         Specification<T> querySpec = buildSpecification(queryOptions);
-        return path.map(p -> querySpec.and(parsePath(p)))
+        return path.map(SelectPath::getPathSegments)
+                   .map(p -> querySpec.and(parsePath(p)))
                    .orElse(querySpec);
     }
 
-    private Specification<T> parsePath(SelectPath path) throws ProviderException {
+    private Specification<T> parsePath(List<PathSegment> segments) throws ProviderException {
         Specification<T> specification = null;
         try {
-            List<PathSegment> segments = path.getPathSegments();
-
             // Segment of requested Entity
             PathSegment current = segments.get(0);
             if (current.getIdentifier()

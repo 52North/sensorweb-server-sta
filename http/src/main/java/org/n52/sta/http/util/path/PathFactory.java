@@ -6,10 +6,11 @@ import org.antlr.v4.runtime.RecognitionException;
 import org.antlr.v4.runtime.Recognizer;
 import org.antlr.v4.runtime.Vocabulary;
 import org.n52.shetland.ogc.sta.exception.STAInvalidUrlException;
+import org.n52.sta.api.entity.Identifiable;
 
 public abstract class PathFactory {
 
-    public abstract StaPath parse(String url) throws STAInvalidUrlException;
+    public abstract StaPath< ? extends Identifiable> parse(String url) throws STAInvalidUrlException;
 
     protected void replaceErrorListener(Recognizer< ? , ? > recognizer) {
         recognizer.removeErrorListeners();

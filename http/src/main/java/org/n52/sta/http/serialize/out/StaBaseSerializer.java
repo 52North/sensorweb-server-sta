@@ -154,7 +154,7 @@ public abstract class StaBaseSerializer<T extends Identifiable> extends StdSeria
     private <E extends Identifiable> Optional<StaBaseSerializer<E>> createSerializer(String member,
             Function<SerializationContext, StaBaseSerializer<E>> serializerFactory) {
         Optional<QueryOptions> queryOptions = context.getQueryOptionsForExpanded(member);
-        return queryOptions.map(expandQueryOptions -> SerializationContext.create(context, expandQueryOptions))
+        return queryOptions.map(expandQueryOptions -> SerializationContext.createInternal(context, expandQueryOptions))
                            .map(serializerFactory::apply);
     }
 

@@ -42,6 +42,7 @@ import org.n52.shetland.filter.SelectFilter;
 import org.n52.shetland.oasis.odata.query.option.QueryOptions;
 import org.n52.shetland.ogc.sta.StaConstants;
 import org.n52.shetland.ogc.sta.exception.STAInvalidUrlException;
+import org.n52.sta.api.entity.Identifiable;
 import org.n52.sta.api.path.Request;
 import org.n52.sta.api.path.SelectPath;
 import org.n52.sta.http.util.path.PathFactory;
@@ -55,7 +56,7 @@ public final class RequestContext {
 
     private final Request request;
 
-    private RequestContext(String serviceUri, StaPath path, QueryOptions queryOptions) {
+    private RequestContext(String serviceUri, StaPath< ? extends Identifiable> path, QueryOptions queryOptions) {
         Objects.requireNonNull(serviceUri, "serviceUri must not be null");
         this.request = new Request(path, queryOptions);
         this.serviceUri = serviceUri;
@@ -65,7 +66,7 @@ public final class RequestContext {
             throws STAInvalidUrlException {
         Objects.requireNonNull(request, "request must not be null");
         Objects.requireNonNull(pathFactory, "pathFactory must not be null");
-        StaPath path = parsePath(request, pathFactory);
+        StaPath< ? extends Identifiable> path = parsePath(request, pathFactory);
         QueryOptions queryOptions = path.isRef()
                 ? createRefQueryOptions()
                 : parseQueryOptions(request);
@@ -80,12 +81,12 @@ public final class RequestContext {
     private static QueryOptions parseQueryOptions(HttpServletRequest request) {
         String queryString = request.getQueryString();
         return Optional.ofNullable(queryString)
-                .map(decodeQueryString())
-                .map(QueryOptionsFactory::createQueryOptions)
-                .orElse(QueryOptionsFactory.createEmpty());
+                       .map(decodeQueryString())
+                       .map(QueryOptionsFactory::createQueryOptions)
+                       .orElse(QueryOptionsFactory.createEmpty());
     }
 
-    private static StaPath parsePath(HttpServletRequest request, PathFactory pathFactory)
+    private static StaPath< ? extends Identifiable> parsePath(HttpServletRequest request, PathFactory pathFactory)
             throws STAInvalidUrlException {
         return pathFactory.parse((String) request.getAttribute(HandlerMapping.LOOKUP_PATH));
     }
@@ -112,10 +113,10 @@ public final class RequestContext {
         return request;
     }
 
-    public StaPath getPath() {
-        Optional<SelectPath> path = request.getPath();
+    public StaPath< ? extends Identifiable> getPath() {
+        Optional<SelectPath< ? extends Identifiable>> path = request.getPath();
         // We are inside an actual RequestContext so Path should be always present
-        return (StaPath) path.orElseThrow(() -> new IllegalStateException("No path present!"));
+        return (StaPath< ? extends Identifiable>) path.orElseThrow(() -> new IllegalStateException("No path present!"));
     }
 
 }
