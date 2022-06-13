@@ -28,11 +28,11 @@ public abstract class PathFactory {
 
         @Override
         public void syntaxError(Recognizer< ? , ? > recognizer,
-                                Object offendingSymbol,
-                                int line,
-                                int charPositionInLine,
-                                String msg,
-                                RecognitionException e) {
+                Object offendingSymbol,
+                int line,
+                int charPositionInLine,
+                String msg,
+                RecognitionException e) {
             String message = null;
             if (hasOffendingToken(e)) {
                 int tokenType = e.getOffendingToken()

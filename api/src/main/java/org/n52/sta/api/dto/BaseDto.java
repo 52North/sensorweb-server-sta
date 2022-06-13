@@ -32,9 +32,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * 
  * @deprecated use classes declared in package {@code entity}.
- *
  */
 @Deprecated
 public abstract class BaseDto extends StaDto {

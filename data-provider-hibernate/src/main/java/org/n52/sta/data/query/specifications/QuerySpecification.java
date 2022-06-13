@@ -112,8 +112,8 @@ public abstract class QuerySpecification<T> implements BaseQuerySpecifications<T
 
     @Override
     public Specification<T> compareProperty(String property,
-                                            FilterConstants.ComparisonOperator operator,
-                                            Expression< ? > rightExpr)
+            FilterConstants.ComparisonOperator operator,
+            Expression< ? > rightExpr)
             throws SpecificationsException {
         assertAvailableProperty(property);
         PropertyComparator<T, ? > comparator = entityPathByProperty.get(property);
@@ -122,8 +122,8 @@ public abstract class QuerySpecification<T> implements BaseQuerySpecifications<T
 
     @Override
     public Specification<T> compareProperty(Expression< ? > leftExpr,
-                                            FilterConstants.ComparisonOperator operator,
-                                            String property)
+            FilterConstants.ComparisonOperator operator,
+            String property)
             throws SpecificationsException {
         assertAvailableProperty(property);
         PropertyComparator<T, ? > comparator = entityPathByProperty.get(property);
@@ -152,33 +152,33 @@ public abstract class QuerySpecification<T> implements BaseQuerySpecifications<T
 
     @Override
     public <Y extends Comparable< ? super Y>> Specification<T> compare(Expression< ? extends Y> left,
-                                                                       Expression< ? extends Y> right,
-                                                                       FilterConstants.ComparisonOperator operator) {
+            Expression< ? extends Y> right,
+            FilterConstants.ComparisonOperator operator) {
         return (root, query, builder) -> compare(left, right, operator, builder);
     }
 
     @Override
     public <Y extends Comparable< ? super Y>> Predicate compare(Expression< ? extends Y> left,
-                                                                Expression< ? extends Y> right,
-                                                                FilterConstants.ComparisonOperator operator,
-                                                                CriteriaBuilder builder) {
+            Expression< ? extends Y> right,
+            FilterConstants.ComparisonOperator operator,
+            CriteriaBuilder builder) {
         switch (operator) {
-        case PropertyIsEqualTo:
-            return builder.equal(left, right);
-        case PropertyIsNotEqualTo:
-            return builder.notEqual(left, right);
-        case PropertyIsLessThan:
-            return builder.lessThan(left, right);
-        case PropertyIsLessThanOrEqualTo:
-            return builder.lessThanOrEqualTo(left, right);
-        case PropertyIsGreaterThan:
-            return builder.greaterThan(left, right);
-        case PropertyIsGreaterThanOrEqualTo:
-            return builder.greaterThanOrEqualTo(left, right);
-        case PropertyIsBetween:
-            // unsupported between
-        default:
-            return null;
+            case PropertyIsEqualTo:
+                return builder.equal(left, right);
+            case PropertyIsNotEqualTo:
+                return builder.notEqual(left, right);
+            case PropertyIsLessThan:
+                return builder.lessThan(left, right);
+            case PropertyIsLessThanOrEqualTo:
+                return builder.lessThanOrEqualTo(left, right);
+            case PropertyIsGreaterThan:
+                return builder.greaterThan(left, right);
+            case PropertyIsGreaterThanOrEqualTo:
+                return builder.greaterThanOrEqualTo(left, right);
+            case PropertyIsBetween:
+                // unsupported between
+            default:
+                return null;
         }
     }
 

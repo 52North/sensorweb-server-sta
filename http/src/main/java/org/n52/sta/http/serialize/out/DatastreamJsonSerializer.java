@@ -38,6 +38,8 @@ import java.io.IOException;
 
 public class DatastreamJsonSerializer extends StaBaseSerializer<Datastream> {
 
+    private static final long serialVersionUID = -4186364473643407848L;
+
     public DatastreamJsonSerializer(SerializationContext context) {
         super(context, StaConstants.DATASTREAMS, Datastream.class);
     }
