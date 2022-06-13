@@ -28,15 +28,16 @@
 
 package org.n52.sta.api.domain.aggregate;
 
+import java.util.Objects;
+import java.util.Optional;
+
+import org.n52.sta.api.EditorException;
 import org.n52.sta.api.EntityEditor;
 import org.n52.sta.api.domain.event.DomainEvent;
 import org.n52.sta.api.domain.event.EntityDeletedEvent;
 import org.n52.sta.api.domain.event.EntityUpdateEvent;
 import org.n52.sta.api.domain.service.DomainService;
 import org.n52.sta.api.entity.Identifiable;
-
-import java.util.Objects;
-import java.util.Optional;
 
 public abstract class EntityAggregate<T extends Identifiable> {
 
@@ -65,24 +66,29 @@ public abstract class EntityAggregate<T extends Identifiable> {
     public T save(T oldEntity) throws AggregateException {
         assertEditor();
         EntityEditor<T> editor = optionalEditor.get();
-
-        T newEntity = oldEntity == null
-                ? editor.save(entity)
-                : editor.update(entity);
-
-        DomainEvent<T> updatedEvent = new EntityUpdateEvent<>(oldEntity, newEntity);
-        domainService.sendDomainEvent(updatedEvent);
-        return newEntity;
+        try {
+            T newEntity = oldEntity == null
+                    ? editor.save(entity)
+                    : editor.update(entity);
+            DomainEvent<T> updatedEvent = new EntityUpdateEvent<>(oldEntity, newEntity);
+            domainService.sendDomainEvent(updatedEvent);
+            return newEntity;
+        } catch (EditorException e) {
+            throw new AggregateException("Could not save entity!", e);
+        }
     }
 
     public T delete() throws AggregateException {
         assertEditor();
         EntityEditor<T> editor = optionalEditor.get();
-        editor.delete(entity.getId());
-
-        DomainEvent<T> deletedEvent = new EntityDeletedEvent<>(entity);
-        domainService.sendDomainEvent(deletedEvent);
-        return entity;
+        try {
+            editor.delete(entity.getId());
+            DomainEvent<T> deletedEvent = new EntityDeletedEvent<>(entity);
+            domainService.sendDomainEvent(deletedEvent);
+            return entity;
+        } catch (EditorException e) {
+            throw new AggregateException("Could not delete entity!", e);
+        }
     }
 
     private void assertEditor() {

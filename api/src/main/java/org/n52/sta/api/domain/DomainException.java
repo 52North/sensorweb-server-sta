@@ -30,6 +30,8 @@ package org.n52.sta.api.domain;
 
 public class DomainException extends Exception {
 
+    private static final long serialVersionUID = -6280659818403734437L;
+
     public DomainException(String message) {
         super(message);
     }

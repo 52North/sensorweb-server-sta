@@ -32,9 +32,9 @@ import org.n52.sta.api.entity.Identifiable;
 
 public interface EntityEditor<T extends Identifiable> {
 
-    T save(T entity) throws ProviderException;
+    T save(T entity) throws EditorException;
 
-    T update(T entity) throws ProviderException;
+    T update(T entity) throws EditorException;
 
-    void delete(String id) throws ProviderException;
+    void delete(String id) throws EditorException;
 }

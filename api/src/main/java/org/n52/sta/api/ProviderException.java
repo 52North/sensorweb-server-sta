@@ -30,6 +30,8 @@ package org.n52.sta.api;
 
 public class ProviderException extends RuntimeException {
 
+    private static final long serialVersionUID = -6692844622357289733L;
+
     public ProviderException(String message) {
         super(message);
     }

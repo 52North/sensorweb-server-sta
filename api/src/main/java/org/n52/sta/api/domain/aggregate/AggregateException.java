@@ -32,6 +32,8 @@ import org.n52.sta.api.domain.DomainException;
 
 public class AggregateException extends DomainException {
 
+    private static final long serialVersionUID = -3746278427618594635L;
+
     public AggregateException(String message) {
         super(message);
     }
