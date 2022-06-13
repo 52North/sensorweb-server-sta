@@ -47,7 +47,7 @@ import org.n52.svalbard.odata.core.QueryOptionsFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class FeatureOfInterestService implements EntityService<FeatureOfInterest>, EntityEditor<FeatureOfInterest> {
+public class FeatureOfInterestService implements EntityService<FeatureOfInterest> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(FeatureOfInterestService.class);
 

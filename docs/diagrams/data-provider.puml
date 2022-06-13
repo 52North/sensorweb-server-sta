@@ -47,9 +47,9 @@ package dao {
 }
 
 
+api_entity_editor <|-- api_entity_service
 api_entity_provider <|-- api_entity_service
 domain_domain_service <-- api_ds_service
-api_entity_editor <|.. api_ds_service
 api_entity_editor <-- api_ds_service
 
 domain_entity_aggregate --> domain_domain_service

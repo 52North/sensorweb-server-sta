@@ -47,7 +47,7 @@ import org.n52.svalbard.odata.core.QueryOptionsFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class ThingService implements EntityService<Thing>, EntityEditor<Thing> {
+public class ThingService implements EntityService<Thing> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ThingService.class);
 
@@ -61,6 +61,7 @@ public class ThingService implements EntityService<Thing>, EntityEditor<Thing> {
 
     public ThingService(EntityProvider<Thing> provider, DomainService<Thing> domainService) {
         Objects.requireNonNull(provider, "provider must not be null");
+        this.thingEditor = Optional.empty();
         this.domainService = domainService == null
                 ? new DefaultDomainService<>(provider)
                 : domainService;

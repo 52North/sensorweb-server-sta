@@ -47,7 +47,7 @@ import org.n52.svalbard.odata.core.QueryOptionsFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class SensorService implements EntityService<Sensor>, EntityEditor<Sensor> {
+public class SensorService implements EntityService<Sensor> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SensorService.class);
 

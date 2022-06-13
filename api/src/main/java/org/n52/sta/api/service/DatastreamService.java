@@ -47,7 +47,7 @@ import org.n52.svalbard.odata.core.QueryOptionsFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class DatastreamService implements EntityService<Datastream>, EntityEditor<Datastream> {
+public class DatastreamService implements EntityService<Datastream> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DatastreamService.class);
 
@@ -120,7 +120,7 @@ public class DatastreamService implements EntityService<Datastream>, EntityEdito
         }
     }
 
-    public void setThingEditor(EntityEditor<Datastream> editor) {
+    public void setDatastreamEditor(EntityEditor<Datastream> editor) {
         datastreamEditor = Optional.ofNullable(editor);
     }
 

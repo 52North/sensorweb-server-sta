@@ -28,7 +28,9 @@
 
 package org.n52.sta.api;
 
-public interface EntityEditor<T> {
+import org.n52.sta.api.entity.Identifiable;
+
+public interface EntityEditor<T extends Identifiable> {
 
     T save(T entity) throws ProviderException;
 

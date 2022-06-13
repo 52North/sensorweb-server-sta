@@ -47,7 +47,7 @@ import org.n52.svalbard.odata.core.QueryOptionsFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class ObservationService implements EntityService<Observation>, EntityEditor<Observation> {
+public class ObservationService implements EntityService<Observation> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ObservationService.class);
 
