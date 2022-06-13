@@ -116,7 +116,7 @@ public class DatastreamService implements EntityService<Datastream> {
             createAggregate(entity).delete();
         } catch (AggregateException e) {
             LOGGER.error("Could not delete entity: {}", entity, e);
-            throw new ProviderException("Could not delete Thing!");
+            throw new ProviderException("Could not delete Datastream!");
         }
     }
 
