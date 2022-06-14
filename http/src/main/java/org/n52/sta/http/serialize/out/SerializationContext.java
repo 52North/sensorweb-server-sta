@@ -28,6 +28,11 @@
 
 package org.n52.sta.http.serialize.out;
 
+import java.util.Objects;
+import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
 import com.fasterxml.jackson.databind.module.SimpleModule;
@@ -36,13 +41,12 @@ import org.n52.shetland.filter.ExpandFilter;
 import org.n52.shetland.filter.ExpandItem;
 import org.n52.shetland.filter.SelectFilter;
 import org.n52.shetland.oasis.odata.query.option.QueryOptions;
+import org.n52.shetland.ogc.filter.FilterClause;
 import org.n52.sta.api.entity.Identifiable;
+import org.n52.sta.api.path.SelectPath;
 import org.n52.sta.http.controller.RequestContext;
 import org.n52.sta.http.util.path.StaPath;
-
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Set;
+import org.n52.svalbard.odata.core.QueryOptionsFactory;
 
 public class SerializationContext {
 
@@ -81,13 +85,25 @@ public class SerializationContext {
         Objects.requireNonNull(requestContext, "requestContext must not be null");
         Objects.requireNonNull(mapperConfig, "mapperConfig must not be null!");
 
+        StaPath< ? extends Identifiable> path = requestContext.getPath();
+
         ObjectMapper mapper = mapperConfig.copy();
         String serviceUri = requestContext.getServiceUri();
         QueryOptions queryOptions = requestContext.getQueryOptions();
+        if (path.getPathType() == SelectPath.PathType.property) {
+            // We adjust the QueryOptions to behave like it includes $select=<property>
+            // all other filters are left untouched
+            Set<FilterClause> filters = queryOptions.getAllFilters()
+                                                    .stream()
+                                                    .filter(f -> !(f instanceof SelectFilter))
+                                                    .collect(Collectors.toSet());
+
+            filters.add(new SelectFilter(requestContext.getPath().getPathSegments().get(0).getProperty().get()));
+            queryOptions = QueryOptionsFactory.createQueryOptions(filters);
+        }
         SerializationContext context = new SerializationContext(serviceUri, queryOptions, mapper);
 
         // jackson registration register serialization context
-        StaPath< ? extends Identifiable> path = requestContext.getPath();
         StaBaseSerializer< ? extends Identifiable> serializer = path.createSerializer(context);
         context.register(serializer);
         return context;
