@@ -28,14 +28,14 @@
 
 package org.n52.sta.http.serialize.out;
 
+import java.io.IOException;
+import java.math.BigDecimal;
+import java.util.Collection;
+
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import org.n52.shetland.ogc.sta.StaConstants;
 import org.n52.sta.api.entity.Observation;
-
-import java.io.IOException;
-import java.math.BigDecimal;
-import java.util.Collection;
 
 @SuppressWarnings("MultipleStringLiterals")
 public class ObservationJsonSerializer extends StaBaseSerializer<Observation> {
@@ -131,7 +131,7 @@ public class ObservationJsonSerializer extends StaBaseSerializer<Observation> {
                     DatastreamJsonSerializer::new,
                     serializer -> serializer.serialize(value.getDatastream(), gen, serializers));
 
-        writeMember(StaConstants.FEATURES_OF_INTEREST,
+        writeMember(StaConstants.FEATURE_OF_INTEREST,
                     id,
                     gen,
                     FeatureOfInterestJsonSerializer::new,
