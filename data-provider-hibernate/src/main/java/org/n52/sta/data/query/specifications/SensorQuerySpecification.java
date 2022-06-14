@@ -28,32 +28,28 @@
 
 package org.n52.sta.data.query.specifications;
 
+import javax.persistence.criteria.Subquery;
+
 import org.n52.series.db.beans.AbstractDatasetEntity;
 import org.n52.series.db.beans.IdEntity;
 import org.n52.series.db.beans.ProcedureEntity;
 import org.n52.shetland.ogc.sta.StaConstants;
-import org.springframework.data.jpa.domain.Specification;
-
-import javax.persistence.criteria.Subquery;
 
 public class SensorQuerySpecification extends QuerySpecification<ProcedureEntity> {
 
     public SensorQuerySpecification() {
         super();
-        this.filterByMember.put(StaConstants.DATASTREAMS, new SensorQuerySpecification.DatastreamFilter());
+        this.filterByMember.put(StaConstants.DATASTREAMS, createDatastreamFilter());
     }
 
-    private final class DatastreamFilter extends MemberFilterImpl<ProcedureEntity> {
-
-        protected Specification<ProcedureEntity> prepareQuery(Specification< ? > specification) {
-            return (root, query, builder) -> {
-                EntityQuery memberQuery = createQuery(AbstractDatasetEntity.PROPERTY_PROCEDURE,
-                                                      AbstractDatasetEntity.class);
-                Subquery< ? > subquery = memberQuery.create(specification, query, builder);
-                // 1..n
-                return builder.in(root.get(IdEntity.PROPERTY_ID))
-                              .value(subquery);
-            };
-        }
+    private MemberFilter<ProcedureEntity> createDatastreamFilter() {
+        return specification -> (root, query, builder) -> {
+            EntityQuery memberQuery = createQuery(AbstractDatasetEntity.PROPERTY_PROCEDURE,
+                                                  AbstractDatasetEntity.class);
+            Subquery< ? > subquery = memberQuery.create(specification, query, builder);
+            // 1..n
+            return builder.in(root.get(IdEntity.PROPERTY_ID))
+                          .value(subquery);
+        };
     }
 }

@@ -28,6 +28,11 @@
 
 package org.n52.sta.data.query.specifications;
 
+import java.util.Optional;
+
+import javax.persistence.criteria.Root;
+import javax.persistence.criteria.Subquery;
+
 import org.n52.series.db.beans.AbstractDatasetEntity;
 import org.n52.series.db.beans.DataEntity;
 import org.n52.series.db.beans.DatasetEntity;
@@ -35,16 +40,12 @@ import org.n52.series.db.beans.FeatureEntity;
 import org.n52.shetland.ogc.sta.StaConstants;
 import org.springframework.data.jpa.domain.Specification;
 
-import javax.persistence.criteria.Root;
-import javax.persistence.criteria.Subquery;
-import java.util.Optional;
-
 public class ObservationQuerySpecification extends QuerySpecification<DataEntity< ? >> {
 
     public ObservationQuerySpecification() {
         super();
-        this.filterByMember.put(StaConstants.DATASTREAMS, new DatastreamFilter());
-        this.filterByMember.put(StaConstants.FEATURES_OF_INTEREST, new FeatureOfInterestFilter());
+        this.filterByMember.put(StaConstants.DATASTREAMS, createDatastreamFilter());
+        this.filterByMember.put(StaConstants.FEATURES_OF_INTEREST, createFeatureOfInterestFilter());
     }
 
     @Override
@@ -52,34 +53,28 @@ public class ObservationQuerySpecification extends QuerySpecification<DataEntity
         return Optional.of((root, query, builder) -> builder.isNull(root.get(DataEntity.PROPERTY_PARENT)));
     }
 
-    private final class DatastreamFilter extends MemberFilterImpl<DataEntity< ? >> {
-
-        protected Specification<DataEntity< ? >> prepareQuery(Specification< ? > specification) {
-            return (root, query, builder) -> {
-                EntityQuery memberQuery = createQuery(AbstractDatasetEntity.PROPERTY_ID, AbstractDatasetEntity.class);
-                Subquery< ? > subquery = memberQuery.create(specification, query, builder);
-                // n..1
-                return builder.in(subquery)
-                              .value(root.get(DataEntity.PROPERTY_DATASET_ID));
-            };
-        }
+    private MemberFilter<DataEntity<?>> createDatastreamFilter() {
+        return specification -> (root, query, builder) -> {
+            EntityQuery memberQuery = createQuery(AbstractDatasetEntity.PROPERTY_ID, AbstractDatasetEntity.class);
+            Subquery< ? > subquery = memberQuery.create(specification, query, builder);
+            // n..1
+            return builder.in(subquery)
+                          .value(root.get(DataEntity.PROPERTY_DATASET_ID));
+        };
     }
 
-    private final class FeatureOfInterestFilter extends MemberFilterImpl<DataEntity< ? >> {
-
-        protected Specification<DataEntity< ? >> prepareQuery(Specification< ? > specification) {
-            return (root, query, builder) -> {
-                Subquery<DatasetEntity> sq = query.subquery(DatasetEntity.class);
-                Root<DatasetEntity> dataset = sq.from(DatasetEntity.class);
-                Subquery<FeatureEntity> subquery = query.subquery(FeatureEntity.class);
-                Root<FeatureEntity> feature = subquery.from(FeatureEntity.class);
-                subquery.select(feature.get(FeatureEntity.PROPERTY_ID))
-                        .where(((Specification<FeatureEntity>) specification).toPredicate(feature, query, builder));
-                sq.select(dataset.get(DatasetEntity.PROPERTY_ID))
-                  .where(builder.equal(dataset.get(DatasetEntity.PROPERTY_FEATURE), subquery));
-                return builder.in(root.get(DataEntity.PROPERTY_DATASET))
-                              .value(sq);
-            };
-        }
+    private MemberFilter<DataEntity<?>> createFeatureOfInterestFilter() {
+        return specification -> (root, query, builder) -> {
+            Subquery<DatasetEntity> sq = query.subquery(DatasetEntity.class);
+            Root<DatasetEntity> dataset = sq.from(DatasetEntity.class);
+            Subquery<FeatureEntity> subquery = query.subquery(FeatureEntity.class);
+            Root<FeatureEntity> feature = subquery.from(FeatureEntity.class);
+            subquery.select(feature.get(FeatureEntity.PROPERTY_ID))
+                    .where(((Specification<FeatureEntity>) specification).toPredicate(feature, query, builder));
+            sq.select(dataset.get(DatasetEntity.PROPERTY_ID))
+              .where(builder.equal(dataset.get(DatasetEntity.PROPERTY_FEATURE), subquery));
+            return builder.in(root.get(DataEntity.PROPERTY_DATASET))
+                          .value(sq);
+        };
     }
 }

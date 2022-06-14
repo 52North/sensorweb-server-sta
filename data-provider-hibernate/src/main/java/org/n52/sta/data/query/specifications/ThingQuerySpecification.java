@@ -41,15 +41,14 @@ import org.n52.series.db.beans.PlatformEntity;
 import org.n52.series.db.beans.sta.HistoricalLocationEntity;
 import org.n52.series.db.beans.sta.LocationEntity;
 import org.n52.shetland.ogc.sta.StaConstants;
-import org.springframework.data.jpa.domain.Specification;
 
 public class ThingQuerySpecification extends QuerySpecification<PlatformEntity> {
 
     public ThingQuerySpecification() {
         super();
-        this.filterByMember.put(StaConstants.DATASTREAMS, new DatastreamFilter());
-        this.filterByMember.put(StaConstants.HISTORICAL_LOCATIONS, new HistoricalLocationsFilter());
-        this.filterByMember.put(StaConstants.LOCATIONS, new LocationsFilter());
+        this.filterByMember.put(StaConstants.DATASTREAMS, createDatastreamFilter());
+        this.filterByMember.put(StaConstants.HISTORICAL_LOCATIONS, createHistoricalLocationFilter());
+        this.filterByMember.put(StaConstants.LOCATIONS, createLocationFilter());
 
         this.entityPathByProperty.put(StaConstants.PROP_ID,
                                       new PropertyComparator<>(DescribableEntity.PROPERTY_STA_IDENTIFIER));
@@ -58,57 +57,43 @@ public class ThingQuerySpecification extends QuerySpecification<PlatformEntity> 
                                       new PropertyComparator<>(HasDescription.PROPERTY_DESCRIPTION));
     }
 
-    /*
-     * public Specification<PlatformEntity> withMemberStaIdentifier(String member, String staIdentifier) {
-     * return (root, query, builder) -> { String property = DescribableEntity.STA_IDENTIFIER; return
-     * builder.equal(root.join(member, JoinType.INNER).get(property), staIdentifier); }; }
-     */
-
     // TODO discuss: split multiple (tiny) subqueries so that we are able to use
     // kind of a DSL query language
 
-    private final class DatastreamFilter extends MemberFilterImpl<PlatformEntity> {
+    private MemberFilter<PlatformEntity> createDatastreamFilter() {
+        return specification -> (root, query, builder) -> {
+            EntityQuery memberQuery = createQuery(AbstractDatasetEntity.PROPERTY_PLATFORM,
+                                                  AbstractDatasetEntity.class);
+            Subquery<?> subquery = memberQuery.create(specification, query, builder);
+            // 1..n
+            return builder.in(root.get(IdEntity.PROPERTY_ID))
+                          .value(subquery);
 
-        protected Specification<PlatformEntity> prepareQuery(Specification< ? > specification) {
-            return (root, query, builder) -> {
-                EntityQuery memberQuery = createQuery(AbstractDatasetEntity.PROPERTY_PLATFORM,
-                                                      AbstractDatasetEntity.class);
-                Subquery< ? > subquery = memberQuery.create(specification, query, builder);
-                // 1..n
-                return builder.in(root.get(IdEntity.PROPERTY_ID))
-                              .value(subquery);
-            };
-        }
+        };
     }
 
-    private final class HistoricalLocationsFilter extends MemberFilterImpl<PlatformEntity> {
+    private MemberFilter<PlatformEntity> createHistoricalLocationFilter() {
+        return specification -> (root, query, builder) -> {
+            EntityQuery memberQuery = createQuery(IdEntity.PROPERTY_ID, HistoricalLocationEntity.class);
+            Subquery<?> subquery = memberQuery.create(specification, query, builder);
+            // m..n
+            Join<?, ?> join = root.join(PlatformEntity.PROPERTY_HISTORICAL_LOCATIONS, JoinType.INNER);
+            return builder.in(join.get(IdEntity.PROPERTY_ID))
+                          .value(subquery);
 
-        protected Specification<PlatformEntity> prepareQuery(Specification< ? > specification) {
-            return (root, query, builder) -> {
-                EntityQuery memberQuery = createQuery(IdEntity.PROPERTY_ID, HistoricalLocationEntity.class);
-                Subquery< ? > subquery = memberQuery.create(specification, query, builder);
-                // m..n
-                Join< ? , ? > join = root.join(PlatformEntity.PROPERTY_HISTORICAL_LOCATIONS, JoinType.INNER);
-                return builder.in(join.get(IdEntity.PROPERTY_ID))
-                              .value(subquery);
-            };
-        }
-
+        };
     }
 
-    private final class LocationsFilter extends MemberFilterImpl<PlatformEntity> {
+    private MemberFilter<PlatformEntity> createLocationFilter() {
+        return specification -> (root, query, builder) -> {
+            EntityQuery memberQuery = createQuery(IdEntity.PROPERTY_ID, LocationEntity.class);
+            Subquery<?> subquery = memberQuery.create(specification, query, builder);
+            // m..n
+            Join<?, ?> join = root.join(PlatformEntity.PROPERTY_LOCATIONS, JoinType.INNER);
+            return builder.in(join.get(IdEntity.PROPERTY_ID))
+                          .value(subquery);
 
-        protected Specification<PlatformEntity> prepareQuery(Specification< ? > specification) {
-            return (root, query, builder) -> {
-                EntityQuery memberQuery = createQuery(IdEntity.PROPERTY_ID, LocationEntity.class);
-                Subquery< ? > subquery = memberQuery.create(specification, query, builder);
-                // m..n
-                Join< ? , ? > join = root.join(PlatformEntity.PROPERTY_LOCATIONS, JoinType.INNER);
-                return builder.in(join.get(IdEntity.PROPERTY_ID))
-                              .value(subquery);
-            };
-        }
-
+        };
     }
 
 }

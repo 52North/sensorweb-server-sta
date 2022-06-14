@@ -28,33 +28,28 @@
 
 package org.n52.sta.data.query.specifications;
 
+import javax.persistence.criteria.Subquery;
+
 import org.n52.series.db.beans.AbstractDatasetEntity;
 import org.n52.series.db.beans.IdEntity;
 import org.n52.series.db.beans.PhenomenonEntity;
 import org.n52.shetland.ogc.sta.StaConstants;
-import org.springframework.data.jpa.domain.Specification;
-
-import javax.persistence.criteria.Subquery;
 
 public class ObservedPropertyQuerySpecification extends QuerySpecification<PhenomenonEntity> {
 
     public ObservedPropertyQuerySpecification() {
         super();
-        this.filterByMember.put(StaConstants.DATASTREAMS, new ObservedPropertyQuerySpecification.DatastreamFilter());
+        this.filterByMember.put(StaConstants.DATASTREAMS, createDatastreamFilter());
     }
 
-    private final class DatastreamFilter extends MemberFilterImpl<PhenomenonEntity> {
-
-        protected Specification<PhenomenonEntity> prepareQuery(Specification< ? > specification) {
-            return (root, query, builder) -> {
-                EntityQuery memberQuery = createQuery(AbstractDatasetEntity.PROPERTY_PHENOMENON,
-                                                      AbstractDatasetEntity.class);
-                Subquery< ? > subquery = memberQuery.create(specification, query, builder);
-                // 1..n
-                return builder.in(root.get(IdEntity.PROPERTY_ID))
-                              .value(subquery);
-            };
-        }
+    private MemberFilter<PhenomenonEntity> createDatastreamFilter() {
+        return specification -> (root, query, builder) -> {
+            EntityQuery memberQuery = createQuery(AbstractDatasetEntity.PROPERTY_PHENOMENON,
+                                                  AbstractDatasetEntity.class);
+            Subquery<?> subquery = memberQuery.create(specification, query, builder);
+            // 1..n
+            return builder.in(root.get(IdEntity.PROPERTY_ID))
+                          .value(subquery);
+        };
     }
-
 }

@@ -46,9 +46,9 @@ import org.springframework.data.jpa.domain.Specification;
 public class DatastreamQuerySpecification extends QuerySpecification<AbstractDatasetEntity> {
 
     public DatastreamQuerySpecification() {
-        this.filterByMember.put(StaConstants.SENSORS, new SensorFilter());
-        this.filterByMember.put(StaConstants.OBSERVED_PROPERTIES, new ObservedPropertyFilter());
-        this.filterByMember.put(StaConstants.THINGS, new ThingFilter());
+        this.filterByMember.put(StaConstants.SENSORS, createSensorFilter());
+        this.filterByMember.put(StaConstants.OBSERVED_PROPERTIES, createObservedPropertyFilter());
+        this.filterByMember.put(StaConstants.THINGS, createThingfilter());
         this.filterByMember.put(StaConstants.OBSERVATIONS, createObservationFilter());
     }
 
@@ -74,9 +74,9 @@ public class DatastreamQuerySpecification extends QuerySpecification<AbstractDat
             // to other Filters
 
             Subquery<AbstractDatasetEntity> idQuery = query.subquery(AbstractDatasetEntity.class);
-            Root<AbstractDatasetEntity> data = idQuery.from(AbstractDatasetEntity.class);
+            Root<DataEntity> data = idQuery.from(DataEntity.class);
             idQuery.select(data.get(DataEntity.PROPERTY_DATASET_ID))
-                   .where(((Specification<AbstractDatasetEntity>) memberSpec).toPredicate(data, query, builder));
+                   .where(((Specification<DataEntity>) memberSpec).toPredicate(data, query, builder));
 
             Subquery<AbstractDatasetEntity> aggregationQuery = query.subquery(AbstractDatasetEntity.class);
             Root<AbstractDatasetEntity> realDataset = aggregationQuery.from(AbstractDatasetEntity.class);
@@ -89,71 +89,39 @@ public class DatastreamQuerySpecification extends QuerySpecification<AbstractDat
         };
     }
 
-    private final class ObservationFilter extends MemberFilterImpl<AbstractDatasetEntity> {
+    private MemberFilter<AbstractDatasetEntity> createSensorFilter() {
+        return memberSpecification -> (root, query, builder) -> {
+            EntityQuery memberQuery = createQuery(IdEntity.PROPERTY_ID,
+                                                  ProcedureEntity.class);
+            Subquery< ? > subquery = memberQuery.create(memberSpecification, query, builder);
+            // n..1
+            return builder.in(subquery)
+                          .value(root.get(AbstractDatasetEntity.PROPERTY_PROCEDURE));
 
-        protected Specification<AbstractDatasetEntity> prepareQuery(Specification< ? > specification) {
-            return (root, query, builder) -> {
-                // TODO: maybe refactor this to use BaseQuerySpecifications.createQuery similar
-                // to other Filters
-                Subquery<AbstractDatasetEntity> sq = query.subquery(AbstractDatasetEntity.class);
-
-                Root<DataEntity> data = sq.from(DataEntity.class);
-                sq.select(data.get(DataEntity.PROPERTY_DATASET_ID))
-                  .where(((Specification<DataEntity>) specification).toPredicate(data, query, builder));
-
-                Subquery<AbstractDatasetEntity> subquery = query.subquery(AbstractDatasetEntity.class);
-                Root<AbstractDatasetEntity> realDataset = subquery.from(AbstractDatasetEntity.class);
-                subquery.select(realDataset.get(AbstractDatasetEntity.PROPERTY_AGGREGATION))
-                        .where(builder.equal(realDataset.get(IdEntity.PROPERTY_ID), sq));
-
-                // Either id matches or aggregation id matches
-                return builder.or(builder.equal(root.get(IdEntity.PROPERTY_ID), sq),
-                                  builder.equal(root.get(IdEntity.PROPERTY_ID), subquery));
-
-            };
-        }
+        };
     }
 
-    private final class SensorFilter extends MemberFilterImpl<AbstractDatasetEntity> {
-
-        protected Specification<AbstractDatasetEntity> prepareQuery(Specification< ? > specification) {
-            return (root, query, builder) -> {
-                EntityQuery memberQuery = createQuery(IdEntity.PROPERTY_ID,
-                                                      ProcedureEntity.class);
-                Subquery< ? > subquery = memberQuery.create(specification, query, builder);
-                // n..1
-                return builder.in(subquery)
-                              .value(root.get(AbstractDatasetEntity.PROPERTY_PROCEDURE));
-            };
-        }
+    private MemberFilter<AbstractDatasetEntity> createObservedPropertyFilter() {
+        return specification -> (root, query, builder) -> {
+            EntityQuery memberQuery = createQuery(IdEntity.PROPERTY_ID,
+                                                  PhenomenonEntity.class);
+            Subquery<?> subquery = memberQuery.create(specification, query, builder);
+            // n..1
+            return builder.in(subquery)
+                          .value(root.get(AbstractDatasetEntity.PROPERTY_PHENOMENON));
+        };
     }
 
-    private final class ObservedPropertyFilter extends MemberFilterImpl<AbstractDatasetEntity> {
+    private MemberFilter<AbstractDatasetEntity> createThingfilter() {
+        return specification -> (root, query, builder) -> {
+            EntityQuery memberQuery = createQuery(IdEntity.PROPERTY_ID,
+                                                  PlatformEntity.class);
+            Subquery< ? > subquery = memberQuery.create(specification, query, builder);
+            // n..1
+            return builder.in(subquery)
+                          .value(root.get(AbstractDatasetEntity.PROPERTY_PLATFORM));
 
-        protected Specification<AbstractDatasetEntity> prepareQuery(Specification< ? > specification) {
-            return (root, query, builder) -> {
-                EntityQuery memberQuery = createQuery(IdEntity.PROPERTY_ID,
-                                                      PhenomenonEntity.class);
-                Subquery< ? > subquery = memberQuery.create(specification, query, builder);
-                // n..1
-                return builder.in(subquery)
-                              .value(root.get(AbstractDatasetEntity.PROPERTY_PHENOMENON));
-            };
-        }
-    }
-
-    private final class ThingFilter extends MemberFilterImpl<AbstractDatasetEntity> {
-
-        protected Specification<AbstractDatasetEntity> prepareQuery(Specification< ? > specification) {
-            return (root, query, builder) -> {
-                EntityQuery memberQuery = createQuery(IdEntity.PROPERTY_ID,
-                                                      PlatformEntity.class);
-                Subquery< ? > subquery = memberQuery.create(specification, query, builder);
-                // n..1
-                return builder.in(subquery)
-                              .value(root.get(AbstractDatasetEntity.PROPERTY_PLATFORM));
-            };
-        }
+        };
     }
 
 }

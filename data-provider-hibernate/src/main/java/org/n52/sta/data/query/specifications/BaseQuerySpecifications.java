@@ -188,17 +188,6 @@ public interface BaseQuerySpecifications<T> {
         Specification<T> apply(Specification< ? > memberSpecification);
     }
 
-    // TODO get rid of this impl class?
-    abstract class MemberFilterImpl<T> implements MemberFilter<T> {
-
-        public Specification<T> apply(Specification< ? > specification) {
-            return prepareQuery(specification);
-        }
-
-        protected abstract Specification<T> prepareQuery(Specification< ? > specification);
-
-    }
-
     @FunctionalInterface
     interface EntityQuery {
 
