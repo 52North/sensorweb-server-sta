@@ -35,11 +35,12 @@ import java.util.Optional;
 
 import javax.servlet.http.HttpServletRequest;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectWriter;
 import org.n52.shetland.ogc.sta.exception.STACRUDException;
-import org.n52.shetland.ogc.sta.exception.STAInvalidUrlException;
+import org.n52.shetland.ogc.sta.exception.STANotFoundException;
 import org.n52.sta.api.EntityPage;
 import org.n52.sta.api.EntityServiceLookup;
-import org.n52.sta.api.ProviderException;
 import org.n52.sta.api.entity.Identifiable;
 import org.n52.sta.api.path.Request;
 import org.n52.sta.api.service.EntityService;
@@ -54,9 +55,6 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.ObjectWriter;
-
 @RestController
 public class ReadController {
 
@@ -68,10 +66,12 @@ public class ReadController {
 
     private final PathFactory pathFactory;
 
-    public ReadController(@Value("${server.config.service-root-url}") String serviceUri,
-                          EntityServiceLookup lookup,
-                          PathFactory pathFactory,
-                          ObjectMapper mapper) {
+    public ReadController(
+            @Value("${server.config.service-root-url}")
+                    String serviceUri,
+            EntityServiceLookup lookup,
+            PathFactory pathFactory,
+            ObjectMapper mapper) {
         Objects.requireNonNull(serviceUri, "serviceUri must not be null!");
         Objects.requireNonNull(lookup, "lookup must not be null!");
         Objects.requireNonNull(pathFactory, "pathFactory must not be null!");
@@ -84,7 +84,7 @@ public class ReadController {
 
     @GetMapping(value = "/**")
     public ResponseEntity<StreamingResponseBody> handleGetRequest(HttpServletRequest request)
-            throws STAInvalidUrlException, STACRUDException {
+            throws Exception {
         RequestContext requestContext = RequestContext.create(serviceUri, request, pathFactory);
         SerializationContext serializationContext = SerializationContext.create(requestContext, mapper);
         return ResponseEntity.ok()
@@ -93,24 +93,21 @@ public class ReadController {
     }
 
     private StreamingResponseBody getAndWriteToResponse(RequestContext requestContext, SerializationContext context)
-            throws STACRUDException {
-        try {
-            StaPath< ? extends Identifiable> path = requestContext.getPath();
-            EntityService< ? extends Identifiable> entityService = getEntityService(path.getEntityType());
-            Request request = requestContext.getRequest();
-            switch (path.getPathType()) {
-                case collection:
-                    EntityPage< ? extends Identifiable> collection = entityService.getEntities(request);
-                    return writeCollection(collection, context);
-                case entity:
-                case property:
-                    Optional< ? extends Identifiable> entity = entityService.getEntity(request);
-                    return writeEntity(entity.orElseThrow(() -> new STACRUDException("no such entity")), context);
-                default:
-                    throw new STACRUDException("not implemented!");
-            }
-        } catch (ProviderException e) {
-            throw new STACRUDException(e.getLocalizedMessage());
+            throws Exception {
+        StaPath<? extends Identifiable> path = requestContext.getPath();
+        EntityService<? extends Identifiable> entityService = getEntityService(path.getEntityType());
+        Request request = requestContext.getRequest();
+        switch (path.getPathType()) {
+            case collection:
+                EntityPage<? extends Identifiable> collection = entityService.getEntities(request);
+                return writeCollection(collection, context);
+            case entity:
+                //fallthru
+            case property:
+                Optional<? extends Identifiable> entity = entityService.getEntity(request);
+                return writeEntity(entity.orElseThrow(() -> new STANotFoundException("no such entity")), context);
+            default:
+                throw new STACRUDException("could not recognize PathType!");
         }
     }
 
@@ -124,7 +121,7 @@ public class ReadController {
     }
 
     private <T extends Identifiable> StreamingResponseBody writeCollection(EntityPage<T> page,
-            SerializationContext context) {
+                                                                           SerializationContext context) {
         return outputStream -> {
             try (OutputStream out = new BufferedOutputStream(outputStream)) {
                 ObjectWriter writer = context.createWriter();
@@ -138,8 +135,8 @@ public class ReadController {
     private <T extends Identifiable> EntityService<T> getEntityService(Class<T> type) {
         return lookup.getService(type)
                      .orElseThrow(() -> new IllegalStateException("No service registered for type '"
-                             + type.getSimpleName()
-                             + "'"));
+                                                                          + type.getSimpleName()
+                                                                          + "'"));
     }
 
 }
