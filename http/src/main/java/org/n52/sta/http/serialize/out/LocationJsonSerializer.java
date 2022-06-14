@@ -28,14 +28,14 @@
 
 package org.n52.sta.http.serialize.out;
 
+import java.io.IOException;
+
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import org.n52.shetland.ogc.sta.StaConstants;
 import org.n52.sta.api.entity.HistoricalLocation;
 import org.n52.sta.api.entity.Location;
 import org.n52.sta.api.entity.Thing;
-
-import java.io.IOException;
 
 public class LocationJsonSerializer extends StaBaseSerializer<Location> {
 
@@ -55,7 +55,8 @@ public class LocationJsonSerializer extends StaBaseSerializer<Location> {
         writeStringProperty(StaConstants.PROP_NAME, value::getName, gen);
         writeStringProperty(StaConstants.PROP_DESCRIPTION, value::getDescription, gen);
         writeObjectProperty(StaConstants.PROP_PROPERTIES, value::getProperties, gen);
-        writeGeometryAndEncodingType(StaConstants.PROP_LOCATION, value::getGeometry, gen);
+        writeGeometry(StaConstants.PROP_LOCATION, value::getGeometry, gen);
+        writeStringProperty(StaConstants.PROP_ENCODINGTYPE, value::getEncodingType, gen);
 
         // entity members
         String things = StaConstants.THINGS;

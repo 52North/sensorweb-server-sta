@@ -28,13 +28,13 @@
 
 package org.n52.sta.http.serialize.out;
 
+import java.io.IOException;
+
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import org.n52.shetland.ogc.sta.StaConstants;
 import org.n52.sta.api.entity.Datastream;
 import org.n52.sta.api.entity.Observation;
-
-import java.io.IOException;
 
 public class DatastreamJsonSerializer extends StaBaseSerializer<Datastream> {
 
@@ -61,7 +61,7 @@ public class DatastreamJsonSerializer extends StaBaseSerializer<Datastream> {
         writeObjectProperty(StaConstants.PROP_PROPERTIES, value::getProperties, gen);
         writeTimeProperty(StaConstants.PROP_RESULT_TIME, value::getResultTime, gen);
         writeTimeProperty(StaConstants.PROP_PHENOMENON_TIME, value::getPhenomenonTime, gen);
-        writeGeometryAndEncodingType(StaConstants.PROP_OBSERVED_AREA, value::getObservedArea, gen);
+        writeGeometry(StaConstants.PROP_OBSERVED_AREA, value::getObservedArea, gen);
 
         // entity members
         String observations = StaConstants.OBSERVATIONS;

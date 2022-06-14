@@ -61,7 +61,7 @@ public class LocationData extends StaData<LocationEntity> implements Location {
 
     @Override
     public String getEncodingType() {
-        return null;
+        return "application/vnd.geo+json";
     }
 
     @Override

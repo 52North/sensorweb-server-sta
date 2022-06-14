@@ -28,13 +28,13 @@
 
 package org.n52.sta.http.serialize.out;
 
+import java.io.IOException;
+
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import org.n52.shetland.ogc.sta.StaConstants;
 import org.n52.sta.api.entity.FeatureOfInterest;
 import org.n52.sta.api.entity.Observation;
-
-import java.io.IOException;
 
 public class FeatureOfInterestJsonSerializer extends StaBaseSerializer<FeatureOfInterest> {
 
@@ -55,7 +55,8 @@ public class FeatureOfInterestJsonSerializer extends StaBaseSerializer<FeatureOf
         writeStringProperty(StaConstants.PROP_NAME, value::getName, gen);
         writeStringProperty(StaConstants.PROP_DESCRIPTION, value::getDescription, gen);
         writeObjectProperty(StaConstants.PROP_DESCRIPTION, value::getProperties, gen);
-        writeGeometryAndEncodingType(StaConstants.PROP_FEATURE, value::getFeature, gen);
+        writeGeometry(StaConstants.PROP_FEATURE, value::getFeature, gen);
+        writeStringProperty(StaConstants.PROP_ENCODINGTYPE, () -> "application/vnd.geo+json", gen);
 
         // entity members
         String observations = StaConstants.OBSERVATIONS;

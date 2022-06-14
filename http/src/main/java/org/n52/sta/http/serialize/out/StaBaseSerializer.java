@@ -85,16 +85,14 @@ public abstract class StaBaseSerializer<T extends Identifiable> extends StdSeria
         writeProperty(name, fieldName -> gen.writeObjectField(fieldName, value.get()));
     }
 
-    protected void writeGeometryAndEncodingType(String name, Supplier<Geometry> geometry, JsonGenerator gen)
+    protected void writeGeometry(String name, Supplier<Geometry> geometry, JsonGenerator gen)
             throws IOException {
         if (context.isSelected(name)) {
             Geometry value = geometry.get();
             if (value != null) {
                 gen.writeObjectField(name, value);
-                gen.writeStringField(StaConstants.PROP_ENCODINGTYPE, ENCODINGTYPE_GEOJSON);
             } else {
                 gen.writeStringField(name, null);
-                gen.writeStringField(StaConstants.PROP_ENCODINGTYPE, null);
             }
         }
     }
