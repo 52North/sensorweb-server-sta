@@ -38,7 +38,7 @@ import org.testcontainers.utility.DockerImageName;
  */
 public class STAPostgresContainer extends PostgreSQLContainer<STAPostgresContainer> {
 
-    private static final String IMAGE_VERSION = "mdillon/postgis:latest";
+    private static final String IMAGE_VERSION = "postgis/postgis:12-3.2-alpine";
     private static STAPostgresContainer container;
 
     private STAPostgresContainer() {
@@ -48,7 +48,10 @@ public class STAPostgresContainer extends PostgreSQLContainer<STAPostgresContain
 
     public static STAPostgresContainer instance() {
         if (container == null) {
-            container = new STAPostgresContainer();
+            container = new STAPostgresContainer()
+                    .withInitScript("testdata.sql")
+                    .withUsername("postgres")
+                    .withPassword("postgres");
         }
         return container;
     }
