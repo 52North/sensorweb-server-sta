@@ -54,16 +54,16 @@ The latest jar/war packages are available via the GitHub [Releases](https://gith
 
 ## Conformance Status:
 
-| Conformance Class                     | Reference | Implemented |Test Status |
-|:--------------------------------------|:---------:|:-----------:|-----------:|
-| Sensing Core                          | A.1       | Yes         |   5 / 6    |
-| Filtering Extension                   | A.2       | Yes         |   0 / 8    |
-| Create-Update-Delete                  | A.3       | Yes         |   8 / 8    |
-| Batch Requests                        | A.4       | No          |   0 / ?    |
-| MultiDatastream Extension             | A.5       | No          |   0 / ?    |
-| DataArray Extension                   | A.6       | No          |   0 / ?    |
-| Observation Creation via MQTT         | A.7       | Yes         |   1 / 1    |
-| Receiving Updates via MQTT            | A.8       | Yes         |   5 / 5    |
+| Conformance Class                     | Reference | Implemented | Test Status |
+|:--------------------------------------|:---------:|:-----------:|------------:|
+| Sensing Core                          | A.1       |     Yes     |       6 / 6 |
+| Filtering Extension                   | A.2       |     No      |       0 / 8 |
+| Create-Update-Delete                  | A.3       |     No      |       8 / 8 |
+| Batch Requests                        | A.4       |     No      |       0 / ? |
+| MultiDatastream Extension             | A.5       |     No      |       0 / ? |
+| DataArray Extension                   | A.6       |     No      |       0 / ? |
+| Observation Creation via MQTT         | A.7       |     No      |       0 / 1 |
+| Receiving Updates via MQTT            | A.8       |     No      |       0 / 5 |
 
 
 ## Support
