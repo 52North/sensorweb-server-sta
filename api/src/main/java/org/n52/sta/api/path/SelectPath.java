@@ -18,6 +18,7 @@ public interface SelectPath<T extends Identifiable> {
     enum PathType {
         collection,
         entity,
-        property
+        property,
+        value
     }
 }

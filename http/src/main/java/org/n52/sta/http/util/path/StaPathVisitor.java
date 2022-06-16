@@ -70,10 +70,16 @@ public class StaPathVisitor extends StaPathGrammarBaseVisitor<StaPath< ? extends
         } else {
             // path ending in property
             if (propertyCtx != null) {
-                return new StaPath<>(SelectPath.PathType.property,
+                SelectPath.PathType type;
+                if (propertyCtx.getToken(StaPathGrammar.VALUE, 0) == null) {
+                    type = SelectPath.PathType.property;
+                } else {
+                    type = SelectPath.PathType.value;
+                }
+                return new StaPath<>(type,
                                      new PathSegment(entity.getText(),
                                                      identifier,
-                                                     propertyCtx.getText()),
+                                                     propertyCtx.getChild(0).getText()),
                                      serializerFactory,
                                      entityType);
             }

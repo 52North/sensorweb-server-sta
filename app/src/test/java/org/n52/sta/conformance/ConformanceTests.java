@@ -341,11 +341,6 @@ abstract class ConformanceTests implements TestUtil {
                                                  .build()
                                                  .execute(request);
 
-        // Check Response MIME Type
-        String mimeType = ContentType.getOrDefault(response.getEntity())
-                                     .getMimeType();
-        Assertions.assertEquals("text/plain", mimeType);
-
         Assertions.assertEquals(200,
                                 response.getStatusLine()
                                         .getStatusCode(),
@@ -354,6 +349,11 @@ abstract class ConformanceTests implements TestUtil {
                                         + " Instead received Status Code: "
                                         + response.getStatusLine()
                                                   .getStatusCode());
+
+        // Check Response MIME Type
+        String mimeType = ContentType.getOrDefault(response.getEntity())
+                                     .getMimeType();
+        Assertions.assertEquals("text/plain", mimeType);
         return new BufferedReader(new InputStreamReader(response.getEntity()
                                                                 .getContent()))
                                                                                .lines()

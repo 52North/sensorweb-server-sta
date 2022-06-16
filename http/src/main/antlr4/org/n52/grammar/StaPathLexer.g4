@@ -21,53 +21,187 @@
  * ----------------------------------------------------------------------------
  */
 lexer grammar StaPathLexer;
-
 // General
-SLASH : '/' ;
-SQ : ['] ;
-OP : '(' ;
-CP : ')' ;
-IDENTIFIER : OP SQ? .*? SQ? CP;
-fragment DIGIT : [0-9] ;
-REF : '$ref' ;
-DIGITPLUS : DIGIT+ ;
 
-// STA Entities
-DATASTREAM : 'Datastream';
-DATASTREAMS : 'Datastreams' ;
-THING : 'Thing';
-THINGS : 'Things' ;
-LOCATION : 'Location';
-LOCATIONS : 'Locations';
-HISTORICAL_LOCATION : 'HistoricalLocation' ;
-HISTORICAL_LOCATIONS : 'HistoricalLocations' ;
-SENSOR : 'Sensor';
-SENSORS : 'Sensors';
-OBSERVED_PROPERTY : 'ObservedProperty' ;
-OBSERVED_PROPERTIES : 'ObservedProperties' ;
-OBSERVATION : 'Observation' ;
-OBSERVATIONS : 'Observations' ;
-FEATURE_OF_INTEREST : 'FeatureOfInterest' ;
-FEATURES_OF_INTEREST : 'FeaturesOfInterest' ;
+SLASH
+   : '/'
+   ;
 
-// Entity Properties
-PROP_ID : 'id';
-PROP_SELF_LINK : 'selfLink';
-PROP_DEFINITION : 'definition';
-PROP_DESCRIPTION : 'description';
-PROP_ENCODINGTYPE : 'encodingType';
-PROP_FEATURE : 'feature';
-PROP_LOCATION : 'location';
-PROP_NAME : 'name';
-PROP_OBSERVATION_TYPE : 'observationType';
-PROP_OBSERVED_AREA : 'observedArea';
-PROP_PARAMETERS : 'parameters';
-PROP_PHENOMENON_TIME : 'phenomenonTime';
-PROP_PROPERTIES : 'properties';
-PROP_RESULT_TIME : 'resultTime';
-PROP_RESULT : 'result';
-PROP_RESULT_QUALITY : 'resultQuality';
-PROP_TIME : 'time';
-PROP_UOM : 'unitOfMeasurement';
-PROP_VALID_TIME : 'validTime';
-PROP_METADATA : 'metadata';
+SQ
+   : [']
+   ;
+
+OP
+   : '('
+   ;
+
+CP
+   : ')'
+   ;
+
+IDENTIFIER
+   : OP SQ? .*? SQ? CP
+   ;
+
+fragment DIGIT
+   : [0-9]
+   ;
+
+REF
+   : '$ref'
+   ;
+
+VALUE
+   : '$value'
+   ;
+
+DIGITPLUS
+   : DIGIT+
+   ;
+   // STA Entities
+   
+DATASTREAM
+   : 'Datastream'
+   ;
+
+DATASTREAMS
+   : 'Datastreams'
+   ;
+
+THING
+   : 'Thing'
+   ;
+
+THINGS
+   : 'Things'
+   ;
+
+LOCATION
+   : 'Location'
+   ;
+
+LOCATIONS
+   : 'Locations'
+   ;
+
+HISTORICAL_LOCATION
+   : 'HistoricalLocation'
+   ;
+
+HISTORICAL_LOCATIONS
+   : 'HistoricalLocations'
+   ;
+
+SENSOR
+   : 'Sensor'
+   ;
+
+SENSORS
+   : 'Sensors'
+   ;
+
+OBSERVED_PROPERTY
+   : 'ObservedProperty'
+   ;
+
+OBSERVED_PROPERTIES
+   : 'ObservedProperties'
+   ;
+
+OBSERVATION
+   : 'Observation'
+   ;
+
+OBSERVATIONS
+   : 'Observations'
+   ;
+
+FEATURE_OF_INTEREST
+   : 'FeatureOfInterest'
+   ;
+
+FEATURES_OF_INTEREST
+   : 'FeaturesOfInterest'
+   ;
+   // Entity Properties
+   
+PROP_ID
+   : 'id'
+   ;
+
+PROP_SELF_LINK
+   : 'selfLink'
+   ;
+
+PROP_DEFINITION
+   : 'definition'
+   ;
+
+PROP_DESCRIPTION
+   : 'description'
+   ;
+
+PROP_ENCODINGTYPE
+   : 'encodingType'
+   ;
+
+PROP_FEATURE
+   : 'feature'
+   ;
+
+PROP_LOCATION
+   : 'location'
+   ;
+
+PROP_NAME
+   : 'name'
+   ;
+
+PROP_OBSERVATION_TYPE
+   : 'observationType'
+   ;
+
+PROP_OBSERVED_AREA
+   : 'observedArea'
+   ;
+
+PROP_PARAMETERS
+   : 'parameters'
+   ;
+
+PROP_PHENOMENON_TIME
+   : 'phenomenonTime'
+   ;
+
+PROP_PROPERTIES
+   : 'properties'
+   ;
+
+PROP_RESULT_TIME
+   : 'resultTime'
+   ;
+
+PROP_RESULT
+   : 'result'
+   ;
+
+PROP_RESULT_QUALITY
+   : 'resultQuality'
+   ;
+
+PROP_TIME
+   : 'time'
+   ;
+
+PROP_UOM
+   : 'unitOfMeasurement'
+   ;
+
+PROP_VALID_TIME
+   : 'validTime'
+   ;
+
+PROP_METADATA
+   : 'metadata'
+   ;
+

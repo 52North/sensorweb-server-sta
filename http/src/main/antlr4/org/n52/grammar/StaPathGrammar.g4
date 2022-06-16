@@ -22,10 +22,10 @@
  */
 parser grammar StaPathGrammar;
 
-options { tokenVocab = StaPathLexer; }
 
+options { tokenVocab = StaPathLexer; }
 path
-   : SLASH resource (SLASH | (SLASH REF))? EOF
+   : SLASH resource (SLASH | SLASH REF)? EOF
    ;
 
 resource
@@ -49,154 +49,121 @@ resource
 
 datastream
    : DATASTREAM
-   | DATASTREAMS identifier
-        (SLASH (observations
-                | observation
-                | observedProperties
-                | observedProperty
-                | sensor
-                | thing
-                | datastreamProperty
-               )
-        )?
+   | DATASTREAMS identifier (SLASH (observations | observation | observedProperties | observedProperty | sensor | thing | datastreamProperty))?
    ;
 
 observation
-   : OBSERVATIONS identifier
-        (SLASH (datastream | featuresOfInterest | observationProperty ))?
+   : OBSERVATIONS identifier (SLASH (datastream | featuresOfInterest | observationProperty))?
    ;
 
 thing
    : THING
-   | THINGS identifier
-        (SLASH (datastream
-                | datastreams
-                | location
-                | locations
-                | historicalLocation
-                | historicalLocations
-                | thingProperty
-               )
-        )?
+   | THINGS identifier (SLASH (datastream | datastreams | location | locations | historicalLocation | historicalLocations | thingProperty))?
    ;
 
 location
-   : LOCATIONS identifier
-        (SLASH (thing | things | historicalLocation | historicalLocations | locationProperty))?
+   : LOCATIONS identifier (SLASH (thing | things | historicalLocation | historicalLocations | locationProperty))?
    ;
 
 historicalLocation
-   : HISTORICAL_LOCATIONS identifier
-        (SLASH (thing | things | location| locations | historicalLocationProperty))?
+   : HISTORICAL_LOCATIONS identifier (SLASH (thing | things | location | locations | historicalLocationProperty))?
    ;
 
 sensor
    : SENSOR
-   | SENSORS identifier
-        (SLASH (datastream | datastreams | sensorProperty))?
+   | SENSORS identifier (SLASH (datastream | datastreams | sensorProperty))?
    ;
 
 observedProperty
    : OBSERVED_PROPERTY
-   | OBSERVED_PROPERTIES identifier
-        (SLASH (datastream | datastreams | observedPropertyProperty))?
+   | OBSERVED_PROPERTIES identifier (SLASH (datastream | datastreams | observedPropertyProperty))?
    ;
 
 featureOfInterest
    : FEATURE_OF_INTEREST
-   | FEATURES_OF_INTEREST identifier
-        (SLASH (observation | observations | featureOfInterestProperty))?
+   | FEATURES_OF_INTEREST identifier (SLASH (observation | observations | featureOfInterestProperty))?
    ;
-
-////////////////////////////////////////////////////////////////
-// properties
-////////////////////////////////////////////////////////////////
-
+   ////////////////////////////////////////////////////////////////
+   
+   // properties
+   
+   ////////////////////////////////////////////////////////////////
+   
 datastreamProperty
-   : PROP_ID
-   | PROP_NAME
-   | PROP_DESCRIPTION
-   | PROP_OBSERVATION_TYPE
-   | PROP_UOM
-   | PROP_OBSERVED_AREA
-   | PROP_PHENOMENON_TIME
-   | PROP_RESULT_TIME
-   | PROP_PROPERTIES
+   : (PROP_ID | PROP_NAME | PROP_DESCRIPTION | PROP_OBSERVATION_TYPE | PROP_UOM | PROP_OBSERVED_AREA | PROP_PHENOMENON_TIME | PROP_RESULT_TIME | PROP_PROPERTIES) (SLASH VALUE)?
    ;
 
 observationProperty
-   : PROP_ID
-   | PROP_PHENOMENON_TIME
-   | PROP_RESULT
-   | PROP_RESULT_TIME
-   | PROP_RESULT_QUALITY
-   | PROP_VALID_TIME
-   | PROP_PARAMETERS
+   : (PROP_ID | PROP_PHENOMENON_TIME | PROP_RESULT | PROP_RESULT_TIME | PROP_RESULT_QUALITY | PROP_VALID_TIME | PROP_PARAMETERS) (SLASH VALUE)?
    ;
 
 thingProperty
-   : PROP_ID
-   | PROP_NAME
-   | PROP_DESCRIPTION
-   | PROP_PROPERTIES
+   : (PROP_ID | PROP_NAME | PROP_DESCRIPTION | PROP_PROPERTIES) (SLASH VALUE)?
    ;
 
 locationProperty
-   : PROP_ID
-   | PROP_NAME
-   | PROP_DESCRIPTION
-   | PROP_ENCODINGTYPE
-   | PROP_LOCATION
-   | PROP_PROPERTIES
+   : (PROP_ID | PROP_NAME | PROP_DESCRIPTION | PROP_ENCODINGTYPE | PROP_LOCATION | PROP_PROPERTIES) (SLASH VALUE)?
    ;
 
 historicalLocationProperty
-   : PROP_ID
-   | PROP_TIME
+   : (PROP_ID | PROP_TIME) (SLASH VALUE)?
    ;
 
 sensorProperty
-   : PROP_ID
-   | PROP_NAME
-   | PROP_DESCRIPTION
-   | PROP_ENCODINGTYPE
-   | PROP_METADATA
-   | PROP_PROPERTIES
+   : (PROP_ID | PROP_NAME | PROP_DESCRIPTION | PROP_ENCODINGTYPE | PROP_METADATA | PROP_PROPERTIES) (SLASH VALUE)?
    ;
 
 observedPropertyProperty
-   : PROP_ID
-   | PROP_NAME
-   | PROP_DESCRIPTION
-   | PROP_DEFINITION
-   | PROP_PROPERTIES
+   : (PROP_ID | PROP_NAME | PROP_DESCRIPTION | PROP_DEFINITION | PROP_PROPERTIES) (SLASH VALUE)?
    ;
 
 featureOfInterestProperty
-   : PROP_ID
-   | PROP_NAME
-   | PROP_DESCRIPTION
-   | PROP_ENCODINGTYPE
-   | PROP_FEATURE
+   : (PROP_ID | PROP_NAME | PROP_DESCRIPTION | PROP_ENCODINGTYPE | PROP_FEATURE) (SLASH VALUE)?
+   ;
+   ////////////////////////////////////////////////////////////////
+   
+   // Collections
+   
+   ////////////////////////////////////////////////////////////////
+   
+datastreams
+   : DATASTREAMS
    ;
 
-////////////////////////////////////////////////////////////////
-// Collections
-////////////////////////////////////////////////////////////////
+observations
+   : OBSERVATIONS
+   ;
 
-datastreams : DATASTREAMS ;
-observations : OBSERVATIONS ;
-things : THINGS ;
-locations: LOCATIONS ;
-historicalLocations: HISTORICAL_LOCATIONS ;
-sensors : SENSORS ;
-observedProperties : OBSERVED_PROPERTIES ;
-featuresOfInterest : FEATURES_OF_INTEREST ;
+things
+   : THINGS
+   ;
 
-////////////////////////////////////////////////////////////////
-// General
-////////////////////////////////////////////////////////////////
+locations
+   : LOCATIONS
+   ;
 
+historicalLocations
+   : HISTORICAL_LOCATIONS
+   ;
+
+sensors
+   : SENSORS
+   ;
+
+observedProperties
+   : OBSERVED_PROPERTIES
+   ;
+
+featuresOfInterest
+   : FEATURES_OF_INTEREST
+   ;
+   ////////////////////////////////////////////////////////////////
+   
+   // General
+   
+   ////////////////////////////////////////////////////////////////
+   
 identifier
    : IDENTIFIER
    ;
+

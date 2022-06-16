@@ -28,10 +28,10 @@
 
 package org.n52.sta.http.serialize.out;
 
+import java.util.HashSet;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
@@ -90,14 +90,10 @@ public class SerializationContext {
         ObjectMapper mapper = mapperConfig.copy();
         String serviceUri = requestContext.getServiceUri();
         QueryOptions queryOptions = requestContext.getQueryOptions();
-        if (path.getPathType() == SelectPath.PathType.property) {
-            // We adjust the QueryOptions to behave like it includes $select=<property>
-            // all other filters are left untouched
-            Set<FilterClause> filters = queryOptions.getAllFilters()
-                                                    .stream()
-                                                    .filter(f -> !(f instanceof SelectFilter))
-                                                    .collect(Collectors.toSet());
-
+        if (path.getPathType() == SelectPath.PathType.property || path.getPathType() == SelectPath.PathType.value) {
+            // We replace all queryOptions with a single $select=<property> as they do not make sense when requesting
+            // a property directly
+            Set<FilterClause> filters = new HashSet<>(2);
             filters.add(new SelectFilter(requestContext.getPath().getPathSegments().get(0).getProperty().get()));
             queryOptions = QueryOptionsFactory.createQueryOptions(filters);
         }

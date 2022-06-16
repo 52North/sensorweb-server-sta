@@ -30,14 +30,14 @@ package org.n52.sta.http.controller;
 
 import java.io.BufferedOutputStream;
 import java.io.OutputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.Objects;
-import java.util.Optional;
 
 import javax.servlet.http.HttpServletRequest;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
-import org.n52.shetland.ogc.sta.exception.STACRUDException;
+import org.n52.shetland.ogc.sta.exception.STAInvalidUrlException;
 import org.n52.shetland.ogc.sta.exception.STANotFoundException;
 import org.n52.sta.api.EntityPage;
 import org.n52.sta.api.EntityServiceLookup;
@@ -83,52 +83,70 @@ public class ReadController {
     }
 
     @GetMapping(value = "/**")
-    public ResponseEntity<StreamingResponseBody> handleGetRequest(HttpServletRequest request)
+    public ResponseEntity<StreamingResponseBody> handleGetRequest(HttpServletRequest servletRequest)
             throws Exception {
-        RequestContext requestContext = RequestContext.create(serviceUri, request, pathFactory);
+        RequestContext requestContext = RequestContext.create(serviceUri, servletRequest, pathFactory);
         SerializationContext serializationContext = SerializationContext.create(requestContext, mapper);
-        return ResponseEntity.ok()
-                             .contentType(MediaType.APPLICATION_JSON)
-                             .body(getAndWriteToResponse(requestContext, serializationContext));
-    }
-
-    private StreamingResponseBody getAndWriteToResponse(RequestContext requestContext, SerializationContext context)
-            throws Exception {
         StaPath<? extends Identifiable> path = requestContext.getPath();
         EntityService<? extends Identifiable> entityService = getEntityService(path.getEntityType());
         Request request = requestContext.getRequest();
+
+        StreamingResponseBody body = null;
+        MediaType contentType = MediaType.APPLICATION_JSON;
         switch (path.getPathType()) {
-            case collection:
-                EntityPage<? extends Identifiable> collection = entityService.getEntities(request);
-                return writeCollection(collection, context);
-            case entity:
-                //fallthru
-            case property:
-                Optional<? extends Identifiable> entity = entityService.getEntity(request);
-                return writeEntity(entity.orElseThrow(() -> new STANotFoundException("no such entity")), context);
-            default:
-                throw new STACRUDException("could not recognize PathType!");
+        case collection:
+            body = serializeCollection(entityService.getEntities(request), serializationContext);
+            break;
+        case entity:
+        case property:
+            body = serializeEntity(entityService.getEntity(request)
+                                                .orElseThrow(() -> new STANotFoundException("no matching entity found")),
+                                   serializationContext);
+            break;
+        case value:
+            body = serializePropertyValue(entityService.getEntity(request)
+                                                       .orElseThrow(() -> new STANotFoundException("")),
+                                          serializationContext);
+            contentType = MediaType.TEXT_PLAIN;
+            break;
+        default:
+            throw new STAInvalidUrlException("could not identify request type!");
         }
+        return ResponseEntity.ok()
+                             .contentType(contentType)
+                             .body(body);
     }
 
-    private <T extends Identifiable> StreamingResponseBody writeEntity(T entity, SerializationContext context) {
+    private <T extends Identifiable> StreamingResponseBody serializeEntity(T entity, SerializationContext context) {
         return outputStream -> {
             OutputStream out = new BufferedOutputStream(outputStream);
             ObjectWriter writer = context.createWriter();
-            // TODO apply service-root-uri
             writer.writeValue(out, entity);
         };
     }
 
-    private <T extends Identifiable> StreamingResponseBody writeCollection(EntityPage<T> page,
-                                                                           SerializationContext context) {
+    private <T extends Identifiable> StreamingResponseBody serializeCollection(EntityPage<T> page,
+                                                                               SerializationContext context) {
         return outputStream -> {
             try (OutputStream out = new BufferedOutputStream(outputStream)) {
                 ObjectWriter writer = context.createWriter();
-                // TODO apply service-root-uri
                 CollectionNode<T> node = new CollectionNode<>(page, "http://");
                 writer.writeValue(out, node);
             }
+        };
+    }
+
+    private <T extends Identifiable> StreamingResponseBody serializePropertyValue(T entity, SerializationContext context) {
+        return outputStream -> {
+            OutputStream out = new BufferedOutputStream(outputStream);
+            ObjectWriter writer = context.createWriter();
+            String jsonValue = writer.writeValueAsString(entity);
+            // We extract the plain value from json representation
+            String plainValue = jsonValue.length() > 2
+                    ? jsonValue.substring(jsonValue.indexOf("\"", 3) + 3, jsonValue.length() - 3)
+                    : "";
+            out.write(plainValue.getBytes(StandardCharsets.UTF_8));
+            out.flush();
         };
     }
 
