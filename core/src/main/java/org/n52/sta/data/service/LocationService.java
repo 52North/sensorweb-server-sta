@@ -225,8 +225,8 @@ public class LocationService
                                                     })
                                                     .collect(Collectors.toSet()));
                 }
-                location = getRepository().save(location);
                 processThings(location);
+                location = getRepository().save(location);
             }
         }
         return location;
