@@ -57,7 +57,7 @@ public class CategoryService {
             category.setName(DEFAULT_CATEGORY);
             category.setDescription("Default STA category");
             logger.debug("Persisting default CategoryEntity: " + category.getName());
-            categoryRepository.save(category);
+            categoryRepository.saveAndFlush(category);
         }
     }
 

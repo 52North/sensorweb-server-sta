@@ -94,7 +94,7 @@ public class JSONFeatureOfInterest extends JSONBase.JSONwithIdNameDescription<Fe
                 self.setDescription(description);
 
                 if (properties != null) {
-                    self.setParameters(convertParameters(properties, ParameterFactory.EntityType.FEATURE));
+                    self.setParameters(convertParameters(properties, self));
                 }
 
                 if (feature != null) {
@@ -131,7 +131,7 @@ public class JSONFeatureOfInterest extends JSONBase.JSONwithIdNameDescription<Fe
                 }
 
                 if (properties != null) {
-                    self.setParameters(convertParameters(properties, ParameterFactory.EntityType.FEATURE));
+                    self.setParameters(convertParameters(properties, self));
                 }
 
                 if (feature != null) {

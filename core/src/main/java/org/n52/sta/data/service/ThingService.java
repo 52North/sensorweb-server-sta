@@ -29,6 +29,16 @@
 
 package org.n52.sta.data.service;
 
+import java.util.HashSet;
+import java.util.LinkedHashSet;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.Set;
+import java.util.UUID;
+import java.util.stream.Collectors;
+
+import javax.persistence.EntityManager;
+
 import org.hibernate.Hibernate;
 import org.joda.time.DateTime;
 import org.n52.janmayen.http.HTTPStatus;
@@ -55,15 +65,6 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
-
-import javax.persistence.EntityManager;
-import java.util.HashSet;
-import java.util.LinkedHashSet;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Set;
-import java.util.UUID;
-import java.util.stream.Collectors;
 
 /**
  * @author <a href="mailto:s.drost@52north.org">Sebastian Drost</a>
@@ -215,17 +216,6 @@ public class ThingService
                     thing.setProcessed(true);
                     thing = getRepository().intermediateSave(thing);
                     boolean locationChanged = processLocations(thing, thing.getLocations());
-                    if (thing.getParameters() != null) {
-                        PlatformEntity finalThing = thing;
-                        parameterRepository.saveAll(thing.getParameters()
-                                                        .stream()
-                                                        .filter(t -> t instanceof PlatformParameterEntity)
-                                                        .map(t -> {
-                                                            ((PlatformParameterEntity) t).setPlatform(finalThing);
-                                                            return (PlatformParameterEntity) t;
-                                                        })
-                                                        .collect(Collectors.toSet()));
-                    }
                     processDatastreams(thing);
                     boolean hasUnpersistedHLocs = thing.hasHistoricalLocations() &&
                         thing.getHistoricalLocations().stream().anyMatch(p -> p.getId() == null);
@@ -314,6 +304,7 @@ public class ThingService
             if (getRepository().existsByStaIdentifier(identifier)) {
                 PlatformEntity thing =
                     getRepository().findByStaIdentifier(identifier,
+                                                        EntityGraphRepository.FetchGraph.FETCHGRAPH_PARAMETERS,
                                                         EntityGraphRepository.FetchGraph.FETCHGRAPH_DATASETS,
                                                         EntityGraphRepository.FetchGraph.FETCHGRAPH_HIST_LOCATIONS)
                         .get();

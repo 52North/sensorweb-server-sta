@@ -230,17 +230,6 @@ public class FeatureOfInterestService
             } else {
                 feature.setXml(null);
                 checkFeatureType(feature);
-                AbstractFeatureEntity<?> intermediateSave = getRepository().intermediateSave(feature);
-                if (feature.getParameters() != null) {
-                    parameterRepository.saveAll(feature.getParameters()
-                                                    .stream()
-                                                    .filter(t -> t instanceof FeatureParameterEntity)
-                                                    .map(t -> {
-                                                        ((FeatureParameterEntity) t).setFeature(intermediateSave);
-                                                        return (FeatureParameterEntity) t;
-                                                    })
-                                                    .collect(Collectors.toSet()));
-                }
                 return getRepository().save(feature);
             }
         }

@@ -90,8 +90,7 @@ public class JSONThing extends JSONBase.JSONwithIdNameDescription<PlatformEntity
                 self.setDescription(description);
 
                 if (properties != null) {
-                    self.setParameters(convertParameters(properties,
-                                                         ParameterFactory.EntityType.PLATFORM));
+                    self.setParameters(convertParameters(properties, self));
                 }
 
                 if (Locations != null) {
@@ -138,8 +137,7 @@ public class JSONThing extends JSONBase.JSONwithIdNameDescription<PlatformEntity
                 self.setDescription(description);
 
                 if (properties != null) {
-                    self.setParameters(convertParameters(properties,
-                                                         ParameterFactory.EntityType.PLATFORM));
+                    self.setParameters(convertParameters(properties, self));
                 }
 
                 if (Locations != null) {

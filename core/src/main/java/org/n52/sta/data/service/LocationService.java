@@ -214,17 +214,6 @@ public class LocationService
                 }
                 location.setProcessed(true);
                 checkLocationEncoding(location);
-                LocationEntity intermediateSave = getRepository().intermediateSave(location);
-                if (location.getParameters() != null) {
-                    parameterRepository.saveAll(location.getParameters()
-                                                    .stream()
-                                                    .filter(t -> t instanceof LocationParameterEntity)
-                                                    .map(t -> {
-                                                        ((LocationParameterEntity) t).setLocation(intermediateSave);
-                                                        return (LocationParameterEntity) t;
-                                                    })
-                                                    .collect(Collectors.toSet()));
-                }
                 processThings(location);
                 location = getRepository().save(location);
             }

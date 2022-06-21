@@ -212,17 +212,6 @@ public class ObservedPropertyService
             if (getRepository().existsByStaIdentifier(observableProperty.getStaIdentifier())) {
                 throw new STACRUDException(IDENTIFIER_ALREADY_EXISTS, HTTPStatus.CONFLICT);
             }
-            PhenomenonEntity intermediateSave = getRepository().intermediateSave(observableProperty);
-            if (observableProperty.getParameters() != null) {
-                parameterRepository.saveAll(observableProperty.getParameters()
-                                                .stream()
-                                                .filter(t -> t instanceof PhenomenonParameterEntity)
-                                                .map(t -> {
-                                                    ((PhenomenonParameterEntity) t).setPhenomenon(intermediateSave);
-                                                    return (PhenomenonParameterEntity) t;
-                                                })
-                                                .collect(Collectors.toSet()));
-            }
             return getRepository().save(observableProperty);
         }
     }

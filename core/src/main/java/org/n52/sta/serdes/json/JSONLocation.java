@@ -140,7 +140,7 @@ public class JSONLocation extends JSONBase.JSONwithIdNameDescription<LocationEnt
                 }
 
                 if (properties != null) {
-                    self.setParameters(convertParameters(properties, ParameterFactory.EntityType.LOCATION));
+                    self.setParameters(convertParameters(properties, self));
                 }
 
                 if (Things != null) {
@@ -198,7 +198,7 @@ public class JSONLocation extends JSONBase.JSONwithIdNameDescription<LocationEnt
                 }
 
                 if (properties != null) {
-                    self.setParameters(convertParameters(properties, ParameterFactory.EntityType.LOCATION));
+                    self.setParameters(convertParameters(properties, self));
                 }
 
                 if (Things != null) {

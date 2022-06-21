@@ -219,16 +219,6 @@ public class SensorService
                     }
                 }
             }
-            if (sensor.getParameters() != null) {
-                parameterRepository.saveAll(sensor.getParameters()
-                                                .stream()
-                                                .filter(t -> t instanceof ProcedureParameterEntity)
-                                                .map(t -> {
-                                                    ((ProcedureParameterEntity) t).setProcedure(intermediateSave);
-                                                    return (ProcedureParameterEntity) t;
-                                                })
-                                                .collect(Collectors.toSet()));
-            }
 
             // Save with Interception as procedure is now linked to Datastream
             getRepository().save(sensor);

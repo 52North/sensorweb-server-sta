@@ -69,7 +69,7 @@ public class JSONObservedProperty extends JSONBase.JSONwithIdNameDescription<Phe
                 self.setDescription(description);
 
                 if (properties != null) {
-                    self.setParameters(convertParameters(properties, ParameterFactory.EntityType.PHENOMENON));
+                    self.setParameters(convertParameters(properties, self));
                 }
 
                 if (Datastreams != null) {
@@ -91,7 +91,7 @@ public class JSONObservedProperty extends JSONBase.JSONwithIdNameDescription<Phe
                 self.setDescription(description);
 
                 if (properties != null) {
-                    self.setParameters(convertParameters(properties, ParameterFactory.EntityType.PHENOMENON));
+                    self.setParameters(convertParameters(properties, self));
                 }
 
                 if (Datastreams != null) {

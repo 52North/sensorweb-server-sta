@@ -213,7 +213,7 @@ public class JSONDatastream extends JSONBase.JSONwithIdNameDescriptionTime<Datas
         }
 
         if (properties != null) {
-            self.setParameters(convertParameters(properties, ParameterFactory.EntityType.DATASET));
+            self.setParameters(convertParameters(properties, self));
         }
 
         // if (phenomenonTime != null) {
@@ -276,7 +276,7 @@ public class JSONDatastream extends JSONBase.JSONwithIdNameDescriptionTime<Datas
         }
 
         if (properties != null) {
-            self.setParameters(convertParameters(properties, ParameterFactory.EntityType.DATASET));
+            self.setParameters(convertParameters(properties, self));
         }
 
         if (Thing != null) {

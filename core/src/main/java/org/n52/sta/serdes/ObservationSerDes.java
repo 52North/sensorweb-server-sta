@@ -29,6 +29,17 @@
 
 package org.n52.sta.serdes;
 
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+import java.util.TreeSet;
+
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.DeserializationContext;
@@ -44,6 +55,7 @@ import org.n52.series.db.beans.DataEntity;
 import org.n52.series.db.beans.HibernateRelations;
 import org.n52.series.db.beans.ProfileDataEntity;
 import org.n52.series.db.beans.QuantityDataEntity;
+import org.n52.series.db.beans.SensorML20DataEntity;
 import org.n52.series.db.beans.TrajectoryDataEntity;
 import org.n52.series.db.beans.parameter.JsonParameterEntity;
 import org.n52.series.db.beans.parameter.ParameterEntity;
@@ -62,17 +74,6 @@ import org.n52.sta.serdes.util.ElementWithQueryOptions.ObservationWithQueryOptio
 import org.n52.sta.serdes.util.EntityPatch;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-import java.util.TreeSet;
 
 @SuppressFBWarnings({"EI_EXPOSE_REP", "EI_EXPOSE_REP2"})
 public class ObservationSerDes {
@@ -160,6 +161,8 @@ public class ObservationSerDes {
                     gen.writeNumber(((QuantityDataEntity) observation).getValue());
                 } else if (observation instanceof CountDataEntity) {
                     gen.writeNumber(((CountDataEntity) observation).getValue());
+                } else if (observation instanceof SensorML20DataEntity) {
+                    gen.writeRawValue(((SensorML20DataEntity) observation).getValue());
                 } else {
                     gen.writeString(observation.getValue().toString());
                 }

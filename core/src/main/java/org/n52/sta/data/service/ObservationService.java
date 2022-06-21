@@ -94,14 +94,14 @@ import org.springframework.transaction.annotation.Transactional;
 @DependsOn({"springApplicationContext"})
 @Transactional
 public class ObservationService
-    extends AbstractSensorThingsEntityServiceImpl<ObservationRepository<DataEntity<?>>, DataEntity<?>> {
+        extends AbstractSensorThingsEntityServiceImpl<ObservationRepository<DataEntity<?>>, DataEntity<?>> {
 
     private static final ObservationQuerySpecifications oQS = new ObservationQuerySpecifications();
     private static final Logger LOGGER = LoggerFactory.getLogger(ObservationService.class);
     protected final DatastreamRepository datastreamRepository;
     protected final ObservationParameterRepository parameterRepository;
     private final String OBS_TYPE_SENSORML_OBSERVATION =
-        "http://www.52north.org/def/observationType/OGC-OM/2.0/OM_SensorML20Observation";
+            "http://www.52north.org/def/observationType/OGC-OM/2.0/OM_SensorML20Observation";
     private final Class entityClass;
 
     @Autowired
@@ -119,7 +119,7 @@ public class ObservationService
     public ElementWithQueryOptions getEntity(String id, QueryOptions queryOptions) throws STACRUDException {
         try {
             DataEntity<?> entity =
-                getRepository().findByStaIdentifier(id, createFetchGraph(queryOptions.getExpandFilter())).get();
+                    getRepository().findByStaIdentifier(id, createFetchGraph(queryOptions.getExpandFilter())).get();
             this.fetchValueIfCompositeDataEntity(entity);
             if (queryOptions.hasExpandFilter()) {
                 return this.createWrapper(fetchExpandEntitiesWithFilter(entity, queryOptions.getExpandFilter()),
@@ -138,7 +138,7 @@ public class ObservationService
             Page<DataEntity<?>> pages = getRepository().findAll(getFilterPredicate(entityClass, queryOptions),
                                                                 createPageableRequest(queryOptions),
                                                                 queryOptions.hasCountFilter() &&
-                                                                    queryOptions.getCountFilter().getValue(),
+                                                                        queryOptions.getCountFilter().getValue(),
                                                                 createFetchGraph(queryOptions.getExpandFilter()));
             pages.forEach(this::fetchValueIfCompositeDataEntity);
             return createCollectionWrapperAndExpand(queryOptions, pages);
@@ -151,14 +151,14 @@ public class ObservationService
     protected Page getEntityCollectionByRelatedEntityRaw(String relatedId,
                                                          String relatedType,
                                                          QueryOptions queryOptions)
-        throws STACRUDException {
+            throws STACRUDException {
         try {
             Page<DataEntity<?>> pages = getRepository()
-                .findAll(byRelatedEntityFilter(relatedId, relatedType, null)
-                             .and(getFilterPredicate(entityClass, queryOptions)),
-                         createPageableRequest(queryOptions),
-                         queryOptions.hasCountFilter() && queryOptions.getCountFilter().getValue(),
-                         createFetchGraph(queryOptions.getExpandFilter()));
+                    .findAll(byRelatedEntityFilter(relatedId, relatedType, null)
+                                     .and(getFilterPredicate(entityClass, queryOptions)),
+                             createPageableRequest(queryOptions),
+                             queryOptions.hasCountFilter() && queryOptions.getCountFilter().getValue(),
+                             createFetchGraph(queryOptions.getExpandFilter()));
             pages.forEach(this::fetchValueIfCompositeDataEntity);
             if (queryOptions.hasExpandFilter()) {
                 return pages.map(e -> {
@@ -190,7 +190,7 @@ public class ObservationService
                                                      String ownId,
                                                      QueryOptions queryOptions) throws STACRUDException {
         DataEntity<?> entity =
-            super.getEntityByRelatedEntityRaw(relatedId, relatedType, ownId, queryOptions);
+                super.getEntityByRelatedEntityRaw(relatedId, relatedType, ownId, queryOptions);
         fetchValueIfCompositeDataEntity(entity);
         return entity;
     }
@@ -198,34 +198,34 @@ public class ObservationService
     @Override
     protected EntityGraphRepository.FetchGraph[] createFetchGraph(ExpandFilter expandOption) {
         return new EntityGraphRepository.FetchGraph[] {
-            EntityGraphRepository.FetchGraph.FETCHGRAPH_PARAMETERS
+                EntityGraphRepository.FetchGraph.FETCHGRAPH_PARAMETERS
         };
     }
 
     @Override
     protected DataEntity<?> fetchExpandEntitiesWithFilter(DataEntity<?> returned,
                                                           ExpandFilter expandOption)
-        throws STACRUDException, STAInvalidQueryException {
+            throws STACRUDException, STAInvalidQueryException {
         for (ExpandItem expandItem : expandOption.getItems()) {
             String expandProperty = expandItem.getPath();
             switch (expandProperty) {
-                case STAEntityDefinition.DATASTREAM:
-                    DatasetEntity datastream = (DatasetEntity) getDatastreamService()
+            case STAEntityDefinition.DATASTREAM:
+                DatasetEntity datastream = (DatasetEntity) getDatastreamService()
                         .getEntityByRelatedEntityRaw(returned.getStaIdentifier(),
                                                      STAEntityDefinition.OBSERVATIONS,
                                                      null,
                                                      expandItem.getQueryOptions());
-                    returned.setDataset(datastream);
-                    break;
-                case STAEntityDefinition.FEATURE_OF_INTEREST:
-                    AbstractFeatureEntity<?> foi = getFeatureOfInterestService()
-                            .getEntityByDatasetIdRaw(returned.getDataset().getId(), expandItem.getQueryOptions());
-                    returned.setFeature(foi);
-                    break;
-                default:
-                    throw new STAInvalidQueryException(String.format(INVALID_EXPAND_OPTION_SUPPLIED,
-                                                                     expandProperty,
-                                                                     StaConstants.OBSERVATIONS));
+                returned.setDataset(datastream);
+                break;
+            case STAEntityDefinition.FEATURE_OF_INTEREST:
+                AbstractFeatureEntity<?> foi = getFeatureOfInterestService()
+                        .getEntityByDatasetIdRaw(returned.getDataset().getId(), expandItem.getQueryOptions());
+                returned.setFeature(foi);
+                break;
+            default:
+                throw new STAInvalidQueryException(String.format(INVALID_EXPAND_OPTION_SUPPLIED,
+                                                                 expandProperty,
+                                                                 StaConstants.OBSERVATIONS));
             }
         }
         return returned;
@@ -237,16 +237,16 @@ public class ObservationService
                                                               String ownId) {
         Specification<DataEntity<?>> filter;
         switch (relatedType) {
-            case STAEntityDefinition.DATASTREAMS: {
-                filter = ObservationQuerySpecifications.withDatastreamStaIdentifier(relatedId);
-                break;
-            }
-            case STAEntityDefinition.FEATURES_OF_INTEREST: {
-                filter = ObservationQuerySpecifications.withFeatureOfInterestStaIdentifier(relatedId);
-                break;
-            }
-            default:
-                throw new IllegalStateException(String.format(TRYING_TO_FILTER_BY_UNRELATED_TYPE, relatedType));
+        case STAEntityDefinition.DATASTREAMS: {
+            filter = ObservationQuerySpecifications.withDatastreamStaIdentifier(relatedId);
+            break;
+        }
+        case STAEntityDefinition.FEATURES_OF_INTEREST: {
+            filter = ObservationQuerySpecifications.withFeatureOfInterestStaIdentifier(relatedId);
+            break;
+        }
+        default:
+            throw new IllegalStateException(String.format(TRYING_TO_FILTER_BY_UNRELATED_TYPE, relatedType));
         }
         if (ownId != null) {
             filter = filter.and(oQS.withStaIdentifier(ownId));
@@ -264,9 +264,9 @@ public class ObservationService
 
                 // Fetch dataset and check if FOI matches to reuse existing dataset
                 AbstractDatasetEntity datastream = datastreamRepository
-                    .findByStaIdentifier(entity.getDataset().getStaIdentifier(),
-                                         EntityGraphRepository.FetchGraph.FETCHGRAPH_FEATURE)
-                    .orElseThrow(() -> new STACRUDException("Unable to find Datastream!"));
+                        .findByStaIdentifier(entity.getDataset().getStaIdentifier(),
+                                             EntityGraphRepository.FetchGraph.FETCHGRAPH_FEATURE)
+                        .orElseThrow(() -> new STACRUDException("Unable to find Datastream!"));
                 AbstractFeatureEntity<?> feature = createOrfetchFeature(observation, datastream.getPlatform().getId());
 
                 // Check all subdatasets for a matching  dataset
@@ -276,9 +276,9 @@ public class ObservationService
                     datasets = Collections.singleton((DatasetEntity) datastream);
                 } else {
                     datasets = datastreamRepository.findAllByAggregationId(datastream.getId())
-                        .stream()
-                        .map(d -> (DatasetEntity) d)
-                        .collect(Collectors.toSet());
+                                                   .stream()
+                                                   .map(d -> (DatasetEntity) d)
+                                                   .collect(Collectors.toSet());
                 }
 
                 // Check all datasets for a matching FOI
@@ -309,22 +309,6 @@ public class ObservationService
                 // Save Observation
                 DataEntity<?> data = saveObservation(observation, observation.getDataset());
 
-                // Save parameters
-                if (observation.getParameters() != null) {
-                    parameterRepository.saveAll(
-                        observation
-                            .getParameters()
-                            .stream()
-                            .filter(o -> o instanceof ObservationParameterEntity)
-                            .map(o -> {
-                                ((ObservationParameterEntity<?>) o).setObservation(data);
-                                return (ObservationParameterEntity) o;
-                            })
-                            .collect(Collectors.toSet())
-                    );
-                    data.setParameters(observation.getParameters());
-                }
-
                 // Update FirstValue/LastValue + FirstObservation/LastObservation of Dataset + Aggregation
                 updateDataset(observation.getDataset(), data);
                 return data;
@@ -335,21 +319,21 @@ public class ObservationService
 
     @Override
     public DataEntity<?> updateEntity(String id, DataEntity<?> entity, HttpMethod method)
-        throws STACRUDException {
+            throws STACRUDException {
         if (HttpMethod.PATCH.equals(method)) {
             synchronized (getLock(id)) {
                 Optional<DataEntity<?>> existing =
-                    getRepository()
-                        .findByStaIdentifier(id,
-                                             EntityGraphRepository
-                                                 .FetchGraph
-                                                 .FETCHGRAPH_PARAMETERS);
+                        getRepository()
+                                .findByStaIdentifier(id,
+                                                     EntityGraphRepository
+                                                             .FetchGraph
+                                                             .FETCHGRAPH_PARAMETERS);
                 if (existing.isPresent()) {
                     DataEntity<?> merged = merge(existing.get(), entity);
                     DataEntity<?> saved = getRepository().save(merged);
 
                     AbstractDatasetEntity datastreamEntity =
-                        datastreamRepository.findById(saved.getDataset().getId()).get();
+                            datastreamRepository.findById(saved.getDataset().getId()).get();
 
                     updateDatastreamPhenomenonTimeOnObservationUpdate(datastreamEntity, saved);
                     Hibernate.initialize(saved.getParameters());
@@ -386,10 +370,10 @@ public class ObservationService
                 Expr filter = (Expr) filterOption.getFilter();
                 try {
                     HibernateSpatialCriteriaBuilderImpl staBuilder =
-                        new HibernateSpatialCriteriaBuilderImpl((CriteriaBuilderImpl) builder);
+                            new HibernateSpatialCriteriaBuilderImpl((CriteriaBuilderImpl) builder);
                     return builder.and(defaultFilter,
                                        (Predicate) filter.accept(
-                                           new FilterExprVisitor<DataEntity<?>>(root, query, staBuilder)));
+                                               new FilterExprVisitor<DataEntity<?>>(root, query, staBuilder)));
                 } catch (STAInvalidQueryException e) {
                     throw new RuntimeException(e);
                 }
@@ -404,7 +388,7 @@ public class ObservationService
 
     @Override
     public DataEntity<?> merge(DataEntity<?> existing, DataEntity<?> toMerge)
-        throws STACRUDException {
+            throws STACRUDException {
         // phenomenonTime
         mergeSamplingTimeAndCheckResultTime(existing, toMerge);
         // resultTime
@@ -419,20 +403,12 @@ public class ObservationService
         // parameter
         if (toMerge.getParameters() != null) {
             synchronized (getLock(String.valueOf(
-                toMerge.getParameters().hashCode() + existing.getParameters().hashCode()))) {
-                parameterRepository.saveAll(toMerge.getParameters()
-                                                .stream()
-                                                .filter(o -> o instanceof ObservationParameterEntity)
-                                                .map(o -> {
-                                                    ((ObservationParameterEntity<?>) o).setObservation(existing);
-                                                    return (ObservationParameterEntity) o;
-                                                })
-                                                .collect(Collectors.toSet()));
+                    toMerge.getParameters().hashCode() + existing.getParameters().hashCode()))) {
                 existing.getParameters()
-                    .stream()
-                    .filter(o -> o instanceof ObservationParameterEntity)
-                    .map(o -> (ObservationParameterEntity) o)
-                    .forEach(parameterRepository::delete);
+                        .stream()
+                        .filter(o -> o instanceof ObservationParameterEntity)
+                        .map(o -> (ObservationParameterEntity) o)
+                        .forEach(parameterRepository::delete);
                 existing.setParameters(toMerge.getParameters());
             }
         }
@@ -457,54 +433,54 @@ public class ObservationService
         DataEntity<?> unproxy = (DataEntity<?>) Hibernate.unproxy(entity);
         if (unproxy instanceof CompositeDataEntity) {
             ((Set<DataEntity<?>>) unproxy.getValue())
-                .forEach(v -> Hibernate.initialize(v.getParameters())
-            );
+                    .forEach(v -> Hibernate.initialize(v.getParameters())
+                    );
         }
         return unproxy;
     }
 
     protected DataEntity castToConcreteObservationType(DataEntity<?> observation,
                                                        DatasetEntity dataset)
-        throws STACRUDException {
+            throws STACRUDException {
         DataEntity data = null;
         String value = observation.getValueText();
         switch (dataset.getOMObservationType().getFormat()) {
-            case OmConstants.OBS_TYPE_MEASUREMENT:
-                QuantityDataEntity quantityObservationEntity = new QuantityDataEntity();
-                if (value.equals("NaN") || value.equals("Inf") || value.equals("-Inf")) {
-                    quantityObservationEntity.setValue(null);
-                } else {
-                    quantityObservationEntity.setValue(BigDecimal.valueOf(Double.parseDouble(value)));
-                }
-                data = quantityObservationEntity;
-                break;
-            case OmConstants.OBS_TYPE_CATEGORY_OBSERVATION:
-                CategoryDataEntity categoryObservationEntity = new CategoryDataEntity();
-                categoryObservationEntity.setValue(value);
-                data = categoryObservationEntity;
-                break;
-            case OmConstants.OBS_TYPE_COUNT_OBSERVATION:
-                CountDataEntity countObservationEntity = new CountDataEntity();
-                countObservationEntity.setValue(Integer.parseInt(value));
-                data = countObservationEntity;
-                break;
-            case OmConstants.OBS_TYPE_TEXT_OBSERVATION:
-                TextDataEntity textObservationEntity = new TextDataEntity();
-                textObservationEntity.setValue(value);
-                data = textObservationEntity;
-                break;
-            case OmConstants.OBS_TYPE_TRUTH_OBSERVATION:
-                BooleanDataEntity booleanObservationEntity = new BooleanDataEntity();
-                booleanObservationEntity.setValue(Boolean.parseBoolean(value));
-                data = booleanObservationEntity;
-                break;
-            //            case OBS_TYPE_SENSORML_OBSERVATION:
-            //                SensorML20DataEntity sensorML20DataEntity = new SensorML20DataEntity();
-            //                sensorML20DataEntity.setValue(value);
-            //                data = sensorML20DataEntity;
-            //                break;
-            default:
-                throw new STACRUDException(
+        case OmConstants.OBS_TYPE_MEASUREMENT:
+            QuantityDataEntity quantityObservationEntity = new QuantityDataEntity();
+            if (value.equals("NaN") || value.equals("Inf") || value.equals("-Inf")) {
+                quantityObservationEntity.setValue(null);
+            } else {
+                quantityObservationEntity.setValue(BigDecimal.valueOf(Double.parseDouble(value)));
+            }
+            data = quantityObservationEntity;
+            break;
+        case OmConstants.OBS_TYPE_CATEGORY_OBSERVATION:
+            CategoryDataEntity categoryObservationEntity = new CategoryDataEntity();
+            categoryObservationEntity.setValue(value);
+            data = categoryObservationEntity;
+            break;
+        case OmConstants.OBS_TYPE_COUNT_OBSERVATION:
+            CountDataEntity countObservationEntity = new CountDataEntity();
+            countObservationEntity.setValue(Integer.parseInt(value));
+            data = countObservationEntity;
+            break;
+        case OmConstants.OBS_TYPE_TEXT_OBSERVATION:
+            TextDataEntity textObservationEntity = new TextDataEntity();
+            textObservationEntity.setValue(value);
+            data = textObservationEntity;
+            break;
+        case OmConstants.OBS_TYPE_TRUTH_OBSERVATION:
+            BooleanDataEntity booleanObservationEntity = new BooleanDataEntity();
+            booleanObservationEntity.setValue(Boolean.parseBoolean(value));
+            data = booleanObservationEntity;
+            break;
+        case OBS_TYPE_SENSORML_OBSERVATION:
+            org.n52.series.db.beans.SensorML20DataEntity sensorML20DataEntity = new org.n52.series.db.beans.SensorML20DataEntity();
+            sensorML20DataEntity.setValue(value);
+            data = sensorML20DataEntity;
+            break;
+        default:
+            throw new STACRUDException(
                     "Unable to handle OMObservation with type: " + dataset.getOMObservationType().getFormat());
         }
         return fillConcreteObservationType(data, observation, dataset);
@@ -527,13 +503,13 @@ public class ObservationService
     protected void updateDatastreamPhenomenonTimeOnObservationUpdate(AbstractDatasetEntity datastreamEntity,
                                                                      DataEntity<?> observation) {
         if (datastreamEntity.getPhenomenonTimeStart() == null ||
-            datastreamEntity.getPhenomenonTimeEnd() == null ||
-            observation.getPhenomenonTimeStart().compareTo(datastreamEntity.getPhenomenonTimeStart()) != 1 ||
-            observation.getPhenomenonTimeEnd().compareTo(datastreamEntity.getPhenomenonTimeEnd()) != -1
+                datastreamEntity.getPhenomenonTimeEnd() == null ||
+                observation.getPhenomenonTimeStart().compareTo(datastreamEntity.getPhenomenonTimeStart()) != 1 ||
+                observation.getPhenomenonTimeEnd().compareTo(datastreamEntity.getPhenomenonTimeEnd()) != -1
         ) {
             // Setting new phenomenonTimeStart
             DataEntity<?> firstObservation = getRepository()
-                .findFirstByDataset_idOrderBySamplingTimeStartAsc(datastreamEntity.getId());
+                    .findFirstByDataset_idOrderBySamplingTimeStartAsc(datastreamEntity.getId());
             Date newPhenomenonStart = (firstObservation == null) ? null : firstObservation.getPhenomenonTimeStart();
 
             // Set Start and End to null if there is no observation.
@@ -545,7 +521,7 @@ public class ObservationService
 
                 // Setting new phenomenonTimeEnd
                 DataEntity<?> lastObservation = getRepository()
-                    .findFirstByDataset_idOrderBySamplingTimeEndDesc(datastreamEntity.getId());
+                        .findFirstByDataset_idOrderBySamplingTimeEndDesc(datastreamEntity.getId());
                 Date newPhenomenonEnd = (lastObservation == null) ? null : lastObservation.getPhenomenonTimeEnd();
                 if (newPhenomenonEnd != null) {
                     datastreamEntity.setPhenomenonTimeEnd(newPhenomenonEnd);
@@ -558,9 +534,9 @@ public class ObservationService
             // update parent if its part of the aggregation
             if (datastreamEntity.isSetAggregation()) {
                 updateDatastreamPhenomenonTimeOnObservationUpdate(
-                    datastreamRepository.findById(datastreamEntity.getAggregation()
-                                                      .getId()).get(),
-                    observation);
+                        datastreamRepository.findById(datastreamEntity.getAggregation()
+                                                                      .getId()).get(),
+                        observation);
             }
         }
     }
@@ -570,15 +546,15 @@ public class ObservationService
         synchronized (getLock(identifier)) {
             if (getRepository().existsByStaIdentifier(identifier)) {
                 DataEntity<?> observation =
-                    getRepository().findByStaIdentifier(
-                            identifier,
-                            EntityGraphRepository.FetchGraph.FETCHGRAPH_DATASET_FIRSTLAST_OBSERVATION)
-                        .get();
+                        getRepository().findByStaIdentifier(
+                                               identifier,
+                                               EntityGraphRepository.FetchGraph.FETCHGRAPH_DATASET_FIRSTLAST_OBSERVATION)
+                                       .get();
                 deleteReferenceFromDatasetFirstLast(observation);
 
                 if (observation.hasParameters()) {
                     observation.getParameters()
-                        .forEach(entity -> parameterRepository.delete((ObservationParameterEntity) entity));
+                               .forEach(entity -> parameterRepository.delete((ObservationParameterEntity) entity));
                 }
                 // Important! Delete first and then update else we find
                 // ourselves again in search for new latest/earliest obs.
@@ -594,14 +570,14 @@ public class ObservationService
         // TODO get the next first/last observation and set it
         DatasetEntity dataset = observation.getDataset();
         if (dataset.getFirstObservation() != null
-            && dataset.getFirstObservation().getStaIdentifier().equals(observation.getStaIdentifier())) {
+                && dataset.getFirstObservation().getStaIdentifier().equals(observation.getStaIdentifier())) {
             dataset.setFirstObservation(null);
             dataset.setFirstQuantityValue(null);
             dataset.setFirstValueAt(null);
         }
         if (dataset.getLastObservation() != null && dataset.getLastObservation()
-            .getStaIdentifier()
-            .equals(observation.getStaIdentifier())) {
+                                                           .getStaIdentifier()
+                                                           .equals(observation.getStaIdentifier())) {
             dataset.setLastObservation(null);
             dataset.setLastQuantityValue(null);
             dataset.setLastValueAt(null);
@@ -611,7 +587,7 @@ public class ObservationService
 
     private AbstractFeatureEntity<?> createOrfetchFeature(DataEntity observation,
                                                           Long thingId)
-        throws STACRUDException {
+            throws STACRUDException {
         // Create feature based on Thing.location if there is no feature given
         if (!observation.hasFeature()) {
             AbstractFeatureEntity<?> feature = null;
@@ -628,7 +604,7 @@ public class ObservationService
             }
             if (feature == null) {
                 throw new STACRUDException("The observation to create is invalid." +
-                                               " Missing feature or thing.location!", HTTPStatus.BAD_REQUEST);
+                                                   " Missing feature or thing.location!", HTTPStatus.BAD_REQUEST);
             }
             observation.setFeature(feature);
         }
@@ -639,7 +615,7 @@ public class ObservationService
     }
 
     private DataEntity<?> saveObservation(DataEntity<?> observation, DatasetEntity dataset)
-        throws STACRUDException {
+            throws STACRUDException {
         DataEntity<?> data = castToConcreteObservationType(observation, dataset);
         return getRepository().save(data);
     }
@@ -653,14 +629,14 @@ public class ObservationService
      * @throws STACRUDException if an error occurred
      */
     private AbstractDatasetEntity updateDataset(AbstractDatasetEntity dataset, DataEntity<?> data)
-        throws STACRUDException {
+            throws STACRUDException {
         Optional<DataEntity<?>> rawObservation = getRepository().findById(data.getId());
         if (rawObservation.isPresent()) {
             synchronized (getLock(dataset.getId().toString() + "Dataset")) {
                 LOGGER.debug("Updating First/Last/Geometry of of Dataset: {}", dataset.getId());
                 if (!dataset.isSetFirstValueAt()
-                    || dataset.isSetFirstValueAt()
-                    && data.getSamplingTimeStart().before(dataset.getFirstValueAt())) {
+                        || dataset.isSetFirstValueAt()
+                        && data.getSamplingTimeStart().before(dataset.getFirstValueAt())) {
                     dataset.setFirstValueAt(data.getSamplingTimeStart());
                     dataset.setFirstObservation(rawObservation.get());
                     if (data instanceof QuantityDataEntity) {
@@ -668,8 +644,8 @@ public class ObservationService
                     }
                 }
                 if (!dataset.isSetLastValueAt()
-                    || dataset.isSetLastValueAt()
-                    && data.getSamplingTimeEnd().after(dataset.getLastValueAt())) {
+                        || dataset.isSetLastValueAt()
+                        && data.getSamplingTimeEnd().after(dataset.getLastValueAt())) {
                     dataset.setLastValueAt(data.getSamplingTimeEnd());
                     dataset.setLastObservation(rawObservation.get());
                     if (data instanceof QuantityDataEntity) {
@@ -700,7 +676,7 @@ public class ObservationService
             }
         } else {
             throw new STACRUDException("Could not update Dataset->firstObservation or Dataset->firstObservation. " +
-                                           "Unable to find Observation with Id:" + data.getId());
+                                               "Unable to find Observation with Id:" + data.getId());
         }
     }
 
@@ -714,7 +690,7 @@ public class ObservationService
     private void checkValue(DataEntity<?> existing, DataEntity<?> toMerge) throws STACRUDException {
         if (existing instanceof QuantityDataEntity) {
             ((QuantityDataEntity) existing)
-                .setValue(BigDecimal.valueOf(Double.parseDouble(toMerge.getValueText())));
+                    .setValue(BigDecimal.valueOf(Double.parseDouble(toMerge.getValueText())));
         } else if (existing instanceof CountDataEntity) {
             ((CountDataEntity) existing).setValue(Integer.parseInt(toMerge.getValueText()));
         } else if (existing instanceof BooleanDataEntity) {
@@ -725,9 +701,9 @@ public class ObservationService
             ((CategoryDataEntity) existing).setValue(toMerge.getValueText());
         } else {
             throw new STACRUDException(
-                String.format("The observation value for @iot.id %s can not be updated!",
-                              existing.getStaIdentifier()),
-                HTTPStatus.CONFLICT);
+                    String.format("The observation value for @iot.id %s can not be updated!",
+                                  existing.getStaIdentifier()),
+                    HTTPStatus.CONFLICT);
         }
     }
 
@@ -761,10 +737,10 @@ public class ObservationService
     private String generateIdentifier(DataEntity<?> observation) {
         StringBuffer buffer = new StringBuffer();
         buffer.append(observation.getDataset().getIdentifier())
-                .append(new DateTime(observation.getSamplingTimeStart())).append("/")
-                .append(new DateTime(observation.getSamplingTimeEnd())).append(observation.getValue())
-                .append(new DateTime(observation.getResultTime())).append(observation.getVerticalFrom())
-                .append(observation.getVerticalTo());
+              .append(new DateTime(observation.getSamplingTimeStart())).append("/")
+              .append(new DateTime(observation.getSamplingTimeEnd())).append(observation.getValue())
+              .append(new DateTime(observation.getResultTime())).append(observation.getVerticalFrom())
+              .append(observation.getVerticalTo());
         return IdGenerator.generate(buffer.toString());
     }
 }

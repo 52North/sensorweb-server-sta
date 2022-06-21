@@ -305,16 +305,6 @@ public class DatastreamService extends
                 datastream.setThing(getThingService().createOrfetch(datastream.getThing()));
 
                 DatasetEntity dataset = createandSaveDataset(datastream, null, datastream.getStaIdentifier());
-                if (datastream.getParameters() != null) {
-                    parameterRepository.saveAll(datastream.getParameters()
-                                                    .stream()
-                                                    .filter(t -> t instanceof DatasetParameterEntity)
-                                                    .map(t -> {
-                                                        ((DatasetParameterEntity) t).setDataset(dataset);
-                                                        return (DatasetParameterEntity) t;
-                                                    })
-                                                    .collect(Collectors.toSet()));
-                }
                 processObservation(dataset, entity.getObservations());
             }
             return getRepository().findByStaIdentifier(entity.getStaIdentifier(),

@@ -61,7 +61,7 @@ public class JSONObservation extends JSONBase.JSONwithIdTime<DataEntity<?>> impl
     // JSON Properties. Matched by Annotation or variable name
     public String phenomenonTime;
     public String resultTime;
-    public String result;
+    public Object result;
     public Object resultQuality;
     public String validTime;
     public ObjectNode parameters;
@@ -129,7 +129,7 @@ public class JSONObservation extends JSONBase.JSONwithIdTime<DataEntity<?>> impl
         self.setStaIdentifier(identifier);
 
         // parameters
-        self.setParameters(convertParameters(parameters, ParameterFactory.EntityType.OBSERVATION));
+        self.setParameters(convertParameters(parameters, self));
 
         // phenomenonTime
         if (phenomenonTime != null) {
@@ -161,7 +161,7 @@ public class JSONObservation extends JSONBase.JSONwithIdTime<DataEntity<?>> impl
             }
         }
 
-        self.setValueText(result);
+        self.setValueText(result.toString());
 
         // Link to Datastream
         if (Datastream != null) {
@@ -213,10 +213,10 @@ public class JSONObservation extends JSONBase.JSONwithIdTime<DataEntity<?>> impl
         }
 
         // parameters
-        self.setParameters(convertParameters(parameters, ParameterFactory.EntityType.OBSERVATION));
+        self.setParameters(convertParameters(parameters, self));
 
         // result
-        self.setValueText(result);
+        self.setValueText(result.toString());
 
         // Link to Datastream
         if (Datastream != null) {

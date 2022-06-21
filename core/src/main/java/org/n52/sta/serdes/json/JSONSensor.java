@@ -81,7 +81,7 @@ public class JSONSensor extends JSONBase.JSONwithIdNameDescription<ProcedureEnti
                 handleEncodingType();
 
                 if (properties != null) {
-                    self.setParameters(convertParameters(properties, ParameterFactory.EntityType.PROCEDURE));
+                    self.setParameters(convertParameters(properties, self));
                 }
 
                 if (Datastreams != null) {
@@ -111,7 +111,7 @@ public class JSONSensor extends JSONBase.JSONwithIdNameDescription<ProcedureEnti
                 }
 
                 if (properties != null) {
-                    self.setParameters(convertParameters(properties, ParameterFactory.EntityType.PROCEDURE));
+                    self.setParameters(convertParameters(properties, self));
                 }
 
                 if (Datastreams != null) {

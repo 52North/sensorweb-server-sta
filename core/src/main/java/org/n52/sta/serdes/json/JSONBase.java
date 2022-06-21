@@ -34,6 +34,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.JsonNode;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.joda.time.DateTime;
+import org.n52.series.db.beans.DescribableEntity;
 import org.n52.series.db.beans.parameter.ParameterEntity;
 import org.n52.series.db.beans.parameter.ParameterFactory;
 import org.n52.shetland.ogc.gml.time.Time;
@@ -154,8 +155,7 @@ public class JSONBase {
         }
 
         @SuppressWarnings("unchecked")
-        protected HashSet<ParameterEntity<?>> convertParameters(JsonNode parameters,
-                                                                ParameterFactory.EntityType entityType) {
+        protected <E> HashSet<ParameterEntity<?>> convertParameters(JsonNode parameters, DescribableEntity entity) {
             // parameters
             if (parameters != null) {
                 HashSet<ParameterEntity<?>> parameterEntities = new HashSet<>();
@@ -176,21 +176,21 @@ public class JSONBase {
                         case OBJECT:
                             // fallthru
                         case POJO:
-                            parameterEntity = ParameterFactory.from(entityType, ParameterFactory.ValueType.JSON);
+                            parameterEntity = ParameterFactory.from(entity, ParameterFactory.ValueType.JSON);
                             parameterEntity.setValue(value.toString());
                             break;
                         case BINARY:
                             // fallthru
                         case BOOLEAN:
-                            parameterEntity = ParameterFactory.from(entityType, ParameterFactory.ValueType.BOOLEAN);
+                            parameterEntity = ParameterFactory.from(entity, ParameterFactory.ValueType.BOOLEAN);
                             parameterEntity.setValue(value.asBoolean());
                             break;
                         case NUMBER:
-                            parameterEntity = ParameterFactory.from(entityType, ParameterFactory.ValueType.QUANTITY);
+                            parameterEntity = ParameterFactory.from(entity, ParameterFactory.ValueType.QUANTITY);
                             parameterEntity.setValue(BigDecimal.valueOf(value.asDouble()));
                             break;
                         case STRING:
-                            parameterEntity = ParameterFactory.from(entityType, ParameterFactory.ValueType.TEXT);
+                            parameterEntity = ParameterFactory.from(entity, ParameterFactory.ValueType.TEXT);
                             parameterEntity.setValue(value.asText());
                             break;
                         default:
