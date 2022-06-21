@@ -68,7 +68,7 @@ public class OfferingService {
                 offering.setStaIdentifier(procedure.getStaIdentifier());
                 offering.setName(procedure.getName());
                 offering.setDescription(procedure.getDescription());
-                return offeringRepository.save(offering);
+                return offeringRepository.saveAndFlush(offering);
             } else {
                 return offeringRepository.findByIdentifier(procedure.getIdentifier()).get();
             }
