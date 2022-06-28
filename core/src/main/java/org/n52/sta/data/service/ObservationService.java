@@ -53,6 +53,7 @@ import org.n52.series.db.beans.DataEntity;
 import org.n52.series.db.beans.DatasetAggregationEntity;
 import org.n52.series.db.beans.DatasetEntity;
 import org.n52.series.db.beans.QuantityDataEntity;
+import org.n52.series.db.beans.SensorML20DataEntity;
 import org.n52.series.db.beans.TextDataEntity;
 import org.n52.series.db.beans.parameter.observation.ObservationParameterEntity;
 import org.n52.series.db.beans.sta.LocationEntity;
@@ -475,7 +476,7 @@ public class ObservationService
             data = booleanObservationEntity;
             break;
         case OBS_TYPE_SENSORML_OBSERVATION:
-            org.n52.series.db.beans.SensorML20DataEntity sensorML20DataEntity = new org.n52.series.db.beans.SensorML20DataEntity();
+            SensorML20DataEntity sensorML20DataEntity = new SensorML20DataEntity();
             sensorML20DataEntity.setValue(value);
             data = sensorML20DataEntity;
             break;

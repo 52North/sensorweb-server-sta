@@ -29,6 +29,11 @@
 
 package org.n52.sta.serdes.json;
 
+import java.math.BigDecimal;
+import java.util.Date;
+import java.util.Iterator;
+import java.util.Map;
+
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -41,18 +46,12 @@ import org.locationtech.jts.io.geojson.GeoJsonReader;
 import org.n52.series.db.beans.DataEntity;
 import org.n52.series.db.beans.GeometryEntity;
 import org.n52.series.db.beans.TextDataEntity;
-import org.n52.series.db.beans.parameter.ParameterFactory;
 import org.n52.shetland.ogc.gml.time.Time;
 import org.n52.shetland.ogc.gml.time.TimeInstant;
 import org.n52.shetland.ogc.gml.time.TimePeriod;
 import org.n52.shetland.ogc.sta.StaConstants;
 import org.n52.sta.utils.IdGenerator;
 import org.springframework.util.Assert;
-
-import java.math.BigDecimal;
-import java.util.Date;
-import java.util.Iterator;
-import java.util.Map;
 
 @SuppressWarnings("VisibilityModifier")
 @SuppressFBWarnings({"NM_FIELD_NAMING_CONVENTION", "UWF_UNWRITTEN_PUBLIC_OR_PROTECTED_FIELD"})
@@ -61,7 +60,7 @@ public class JSONObservation extends JSONBase.JSONwithIdTime<DataEntity<?>> impl
     // JSON Properties. Matched by Annotation or variable name
     public String phenomenonTime;
     public String resultTime;
-    public Object result;
+    public JsonNode result;
     public Object resultQuality;
     public String validTime;
     public ObjectNode parameters;
