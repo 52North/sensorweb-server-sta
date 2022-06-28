@@ -552,10 +552,6 @@ public class ObservationService
                                        .get();
                 deleteReferenceFromDatasetFirstLast(observation);
 
-                if (observation.hasParameters()) {
-                    observation.getParameters()
-                               .forEach(entity -> parameterRepository.delete((ObservationParameterEntity) entity));
-                }
                 // Important! Delete first and then update else we find
                 // ourselves again in search for new latest/earliest obs.
                 getRepository().deleteByStaIdentifier(observation.getStaIdentifier());

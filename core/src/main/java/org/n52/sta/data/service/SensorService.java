@@ -29,13 +29,18 @@
 
 package org.n52.sta.data.service;
 
+import java.util.Optional;
+import java.util.UUID;
+import java.util.stream.Collectors;
+
+import javax.persistence.EntityManager;
+
 import org.hibernate.Hibernate;
 import org.n52.janmayen.http.HTTPStatus;
 import org.n52.series.db.beans.AbstractDatasetEntity;
 import org.n52.series.db.beans.FormatEntity;
 import org.n52.series.db.beans.ProcedureEntity;
 import org.n52.series.db.beans.ProcedureHistoryEntity;
-import org.n52.series.db.beans.parameter.procedure.ProcedureParameterEntity;
 import org.n52.shetland.filter.ExpandFilter;
 import org.n52.shetland.filter.ExpandItem;
 import org.n52.shetland.ogc.sta.StaConstants;
@@ -60,11 +65,6 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
-
-import javax.persistence.EntityManager;
-import java.util.Optional;
-import java.util.UUID;
-import java.util.stream.Collectors;
 
 /**
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
@@ -305,11 +305,6 @@ public class SensorService
                     getDatastreamService().delete(ds.getStaIdentifier());
                 }
 
-                ProcedureEntity sensor = getRepository().findByStaIdentifier(identifier).get();
-                if (sensor.hasParameters()) {
-                    sensor.getParameters()
-                        .forEach(entity -> parameterRepository.delete((ProcedureParameterEntity) entity));
-                }
                 getRepository().deleteByStaIdentifier(identifier);
             } else {
                 throw new STACRUDException(UNABLE_TO_DELETE_ENTITY_NOT_FOUND, HTTPStatus.NOT_FOUND);

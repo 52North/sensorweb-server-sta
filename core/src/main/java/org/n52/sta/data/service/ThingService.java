@@ -304,7 +304,6 @@ public class ThingService
             if (getRepository().existsByStaIdentifier(identifier)) {
                 PlatformEntity thing =
                     getRepository().findByStaIdentifier(identifier,
-                                                        EntityGraphRepository.FetchGraph.FETCHGRAPH_PARAMETERS,
                                                         EntityGraphRepository.FetchGraph.FETCHGRAPH_DATASETS,
                                                         EntityGraphRepository.FetchGraph.FETCHGRAPH_HIST_LOCATIONS)
                         .get();
@@ -316,11 +315,8 @@ public class ThingService
                 for (HistoricalLocationEntity hloc : thing.getHistoricalLocations()) {
                     getHistoricalLocationService().delete(hloc.getStaIdentifier());
                 }
-                if (thing.hasParameters()) {
-                    thing.getParameters()
-                        .forEach(entity -> parameterRepository.delete((PlatformParameterEntity) entity));
-                }
-                getRepository().deleteByStaIdentifier(identifier);
+
+                getRepository().delete(thing);
             } else {
                 throw new STACRUDException(UNABLE_TO_DELETE_ENTITY_NOT_FOUND, HTTPStatus.NOT_FOUND);
             }

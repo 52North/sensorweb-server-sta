@@ -29,6 +29,18 @@
 
 package org.n52.sta.data.service;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
+import java.util.UUID;
+
+import javax.persistence.EntityManager;
+
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.hibernate.Hibernate;
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.Geometry;
@@ -41,7 +53,6 @@ import org.n52.series.db.beans.AbstractDatasetEntity;
 import org.n52.series.db.beans.AbstractFeatureEntity;
 import org.n52.series.db.beans.DataEntity;
 import org.n52.series.db.beans.FormatEntity;
-import org.n52.series.db.beans.parameter.feature.FeatureParameterEntity;
 import org.n52.series.db.beans.sta.StaFeatureEntity;
 import org.n52.shetland.filter.ExpandFilter;
 import org.n52.shetland.filter.ExpandItem;
@@ -68,19 +79,6 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
-
-import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
-
-import javax.persistence.EntityManager;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
-import java.util.UUID;
-import java.util.stream.Collectors;
 
 /**
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
@@ -314,12 +312,6 @@ public class FeatureOfInterestService
             if (getRepository().existsByStaIdentifier(id)) {
                 // check observations
                 deleteRelatedObservationsAndUpdateDatasets(id);
-                AbstractFeatureEntity<?> foi = getRepository().findByStaIdentifier(id).get();
-
-                if (foi.hasParameters()) {
-                    foi.getParameters()
-                        .forEach(entity -> parameterRepository.delete((FeatureParameterEntity) entity));
-                }
                 getRepository().deleteByStaIdentifier(id);
             } else {
                 throw new STACRUDException(UNABLE_TO_DELETE_ENTITY_NOT_FOUND, HTTPStatus.NOT_FOUND);

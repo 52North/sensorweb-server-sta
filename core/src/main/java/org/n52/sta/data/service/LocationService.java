@@ -29,13 +29,21 @@
 
 package org.n52.sta.data.service;
 
+import java.util.HashSet;
+import java.util.LinkedHashSet;
+import java.util.Optional;
+import java.util.Set;
+import java.util.UUID;
+import java.util.stream.Collectors;
+
+import javax.persistence.EntityManager;
+
 import org.hibernate.Hibernate;
 import org.n52.janmayen.http.HTTPStatus;
 import org.n52.series.db.beans.FormatEntity;
 import org.n52.series.db.beans.PlatformEntity;
 import org.n52.series.db.beans.parameter.ParameterEntity;
 import org.n52.series.db.beans.parameter.TextParameterEntity;
-import org.n52.series.db.beans.parameter.location.LocationParameterEntity;
 import org.n52.series.db.beans.sta.HistoricalLocationEntity;
 import org.n52.series.db.beans.sta.LocationEntity;
 import org.n52.shetland.filter.ExpandFilter;
@@ -61,14 +69,6 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
-
-import javax.persistence.EntityManager;
-import java.util.HashSet;
-import java.util.LinkedHashSet;
-import java.util.Optional;
-import java.util.Set;
-import java.util.UUID;
-import java.util.stream.Collectors;
 
 /**
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
@@ -293,10 +293,6 @@ public class LocationService
                     getHistoricalLocationService().delete(historicalLocation.getStaIdentifier());
                 }
 
-                if (location.hasParameters()) {
-                    location.getParameters()
-                        .forEach(entity -> parameterRepository.delete((LocationParameterEntity) entity));
-                }
                 getRepository().deleteByStaIdentifier(id);
             } else {
                 throw new STACRUDException(UNABLE_TO_UPDATE_ENTITY_NOT_FOUND, HTTPStatus.NOT_FOUND);
