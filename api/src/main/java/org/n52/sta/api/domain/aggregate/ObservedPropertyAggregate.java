@@ -28,13 +28,12 @@
 
 package org.n52.sta.api.domain.aggregate;
 
-import org.n52.sta.api.EntityEditor;
-import org.n52.sta.api.domain.service.DomainService;
-import org.n52.sta.api.entity.Datastream;
-import org.n52.sta.api.entity.ObservedProperty;
-
 import java.util.Map;
 import java.util.Set;
+
+import org.n52.sta.api.EntityEditor;
+import org.n52.sta.api.entity.Datastream;
+import org.n52.sta.api.entity.ObservedProperty;
 
 public class ObservedPropertyAggregate extends EntityAggregate<ObservedProperty> implements ObservedProperty {
 

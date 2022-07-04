@@ -28,7 +28,8 @@
 
 package org.n52.sta.api.domain.service;
 
-import org.n52.sta.api.domain.service.DomainService.DomainServiceAdapter;
+import org.n52.sta.api.domain.DomainService;
+import org.n52.sta.api.domain.DomainService.DomainServiceAdapter;
 import org.n52.sta.api.entity.Location;
 
 public class LocationDomainService extends DomainServiceAdapter<Location> {

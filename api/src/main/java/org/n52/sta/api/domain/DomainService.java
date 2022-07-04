@@ -26,7 +26,7 @@
  * Public License for more details.
  */
 
-package org.n52.sta.api.domain.service;
+package org.n52.sta.api.domain;
 
 import java.util.Optional;
 

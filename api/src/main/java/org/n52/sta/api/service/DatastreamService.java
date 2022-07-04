@@ -39,8 +39,6 @@ import org.n52.sta.api.ProviderException;
 import org.n52.sta.api.domain.aggregate.AggregateException;
 import org.n52.sta.api.domain.aggregate.DatastreamAggregate;
 import org.n52.sta.api.domain.aggregate.EntityAggregate;
-import org.n52.sta.api.domain.service.DefaultDomainService;
-import org.n52.sta.api.domain.service.DomainService;
 import org.n52.sta.api.entity.Datastream;
 import org.n52.sta.api.path.Request;
 import org.n52.svalbard.odata.core.QueryOptionsFactory;

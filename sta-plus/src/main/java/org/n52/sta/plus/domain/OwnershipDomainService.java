@@ -29,7 +29,7 @@
 package org.n52.sta.plus.domain;
 
 import org.n52.sta.api.EntityProvider;
-import org.n52.sta.api.domain.service.DomainService.DomainServiceAdapter;
+import org.n52.sta.api.domain.DomainService.DomainServiceAdapter;
 import org.n52.sta.plus.data.entity.StaPlusThing;
 
 public class OwnershipDomainService extends DomainServiceAdapter<StaPlusThing> {

@@ -32,7 +32,7 @@ import java.util.Optional;
 
 import org.n52.sta.api.EntityProvider;
 import org.n52.sta.api.EntityServiceLookup;
-import org.n52.sta.api.domain.service.DomainService;
+import org.n52.sta.api.domain.DomainService;
 import org.n52.sta.api.entity.Datastream;
 import org.n52.sta.api.entity.FeatureOfInterest;
 import org.n52.sta.api.entity.HistoricalLocation;
@@ -54,7 +54,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
-public class StaConfiguration {
+public class EntityServiceConfiguration {
 
     @Bean
     public EntityServiceLookup getEntityProviderLookup() {

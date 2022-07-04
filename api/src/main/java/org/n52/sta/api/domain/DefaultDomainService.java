@@ -26,10 +26,10 @@
  * Public License for more details.
  */
 
-package org.n52.sta.api.domain.service;
+package org.n52.sta.api.domain;
 
 import org.n52.sta.api.EntityProvider;
-import org.n52.sta.api.domain.service.DomainService.DomainServiceAdapter;
+import org.n52.sta.api.domain.DomainService.DomainServiceAdapter;
 import org.n52.sta.api.entity.Identifiable;
 
 public final class DefaultDomainService<T extends Identifiable> extends DomainServiceAdapter<T> {

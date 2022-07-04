@@ -28,14 +28,13 @@
 
 package org.n52.sta.api.domain.aggregate;
 
-import org.locationtech.jts.geom.Geometry;
-import org.n52.sta.api.EntityEditor;
-import org.n52.sta.api.domain.service.DomainService;
-import org.n52.sta.api.entity.FeatureOfInterest;
-import org.n52.sta.api.entity.Observation;
-
 import java.util.Map;
 import java.util.Set;
+
+import org.locationtech.jts.geom.Geometry;
+import org.n52.sta.api.EntityEditor;
+import org.n52.sta.api.entity.FeatureOfInterest;
+import org.n52.sta.api.entity.Observation;
 
 public class FeatureOfInterestAggregate extends EntityAggregate<FeatureOfInterest> implements FeatureOfInterest {
 

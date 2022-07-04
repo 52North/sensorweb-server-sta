@@ -29,7 +29,8 @@
 package org.n52.sta.api.domain.service;
 
 import org.n52.sta.api.ProviderException;
-import org.n52.sta.api.domain.service.DomainService.DomainServiceAdapter;
+import org.n52.sta.api.domain.DomainService;
+import org.n52.sta.api.domain.DomainService.DomainServiceAdapter;
 import org.n52.sta.api.entity.Thing;
 
 public class ThingDomainService extends DomainServiceAdapter<Thing> {

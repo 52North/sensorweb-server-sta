@@ -32,7 +32,6 @@ import java.util.Set;
 
 import org.n52.shetland.ogc.gml.time.Time;
 import org.n52.sta.api.EntityEditor;
-import org.n52.sta.api.domain.service.DomainService;
 import org.n52.sta.api.entity.HistoricalLocation;
 import org.n52.sta.api.entity.Location;
 import org.n52.sta.api.entity.Thing;

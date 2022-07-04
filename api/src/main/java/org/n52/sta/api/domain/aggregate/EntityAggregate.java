@@ -33,10 +33,6 @@ import java.util.Optional;
 
 import org.n52.sta.api.EditorException;
 import org.n52.sta.api.EntityEditor;
-import org.n52.sta.api.domain.event.DomainEvent;
-import org.n52.sta.api.domain.event.EntityDeletedEvent;
-import org.n52.sta.api.domain.event.EntityUpdateEvent;
-import org.n52.sta.api.domain.service.DomainService;
 import org.n52.sta.api.entity.Identifiable;
 
 public abstract class EntityAggregate<T extends Identifiable> {
