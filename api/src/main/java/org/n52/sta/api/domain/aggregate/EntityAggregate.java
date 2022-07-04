@@ -78,6 +78,12 @@ public abstract class EntityAggregate<T extends Identifiable> {
             throw new AggregateException("Could not delete entity!", e);
         }
     }
+    
+    protected void assertRequired(Object reference, String message) throws InvalidAggregateException {
+        if (reference == null) {
+            throw new InvalidAggregateException(message);
+        }
+    }
 
     private void assertEditor() {
         if (!optionalEditor.isPresent()) {

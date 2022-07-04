@@ -47,6 +47,8 @@ public class ObservationAggregate extends EntityAggregate<Observation> implement
     public ObservationAggregate(Observation observation, EntityEditor<Observation> editor) {
         super(observation, editor);
         this.observation = observation;
+        assertRequired(observation.getDatastream(), "Datastream is mandatory!");
+        assertRequired(observation.getFeatureOfInterest(), "FeatureOfInterest is mandatory!");
     }
 
     public String getId() {

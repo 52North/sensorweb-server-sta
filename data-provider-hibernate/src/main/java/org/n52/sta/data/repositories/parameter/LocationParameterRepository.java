@@ -31,7 +31,6 @@ package org.n52.sta.data.repositories.parameter;
 import org.n52.series.db.beans.parameter.location.LocationParameterEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
-import org.springframework.transaction.annotation.Transactional;
 
 @Repository
 public interface LocationParameterRepository extends JpaRepository<LocationParameterEntity< ? >, Long> {

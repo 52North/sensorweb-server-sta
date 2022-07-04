@@ -51,6 +51,9 @@ public class DatastreamAggregate extends EntityAggregate<Datastream> implements 
     public DatastreamAggregate(Datastream datastream, EntityEditor<Datastream> editor) {
         super(datastream, editor);
         this.datastream = datastream;
+        assertRequired(datastream.getThing(), "Thing is mandatory!");
+        assertRequired(datastream.getSensor(), "Sensor is mandatory!");
+        assertRequired(datastream.getObservedProperty(), "ObservedProperty is mandatory!");
     }
 
     public String getId() {

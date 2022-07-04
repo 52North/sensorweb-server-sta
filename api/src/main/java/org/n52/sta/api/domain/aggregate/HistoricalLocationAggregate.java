@@ -47,6 +47,11 @@ public class HistoricalLocationAggregate extends EntityAggregate<HistoricalLocat
     public HistoricalLocationAggregate(HistoricalLocation historicalLocation, EntityEditor<HistoricalLocation> editor) {
         super(historicalLocation, editor);
         this.historicalLocation = historicalLocation;
+        assertRequired(historicalLocation.getThing(), "Thing is mandatory!");
+        assertRequired(historicalLocation.getLocations(), "Locations is mandatory!");
+        if (getLocations().size() == 0) {
+            throw new InvalidAggregateException("At least one Location must be present!");
+        }
     }
 
     @Override

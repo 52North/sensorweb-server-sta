@@ -31,7 +31,6 @@ package org.n52.sta.data.repositories.parameter;
 import org.n52.series.db.beans.parameter.platform.PlatformParameterEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
-import org.springframework.transaction.annotation.Transactional;
 
 @Repository
 public interface PlatformParameterRepository extends JpaRepository<PlatformParameterEntity< ? >, Long> {
