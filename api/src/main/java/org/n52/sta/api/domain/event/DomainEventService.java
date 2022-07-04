@@ -31,6 +31,8 @@ package org.n52.sta.api.domain.event;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.n52.sta.api.entity.Identifiable;
+
 public final class DomainEventService {
 
     private final List<DomainEventHandler> eventHandlers;
@@ -39,7 +41,7 @@ public final class DomainEventService {
         this.eventHandlers = new ArrayList<>();
     }
 
-    public void handleDomainEvent(DomainEvent domainEvent) {
+    public void handleDomainEvent(DomainEvent<Identifiable> domainEvent) {
         eventHandlers.forEach(handler -> handler.handle(domainEvent));
     }
 

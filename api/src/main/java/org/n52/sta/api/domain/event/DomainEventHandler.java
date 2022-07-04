@@ -28,7 +28,9 @@
 
 package org.n52.sta.api.domain.event;
 
+import org.n52.sta.api.entity.Identifiable;
+
 public interface DomainEventHandler {
 
-    void handle(DomainEvent domainEvent);
+    void handle(DomainEvent<Identifiable> domainEvent);
 }

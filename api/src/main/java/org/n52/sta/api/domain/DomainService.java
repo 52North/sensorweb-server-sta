@@ -41,7 +41,7 @@ import org.n52.sta.api.path.Request;
 
 public interface DomainService<T extends Identifiable> extends EntityProvider<T> {
 
-    void sendDomainEvent(DomainEvent<T> event);
+    void sendDomainEvent(DomainEvent<Identifiable> event);
 
     abstract class DomainServiceAdapter<T extends Identifiable> implements DomainService<T> {
 
@@ -55,7 +55,7 @@ public interface DomainService<T extends Identifiable> extends EntityProvider<T>
         }
 
         @Override
-        public void sendDomainEvent(DomainEvent<T> event) {
+        public void sendDomainEvent(DomainEvent<Identifiable> event) {
             domainEventService.ifPresent(service -> service.handleDomainEvent(event));
         }
 
