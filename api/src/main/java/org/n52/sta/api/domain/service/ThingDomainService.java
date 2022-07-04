@@ -42,16 +42,4 @@ public class ThingDomainService extends DomainServiceAdapter<Thing> {
         this.domainService = domainService;
     }
 
-    @Override
-    public boolean exists(String id) throws ProviderException {
-
-        // TODO action before
-
-        boolean exists = domainService.exists(id);
-
-        // TODO action after
-
-        return exists;
-    }
-
 }

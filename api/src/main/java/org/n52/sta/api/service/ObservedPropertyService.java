@@ -32,6 +32,7 @@ import java.util.Objects;
 import java.util.Optional;
 
 import org.n52.shetland.oasis.odata.query.option.QueryOptions;
+import org.n52.sta.api.EditorException;
 import org.n52.sta.api.EntityEditor;
 import org.n52.sta.api.EntityPage;
 import org.n52.sta.api.EntityProvider;
@@ -88,7 +89,7 @@ public class ObservedPropertyService implements EntityService<ObservedProperty> 
     }
 
     @Override
-    public ObservedProperty save(ObservedProperty entity) throws ProviderException {
+    public ObservedProperty save(ObservedProperty entity) throws EditorException {
         try {
             return createAggregate(entity).save();
         } catch (AggregateException e) {
@@ -98,7 +99,7 @@ public class ObservedPropertyService implements EntityService<ObservedProperty> 
     }
 
     @Override
-    public ObservedProperty update(ObservedProperty entity) throws ProviderException {
+    public ObservedProperty update(ObservedProperty entity) throws EditorException {
         Objects.requireNonNull(entity, "entity must not be null!");
         try {
             String id = entity.getId();
@@ -111,7 +112,7 @@ public class ObservedPropertyService implements EntityService<ObservedProperty> 
     }
 
     @Override
-    public void delete(String id) throws ProviderException {
+    public void delete(String id) throws EditorException {
         ObservedProperty entity = getOrThrow(id);
         try {
             createAggregate(entity).delete();

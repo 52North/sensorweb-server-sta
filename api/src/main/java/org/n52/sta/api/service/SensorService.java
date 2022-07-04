@@ -32,6 +32,7 @@ import java.util.Objects;
 import java.util.Optional;
 
 import org.n52.shetland.oasis.odata.query.option.QueryOptions;
+import org.n52.sta.api.EditorException;
 import org.n52.sta.api.EntityEditor;
 import org.n52.sta.api.EntityPage;
 import org.n52.sta.api.EntityProvider;
@@ -87,7 +88,7 @@ public class SensorService implements EntityService<Sensor> {
     }
 
     @Override
-    public Sensor save(Sensor entity) throws ProviderException {
+    public Sensor save(Sensor entity) throws EditorException {
         try {
             return createAggregate(entity).save();
         } catch (AggregateException e) {
@@ -97,7 +98,7 @@ public class SensorService implements EntityService<Sensor> {
     }
 
     @Override
-    public Sensor update(Sensor entity) throws ProviderException {
+    public Sensor update(Sensor entity) throws EditorException {
         Objects.requireNonNull(entity, "entity must not be null!");
         try {
             String id = entity.getId();
@@ -110,7 +111,7 @@ public class SensorService implements EntityService<Sensor> {
     }
 
     @Override
-    public void delete(String id) throws ProviderException {
+    public void delete(String id) throws EditorException {
         Sensor entity = getOrThrow(id);
         try {
             createAggregate(entity).delete();

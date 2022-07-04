@@ -35,8 +35,8 @@ import javax.servlet.http.HttpServletRequest;
 
 import org.n52.shetland.ogc.sta.exception.STACRUDException;
 import org.n52.shetland.ogc.sta.exception.STAInvalidUrlException;
+import org.n52.sta.api.EditorException;
 import org.n52.sta.api.EntityServiceLookup;
-import org.n52.sta.api.ProviderException;
 import org.n52.sta.api.entity.Identifiable;
 import org.n52.sta.api.path.SelectPath;
 import org.n52.sta.api.service.EntityService;
@@ -85,7 +85,7 @@ public class WriteController {
 
     @PostMapping("/**")
     public ResponseEntity<String> handlePostRequest(@RequestBody JsonNode node, HttpServletRequest request)
-            throws STAInvalidUrlException, STACRUDException, ProviderException, IOException {
+            throws STAInvalidUrlException, STACRUDException, EditorException, IOException {
 
         StaPath< ? extends Identifiable> path = parsePath(request);
         Class< ? extends Identifiable> entityType = path.getEntityType();
@@ -107,7 +107,7 @@ public class WriteController {
     }
 
     private <T extends Identifiable> void saveEntityService(JsonNode node, Class<T> type)
-            throws ProviderException, IOException {
+            throws EditorException, IOException {
         EntityService<T> service = lookup.getService(type)
                                          .orElseThrow(() -> {
                                              String typeName = type.getSimpleName();

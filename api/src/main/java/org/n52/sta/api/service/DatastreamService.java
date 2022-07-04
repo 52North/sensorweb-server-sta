@@ -32,6 +32,7 @@ import java.util.Objects;
 import java.util.Optional;
 
 import org.n52.shetland.oasis.odata.query.option.QueryOptions;
+import org.n52.sta.api.EditorException;
 import org.n52.sta.api.EntityEditor;
 import org.n52.sta.api.EntityPage;
 import org.n52.sta.api.EntityProvider;
@@ -85,7 +86,7 @@ public class DatastreamService implements EntityService<Datastream> {
     }
 
     @Override
-    public Datastream save(Datastream entity) throws ProviderException {
+    public Datastream save(Datastream entity) throws EditorException {
         try {
             return createAggregate(entity).save();
         } catch (AggregateException e) {
@@ -95,7 +96,7 @@ public class DatastreamService implements EntityService<Datastream> {
     }
 
     @Override
-    public Datastream update(Datastream entity) throws ProviderException {
+    public Datastream update(Datastream entity) throws EditorException {
         Objects.requireNonNull(entity, "entity must not be null!");
         try {
             String id = entity.getId();
@@ -108,7 +109,7 @@ public class DatastreamService implements EntityService<Datastream> {
     }
 
     @Override
-    public void delete(String id) throws ProviderException {
+    public void delete(String id) throws EditorException {
         Datastream entity = getOrThrow(id);
         try {
             createAggregate(entity).delete();

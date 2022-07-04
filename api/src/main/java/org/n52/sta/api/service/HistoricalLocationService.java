@@ -32,6 +32,7 @@ import java.util.Objects;
 import java.util.Optional;
 
 import org.n52.shetland.oasis.odata.query.option.QueryOptions;
+import org.n52.sta.api.EditorException;
 import org.n52.sta.api.EntityEditor;
 import org.n52.sta.api.EntityPage;
 import org.n52.sta.api.EntityProvider;
@@ -88,7 +89,7 @@ public class HistoricalLocationService implements EntityService<HistoricalLocati
     }
 
     @Override
-    public HistoricalLocation save(HistoricalLocation entity) throws ProviderException {
+    public HistoricalLocation save(HistoricalLocation entity) throws EditorException {
         try {
             return createAggregate(entity).save();
         } catch (AggregateException e) {
@@ -98,7 +99,7 @@ public class HistoricalLocationService implements EntityService<HistoricalLocati
     }
 
     @Override
-    public HistoricalLocation update(HistoricalLocation entity) throws ProviderException {
+    public HistoricalLocation update(HistoricalLocation entity) throws EditorException {
         Objects.requireNonNull(entity, "entity must not be null!");
         try {
             String id = entity.getId();
@@ -111,7 +112,7 @@ public class HistoricalLocationService implements EntityService<HistoricalLocati
     }
 
     @Override
-    public void delete(String id) throws ProviderException {
+    public void delete(String id) throws EditorException {
         HistoricalLocation entity = getOrThrow(id);
         try {
             createAggregate(entity).delete();
