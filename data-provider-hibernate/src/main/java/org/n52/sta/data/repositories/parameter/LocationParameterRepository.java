@@ -34,7 +34,6 @@ import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
 @Repository
-@Transactional
 public interface LocationParameterRepository extends JpaRepository<LocationParameterEntity< ? >, Long> {
 
 }
