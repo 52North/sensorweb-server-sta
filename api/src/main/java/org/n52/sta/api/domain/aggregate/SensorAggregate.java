@@ -39,12 +39,12 @@ public class SensorAggregate extends EntityAggregate<Sensor> implements Sensor {
 
     private final Sensor sensor;
 
-    public SensorAggregate(Sensor sensor, DomainService<Sensor> domainService) {
-        this(sensor, domainService, null);
+    public SensorAggregate(Sensor sensor) {
+        this(sensor, null);
     }
 
-    public SensorAggregate(Sensor sensor, DomainService<Sensor> domainService, EntityEditor<Sensor> editor) {
-        super(sensor, domainService, editor);
+    public SensorAggregate(Sensor sensor, EntityEditor<Sensor> editor) {
+        super(sensor, editor);
         this.sensor = sensor;
     }
 

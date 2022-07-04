@@ -41,12 +41,12 @@ public class ThingAggregate extends EntityAggregate<Thing> implements Thing {
 
     private final Thing thing;
 
-    public ThingAggregate(Thing thing, DomainService<Thing> domainService) {
-        this(thing, domainService, null);
+    public ThingAggregate(Thing thing) {
+        this(thing, null);
     }
 
-    public ThingAggregate(Thing thing, DomainService<Thing> domainService, EntityEditor<Thing> editor) {
-        super(thing, domainService, editor);
+    public ThingAggregate(Thing thing, EntityEditor<Thing> editor) {
+        super(thing, editor);
         this.thing = thing;
     }
 

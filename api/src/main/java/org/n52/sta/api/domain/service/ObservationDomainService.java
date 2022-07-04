@@ -28,17 +28,15 @@
 
 package org.n52.sta.api.domain.service;
 
+import org.n52.sta.api.EntityProvider;
 import org.n52.sta.api.domain.DomainService;
 import org.n52.sta.api.domain.DomainService.DomainServiceAdapter;
 import org.n52.sta.api.entity.Observation;
 
 public class ObservationDomainService extends DomainServiceAdapter<Observation> {
 
-    private final DomainService<Observation> domainService;
-
-    public ObservationDomainService(DomainService<Observation> domainService) {
-        super(domainService);
-        this.domainService = domainService;
+    public ObservationDomainService(EntityProvider<Observation> entityProvider) {
+        super(entityProvider);
     }
 
 }

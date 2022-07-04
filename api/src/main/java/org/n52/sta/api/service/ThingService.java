@@ -127,7 +127,7 @@ public class ThingService implements EntityService<Thing> {
     }
 
     private EntityAggregate<Thing> createAggregate(Thing entity) {
-        return new ThingAggregate(entity, domainService, thingEditor.orElse(null));
+        return new ThingAggregate(entity, thingEditor.orElse(null));
     }
 
     private Thing getOrThrow(String id) throws ProviderException {

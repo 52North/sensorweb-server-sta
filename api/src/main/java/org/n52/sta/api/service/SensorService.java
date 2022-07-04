@@ -126,7 +126,7 @@ public class SensorService implements EntityService<Sensor> {
     }
 
     private EntityAggregate<Sensor> createAggregate(Sensor entity) {
-        return new SensorAggregate(entity, domainService, sensorEditor.orElse(null));
+        return new SensorAggregate(entity, sensorEditor.orElse(null));
     }
 
     private Sensor getOrThrow(String id) throws ProviderException {

@@ -39,19 +39,15 @@ public abstract class EntityAggregate<T extends Identifiable> {
 
     private final T entity;
 
-    private final DomainService<T> domainService;
-
     private final Optional<EntityEditor<T>> optionalEditor;
 
-    protected EntityAggregate(T entity, DomainService<T> domainService) {
-        this(entity, domainService, null);
+    protected EntityAggregate(T entity) {
+        this(entity, null);
     }
 
-    protected EntityAggregate(T entity, DomainService<T> domainService, EntityEditor<T> editor) {
+    protected EntityAggregate(T entity, EntityEditor<T> editor) {
         Objects.requireNonNull(entity, "entity must not be null!");
-        Objects.requireNonNull(domainService, "domainService must not be null!");
         this.entity = entity;
-        this.domainService = domainService;
         this.optionalEditor = Optional.ofNullable(editor);
     }
 
@@ -66,8 +62,6 @@ public abstract class EntityAggregate<T extends Identifiable> {
             T newEntity = oldEntity == null
                     ? editor.save(entity)
                     : editor.update(entity);
-            DomainEvent<T> updatedEvent = new EntityUpdateEvent<>(oldEntity, newEntity);
-            domainService.sendDomainEvent(updatedEvent);
             return newEntity;
         } catch (EditorException e) {
             throw new AggregateException("Could not save entity!", e);
@@ -79,8 +73,6 @@ public abstract class EntityAggregate<T extends Identifiable> {
         EntityEditor<T> editor = optionalEditor.get();
         try {
             editor.delete(entity.getId());
-            DomainEvent<T> deletedEvent = new EntityDeletedEvent<>(entity);
-            domainService.sendDomainEvent(deletedEvent);
             return entity;
         } catch (EditorException e) {
             throw new AggregateException("Could not delete entity!", e);

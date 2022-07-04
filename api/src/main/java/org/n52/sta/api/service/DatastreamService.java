@@ -50,39 +50,33 @@ public class DatastreamService implements EntityService<Datastream> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DatastreamService.class);
 
-    private final DomainService<Datastream> domainService;
+    private final EntityProvider<Datastream> datastreamProvider;
 
     private Optional<EntityEditor<Datastream>> datastreamEditor;
 
     public DatastreamService(EntityProvider<Datastream> provider) {
-        this(provider, null);
-    }
-
-    public DatastreamService(EntityProvider<Datastream> provider, DomainService<Datastream> domainService) {
         Objects.requireNonNull(provider, "provider must not be null");
-        this.domainService = domainService == null
-                ? new DefaultDomainService<>(provider)
-                : domainService;
+        this.datastreamProvider = provider;
     }
 
     @Override
     public boolean exists(String id) throws ProviderException {
-        return domainService.exists(id);
+        return datastreamProvider.exists(id);
     }
 
     @Override
     public Optional<Datastream> getEntity(String id, QueryOptions queryOptions) throws ProviderException {
-        return domainService.getEntity(id, queryOptions);
+        return datastreamProvider.getEntity(id, queryOptions);
     }
 
     @Override
     public Optional<Datastream> getEntity(Request req) throws ProviderException {
-        return domainService.getEntity(req);
+        return datastreamProvider.getEntity(req);
     }
 
     @Override
     public EntityPage<Datastream> getEntities(Request req) throws ProviderException {
-        return domainService.getEntities(req);
+        return datastreamProvider.getEntities(req);
     }
 
     @Override
@@ -104,7 +98,7 @@ public class DatastreamService implements EntityService<Datastream> {
             return createAggregate(thing).save(entity);
         } catch (AggregateException e) {
             LOGGER.error("Could not update entity: {}", entity, e);
-            throw new ProviderException("Could not update Thing!");
+            throw new ProviderException("Could not update Datastream!");
         }
     }
 
@@ -124,12 +118,12 @@ public class DatastreamService implements EntityService<Datastream> {
     }
 
     private EntityAggregate<Datastream> createAggregate(Datastream entity) {
-        return new DatastreamAggregate(entity, domainService, datastreamEditor.orElse(null));
+        return new DatastreamAggregate(entity, datastreamEditor.orElse(null));
     }
 
     private Datastream getOrThrow(String id) throws ProviderException {
-        return domainService.getEntity(id, QueryOptionsFactory.createEmpty())
-                            .orElseThrow(() -> new ProviderException("Id '" + id + "' does not exist."));
+        return datastreamProvider.getEntity(id, QueryOptionsFactory.createEmpty())
+                                 .orElseThrow(() -> new ProviderException("Id '" + id + "' does not exist."));
     }
 
 }

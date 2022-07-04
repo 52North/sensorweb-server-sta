@@ -127,7 +127,7 @@ public class ObservedPropertyService implements EntityService<ObservedProperty> 
     }
 
     private EntityAggregate<ObservedProperty> createAggregate(ObservedProperty entity) {
-        return new ObservedPropertyAggregate(entity, domainService, observedPropertyEditor.orElse(null));
+        return new ObservedPropertyAggregate(entity, observedPropertyEditor.orElse(null));
     }
 
     private ObservedProperty getOrThrow(String id) throws ProviderException {

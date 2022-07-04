@@ -28,6 +28,7 @@
 
 package org.n52.sta.api.domain.service;
 
+import org.n52.sta.api.EntityProvider;
 import org.n52.sta.api.ProviderException;
 import org.n52.sta.api.domain.DomainService;
 import org.n52.sta.api.domain.DomainService.DomainServiceAdapter;
@@ -35,11 +36,8 @@ import org.n52.sta.api.entity.Thing;
 
 public class ThingDomainService extends DomainServiceAdapter<Thing> {
 
-    private final DomainService<Thing> domainService;
-
-    public ThingDomainService(DomainService<Thing> domainService) {
-        super(domainService);
-        this.domainService = domainService;
+    public ThingDomainService(EntityProvider<Thing> entityProvider) {
+        super(entityProvider);
     }
 
 }

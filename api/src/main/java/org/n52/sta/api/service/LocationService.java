@@ -126,7 +126,7 @@ public class LocationService implements EntityService<Location> {
     }
 
     private EntityAggregate<Location> createAggregate(Location entity) {
-        return new LocationAggregate(entity, domainService, locationEditor.orElse(null));
+        return new LocationAggregate(entity, locationEditor.orElse(null));
     }
 
     private Location getOrThrow(String id) throws ProviderException {

@@ -40,15 +40,12 @@ public class FeatureOfInterestAggregate extends EntityAggregate<FeatureOfInteres
 
     private final FeatureOfInterest featureOfInterest;
 
-    public FeatureOfInterestAggregate(FeatureOfInterest featureOfInterest,
-                                      DomainService<FeatureOfInterest> domainService) {
-        this(featureOfInterest, domainService, null);
+    public FeatureOfInterestAggregate(FeatureOfInterest featureOfInterest) {
+        this(featureOfInterest, null);
     }
 
-    public FeatureOfInterestAggregate(FeatureOfInterest featureOfInterest,
-                                      DomainService<FeatureOfInterest> domainService,
-                                      EntityEditor<FeatureOfInterest> editor) {
-        super(featureOfInterest, domainService, editor);
+    public FeatureOfInterestAggregate(FeatureOfInterest featureOfInterest, EntityEditor<FeatureOfInterest> editor) {
+        super(featureOfInterest, editor);
         this.featureOfInterest = featureOfInterest;
     }
 

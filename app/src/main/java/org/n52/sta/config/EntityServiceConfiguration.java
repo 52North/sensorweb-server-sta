@@ -30,6 +30,7 @@ package org.n52.sta.config;
 
 import java.util.Optional;
 
+import org.n52.sta.api.EntityEditor;
 import org.n52.sta.api.EntityProvider;
 import org.n52.sta.api.EntityServiceLookup;
 import org.n52.sta.api.domain.DomainService;
@@ -73,12 +74,11 @@ public class EntityServiceConfiguration {
     }
 
     @Bean
-    public EntityService<Datastream> getDatastreamService(EntityProvider<Datastream> entityProvider,
-            Optional<DomainService<Datastream>> datastreamDomainService,
+    public EntityService<Datastream> datastreamService(EntityProvider<Datastream> entityProvider,
+            Optional<EntityEditor<Datastream>> entityEditor,
             EntityServiceLookup lookup) {
-        DatastreamService service = datastreamDomainService.isPresent()
-                ? new DatastreamService(entityProvider, datastreamDomainService.get())
-                : new DatastreamService(entityProvider);
+        DatastreamService service = new DatastreamService(entityProvider);
+        entityEditor.ifPresent(service::setDatastreamEditor);
         lookup.addEntityService(Datastream.class, service);
         return service;
     }

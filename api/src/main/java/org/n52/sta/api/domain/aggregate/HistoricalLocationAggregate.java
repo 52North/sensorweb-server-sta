@@ -40,15 +40,12 @@ public class HistoricalLocationAggregate extends EntityAggregate<HistoricalLocat
 
     private final HistoricalLocation historicalLocation;
 
-    public HistoricalLocationAggregate(HistoricalLocation historicalLocation,
-                                       DomainService<HistoricalLocation> domainService) {
-        this(historicalLocation, domainService, null);
+    public HistoricalLocationAggregate(HistoricalLocation historicalLocation) {
+        this(historicalLocation, null);
     }
 
-    public HistoricalLocationAggregate(HistoricalLocation historicalLocation,
-                                       DomainService<HistoricalLocation> domainService,
-                                       EntityEditor<HistoricalLocation> editor) {
-        super(historicalLocation, domainService, editor);
+    public HistoricalLocationAggregate(HistoricalLocation historicalLocation, EntityEditor<HistoricalLocation> editor) {
+        super(historicalLocation, editor);
         this.historicalLocation = historicalLocation;
     }
 

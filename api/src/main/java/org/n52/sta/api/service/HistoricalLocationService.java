@@ -127,7 +127,7 @@ public class HistoricalLocationService implements EntityService<HistoricalLocati
     }
 
     private EntityAggregate<HistoricalLocation> createAggregate(HistoricalLocation entity) {
-        return new HistoricalLocationAggregate(entity, domainService, historicalLocationEditor.orElse(null));
+        return new HistoricalLocationAggregate(entity, historicalLocationEditor.orElse(null));
     }
 
     private HistoricalLocation getOrThrow(String id) throws ProviderException {

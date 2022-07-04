@@ -127,7 +127,7 @@ public class FeatureOfInterestService implements EntityService<FeatureOfInterest
     }
 
     private EntityAggregate<FeatureOfInterest> createAggregate(FeatureOfInterest entity) {
-        return new FeatureOfInterestAggregate(entity, domainService, featureOfInterestEditor.orElse(null));
+        return new FeatureOfInterestAggregate(entity, featureOfInterestEditor.orElse(null));
     }
 
     private FeatureOfInterest getOrThrow(String id) throws ProviderException {

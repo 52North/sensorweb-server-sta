@@ -41,12 +41,12 @@ public class LocationAggregate extends EntityAggregate<Location> implements Loca
 
     private final Location location;
 
-    public LocationAggregate(Location location, DomainService<Location> domainService) {
-        this(location, domainService, null);
+    public LocationAggregate(Location location) {
+        this(location, null);
     }
 
-    public LocationAggregate(Location location, DomainService<Location> domainService, EntityEditor<Location> editor) {
-        super(location, domainService, editor);
+    public LocationAggregate(Location location, EntityEditor<Location> editor) {
+        super(location, editor);
         this.location = location;
     }
 

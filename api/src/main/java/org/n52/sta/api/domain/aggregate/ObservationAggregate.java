@@ -40,14 +40,12 @@ public class ObservationAggregate extends EntityAggregate<Observation> implement
 
     private final Observation observation;
 
-    public ObservationAggregate(Observation observation, DomainService<Observation> domainService) {
-        this(observation, domainService, null);
+    public ObservationAggregate(Observation observation) {
+        this(observation, null);
     }
 
-    public ObservationAggregate(Observation observation,
-                                DomainService<Observation> domainService,
-                                EntityEditor<Observation> editor) {
-        super(observation, domainService, editor);
+    public ObservationAggregate(Observation observation, EntityEditor<Observation> editor) {
+        super(observation, editor);
         this.observation = observation;
     }
 

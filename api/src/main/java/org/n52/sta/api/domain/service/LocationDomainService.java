@@ -28,17 +28,15 @@
 
 package org.n52.sta.api.domain.service;
 
+import org.n52.sta.api.EntityProvider;
 import org.n52.sta.api.domain.DomainService;
 import org.n52.sta.api.domain.DomainService.DomainServiceAdapter;
 import org.n52.sta.api.entity.Location;
 
 public class LocationDomainService extends DomainServiceAdapter<Location> {
 
-    private final DomainService<Location> domainService;
-
-    public LocationDomainService(DomainService<Location> domainService) {
-        super(domainService);
-        this.domainService = domainService;
+    public LocationDomainService(EntityProvider<Location> entityProvider) {
+        super(entityProvider);
     }
 
 }

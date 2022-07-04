@@ -44,14 +44,12 @@ public class DatastreamAggregate extends EntityAggregate<Datastream> implements 
 
     private final Datastream datastream;
 
-    public DatastreamAggregate(Datastream datastream, DomainService<Datastream> domainService) {
-        this(datastream, domainService, null);
+    public DatastreamAggregate(Datastream datastream) {
+        this(datastream, null);
     }
 
-    public DatastreamAggregate(Datastream datastream,
-                               DomainService<Datastream> domainService,
-                               EntityEditor<Datastream> editor) {
-        super(datastream, domainService, editor);
+    public DatastreamAggregate(Datastream datastream, EntityEditor<Datastream> editor) {
+        super(datastream, editor);
         this.datastream = datastream;
     }
 

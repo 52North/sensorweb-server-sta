@@ -39,14 +39,12 @@ public class ObservedPropertyAggregate extends EntityAggregate<ObservedProperty>
 
     private final ObservedProperty observedProperty;
 
-    public ObservedPropertyAggregate(ObservedProperty observedProperty, DomainService<ObservedProperty> domainService) {
-        this(observedProperty, domainService, null);
+    public ObservedPropertyAggregate(ObservedProperty observedProperty) {
+        this(observedProperty, null);
     }
 
-    public ObservedPropertyAggregate(ObservedProperty observedProperty,
-                                     DomainService<ObservedProperty> domainService,
-                                     EntityEditor<ObservedProperty> editor) {
-        super(observedProperty, domainService, editor);
+    public ObservedPropertyAggregate(ObservedProperty observedProperty, EntityEditor<ObservedProperty> editor) {
+        super(observedProperty, editor);
         this.observedProperty = observedProperty;
     }
 

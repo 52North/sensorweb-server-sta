@@ -126,7 +126,7 @@ public class ObservationService implements EntityService<Observation> {
     }
 
     private EntityAggregate<Observation> createAggregate(Observation entity) {
-        return new ObservationAggregate(entity, domainService, observationEditor.orElse(null));
+        return new ObservationAggregate(entity, observationEditor.orElse(null));
     }
 
     private Observation getOrThrow(String id) throws ProviderException {

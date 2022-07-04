@@ -28,16 +28,14 @@
 
 package org.n52.sta.api.domain.service;
 
+import org.n52.sta.api.EntityProvider;
 import org.n52.sta.api.domain.DomainService.DomainServiceAdapter;
 import org.n52.sta.api.entity.Datastream;
 
-/**
- * Serves as an (empty) example which could be instantiated and injected
- */
 public class DatastreamDomainService extends DomainServiceAdapter<Datastream> {
 
-    public DatastreamDomainService(DomainService<Datastream> domainService) {
-        super(domainService);
+    public DatastreamDomainService(EntityProvider<Datastream> entityProvider) {
+        super(entityProvider);
     }
 
 }
