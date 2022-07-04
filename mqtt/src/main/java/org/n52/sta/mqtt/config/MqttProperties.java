@@ -40,7 +40,7 @@ public class MqttProperties {
     // TODO move all server.feature.mqtt.* properties to here
 
     private boolean enabled;
-    private boolean readOnly;
+    private boolean writable;
 
     private boolean brokerTcpEnabled;
     private String brokerTcpHost;
@@ -64,12 +64,12 @@ public class MqttProperties {
         this.enabled = enabled;
     }
 
-    public boolean isReadOnly() {
-        return readOnly;
+    public boolean isWritable() {
+        return writable;
     }
 
-    public void setReadOnly(boolean readOnly) {
-        this.readOnly = readOnly;
+    public void setWritable(boolean writable) {
+        this.writable = writable;
     }
 
     public boolean isBrokerTcpEnabled() {

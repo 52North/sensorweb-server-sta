@@ -61,7 +61,7 @@ public class RootRequestHandler {
     private static final String HTTPS_GITHUB_COM_52_NORTH_SENSORWEB_SERVER_STA_EXTENSION_SERVER_VERSION_MD = "https://github.com/52North/sensorweb-server-sta/extension/server-version.md";
     private static final String HTTPS_GITHUB_COM_52_NORTH_SENSORWEB_SERVER_STA_EXTENSION_EXTENDED_SENSOR_ENCODINGTYPE = "https://github.com/52North/sensorweb-server-sta/extension/extended-sensor-encodingtype.md";
 
-    @Value("${server.feature.http.read-only}")
+    @Value("${server.feature.http.writable}")
     private Boolean httpReadOnly = true;
     private final String rootResponse;
     private final ServerProperties serverProperties;

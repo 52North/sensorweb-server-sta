@@ -58,7 +58,7 @@ public class MqttExtension {
         boolean wsEnabled = mqttProperties.isBrokerWsEnabled();
         if (plainTcpEnabled || wsEnabled) {
             addConformance(OPENGIS_MQTT_RECEIVE_UPDATES);
-            if (!mqttProperties.isReadOnly()) {
+            if (mqttProperties.isWritable()) {
                 addConformance(OPENGIS_MQTT_OBSERVATIONS_CREATION);
                 addConformance(N52_CREATE_VIA_MQTT);
             }
@@ -89,7 +89,7 @@ public class MqttExtension {
             serverSettings.addExtension(OPENGIS_MQTT_RECEIVE_UPDATES, mqttExtension);
 
             // MQTT Publish
-            if (!mqttProperties.isReadOnly()) {
+            if (mqttProperties.isWritable()) {
                 serverSettings.addExtension(OPENGIS_MQTT_OBSERVATIONS_CREATION, mqttExtension);
                 serverSettings.addExtension(N52_CREATE_VIA_MQTT, new ServerSettings.Extension() {
                     @Override

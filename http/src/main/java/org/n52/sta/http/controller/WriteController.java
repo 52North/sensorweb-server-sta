@@ -58,7 +58,7 @@ import com.fasterxml.jackson.databind.ObjectReader;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 
 @RestController
-@ConditionalOnProperty(name = "server.feature.http.read-only", havingValue = "true", matchIfMissing = false)
+@ConditionalOnProperty(name = "server.feature.http.writable", havingValue = "true", matchIfMissing = false)
 public class WriteController {
 
     private final String serviceUri;
