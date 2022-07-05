@@ -548,8 +548,8 @@ public class ObservationService
             if (getRepository().existsByStaIdentifier(identifier)) {
                 DataEntity<?> observation =
                         getRepository().findByStaIdentifier(
-                                               identifier,
-                                               EntityGraphRepository.FetchGraph.FETCHGRAPH_DATASET_FIRSTLAST_OBSERVATION)
+                                           identifier,
+                                           EntityGraphRepository.FetchGraph.FETCHGRAPH_DATASET_FIRSTLAST_OBSERVATION)
                                        .get();
                 deleteReferenceFromDatasetFirstLast(observation);
 
