@@ -20,7 +20,7 @@
     <scm>
         <url>https://github.com/52North/sensor-things</url>
         <connection>scm:git:https://github.com/52North/sensor-things.git</connection>
-        <developerConnection>scm:git:https://github.com/52North/sensor-things.git</developerConnection>
+        <developerConnection>scm:git:git://github.com/52North/sensor-things.git</developerConnection>
         <tag>v3.1.0</tag>
     </scm>
 
