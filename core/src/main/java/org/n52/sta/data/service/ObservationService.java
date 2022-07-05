@@ -55,7 +55,6 @@ import org.n52.series.db.beans.DatasetEntity;
 import org.n52.series.db.beans.QuantityDataEntity;
 import org.n52.series.db.beans.SensorML20DataEntity;
 import org.n52.series.db.beans.TextDataEntity;
-import org.n52.series.db.beans.parameter.observation.ObservationParameterEntity;
 import org.n52.series.db.beans.sta.LocationEntity;
 import org.n52.shetland.filter.ExpandFilter;
 import org.n52.shetland.filter.ExpandItem;
@@ -331,14 +330,13 @@ public class ObservationService
                                                              .FETCHGRAPH_PARAMETERS);
                 if (existing.isPresent()) {
                     DataEntity<?> merged = merge(existing.get(), entity);
-                    DataEntity<?> saved = getRepository().save(merged);
+                    merged = getRepository().save(merged);
 
                     AbstractDatasetEntity datastreamEntity =
-                            datastreamRepository.findById(saved.getDataset().getId()).get();
+                            datastreamRepository.findById(merged.getDataset().getId()).get();
 
-                    updateDatastreamPhenomenonTimeOnObservationUpdate(datastreamEntity, saved);
-                    Hibernate.initialize(saved.getParameters());
-                    return saved;
+                    updateDatastreamPhenomenonTimeOnObservationUpdate(datastreamEntity, merged);
+                    return merged;
                 }
                 throw new STACRUDException(UNABLE_TO_UPDATE_ENTITY_NOT_FOUND, HTTPStatus.NOT_FOUND);
             }
@@ -402,16 +400,13 @@ public class ObservationService
             existing.setValidTimeEnd(toMerge.getValidTimeEnd());
         }
         // parameter
-        if (toMerge.getParameters() != null) {
-            synchronized (getLock(String.valueOf(
-                    toMerge.getParameters().hashCode() + existing.getParameters().hashCode()))) {
-                existing.getParameters()
-                        .stream()
-                        .filter(o -> o instanceof ObservationParameterEntity)
-                        .map(o -> (ObservationParameterEntity) o)
-                        .forEach(parameterRepository::delete);
-                existing.setParameters(toMerge.getParameters());
-            }
+        if (toMerge.hasParameters()) {
+            existing.getParameters().clear();
+            toMerge.getParameters().forEach(p -> {
+                                                p.setDescribeableEntity(existing);
+                                                existing.addParameter(p);
+                                            }
+            );
         }
         // value
         if (toMerge.getValueText() != null) {

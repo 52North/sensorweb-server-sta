@@ -411,6 +411,14 @@ public class DatastreamService extends
             && !toMerge.getOMObservationType().getFormat().equalsIgnoreCase(UNKNOWN)) {
             existing.setOMObservationType(toMerge.getOMObservationType());
         }
+        if (toMerge.hasParameters()) {
+            existing.getParameters().clear();
+            toMerge.getParameters().forEach(p -> {
+                                                p.setDescribeableEntity(existing);
+                                                existing.addParameter(p);
+                                            }
+            );
+        }
         return existing;
     }
 

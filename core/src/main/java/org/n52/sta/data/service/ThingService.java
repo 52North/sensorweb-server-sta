@@ -44,7 +44,7 @@ import org.joda.time.DateTime;
 import org.n52.janmayen.http.HTTPStatus;
 import org.n52.series.db.beans.AbstractDatasetEntity;
 import org.n52.series.db.beans.PlatformEntity;
-import org.n52.series.db.beans.parameter.platform.PlatformParameterEntity;
+import org.n52.series.db.beans.parameter.ParameterEntity;
 import org.n52.series.db.beans.sta.HistoricalLocationEntity;
 import org.n52.series.db.beans.sta.LocationEntity;
 import org.n52.shetland.filter.ExpandFilter;
@@ -251,7 +251,7 @@ public class ThingService
                     }
                     PlatformEntity result = getRepository().save(merged);
                     Hibernate.initialize(result.getParameters());
-                    return result;
+                    return merged;
                 } else {
                     throw new STACRUDException(UNABLE_TO_UPDATE_ENTITY_NOT_FOUND, HTTPStatus.NOT_FOUND);
                 }
@@ -284,15 +284,11 @@ public class ThingService
         // properties
         if (toMerge.getParameters() != null) {
             synchronized (getLock(String.valueOf(existing.getParameters().hashCode()))) {
-                parameterRepository.saveAll(toMerge.getParameters()
-                                                .stream()
-                                                .filter(t -> t instanceof PlatformParameterEntity)
-                                                .map(t -> {
-                                                    ((PlatformParameterEntity) t).setPlatform(existing);
-                                                    return (PlatformParameterEntity) t;
-                                                })
-                                                .collect(Collectors.toSet()));
-                existing.setParameters(toMerge.getParameters());
+                existing.getParameters().clear();
+                for (ParameterEntity<?> parameter : toMerge.getParameters()) {
+                    parameter.setDescribeableEntity(existing);
+                    existing.addParameter(parameter);
+                }
             }
         }
         return existing;

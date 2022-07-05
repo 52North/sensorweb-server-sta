@@ -207,7 +207,7 @@ public class SensorService
             // Intermediate save to allow DatastreamService->createOrUpdate to use this entity. Does not trigger
             // intercept handling (e.g. mqtt). Needed as Datastream<->Procedure connection is not yet set but
             // required by interceptors
-            ProcedureEntity intermediateSave = getRepository().intermediateSave(sensor);
+            getRepository().intermediateSave(sensor);
             checkProcedureHistory(sensor);
             if (sensor.hasDatastreams()) {
                 for (AbstractDatasetEntity datastreamEntity : sensor.getDatasets()) {
@@ -284,6 +284,14 @@ public class SensorService
             existing.setFormat(toMerge.getFormat());
         }
         */
+        if (toMerge.hasParameters()) {
+            existing.getParameters().clear();
+            toMerge.getParameters().forEach(p -> {
+                                                p.setDescribeableEntity(existing);
+                                                existing.addParameter(p);
+                                            }
+            );
+        }
 
         return existing;
     }

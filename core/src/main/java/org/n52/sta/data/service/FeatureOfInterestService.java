@@ -276,6 +276,14 @@ public class FeatureOfInterestService
             existing.setGeometryEntity(toMerge.getGeometryEntity());
         }
         mergeFeatureType(existing);
+        if (toMerge.hasParameters()) {
+            existing.getParameters().clear();
+            toMerge.getParameters().forEach(p -> {
+                                                p.setDescribeableEntity(existing);
+                                                existing.addParameter(p);
+                                            }
+            );
+        }
         return existing;
     }
 
