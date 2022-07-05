@@ -32,7 +32,7 @@ import org.n52.series.db.beans.FormatEntity;
 import org.n52.shetland.ogc.om.features.SfConstants;
 import org.n52.shetland.ogc.sta.exception.STACRUDException;
 import org.n52.sta.data.old.MutexFactory;
-import org.n52.sta.data.repositories.value.FormatRepository;
+import org.n52.sta.data.old.repositories.FormatRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.transaction.annotation.Transactional;
