@@ -108,4 +108,18 @@ public class DatastreamAggregate extends EntityAggregate<Datastream> implements 
         return datastream.getObservations();
     }
 
+    private boolean isTrajectory(Datastream entity) {
+        // Thing thing = entity.getThing();
+        // return isMobileEnabled
+        // && thing.hasParameters()
+        // && thing
+        // .getParameters()
+        // .stream()
+        // .filter(p -> p instanceof BooleanParameterEntity)
+        // .filter(p -> p.getName()
+        // .equals("isMobile"))
+        // .anyMatch(p -> ((ParameterEntity<Boolean>) p).getValue()))
+        return false;
+    }
+
 }

@@ -28,6 +28,8 @@
 
 package org.n52.sta.data.repositories.value;
 
+import java.util.Optional;
+
 import org.n52.series.db.beans.FormatEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
@@ -35,8 +37,6 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface FormatRepository extends JpaRepository<FormatEntity, Long> {
 
-    boolean existsByFormat(String format);
-
-    FormatEntity findByFormat(String format);
+    Optional<FormatEntity> findByFormat(String format);
 
 }

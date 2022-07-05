@@ -26,20 +26,39 @@
  * Public License for more details.
  */
 
-package org.n52.sta.data.repositories.value;
+package org.n52.sta.config;
 
-import java.util.Optional;
+import org.n52.sta.api.EntityEditor;
+import org.n52.sta.api.EntityEditorLookup;
+import org.n52.sta.api.EntityServiceLookup;
+import org.n52.sta.api.entity.Datastream;
+import org.n52.sta.data.editor.DatastreamEntityEditor;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.transaction.annotation.EnableTransactionManagement;
 
-import org.n52.series.db.beans.UnitEntity;
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.stereotype.Repository;
+@Configuration
+@ConditionalOnExpression(""
+        + "${server.feature.http.writable:false} or "
+        + "(${server.feature.mqtt.enabled:false} and ${server.feature.http.writable:false})")
+@EnableTransactionManagement
+public class DataEditorConfiguration {
 
-@Repository
-public interface UnitRepository extends JpaRepository<UnitEntity, Long> {
-
-    Optional<UnitEntity> findByIdentifier(String identifier);
-
-    default Optional<UnitEntity> findBySymbol(String symbol) {
-        return findByIdentifier(symbol);
+    @Autowired
+    private EntityServiceLookup serviceLookup;
+    
+    @Autowired
+    private EntityEditorLookup editorLookup;
+    
+    @Bean
+    public EntityEditor<Datastream> datastreamEntityEditor() {
+        DatastreamEntityEditor editor = new DatastreamEntityEditor(serviceLookup, editorLookup);
+        editorLookup.addEntityEditor(Datastream.class, editor);
+        return editor;
     }
+    
+    // TODO add missing editors
+
 }
