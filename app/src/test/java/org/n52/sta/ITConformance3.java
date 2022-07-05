@@ -29,21 +29,6 @@
 
 package org.n52.sta;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Order;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestMethodOrder;
-import org.junit.jupiter.api.MethodOrderer.OrderAnnotation;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.annotation.DirtiesContext;
-import org.testcontainers.junit.jupiter.Testcontainers;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -51,6 +36,21 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.MethodOrderer.OrderAnnotation;
+import org.junit.jupiter.api.Order;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestMethodOrder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.annotation.DirtiesContext;
+import org.testcontainers.junit.jupiter.Testcontainers;
 
 /**
  * Implements Conformance Tests according to Section A.3 in OGC SensorThings API Part 1: Sensing (15-078r6)
@@ -932,16 +932,26 @@ public class ITConformance3 extends ConformanceTests implements TestUtil {
         // Patch and check Entities
 
         /* Thing */
-        urlParameters = "{\"description\":\"This is a PATCHED Test Thing From TestNG\"}";
         Map<String, String> diffs = new HashMap<>();
+        urlParameters = "{\"description\":\"This is a PATCHED Test Thing From TestNG\"}";
         diffs.put("description", "This is a PATCHED Test Thing From TestNG");
         JsonNode updatedEntity = patchEntity(EntityType.THING, urlParameters, thingId);
         checkPatch(EntityType.THING, thingEntity, updatedEntity, diffs);
 
+        urlParameters = "{\"properties\":{\"testKey\":\"testValue\"}}";
+        diffs.put("properties", "{\"testKey\":\"testValue\"}");
+        updatedEntity = patchEntity(EntityType.THING, urlParameters, thingId);
+        checkPatch(EntityType.THING, thingEntity, updatedEntity, diffs);
+
         /* Location */
-        urlParameters = "{\"location\": { \"type\": \"Point\", \"coordinates\": [114.05, -50] }}";
         diffs = new HashMap<>();
+        urlParameters = "{\"location\": { \"type\": \"Point\", \"coordinates\": [114.05, -50] }}";
         diffs.put("location", "{ \"type\": \"Point\", \"coordinates\": [114.05, -50] }}");
+        updatedEntity = patchEntity(EntityType.LOCATION, urlParameters, locationId);
+        checkPatch(EntityType.LOCATION, locationEntity, updatedEntity, diffs);
+
+        urlParameters = "{\"properties\":{\"testKey\":\"testValue\"}}";
+        diffs.put("properties", "{\"testKey\":\"testValue\"}");
         updatedEntity = patchEntity(EntityType.LOCATION, urlParameters, locationId);
         checkPatch(EntityType.LOCATION, locationEntity, updatedEntity, diffs);
 
@@ -953,9 +963,14 @@ public class ITConformance3 extends ConformanceTests implements TestUtil {
         checkPatch(EntityType.HISTORICAL_LOCATION, histLocEntity, updatedEntity, diffs);
 
         /* Sensor */
-        urlParameters = "{\"metadata\": \"PATCHED\"}";
         diffs = new HashMap<>();
+        urlParameters = "{\"metadata\": \"PATCHED\"}";
         diffs.put("metadata", "PATCHED");
+        updatedEntity = patchEntity(EntityType.SENSOR, urlParameters, sensorId);
+        checkPatch(EntityType.SENSOR, sensorEntity, updatedEntity, diffs);
+
+        urlParameters = "{\"properties\":{\"testKey\":\"testValue\"}}";
+        diffs.put("properties", "{\"testKey\":\"testValue\"}");
         updatedEntity = patchEntity(EntityType.SENSOR, urlParameters, sensorId);
         checkPatch(EntityType.SENSOR, sensorEntity, updatedEntity, diffs);
 
@@ -966,10 +981,20 @@ public class ITConformance3 extends ConformanceTests implements TestUtil {
         updatedEntity = patchEntity(EntityType.OBSERVED_PROPERTY, urlParameters, obsPropId);
         checkPatch(EntityType.OBSERVED_PROPERTY, obsPropEntity, updatedEntity, diffs);
 
+        urlParameters = "{\"properties\":{\"testKey\":\"testValue\"}}";
+        diffs.put("properties", "{\"testKey\":\"testValue\"}");
+        updatedEntity = patchEntity(EntityType.OBSERVED_PROPERTY, urlParameters, obsPropId);
+        checkPatch(EntityType.OBSERVED_PROPERTY, obsPropEntity, updatedEntity, diffs);
+
         /* FeatureOfInterest */
         urlParameters = "{\"feature\":{ \"type\": \"Point\", \"coordinates\": [114.05, -51.05] }}";
         diffs = new HashMap<>();
         diffs.put("feature", "{ \"type\": \"Point\", \"coordinates\": [114.05, -51.05] }");
+        updatedEntity = patchEntity(EntityType.FEATURE_OF_INTEREST, urlParameters, foiId);
+        checkPatch(EntityType.FEATURE_OF_INTEREST, foiEntity, updatedEntity, diffs);
+
+        urlParameters = "{\"properties\":{\"testKey\":\"testValue\"}}";
+        diffs.put("properties", "{\"testKey\":\"testValue\"}");
         updatedEntity = patchEntity(EntityType.FEATURE_OF_INTEREST, urlParameters, foiId);
         checkPatch(EntityType.FEATURE_OF_INTEREST, foiEntity, updatedEntity, diffs);
 
@@ -997,11 +1022,20 @@ public class ITConformance3 extends ConformanceTests implements TestUtil {
         updatedEntity = patchEntity(EntityType.DATASTREAM, urlParameters, datastreamId);
         checkPatch(EntityType.DATASTREAM, patchedDatastream, updatedEntity, diffs);
 
+        urlParameters = "{\"properties\":{\"testKey\":\"testValue\"}}";
+        diffs.put("properties", "{\"testKey\":\"testValue\"}");
+        updatedEntity = patchEntity(EntityType.DATASTREAM, urlParameters, datastreamId);
+        checkPatch(EntityType.DATASTREAM, patchedDatastream, updatedEntity, diffs);
+
         /* Observation */
         urlParameters = "{\"phenomenonTime\": \"2015-07-01T00:40:00.000Z\"}";
         diffs = new HashMap<>();
         diffs.put("phenomenonTime", "2015-07-01T00:40:00.000Z");
-        //TODO: Also check patch on Entity. Currently only tested in ITConformance8.
+        updatedEntity = patchEntity(EntityType.OBSERVATION, urlParameters, obsId);
+        checkPatch(EntityType.OBSERVATION, obsEntity, updatedEntity, diffs);
+
+        urlParameters = "{\"parameters\":{\"testKey\":\"testValue\"}}";
+        diffs.put("parameters", "{\"testKey\":\"testValue\"}");
         updatedEntity = patchEntity(EntityType.OBSERVATION, urlParameters, obsId);
         checkPatch(EntityType.OBSERVATION, obsEntity, updatedEntity, diffs);
     }
@@ -1455,7 +1489,12 @@ public class ITConformance3 extends ConformanceTests implements TestUtil {
      *                   request due to the specification
      */
     private void checkPatch(EntityType entityType, JsonNode oldEntity, JsonNode newEntity, Map<String, String> diffs) {
-        oldEntity.fieldNames().forEachRemaining(field -> {
+        // Join diffMap and oldProperties as we might patch on previously omitted fields
+        Set<String> fields = new HashSet<>();
+        oldEntity.fieldNames().forEachRemaining(fields::add);
+        diffs.forEach((k,v) -> fields.add(k));
+        fields.forEach(field -> {
+            Assertions.assertNotNull(newEntity.get(field), "missing field in actual Entity: " + field);
             if (diffs.containsKey(field)) {
                 if (newEntity.get(field).isTextual()) {
                     Assertions.assertEquals(
@@ -1483,6 +1522,7 @@ public class ITConformance3 extends ConformanceTests implements TestUtil {
                         oldEntity.get(field).asDouble() == (newEntity.get(field).asDouble()),
                         "PATCH was not applied correctly for " + entityType + "'s " + field + ".");
                 } else {
+                    Assertions.assertNotNull(oldEntity.get(field), "missing field in reference Entity: " + field);
                     Assertions.assertTrue(
                         oldEntity.get(field).equals(newEntity.get(field)),
                         "PATCH was not applied correctly for " + entityType + "'s " + field + ".");
