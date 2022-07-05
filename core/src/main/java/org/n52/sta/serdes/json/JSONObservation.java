@@ -160,7 +160,9 @@ public class JSONObservation extends JSONBase.JSONwithIdTime<DataEntity<?>> impl
             }
         }
 
-        self.setValueText(result.toString());
+        if (result != null) {
+            self.setValueText(result.toString());
+        }
 
         // Link to Datastream
         if (Datastream != null) {
