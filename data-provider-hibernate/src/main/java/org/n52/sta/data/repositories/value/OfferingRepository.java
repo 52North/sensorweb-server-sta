@@ -26,7 +26,9 @@
  * Public License for more details.
  */
 
-package org.n52.sta.data.repositories.entity;
+package org.n52.sta.data.repositories.value;
+
+import java.util.Optional;
 
 import org.n52.series.db.beans.OfferingEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -35,4 +37,5 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface OfferingRepository extends JpaRepository<OfferingEntity, Long> {
 
+    Optional<OfferingEntity> findByIdentifier(String identifier);
 }
