@@ -61,6 +61,7 @@ public class FormatService {
         String[] COMMON_FORMATS = {
             "application/pdf",
             "application/vnd.geo+json",
+            "http://www.opengis.net/sensorml/2.0",
             "http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_Observation",
             "http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_TruthObservation",
             "http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_Measurement",
