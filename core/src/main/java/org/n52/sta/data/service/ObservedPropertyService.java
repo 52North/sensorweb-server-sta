@@ -203,16 +203,18 @@ public class ObservedPropertyService
                 observableProperty.setStaIdentifier(UUID.randomUUID().toString());
             }
         }
-        synchronized (getLock(observableProperty.getStaIdentifier())) {
-            // Check for duplicate definition
-            if (getRepository().existsByIdentifier(observableProperty.getIdentifier())) {
-                throw new STACRUDException("Observed Property with given Definition already exists!",
-                                           HTTPStatus.CONFLICT);
+        synchronized (getLock(observableProperty.getIdentifier())) {
+            synchronized (getLock(observableProperty.getStaIdentifier())) {
+                // Check for duplicate definition
+                if (getRepository().existsByIdentifier(observableProperty.getIdentifier())) {
+                    throw new STACRUDException("Observed Property with given Definition already exists!",
+                                               HTTPStatus.CONFLICT);
+                }
+                if (getRepository().existsByStaIdentifier(observableProperty.getStaIdentifier())) {
+                    throw new STACRUDException(IDENTIFIER_ALREADY_EXISTS, HTTPStatus.CONFLICT);
+                }
+                return getRepository().save(observableProperty);
             }
-            if (getRepository().existsByStaIdentifier(observableProperty.getStaIdentifier())) {
-                throw new STACRUDException(IDENTIFIER_ALREADY_EXISTS, HTTPStatus.CONFLICT);
-            }
-            return getRepository().save(observableProperty);
         }
     }
 
