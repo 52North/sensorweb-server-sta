@@ -217,8 +217,8 @@ public class LocationService
                 }
                 location.setProcessed(true);
                 checkLocationEncoding(location);
-                processThings(location);
                 location = getRepository().save(location);
+                processThings(location);
             }
         }
         return location;
