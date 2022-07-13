@@ -33,7 +33,6 @@ import javax.persistence.criteria.JoinType;
 import javax.persistence.criteria.Subquery;
 
 import org.n52.series.db.beans.AbstractDatasetEntity;
-import org.n52.series.db.beans.DescribableEntity;
 import org.n52.series.db.beans.HibernateRelations.HasDescription;
 import org.n52.series.db.beans.HibernateRelations.HasName;
 import org.n52.series.db.beans.IdEntity;
@@ -50,11 +49,9 @@ public class ThingQuerySpecification extends QuerySpecification<PlatformEntity> 
         this.filterByMember.put(StaConstants.HISTORICAL_LOCATIONS, createHistoricalLocationFilter());
         this.filterByMember.put(StaConstants.LOCATIONS, createLocationFilter());
 
-        this.entityPathByProperty.put(StaConstants.PROP_ID,
-                                      new PropertyComparator<>(DescribableEntity.PROPERTY_STA_IDENTIFIER));
-        this.entityPathByProperty.put(StaConstants.PROP_NAME, new PropertyComparator<>(HasName.PROPERTY_NAME));
+        this.entityPathByProperty.put(StaConstants.PROP_NAME, new SimplePropertyComparator<>(HasName.PROPERTY_NAME));
         this.entityPathByProperty.put(StaConstants.PROP_DESCRIPTION,
-                                      new PropertyComparator<>(HasDescription.PROPERTY_DESCRIPTION));
+                                      new SimplePropertyComparator<>(HasDescription.PROPERTY_DESCRIPTION));
     }
 
     // TODO discuss: split multiple (tiny) subqueries so that we are able to use

@@ -40,7 +40,7 @@ import org.n52.series.db.beans.FeatureEntity;
 import org.n52.shetland.ogc.sta.StaConstants;
 import org.springframework.data.jpa.domain.Specification;
 
-public class ObservationQuerySpecification extends QuerySpecification<DataEntity< ? >> {
+public class ObservationQuerySpecification extends QuerySpecification<DataEntity<?>> {
 
     public ObservationQuerySpecification() {
         super();
@@ -49,14 +49,14 @@ public class ObservationQuerySpecification extends QuerySpecification<DataEntity
     }
 
     @Override
-    public Optional<Specification<DataEntity< ? >>> isStaEntity() {
+    public Optional<Specification<DataEntity<?>>> isStaEntity() {
         return Optional.of((root, query, builder) -> builder.isNull(root.get(DataEntity.PROPERTY_PARENT)));
     }
 
     private MemberFilter<DataEntity<?>> createDatastreamFilter() {
         return specification -> (root, query, builder) -> {
             EntityQuery memberQuery = createQuery(AbstractDatasetEntity.PROPERTY_ID, AbstractDatasetEntity.class);
-            Subquery< ? > subquery = memberQuery.create(specification, query, builder);
+            Subquery<?> subquery = memberQuery.create(specification, query, builder);
             // n..1
             return builder.in(subquery)
                           .value(root.get(DataEntity.PROPERTY_DATASET_ID));

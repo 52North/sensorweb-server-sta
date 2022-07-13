@@ -30,12 +30,17 @@ package org.n52.sta.data.query.specifications;
 
 import java.util.Optional;
 
+import javax.persistence.criteria.Join;
+import javax.persistence.criteria.Path;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 import javax.persistence.criteria.Subquery;
 
 import org.n52.series.db.beans.AbstractDatasetEntity;
 import org.n52.series.db.beans.DataEntity;
+import org.n52.series.db.beans.FormatEntity;
+import org.n52.series.db.beans.HibernateRelations.HasDescription;
+import org.n52.series.db.beans.HibernateRelations.HasName;
 import org.n52.series.db.beans.IdEntity;
 import org.n52.series.db.beans.PhenomenonEntity;
 import org.n52.series.db.beans.PlatformEntity;
@@ -50,7 +55,39 @@ public class DatastreamQuerySpecification extends QuerySpecification<AbstractDat
         this.filterByMember.put(StaConstants.OBSERVED_PROPERTIES, createObservedPropertyFilter());
         this.filterByMember.put(StaConstants.THINGS, createThingfilter());
         this.filterByMember.put(StaConstants.OBSERVATIONS, createObservationFilter());
-    }
+
+        this.entityPathByProperty.put(StaConstants.PROP_NAME, new SimplePropertyComparator<>(HasName.PROPERTY_NAME));
+        this.entityPathByProperty.put(StaConstants.PROP_DESCRIPTION,
+                                      new SimplePropertyComparator<>(HasDescription.PROPERTY_DESCRIPTION));
+
+        this.entityPathByProperty.put(StaConstants.PROP_OBSERVATION_TYPE,
+                                      new SimplePropertyComparator<AbstractDatasetEntity, String>(FormatEntity.FORMAT) {
+
+                                          /**
+                                           * We need to join the FormatEntity that actually stores our observationType
+                                           * @param root Root DatasetRoot
+                                           * @return Path to specific property
+                                           */
+                                          @Override
+                                          protected Path<String> getPath(Root<AbstractDatasetEntity> root) {
+                                              Join<AbstractDatasetEntity, FormatEntity> join = root
+                                                      .join(AbstractDatasetEntity.PROPERTY_OM_OBSERVATION_TYPE);
+                                              return join.get(this.entityPath);
+                                          }
+                                      });
+
+        this.entityPathByProperty.put(StaConstants.PROP_PHENOMENON_TIME,
+                                      new TimePropertyComparator<>(
+                                              AbstractDatasetEntity.PROPERTY_FIRST_VALUE_AT,
+                                              AbstractDatasetEntity.PROPERTY_LAST_VALUE_AT
+                                      ));
+        this.entityPathByProperty.put(StaConstants.PROP_RESULT_TIME,
+                                      new TimePropertyComparator<>(
+                                              AbstractDatasetEntity.PROPERTY_RESULT_TIME_START,
+                                              AbstractDatasetEntity.PROPERTY_RESULT_TIME_END
+                                      ));
+        //TODO $filter=unitOfMeasurement/symbol eq 'asdf'
+}
 
     @Override
     public Optional<Specification<AbstractDatasetEntity>> isStaEntity() {
@@ -93,7 +130,7 @@ public class DatastreamQuerySpecification extends QuerySpecification<AbstractDat
         return memberSpecification -> (root, query, builder) -> {
             EntityQuery memberQuery = createQuery(IdEntity.PROPERTY_ID,
                                                   ProcedureEntity.class);
-            Subquery< ? > subquery = memberQuery.create(memberSpecification, query, builder);
+            Subquery<?> subquery = memberQuery.create(memberSpecification, query, builder);
             // n..1
             return builder.in(subquery)
                           .value(root.get(AbstractDatasetEntity.PROPERTY_PROCEDURE));
@@ -116,7 +153,7 @@ public class DatastreamQuerySpecification extends QuerySpecification<AbstractDat
         return specification -> (root, query, builder) -> {
             EntityQuery memberQuery = createQuery(IdEntity.PROPERTY_ID,
                                                   PlatformEntity.class);
-            Subquery< ? > subquery = memberQuery.create(specification, query, builder);
+            Subquery<?> subquery = memberQuery.create(specification, query, builder);
             // n..1
             return builder.in(subquery)
                           .value(root.get(AbstractDatasetEntity.PROPERTY_PLATFORM));

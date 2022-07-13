@@ -40,7 +40,7 @@ public abstract class QuerySpecification<T> implements BaseQuerySpecifications<T
         this.filterByMember = new HashMap<>();
         this.entityPathByProperty = new HashMap<>();
         this.entityPathByProperty.put(StaConstants.PROP_ID,
-                                      new PropertyComparator<>(DescribableEntity.PROPERTY_STA_IDENTIFIER));
+                                      new SimplePropertyComparator<>(DescribableEntity.PROPERTY_STA_IDENTIFIER));
     }
 
     public Specification<T> buildSpecification(QueryOptions queryOptions) {

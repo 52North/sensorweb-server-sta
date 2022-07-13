@@ -28,168 +28,104 @@
 
 package org.n52.sta.data.query.specifications;
 
-import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.Expression;
-import javax.persistence.criteria.Path;
-import javax.persistence.criteria.Predicate;
-import javax.persistence.criteria.Root;
 
-import org.n52.shetland.ogc.filter.FilterConstants;
 import org.n52.shetland.ogc.filter.FilterConstants.ComparisonOperator;
 import org.springframework.data.jpa.domain.Specification;
 
-class PropertyComparator<R, T extends Comparable< ? super T>> {
+class TimePropertyComparator<R, T extends Comparable<? super T>> implements PropertyComparator<R, T> {
 
-    protected final String entityPath;
+    private String startProperty;
+    private String endProperty;
 
-    PropertyComparator(String entityPath) {
-        this.entityPath = entityPath;
-    }
-
-    /**
-     * Get a Path to the specified property. May be overwritten if processing of the Root entity (e.g. joining) is
-     * needed to construct the path.
-     * @param root Root
-     * @param operator
-     * @return Path to this.entityPath
-     */
-    protected Path<T> getPath(Root<R> root, ComparisonOperator operator) {
-        return root.get(entityPath);
+    TimePropertyComparator(String startProperty, String endProperty) {
+        this.startProperty = startProperty;
+        this.endProperty = endProperty;
     }
 
     /**
      * Creates a specification that compares the specified right expression to the instance's entity path by
      * using given operator.
      *
-     * @param right
-     *        the entity's property
-     * @param operator
-     *        the comparison operator
+     * @param rightExpr the value to be compared
+     * @param operator  the comparison operator
      * @return a specification comparing entity path and right expression
-     * @throws SpecificationsException
-     *         if comparison fails
-     * @throws ClassCastException
-     *         if the comparison types do not match
-     * @see #compare(Expression, ComparisonOperator, Expression, CriteriaBuilder) for a list of supported
-     *      operators
+     * @throws SpecificationsException if comparison fails
+     * @throws ClassCastException      if the comparison types do not match
      */
-    Specification<R> compareToRight(Expression< ? > right, ComparisonOperator operator) {
+    @Override
+    public Specification<R> compareToRight(Expression<?> rightExpr, ComparisonOperator operator) {
         return (root, query, builder) -> {
-            Path<T> selectPath = getPath(root, operator);
-            Expression<T> rightExpr = castToComparable(right);
-            return compare(selectPath, operator, rightExpr, builder);
+            Expression<T> right = (Expression<T>) rightExpr;
+            Expression<T> startPath = root.get(startProperty);
+            Expression<T> endPath = root.get(endProperty);
+            switch (operator) {
+            case PropertyIsEqualTo:
+                return builder.and(
+                        builder.equal(right, endPath),
+                        builder.equal(right, startPath)
+                );
+            case PropertyIsNotEqualTo:
+                return builder.not(builder.and(
+                        builder.equal(right, endPath),
+                        builder.equal(right, startPath)));
+            case PropertyIsLessThan:
+                return builder.lessThan(startPath, right);
+            case PropertyIsLessThanOrEqualTo:
+                return builder.lessThanOrEqualTo(startPath, right);
+            case PropertyIsGreaterThan:
+                return builder.greaterThan(endPath, right);
+            case PropertyIsGreaterThanOrEqualTo:
+                return builder.greaterThanOrEqualTo(endPath, right);
+            case PropertyIsBetween:
+                // unsupported between
+            default:
+                throw new SpecificationsException("Unsupported comparison operator: '" + operator + "'");
+            }
         };
     }
 
     /**
      * Creates a specification that compares the specified left expression to the instance's entity path by
      * using given operator.
+     * e.g. 2020-12-03T23:00:00.000Z/2022-06-30T21:59:59.000Z gt phenomenonTime
      *
-     * @param left
-     *        the entity's property
-     * @param operator
-     *        the comparison operator
+     * @param leftExpr: the expression to compare to
+     * @param operator  the comparison operator
      * @return a specification comparing entity path and left expression
-     * @throws SpecificationsException
-     *         if comparison fails
-     * @throws ClassCastException
-     *         if the comparison types do not match
-     * @see #compare(Expression, ComparisonOperator, Expression, CriteriaBuilder) for a list of supported
-     *      operators
+     * @throws SpecificationsException if comparison fails
+     * @throws ClassCastException      if the comparison types do not match
      */
-    Specification<R> compareToLeft(Expression< ? > left, ComparisonOperator operator) {
+    @Override
+    public Specification<R> compareToLeft(Expression<?> leftExpr, ComparisonOperator operator) {
         return (root, query, builder) -> {
-            Path<T> selectPath = getPath(root, operator);
-            Expression<T> leftExpr = castToComparable(left);
-            return compare(leftExpr, operator, selectPath, builder);
+            Expression<T> left = (Expression<T>) leftExpr;
+            Expression<T> startPath = root.get(startProperty);
+            Expression<T> endPath = root.get(endProperty);
+            switch (operator) {
+            case PropertyIsEqualTo:
+                return builder.and(
+                        builder.equal(left, endPath),
+                        builder.equal(left, startPath)
+                );
+            case PropertyIsNotEqualTo:
+                return builder.not(builder.and(
+                        builder.equal(left, endPath),
+                        builder.equal(left, startPath)));
+            case PropertyIsLessThan:
+                return builder.lessThan(left, startPath);
+            case PropertyIsLessThanOrEqualTo:
+                return builder.lessThanOrEqualTo(left, startPath);
+            case PropertyIsGreaterThan:
+                return builder.greaterThan(left, endPath);
+            case PropertyIsGreaterThanOrEqualTo:
+                return builder.greaterThanOrEqualTo(left, endPath);
+            case PropertyIsBetween:
+                // unsupported between
+            default:
+                throw new SpecificationsException("Unsupported comparison operator: '" + operator + "'");
+            }
         };
-    }
-
-    /**
-     * Creates a specification that compares two expressions with the specified operator.
-     * <p>
-     * Delegates to {@link #compare(Expression, ComparisonOperator, Expression, CriteriaBuilder)}.
-     *
-     * @param left
-     *        the left expression
-     * @param operator
-     *        the comparison operator
-     * @param right
-     *        the right expression
-     * @return a specification comparing both expressions
-     * @throws ClassCastException
-     *         if the comparison types do not match
-     * @see #compare(Expression, ComparisonOperator, Expression, CriteriaBuilder) for a list of supported
-     *      operators
-     */
-    Specification<T> compare(Expression< ? > left,
-                             FilterConstants.ComparisonOperator operator,
-                             Expression< ? > right) {
-        return (root, query, builder) -> compare(left, operator, right, builder);
-    }
-
-    /**
-     * Creates a predicate that compares two expressions with the specified operator.
-     * <p>
-     * The following {@link FilterConstants.ComparisonOperator operators} are mapped to SQL:
-     * <ul>
-     * <li>{@link ComparisonOperator#PropertyIsEqualTo PropertyIsEqualTo }
-     * <li>{@link ComparisonOperator#PropertyIsNotEqualTo PropertyIsNotEqualTo}
-     * <li>{@link ComparisonOperator#PropertyIsLessThan PropertyIsLessThan}
-     * <li>{@link ComparisonOperator#PropertyIsLessThanOrEqualTo PropertyIsLessThanOrEqualTo}
-     * <li>{@link ComparisonOperator#PropertyIsGreaterThan PropertyIsGreaterThan}
-     * <li>{@link ComparisonOperator#PropertyIsGreaterThanOrEqualTo PropertyIsGreaterThanOrEqualTo}
-     * </ul>
-     * <p>
-     * Throws in case of unsupported operation, for example {@link ComparisonOperator#PropertyIsBetween
-     * PropertyIsBetween}.
-     *
-     * @param <Y>
-     *        the type of the expressions to compare
-     * @param leftExpr
-     *        the left expression
-     * @param operator
-     *        the comparison operator
-     * @param rightExpr
-     *        the right expression
-     * @param builder
-     *        the criteria builder
-     * @return a predicate comparing both expressions, or null
-     * @throws SpecificationsException
-     *         if operator is not supported
-     * @throws ClassCastException
-     *         if the comparison types do not match
-     */
-    <Y extends Comparable< ? super Y>> Predicate compare(Expression< ? > leftExpr,
-                                                         ComparisonOperator operator,
-                                                         Expression< ? > rightExpr,
-                                                         CriteriaBuilder builder)
-            throws SpecificationsException {
-        Expression<Y> left = castToComparable(leftExpr);
-        Expression<Y> right = castToComparable(rightExpr);
-        switch (operator) {
-        case PropertyIsEqualTo:
-            return builder.equal(left, right);
-        case PropertyIsNotEqualTo:
-            return builder.notEqual(left, right);
-        case PropertyIsLessThan:
-            return builder.lessThan(left, right);
-        case PropertyIsLessThanOrEqualTo:
-            return builder.lessThanOrEqualTo(left, right);
-        case PropertyIsGreaterThan:
-            return builder.greaterThan(left, right);
-        case PropertyIsGreaterThanOrEqualTo:
-            return builder.greaterThanOrEqualTo(left, right);
-        case PropertyIsBetween:
-            // unsupported between
-        default:
-            throw new SpecificationsException("Unsupported comparison operator: '" + operator + "'");
-        }
-    }
-
-    @SuppressWarnings("unchecked")
-    private <Y extends Comparable< ? super Y>> Expression<Y> castToComparable(Expression< ? > leftExpr) {
-        return (Expression<Y>) leftExpr;
     }
 
 }
