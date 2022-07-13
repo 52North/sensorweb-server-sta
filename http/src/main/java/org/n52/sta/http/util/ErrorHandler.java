@@ -70,9 +70,7 @@ public class ErrorHandler {
 
     @ExceptionHandler(value = STANotFoundException.class)
     public ResponseEntity<Object> staNotFoundException(STANotFoundException exception) {
-        String msg = createErrorMessage(exception.getClass()
-                                                 .getName(),
-                                        exception.getMessage());
+        String msg = createErrorMessage(exception);
         LOGGER.debug(msg, exception);
         return new ResponseEntity<>(msg,
                                     headers,
@@ -88,9 +86,7 @@ public class ErrorHandler {
         STAInvalidUrlException.class
     })
     public ResponseEntity<Object> staInvalidUrlException(STAInvalidUrlException exception) {
-        String msg = createErrorMessage(exception.getClass()
-                                                 .getName(),
-                                        exception.getMessage());
+        String msg = createErrorMessage(exception);
         LOGGER.debug(msg, exception);
         return new ResponseEntity<>(msg,
                                     headers,
@@ -99,9 +95,7 @@ public class ErrorHandler {
 
     @ExceptionHandler(value = STACRUDException.class)
     public ResponseEntity<Object> staCrudException(STACRUDException exception) {
-        String msg = createErrorMessage(exception.getClass()
-                                                 .getName(),
-                                        exception.getMessage());
+        String msg = createErrorMessage(exception);
         LOGGER.debug(msg, exception);
         return new ResponseEntity<>(msg,
                                     headers,
@@ -112,34 +106,32 @@ public class ErrorHandler {
     @ExceptionHandler(value = {
         IllegalArgumentException.class,
         IllegalStateException.class,
-        Exception.class
+        Exception.class,
+        RuntimeException.class,
+        ProviderException.class
     })
     public ResponseEntity<Object> fallbackException(Exception exception) {
-        String msg = createErrorMessage(exception.getClass()
-                                                 .getName(),
-                                        exception.getMessage());
+        String msg = createErrorMessage(exception);
         LOGGER.error(msg, exception);
-        return new ResponseEntity<>("An internal error occured!",
+        return new ResponseEntity<>(msg,
                                     headers,
                                     HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
-    @ExceptionHandler(value = {
-        RuntimeException.class,
-        ProviderException.class
-    })
-    public void fallbackRuntimeException(RuntimeException exception) {
-        String msg = createErrorMessage(exception.getClass()
-                                                 .getName(),
-                                        exception.getMessage());
-        LOGGER.error(msg, exception);
+    private String createErrorMessage(Exception e) {
+        ObjectNode err = formatError(e);
+        err.put("timestamp", System.currentTimeMillis());
+        return err.toPrettyString();
     }
 
-    private String createErrorMessage(String error, String message) {
+    private ObjectNode formatError(Exception e) {
         ObjectNode root = mapper.createObjectNode();
         root.put("timestamp", System.currentTimeMillis());
-        root.put("error", error);
-        root.put("message", message);
-        return root.toString();
+        root.put("error", e.getClass().getSimpleName());
+        root.put("message", e.getMessage());
+        if (e.getCause() != null) {
+            root.put("cause", formatError((Exception) e.getCause()));
+        }
+        return root;
     }
 }
