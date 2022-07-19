@@ -37,7 +37,5 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface CategoryRepository extends JpaRepository<CategoryEntity, Long> {
 
-    boolean existsByIdentifier(String identifier);
-
     Optional<CategoryEntity> findByIdentifier(String identifier);
 }
