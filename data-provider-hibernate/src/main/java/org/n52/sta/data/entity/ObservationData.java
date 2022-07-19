@@ -44,9 +44,9 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-public class ObservationData<T> extends StaData<DataEntity<T>> implements Observation {
+public class ObservationData extends StaData<DataEntity<?>> implements Observation {
 
-    public ObservationData(DataEntity<T> dataEntity, EntityPropertyMapping parameterProperties) {
+    public ObservationData(DataEntity<?> dataEntity, EntityPropertyMapping parameterProperties) {
         super(dataEntity, parameterProperties);
     }
 
@@ -75,7 +75,7 @@ public class ObservationData<T> extends StaData<DataEntity<T>> implements Observ
             @SuppressWarnings("unchecked")
             Collection<DataEntity< ? >> items = (Collection<DataEntity< ? >>) value;
             return items.stream()
-                        .map(v -> new ObservationData<>(v, propertyMapping))
+                        .map(v -> new ObservationData(v, propertyMapping))
                         .collect(Collectors.toSet());
         } else {
             return value;
