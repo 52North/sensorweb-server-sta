@@ -36,6 +36,6 @@ import org.springframework.stereotype.Repository;
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
  */
 @Repository
-public interface ThingRepository extends BaseRepository<PlatformEntity> {
+public interface PlatformRepository extends BaseRepository<PlatformEntity> {
 
 }

@@ -42,7 +42,7 @@ import org.n52.sta.data.StaEntityPage;
 import org.n52.sta.data.StaPageRequest;
 import org.n52.sta.data.entity.ThingData;
 import org.n52.sta.data.query.specifications.ThingQuerySpecification;
-import org.n52.sta.data.repositories.entity.ThingRepository;
+import org.n52.sta.data.repositories.entity.PlatformRepository;
 import org.n52.sta.data.support.ThingGraphBuilder;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -50,10 +50,10 @@ import org.springframework.data.jpa.domain.Specification;
 
 public class ThingEntityProvider extends BaseEntityProvider<Thing> {
 
-    private final ThingRepository thingRepository;
+    private final PlatformRepository thingRepository;
     private final ThingQuerySpecification rootSpecification;
 
-    public ThingEntityProvider(ThingRepository thingRepository, EntityPropertyMapping propertyMapping) {
+    public ThingEntityProvider(PlatformRepository thingRepository, EntityPropertyMapping propertyMapping) {
         super(propertyMapping);
         Objects.requireNonNull(thingRepository, "thingRepository must not be null");
         this.thingRepository = thingRepository;

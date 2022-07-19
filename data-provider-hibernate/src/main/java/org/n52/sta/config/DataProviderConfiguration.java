@@ -44,7 +44,7 @@ import org.n52.sta.data.repositories.entity.LocationRepository;
 import org.n52.sta.data.repositories.entity.ObservationRepository;
 import org.n52.sta.data.repositories.entity.PhenomenonRepository;
 import org.n52.sta.data.repositories.entity.ProcedureRepository;
-import org.n52.sta.data.repositories.entity.ThingRepository;
+import org.n52.sta.data.repositories.entity.PlatformRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -59,7 +59,7 @@ public class DataProviderConfiguration {
     private EntityPropertyMapping propertyMapping;
 
     @Bean
-    public ThingEntityProvider thingEntityProvider(ThingRepository repository) {
+    public ThingEntityProvider thingEntityProvider(PlatformRepository repository) {
         return new ThingEntityProvider(repository, propertyMapping);
     }
 
