@@ -48,7 +48,7 @@ import org.n52.svalbard.odata.core.QueryOptionsFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class LocationService implements EntityService<Location> {
+public class LocationService extends EntityService<Location> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(LocationService.class);
 

@@ -36,12 +36,12 @@ import org.n52.sta.api.ProviderException;
 import org.n52.sta.api.entity.Identifiable;
 import org.n52.svalbard.odata.core.QueryOptionsFactory;
 
-public interface EntityService<T extends Identifiable> extends EntityProvider<T>, EntityEditor<T> {
+public abstract class EntityService<T extends Identifiable> implements EntityProvider<T>, EntityEditor<T> {
 
     // intermediary interface to let Spring differentiate
     // between EntityService and DomainService
 
-    default Optional<T> getEntity(String id) throws ProviderException {
+    public Optional<T> getEntity(String id) throws ProviderException {
         return getEntity(id, QueryOptionsFactory.createEmpty());
     }
 

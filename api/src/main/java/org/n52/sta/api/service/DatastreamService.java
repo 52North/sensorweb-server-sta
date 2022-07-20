@@ -46,7 +46,7 @@ import org.n52.svalbard.odata.core.QueryOptionsFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class DatastreamService implements EntityService<Datastream> {
+public class DatastreamService extends EntityService<Datastream> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DatastreamService.class);
 
