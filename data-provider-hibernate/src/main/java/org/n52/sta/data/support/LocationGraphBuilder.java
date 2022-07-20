@@ -56,14 +56,14 @@ public final class LocationGraphBuilder extends GraphBuilder<LocationEntity> {
     @Override
     public void addExpanded(ExpandItem expandItem) {
         switch (expandItem.getPath()) {
-        case StaConstants.HISTORICAL_LOCATIONS:
-            addGraphText(GraphText.GRAPH_HIST_LOCATIONS);
-            break;
-        case StaConstants.THINGS:
-            addGraphText(GraphText.GRAPH_PLATFORMS);
-            break;
-        default:
-            // no expand
+            case StaConstants.HISTORICAL_LOCATIONS:
+                addGraphText(GraphText.GRAPH_HIST_LOCATIONS);
+                break;
+            case StaConstants.THINGS:
+                addGraphText(GraphText.GRAPH_PLATFORMS);
+                break;
+            default:
+                // no expand
         }
     }
 

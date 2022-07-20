@@ -82,7 +82,7 @@ public class HistoricalLocationEntityProvider extends BaseEntityProvider<Histori
     }
 
     private Optional<HistoricalLocation> getEntity(Specification<HistoricalLocationEntity> spec,
-                                                   HistoricalLocationGraphBuilder graphBuilder) {
+            HistoricalLocationGraphBuilder graphBuilder) {
         Optional<HistoricalLocationEntity> datastream = historicalLocationRepository.findOne(spec, graphBuilder);
         return datastream.map(entity -> new HistoricalLocationData(entity, propertyMapping));
     }

@@ -57,17 +57,17 @@ public final class ThingGraphBuilder extends GraphBuilder<PlatformEntity> {
     public void addExpanded(ExpandItem expandItem) {
         if (expandItem != null) {
             switch (expandItem.getPath()) {
-            case StaConstants.HISTORICAL_LOCATIONS:
-                addGraphText(GraphText.GRAPH_HIST_LOCATIONS);
-                break;
-            case StaConstants.DATASTREAMS:
-                addGraphText(GraphText.GRAPH_DATASETS);
-                break;
-            case StaConstants.LOCATIONS:
-                addGraphText(GraphText.GRAPH_LOCATIONS);
-                break;
-            default:
-                // no expand
+                case StaConstants.HISTORICAL_LOCATIONS:
+                    addGraphText(GraphText.GRAPH_HIST_LOCATIONS);
+                    break;
+                case StaConstants.DATASTREAMS:
+                    addGraphText(GraphText.GRAPH_DATASETS);
+                    break;
+                case StaConstants.LOCATIONS:
+                    addGraphText(GraphText.GRAPH_LOCATIONS);
+                    break;
+                default:
+                    // no expand
             }
         }
     }

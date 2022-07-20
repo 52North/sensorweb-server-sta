@@ -36,8 +36,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-
 import org.n52.shetland.ogc.sta.exception.STACRUDException;
 import org.n52.shetland.ogc.sta.exception.STANotFoundException;
 import org.n52.sta.api.old.AbstractSensorThingsEntityService;
@@ -59,12 +57,14 @@ import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 /**
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
  */
 // @RestController
-// @ConditionalOnProperty(value = "server.feature.http.read-Only", havingValue = "false", matchIfMissing =
-// true)
+// @ConditionalOnProperty(value = "server.feature.http.writable", havingValue = "true", matchIfMissing =
+// false)
 // @Profile(StaConstants.STAPLUS)
 @SuppressWarnings("checkstyle:linelength")
 public class CitSciMultipartObservationRequestHandler {

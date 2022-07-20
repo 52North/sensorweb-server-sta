@@ -82,7 +82,7 @@ public class FeatureOfInterestEntityProvider extends BaseEntityProvider<FeatureO
     }
 
     private Optional<FeatureOfInterest> getEntity(Specification<AbstractFeatureEntity> specification,
-                                                  FeatureOfInterestGraphBuilder graphBuilder) {
+            FeatureOfInterestGraphBuilder graphBuilder) {
         Optional<AbstractFeatureEntity> datastream = featureOfInterestRepository.findOne(specification, graphBuilder);
         return datastream.map(entity -> new FeatureOfInterestData(entity, propertyMapping));
     }

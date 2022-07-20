@@ -54,6 +54,7 @@ import org.n52.series.db.beans.DataEntity;
 import org.n52.series.db.beans.Dataset;
 import org.n52.series.db.beans.DatasetAggregationEntity;
 import org.n52.series.db.beans.DatasetEntity;
+import org.n52.series.db.beans.PlatformEntity;
 import org.n52.series.db.beans.QuantityDataEntity;
 import org.n52.series.db.beans.TextDataEntity;
 import org.n52.series.db.beans.parameter.observation.ObservationParameterEntity;
@@ -301,10 +302,7 @@ public class ObservationService
                                                                                               .getStaIdentifier(),
                                                                                         EntityGraphRepository.FetchGraph.FETCHGRAPH_FEATURE)
                                                                    .orElseThrow(() -> new STACRUDException("Unable to find Datastream!"));
-                AbstractFeatureEntity< ? > feature = createOrfetchFeature(observation,
-                                                                          datastream.getPlatform()
-                                                                                    .getId());
-
+                
                 // Check all subdatasets for a matching dataset
                 Set<DatasetEntity> datasets;
                 if (datastream.getAggregation() == null && !(datastream instanceof DatasetAggregationEntity)) {
@@ -316,8 +314,11 @@ public class ObservationService
                                                    .map(d -> (DatasetEntity) d)
                                                    .collect(Collectors.toSet());
                 }
-
+                
                 // Check all datasets for a matching FOI
+                PlatformEntity platform = datastream.getPlatform();
+                AbstractFeatureEntity< ? > feature = createOrfetchFeature(observation, platform.getId());
+                
                 boolean found = false;
                 for (DatasetEntity dataset : datasets) {
                     if (!dataset.hasFeature()) {

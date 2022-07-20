@@ -59,18 +59,18 @@ public final class DatastreamGraphBuilder extends GraphBuilder<AbstractDatasetEn
     public void addExpanded(ExpandItem expandItem) {
         if (expandItem != null) {
             switch (expandItem.getPath()) {
-            case StaConstants.SENSOR:
-                addGraphText(GraphText.GRAPH_PROCEDURE);
-                break;
-            case StaConstants.THING:
-                addGraphText(GraphText.GRAPH_PLATFORM);
-                break;
-            case StaConstants.OBSERVED_PROPERTY:
-                addGraphText(GraphText.GRAPH_PHENOMENON);
-                break;
-            case StaConstants.OBSERVATIONS:
-            default:
-                // no expand
+                case StaConstants.SENSOR:
+                    addGraphText(GraphText.GRAPH_PROCEDURE);
+                    break;
+                case StaConstants.THING:
+                    addGraphText(GraphText.GRAPH_PLATFORM);
+                    break;
+                case StaConstants.OBSERVED_PROPERTY:
+                    addGraphText(GraphText.GRAPH_PHENOMENON);
+                    break;
+                case StaConstants.OBSERVATIONS:
+                default:
+                    // no expand
             }
         }
     }

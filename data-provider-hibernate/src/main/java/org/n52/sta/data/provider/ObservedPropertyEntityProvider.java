@@ -82,7 +82,7 @@ public class ObservedPropertyEntityProvider extends BaseEntityProvider<ObservedP
     }
 
     private Optional<ObservedProperty> getEntity(Specification<PhenomenonEntity> spec,
-                                                 ObservedPropertyGraphBuilder graphBuilder) {
+            ObservedPropertyGraphBuilder graphBuilder) {
         Optional<PhenomenonEntity> platform = observedPropertyRepository.findOne(spec, graphBuilder);
         return platform.map(entity -> new ObservedPropertyData(entity, propertyMapping));
     }

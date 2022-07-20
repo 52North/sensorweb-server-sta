@@ -81,7 +81,7 @@ public class DatastreamEntityProvider extends BaseEntityProvider<Datastream> {
     }
 
     private Optional<Datastream> getEntity(Specification<AbstractDatasetEntity> specification,
-                                           DatastreamGraphBuilder graphBuilder) {
+            DatastreamGraphBuilder graphBuilder) {
         Optional<AbstractDatasetEntity> datastream = datastreamRepository.findOne(specification, graphBuilder);
         return datastream.map(entity -> new DatastreamData(entity, propertyMapping));
     }

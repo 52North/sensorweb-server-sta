@@ -82,7 +82,7 @@ public class ObservationEntityProvider extends BaseEntityProvider<Observation> {
     }
 
     private Optional<Observation> getEntity(Specification<DataEntity< ? >> spec,
-                                            ObservationGraphBuilder graphBuilder) {
+            ObservationGraphBuilder graphBuilder) {
         Optional<DataEntity< ? >> platform = observationRepository.findOne(spec, graphBuilder);
         return platform.map(entity -> new ObservationData(entity, propertyMapping));
     }

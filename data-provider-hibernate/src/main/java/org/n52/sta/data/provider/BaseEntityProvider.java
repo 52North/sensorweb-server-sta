@@ -42,7 +42,7 @@ public abstract class BaseEntityProvider<T extends Identifiable> implements Enti
         Objects.requireNonNull(propertyMapping, "propertyMapping must not be null!");
         this.propertyMapping = propertyMapping;
     }
-
+    
     /**
      * Assert that id is neither null or empty.
      *

@@ -104,8 +104,8 @@ public interface BaseQuerySpecifications<T> {
      *      operators
      */
     <Y extends Comparable< ? super Y>> Specification<T> compare(Expression< ? extends Y> left,
-                                                                Expression< ? extends Y> right,
-                                                                FilterConstants.ComparisonOperator operator);
+            Expression< ? extends Y> right,
+            FilterConstants.ComparisonOperator operator);
 
     /**
      * Creates a predicate that compares two expressions with the specified operator.
@@ -137,9 +137,9 @@ public interface BaseQuerySpecifications<T> {
      * @return a predicate comparing both expressions, or null
      */
     <Y extends Comparable< ? super Y>> Predicate compare(Expression< ? extends Y> left,
-                                                         Expression< ? extends Y> right,
-                                                         FilterConstants.ComparisonOperator operator,
-                                                         CriteriaBuilder builder);
+            Expression< ? extends Y> right,
+            FilterConstants.ComparisonOperator operator,
+            CriteriaBuilder builder);
 
     /**
      * Applies given specification on a member of the root entity.

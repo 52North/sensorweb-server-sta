@@ -64,52 +64,52 @@ public class QuerySpecificationFactory {
     public static BaseQuerySpecifications< ? > createSpecification(String name)
             throws STAInvalidFilterExpressionException {
         switch (name) {
-        case "PlatformEntity":
-        case "Thing":
-        case "Things": {
-            return new ThingQuerySpecification();
-        }
-        case "LocationEntity":
-        case "Location":
-        case "Locations": {
-            return new LocationQuerySpecification();
-        }
-        case "HistoricalLocationEntity":
-        case "HistoricalLocation":
-        case "HistoricalLocations": {
-            return new HistoricalLocationQuerySpecification();
-        }
-        case "AbstractDatasetEntity":
-        case "DatasetEntity":
-        case "DatasetAggregationEntity":
-        case "Datastream":
-        case "Datastreams": {
-            return new DatastreamQuerySpecification();
-        }
-        case "ProcedureEntity":
-        case "Sensor":
-        case "Sensors": {
-            return new SensorQuerySpecification();
-        }
-        case "ObservationEntity":
-        case "DataEntity":
-        case "Observation":
-        case "Observations": {
-            return new ObservationQuerySpecification();
-        }
-        case "FeatureEntity":
-        case "AbstractFeatureEntity":
-        case "FeatureOfInterest":
-        case "FeaturesOfInterest": {
-            return new FeatureOfInterestQuerySpecification();
-        }
-        case "PhenomenonEntity":
-        case "ObservedProperty":
-        case "ObservedProperties": {
-            return new ObservedPropertyQuerySpecification();
-        }
-        default:
-            throw new STAInvalidFilterExpressionException("Unable to find QuerySpecification for type: " + name);
+            case "PlatformEntity":
+            case "Thing":
+            case "Things": {
+                return new ThingQuerySpecification();
+            }
+            case "LocationEntity":
+            case "Location":
+            case "Locations": {
+                return new LocationQuerySpecification();
+            }
+            case "HistoricalLocationEntity":
+            case "HistoricalLocation":
+            case "HistoricalLocations": {
+                return new HistoricalLocationQuerySpecification();
+            }
+            case "AbstractDatasetEntity":
+            case "DatasetEntity":
+            case "DatasetAggregationEntity":
+            case "Datastream":
+            case "Datastreams": {
+                return new DatastreamQuerySpecification();
+            }
+            case "ProcedureEntity":
+            case "Sensor":
+            case "Sensors": {
+                return new SensorQuerySpecification();
+            }
+            case "ObservationEntity":
+            case "DataEntity":
+            case "Observation":
+            case "Observations": {
+                return new ObservationQuerySpecification();
+            }
+            case "FeatureEntity":
+            case "AbstractFeatureEntity":
+            case "FeatureOfInterest":
+            case "FeaturesOfInterest": {
+                return new FeatureOfInterestQuerySpecification();
+            }
+            case "PhenomenonEntity":
+            case "ObservedProperty":
+            case "ObservedProperties": {
+                return new ObservedPropertyQuerySpecification();
+            }
+            default:
+                throw new STAInvalidFilterExpressionException("Unable to find QuerySpecification for type: " + name);
         }
     }
 

@@ -54,9 +54,10 @@ public class HibernateConfiguration {
 
     @Bean
     @SuppressWarnings("checkstyle:linelength")
-    public EntityManagerFactory entityManagerFactory(@Value("${database.jpa.persistence-location}") String persistenceXmlLocation,
-                                                     DataSource datasource,
-                                                     JpaProperties properties) {
+    public EntityManagerFactory entityManagerFactory(
+            @Value("${database.jpa.persistence-location}") String persistenceXmlLocation,
+            DataSource datasource,
+            JpaProperties properties) {
         LocalContainerEntityManagerFactoryBean emf = new LocalContainerEntityManagerFactoryBean();
         emf.setJpaVendorAdapter(new HibernateJpaVendorAdapter());
         emf.setJpaPropertyMap(addCustomTypes(properties));

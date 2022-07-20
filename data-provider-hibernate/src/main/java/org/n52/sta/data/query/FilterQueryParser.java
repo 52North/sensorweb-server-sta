@@ -68,7 +68,7 @@ public final class FilterQueryParser {
     private static final Logger LOGGER = LoggerFactory.getLogger(FilterQueryParser.class);
 
     public static <E> Specification<E> parse(QueryOptions options,
-                                             BaseQuerySpecifications<E> specs) {
+            BaseQuerySpecifications<E> specs) {
         return (root, query, builder) -> {
             FilterQueryRoot<E> filterRoot = new FilterQueryRoot<>(root, query, specs);
             FilterQueryVisitor<E> visitor = new FilterQueryVisitor<>(filterRoot, builder);
@@ -173,8 +173,8 @@ public final class FilterQueryParser {
         }
 
         private Predicate compareMemberOnLeft(String member,
-                                              ComparisonOperator operator,
-                                              Expr right)
+                ComparisonOperator operator,
+                Expr right)
                 throws FilterQueryException {
             Expression<?> rightExpr = right.accept(this);
             return rootSpecification.compareProperty(member, operator, rightExpr)

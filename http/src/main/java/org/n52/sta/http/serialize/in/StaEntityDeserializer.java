@@ -57,7 +57,7 @@ public class StaEntityDeserializer<T extends Identifiable> extends StdDeserializ
     private static final Logger LOGGER = LoggerFactory.getLogger(StaEntityDeserializer.class);
 
     private final BiFunction<JsonNode, ObjectMapper, ? extends Identifiable> instanceFactory;
-    
+
     private final ObjectMapper mapper;
 
     public StaEntityDeserializer(Class<T> entityType, ObjectMapper mapper) {

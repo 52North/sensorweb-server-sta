@@ -1,3 +1,4 @@
+
 package org.n52.sta.api;
 
 public class EditorException extends Exception {
