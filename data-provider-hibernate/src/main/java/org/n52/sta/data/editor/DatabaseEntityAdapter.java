@@ -3,6 +3,7 @@ package org.n52.sta.data.editor;
 
 import java.util.Objects;
 import java.util.Optional;
+import java.util.UUID;
 
 import org.n52.series.db.beans.DescribableEntity;
 import org.n52.sta.api.EditorException;
@@ -19,6 +20,13 @@ abstract class DatabaseEntityAdapter<T extends DescribableEntity> {
         this.serviceLookup = serviceLookup;
     }
 
+    protected abstract Optional<T> getEntity(String id);
+
+    protected String generateId() {
+        UUID uuid = UUID.randomUUID();
+        return uuid.toString();
+    }
+    
     protected <E extends Identifiable> E getOrSaveMandatory(E input, Class<E> type) throws EditorException {
         if (input == null) {
             String typeName = type.getSimpleName();
@@ -26,7 +34,7 @@ abstract class DatabaseEntityAdapter<T extends DescribableEntity> {
         }
         return getOrSave(input, type);
     }
-
+    
     protected <E extends Identifiable> Optional<E> getOrSaveOptional(E input, Class<E> type) throws EditorException {
         return input == null
                 ? Optional.empty()

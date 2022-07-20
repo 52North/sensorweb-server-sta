@@ -30,56 +30,60 @@ public class ValueHelper {
     private UnitRepository unitRepository;
 
     public void setStartTime(Consumer<Date> setter, Time time) {
-        if (TimePeriod.class.isAssignableFrom(time.getClass())) {
+        if (time instanceof TimeInstant) {
+            setTime(setter, time);
+        } else {
             TimePeriod period = (TimePeriod) time;
             DateTime startTime = period.getStart();
-            setter.accept(startTime.toDate());
-        } else {
-            TimeInstant instant = (TimeInstant) time;
-            DateTime startTime = instant.getValue();
             setter.accept(startTime.toDate());
         }
     }
 
     public void setEndTime(Consumer<Date> setter, Time time) {
-        if (TimePeriod.class.isAssignableFrom(time.getClass())) {
+        if (time instanceof TimeInstant) {
+            setTime(setter, time);
+        } else {
             TimePeriod period = (TimePeriod) time;
             DateTime endTime = period.getEnd();
             setter.accept(endTime.toDate());
-        } else {
-            TimeInstant instant = (TimeInstant) time;
-            DateTime startTime = instant.getValue();
-            setter.accept(startTime.toDate());
         }
     }
 
+    public void setTime(Consumer<Date> setter, Time time) {
+        TimeInstant instant = (TimeInstant) time;
+        DateTime startTime = instant.getValue();
+        setter.accept(startTime.toDate());
+    }
+
     @Transactional(value = TxType.REQUIRES_NEW)
-    public FormatEntity getOrSaveFormat(String format) {
+    public void setFormat(Consumer<FormatEntity> setter, String format) {
         Objects.requireNonNull(format, "format must not be null");
         Optional<FormatEntity> entity = formatRepository.findByFormat(format);
         if (entity.isPresent()) {
-            return entity.get();
+            setter.accept(entity.get());
         }
 
         FormatEntity formatEntity = new FormatEntity();
         formatEntity.setFormat(format);
-        return formatRepository.save(formatEntity);
+        FormatEntity savedEntity = formatRepository.save(formatEntity);
+        setter.accept(savedEntity);
     }
 
     @Transactional(value = TxType.REQUIRES_NEW)
-    public UnitEntity getOrSaveUnit(Datastream.UnitOfMeasurement uom) {
+    public void setUnit(Consumer<UnitEntity> setter, Datastream.UnitOfMeasurement uom) {
         Objects.requireNonNull(uom, "uom must not be null");
         String symbol = uom.getSymbol();
-        Optional<UnitEntity> unit = unitRepository.findBySymbol(symbol);
-        if (unit.isPresent()) {
-            return unit.get();
+        Optional<UnitEntity> entity = unitRepository.findBySymbol(symbol);
+        if (entity.isPresent()) {
+            setter.accept(entity.get());
         }
 
         UnitEntity unitEntity = new UnitEntity();
         unitEntity.setLink(uom.getDefinition());
         unitEntity.setName(uom.getName());
         unitEntity.setSymbol(symbol);
-        return unitRepository.save(unitEntity);
+        UnitEntity savedUnit = unitRepository.save(unitEntity);
+        setter.accept(savedUnit);
     }
 
 }

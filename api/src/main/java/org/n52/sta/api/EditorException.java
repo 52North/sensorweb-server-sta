@@ -1,7 +1,7 @@
 
 package org.n52.sta.api;
 
-public class EditorException extends Exception {
+public class EditorException extends RuntimeException {
 
     private static final long serialVersionUID = 3628980884160012470L;
 
