@@ -68,7 +68,7 @@ public class EntityServiceConfiguration {
         ThingService service = thingDomainService.isPresent()
                 ? new ThingService(entityProvider, thingDomainService.get())
                 : new ThingService(entityProvider);
-        serviceLookup.addItem(Thing.class, service);
+        serviceLookup.addEntityService(Thing.class, service);
         return service;
     }
 
@@ -77,7 +77,7 @@ public class EntityServiceConfiguration {
             Optional<EntityEditor<Datastream>> entityEditor) {
         DatastreamService service = new DatastreamService(entityProvider);
         entityEditor.ifPresent(service::setDatastreamEditor);
-        serviceLookup.addItem(Datastream.class, service);
+        serviceLookup.addEntityService(Datastream.class, service);
         return service;
     }
 
@@ -87,7 +87,7 @@ public class EntityServiceConfiguration {
         SensorService service = sensorDomainService.isPresent()
                 ? new SensorService(entityProvider, sensorDomainService.get())
                 : new SensorService(entityProvider);
-        serviceLookup.addItem(Sensor.class, service);
+        serviceLookup.addEntityService(Sensor.class, service);
         return service;
     }
 
@@ -97,7 +97,7 @@ public class EntityServiceConfiguration {
         LocationService service = locationDomainService.isPresent()
                 ? new LocationService(entityProvider, locationDomainService.get())
                 : new LocationService(entityProvider);
-        serviceLookup.addItem(Location.class, service);
+        serviceLookup.addEntityService(Location.class, service);
         return service;
     }
 
