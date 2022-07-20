@@ -33,7 +33,6 @@ import java.util.Optional;
 import org.n52.sta.api.EntityEditor;
 import org.n52.sta.api.EntityProvider;
 import org.n52.sta.api.EntityServiceLookup;
-import org.n52.sta.api.EntityEditorLookup;
 import org.n52.sta.api.domain.DomainService;
 import org.n52.sta.api.entity.Datastream;
 import org.n52.sta.api.entity.FeatureOfInterest;

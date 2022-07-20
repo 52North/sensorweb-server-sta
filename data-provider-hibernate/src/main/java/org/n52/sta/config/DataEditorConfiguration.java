@@ -29,7 +29,6 @@
 package org.n52.sta.config;
 
 import org.n52.sta.api.EntityEditor;
-import org.n52.sta.api.EntityEditorLookup;
 import org.n52.sta.api.EntityServiceLookup;
 import org.n52.sta.api.entity.Datastream;
 import org.n52.sta.data.editor.DatastreamEntityEditor;
@@ -49,14 +48,9 @@ public class DataEditorConfiguration {
     @Autowired
     private EntityServiceLookup serviceLookup;
     
-    @Autowired
-    private EntityEditorLookup editorLookup;
-    
     @Bean
     public EntityEditor<Datastream> datastreamEntityEditor() {
-        DatastreamEntityEditor editor = new DatastreamEntityEditor(serviceLookup, editorLookup);
-        editorLookup.addEntityEditor(Datastream.class, editor);
-        return editor;
+        return new DatastreamEntityEditor(serviceLookup);
     }
     
     // TODO add missing editors

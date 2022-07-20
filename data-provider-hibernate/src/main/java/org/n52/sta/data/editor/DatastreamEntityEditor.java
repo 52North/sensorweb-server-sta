@@ -19,7 +19,6 @@ import org.n52.series.db.beans.parameter.dataset.DatasetTextParameterEntity;
 import org.n52.shetland.ogc.gml.time.Time;
 import org.n52.sta.api.EditorException;
 import org.n52.sta.api.EntityEditor;
-import org.n52.sta.api.EntityEditorLookup;
 import org.n52.sta.api.EntityServiceLookup;
 import org.n52.sta.api.domain.aggregate.DatastreamAggregate;
 import org.n52.sta.api.domain.aggregate.SensorAggregate;
@@ -51,8 +50,11 @@ public class DatastreamEntityEditor extends DatabaseEntityAdapter<AbstractDatase
     @Autowired
     private ValueHelper valueHelper;
 
-    public DatastreamEntityEditor(EntityServiceLookup serviceLookup, EntityEditorLookup editorLookup) {
-        super(serviceLookup, editorLookup);
+    @Autowired
+    private EntityPropertyMapping propertyMapping;
+
+    public DatastreamEntityEditor(EntityServiceLookup serviceLookup) {
+        super(serviceLookup);
 
         // TODO feature toggles, e.g. mobile, FOI-update, ...
     }

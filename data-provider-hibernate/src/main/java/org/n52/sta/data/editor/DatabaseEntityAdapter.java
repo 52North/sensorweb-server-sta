@@ -6,8 +6,6 @@ import java.util.Optional;
 
 import org.n52.series.db.beans.DescribableEntity;
 import org.n52.sta.api.EditorException;
-import org.n52.sta.api.EntityEditor;
-import org.n52.sta.api.EntityEditorLookup;
 import org.n52.sta.api.EntityServiceLookup;
 import org.n52.sta.api.entity.Identifiable;
 import org.n52.sta.api.service.EntityService;
@@ -16,13 +14,9 @@ abstract class DatabaseEntityAdapter<T extends DescribableEntity> {
 
     private final EntityServiceLookup serviceLookup;
 
-    private final EntityEditorLookup editorLookup;
-
-    protected DatabaseEntityAdapter(EntityServiceLookup serviceLookup, EntityEditorLookup editorLookup) {
+    protected DatabaseEntityAdapter(EntityServiceLookup serviceLookup) {
         Objects.requireNonNull(serviceLookup, "serviceLookup must not be null");
-        Objects.requireNonNull(editorLookup, "editorLookup must not be null");
         this.serviceLookup = serviceLookup;
-        this.editorLookup = editorLookup;
     }
 
     protected <E extends Identifiable> E getOrSaveMandatory(E input, Class<E> type) throws EditorException {
@@ -56,12 +50,4 @@ abstract class DatabaseEntityAdapter<T extends DescribableEntity> {
                             });
     }
 
-    protected <E extends Identifiable> EntityEditor<E> getEditor(Class<E> entityType) {
-        return editorLookup.getEditor(entityType)
-                           .orElseThrow(() -> {
-                               String msg = String.format("No registered editor found for '%s'",
-                                                          entityType.getSimpleName());
-                               return new IllegalStateException(msg);
-                           });
-    }
 }
