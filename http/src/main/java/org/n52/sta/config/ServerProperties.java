@@ -49,8 +49,10 @@ public class ServerProperties {
     private Boolean implicitExpand;
     private Boolean updateFOI;
     private Boolean variableEncodingType;
-    private Boolean isMobile;
     private Map<String, String> observation;
+
+    @Deprecated
+    private Boolean isMobile;
 
     public Boolean getImplicitExpand() {
         return implicitExpand;
@@ -76,10 +78,12 @@ public class ServerProperties {
         this.variableEncodingType = variableEncodingType;
     }
 
+    @Deprecated
     public Boolean getIsMobile() {
         return isMobile;
     }
 
+    @Deprecated
     public void setIsMobile(Boolean mobile) {
         isMobile = mobile;
     }
