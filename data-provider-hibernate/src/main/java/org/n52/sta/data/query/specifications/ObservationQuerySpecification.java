@@ -40,7 +40,7 @@ import org.n52.series.db.beans.FeatureEntity;
 import org.n52.shetland.ogc.sta.StaConstants;
 import org.springframework.data.jpa.domain.Specification;
 
-public class ObservationQuerySpecification extends QuerySpecification<DataEntity<?>> {
+public class ObservationQuerySpecification extends QuerySpecification<DataEntity> {
 
     public ObservationQuerySpecification() {
         super();
@@ -49,7 +49,7 @@ public class ObservationQuerySpecification extends QuerySpecification<DataEntity
     }
 
     @Override
-    public Optional<Specification<DataEntity<?>>> isStaEntity() {
+    public Optional<Specification<DataEntity>> isStaEntity() {
         return Optional.of((root, query, builder) -> builder.isNull(root.get(DataEntity.PROPERTY_PARENT)));
     }
 

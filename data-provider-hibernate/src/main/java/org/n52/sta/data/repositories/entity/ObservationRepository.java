@@ -35,11 +35,11 @@ import org.n52.sta.data.repositories.BaseRepository;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface ObservationRepository<T extends DataEntity< ? >> extends BaseRepository<T> {
+public interface ObservationRepository extends BaseRepository<DataEntity> {
 
-    DataEntity<T> findFirstByDataset_idOrderBySamplingTimeStartAsc(Long datasetIdentifier);
+    DataEntity<DataEntity> findFirstByDataset_idOrderBySamplingTimeStartAsc(Long datasetIdentifier);
 
-    DataEntity<T> findFirstByDataset_idOrderBySamplingTimeEndDesc(Long datasetIdentifier);
+    DataEntity<DataEntity> findFirstByDataset_idOrderBySamplingTimeEndDesc(Long datasetIdentifier);
 
     void deleteAllByDatasetIdIn(Set<Long> datasetId);
 }

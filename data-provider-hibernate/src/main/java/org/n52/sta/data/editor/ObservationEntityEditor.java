@@ -37,7 +37,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 public class ObservationEntityEditor extends DatabaseEntityAdapter<DataEntity> implements EntityEditor<Observation> {
 
     @Autowired
-    private ObservationRepository<DataEntity> observationRepository;
+    private ObservationRepository observationRepository;
 
     @Autowired
     private DatastreamEntityEditor datastreamEditor;

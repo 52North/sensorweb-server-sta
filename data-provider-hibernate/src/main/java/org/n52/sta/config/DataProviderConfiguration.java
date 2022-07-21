@@ -89,7 +89,7 @@ public class DataProviderConfiguration {
     }
 
     @Bean
-    public ObservationEntityProvider observationEntityProvider(ObservationRepository< ? > repository) {
+    public ObservationEntityProvider observationEntityProvider(ObservationRepository repository) {
         return new ObservationEntityProvider(repository, propertyMapping);
     }
 
