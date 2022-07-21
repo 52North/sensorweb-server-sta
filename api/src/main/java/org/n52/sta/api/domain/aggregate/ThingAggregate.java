@@ -84,7 +84,7 @@ public class ThingAggregate extends EntityAggregate<Thing> implements Thing {
         Map<String, Object> properties = thing.getProperties();
         if (properties.containsKey(PROPERTY_IS_MOBILE)) {
             Object value = properties.get(PROPERTY_IS_MOBILE);
-            return Boolean.class.isAssignableFrom(value.getClass())
+            return value instanceof Boolean
                     ? (boolean) properties.get(PROPERTY_IS_MOBILE)
                     : false;
         }

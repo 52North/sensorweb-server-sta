@@ -127,6 +127,13 @@ public class DatastreamEntityEditor extends DatabaseEntityAdapter<AbstractDatase
                .findFirst()
                .ifPresentOrElse(o -> dataset.setObservationType(getObservationType(o)),
                                 () -> dataset.setObservationType(ObservationType.not_initialized));
+        
+        // TODO create aggregate on multiple FOIs <- observation
+        
+        // TODO update first/last observation
+        //  -> decoupling via updateFirstLastObservationHandler?
+        //  -> enable event handling
+        
         dataset.setObservations(observationEditor.saveAll(observations, dataset));
 
         // parameters are saved as cascade

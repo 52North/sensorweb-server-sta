@@ -28,6 +28,7 @@ import org.n52.sta.api.EntityServiceLookup;
 import org.n52.sta.api.entity.Datastream;
 import org.n52.sta.api.entity.Observation;
 import org.n52.sta.config.EntityPropertyMapping;
+import org.n52.sta.data.entity.DatastreamData;
 import org.n52.sta.data.entity.ObservationData;
 import org.n52.sta.data.repositories.entity.ObservationRepository;
 import org.n52.sta.data.support.GraphBuilder;
@@ -96,9 +97,10 @@ public class ObservationEntityEditor extends DatabaseEntityAdapter<DataEntity> i
     }
 
     private AbstractDatasetEntity getDatastreamOf(Observation entity) throws EditorException {
-        Datastream datastream = getOrSaveMandatory(entity.getDatastream(), Datastream.class);
-        return datastreamEditor.getEntity(datastream.getId())
-                               .orElseThrow(() -> new IllegalStateException("Datastream not found for Observation!"));
+        DatastreamData datastream = (DatastreamData) getOrSaveMandatory(entity.getDatastream(), Datastream.class);
+        return datastream.getData();
+//        return datastreamEditor.getEntity(datastream.getId())
+//                               .orElseThrow(() -> new IllegalStateException("Datastream not found for Observation!"));
     }
 
     private DataEntity< ? > createEntity(Observation observation, DatasetEntity datasetEntity) throws EditorException {
