@@ -39,6 +39,8 @@ import org.n52.sta.api.entity.Thing;
 
 public class ThingAggregate extends EntityAggregate<Thing> implements Thing {
 
+    private static final String PROPERTY_IS_MOBILE = "isMobile";
+
     private final Thing thing;
 
     public ThingAggregate(Thing thing) {
@@ -80,10 +82,10 @@ public class ThingAggregate extends EntityAggregate<Thing> implements Thing {
 
     public boolean isMobile() {
         Map<String, Object> properties = thing.getProperties();
-        if (properties.containsKey("isMobile")) {
-            Object value = properties.get("isMobile");
+        if (properties.containsKey(PROPERTY_IS_MOBILE)) {
+            Object value = properties.get(PROPERTY_IS_MOBILE);
             return Boolean.class.isAssignableFrom(value.getClass())
-                    ? (boolean) properties.get("isMobile")
+                    ? (boolean) properties.get(PROPERTY_IS_MOBILE)
                     : false;
         }
 
