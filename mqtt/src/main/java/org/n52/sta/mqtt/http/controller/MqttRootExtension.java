@@ -26,7 +26,7 @@
  * Public License for more details.
  */
 
-package org.n52.sta.mqtt.entity;
+package org.n52.sta.mqtt.http.controller;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -38,7 +38,7 @@ import org.n52.sta.api.server.ServerSettings;
 import org.n52.sta.mqtt.config.MqttProperties;
 
 @SuppressWarnings("checkstyle:linelength")
-public class MqttExtension {
+public class MqttRootExtension {
 
     private static final String OPENGIS_MQTT_OBSERVATIONS_CREATION = "http://www.opengis.net/spec/iot_sensing/1.1/req/create-observations-via-mqtt/observations-creation";
     private static final String OPENGIS_MQTT_RECEIVE_UPDATES = "http://www.opengis.net/spec/iot_sensing/1.1/req/receive-updates-via-mqtt/receive-updates";
@@ -46,7 +46,7 @@ public class MqttExtension {
 
     private final ServerSettings serverSettings;
 
-    public MqttExtension(MqttProperties mqttProperties, ServerSettings serverSettings) {
+    public MqttRootExtension(MqttProperties mqttProperties, ServerSettings serverSettings) {
         Objects.requireNonNull(mqttProperties, "mqttProperties must not be null!");
         Objects.requireNonNull(serverSettings, "serverSettings must not be null!");
         this.serverSettings = serverSettings;
