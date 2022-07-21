@@ -1572,9 +1572,9 @@ public class ITConformance3 extends ConformanceTests implements TestUtil {
      * @return The id of related object
      */
     private String checkRelatedEntity(EntityType sourceType,
-                                      String sourceId,
-                                      EntityType targetType,
-                                      JsonNode reference)
+            String sourceId,
+            EntityType targetType,
+            JsonNode reference)
             throws Exception {
 
         String url = String.format(getRelatedEntityEndpoint(sourceType, targetType), sourceId);

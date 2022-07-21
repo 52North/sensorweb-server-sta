@@ -494,8 +494,8 @@ public class ITConformance8 extends ConformanceTests implements TestUtil {
      *         if an error occurred
      */
     private void testCollectionSubscriptionOnExistingEntityPatch(Map<String, String> patchMap,
-                                                                 EntityType type,
-                                                                 String source)
+            EntityType type,
+            String source)
             throws MqttException, Exception {
         MessageListener listener = new MessageListener();
         JsonNode entity = postEntity(type, source);
@@ -538,8 +538,8 @@ public class ITConformance8 extends ConformanceTests implements TestUtil {
      *         if an error occurred
      */
     private void testPropertySubscriptionOnEntityPatch(Map<String, String> patchMap,
-                                                       EntityType type,
-                                                       String source)
+            EntityType type,
+            String source)
             throws MqttException, Exception {
         MessageListener listener = new MessageListener();
         JsonNode entity = postEntity(type, source);

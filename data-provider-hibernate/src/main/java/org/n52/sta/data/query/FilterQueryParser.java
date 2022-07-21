@@ -42,6 +42,7 @@ import org.n52.series.db.beans.DataEntity;
 import org.n52.shetland.oasis.odata.query.option.QueryOptions;
 import org.n52.shetland.ogc.filter.FilterConstants.BinaryLogicOperator;
 import org.n52.shetland.ogc.filter.FilterConstants.ComparisonOperator;
+import org.n52.shetland.ogc.filter.FilterConstants.SimpleArithmeticOperator;
 import org.n52.shetland.ogc.gml.time.TimeInstant;
 import org.n52.shetland.ogc.sta.StaConstants;
 import org.n52.sta.api.ProviderException;
@@ -72,22 +73,16 @@ public final class FilterQueryParser {
         return (root, query, builder) -> {
             FilterQueryRoot<E> filterRoot = new FilterQueryRoot<>(root, query, specs);
             FilterQueryVisitor<E> visitor = new FilterQueryVisitor<>(filterRoot, builder);
-            Optional<Specification<E>> defaultPredicate = specs.isStaEntity();
-
+            Optional<Predicate> defaultPredicate = specs.isStaEntity()
+                                                        .map(spec -> spec.toPredicate(root, query, builder));
             Optional<Predicate> filterPredicate = Optional.ofNullable(options.getFilterFilter())
                                                           .map(filter -> (Expr) filter.getFilter())
                                                           .map(visitExpression(visitor));
+            return filterPredicate.isEmpty()
+                    ? defaultPredicate.orElse(null)
+                    : defaultPredicate.map(predicate -> builder.and(predicate, filterPredicate.get()))
+                                      .orElse(null);
 
-            if (filterPredicate.isPresent() && defaultPredicate.isPresent()) {
-                return builder.and(defaultPredicate.get()
-                                                   .toPredicate(root, query, builder),
-                                   filterPredicate.get());
-            } else if (defaultPredicate.isPresent()) {
-                return defaultPredicate.get()
-                                       .toPredicate(root, query, builder);
-            } else {
-                return filterPredicate.orElse(null);
-            }
         };
     }
 
@@ -103,10 +98,10 @@ public final class FilterQueryParser {
         };
     }
 
-    private static final class FilterQueryVisitor<T> implements ExprVisitor<Expression<?>, FilterQueryException> {
+    private static final class FilterQueryVisitor<T> implements ExprVisitor<Expression< ? >, FilterQueryException> {
 
         private final Root<T> root;
-        private final CriteriaQuery<?> query;
+        private final CriteriaQuery< ? > query;
         private final CriteriaBuilder criteriaBuilder;
         private final BaseQuerySpecifications<T> rootSpecification;
         private final QuerySpecificationFactory qsFactory;
@@ -134,7 +129,7 @@ public final class FilterQueryParser {
         @Override
         public Predicate visitBooleanUnary(BooleanUnaryExpr expr) throws FilterQueryException {
             BooleanExpr operand = expr.getOperand();
-            Expression<?> result = operand.accept(this);
+            Expression< ? > result = operand.accept(this);
             return criteriaBuilder.not((Predicate) result);
         }
 
@@ -176,52 +171,59 @@ public final class FilterQueryParser {
                 ComparisonOperator operator,
                 Expr right)
                 throws FilterQueryException {
-            Expression<?> rightExpr = right.accept(this);
+            Expression< ? > rightExpr = right.accept(this);
             return rootSpecification.compareProperty(member, operator, rightExpr)
                                     .toPredicate(root, query, criteriaBuilder);
         }
 
         private Predicate compareMemberOnRight(Expr left, ComparisonOperator operator, String member)
                 throws FilterQueryException {
-            Expression<?> leftExpr = left.accept(this);
+            Expression< ? > leftExpr = left.accept(this);
             return rootSpecification.compareProperty(leftExpr, operator, member)
                                     .toPredicate(root, query, criteriaBuilder);
         }
 
         @SuppressWarnings("unchecked")
-        private <Y extends Comparable<? super Y>> Predicate compareNonMembers(Expr left,
-                                                                              Expr right,
-                                                                              ComparisonOperator operator)
+        private <Y extends Comparable< ? super Y>> Predicate compareNonMembers(Expr left,
+                Expr right,
+                ComparisonOperator operator)
                 throws FilterQueryException {
-            Expression<? extends Y> leftExpr = (Expression<? extends Y>) left.accept(this);
-            Expression<? extends Y> rightExpr = (Expression<? extends Y>) right.accept(this);
+            Expression< ? extends Y> leftExpr = (Expression< ? extends Y>) left.accept(this);
+            Expression< ? extends Y> rightExpr = (Expression< ? extends Y>) right.accept(this);
             return rootSpecification.compare(leftExpr, rightExpr, operator, criteriaBuilder);
         }
 
         @Override
         public Predicate visitMethodCall(MethodCallExpr expr) throws FilterQueryException {
-            switch (expr.getParameters().size()) {
-            case 0:
-                //return visitMethodCallNullary(expr);
-            case 1:
-                //return visitMethodCallUnary(expr);
-            case 2:
-                //return visitMethodCallBinary(expr);
-            case 3:
-                //return visitMethodCallTernary(expr);
-            default:
-                throw new FilterQueryException("method calls not implemented yet!");
+            switch (expr.getParameters()
+                        .size()) {
+                case 0:
+                    // return visitMethodCallNullary(expr);
+                case 1:
+                    // return visitMethodCallUnary(expr);
+                case 2:
+                    // return visitMethodCallBinary(expr);
+                case 3:
+                    // return visitMethodCallTernary(expr);
+                default:
+                    throw new FilterQueryException("method calls not implemented yet!");
             }
         }
 
         @Override
-        public Expression<?> visitMember(MemberExpr expr) throws FilterQueryException {
-            // Add special handling for Observation as they have stored their "value"
-            // attribute distributed over several different columns
-            return (root.getJavaType().isAssignableFrom(DataEntity.class)
-                    && expr.getValue().equals(StaConstants.PROP_RESULT)) ?
-                    null :
-                    root.get(expr.getValue());
+        public Expression< ? > visitMember(MemberExpr expr) throws FilterQueryException {
+            // Observation.result has to be treated differently, as result
+            // attribute is mapped on different columns (depending on value type)
+            String exprValue = expr.getValue();
+            return !isObservationResult(exprValue)
+                    ? root.get(exprValue)
+                    : null;
+        }
+
+        private boolean isObservationResult(String exprValue) {
+            Class< ? extends T> javaType = root.getJavaType();
+            return javaType.isAssignableFrom(DataEntity.class)
+                    && exprValue.equals(StaConstants.PROP_RESULT);
         }
 
         @Override
@@ -230,36 +232,36 @@ public final class FilterQueryParser {
         }
 
         @Override
-        public Expression<? extends Number> visitSimpleArithmetic(SimpleArithmeticExpr expr)
+        public Expression< ? extends Number> visitSimpleArithmetic(SimpleArithmeticExpr expr)
                 throws FilterQueryException {
-            //TODO: should we add typechecks here to assure that this cast never fails?
-            Expression<? extends Number> left = (Expression<? extends Number>) expr.getLeft()
-                                                                                   .accept(this);
-            Expression<? extends Number> right = (Expression<? extends Number>) expr.getRight()
-                                                                                    .accept(this);
+            // TODO: should we add typechecks here to assure that this cast never fails?
+            Expr leftExpr = expr.getLeft();                                       
+            Expr rightExpr = expr.getRight();
+            Expression< ? extends Number> left = (Expression< ? extends Number>) leftExpr.accept(this);
+            Expression< ? extends Number> right = (Expression< ? extends Number>) rightExpr.accept(this);
             switch (expr.getOperator()) {
-            case Add:
-                return criteriaBuilder.sum(left, right);
-            case Sub:
-                return criteriaBuilder.diff(left, right);
-            case Mul:
-                return criteriaBuilder.prod(left, right);
-            case Div:
-                return criteriaBuilder.quot(left, right);
-            case Mod:
-                return criteriaBuilder.mod((Expression<Integer>) left,
-                                           (Expression<Integer>) right);
-            default:
-                throw new FilterQueryException(
-                        "Could not parse ArithmeticExpr. Could not identify Operator:"
-                                + expr.getOperator().name());
+                case Add:
+                    return criteriaBuilder.sum(left, right);
+                case Sub:
+                    return criteriaBuilder.diff(left, right);
+                case Mul:
+                    return criteriaBuilder.prod(left, right);
+                case Div:
+                    return criteriaBuilder.quot(left, right);
+                case Mod:
+                    return criteriaBuilder.mod((Expression<Integer>) left, (Expression<Integer>) right);
+                default:
+                    SimpleArithmeticOperator operator = expr.getOperator();
+                    String msgTemplate = "Could not parse ArithmeticExpr. Could not identify Operator: %s";
+                    throw new FilterQueryException(String.format(msgTemplate, operator.name()));
             }
         }
 
         @Override
         public Expression<Date> visitTime(TimeValueExpr expr) throws FilterQueryException {
             // This is always literal as we handle member Expressions seperately
-            return criteriaBuilder.literal(((TimeInstant) expr.getTime()).getValue().toDate());
+            return criteriaBuilder.literal(((TimeInstant) expr.getTime()).getValue()
+                                                                         .toDate());
         }
 
         @Override

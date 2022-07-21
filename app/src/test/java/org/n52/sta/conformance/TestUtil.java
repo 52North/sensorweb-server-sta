@@ -137,27 +137,27 @@ public interface TestUtil {
         for (Iterator<Map.Entry<String, JsonNode>> it = reference.fields(); it.hasNext();) {
             Map.Entry<String, JsonNode> next = it.next();
             switch (next.getKey()) {
-            case "feature":
-            case "location":
-                compareJsonNodesGeo(next.getKey(), next.getValue(), actual.get(next.getKey()));
-                break;
-            case "validTime":
-            case "phenomenonTime":
-            case "resultTime":
-                compareJsonNodesTime(next.getKey(), next.getValue(), actual.get(next.getKey()));
-                break;
-            default:
-                // Skip navigation links as they have different keys in response
-                // e.g. "Things" vs "Things@iot.navigationLink"
-                if (!Character.isUpperCase(next.getKey()
-                                               .charAt(0))) {
-                    if (Objects.equals(next.getKey(), "result")) {
-                        compareJsonNodesNumeric(next.getKey(), next.getValue(), actual.get(next.getKey()));
-                    } else {
-                        compareJsonNodesString(next.getKey(), next.getValue(), actual.get(next.getKey()));
+                case "feature":
+                case "location":
+                    compareJsonNodesGeo(next.getKey(), next.getValue(), actual.get(next.getKey()));
+                    break;
+                case "validTime":
+                case "phenomenonTime":
+                case "resultTime":
+                    compareJsonNodesTime(next.getKey(), next.getValue(), actual.get(next.getKey()));
+                    break;
+                default:
+                    // Skip navigation links as they have different keys in response
+                    // e.g. "Things" vs "Things@iot.navigationLink"
+                    if (!Character.isUpperCase(next.getKey()
+                                                   .charAt(0))) {
+                        if (Objects.equals(next.getKey(), "result")) {
+                            compareJsonNodesNumeric(next.getKey(), next.getValue(), actual.get(next.getKey()));
+                        } else {
+                            compareJsonNodesString(next.getKey(), next.getValue(), actual.get(next.getKey()));
+                        }
                     }
-                }
-                break;
+                    break;
             }
 
         }

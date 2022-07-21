@@ -128,8 +128,8 @@ public class ITQueryOptionPrecedence extends ConformanceTests implements TestUti
      * .com/questions/271080/the-mit-license-clarity-on-using-code-on-stack-overflow-and-stack-exchange
      */
     private static void testPermutations(java.util.List<Integer> arr,
-                                         int k,
-                                         Consumer<List<Integer>> consumer) {
+            int k,
+            Consumer<List<Integer>> consumer) {
         for (int i = k; i < arr.size(); i++) {
             java.util.Collections.swap(arr, i, k);
             testPermutations(arr, k + 1, consumer);

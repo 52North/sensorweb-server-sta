@@ -63,10 +63,9 @@ public class ITConformance2 extends ConformanceTests implements TestUtil {
     }
 
     /*
-     * - Prior to applying any server-driven pagination: $filter $count $orderby $skip $top
-     * - After applying any server-driven pagination: $expand $select
-     * @Test
-     * public void testQueryOptionOrder() { }
+     * - Prior to applying any server-driven pagination: $filter $count $orderby $skip $top - After applying
+     * any server-driven pagination: $expand $select
+     * @Test public void testQueryOptionOrder() { }
      */
 
     @Test

@@ -35,8 +35,6 @@ import java.util.Objects;
 
 import javax.servlet.http.HttpServletRequest;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.ObjectWriter;
 import org.n52.shetland.ogc.sta.exception.STAInvalidUrlException;
 import org.n52.shetland.ogc.sta.exception.STANotFoundException;
 import org.n52.sta.api.EntityPage;
@@ -55,6 +53,9 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectWriter;
+
 @RestController
 public class ReadController {
 
@@ -67,11 +68,10 @@ public class ReadController {
     private final PathFactory pathFactory;
 
     public ReadController(
-            @Value("${server.config.service-root-url}")
-                    String serviceUri,
-            EntityServiceLookup lookup,
-            PathFactory pathFactory,
-            ObjectMapper mapper) {
+                          @Value("${server.config.service-root-url}") String serviceUri,
+                          EntityServiceLookup lookup,
+                          PathFactory pathFactory,
+                          ObjectMapper mapper) {
         Objects.requireNonNull(serviceUri, "serviceUri must not be null!");
         Objects.requireNonNull(lookup, "lookup must not be null!");
         Objects.requireNonNull(pathFactory, "pathFactory must not be null!");
@@ -87,34 +87,36 @@ public class ReadController {
             throws Exception {
         RequestContext requestContext = RequestContext.create(serviceUri, servletRequest, pathFactory);
         SerializationContext serializationContext = SerializationContext.create(requestContext, mapper);
-        StaPath<? extends Identifiable> path = requestContext.getPath();
-        EntityService<? extends Identifiable> entityService = getEntityService(path.getEntityType());
+        StaPath< ? extends Identifiable> path = requestContext.getPath();
+        EntityService< ? extends Identifiable> entityService = getEntityService(path.getEntityType());
         Request request = requestContext.getRequest();
 
         StreamingResponseBody body = null;
         MediaType contentType = MediaType.APPLICATION_JSON;
         switch (path.getPathType()) {
-        case collection:
-            body = serializeCollection(entityService.getEntities(request), serializationContext);
-            break;
-        case entity:
-        case property:
-            body = serializeEntity(entityService.getEntity(request)
-                                                .orElseThrow(() -> new STANotFoundException("no matching entity found")),
-                                   serializationContext);
-            break;
-        case value:
-            body = serializePropertyValue(entityService.getEntity(request)
-                                                       .orElseThrow(() -> new STANotFoundException("")),
-                                          serializationContext);
-            contentType = MediaType.TEXT_PLAIN;
-            break;
-        default:
-            throw new STAInvalidUrlException("could not identify request type!");
+            case collection:
+                body = serializeCollection(entityService.getEntities(request), serializationContext);
+                break;
+            case entity:
+            case property:
+                body = serializeEntity(getEntity(entityService, request), serializationContext);
+                break;
+            case value:
+                body = serializePropertyValue(getEntity(entityService, request), serializationContext);
+                contentType = MediaType.TEXT_PLAIN;
+                break;
+            default:
+                throw new STAInvalidUrlException("Unknown request type!");
         }
         return ResponseEntity.ok()
                              .contentType(contentType)
                              .body(body);
+    }
+
+    private Identifiable getEntity(EntityService< ? extends Identifiable> entityService, Request request)
+            throws STANotFoundException {
+        return entityService.getEntity(request)
+                            .orElseThrow(() -> new STANotFoundException("no matching entity found"));
     }
 
     private <T extends Identifiable> StreamingResponseBody serializeEntity(T entity, SerializationContext context) {
@@ -126,7 +128,7 @@ public class ReadController {
     }
 
     private <T extends Identifiable> StreamingResponseBody serializeCollection(EntityPage<T> page,
-                                                                               SerializationContext context) {
+            SerializationContext context) {
         return outputStream -> {
             try (OutputStream out = new BufferedOutputStream(outputStream)) {
                 ObjectWriter writer = context.createWriter();
@@ -136,7 +138,8 @@ public class ReadController {
         };
     }
 
-    private <T extends Identifiable> StreamingResponseBody serializePropertyValue(T entity, SerializationContext context) {
+    private <T extends Identifiable> StreamingResponseBody serializePropertyValue(T entity,
+            SerializationContext context) {
         return outputStream -> {
             OutputStream out = new BufferedOutputStream(outputStream);
             ObjectWriter writer = context.createWriter();
@@ -153,8 +156,8 @@ public class ReadController {
     private <T extends Identifiable> EntityService<T> getEntityService(Class<T> type) {
         return lookup.getService(type)
                      .orElseThrow(() -> new IllegalStateException("No service registered for type '"
-                                                                          + type.getSimpleName()
-                                                                          + "'"));
+                             + type.getSimpleName()
+                             + "'"));
     }
 
 }

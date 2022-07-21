@@ -62,6 +62,11 @@ public class EntityServiceConfiguration {
     private EntityServiceLookup serviceLookup;
 
     @Bean
+    public EntityServiceLookup entityServiceLookup() {
+        return new EntityServiceLookup();
+    }
+
+    @Bean
     public EntityService<Thing> thingService(EntityProvider<Thing> entityProvider,
             Optional<DomainService<Thing>> thingDomainService) {
         ThingService service = thingDomainService.isPresent()
@@ -102,7 +107,7 @@ public class EntityServiceConfiguration {
 
     @Bean
     public EntityService<ObservedProperty> observedPropertyService(EntityProvider<ObservedProperty> entityProvider,
-            Optional<DomainService<ObservedProperty>> observedPropertyDomainService, 
+            Optional<DomainService<ObservedProperty>> observedPropertyDomainService,
             EntityServiceLookup serviceLookup) {
         ObservedPropertyService service = observedPropertyDomainService.isPresent()
                 ? new ObservedPropertyService(entityProvider, observedPropertyDomainService.get())

@@ -44,35 +44,28 @@ import org.springframework.web.bind.annotation.RestController;
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
  */
 @RestController
+@SuppressWarnings("checkstyle:LineLength")
 public class RootController {
 
-    protected static final String HTTPS_GITHUB_COM_52_NORTH_SENSORWEB_SERVER_STA_EXTENSION_SERVER_PROPERTIES_MD =
-            "https://github.com/52North/sensorweb-server-sta/extension/server-properties.md";
-    private static final String HTTP_WWW_OPENGIS_NET_SPEC_IOT_SENSING_1_1_REQ_CREATE_UPDATE_DELETE =
-            "http://www.opengis.net/spec/iot_sensing/1.1/req/create-update-delete";
-    private static final String HTTP_WWW_OPENGIS_NET_SPEC_IOT_SENSING_1_1_REQ_REQUEST_DATA =
-            "http://www.opengis.net/spec/iot_sensing/1.1/req/request-data";
-    private static final String HTTP_WWW_OPENGIS_NET_SPEC_IOT_SENSING_1_1_REQ_RESOURCE_PATH_RESOURCE_PATH_TO_ENTITIES =
-            "http://www.opengis.net/spec/iot_sensing/1.1/req/resource-path/resource-path-to-entities";
-    private static final String HTTP_WWW_OPENGIS_NET_SPEC_IOT_SENSING_1_1_REQ_DATAMODEL =
-            "http://www.opengis.net/spec/iot_sensing/1.1/req/datamodel";
+    protected static final String HTTPS_GITHUB_COM_52_NORTH_SENSORWEB_SERVER_STA_EXTENSION_SERVER_PROPERTIES_MD = "https://github.com/52North/sensorweb-server-sta/extension/server-properties.md";
+    private static final String HTTP_WWW_OPENGIS_NET_SPEC_IOT_SENSING_1_1_REQ_CREATE_UPDATE_DELETE = "http://www.opengis.net/spec/iot_sensing/1.1/req/create-update-delete";
+    private static final String HTTP_WWW_OPENGIS_NET_SPEC_IOT_SENSING_1_1_REQ_REQUEST_DATA = "http://www.opengis.net/spec/iot_sensing/1.1/req/request-data";
+    private static final String HTTP_WWW_OPENGIS_NET_SPEC_IOT_SENSING_1_1_REQ_RESOURCE_PATH_RESOURCE_PATH_TO_ENTITIES = "http://www.opengis.net/spec/iot_sensing/1.1/req/resource-path/resource-path-to-entities";
+    private static final String HTTP_WWW_OPENGIS_NET_SPEC_IOT_SENSING_1_1_REQ_DATAMODEL = "http://www.opengis.net/spec/iot_sensing/1.1/req/datamodel";
 
-    private static final String HTTPS_GITHUB_COM_52_NORTH_SENSORWEB_SERVER_STA_EXTENSION_SERVER_VERSION_MD =
-            "https://github.com/52North/sensorweb-server-sta/extension/server-version.md";
-    private static final String HTTPS_GITHUB_COM_52_NORTH_SENSORWEB_SERVER_STA_EXTENSION_EXTENDED_SENSOR_ENCODINGTYPE =
-            "https://github.com/52North/sensorweb-server-sta/extension/extended-sensor-encodingtype.md";
+    private static final String HTTPS_GITHUB_COM_52_NORTH_SENSORWEB_SERVER_STA_EXTENSION_SERVER_VERSION_MD = "https://github.com/52North/sensorweb-server-sta/extension/server-version.md";
+    private static final String HTTPS_GITHUB_COM_52_NORTH_SENSORWEB_SERVER_STA_EXTENSION_EXTENDED_SENSOR_ENCODINGTYPE = "https://github.com/52North/sensorweb-server-sta/extension/extended-sensor-encodingtype.md";
 
-    @Value("${server.feature.http.read-only}")
-    private final Boolean httpReadOnly = true;
+    @Value("${server.feature.http.writable}")
+    private final Boolean writable = false;
     private final String rootResponse;
     private final ServerProperties serverProperties;
     private final VersionProperties versionProperties;
 
-    public RootController(
-            ObjectMapper mapper,
-            Environment environment,
-            ServerProperties serverProperties,
-            VersionProperties versionProperties) {
+    public RootController(ObjectMapper mapper,
+                          Environment environment,
+                          ServerProperties serverProperties,
+                          VersionProperties versionProperties) {
         this.serverProperties = serverProperties;
         this.versionProperties = versionProperties;
         rootResponse = createRootResponse(mapper, environment);
@@ -102,31 +95,31 @@ public class RootController {
         ArrayNode conformanceClasses = mapper.createArrayNode();
         serverSettings.set("conformance", conformanceClasses);
         conformanceClasses.add(
-                HTTP_WWW_OPENGIS_NET_SPEC_IOT_SENSING_1_1_REQ_DATAMODEL);
+                               HTTP_WWW_OPENGIS_NET_SPEC_IOT_SENSING_1_1_REQ_DATAMODEL);
         conformanceClasses.add(
-                HTTP_WWW_OPENGIS_NET_SPEC_IOT_SENSING_1_1_REQ_RESOURCE_PATH_RESOURCE_PATH_TO_ENTITIES);
+                               HTTP_WWW_OPENGIS_NET_SPEC_IOT_SENSING_1_1_REQ_RESOURCE_PATH_RESOURCE_PATH_TO_ENTITIES);
         conformanceClasses.add(
-                HTTP_WWW_OPENGIS_NET_SPEC_IOT_SENSING_1_1_REQ_REQUEST_DATA);
+                               HTTP_WWW_OPENGIS_NET_SPEC_IOT_SENSING_1_1_REQ_REQUEST_DATA);
         // Do not list CUD if we are in readOnly-Mode
-        if (!httpReadOnly) {
+        if (writable) {
             conformanceClasses.add(
-                    HTTP_WWW_OPENGIS_NET_SPEC_IOT_SENSING_1_1_REQ_CREATE_UPDATE_DELETE);
+                                   HTTP_WWW_OPENGIS_NET_SPEC_IOT_SENSING_1_1_REQ_CREATE_UPDATE_DELETE);
         }
 
         // 52N Extensions
         conformanceClasses.add(
-                HTTPS_GITHUB_COM_52_NORTH_SENSORWEB_SERVER_STA_EXTENSION_SERVER_PROPERTIES_MD);
+                               HTTPS_GITHUB_COM_52_NORTH_SENSORWEB_SERVER_STA_EXTENSION_SERVER_PROPERTIES_MD);
         serverSettings.set(HTTPS_GITHUB_COM_52_NORTH_SENSORWEB_SERVER_STA_EXTENSION_SERVER_PROPERTIES_MD,
                            serverProperties.getFeatureInformation(mapper));
 
         conformanceClasses.add(
-                HTTPS_GITHUB_COM_52_NORTH_SENSORWEB_SERVER_STA_EXTENSION_SERVER_VERSION_MD);
+                               HTTPS_GITHUB_COM_52_NORTH_SENSORWEB_SERVER_STA_EXTENSION_SERVER_VERSION_MD);
         serverSettings.set(HTTPS_GITHUB_COM_52_NORTH_SENSORWEB_SERVER_STA_EXTENSION_SERVER_VERSION_MD,
                            versionProperties.getVersionInformation(mapper));
 
         if (environment.getRequiredProperty("server.feature.variableEncodingType", Boolean.class)) {
             conformanceClasses.add(
-                    HTTPS_GITHUB_COM_52_NORTH_SENSORWEB_SERVER_STA_EXTENSION_EXTENDED_SENSOR_ENCODINGTYPE);
+                                   HTTPS_GITHUB_COM_52_NORTH_SENSORWEB_SERVER_STA_EXTENSION_EXTENDED_SENSOR_ENCODINGTYPE);
         }
 
         node.set("serverSettings", serverSettings);

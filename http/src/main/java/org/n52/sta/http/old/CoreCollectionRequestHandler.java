@@ -56,14 +56,14 @@ public class CoreCollectionRequestHandler extends CollectionRequestHandler imple
 
     @GetMapping(value = "/{collectionName:" + BASE_COLLECTION_REGEX + "}", produces = "application/json")
     public CollectionWrapper readCollectionDirect(@PathVariable String collectionName,
-                                                  HttpServletRequest request)
+            HttpServletRequest request)
             throws STACRUDException {
         return super.readCollectionDirect(collectionName, request);
     }
 
     @GetMapping(value = "/{collectionName:" + BASE_COLLECTION_REGEX + "}" + SLASHREF, produces = "application/json")
     public CollectionWrapper readCollectionRefDirect(@PathVariable String collectionName,
-                                                     HttpServletRequest request)
+            HttpServletRequest request)
             throws STACRUDException {
         return super.readCollectionRefDirect(collectionName, request);
     }
@@ -78,8 +78,8 @@ public class CoreCollectionRequestHandler extends CollectionRequestHandler imple
         MAPPING_PREFIX + COLLECTION_IDENTIFIED_BY_HIST_LOCATION_PATH_VARIABLE
     }, produces = "application/json")
     public CollectionWrapper readCollectionRelated(@PathVariable String entity,
-                                                   @PathVariable String target,
-                                                   HttpServletRequest request)
+            @PathVariable String target,
+            HttpServletRequest request)
             throws Exception {
         return super.readCollectionRelated(entity, target, request);
     }
@@ -94,8 +94,8 @@ public class CoreCollectionRequestHandler extends CollectionRequestHandler imple
         MAPPING_PREFIX + COLLECTION_IDENTIFIED_BY_HIST_LOCATION_PATH_VARIABLE + SLASHREF
     }, produces = "application/json")
     public CollectionWrapper readCollectionRelatedRef(@PathVariable String entity,
-                                                      @PathVariable String target,
-                                                      HttpServletRequest request)
+            @PathVariable String target,
+            HttpServletRequest request)
             throws Exception {
         return super.readCollectionRelatedRef(entity, target, request);
     }
