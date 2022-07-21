@@ -57,8 +57,8 @@ public class CoreEntityRequestHandler extends EntityRequestHandler implements Co
         value = MAPPING_PREFIX + CoreRequestUtils.ENTITY_IDENTIFIED_DIRECTLY,
         produces = "application/json")
     public StaDTO readEntityDirect(@PathVariable String entity,
-                                   @PathVariable String id,
-                                   HttpServletRequest request)
+            @PathVariable String id,
+            HttpServletRequest request)
             throws Exception {
         return super.readEntityDirect(entity, id, request);
     }
@@ -67,8 +67,8 @@ public class CoreEntityRequestHandler extends EntityRequestHandler implements Co
         value = MAPPING_PREFIX + CoreRequestUtils.ENTITY_IDENTIFIED_DIRECTLY + SLASHREF,
         produces = "application/json")
     public StaDTO readEntityRefDirect(@PathVariable String entity,
-                                      @PathVariable String id,
-                                      HttpServletRequest request)
+            @PathVariable String id,
+            HttpServletRequest request)
             throws Exception {
         return super.readEntityRefDirect(entity, id, request);
     }
@@ -81,8 +81,8 @@ public class CoreEntityRequestHandler extends EntityRequestHandler implements Co
         },
         produces = "application/json")
     public StaDTO readRelatedEntity(@PathVariable String entity,
-                                    @PathVariable String target,
-                                    HttpServletRequest request)
+            @PathVariable String target,
+            HttpServletRequest request)
             throws Exception {
         return super.readRelatedEntity(entity, target, request);
     }
@@ -95,8 +95,8 @@ public class CoreEntityRequestHandler extends EntityRequestHandler implements Co
         },
         produces = "application/json")
     public StaDTO readRelatedEntityRef(@PathVariable String entity,
-                                       @PathVariable String target,
-                                       HttpServletRequest request)
+            @PathVariable String target,
+            HttpServletRequest request)
             throws Exception {
         return super.readRelatedEntityRef(entity, target, request);
     }

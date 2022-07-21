@@ -1,3 +1,4 @@
+
 package org.n52.sta.data.editor;
 
 import java.math.BigDecimal;
@@ -24,20 +25,20 @@ public class ThingEntityEditor extends DatabaseEntityAdapter<PlatformEntity> imp
 
     @Autowired
     private PlatformRepository platformRepository;
-    
+
     protected ThingEntityEditor(EntityServiceLookup serviceLookup) {
         super(serviceLookup);
     }
 
     @Override
     public ThingData save(Thing entity) throws EditorException {
-        
+
         String staIdentifier = entity.getId();
         EntityService<Thing> thingService = getService(Thing.class);
         if (thingService.exists(staIdentifier)) {
             throw new EditorException("Thing already exists with ID '" + staIdentifier + "'");
         }
-        
+
         String id = entity.getId() == null
                 ? generateId()
                 : entity.getId();
@@ -53,7 +54,7 @@ public class ThingEntityEditor extends DatabaseEntityAdapter<PlatformEntity> imp
                .map(this::convertParameter)
                .filter(p -> p != null)
                .forEach(platformEntity::addParameter);
-        
+
         // TODO Auto-generated method stub
         return null;
     }
@@ -67,15 +68,15 @@ public class ThingEntityEditor extends DatabaseEntityAdapter<PlatformEntity> imp
     @Override
     public void delete(String id) throws EditorException {
         // TODO Auto-generated method stub
-        
+
     }
-    
-    private PlatformParameterEntity<?> convertParameter(Map.Entry<String, Object> parameter) {
+
+    private PlatformParameterEntity< ? > convertParameter(Map.Entry<String, Object> parameter) {
         String key = parameter.getKey();
         Object value = parameter.getValue();
-        
+
         // TODO review ParameterFactory and DTOTransformerImpl#convertParameters
-        
+
         Class< ? extends Object> valueType = value.getClass();
         if (Number.class.isAssignableFrom(valueType)) {
             PlatformQuantityParameterEntity parameterEntity = new PlatformQuantityParameterEntity();
@@ -89,8 +90,8 @@ public class ThingEntityEditor extends DatabaseEntityAdapter<PlatformEntity> imp
             PlatformTextParameterEntity parameterEntity = new PlatformTextParameterEntity();
             parameterEntity.setName(key);
             parameterEntity.setValue((String) value);
-        } else {
-            // TODO handle other cases from DTOTransformerImpl#convertParameters
+            // } else {
+            // // TODO handle other cases from DTOTransformerImpl#convertParameters
         }
         return null;
     }

@@ -34,8 +34,7 @@ import org.n52.sta.data.support.GraphBuilder;
 import org.n52.sta.data.support.ObservationGraphBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
 
-public class ObservationEntityEditor extends DatabaseEntityAdapter<DataEntity> implements
-        EntityEditor<Observation> {
+public class ObservationEntityEditor extends DatabaseEntityAdapter<DataEntity> implements EntityEditor<Observation> {
 
     @Autowired
     private ObservationRepository<DataEntity> observationRepository;
@@ -118,9 +117,9 @@ public class ObservationEntityEditor extends DatabaseEntityAdapter<DataEntity> i
                     quantityObservationEntity.setValue(BigDecimal.valueOf(doubleValue));
                 }
                 return initDataEntity(quantityObservationEntity, observation, datasetEntity);
-            
+
             // TODO add further observation types
-                
+
             default:
                 throw new EditorException("Unknown OMObservation type: " + format);
         }
@@ -134,47 +133,47 @@ public class ObservationEntityEditor extends DatabaseEntityAdapter<DataEntity> i
                 : observation.getId();
         data.setIdentifier(id);
         data.setStaIdentifier(id);
-        
+
         // values
         Time phenomenonTime = observation.getPhenomenonTime();
         valueHelper.setStartTime(data::setSamplingTimeStart, phenomenonTime);
         valueHelper.setEndTime(data::setSamplingTimeEnd, phenomenonTime);
-        
+
         Time validTime = observation.getValidTime();
         valueHelper.setStartTime(data::setValidTimeStart, validTime);
         valueHelper.setEndTime(data::setValidTimeEnd, validTime);
-        
+
         Time resultTime = observation.getResultTime();
         valueHelper.setTime(data::setResultTime, resultTime);
-        
+
         Map<String, Object> parameters = observation.getParameters();
         Streams.stream(parameters.entrySet())
                .map(this::convertParameter)
                .filter(p -> p != null)
                .forEach(data::addParameter);
-        
+
         // following parameters have to be set explicitly, too
         if (parameters.containsKey(propertyMapping.getSamplingGeometry())) {
             GeometryEntity geometryEntity = valueToGeometry(propertyMapping.getSamplingGeometry(), parameters);
             data.setGeometryEntity(geometryEntity);
         }
-        
+
         if (parameters.containsKey(propertyMapping.getVerticalFrom())) {
             BigDecimal verticalFrom = valueToDouble(propertyMapping.getVerticalFrom(), parameters);
             data.setVerticalFrom(verticalFrom);
         }
-        
-        if (parameters.containsKey(propertyMapping.getVerticalTo()))  {
+
+        if (parameters.containsKey(propertyMapping.getVerticalTo())) {
             BigDecimal verticalTo = valueToDouble(propertyMapping.getVerticalTo(), parameters);
             data.setVerticalFrom(verticalTo);
         }
-        
+
         if (parameters.containsKey(propertyMapping.getVerticalFromTo())) {
             BigDecimal verticalFromTo = valueToDouble(propertyMapping.getVerticalFromTo(), parameters);
             data.setVerticalFrom(verticalFromTo);
             data.setVerticalTo(verticalFromTo);
         }
-        
+
         // references
         data.setDataset(dataset);
         return data;
@@ -187,7 +186,7 @@ public class ObservationEntityEditor extends DatabaseEntityAdapter<DataEntity> i
                 : (Double) value;
         return BigDecimal.valueOf(doubleValue);
     }
-    
+
     private GeometryEntity valueToGeometry(String parameter, Map<String, Object> parameters) {
         throw new UnsupportedOperationException("not implemented yet");
     }
@@ -210,12 +209,12 @@ public class ObservationEntityEditor extends DatabaseEntityAdapter<DataEntity> i
             ObservationTextParameterEntity parameterEntity = new ObservationTextParameterEntity();
             parameterEntity.setName(key);
             parameterEntity.setValue((String) value);
-        } else {
-            // TODO handle other cases from DTOTransformerImpl#convertParameters
+            // } else {
+            // // TODO handle other cases from DTOTransformerImpl#convertParameters
         }
         return null;
     }
-    
+
     private void assertNew(Observation observation) throws EditorException {
         String staIdentifier = observation.getId();
         if (getEntity(staIdentifier).isPresent()) {

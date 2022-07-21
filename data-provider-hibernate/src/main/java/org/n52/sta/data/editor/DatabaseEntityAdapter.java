@@ -26,7 +26,7 @@ abstract class DatabaseEntityAdapter<T extends DescribableEntity> {
         UUID uuid = UUID.randomUUID();
         return uuid.toString();
     }
-    
+
     protected <E extends Identifiable> E getOrSaveMandatory(E input, Class<E> type) throws EditorException {
         if (input == null) {
             String typeName = type.getSimpleName();
@@ -34,7 +34,7 @@ abstract class DatabaseEntityAdapter<T extends DescribableEntity> {
         }
         return getOrSave(input, type);
     }
-    
+
     protected <E extends Identifiable> Optional<E> getOrSaveOptional(E input, Class<E> type) throws EditorException {
         return input == null
                 ? Optional.empty()

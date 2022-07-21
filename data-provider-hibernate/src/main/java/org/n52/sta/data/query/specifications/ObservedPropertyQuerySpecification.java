@@ -46,7 +46,7 @@ public class ObservedPropertyQuerySpecification extends QuerySpecification<Pheno
         return specification -> (root, query, builder) -> {
             EntityQuery memberQuery = createQuery(AbstractDatasetEntity.PROPERTY_PHENOMENON,
                                                   AbstractDatasetEntity.class);
-            Subquery<?> subquery = memberQuery.create(specification, query, builder);
+            Subquery< ? > subquery = memberQuery.create(specification, query, builder);
             // 1..n
             return builder.in(root.get(IdEntity.PROPERTY_ID))
                           .value(subquery);

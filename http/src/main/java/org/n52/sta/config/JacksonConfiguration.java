@@ -69,14 +69,14 @@ public class JacksonConfiguration {
 
     @Bean
     public ObjectMapper customMapper(@Value("${server.config.service-root-url}") String rootUrl,
-                                     @Value("${server.feature.variableEncodingType:false}") boolean variableSensorEncodingTypeEnabled,
-                                     @Value("${server.feature.observation.samplingGeometry}") String samplingGeometryMapping,
-                                     @Value("${server.feature.observation.verticalFrom}") String verticalFromMapping,
-                                     @Value("${server.feature.observation.verticalTo}") String verticalToMapping,
-                                     @Value("${server.feature.observation.verticalFromTo}") String verticalFromToMapping,
-                                     @Value("${server.feature.implicitExpand:false}") boolean implicitExpand,
-                                     @Value("${server.feature.includeDatastreamCategory:false}") boolean includeDatastreamCategory,
-                                     Environment environment) {
+            @Value("${server.feature.variableEncodingType:false}") boolean variableSensorEncodingTypeEnabled,
+            @Value("${server.feature.observation.samplingGeometry}") String samplingGeometryMapping,
+            @Value("${server.feature.observation.verticalFrom}") String verticalFromMapping,
+            @Value("${server.feature.observation.verticalTo}") String verticalToMapping,
+            @Value("${server.feature.observation.verticalFromTo}") String verticalFromToMapping,
+            @Value("${server.feature.implicitExpand:false}") boolean implicitExpand,
+            @Value("${server.feature.includeDatastreamCategory:false}") boolean includeDatastreamCategory,
+            Environment environment) {
         Map<String, String> parameterMapping = new HashMap<>();
         parameterMapping.put("samplingGeometry", samplingGeometryMapping);
         parameterMapping.put("verticalFrom", verticalFromMapping);

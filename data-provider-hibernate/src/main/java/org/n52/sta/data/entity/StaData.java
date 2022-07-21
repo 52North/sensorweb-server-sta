@@ -58,7 +58,7 @@ public class StaData<T extends DescribableEntity> implements Identifiable {
         this.data = dataEntity;
         this.propertyMapping = propertyMapping;
     }
-    
+
     public T getData() {
         return data;
     }

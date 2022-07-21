@@ -47,12 +47,12 @@ public class DataEditorConfiguration {
 
     @Autowired
     private EntityServiceLookup serviceLookup;
-    
+
     @Bean
     public EntityEditor<Datastream> datastreamEntityEditor() {
         return new DatastreamEntityEditor(serviceLookup);
     }
-    
+
     // TODO add missing editors
 
 }

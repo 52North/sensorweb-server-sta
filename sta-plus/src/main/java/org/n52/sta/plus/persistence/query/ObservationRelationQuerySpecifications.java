@@ -57,7 +57,7 @@ public class ObservationRelationQuerySpecifications extends EntityQuerySpecifica
     }
 
     public static Specification<RelationEntity> withSubjectStaIdentifier(
-                                                                         final String observationIdentifier) {
+            final String observationIdentifier) {
         return (root, query, builder) -> {
             final Join<RelationEntity, DataEntity< ? >> join = root.join(RelationEntity.PROPERTY_SUBJECT,
                                                                          JoinType.INNER);
@@ -66,7 +66,7 @@ public class ObservationRelationQuerySpecifications extends EntityQuerySpecifica
     }
 
     public static Specification<RelationEntity> withObjectStaIdentifier(
-                                                                        final String observationIdentifier) {
+            final String observationIdentifier) {
         return (root, query, builder) -> {
             final Join<RelationEntity, DataEntity< ? >> join = root.join(RelationEntity.PROPERTY_OBJECT,
                                                                          JoinType.INNER);
@@ -76,8 +76,8 @@ public class ObservationRelationQuerySpecifications extends EntityQuerySpecifica
 
     @Override
     protected Specification<RelationEntity> handleRelatedPropertyFilter(
-                                                                        String propertyName,
-                                                                        Specification< ? > propertyValue) {
+            String propertyName,
+            Specification< ? > propertyValue) {
         return (root, query, builder) -> {
             if (StaConstants.GROUP.equals(propertyName)) {
                 Subquery<RelationEntity> sq = query.subquery(RelationEntity.class);
@@ -96,36 +96,36 @@ public class ObservationRelationQuerySpecifications extends EntityQuerySpecifica
 
     @Override
     protected Specification<RelationEntity> handleDirectPropertyFilter(
-                                                                       String propertyName,
-                                                                       Expression< ? > propertyValue,
-                                                                       FilterConstants.ComparisonOperator operator,
-                                                                       boolean switched) {
+            String propertyName,
+            Expression< ? > propertyValue,
+            FilterConstants.ComparisonOperator operator,
+            boolean switched) {
         return (Specification<RelationEntity>) (root, query, builder) -> {
             try {
                 switch (propertyName) {
-                case StaConstants.PROP_ID:
-                    return handleDirectStringPropertyFilter(root.get(RelationEntity.STA_IDENTIFIER),
-                                                            propertyValue,
-                                                            operator,
-                                                            builder,
-                                                            false);
-                case StaConstants.PROP_ROLE:
-                    return handleDirectStringPropertyFilter(root.get(RelationEntity.PROPERTY_ROLE),
-                                                            propertyValue,
-                                                            operator,
-                                                            builder,
-                                                            switched);
-                case StaConstants.PROP_DESCRIPTION:
-                    return handleDirectStringPropertyFilter(
-                                                            root.get(RelationEntity.PROPERTY_DESCRIPTION),
-                                                            propertyValue,
-                                                            operator,
-                                                            builder,
-                                                            switched);
-                default:
-                    throw new RuntimeException("Error getting filter for Property: \""
-                            + propertyName
-                            + "\". No such property in Entity.");
+                    case StaConstants.PROP_ID:
+                        return handleDirectStringPropertyFilter(root.get(RelationEntity.STA_IDENTIFIER),
+                                                                propertyValue,
+                                                                operator,
+                                                                builder,
+                                                                false);
+                    case StaConstants.PROP_ROLE:
+                        return handleDirectStringPropertyFilter(root.get(RelationEntity.PROPERTY_ROLE),
+                                                                propertyValue,
+                                                                operator,
+                                                                builder,
+                                                                switched);
+                    case StaConstants.PROP_DESCRIPTION:
+                        return handleDirectStringPropertyFilter(
+                                                                root.get(RelationEntity.PROPERTY_DESCRIPTION),
+                                                                propertyValue,
+                                                                operator,
+                                                                builder,
+                                                                switched);
+                    default:
+                        throw new RuntimeException("Error getting filter for Property: \""
+                                + propertyName
+                                + "\". No such property in Entity.");
 
                 }
             } catch (STAInvalidFilterExpressionException e) {

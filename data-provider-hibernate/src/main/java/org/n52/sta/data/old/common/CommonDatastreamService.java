@@ -525,7 +525,7 @@ public abstract class CommonDatastreamService<S extends AbstractDatasetEntity, T
 
             // TODO: check is this is compatible with the SOS
             datastream.getParameters()
-                      .forEach(parameterEntity -> parameterEntity.setEntity(aggregation));
+                      .forEach(parameterEntity -> parameterEntity.setDescribeableEntity(aggregation));
 
             // update existing datastream with new parent
             datastream.setAggregation(aggregation);

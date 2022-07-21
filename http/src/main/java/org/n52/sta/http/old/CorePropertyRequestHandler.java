@@ -63,9 +63,9 @@ public class CorePropertyRequestHandler extends PropertyRequestHandler implement
             + PATH_PROPERTY,
         produces = "application/json")
     public StaDTO readEntityPropertyDirect(@PathVariable String entity,
-                                           @PathVariable String id,
-                                           @PathVariable String property,
-                                           HttpServletRequest request)
+            @PathVariable String id,
+            @PathVariable String property,
+            HttpServletRequest request)
             throws Exception {
         return super.readEntityPropertyDirect(entity, id, property, request);
     }
@@ -76,9 +76,9 @@ public class CorePropertyRequestHandler extends PropertyRequestHandler implement
         MAPPING_PREFIX + CoreRequestUtils.ENTITY_PROPERTY_IDENTIFIED_BY_HISTORICAL_LOCATION_PATH_VARIABLE
     }, produces = "application/json")
     public StaDTO readRelatedEntityProperty(@PathVariable String entity,
-                                            @PathVariable String target,
-                                            @PathVariable String property,
-                                            HttpServletRequest request)
+            @PathVariable String target,
+            @PathVariable String property,
+            HttpServletRequest request)
             throws Exception {
         return super.readRelatedEntityProperty(entity, target, property, request);
     }
@@ -90,9 +90,9 @@ public class CorePropertyRequestHandler extends PropertyRequestHandler implement
             + SLASHVALUE,
         produces = "text/plain")
     public String readEntityPropertyValueDirect(@PathVariable String entity,
-                                                @PathVariable String id,
-                                                @PathVariable String property,
-                                                HttpServletRequest request)
+            @PathVariable String id,
+            @PathVariable String property,
+            HttpServletRequest request)
             throws Exception {
         return super.readEntityPropertyValueDirect(entity, id, property, request);
     }
@@ -109,9 +109,9 @@ public class CorePropertyRequestHandler extends PropertyRequestHandler implement
                 + SLASHVALUE
     }, produces = "text/plain")
     public String readRelatedEntityPropertyValue(@PathVariable String entity,
-                                                 @PathVariable String target,
-                                                 @PathVariable String property,
-                                                 HttpServletRequest request)
+            @PathVariable String target,
+            @PathVariable String property,
+            HttpServletRequest request)
             throws Exception {
         return super.readRelatedEntityPropertyValue(entity, target, property, request);
     }

@@ -302,7 +302,7 @@ public class ObservationService
                                                                                               .getStaIdentifier(),
                                                                                         EntityGraphRepository.FetchGraph.FETCHGRAPH_FEATURE)
                                                                    .orElseThrow(() -> new STACRUDException("Unable to find Datastream!"));
-                
+
                 // Check all subdatasets for a matching dataset
                 Set<DatasetEntity> datasets;
                 if (datastream.getAggregation() == null && !(datastream instanceof DatasetAggregationEntity)) {
@@ -314,11 +314,11 @@ public class ObservationService
                                                    .map(d -> (DatasetEntity) d)
                                                    .collect(Collectors.toSet());
                 }
-                
+
                 // Check all datasets for a matching FOI
                 PlatformEntity platform = datastream.getPlatform();
                 AbstractFeatureEntity< ? > feature = createOrfetchFeature(observation, platform.getId());
-                
+
                 boolean found = false;
                 for (DatasetEntity dataset : datasets) {
                     if (!dataset.hasFeature()) {

@@ -15,7 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 public class ObservedPropertyEntityEditor extends DatabaseEntityAdapter<PhenomenonEntity> implements
         EntityEditor<ObservedProperty> {
-    
+
     @Autowired
     private PhenomenonRepository phenomenonRepository;
 
@@ -38,7 +38,7 @@ public class ObservedPropertyEntityEditor extends DatabaseEntityAdapter<Phenomen
     @Override
     public void delete(String id) throws EditorException {
         // TODO Auto-generated method stub
-        
+
     }
 
     @Override

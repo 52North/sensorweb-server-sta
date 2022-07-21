@@ -82,7 +82,7 @@ public abstract class CudRequestHandler<T extends StaDTO> extends AbstractSTAReq
      */
     @SuppressWarnings("unchecked")
     public StaDTO handlePostDirect(String collectionName,
-                                   String body)
+            String body)
             throws IOException, STACRUDException, STAInvalidUrlException {
         Class<T> clazz = dtoMapper.collectionNameToClass(collectionName);
         return ((AbstractSensorThingsEntityService<T>) serviceRepository.getEntityService(collectionName))
@@ -105,9 +105,9 @@ public abstract class CudRequestHandler<T extends StaDTO> extends AbstractSTAReq
      */
     @SuppressWarnings("unchecked")
     public StaDTO handlePostRelated(String entity,
-                                    String target,
-                                    String body,
-                                    HttpServletRequest request)
+            String target,
+            String body,
+            HttpServletRequest request)
             throws Exception {
         String lookupPath = (String) request.getAttribute(HandlerMapping.LOOKUP_PATH);
         validateResource(lookupPath);
@@ -139,9 +139,9 @@ public abstract class CudRequestHandler<T extends StaDTO> extends AbstractSTAReq
      */
     @SuppressWarnings("unchecked")
     public StaDTO handleDirectPatch(@PathVariable String collectionName,
-                                    @PathVariable String id,
-                                    @RequestBody String body,
-                                    HttpServletRequest request)
+            @PathVariable String id,
+            @RequestBody String body,
+            HttpServletRequest request)
             throws Exception {
         String lookupPath = (String) request.getAttribute(HandlerMapping.LOOKUP_PATH);
         validateResource(lookupPath);
@@ -171,9 +171,9 @@ public abstract class CudRequestHandler<T extends StaDTO> extends AbstractSTAReq
      */
     @SuppressWarnings("unchecked")
     public StaDTO handleRelatedPatch(String entity,
-                                     String target,
-                                     String body,
-                                     HttpServletRequest request)
+            String target,
+            String body,
+            HttpServletRequest request)
             throws Exception {
         String lookupPath = (String) request.getAttribute(HandlerMapping.LOOKUP_PATH);
         validateResource(lookupPath);
@@ -214,8 +214,8 @@ public abstract class CudRequestHandler<T extends StaDTO> extends AbstractSTAReq
      *        full request
      */
     public Object handleDelete(String collectionName,
-                               String id,
-                               HttpServletRequest request)
+            String id,
+            HttpServletRequest request)
             throws Exception {
         String lookupPath = (String) request.getAttribute(HandlerMapping.LOOKUP_PATH);
         validateResource(lookupPath);
@@ -238,9 +238,9 @@ public abstract class CudRequestHandler<T extends StaDTO> extends AbstractSTAReq
      */
     @SuppressWarnings("unchecked")
     public Object handleRelatedDelete(String entity,
-                                      String target,
-                                      String body,
-                                      HttpServletRequest request)
+            String target,
+            String body,
+            HttpServletRequest request)
             throws Exception {
         String lookupPath = (String) request.getAttribute(HandlerMapping.LOOKUP_PATH);
         validateResource(lookupPath);

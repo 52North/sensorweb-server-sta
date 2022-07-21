@@ -120,14 +120,15 @@ public class ErrorHandler {
 
     private String createErrorMessage(Exception e) {
         ObjectNode err = formatError(e);
-        err.put("timestamp", System.currentTimeMillis());
         return err.toPrettyString();
     }
 
     private ObjectNode formatError(Exception e) {
         ObjectNode root = mapper.createObjectNode();
         root.put("timestamp", System.currentTimeMillis());
-        root.put("error", e.getClass().getSimpleName());
+        root.put("error",
+                 e.getClass()
+                  .getSimpleName());
         root.put("message", e.getMessage());
         if (e.getCause() != null) {
             root.put("cause", formatError((Exception) e.getCause()));

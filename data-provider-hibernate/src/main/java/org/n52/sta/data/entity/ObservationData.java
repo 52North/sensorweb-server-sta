@@ -44,9 +44,9 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-public class ObservationData extends StaData<DataEntity<?>> implements Observation {
+public class ObservationData extends StaData<DataEntity< ? >> implements Observation {
 
-    public ObservationData(DataEntity<?> dataEntity, EntityPropertyMapping parameterProperties) {
+    public ObservationData(DataEntity< ? > dataEntity, EntityPropertyMapping parameterProperties) {
         super(dataEntity, parameterProperties);
     }
 

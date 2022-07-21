@@ -25,6 +25,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
+
 package org.n52.sta.data.query.specifications;
 
 import javax.persistence.criteria.Expression;
@@ -34,8 +35,8 @@ import org.springframework.data.jpa.domain.Specification;
 
 public interface PropertyComparator<R, T> {
 
-    Specification<R> compareToRight(Expression<?> right, FilterConstants.ComparisonOperator operator);
+    Specification<R> compareToRight(Expression< ? > right, FilterConstants.ComparisonOperator operator);
 
-    Specification<R> compareToLeft(Expression<?> left, FilterConstants.ComparisonOperator operator);
+    Specification<R> compareToLeft(Expression< ? > left, FilterConstants.ComparisonOperator operator);
 
 }

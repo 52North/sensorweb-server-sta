@@ -49,9 +49,9 @@ public class STAPostgresContainer extends PostgreSQLContainer<STAPostgresContain
     public static STAPostgresContainer instance() {
         if (container == null) {
             container = new STAPostgresContainer()
-                    .withInitScript("testdata.sql")
-                    .withUsername("postgres")
-                    .withPassword("postgres");
+                                                  .withInitScript("testdata.sql")
+                                                  .withUsername("postgres")
+                                                  .withPassword("postgres");
         }
         return container;
     }

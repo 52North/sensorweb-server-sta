@@ -53,17 +53,17 @@ public class ObservationQuerySpecification extends QuerySpecification<DataEntity
         return Optional.of((root, query, builder) -> builder.isNull(root.get(DataEntity.PROPERTY_PARENT)));
     }
 
-    private MemberFilter<DataEntity<?>> createDatastreamFilter() {
+    private MemberFilter<DataEntity> createDatastreamFilter() {
         return specification -> (root, query, builder) -> {
             EntityQuery memberQuery = createQuery(AbstractDatasetEntity.PROPERTY_ID, AbstractDatasetEntity.class);
-            Subquery<?> subquery = memberQuery.create(specification, query, builder);
+            Subquery< ? > subquery = memberQuery.create(specification, query, builder);
             // n..1
             return builder.in(subquery)
                           .value(root.get(DataEntity.PROPERTY_DATASET_ID));
         };
     }
 
-    private MemberFilter<DataEntity<?>> createFeatureOfInterestFilter() {
+    private MemberFilter<DataEntity> createFeatureOfInterestFilter() {
         return specification -> (root, query, builder) -> {
             Subquery<DatasetEntity> sq = query.subquery(DatasetEntity.class);
             Root<DatasetEntity> dataset = sq.from(DatasetEntity.class);

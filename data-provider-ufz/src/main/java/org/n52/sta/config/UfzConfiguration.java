@@ -53,8 +53,8 @@ public class UfzConfiguration {
 
     @Bean
     public ObservationService getObservationService(SerDesConfig serdesConfig,
-                                                    SensorService sensorService,
-                                                    @Value("${server.security.aggregataToken}") String aggregataToken) {
+            SensorService sensorService,
+            @Value("${server.security.aggregataToken}") String aggregataToken) {
         return new UfzAggregataObservationService(serdesConfig, sensorService, aggregataToken);
     }
 }

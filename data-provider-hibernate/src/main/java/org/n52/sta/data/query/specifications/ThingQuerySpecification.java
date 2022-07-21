@@ -61,7 +61,7 @@ public class ThingQuerySpecification extends QuerySpecification<PlatformEntity> 
         return specification -> (root, query, builder) -> {
             EntityQuery memberQuery = createQuery(AbstractDatasetEntity.PROPERTY_PLATFORM,
                                                   AbstractDatasetEntity.class);
-            Subquery<?> subquery = memberQuery.create(specification, query, builder);
+            Subquery< ? > subquery = memberQuery.create(specification, query, builder);
             // 1..n
             return builder.in(root.get(IdEntity.PROPERTY_ID))
                           .value(subquery);
@@ -72,9 +72,9 @@ public class ThingQuerySpecification extends QuerySpecification<PlatformEntity> 
     private MemberFilter<PlatformEntity> createHistoricalLocationFilter() {
         return specification -> (root, query, builder) -> {
             EntityQuery memberQuery = createQuery(IdEntity.PROPERTY_ID, HistoricalLocationEntity.class);
-            Subquery<?> subquery = memberQuery.create(specification, query, builder);
+            Subquery< ? > subquery = memberQuery.create(specification, query, builder);
             // m..n
-            Join<?, ?> join = root.join(PlatformEntity.PROPERTY_HISTORICAL_LOCATIONS, JoinType.INNER);
+            Join< ? , ? > join = root.join(PlatformEntity.PROPERTY_HISTORICAL_LOCATIONS, JoinType.INNER);
             return builder.in(join.get(IdEntity.PROPERTY_ID))
                           .value(subquery);
 
@@ -84,9 +84,9 @@ public class ThingQuerySpecification extends QuerySpecification<PlatformEntity> 
     private MemberFilter<PlatformEntity> createLocationFilter() {
         return specification -> (root, query, builder) -> {
             EntityQuery memberQuery = createQuery(IdEntity.PROPERTY_ID, LocationEntity.class);
-            Subquery<?> subquery = memberQuery.create(specification, query, builder);
+            Subquery< ? > subquery = memberQuery.create(specification, query, builder);
             // m..n
-            Join<?, ?> join = root.join(PlatformEntity.PROPERTY_LOCATIONS, JoinType.INNER);
+            Join< ? , ? > join = root.join(PlatformEntity.PROPERTY_LOCATIONS, JoinType.INNER);
             return builder.in(join.get(IdEntity.PROPERTY_ID))
                           .value(subquery);
 

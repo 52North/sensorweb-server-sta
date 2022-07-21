@@ -75,8 +75,8 @@ public abstract class EntityRequestHandler extends AbstractSTARequestHandler {
      *        full request
      */
     public StaDTO readEntityDirect(String entity,
-                                   String id,
-                                   HttpServletRequest request)
+            String id,
+            HttpServletRequest request)
             throws Exception {
         String lookupPath = (String) request.getAttribute(HandlerMapping.LOOKUP_PATH);
         validateResource(lookupPath);
@@ -99,8 +99,8 @@ public abstract class EntityRequestHandler extends AbstractSTARequestHandler {
      *        full request
      */
     public StaDTO readEntityRefDirect(String entity,
-                                      String id,
-                                      HttpServletRequest request)
+            String id,
+            HttpServletRequest request)
             throws Exception {
         String lookupPath = (String) request.getAttribute(HandlerMapping.LOOKUP_PATH);
 
@@ -127,8 +127,8 @@ public abstract class EntityRequestHandler extends AbstractSTARequestHandler {
      * @return JSON String representing Entity
      */
     public StaDTO readRelatedEntity(String entity,
-                                    String target,
-                                    HttpServletRequest request)
+            String target,
+            HttpServletRequest request)
             throws Exception {
         String lookupPath = (String) request.getAttribute(HandlerMapping.LOOKUP_PATH);
         validateResource(lookupPath);
@@ -156,8 +156,8 @@ public abstract class EntityRequestHandler extends AbstractSTARequestHandler {
      * @return JSON String representing Entity
      */
     public StaDTO readRelatedEntityRef(String entity,
-                                       String target,
-                                       HttpServletRequest request)
+            String target,
+            HttpServletRequest request)
             throws Exception {
         String lookupPath = (String) request.getAttribute(HandlerMapping.LOOKUP_PATH);
         validateResource(lookupPath.substring(0, lookupPath.length() - 5));

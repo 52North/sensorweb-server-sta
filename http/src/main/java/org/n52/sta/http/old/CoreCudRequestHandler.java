@@ -69,7 +69,7 @@ public class CoreCudRequestHandler extends CudRequestHandler<StaDTO> implements 
             + "$}",
         produces = "application/json")
     public StaDTO handlePostDirect(@PathVariable String collectionName,
-                                   @RequestBody String body)
+            @RequestBody String body)
             throws IOException, STACRUDException, STAInvalidUrlException {
         return super.handlePostDirect(collectionName, body);
     }
@@ -84,9 +84,9 @@ public class CoreCudRequestHandler extends CudRequestHandler<StaDTO> implements 
         MAPPING_PREFIX + CoreRequestUtils.COLLECTION_IDENTIFIED_BY_HIST_LOCATION_PATH_VARIABLE
     }, produces = "application/json")
     public StaDTO handlePostRelated(@PathVariable String entity,
-                                    @PathVariable String target,
-                                    @RequestBody String body,
-                                    HttpServletRequest request)
+            @PathVariable String target,
+            @RequestBody String body,
+            HttpServletRequest request)
             throws Exception {
         return super.handlePostRelated(entity, target, body, request);
     }
@@ -98,9 +98,9 @@ public class CoreCudRequestHandler extends CudRequestHandler<StaDTO> implements 
             + "$}",
         produces = "application/json")
     public StaDTO handleDirectPatch(@PathVariable String collectionName,
-                                    @PathVariable String id,
-                                    @RequestBody String body,
-                                    HttpServletRequest request)
+            @PathVariable String id,
+            @RequestBody String body,
+            HttpServletRequest request)
             throws Exception {
         return super.handleDirectPatch(collectionName, id, body, request);
     }
@@ -111,9 +111,9 @@ public class CoreCudRequestHandler extends CudRequestHandler<StaDTO> implements 
         MAPPING_PREFIX + CoreRequestUtils.ENTITY_IDENTIFIED_BY_HISTORICAL_LOCATION_PATH_VARIABLE
     }, produces = "application/json")
     public StaDTO handleRelatedPatch(@PathVariable String entity,
-                                     @PathVariable String target,
-                                     @RequestBody String body,
-                                     HttpServletRequest request)
+            @PathVariable String target,
+            @RequestBody String body,
+            HttpServletRequest request)
             throws Exception {
         return super.handleRelatedPatch(entity, target, body, request);
     }
@@ -125,8 +125,8 @@ public class CoreCudRequestHandler extends CudRequestHandler<StaDTO> implements 
             + "$}",
         produces = "application/json")
     public Object handleDelete(@PathVariable String collectionName,
-                               @PathVariable String id,
-                               HttpServletRequest request)
+            @PathVariable String id,
+            HttpServletRequest request)
             throws Exception {
         return super.handleDelete(collectionName, id, request);
     }
@@ -137,9 +137,9 @@ public class CoreCudRequestHandler extends CudRequestHandler<StaDTO> implements 
         MAPPING_PREFIX + CoreRequestUtils.ENTITY_IDENTIFIED_BY_HISTORICAL_LOCATION_PATH_VARIABLE
     }, produces = "application/json")
     public Object handleRelatedDelete(@PathVariable String entity,
-                                      @PathVariable String target,
-                                      @RequestBody String body,
-                                      HttpServletRequest request)
+            @PathVariable String target,
+            @RequestBody String body,
+            HttpServletRequest request)
             throws Exception {
         return super.handleRelatedDelete(entity, target, body, request);
     }

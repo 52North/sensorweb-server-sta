@@ -72,18 +72,18 @@ public abstract class PropertyRequestHandler extends AbstractSTARequestHandler {
      *        Full request object. Automatically set by Spring
      */
     public StaDTO readEntityPropertyDirect(String entity,
-                                           String id,
-                                           String property,
-                                           HttpServletRequest request)
+            String id,
+            String property,
+            HttpServletRequest request)
             throws Exception {
         String lookupPath = (String) request.getAttribute(HandlerMapping.LOOKUP_PATH);
         return readEntityPropertyDirect(entity, id, property, lookupPath);
     }
 
     private StaDTO readEntityPropertyDirect(String entity,
-                                            String id,
-                                            String property,
-                                            String url)
+            String id,
+            String property,
+            String url)
             throws Exception {
         validateResource(url.substring(0, url.length() - property.length() - 1));
         validateProperty(entity, property);
@@ -112,18 +112,18 @@ public abstract class PropertyRequestHandler extends AbstractSTARequestHandler {
      * @return JSON Object with serialized property
      */
     public StaDTO readRelatedEntityProperty(String entity,
-                                            String target,
-                                            String property,
-                                            HttpServletRequest request)
+            String target,
+            String property,
+            HttpServletRequest request)
             throws Exception {
         String lookupPath = (String) request.getAttribute(HandlerMapping.LOOKUP_PATH);
         return readRelatedEntityProperty(entity, target, property, lookupPath);
     }
 
     private StaDTO readRelatedEntityProperty(String entity,
-                                             String target,
-                                             String property,
-                                             String url)
+            String target,
+            String property,
+            String url)
             throws Exception {
         validateResource(url.substring(0, url.length() - property.length() - 1));
 
@@ -157,9 +157,9 @@ public abstract class PropertyRequestHandler extends AbstractSTARequestHandler {
      *        Full request object. Automatically set by Spring
      */
     public String readEntityPropertyValueDirect(String entity,
-                                                String id,
-                                                String property,
-                                                HttpServletRequest request)
+            String id,
+            String property,
+            HttpServletRequest request)
             throws Exception {
         String lookupPath = (String) request.getAttribute(HandlerMapping.LOOKUP_PATH);
         StaDTO elementWithQueryOptions = this.readEntityPropertyDirect(entity,
@@ -189,9 +189,9 @@ public abstract class PropertyRequestHandler extends AbstractSTARequestHandler {
      * @return JSON Object with serialized property
      */
     public String readRelatedEntityPropertyValue(String entity,
-                                                 String target,
-                                                 String property,
-                                                 HttpServletRequest request)
+            String target,
+            String property,
+            HttpServletRequest request)
             throws Exception {
         String lookupPath = (String) request.getAttribute(HandlerMapping.LOOKUP_PATH);
         StaDTO elementWithQueryOptions = this.readRelatedEntityProperty(entity,

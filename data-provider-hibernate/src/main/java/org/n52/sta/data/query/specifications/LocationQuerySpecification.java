@@ -50,19 +50,20 @@ public class LocationQuerySpecification extends QuerySpecification<LocationEntit
     private MemberFilter<LocationEntity> createThingFilter() {
         return specification -> (root, query, builder) -> {
             EntityQuery memberQuery = createQuery(IdEntity.PROPERTY_ID, PlatformEntity.class);
-            Subquery<?> subquery = memberQuery.create(specification, query, builder);
+            Subquery< ? > subquery = memberQuery.create(specification, query, builder);
             // m..n
-            Join<?, ?> join = root.join(LocationEntity.PROPERTY_PLATFORMS, JoinType.INNER);
-            return builder.in(join.get(IdEntity.PROPERTY_ID)).value(subquery);
+            Join< ? , ? > join = root.join(LocationEntity.PROPERTY_PLATFORMS, JoinType.INNER);
+            return builder.in(join.get(IdEntity.PROPERTY_ID))
+                          .value(subquery);
         };
     }
 
     private MemberFilter<LocationEntity> createHistoricalLocationFilter() {
         return specification -> (root, query, builder) -> {
             EntityQuery memberQuery = createQuery(IdEntity.PROPERTY_ID, HistoricalLocationEntity.class);
-            Subquery<?> subquery = memberQuery.create(specification, query, builder);
+            Subquery< ? > subquery = memberQuery.create(specification, query, builder);
             // m..n
-            Join<?, ?> join = root.join(LocationEntity.PROPERTY_HISTORICAL_LOCATIONS, JoinType.INNER);
+            Join< ? , ? > join = root.join(LocationEntity.PROPERTY_HISTORICAL_LOCATIONS, JoinType.INNER);
             return builder.in(join.get(IdEntity.PROPERTY_ID))
                           .value(subquery);
         };

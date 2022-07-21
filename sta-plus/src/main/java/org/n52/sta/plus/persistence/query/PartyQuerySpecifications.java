@@ -58,7 +58,7 @@ public class PartyQuerySpecifications extends EntityQuerySpecifications<PartyEnt
 
     @Override
     protected Specification<PartyEntity> handleRelatedPropertyFilter(String propertyName,
-                                                                     Specification< ? > propertyValue) {
+            Specification< ? > propertyValue) {
         return (root, query, builder) -> {
             if (StaConstants.DATASTREAMS.equals(propertyName)) {
                 Subquery<PartyEntity> sq = query.subquery(PartyEntity.class);
@@ -77,35 +77,35 @@ public class PartyQuerySpecifications extends EntityQuerySpecifications<PartyEnt
 
     @Override
     protected Specification<PartyEntity> handleDirectPropertyFilter(
-                                                                    String propertyName,
-                                                                    Expression< ? > propertyValue,
-                                                                    FilterConstants.ComparisonOperator operator,
-                                                                    boolean switched) {
+            String propertyName,
+            Expression< ? > propertyValue,
+            FilterConstants.ComparisonOperator operator,
+            boolean switched) {
         return (Specification<PartyEntity>) (root, query, builder) -> {
             try {
                 switch (propertyName) {
-                case StaConstants.PROP_ID:
-                    return handleDirectStringPropertyFilter(root.get(PartyEntity.STA_IDENTIFIER),
-                                                            propertyValue,
-                                                            operator,
-                                                            builder,
-                                                            false);
-                case StaConstants.PROP_DISPLAY_NAME:
-                    return handleDirectStringPropertyFilter(root.get(PartyEntity.PROPERTY_DISPLAY_NAME),
-                                                            propertyValue,
-                                                            operator,
-                                                            builder,
-                                                            switched);
-                case StaConstants.PROP_ROLE:
-                    return handleDirectStringPropertyFilter(root.get(PartyEntity.PROPERTY_ROLE),
-                                                            propertyValue,
-                                                            operator,
-                                                            builder,
-                                                            switched);
-                default:
-                    throw new RuntimeException("Error getting filter for Property: \""
-                            + propertyName
-                            + "\". No such property in Entity.");
+                    case StaConstants.PROP_ID:
+                        return handleDirectStringPropertyFilter(root.get(PartyEntity.STA_IDENTIFIER),
+                                                                propertyValue,
+                                                                operator,
+                                                                builder,
+                                                                false);
+                    case StaConstants.PROP_DISPLAY_NAME:
+                        return handleDirectStringPropertyFilter(root.get(PartyEntity.PROPERTY_DISPLAY_NAME),
+                                                                propertyValue,
+                                                                operator,
+                                                                builder,
+                                                                switched);
+                    case StaConstants.PROP_ROLE:
+                        return handleDirectStringPropertyFilter(root.get(PartyEntity.PROPERTY_ROLE),
+                                                                propertyValue,
+                                                                operator,
+                                                                builder,
+                                                                switched);
+                    default:
+                        throw new RuntimeException("Error getting filter for Property: \""
+                                + propertyName
+                                + "\". No such property in Entity.");
 
                 }
             } catch (STAInvalidFilterExpressionException e) {

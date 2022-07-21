@@ -75,8 +75,8 @@ public class ObservationGroupQuerySpecifications extends EntityQuerySpecificatio
 
     @Override
     protected Specification<GroupEntity> handleRelatedPropertyFilter(
-                                                                     String propertyName,
-                                                                     Specification< ? > propertyValue) {
+            String propertyName,
+            Specification< ? > propertyValue) {
         return (root, query, builder) -> {
             if (StaConstants.RELATIONS.equals(propertyName)) {
                 Subquery<GroupEntity> sq = query.subquery(GroupEntity.class);
@@ -95,46 +95,46 @@ public class ObservationGroupQuerySpecifications extends EntityQuerySpecificatio
 
     @Override
     protected Specification<GroupEntity> handleDirectPropertyFilter(
-                                                                    String propertyName,
-                                                                    Expression< ? > propertyValue,
-                                                                    FilterConstants.ComparisonOperator operator,
-                                                                    boolean switched) {
+            String propertyName,
+            Expression< ? > propertyValue,
+            FilterConstants.ComparisonOperator operator,
+            boolean switched) {
         return (Specification<GroupEntity>) (root, query, builder) -> {
             try {
                 switch (propertyName) {
-                case StaConstants.PROP_ID:
-                    return handleDirectStringPropertyFilter(root.get(GroupEntity.STA_IDENTIFIER),
-                                                            propertyValue,
-                                                            operator,
-                                                            builder,
-                                                            false);
-                case StaConstants.PROP_NAME:
-                    return handleDirectStringPropertyFilter(root.get(GroupEntity.NAME),
-                                                            propertyValue,
-                                                            operator,
-                                                            builder,
-                                                            switched);
-                case StaConstants.PROP_DESCRIPTION:
-                    return handleDirectStringPropertyFilter(root.get(GroupEntity.DESCRIPTION),
-                                                            propertyValue,
-                                                            operator,
-                                                            builder,
-                                                            switched);
-                default:
-                    // We are filtering on variable keys on properties
-                    if (propertyName.startsWith(StaConstants.PROP_PROPERTIES)) {
-                        return handleProperties(root,
-                                                query,
-                                                builder,
-                                                propertyName,
-                                                propertyValue,
-                                                operator,
-                                                switched,
-                                                ObservationGroupParameterEntity.PROP_OBS_GROUP_ID,
-                                                ParameterFactory.EntityType.OBS_GROUP);
-                    } else {
-                        throw new RuntimeException(String.format(ERROR_GETTING_FILTER_NO_PROP, propertyName));
-                    }
+                    case StaConstants.PROP_ID:
+                        return handleDirectStringPropertyFilter(root.get(GroupEntity.STA_IDENTIFIER),
+                                                                propertyValue,
+                                                                operator,
+                                                                builder,
+                                                                false);
+                    case StaConstants.PROP_NAME:
+                        return handleDirectStringPropertyFilter(root.get(GroupEntity.NAME),
+                                                                propertyValue,
+                                                                operator,
+                                                                builder,
+                                                                switched);
+                    case StaConstants.PROP_DESCRIPTION:
+                        return handleDirectStringPropertyFilter(root.get(GroupEntity.DESCRIPTION),
+                                                                propertyValue,
+                                                                operator,
+                                                                builder,
+                                                                switched);
+                    default:
+                        // We are filtering on variable keys on properties
+                        if (propertyName.startsWith(StaConstants.PROP_PROPERTIES)) {
+                            return handleProperties(root,
+                                                    query,
+                                                    builder,
+                                                    propertyName,
+                                                    propertyValue,
+                                                    operator,
+                                                    switched,
+                                                    ObservationGroupParameterEntity.PROP_OBS_GROUP_ID,
+                                                    ParameterFactory.EntityType.OBS_GROUP);
+                        } else {
+                            throw new RuntimeException(String.format(ERROR_GETTING_FILTER_NO_PROP, propertyName));
+                        }
                 }
             } catch (STAInvalidFilterExpressionException e) {
                 throw new RuntimeException(e);

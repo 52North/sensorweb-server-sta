@@ -59,7 +59,7 @@ public class ProjectQuerySpecifications extends EntityQuerySpecifications<Projec
 
     @Override
     protected Specification<ProjectEntity> handleRelatedPropertyFilter(String propertyName,
-                                                                       Specification< ? > propertyValue) {
+            Specification< ? > propertyValue) {
         return (root, query, builder) -> {
             if (StaConstants.DATASTREAMS.equals(propertyName)) {
                 Subquery<ProjectEntity> sq = query.subquery(ProjectEntity.class);
@@ -78,63 +78,67 @@ public class ProjectQuerySpecifications extends EntityQuerySpecifications<Projec
 
     @Override
     protected Specification<ProjectEntity> handleDirectPropertyFilter(
-                                                                      String propertyName,
-                                                                      Expression< ? > propertyValue,
-                                                                      FilterConstants.ComparisonOperator operator,
-                                                                      boolean switched) {
+            String propertyName,
+            Expression< ? > propertyValue,
+            FilterConstants.ComparisonOperator operator,
+            boolean switched) {
         return (Specification<ProjectEntity>) (root, query, builder) -> {
             try {
                 switch (propertyName) {
-                case StaConstants.PROP_ID:
-                    return handleDirectStringPropertyFilter(root.get(ProjectEntity.STA_IDENTIFIER),
-                                                            propertyValue,
-                                                            operator,
-                                                            builder,
-                                                            false);
-                case StaConstants.PROP_NAME:
-                    return handleDirectStringPropertyFilter(root.get(ProjectEntity.NAME),
-                                                            propertyValue,
-                                                            operator,
-                                                            builder,
-                                                            switched);
-                case StaConstants.PROP_DESCRIPTION:
-                    return handleDirectStringPropertyFilter(root.get(ProjectEntity.DESCRIPTION),
-                                                            propertyValue,
-                                                            operator,
-                                                            builder,
-                                                            switched);
-                case StaConstants.PROP_URL:
-                    return handleDirectStringPropertyFilter(root.get(ProjectEntity.PROPERTY_URL),
-                                                            propertyValue,
-                                                            operator,
-                                                            builder,
-                                                            switched);
-                case StaConstants.PROP_RUNTIME:
-                    switch (operator) {
-                    /*
-                     * case PropertyIsLessThan: case PropertyIsLessThanOrEqualTo: return
-                     * handleDirectDateTimePropertyFilter( root.get(ProjectEntity.PROPERTY_RUNTIME_END),
-                     * propertyValue, operator, builder); case PropertyIsGreaterThan: case
-                     * PropertyIsGreaterThanOrEqualTo: return handleDirectDateTimePropertyFilter(
-                     * root.get(ProjectEntity.PROPERTY_RUNTIME_START), propertyValue, operator, builder); case
-                     * PropertyIsEqualTo: Predicate eqStart = handleDirectDateTimePropertyFilter(
-                     * root.get(ProjectEntity.PROPERTY_RUNTIME_START), propertyValue, operator, builder);
-                     * Predicate eqEnd = handleDirectDateTimePropertyFilter(
-                     * root.get(ProjectEntity.PROPERTY_RUNTIME_END), propertyValue, operator, builder); return
-                     * builder.and(eqStart, eqEnd); case PropertyIsNotEqualTo: Predicate neStart =
-                     * handleDirectDateTimePropertyFilter( root.get(ProjectEntity.PROPERTY_RUNTIME_START),
-                     * propertyValue, operator, builder); Predicate neEnd =
-                     * handleDirectDateTimePropertyFilter( root.get(ProjectEntity.PROPERTY_RUNTIME_END),
-                     * propertyValue, operator, builder); return builder.or(neStart, neEnd);
-                     */
+                    case StaConstants.PROP_ID:
+                        return handleDirectStringPropertyFilter(root.get(ProjectEntity.STA_IDENTIFIER),
+                                                                propertyValue,
+                                                                operator,
+                                                                builder,
+                                                                false);
+                    case StaConstants.PROP_NAME:
+                        return handleDirectStringPropertyFilter(root.get(ProjectEntity.NAME),
+                                                                propertyValue,
+                                                                operator,
+                                                                builder,
+                                                                switched);
+                    case StaConstants.PROP_DESCRIPTION:
+                        return handleDirectStringPropertyFilter(root.get(ProjectEntity.DESCRIPTION),
+                                                                propertyValue,
+                                                                operator,
+                                                                builder,
+                                                                switched);
+                    case StaConstants.PROP_URL:
+                        return handleDirectStringPropertyFilter(root.get(ProjectEntity.PROPERTY_URL),
+                                                                propertyValue,
+                                                                operator,
+                                                                builder,
+                                                                switched);
+                    case StaConstants.PROP_RUNTIME:
+                        switch (operator) {
+                            /*
+                             * case PropertyIsLessThan: case PropertyIsLessThanOrEqualTo: return
+                             * handleDirectDateTimePropertyFilter(
+                             * root.get(ProjectEntity.PROPERTY_RUNTIME_END), propertyValue, operator,
+                             * builder); case PropertyIsGreaterThan: case PropertyIsGreaterThanOrEqualTo:
+                             * return handleDirectDateTimePropertyFilter(
+                             * root.get(ProjectEntity.PROPERTY_RUNTIME_START), propertyValue, operator,
+                             * builder); case PropertyIsEqualTo: Predicate eqStart =
+                             * handleDirectDateTimePropertyFilter(
+                             * root.get(ProjectEntity.PROPERTY_RUNTIME_START), propertyValue, operator,
+                             * builder); Predicate eqEnd = handleDirectDateTimePropertyFilter(
+                             * root.get(ProjectEntity.PROPERTY_RUNTIME_END), propertyValue, operator,
+                             * builder); return builder.and(eqStart, eqEnd); case PropertyIsNotEqualTo:
+                             * Predicate neStart = handleDirectDateTimePropertyFilter(
+                             * root.get(ProjectEntity.PROPERTY_RUNTIME_START), propertyValue, operator,
+                             * builder); Predicate neEnd = handleDirectDateTimePropertyFilter(
+                             * root.get(ProjectEntity.PROPERTY_RUNTIME_END), propertyValue, operator,
+                             * builder); return builder.or(neStart, neEnd);
+                             */
+                            default:
+                                throw new STAInvalidFilterExpressionException(
+                                                                              "Unknown operator: "
+                                                                                      + operator.toString());
+                        }
                     default:
-                        throw new STAInvalidFilterExpressionException(
-                                                                      "Unknown operator: " + operator.toString());
-                    }
-                default:
-                    throw new RuntimeException("Error getting filter for Property: \""
-                            + propertyName
-                            + "\". No such property in Entity.");
+                        throw new RuntimeException("Error getting filter for Property: \""
+                                + propertyName
+                                + "\". No such property in Entity.");
 
                 }
             } catch (STAInvalidFilterExpressionException e) {

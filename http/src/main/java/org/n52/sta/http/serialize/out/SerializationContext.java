@@ -91,10 +91,15 @@ public class SerializationContext {
         String serviceUri = requestContext.getServiceUri();
         QueryOptions queryOptions = requestContext.getQueryOptions();
         if (path.getPathType() == SelectPath.PathType.property || path.getPathType() == SelectPath.PathType.value) {
-            // We replace all queryOptions with a single $select=<property> as they do not make sense when requesting
+            // We replace all queryOptions with a single $select=<property> as they do not make sense when
+            // requesting
             // a property directly
             Set<FilterClause> filters = new HashSet<>(2);
-            filters.add(new SelectFilter(requestContext.getPath().getPathSegments().get(0).getProperty().get()));
+            filters.add(new SelectFilter(requestContext.getPath()
+                                                       .getPathSegments()
+                                                       .get(0)
+                                                       .getProperty()
+                                                       .get()));
             queryOptions = QueryOptionsFactory.createQueryOptions(filters);
         }
         SerializationContext context = new SerializationContext(serviceUri, queryOptions, mapper);

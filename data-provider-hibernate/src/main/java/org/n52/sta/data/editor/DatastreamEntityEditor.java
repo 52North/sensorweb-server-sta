@@ -76,7 +76,7 @@ public class DatastreamEntityEditor extends DatabaseEntityAdapter<AbstractDatase
     public DatastreamData save(Datastream entity) throws EditorException {
         Objects.requireNonNull(entity, "entity must not be null");
         assertNew(entity);
-        
+
         // DTOTransformerImpl#createDatasetEntity
         // CommonDatastreamService
         // DatastreamService (old package)
@@ -86,7 +86,7 @@ public class DatastreamEntityEditor extends DatabaseEntityAdapter<AbstractDatase
         String id = entity.getId() == null
                 ? generateId()
                 : entity.getId();
-        
+
         // metadata
         DatasetEntity dataset = new DatasetEntity();
         dataset.setIdentifier(id);
@@ -199,7 +199,7 @@ public class DatastreamEntityEditor extends DatabaseEntityAdapter<AbstractDatase
             DatasetTextParameterEntity parameterEntity = new DatasetTextParameterEntity();
             parameterEntity.setName(key);
             parameterEntity.setValue((String) value);
-        } else {
+            // } else {
             // TODO handle other cases from DTOTransformerImpl#convertParameters
         }
         return null;

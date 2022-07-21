@@ -77,7 +77,7 @@ public class ThingAggregate extends EntityAggregate<Thing> implements Thing {
     public Set<Datastream> getDatastreams() {
         return thing.getDatastreams();
     }
-    
+
     public boolean isMobile() {
         Map<String, Object> properties = thing.getProperties();
         if (properties.containsKey("isMobile")) {
@@ -86,7 +86,7 @@ public class ThingAggregate extends EntityAggregate<Thing> implements Thing {
                     ? (boolean) properties.get("isMobile")
                     : false;
         }
-        
+
         return false;
     }
 

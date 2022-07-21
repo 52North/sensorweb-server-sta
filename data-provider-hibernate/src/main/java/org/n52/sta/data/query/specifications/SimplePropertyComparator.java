@@ -47,9 +47,11 @@ class SimplePropertyComparator<R, T extends Comparable< ? super T>> implements P
     }
 
     /**
-     * Get a Path to the specified property. May be overwritten if processing of the Root entity (e.g. joining) is
-     * needed to construct the path.
-     * @param root Root
+     * Get a Path to the specified property. May be overwritten if processing of the Root entity (e.g.
+     * joining) is needed to construct the path.
+     *
+     * @param root
+     *        Root
      * @return Path to this.entityPath
      */
     protected Path<T> getPath(Root<R> root) {
@@ -73,7 +75,7 @@ class SimplePropertyComparator<R, T extends Comparable< ? super T>> implements P
      *      operators
      */
     @Override
-    public Specification<R> compareToRight(Expression<?> right, ComparisonOperator operator) {
+    public Specification<R> compareToRight(Expression< ? > right, ComparisonOperator operator) {
         return (root, query, builder) -> {
             Path<T> selectPath = getPath(root);
             Expression<T> rightExpr = castToComparable(right);
@@ -98,7 +100,7 @@ class SimplePropertyComparator<R, T extends Comparable< ? super T>> implements P
      *      operators
      */
     @Override
-    public Specification<R> compareToLeft(Expression<?> left, ComparisonOperator operator) {
+    public Specification<R> compareToLeft(Expression< ? > left, ComparisonOperator operator) {
         return (root, query, builder) -> {
             Path<T> selectPath = getPath(root);
             Expression<T> leftExpr = castToComparable(left);
@@ -123,9 +125,9 @@ class SimplePropertyComparator<R, T extends Comparable< ? super T>> implements P
      * @see #compare(Expression, ComparisonOperator, Expression, CriteriaBuilder) for a list of supported
      *      operators
      */
-    private Specification<T> compare(Expression<?> left,
-                                    FilterConstants.ComparisonOperator operator,
-                                    Expression<?> right) {
+    private Specification<T> compare(Expression< ? > left,
+            FilterConstants.ComparisonOperator operator,
+            Expression< ? > right) {
         return (root, query, builder) -> compare(left, operator, right, builder);
     }
 
@@ -161,30 +163,30 @@ class SimplePropertyComparator<R, T extends Comparable< ? super T>> implements P
      * @throws ClassCastException
      *         if the comparison types do not match
      */
-    private <Y extends Comparable< ? super Y>> Predicate compare(Expression<?> leftExpr,
-                                                                ComparisonOperator operator,
-                                                                Expression<?> rightExpr,
-                                                                CriteriaBuilder builder)
+    private <Y extends Comparable< ? super Y>> Predicate compare(Expression< ? > leftExpr,
+            ComparisonOperator operator,
+            Expression< ? > rightExpr,
+            CriteriaBuilder builder)
             throws SpecificationsException {
         Expression<Y> left = castToComparable(leftExpr);
         Expression<Y> right = castToComparable(rightExpr);
         switch (operator) {
-        case PropertyIsEqualTo:
-            return builder.equal(left, right);
-        case PropertyIsNotEqualTo:
-            return builder.notEqual(left, right);
-        case PropertyIsLessThan:
-            return builder.lessThan(left, right);
-        case PropertyIsLessThanOrEqualTo:
-            return builder.lessThanOrEqualTo(left, right);
-        case PropertyIsGreaterThan:
-            return builder.greaterThan(left, right);
-        case PropertyIsGreaterThanOrEqualTo:
-            return builder.greaterThanOrEqualTo(left, right);
-        case PropertyIsBetween:
-            // unsupported between
-        default:
-            throw new SpecificationsException("Unsupported comparison operator: '" + operator + "'");
+            case PropertyIsEqualTo:
+                return builder.equal(left, right);
+            case PropertyIsNotEqualTo:
+                return builder.notEqual(left, right);
+            case PropertyIsLessThan:
+                return builder.lessThan(left, right);
+            case PropertyIsLessThanOrEqualTo:
+                return builder.lessThanOrEqualTo(left, right);
+            case PropertyIsGreaterThan:
+                return builder.greaterThan(left, right);
+            case PropertyIsGreaterThanOrEqualTo:
+                return builder.greaterThanOrEqualTo(left, right);
+            case PropertyIsBetween:
+                // unsupported between
+            default:
+                throw new SpecificationsException("Unsupported comparison operator: '" + operator + "'");
         }
     }
 

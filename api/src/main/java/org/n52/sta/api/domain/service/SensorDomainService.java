@@ -29,7 +29,6 @@
 package org.n52.sta.api.domain.service;
 
 import org.n52.sta.api.EntityProvider;
-import org.n52.sta.api.domain.DomainService;
 import org.n52.sta.api.domain.DomainService.DomainServiceAdapter;
 import org.n52.sta.api.entity.Sensor;
 

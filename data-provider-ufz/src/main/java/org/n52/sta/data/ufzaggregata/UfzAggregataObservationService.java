@@ -134,16 +134,16 @@ public class UfzAggregataObservationService extends ObservationService {
 
     @Override
     public DataEntity< ? > getEntityByRelatedEntityRaw(String relatedId,
-                                                       String relatedType,
-                                                       String ownId,
-                                                       QueryOptions queryOptions)
+            String relatedType,
+            String ownId,
+            QueryOptions queryOptions)
             throws STACRUDException {
         throw new STACRUDException(NOT_YET_IMPLEMENTED);
     }
 
     public Page getEntityCollectionByRelatedEntityRaw(String relatedId,
-                                                      String relatedType,
-                                                      QueryOptions queryOptions)
+            String relatedType,
+            QueryOptions queryOptions)
             throws STACRUDException {
         try {
             throw new STACRUDException(NOT_YET_IMPLEMENTED);
@@ -159,15 +159,15 @@ public class UfzAggregataObservationService extends ObservationService {
 
     @Override
     protected DataEntity< ? > fetchExpandEntitiesWithFilter(DataEntity< ? > returned,
-                                                            ExpandFilter expandOption)
+            ExpandFilter expandOption)
             throws STACRUDException, STAInvalidQueryException {
         throw new STACRUDException(NOT_YET_IMPLEMENTED);
     }
 
     @Override
     public Specification<DataEntity< ? >> byRelatedEntityFilter(String relatedId,
-                                                                String relatedType,
-                                                                String ownId) {
+            String relatedType,
+            String ownId) {
         throw new STAInvalidQueryError(NOT_YET_IMPLEMENTED);
     }
 
@@ -218,14 +218,14 @@ public class UfzAggregataObservationService extends ObservationService {
      *        ObservationEntity
      */
     protected void updateDatastreamPhenomenonTimeOnObservationUpdate(AbstractDatasetEntity datastreamEntity,
-                                                                     DataEntity< ? > observation) {
+            DataEntity< ? > observation) {
         throw new STAInvalidQueryError(NOT_YET_IMPLEMENTED);
     }
 
     @Override
     public CollectionWrapper getEntityCollectionByRelatedEntity(String relatedId,
-                                                                String relatedType,
-                                                                QueryOptions queryOptions)
+            String relatedType,
+            QueryOptions queryOptions)
             throws STACRUDException {
         try {
             checkValidQueryOptions(queryOptions);

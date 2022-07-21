@@ -106,7 +106,8 @@ public class StaPathVisitor extends StaPathGrammarBaseVisitor<StaPath< ? extends
                 return new StaPath<>(type,
                                      new PathSegment(entity.getText(),
                                                      identifier,
-                                                     propertyCtx.getChild(0).getText()),
+                                                     propertyCtx.getChild(0)
+                                                                .getText()),
                                      serializerFactory,
                                      entityType);
             }

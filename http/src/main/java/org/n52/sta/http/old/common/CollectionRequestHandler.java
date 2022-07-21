@@ -74,7 +74,7 @@ public abstract class CollectionRequestHandler<T extends RequestUtils> extends A
      * @return CollectionWrapper Requested collection
      */
     public CollectionWrapper readCollectionDirect(@PathVariable String collectionName,
-                                                  HttpServletRequest request)
+            HttpServletRequest request)
             throws STACRUDException {
         QueryOptions options = decodeQueryString(request);
         return serviceRepository
@@ -94,7 +94,7 @@ public abstract class CollectionRequestHandler<T extends RequestUtils> extends A
      * @return CollectionWrapper Requested collection
      */
     public CollectionWrapper readCollectionRefDirect(@PathVariable String collectionName,
-                                                     HttpServletRequest request)
+            HttpServletRequest request)
             throws STACRUDException {
         HashSet<FilterClause> filters = new HashSet<>();
         String queryString = request.getQueryString();
@@ -127,8 +127,8 @@ public abstract class CollectionRequestHandler<T extends RequestUtils> extends A
      * @return CollectionWrapper Requested collection
      */
     public CollectionWrapper readCollectionRelated(@PathVariable String entity,
-                                                   @PathVariable String target,
-                                                   HttpServletRequest request)
+            @PathVariable String target,
+            HttpServletRequest request)
             throws Exception {
         validateResource((String) request.getAttribute(HandlerMapping.LOOKUP_PATH));
 
@@ -155,8 +155,8 @@ public abstract class CollectionRequestHandler<T extends RequestUtils> extends A
      * @return CollectionWrapper Requested collection
      */
     public CollectionWrapper readCollectionRelatedRef(@PathVariable String entity,
-                                                      @PathVariable String target,
-                                                      HttpServletRequest request)
+            @PathVariable String target,
+            HttpServletRequest request)
             throws Exception {
         String lookupPath = (String) request.getAttribute(HandlerMapping.LOOKUP_PATH);
         validateResource(lookupPath.substring(0, lookupPath.length() - 5));
