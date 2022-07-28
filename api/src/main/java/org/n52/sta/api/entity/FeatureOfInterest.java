@@ -39,6 +39,10 @@ public interface FeatureOfInterest extends Identifiable {
 
     String getDescription();
 
+    default String getEncodingType() {
+        return "application/geo+json";
+    };
+
     Map<String, Object> getProperties();
 
     Geometry getFeature();

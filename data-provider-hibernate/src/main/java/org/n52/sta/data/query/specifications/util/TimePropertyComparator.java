@@ -26,20 +26,21 @@
  * Public License for more details.
  */
 
-package org.n52.sta.data.query.specifications;
+package org.n52.sta.data.query.specifications.util;
 
 import javax.persistence.criteria.Expression;
 
 import org.n52.shetland.ogc.filter.FilterConstants.ComparisonOperator;
+import org.n52.sta.data.query.specifications.SpecificationsException;
 import org.springframework.data.jpa.domain.Specification;
 
 @SuppressWarnings("checkstyle:MultipleStringLiterals")
-class TimePropertyComparator<R, T extends Comparable< ? super T>> implements PropertyComparator<R, T> {
+public class TimePropertyComparator<R, T extends Comparable< ? super T>> implements PropertyComparator<R, T> {
 
     private String startProperty;
     private String endProperty;
 
-    TimePropertyComparator(String startProperty, String endProperty) {
+    public TimePropertyComparator(String startProperty, String endProperty) {
         this.startProperty = startProperty;
         this.endProperty = endProperty;
     }

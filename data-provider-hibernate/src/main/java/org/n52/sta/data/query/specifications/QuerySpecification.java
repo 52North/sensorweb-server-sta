@@ -52,6 +52,8 @@ import org.n52.sta.api.path.Request;
 import org.n52.sta.api.path.SelectPath;
 import org.n52.sta.data.query.FilterQueryParser;
 import org.n52.sta.data.query.QuerySpecificationFactory;
+import org.n52.sta.data.query.specifications.util.PropertyComparator;
+import org.n52.sta.data.query.specifications.util.SimplePropertyComparator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.jpa.domain.Specification;

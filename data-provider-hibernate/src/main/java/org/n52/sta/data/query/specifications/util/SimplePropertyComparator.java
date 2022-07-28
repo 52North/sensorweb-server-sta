@@ -26,7 +26,7 @@
  * Public License for more details.
  */
 
-package org.n52.sta.data.query.specifications;
+package org.n52.sta.data.query.specifications.util;
 
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.Expression;
@@ -36,13 +36,14 @@ import javax.persistence.criteria.Root;
 
 import org.n52.shetland.ogc.filter.FilterConstants;
 import org.n52.shetland.ogc.filter.FilterConstants.ComparisonOperator;
+import org.n52.sta.data.query.specifications.SpecificationsException;
 import org.springframework.data.jpa.domain.Specification;
 
-class SimplePropertyComparator<R, T extends Comparable< ? super T>> implements PropertyComparator<R, T> {
+public class SimplePropertyComparator<R, T extends Comparable< ? super T>> implements PropertyComparator<R, T> {
 
     protected final String entityPath;
 
-    SimplePropertyComparator(String entityPath) {
+    public SimplePropertyComparator(String entityPath) {
         this.entityPath = entityPath;
     }
 

@@ -46,6 +46,8 @@ import org.n52.series.db.beans.PhenomenonEntity;
 import org.n52.series.db.beans.PlatformEntity;
 import org.n52.series.db.beans.ProcedureEntity;
 import org.n52.shetland.ogc.sta.StaConstants;
+import org.n52.sta.data.query.specifications.util.SimplePropertyComparator;
+import org.n52.sta.data.query.specifications.util.TimePropertyComparator;
 import org.springframework.data.jpa.domain.Specification;
 
 public class DatastreamQuerySpecification extends QuerySpecification<AbstractDatasetEntity> {

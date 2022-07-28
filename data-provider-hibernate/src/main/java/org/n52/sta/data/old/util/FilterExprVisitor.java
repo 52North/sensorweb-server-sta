@@ -615,17 +615,10 @@ public final class FilterExprVisitor<T> implements ExprVisitor<Expression<?>, ST
         switch (expr.getName()) {
             // String Functions
             case ODataConstants.StringFunctions.ENDSWITH:
-                String rawSecondPar = expr.getParameters()
-                        .get(1)
-                        .toString();
+                String rawSecondPar = expr.getParameters().get(1).toString();
                 return this.<String, String, Expression<Boolean>>evalFuncOnMember(
-                        (Expression<String>) expr.getParameters()
-                                .get(0)
-                                .accept(this),
-                        builder.literal(DOLLAR
-                                + rawSecondPar.substring(1,
-                                        rawSecondPar.length()
-                                                - 1)),
+                        (Expression<String>) expr.getParameters().get(0).accept(this),
+                        builder.literal(DOLLAR + rawSecondPar.substring(1, rawSecondPar.length() - 1)),
                         builder::like);
             case ODataConstants.StringFunctions.STARTSWITH:
                 String rawSecondParam = expr.getParameters()

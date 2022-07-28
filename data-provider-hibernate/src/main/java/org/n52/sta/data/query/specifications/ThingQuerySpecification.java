@@ -40,6 +40,7 @@ import org.n52.series.db.beans.PlatformEntity;
 import org.n52.series.db.beans.sta.HistoricalLocationEntity;
 import org.n52.series.db.beans.sta.LocationEntity;
 import org.n52.shetland.ogc.sta.StaConstants;
+import org.n52.sta.data.query.specifications.util.SimplePropertyComparator;
 
 public class ThingQuerySpecification extends QuerySpecification<PlatformEntity> {
 

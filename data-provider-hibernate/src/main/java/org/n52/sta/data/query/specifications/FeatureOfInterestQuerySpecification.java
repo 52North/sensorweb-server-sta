@@ -28,12 +28,49 @@
 
 package org.n52.sta.data.query.specifications;
 
+import javax.persistence.criteria.Root;
+import javax.persistence.criteria.Subquery;
+
 import org.n52.series.db.beans.AbstractFeatureEntity;
+import org.n52.series.db.beans.DataEntity;
+import org.n52.series.db.beans.DatasetEntity;
+import org.n52.series.db.beans.HibernateRelations;
+import org.n52.shetland.ogc.sta.StaConstants;
+import org.n52.sta.data.query.specifications.util.LiteralComparator;
+import org.n52.sta.data.query.specifications.util.SimplePropertyComparator;
+import org.springframework.data.jpa.domain.Specification;
 
 public class FeatureOfInterestQuerySpecification extends QuerySpecification<AbstractFeatureEntity> {
 
     public FeatureOfInterestQuerySpecification() {
         super();
+        this.entityPathByProperty.put(StaConstants.PROP_NAME,
+                                      new SimplePropertyComparator<>(HibernateRelations.HasName.PROPERTY_NAME));
+        this.entityPathByProperty.put(StaConstants.PROP_DESCRIPTION,
+                                      new SimplePropertyComparator<>(HibernateRelations.HasDescription.PROPERTY_DESCRIPTION));
+        this.entityPathByProperty.put(StaConstants.PROP_ENCODINGTYPE, new LiteralComparator<>("application/geo+json"));
+
+        this.filterByMember.put(StaConstants.OBSERVATIONS, createObservationFilter());
+
     }
 
+    private MemberFilter<AbstractFeatureEntity> createObservationFilter() {
+        return memberSpec -> (root, query, builder) -> {
+            Subquery<Long> sqFeature = query.subquery(Long.class);
+            Root<DatasetEntity> dataset = sqFeature.from(DatasetEntity.class);
+            Subquery<DatasetEntity> sqDataset = query.subquery(DatasetEntity.class);
+            Root<DataEntity> data = sqDataset.from(DataEntity.class);
+            sqDataset.select(dataset)
+                     .where(((Specification<DataEntity>) memberSpec).toPredicate(data,
+                                                                                 query,
+                                                                                 builder));
+
+            sqFeature.select(dataset.get(DatasetEntity.PROPERTY_FEATURE))
+                     .where(builder.in(dataset)
+                                   .value(sqDataset));
+            return builder.in(root.get(AbstractFeatureEntity.PROPERTY_ID))
+                          .value(sqFeature);
+
+        };
+    }
 }
