@@ -271,8 +271,7 @@
                     <version>2.19.0</version>
                     <configuration>
                         <lineEnding>LF</lineEnding>
-                        <configFile>${session.executionRootDirectory}/etc/52N_formatter.xml</configFile>
-                        <overrideConfigCompilerVersion>true</overrideConfigCompilerVersion>
+                        <configFile>${project.basedir}/../etc/52N_formatter.xml</configFile>
                         <compilerSource>1.9</compilerSource>
                         <compilerCompliance>1.9</compilerCompliance>
                         <compilerTargetPlatform>1.9</compilerTargetPlatform>
