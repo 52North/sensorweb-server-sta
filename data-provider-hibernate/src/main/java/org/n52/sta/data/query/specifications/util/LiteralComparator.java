@@ -34,7 +34,7 @@ import org.n52.shetland.ogc.filter.FilterConstants.ComparisonOperator;
 import org.n52.sta.data.query.specifications.SpecificationsException;
 import org.springframework.data.jpa.domain.Specification;
 
-public class LiteralComparator<R, T extends Comparable<? super T>> implements PropertyComparator<R, T> {
+public class LiteralComparator<R, T extends Comparable< ? super T>> implements PropertyComparator<R, T> {
 
     private final String literal;
 
@@ -45,43 +45,46 @@ public class LiteralComparator<R, T extends Comparable<? super T>> implements Pr
     /**
      * Creates a specification that compares the specified right expression to a literal value
      *
-     * @param rightExpr the value to be compared
-     * @param operator  the comparison operator
+     * @param rightExpr
+     *        the value to be compared
+     * @param operator
+     *        the comparison operator
      * @return a specification comparing entity path and right expression
-     * @throws SpecificationsException if comparison fails
+     * @throws SpecificationsException
+     *         if comparison fails
      */
     @Override
-    public Specification<R> compareToRight(Expression<?> rightExpr, ComparisonOperator operator) {
+    public Specification<R> compareToRight(Expression< ? > rightExpr, ComparisonOperator operator) {
         return compare(rightExpr, operator);
     }
 
     /**
      * Creates a specification that compares the specified left expression to a literal value
      *
-     * @param leftExpr the expression to compare to
-     * @param operator  the comparison operator
+     * @param leftExpr
+     *        the expression to compare to
+     * @param operator
+     *        the comparison operator
      * @return a specification comparing entity path and left expression
-     * @throws SpecificationsException if comparison fails
+     * @throws SpecificationsException
+     *         if comparison fails
      */
     @Override
-    public Specification<R> compareToLeft(Expression<?> leftExpr, ComparisonOperator operator) {
+    public Specification<R> compareToLeft(Expression< ? > leftExpr, ComparisonOperator operator) {
         return compare(leftExpr, operator);
     }
 
-    private Specification<R> compare(Expression<?> expr, ComparisonOperator operator) {
+    private Specification<R> compare(Expression< ? > expr, ComparisonOperator operator) {
         return (root, query, builder) -> {
             switch (operator) {
-            case PropertyIsEqualTo:
-                return builder.equal(expr, literal);
-            case PropertyIsNotEqualTo:
-                return builder.notEqual(expr, literal);
-            default:
-                throw new SpecificationsException("Unsupported comparison operator: '" + operator + "'");
+                case PropertyIsEqualTo:
+                    return builder.equal(expr, literal);
+                case PropertyIsNotEqualTo:
+                    return builder.notEqual(expr, literal);
+                default:
+                    throw new SpecificationsException("Unsupported comparison operator: '" + operator + "'");
             }
         };
     }
 
 }
-
-
-

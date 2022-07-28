@@ -79,14 +79,14 @@ public class ObservationGroupQuerySpecifications extends EntityQuerySpecificatio
             Specification< ? > propertyValue) {
         return (root, query, builder) -> {
             if (StaConstants.RELATIONS.equals(propertyName)) {
-                Subquery<GroupEntity> sq = query.subquery(GroupEntity.class);
-                Root<RelationEntity> obsRelation = sq.from(RelationEntity.class);
-                sq.select(obsRelation.get(RelationEntity.PROPERTY_GROUPS))
-                  .where(((Specification<RelationEntity>) propertyValue).toPredicate(obsRelation,
-                                                                                     query,
-                                                                                     builder));
+                Subquery<GroupEntity> subq = query.subquery(GroupEntity.class);
+                Root<RelationEntity> obsRelation = subq.from(RelationEntity.class);
+                subq.select(obsRelation.get(RelationEntity.PROPERTY_GROUPS))
+                    .where(((Specification<RelationEntity>) propertyValue).toPredicate(obsRelation,
+                                                                                       query,
+                                                                                       builder));
                 return builder.in(root.get(GroupEntity.ID))
-                              .value(sq);
+                              .value(subq);
             } else {
                 throw new RuntimeException("Could not find related property: " + propertyName);
             }
@@ -99,7 +99,7 @@ public class ObservationGroupQuerySpecifications extends EntityQuerySpecificatio
             Expression< ? > propertyValue,
             FilterConstants.ComparisonOperator operator,
             boolean switched) {
-        return (Specification<GroupEntity>) (root, query, builder) -> {
+        return (root, query, builder) -> {
             try {
                 switch (propertyName) {
                     case StaConstants.PROP_ID:

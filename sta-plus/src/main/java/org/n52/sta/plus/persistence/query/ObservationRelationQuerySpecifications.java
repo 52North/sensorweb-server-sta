@@ -80,14 +80,14 @@ public class ObservationRelationQuerySpecifications extends EntityQuerySpecifica
             Specification< ? > propertyValue) {
         return (root, query, builder) -> {
             if (StaConstants.GROUP.equals(propertyName)) {
-                Subquery<RelationEntity> sq = query.subquery(RelationEntity.class);
-                Root<GroupEntity> obsGroup = sq.from(GroupEntity.class);
-                sq.select(obsGroup.get(GroupEntity.ID))
-                  .where(((Specification<GroupEntity>) propertyValue).toPredicate(obsGroup,
-                                                                                  query,
-                                                                                  builder));
+                Subquery<RelationEntity> subq = query.subquery(RelationEntity.class);
+                Root<GroupEntity> obsGroup = subq.from(GroupEntity.class);
+                subq.select(obsGroup.get(GroupEntity.ID))
+                    .where(((Specification<GroupEntity>) propertyValue).toPredicate(obsGroup,
+                                                                                    query,
+                                                                                    builder));
                 return builder.in(root.get(RelationEntity.PROPERTY_GROUPS))
-                              .value(sq);
+                              .value(subq);
             } else {
                 throw new RuntimeException("Could not find related property: " + propertyName);
             }

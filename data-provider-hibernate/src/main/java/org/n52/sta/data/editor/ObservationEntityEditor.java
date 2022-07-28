@@ -99,8 +99,8 @@ public class ObservationEntityEditor extends DatabaseEntityAdapter<DataEntity> i
     private AbstractDatasetEntity getDatastreamOf(Observation entity) throws EditorException {
         DatastreamData datastream = (DatastreamData) getOrSaveMandatory(entity.getDatastream(), Datastream.class);
         return datastream.getData();
-//        return datastreamEditor.getEntity(datastream.getId())
-//                               .orElseThrow(() -> new IllegalStateException("Datastream not found for Observation!"));
+        // return datastreamEditor.getEntity(datastream.getId())
+        // .orElseThrow(() -> new IllegalStateException("Datastream not found for Observation!"));
     }
 
     private DataEntity< ? > createEntity(Observation observation, DatasetEntity datasetEntity) throws EditorException {

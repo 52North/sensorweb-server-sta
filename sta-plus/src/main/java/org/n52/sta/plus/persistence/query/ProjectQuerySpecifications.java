@@ -62,14 +62,14 @@ public class ProjectQuerySpecifications extends EntityQuerySpecifications<Projec
             Specification< ? > propertyValue) {
         return (root, query, builder) -> {
             if (StaConstants.DATASTREAMS.equals(propertyName)) {
-                Subquery<ProjectEntity> sq = query.subquery(ProjectEntity.class);
-                Root<AbstractDatasetEntity> datastream = sq.from(AbstractDatasetEntity.class);
-                sq.select(datastream.get(StaPlusDatasetEntity.PROPERTY_PROJECT))
-                  .where(((Specification<AbstractDatasetEntity>) propertyValue).toPredicate(datastream,
-                                                                                            query,
-                                                                                            builder));
+                Subquery<ProjectEntity> subq = query.subquery(ProjectEntity.class);
+                Root<AbstractDatasetEntity> datastream = subq.from(AbstractDatasetEntity.class);
+                subq.select(datastream.get(StaPlusDatasetEntity.PROPERTY_PROJECT))
+                    .where(((Specification<AbstractDatasetEntity>) propertyValue).toPredicate(datastream,
+                                                                                              query,
+                                                                                              builder));
                 return builder.in(root.get(ProjectEntity.ID))
-                              .value(sq);
+                              .value(subq);
             } else {
                 throw new RuntimeException("Could not find related property: " + propertyName);
             }

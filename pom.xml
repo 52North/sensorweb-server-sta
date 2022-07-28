@@ -202,6 +202,20 @@
                 <artifactId>junit-jupiter</artifactId>
                 <version>${testcontainers.jupiter.version}</version>
                 <scope>test</scope>
+                <exclusions>
+                    <exclusion>
+                        <groupId>com.google.code.findbugs</groupId>
+                        <artifactId>jsr305</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>net.java.dev.jna</groupId>
+                        <artifactId>jna</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>org.osgi</groupId>
+                        <artifactId>org.osgi.core</artifactId>
+                    </exclusion>
+                </exclusions>
             </dependency>
             <dependency>
                 <groupId>org.testcontainers</groupId>
@@ -356,6 +370,11 @@
                         </goals>
                     </execution>
                 </executions>
+                <configuration>
+                    <excludes>
+                        **/old/
+                    </excludes>
+                </configuration>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>

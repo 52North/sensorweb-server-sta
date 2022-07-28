@@ -86,7 +86,7 @@ public class PartyService
                 String expandProperty = expandItem.getPath();
                 if (PartyEntityDefinition.NAVIGATION_PROPERTIES.contains(expandProperty)) {
                     return new EntityGraphRepository.FetchGraph[] {
-                        EntityGraphRepository.FetchGraph.FETCHGRAPH_DATASETS
+                        EntityGraphRepository.FetchGraph.FETCHGRAPH_DATASETS,
                     };
                 } else {
                     throw new STAInvalidQueryException(String.format(INVALID_EXPAND_OPTION_SUPPLIED,

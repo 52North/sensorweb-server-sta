@@ -61,14 +61,14 @@ public class PartyQuerySpecifications extends EntityQuerySpecifications<PartyEnt
             Specification< ? > propertyValue) {
         return (root, query, builder) -> {
             if (StaConstants.DATASTREAMS.equals(propertyName)) {
-                Subquery<PartyEntity> sq = query.subquery(PartyEntity.class);
-                Root<AbstractDatasetEntity> datastream = sq.from(AbstractDatasetEntity.class);
-                sq.select(datastream.get(StaPlusDatasetEntity.PROPERTY_PARTY))
-                  .where(((Specification<AbstractDatasetEntity>) propertyValue).toPredicate(datastream,
-                                                                                            query,
-                                                                                            builder));
+                Subquery<PartyEntity> subq = query.subquery(PartyEntity.class);
+                Root<AbstractDatasetEntity> datastream = subq.from(AbstractDatasetEntity.class);
+                subq.select(datastream.get(StaPlusDatasetEntity.PROPERTY_PARTY))
+                    .where(((Specification<AbstractDatasetEntity>) propertyValue).toPredicate(datastream,
+                                                                                              query,
+                                                                                              builder));
                 return builder.in(root.get(PartyEntity.ID))
-                              .value(sq);
+                              .value(subq);
             } else {
                 throw new RuntimeException("Could not find related property: " + propertyName);
             }
@@ -81,7 +81,7 @@ public class PartyQuerySpecifications extends EntityQuerySpecifications<PartyEnt
             Expression< ? > propertyValue,
             FilterConstants.ComparisonOperator operator,
             boolean switched) {
-        return (Specification<PartyEntity>) (root, query, builder) -> {
+        return (root, query, builder) -> {
             try {
                 switch (propertyName) {
                     case StaConstants.PROP_ID:

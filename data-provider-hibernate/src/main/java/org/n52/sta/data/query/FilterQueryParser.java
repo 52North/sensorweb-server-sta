@@ -194,139 +194,142 @@ public final class FilterQueryParser {
         }
 
         @Override
-        public Expression<?> visitMethodCall(MethodCallExpr expr) throws FilterQueryException {
-            switch (expr.getParameters().size()) {
-            case 0:
-                return visitMethodCallNullary(expr);
-            case 1:
-                return visitMethodCallUnary(expr);
-            case 2:
-                return visitMethodCallBinary(expr);
-            case 3:
-                //return visitMethodCallTernary(expr);
-            default:
-                throw new FilterQueryException("method call not implemented yet!");
+        public Expression< ? > visitMethodCall(MethodCallExpr expr) throws FilterQueryException {
+            switch (expr.getParameters()
+                        .size()) {
+                case 0:
+                    return visitMethodCallNullary(expr);
+                case 1:
+                    return visitMethodCallUnary(expr);
+                case 2:
+                    return visitMethodCallBinary(expr);
+                case 3:
+                    // return visitMethodCallTernary(expr);
+                default:
+                    throw new FilterQueryException("method call not implemented yet!");
             }
         }
 
-        private Expression<?> visitMethodCallNullary(MethodCallExpr expr) throws FilterQueryException {
+        private Expression< ? > visitMethodCallNullary(MethodCallExpr expr) throws FilterQueryException {
             switch (expr.getName()) {
-            case ODataConstants.DateAndTimeFunctions.NOW:
-                return criteriaBuilder.currentTimestamp();
-            case ODataConstants.DateAndTimeFunctions.MINDATETIME:
-                return criteriaBuilder.literal(new Date(0L));
-            case ODataConstants.DateAndTimeFunctions.MAXDATETIME:
-                return criteriaBuilder.literal(new Date(Long.MAX_VALUE));
-            default:
-                throw new FilterQueryException("could not find function: " + expr.getName());
+                case ODataConstants.DateAndTimeFunctions.NOW:
+                    return criteriaBuilder.currentTimestamp();
+                case ODataConstants.DateAndTimeFunctions.MINDATETIME:
+                    return criteriaBuilder.literal(new Date(0L));
+                case ODataConstants.DateAndTimeFunctions.MAXDATETIME:
+                    return criteriaBuilder.literal(new Date(Long.MAX_VALUE));
+                default:
+                    throw new FilterQueryException("could not find function: " + expr.getName());
             }
 
         }
 
-        private Expression<?> visitMethodCallUnary(MethodCallExpr expr) throws FilterQueryException {
-            Expression<?> param = expr.getParameters()
-                                      .get(0)
-                                      .accept(this);
+        private Expression< ? > visitMethodCallUnary(MethodCallExpr expr) throws FilterQueryException {
+            Expression< ? > param = expr.getParameters()
+                                        .get(0)
+                                        .accept(this);
             switch (expr.getName()) {
-            // String Functions
-            case ODataConstants.StringFunctions.LENGTH:
-                return criteriaBuilder.length((Expression<String>) param);
-            case ODataConstants.StringFunctions.TOLOWER:
-                return criteriaBuilder.lower((Expression<String>) param);
-            case ODataConstants.StringFunctions.TOUPPER:
-                return criteriaBuilder.upper((Expression<String>) param);
-            case ODataConstants.StringFunctions.TRIM:
-                return criteriaBuilder.trim((Expression<String>) param);
-            // DateTime Functions
-            case ODataConstants.DateAndTimeFunctions.YEAR:
-                return criteriaBuilder.function("YEAR", Integer.class, param);
-            case ODataConstants.DateAndTimeFunctions.MONTH:
-                return criteriaBuilder.function("MONTH", Integer.class, param);
-            case ODataConstants.DateAndTimeFunctions.DAY:
-                return criteriaBuilder.function("DAY", Integer.class, param);
-            case ODataConstants.DateAndTimeFunctions.HOUR:
-                return criteriaBuilder.function("HOUR", Integer.class, param);
-            case ODataConstants.DateAndTimeFunctions.MINUTE:
-                return criteriaBuilder.function("MINUTE", Integer.class, param);
-            case ODataConstants.DateAndTimeFunctions.SECOND:
-                return criteriaBuilder.function("SECOND", Integer.class, param);
-            case ODataConstants.DateAndTimeFunctions.FRACTIONALSECONDS:
-                return criteriaBuilder.function("DATEPART",
-                                                Integer.class,
-                                                criteriaBuilder.literal("millisecond"),
-                                                param);
-            // Math Functions
-            case ODataConstants.ArithmeticFunctions.ROUND:
-                return criteriaBuilder.function("ROUND", Integer.class, param);
-            case ODataConstants.ArithmeticFunctions.FLOOR:
-                return criteriaBuilder.function("FLOOR", Integer.class, param);
-            case ODataConstants.ArithmeticFunctions.CEILING:
-                return criteriaBuilder.function("CEIL", Integer.class, param);
-            case ODataConstants.DateAndTimeFunctions.DATE:
-                // fallthru
-            case ODataConstants.DateAndTimeFunctions.TIME:
-                // fallthru
-            case ODataConstants.GeoFunctions.GEO_LENGTH:
-                // fallthru
-            default:
-                throw new FilterQueryException("function not implemented : " + expr.getName());
+                // String Functions
+                case ODataConstants.StringFunctions.LENGTH:
+                    return criteriaBuilder.length((Expression<String>) param);
+                case ODataConstants.StringFunctions.TOLOWER:
+                    return criteriaBuilder.lower((Expression<String>) param);
+                case ODataConstants.StringFunctions.TOUPPER:
+                    return criteriaBuilder.upper((Expression<String>) param);
+                case ODataConstants.StringFunctions.TRIM:
+                    return criteriaBuilder.trim((Expression<String>) param);
+                // DateTime Functions
+                case ODataConstants.DateAndTimeFunctions.YEAR:
+                    return criteriaBuilder.function("YEAR", Integer.class, param);
+                case ODataConstants.DateAndTimeFunctions.MONTH:
+                    return criteriaBuilder.function("MONTH", Integer.class, param);
+                case ODataConstants.DateAndTimeFunctions.DAY:
+                    return criteriaBuilder.function("DAY", Integer.class, param);
+                case ODataConstants.DateAndTimeFunctions.HOUR:
+                    return criteriaBuilder.function("HOUR", Integer.class, param);
+                case ODataConstants.DateAndTimeFunctions.MINUTE:
+                    return criteriaBuilder.function("MINUTE", Integer.class, param);
+                case ODataConstants.DateAndTimeFunctions.SECOND:
+                    return criteriaBuilder.function("SECOND", Integer.class, param);
+                case ODataConstants.DateAndTimeFunctions.FRACTIONALSECONDS:
+                    return criteriaBuilder.function("DATEPART",
+                                                    Integer.class,
+                                                    criteriaBuilder.literal("millisecond"),
+                                                    param);
+                // Math Functions
+                case ODataConstants.ArithmeticFunctions.ROUND:
+                    return criteriaBuilder.function("ROUND", Integer.class, param);
+                case ODataConstants.ArithmeticFunctions.FLOOR:
+                    return criteriaBuilder.function("FLOOR", Integer.class, param);
+                case ODataConstants.ArithmeticFunctions.CEILING:
+                    return criteriaBuilder.function("CEIL", Integer.class, param);
+                case ODataConstants.DateAndTimeFunctions.DATE:
+                    // fallthru
+                case ODataConstants.DateAndTimeFunctions.TIME:
+                    // fallthru
+                case ODataConstants.GeoFunctions.GEO_LENGTH:
+                    // fallthru
+                default:
+                    throw new FilterQueryException("function not implemented : " + expr.getName());
             }
         }
 
-        private Expression<?> visitMethodCallBinary(MethodCallExpr expr) throws FilterQueryException {
+        private Expression< ? > visitMethodCallBinary(MethodCallExpr expr) throws FilterQueryException {
 
             switch (expr.getName()) {
-            // String Functions
-            case ODataConstants.StringFunctions.ENDSWITH:
-                String rawSecondPar = expr.getParameters().get(1).toString();
-                return this.<String, String, Expression<Boolean>>evalFuncOnMember(
-                        (Expression<String>) expr.getParameters().get(0).accept(this),
-                        criteriaBuilder.literal("$" + rawSecondPar.substring(1, rawSecondPar.length() - 1)),
-                        criteriaBuilder::like);
-            default:
-                throw new FilterQueryException("unrecognized function: " + expr.getName());
+                // String Functions
+                case ODataConstants.StringFunctions.ENDSWITH:
+                    String rawSecondPar = expr.getParameters()
+                                              .get(1)
+                                              .toString();
+                    return this.evalFuncOnMember(
+                                                 (Expression<String>) expr.getParameters()
+                                                                          .get(0)
+                                                                          .accept(this),
+                                                 criteriaBuilder.literal("$"
+                                                         + rawSecondPar.substring(1, rawSecondPar.length() - 1)),
+                                                 criteriaBuilder::like);
+                default:
+                    throw new FilterQueryException("unrecognized function: " + expr.getName());
             }
         }
 
         /**
          * wraps function evaluation to handle function on Observation->value or
-         * Observation->parameters->value as
-         * the value is split over multiple columns
+         * Observation->parameters->value as the value is split over multiple columns
          *
-         * @param firstParam  first argument, description to fkt
-         * @param secondParam second argument to fkt
-         * @param fkt         function to be used for check
+         * @param firstParam
+         *        first argument, description to fkt
+         * @param secondParam
+         *        second argument to fkt
+         * @param fkt
+         *        function to be used for check
          * @return evaluated Predicate
          */
-        private <P, Q, S extends Expression<?>> S evalFuncOnMember(Expression<P> firstParam,
-                                                                   Expression<Q> secondParam,
-                                                                   BiFunction<Expression<P>, Expression<Q>, S> fkt)
+        private <P, Q, S extends Expression< ? >> S evalFuncOnMember(Expression<P> firstParam,
+                Expression<Q> secondParam,
+                BiFunction<Expression<P>, Expression<Q>, S> fkt)
                 throws FilterQueryException {
             if (firstParam != null) {
                 return fkt.apply(firstParam, secondParam);
             } else {
                 /*
-                if (secondParam.getJavaType()
-                               .isAssignableFrom(String.class)) {
-                    // We could not resolve firstParam to a value, so we are filtering on
-                    // Observation->result
-                    return (S) criteriaBuilder.concat(
-                            fkt.apply(root.get(DataEntity.PROPERTY_VALUE_CATEGORY), secondParam),
-                            fkt.apply(root.get(DataEntity.PROPERTY_VALUE_TEXT), secondParam));
-                } else if (secondParam.getJavaType()
-                                      .isAssignableFrom(Double.class)) {
-                    return fkt.apply(root.get(DataEntity.PROPERTY_VALUE_QUANTITY), secondParam);
-                } else {
-                    */
-                    throw new FilterQueryException(
-                            "Could not evaluate function call on Observation->result. Result "
-                                    + "type not recognized.");
-                //}
+                 * if (secondParam.getJavaType() .isAssignableFrom(String.class)) { // We could not resolve
+                 * firstParam to a value, so we are filtering on // Observation->result return (S)
+                 * criteriaBuilder.concat( fkt.apply(root.get(DataEntity.PROPERTY_VALUE_CATEGORY),
+                 * secondParam), fkt.apply(root.get(DataEntity.PROPERTY_VALUE_TEXT), secondParam)); } else if
+                 * (secondParam.getJavaType() .isAssignableFrom(Double.class)) { return
+                 * fkt.apply(root.get(DataEntity.PROPERTY_VALUE_QUANTITY), secondParam); } else {
+                 */
+                throw new FilterQueryException(
+                                               "Could not evaluate function call on Observation->result. Result "
+                                                       + "type not recognized.");
+                // }
             }
         }
 
         @Override
-        public Expression<?> visitMember(MemberExpr expr) throws FilterQueryException {
+        public Expression< ? > visitMember(MemberExpr expr) throws FilterQueryException {
             return root.get(expr.getValue());
         }
 
@@ -339,7 +342,7 @@ public final class FilterQueryParser {
         public Expression< ? extends Number> visitSimpleArithmetic(SimpleArithmeticExpr expr)
                 throws FilterQueryException {
             // TODO: should we add typechecks here to assure that this cast never fails?
-            Expr leftExpr = expr.getLeft();                                       
+            Expr leftExpr = expr.getLeft();
             Expr rightExpr = expr.getRight();
             Expression< ? extends Number> left = (Expression< ? extends Number>) leftExpr.accept(this);
             Expression< ? extends Number> right = (Expression< ? extends Number>) rightExpr.accept(this);

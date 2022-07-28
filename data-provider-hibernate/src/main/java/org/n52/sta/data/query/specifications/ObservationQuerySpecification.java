@@ -65,16 +65,16 @@ public class ObservationQuerySpecification extends QuerySpecification<DataEntity
 
     private MemberFilter<DataEntity> createFeatureOfInterestFilter() {
         return specification -> (root, query, builder) -> {
-            Subquery<DatasetEntity> sq = query.subquery(DatasetEntity.class);
-            Root<DatasetEntity> dataset = sq.from(DatasetEntity.class);
-            Subquery<FeatureEntity> subquery = query.subquery(FeatureEntity.class);
-            Root<FeatureEntity> feature = subquery.from(FeatureEntity.class);
-            subquery.select(feature.get(FeatureEntity.PROPERTY_ID))
-                    .where(((Specification<FeatureEntity>) specification).toPredicate(feature, query, builder));
-            sq.select(dataset.get(DatasetEntity.PROPERTY_ID))
-              .where(builder.equal(dataset.get(DatasetEntity.PROPERTY_FEATURE), subquery));
+            Subquery<DatasetEntity> datasetQuery = query.subquery(DatasetEntity.class);
+            Root<DatasetEntity> dataset = datasetQuery.from(DatasetEntity.class);
+            Subquery<FeatureEntity> featureQuery = query.subquery(FeatureEntity.class);
+            Root<FeatureEntity> feature = featureQuery.from(FeatureEntity.class);
+            featureQuery.select(feature.get(FeatureEntity.PROPERTY_ID))
+                        .where(((Specification<FeatureEntity>) specification).toPredicate(feature, query, builder));
+            datasetQuery.select(dataset.get(DatasetEntity.PROPERTY_ID))
+                        .where(builder.equal(dataset.get(DatasetEntity.PROPERTY_FEATURE), featureQuery));
             return builder.in(root.get(DataEntity.PROPERTY_DATASET))
-                          .value(sq);
+                          .value(datasetQuery);
         };
     }
 }

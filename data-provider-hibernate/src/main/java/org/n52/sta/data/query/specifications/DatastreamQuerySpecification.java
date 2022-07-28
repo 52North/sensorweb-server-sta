@@ -61,28 +61,6 @@ public class DatastreamQuerySpecification extends QuerySpecification<AbstractDat
         this.entityPathByProperty.put(StaConstants.PROP_NAME, new SimplePropertyComparator<>(HasName.PROPERTY_NAME));
         this.entityPathByProperty.put(StaConstants.PROP_DESCRIPTION,
                                       new SimplePropertyComparator<>(HasDescription.PROPERTY_DESCRIPTION));
-
-        this.entityPathByProperty.put(StaConstants.PROP_OBSERVATION_TYPE,
-                                      new SimplePropertyComparator<AbstractDatasetEntity, String>(FormatEntity.FORMAT) {
-                                          /**
-                                           * Joins FormatEntity that actually stores OMObservationType.
-                                           *
-                                           * @param root
-                                           *        Root DatasetRoot
-                                           * @return Path to specific property
-                                           */
-                                          @Override
-                                          protected Path<String> getPath(Root<AbstractDatasetEntity> root) {
-                                              Join<AbstractDatasetEntity, FormatEntity> join = joinFormatEntity(root);
-                                              return join.get(this.entityPath);
-                                          }
-
-                                          private Join<AbstractDatasetEntity, FormatEntity> joinFormatEntity(
-                                                  Root<AbstractDatasetEntity> root) {
-                                              return root.join(AbstractDatasetEntity.PROPERTY_OM_OBSERVATION_TYPE);
-                                          }
-                                      });
-
         this.entityPathByProperty.put(StaConstants.PROP_PHENOMENON_TIME,
                                       new TimePropertyComparator<>(
                                                                    AbstractDatasetEntity.PROPERTY_FIRST_VALUE_AT,
@@ -91,6 +69,30 @@ public class DatastreamQuerySpecification extends QuerySpecification<AbstractDat
                                       new TimePropertyComparator<>(
                                                                    AbstractDatasetEntity.PROPERTY_RESULT_TIME_START,
                                                                    AbstractDatasetEntity.PROPERTY_RESULT_TIME_END));
+        //@formatter:off
+        SimplePropertyComparator<AbstractDatasetEntity, String> customComparator =
+                new SimplePropertyComparator<>(FormatEntity.FORMAT) {
+                    /**
+                     * Joins FormatEntity that actually stores OMObservationType.
+                     *
+                     * @param root
+                     *        Root DatasetRoot
+                     * @return Path to specific property
+                     */
+                    @Override
+                    protected Path<String> getPath(Root<AbstractDatasetEntity> root) {
+                        Join<AbstractDatasetEntity, FormatEntity> join = joinFormatEntity(root);
+                        return join.get(this.entityPath);
+                    }
+
+                    private Join<AbstractDatasetEntity, FormatEntity> joinFormatEntity(
+                            Root<AbstractDatasetEntity> root) {
+                        return root.join(AbstractDatasetEntity.PROPERTY_OM_OBSERVATION_TYPE);
+                    }
+                };
+        //@formatter:on
+        this.entityPathByProperty.put(StaConstants.PROP_OBSERVATION_TYPE, customComparator);
+
         // TODO $filter=unitOfMeasurement/symbol eq 'asdf'
     }
 

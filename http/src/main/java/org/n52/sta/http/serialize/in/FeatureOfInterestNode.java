@@ -58,9 +58,9 @@ public class FeatureOfInterestNode extends StaNode implements FeatureOfInterest 
 
     public String getEncodingType() {
         Optional<JsonNode> propertyNode = get(StaConstants.PROP_ENCODINGTYPE);
+        String msg = "Invalid encodingType. Only 'application/geo+json is allowed!'";
         return propertyNode.map(JsonNode::asText)
-                           .orElseThrow(() -> new InvalidValueException(
-                                   "Invalid encodingType. Only 'application/geo+json is allowed!'"));
+                           .orElseThrow(() -> new InvalidValueException(msg));
     }
 
     @Override
