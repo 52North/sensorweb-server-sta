@@ -44,10 +44,10 @@ public class FeatureOfInterestQuerySpecification extends QuerySpecification<Abst
 
     public FeatureOfInterestQuerySpecification() {
         super();
-        this.entityPathByProperty.put(StaConstants.PROP_NAME,
-                                      new SimplePropertyComparator<>(HibernateRelations.HasName.PROPERTY_NAME));
-        this.entityPathByProperty.put(StaConstants.PROP_DESCRIPTION,
-                                      new SimplePropertyComparator<>(HibernateRelations.HasDescription.PROPERTY_DESCRIPTION));
+        this.entityPathByProperty.put(StaConstants.PROP_NAME, new SimplePropertyComparator<>(
+                HibernateRelations.HasName.PROPERTY_NAME));
+        this.entityPathByProperty.put(StaConstants.PROP_DESCRIPTION, new SimplePropertyComparator<>(
+                HibernateRelations.HasDescription.PROPERTY_DESCRIPTION));
         this.entityPathByProperty.put(StaConstants.PROP_ENCODINGTYPE, new LiteralComparator<>("application/geo+json"));
 
         this.filterByMember.put(StaConstants.OBSERVATIONS, createObservationFilter());

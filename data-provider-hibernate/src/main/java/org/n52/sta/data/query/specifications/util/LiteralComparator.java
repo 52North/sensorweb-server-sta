@@ -58,7 +58,7 @@ public class LiteralComparator<R, T extends Comparable<? super T>> implements Pr
     /**
      * Creates a specification that compares the specified left expression to a literal value
      *
-     * @param leftExpr: the expression to compare to
+     * @param leftExpr the expression to compare to
      * @param operator  the comparison operator
      * @return a specification comparing entity path and left expression
      * @throws SpecificationsException if comparison fails
