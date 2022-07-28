@@ -29,6 +29,7 @@
 package org.n52.sta.http.serialize.in;
 
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -53,6 +54,13 @@ public class FeatureOfInterestNode extends StaNode implements FeatureOfInterest 
     @Override
     public String getDescription() {
         return getOrNull(StaConstants.PROP_DESCRIPTION, JsonNode::asText);
+    }
+
+    public String getEncodingType() {
+        Optional<JsonNode> propertyNode = get(StaConstants.PROP_ENCODINGTYPE);
+        return propertyNode.map(JsonNode::asText)
+                           .orElseThrow(() -> new InvalidValueException(
+                                   "Invalid encodingType. Only 'application/geo+json is allowed!'"));
     }
 
     @Override

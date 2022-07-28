@@ -56,7 +56,7 @@ public class FeatureOfInterestJsonSerializer extends StaBaseSerializer<FeatureOf
         writeStringProperty(StaConstants.PROP_DESCRIPTION, value::getDescription, gen);
         writeObjectProperty(StaConstants.PROP_DESCRIPTION, value::getProperties, gen);
         writeGeometry(StaConstants.PROP_FEATURE, value::getFeature, gen);
-        writeStringProperty(StaConstants.PROP_ENCODINGTYPE, () -> "application/vnd.geo+json", gen);
+        writeStringProperty(StaConstants.PROP_ENCODINGTYPE, () -> "application/geo+json", gen);
 
         // entity members
         String observations = StaConstants.OBSERVATIONS;
