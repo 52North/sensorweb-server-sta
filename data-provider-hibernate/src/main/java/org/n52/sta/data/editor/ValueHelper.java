@@ -1,4 +1,3 @@
-
 package org.n52.sta.data.editor;
 
 import java.util.Date;
@@ -30,7 +29,9 @@ public class ValueHelper {
     private UnitRepository unitRepository;
 
     public void setStartTime(Consumer<Date> setter, Time time) {
-        if (time instanceof TimeInstant) {
+        if (time == null) {
+            return;
+        } else if (time instanceof TimeInstant) {
             setTime(setter, time);
         } else {
             TimePeriod period = (TimePeriod) time;
@@ -40,7 +41,9 @@ public class ValueHelper {
     }
 
     public void setEndTime(Consumer<Date> setter, Time time) {
-        if (time instanceof TimeInstant) {
+        if (time == null) {
+            return;
+        } else if (time instanceof TimeInstant) {
             setTime(setter, time);
         } else {
             TimePeriod period = (TimePeriod) time;
@@ -59,14 +62,14 @@ public class ValueHelper {
     public void setFormat(Consumer<FormatEntity> setter, String format) {
         Objects.requireNonNull(format, "format must not be null");
         Optional<FormatEntity> entity = formatRepository.findByFormat(format);
-        if (entity.isPresent()) {
-            setter.accept(entity.get());
-        }
-
-        FormatEntity formatEntity = new FormatEntity();
-        formatEntity.setFormat(format);
-        FormatEntity savedEntity = formatRepository.save(formatEntity);
-        setter.accept(savedEntity);
+        entity.ifPresentOrElse(
+                setter::accept,
+                () -> {
+                    FormatEntity formatEntity = new FormatEntity();
+                    formatEntity.setFormat(format);
+                    FormatEntity savedEntity = formatRepository.save(formatEntity);
+                    setter.accept(savedEntity);
+                });
     }
 
     @Transactional(value = TxType.REQUIRES_NEW)
@@ -74,16 +77,17 @@ public class ValueHelper {
         Objects.requireNonNull(uom, "uom must not be null");
         String symbol = uom.getSymbol();
         Optional<UnitEntity> entity = unitRepository.findBySymbol(symbol);
-        if (entity.isPresent()) {
-            setter.accept(entity.get());
-        }
-
-        UnitEntity unitEntity = new UnitEntity();
-        unitEntity.setLink(uom.getDefinition());
-        unitEntity.setName(uom.getName());
-        unitEntity.setSymbol(symbol);
-        UnitEntity savedUnit = unitRepository.save(unitEntity);
-        setter.accept(savedUnit);
+        entity.ifPresentOrElse(
+                setter::accept,
+                () -> {
+                    UnitEntity unitEntity = new UnitEntity();
+                    unitEntity.setLink(uom.getDefinition());
+                    unitEntity.setName(uom.getName());
+                    unitEntity.setSymbol(symbol);
+                    UnitEntity savedUnit = unitRepository.save(unitEntity);
+                    setter.accept(savedUnit);
+                }
+        );
     }
 
 }
