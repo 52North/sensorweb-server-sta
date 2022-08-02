@@ -6,7 +6,9 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
+import javax.annotation.PostConstruct;
 import javax.transaction.Transactional;
 import javax.transaction.Transactional.TxType;
 
@@ -22,40 +24,35 @@ import org.n52.series.db.beans.parameter.dataset.DatasetParameterEntity;
 import org.n52.series.db.beans.parameter.dataset.DatasetQuantityParameterEntity;
 import org.n52.series.db.beans.parameter.dataset.DatasetTextParameterEntity;
 import org.n52.shetland.ogc.gml.time.Time;
-import org.n52.sta.api.EditorException;
-import org.n52.sta.api.EntityEditor;
+import org.n52.sta.api.exception.EditorException;
+import org.n52.sta.api.EntityEditorDelegate;
 import org.n52.sta.api.EntityServiceLookup;
 import org.n52.sta.api.domain.aggregate.ThingAggregate;
 import org.n52.sta.api.entity.Datastream;
 import org.n52.sta.api.entity.Observation;
+import org.n52.sta.api.entity.ObservedProperty;
 import org.n52.sta.api.entity.Sensor;
+import org.n52.sta.api.entity.Thing;
 import org.n52.sta.config.EntityPropertyMapping;
 import org.n52.sta.data.entity.DatastreamData;
+import org.n52.sta.data.entity.ObservationData;
 import org.n52.sta.data.entity.ObservedPropertyData;
 import org.n52.sta.data.entity.SensorData;
+import org.n52.sta.data.entity.StaData;
 import org.n52.sta.data.entity.ThingData;
 import org.n52.sta.data.repositories.entity.DatastreamRepository;
 import org.n52.sta.data.repositories.value.OfferingRepository;
 import org.n52.sta.data.support.DatastreamGraphBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.event.ContextRefreshedEvent;
+import org.springframework.context.event.EventListener;
 
 public class DatastreamEntityEditor extends DatabaseEntityAdapter<AbstractDatasetEntity> implements
-        EntityEditor<Datastream> {
+        EntityEditorDelegate<Datastream, DatastreamData> {
 
     @Autowired
     private DatastreamRepository datastreamRepository;
 
-    @Autowired
-    private ThingEntityEditor thingEditor;
-
-    @Autowired
-    private SensorEntityEditor sensorEditor;
-
-    @Autowired
-    private ObservedPropertyEntityEditor observedPropertyEditor;
-
-    @Autowired
-    private ObservationEntityEditor observationEditor;
 
     @Autowired
     private OfferingRepository offeringRepository;
@@ -66,10 +63,27 @@ public class DatastreamEntityEditor extends DatabaseEntityAdapter<AbstractDatase
     @Autowired
     private EntityPropertyMapping propertyMapping;
 
+    private EntityEditorDelegate<Thing, ThingData> thingEditor;
+    private EntityEditorDelegate<Sensor, SensorData> sensorEditor;
+    private EntityEditorDelegate<ObservedProperty, ObservedPropertyData> observedPropertyEditor;
+    private EntityEditorDelegate<Observation, ObservationData> observationEditor;
+
     public DatastreamEntityEditor(EntityServiceLookup serviceLookup) {
         super(serviceLookup);
 
         // TODO feature toggles, e.g. mobile, FOI-update, ...
+    }
+
+    @EventListener
+    private void postConstruct(ContextRefreshedEvent event) {
+        this.thingEditor =
+                (EntityEditorDelegate<Thing, ThingData>) getService(Thing.class).getEditor();
+        this.sensorEditor =
+                (EntityEditorDelegate<Sensor, SensorData>) getService(Sensor.class).getEditor();
+        this.observedPropertyEditor =
+                (EntityEditorDelegate<ObservedProperty, ObservedPropertyData>) getService(ObservedProperty.class).getEditor();
+        this.observationEditor =
+                (EntityEditorDelegate<Observation, ObservationData>) getService(Observation.class).getEditor();
     }
 
     @Override
@@ -134,8 +148,6 @@ public class DatastreamEntityEditor extends DatabaseEntityAdapter<AbstractDatase
         // -> decoupling via updateFirstLastObservationHandler?
         // -> enable event handling
 
-        dataset.setObservations(observationEditor.saveAll(observations, dataset));
-
         // parameters are saved as cascade
         Map<String, Object> properties = entity.getProperties();
         Streams.stream(properties.entrySet())
@@ -145,11 +157,17 @@ public class DatastreamEntityEditor extends DatabaseEntityAdapter<AbstractDatase
 
         DatasetEntity savedEntity = datastreamRepository.save(dataset);
 
+        // Set Observations
+        dataset.setObservations(Streams.stream(observations)
+                                       .map(o -> observationEditor.save(o))
+                                       .map(StaData::getData)
+                                       .collect(Collectors.toSet())
+        );
         // TODO explicitly save all references, too? if so, what about CASCADE.PERSIST?
         // sensorEntity.addDatastream(savedEntity);
         // sensorEditor.update(new SensorData(sensorEntity, propertyMapping));
 
-        return new DatastreamData(savedEntity, propertyMapping);
+        return new DatastreamData(savedEntity, Optional.ofNullable(propertyMapping));
     }
 
     private ObservationType getObservationType(Observation observation) {

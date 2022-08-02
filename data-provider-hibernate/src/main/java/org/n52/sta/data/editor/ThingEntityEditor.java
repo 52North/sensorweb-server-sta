@@ -3,6 +3,7 @@ package org.n52.sta.data.editor;
 
 import java.math.BigDecimal;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 
 import org.n52.janmayen.stream.Streams;
@@ -11,8 +12,8 @@ import org.n52.series.db.beans.parameter.platform.PlatformBooleanParameterEntity
 import org.n52.series.db.beans.parameter.platform.PlatformParameterEntity;
 import org.n52.series.db.beans.parameter.platform.PlatformQuantityParameterEntity;
 import org.n52.series.db.beans.parameter.platform.PlatformTextParameterEntity;
-import org.n52.sta.api.EditorException;
-import org.n52.sta.api.EntityEditor;
+import org.n52.sta.api.exception.EditorException;
+import org.n52.sta.api.EntityEditorDelegate;
 import org.n52.sta.api.EntityServiceLookup;
 import org.n52.sta.api.entity.Thing;
 import org.n52.sta.api.service.EntityService;
@@ -21,12 +22,13 @@ import org.n52.sta.data.repositories.entity.PlatformRepository;
 import org.n52.sta.data.support.ThingGraphBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
 
-public class ThingEntityEditor extends DatabaseEntityAdapter<PlatformEntity> implements EntityEditor<Thing> {
+public class ThingEntityEditor extends DatabaseEntityAdapter<PlatformEntity>
+        implements EntityEditorDelegate<Thing, ThingData> {
 
     @Autowired
     private PlatformRepository platformRepository;
 
-    protected ThingEntityEditor(EntityServiceLookup serviceLookup) {
+    public ThingEntityEditor(EntityServiceLookup serviceLookup) {
         super(serviceLookup);
     }
 
@@ -52,11 +54,13 @@ public class ThingEntityEditor extends DatabaseEntityAdapter<PlatformEntity> imp
         Map<String, Object> properties = entity.getProperties();
         Streams.stream(properties.entrySet())
                .map(this::convertParameter)
-               .filter(p -> p != null)
+               .filter(Objects::nonNull)
                .forEach(platformEntity::addParameter);
 
         // TODO Auto-generated method stub
-        return null;
+        PlatformEntity saved = platformRepository.save(platformEntity);
+
+    return new ThingData(saved,Optional.empty());
     }
 
     @Override

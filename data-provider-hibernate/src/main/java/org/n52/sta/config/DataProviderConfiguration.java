@@ -43,8 +43,8 @@ import org.n52.sta.data.repositories.entity.HistoricalLocationRepository;
 import org.n52.sta.data.repositories.entity.LocationRepository;
 import org.n52.sta.data.repositories.entity.ObservationRepository;
 import org.n52.sta.data.repositories.entity.PhenomenonRepository;
-import org.n52.sta.data.repositories.entity.ProcedureRepository;
 import org.n52.sta.data.repositories.entity.PlatformRepository;
+import org.n52.sta.data.repositories.entity.ProcedureRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -100,8 +100,8 @@ public class DataProviderConfiguration {
 
     @Configuration
     @EnableJpaRepositories(
-        repositoryBaseClass = BaseRepositoryImpl.class,
-        basePackages = "org.n52.sta.data.repositories")
+            repositoryBaseClass = BaseRepositoryImpl.class,
+            basePackages = "org.n52.sta.data.repositories")
     public static class RepositoryConfig {
         // inject via annotations
     }

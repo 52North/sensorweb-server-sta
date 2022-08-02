@@ -29,6 +29,7 @@
 package org.n52.sta.data.entity;
 
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 import org.n52.series.db.beans.PhenomenonEntity;
@@ -38,7 +39,7 @@ import org.n52.sta.config.EntityPropertyMapping;
 
 public class ObservedPropertyData extends StaData<PhenomenonEntity> implements ObservedProperty {
 
-    public ObservedPropertyData(PhenomenonEntity dataEntity, EntityPropertyMapping propertyMapping) {
+    public ObservedPropertyData(PhenomenonEntity dataEntity, Optional<EntityPropertyMapping> propertyMapping) {
         super(dataEntity, propertyMapping);
     }
 

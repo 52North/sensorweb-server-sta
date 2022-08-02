@@ -34,7 +34,7 @@ import java.util.Optional;
 import org.n52.series.db.beans.sta.LocationEntity;
 import org.n52.shetland.oasis.odata.query.option.QueryOptions;
 import org.n52.sta.api.EntityPage;
-import org.n52.sta.api.ProviderException;
+import org.n52.sta.api.exception.ProviderException;
 import org.n52.sta.api.entity.Location;
 import org.n52.sta.api.path.Request;
 import org.n52.sta.config.EntityPropertyMapping;
@@ -82,7 +82,7 @@ public class LocationEntityProvider extends BaseEntityProvider<Location> {
 
     private Optional<Location> getEntity(Specification<LocationEntity> spec, LocationGraphBuilder graphBuilder) {
         Optional<LocationEntity> platform = locationRepository.findOne(spec, graphBuilder);
-        return platform.map(entity -> new LocationData(entity, propertyMapping));
+        return platform.map(entity -> new LocationData(entity, Optional.of(propertyMapping)));
     }
 
     @Override
@@ -95,7 +95,8 @@ public class LocationEntityProvider extends BaseEntityProvider<Location> {
                 : LocationGraphBuilder.createWith(request.getQueryOptions());
         Specification<LocationEntity> spec = rootSpecification.buildSpecification(request);
         Page<LocationEntity> results = locationRepository.findAll(spec, pageable, graphBuilder);
-        return new StaEntityPage<>(Location.class, results, entity -> new LocationData(entity, propertyMapping));
+        return new StaEntityPage<>(Location.class, results, entity -> new LocationData(entity,
+                                                                                       Optional.of(propertyMapping)));
     }
 
 }

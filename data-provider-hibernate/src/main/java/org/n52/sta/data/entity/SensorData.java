@@ -44,7 +44,7 @@ import org.n52.sta.config.EntityPropertyMapping;
 
 public class SensorData extends StaData<ProcedureEntity> implements Sensor {
 
-    public SensorData(ProcedureEntity dataEntity, EntityPropertyMapping propertyMapping) {
+    public SensorData(ProcedureEntity dataEntity, Optional<EntityPropertyMapping> propertyMapping) {
         super(dataEntity, propertyMapping);
     }
 

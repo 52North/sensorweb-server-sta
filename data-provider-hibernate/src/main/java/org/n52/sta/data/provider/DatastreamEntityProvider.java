@@ -34,7 +34,7 @@ import java.util.Optional;
 import org.n52.series.db.beans.AbstractDatasetEntity;
 import org.n52.shetland.oasis.odata.query.option.QueryOptions;
 import org.n52.sta.api.EntityPage;
-import org.n52.sta.api.ProviderException;
+import org.n52.sta.api.exception.ProviderException;
 import org.n52.sta.api.entity.Datastream;
 import org.n52.sta.api.path.Request;
 import org.n52.sta.config.EntityPropertyMapping;
@@ -83,7 +83,7 @@ public class DatastreamEntityProvider extends BaseEntityProvider<Datastream> {
     private Optional<Datastream> getEntity(Specification<AbstractDatasetEntity> specification,
             DatastreamGraphBuilder graphBuilder) {
         Optional<AbstractDatasetEntity> datastream = datastreamRepository.findOne(specification, graphBuilder);
-        return datastream.map(entity -> new DatastreamData(entity, propertyMapping));
+        return datastream.map(entity -> new DatastreamData(entity, Optional.of(propertyMapping)));
     }
 
     @Override
@@ -96,7 +96,8 @@ public class DatastreamEntityProvider extends BaseEntityProvider<Datastream> {
                 : DatastreamGraphBuilder.createWith(options);
         Specification<AbstractDatasetEntity> spec = rootSpecification.buildSpecification(request);
         Page<AbstractDatasetEntity> results = datastreamRepository.findAll(spec, pageable, graphBuilder);
-        return new StaEntityPage<>(Datastream.class, results, entity -> new DatastreamData(entity, propertyMapping));
+        return new StaEntityPage<>(Datastream.class, results, entity -> new DatastreamData(entity,
+                                                                                           Optional.of(propertyMapping)));
     }
 
 }

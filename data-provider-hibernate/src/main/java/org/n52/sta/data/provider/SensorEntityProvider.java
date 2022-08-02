@@ -34,7 +34,7 @@ import java.util.Optional;
 import org.n52.series.db.beans.ProcedureEntity;
 import org.n52.shetland.oasis.odata.query.option.QueryOptions;
 import org.n52.sta.api.EntityPage;
-import org.n52.sta.api.ProviderException;
+import org.n52.sta.api.exception.ProviderException;
 import org.n52.sta.api.entity.Sensor;
 import org.n52.sta.api.path.Request;
 import org.n52.sta.config.EntityPropertyMapping;
@@ -82,7 +82,7 @@ public class SensorEntityProvider extends BaseEntityProvider<Sensor> {
 
     private Optional<Sensor> getEntity(Specification<ProcedureEntity> spec, SensorGraphBuilder graphBuilder) {
         Optional<ProcedureEntity> platform = sensorRepository.findOne(spec, graphBuilder);
-        return platform.map(entity -> new SensorData(entity, propertyMapping));
+        return platform.map(entity -> new SensorData(entity, Optional.of(propertyMapping)));
     }
 
     @Override
@@ -95,7 +95,7 @@ public class SensorEntityProvider extends BaseEntityProvider<Sensor> {
                 : SensorGraphBuilder.createWith(options);
         Specification<ProcedureEntity> spec = rootSpecification.buildSpecification(request);
         Page<ProcedureEntity> results = sensorRepository.findAll(spec, pageable, graphBuilder);
-        return new StaEntityPage<>(Sensor.class, results, entity -> new SensorData(entity, propertyMapping));
+        return new StaEntityPage<>(Sensor.class, results, entity -> new SensorData(entity, Optional.of(propertyMapping)));
     }
 
 }

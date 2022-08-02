@@ -6,7 +6,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 import org.n52.series.db.beans.DescribableEntity;
-import org.n52.sta.api.EditorException;
+import org.n52.sta.api.exception.EditorException;
 import org.n52.sta.api.EntityServiceLookup;
 import org.n52.sta.api.entity.Identifiable;
 import org.n52.sta.api.service.EntityService;

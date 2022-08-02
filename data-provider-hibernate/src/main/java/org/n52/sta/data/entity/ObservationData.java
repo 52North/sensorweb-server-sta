@@ -41,13 +41,14 @@ import org.n52.sta.old.utils.TimeUtil;
 import java.util.Collection;
 import java.util.Date;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
 public class ObservationData extends StaData<DataEntity< ? >> implements Observation {
 
     public ObservationData(DataEntity< ? > dataEntity, EntityPropertyMapping parameterProperties) {
-        super(dataEntity, parameterProperties);
+        super(dataEntity, Optional.of(parameterProperties));
     }
 
     @Override
@@ -75,7 +76,7 @@ public class ObservationData extends StaData<DataEntity< ? >> implements Observa
             @SuppressWarnings("unchecked")
             Collection<DataEntity< ? >> items = (Collection<DataEntity< ? >>) value;
             return items.stream()
-                        .map(v -> new ObservationData(v, propertyMapping))
+                        .map(v -> new ObservationData(v, propertyMapping.get()))
                         .collect(Collectors.toSet());
         } else {
             return value;
@@ -98,19 +99,19 @@ public class ObservationData extends StaData<DataEntity< ? >> implements Observa
     @Override
     public Map<String, Object> getParameters() {
         Map<String, Object> parameters = toMap(data.getParameters());
-        String samplingGeometry = propertyMapping.getSamplingGeometry();
+        String samplingGeometry = propertyMapping.get().getSamplingGeometry();
         if (samplingGeometry != null) {
             Optional<GeometryEntity> optionalSamplingGeometry = Optional.ofNullable(data.getGeometryEntity());
             optionalSamplingGeometry.ifPresent(entity -> parameters.put(samplingGeometry, entity.getGeometry()));
         }
 
         if ("profile".equals(getValueType())) {
-            String verticalFrom = propertyMapping.getVerticalFrom();
+            String verticalFrom = propertyMapping.get().getVerticalFrom();
             if (verticalFrom != null) {
                 Optional.ofNullable(data.getVerticalFrom())
                         .ifPresent(entity -> parameters.put(verticalFrom, entity));
             }
-            String verticalTo = propertyMapping.getVerticalTo();
+            String verticalTo = propertyMapping.get().getVerticalTo();
             if (verticalTo != null) {
                 Optional.ofNullable(data.getVerticalTo())
                         .ifPresent(entity -> parameters.put(verticalTo, entity));

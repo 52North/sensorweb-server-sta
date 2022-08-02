@@ -45,7 +45,7 @@ import org.n52.shetland.ogc.filter.FilterConstants.BinaryLogicOperator;
 import org.n52.shetland.ogc.filter.FilterConstants.ComparisonOperator;
 import org.n52.shetland.ogc.filter.FilterConstants.SimpleArithmeticOperator;
 import org.n52.shetland.ogc.gml.time.TimeInstant;
-import org.n52.sta.api.ProviderException;
+import org.n52.sta.api.exception.ProviderException;
 import org.n52.sta.data.query.specifications.BaseQuerySpecifications;
 import org.n52.svalbard.odata.core.expr.Expr;
 import org.n52.svalbard.odata.core.expr.ExprVisitor;

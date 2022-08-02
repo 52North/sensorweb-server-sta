@@ -4,8 +4,8 @@ package org.n52.sta.data.editor;
 import java.util.Optional;
 
 import org.n52.series.db.beans.PhenomenonEntity;
-import org.n52.sta.api.EditorException;
-import org.n52.sta.api.EntityEditor;
+import org.n52.sta.api.exception.EditorException;
+import org.n52.sta.api.EntityEditorDelegate;
 import org.n52.sta.api.EntityServiceLookup;
 import org.n52.sta.api.entity.ObservedProperty;
 import org.n52.sta.data.entity.ObservedPropertyData;
@@ -14,12 +14,12 @@ import org.n52.sta.data.support.ObservedPropertyGraphBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
 
 public class ObservedPropertyEntityEditor extends DatabaseEntityAdapter<PhenomenonEntity> implements
-        EntityEditor<ObservedProperty> {
+        EntityEditorDelegate<ObservedProperty, ObservedPropertyData> {
 
     @Autowired
     private PhenomenonRepository phenomenonRepository;
 
-    protected ObservedPropertyEntityEditor(EntityServiceLookup serviceLookup) {
+    public ObservedPropertyEntityEditor(EntityServiceLookup serviceLookup) {
         super(serviceLookup);
     }
 

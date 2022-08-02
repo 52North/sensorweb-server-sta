@@ -29,6 +29,7 @@
 package org.n52.sta.data.entity;
 
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 import org.n52.series.db.beans.PlatformEntity;
@@ -40,7 +41,7 @@ import org.n52.sta.config.EntityPropertyMapping;
 
 public class ThingData extends StaData<PlatformEntity> implements Thing {
 
-    public ThingData(PlatformEntity dataEntity, EntityPropertyMapping propertyMapping) {
+    public ThingData(PlatformEntity dataEntity, Optional<EntityPropertyMapping> propertyMapping) {
         super(dataEntity, propertyMapping);
     }
 

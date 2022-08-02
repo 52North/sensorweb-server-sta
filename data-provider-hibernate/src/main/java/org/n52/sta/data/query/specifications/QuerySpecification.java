@@ -45,7 +45,7 @@ import org.n52.shetland.oasis.odata.query.option.QueryOptions;
 import org.n52.shetland.ogc.filter.FilterConstants;
 import org.n52.shetland.ogc.sta.StaConstants;
 import org.n52.shetland.ogc.sta.exception.STAInvalidFilterExpressionException;
-import org.n52.sta.api.ProviderException;
+import org.n52.sta.api.exception.ProviderException;
 import org.n52.sta.api.entity.Identifiable;
 import org.n52.sta.api.path.PathSegment;
 import org.n52.sta.api.path.Request;

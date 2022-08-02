@@ -34,7 +34,7 @@ import java.util.Optional;
 import org.n52.series.db.beans.PhenomenonEntity;
 import org.n52.shetland.oasis.odata.query.option.QueryOptions;
 import org.n52.sta.api.EntityPage;
-import org.n52.sta.api.ProviderException;
+import org.n52.sta.api.exception.ProviderException;
 import org.n52.sta.api.entity.ObservedProperty;
 import org.n52.sta.api.path.Request;
 import org.n52.sta.config.EntityPropertyMapping;
@@ -84,7 +84,7 @@ public class ObservedPropertyEntityProvider extends BaseEntityProvider<ObservedP
     private Optional<ObservedProperty> getEntity(Specification<PhenomenonEntity> spec,
             ObservedPropertyGraphBuilder graphBuilder) {
         Optional<PhenomenonEntity> platform = observedPropertyRepository.findOne(spec, graphBuilder);
-        return platform.map(entity -> new ObservedPropertyData(entity, propertyMapping));
+        return platform.map(entity -> new ObservedPropertyData(entity, Optional.of(propertyMapping)));
     }
 
     @Override
@@ -99,7 +99,7 @@ public class ObservedPropertyEntityProvider extends BaseEntityProvider<ObservedP
         Page<PhenomenonEntity> results = observedPropertyRepository.findAll(spec, pageable, graphBuilder);
         return new StaEntityPage<>(ObservedProperty.class,
                                    results,
-                                   entity -> new ObservedPropertyData(entity, propertyMapping));
+                                   entity -> new ObservedPropertyData(entity, Optional.of(propertyMapping)));
     }
 
 }

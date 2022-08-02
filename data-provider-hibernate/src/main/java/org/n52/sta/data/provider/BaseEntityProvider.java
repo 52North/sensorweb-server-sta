@@ -30,11 +30,11 @@ package org.n52.sta.data.provider;
 
 import java.util.Objects;
 
-import org.n52.sta.api.EntityProvider;
+import org.n52.sta.api.EntityProviderDelegate;
 import org.n52.sta.api.entity.Identifiable;
 import org.n52.sta.config.EntityPropertyMapping;
 
-public abstract class BaseEntityProvider<T extends Identifiable> implements EntityProvider<T> {
+public abstract class BaseEntityProvider<T extends Identifiable> implements EntityProviderDelegate<T> {
 
     protected final EntityPropertyMapping propertyMapping;
 

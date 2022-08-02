@@ -29,6 +29,7 @@
 package org.n52.sta.data.entity;
 
 import java.util.Date;
+import java.util.Optional;
 import java.util.Set;
 
 import org.joda.time.DateTime;
@@ -42,7 +43,8 @@ import org.n52.sta.old.utils.TimeUtil;
 
 public class HistoricalLocationData extends StaData<HistoricalLocationEntity> implements HistoricalLocation {
 
-    public HistoricalLocationData(HistoricalLocationEntity dataEntity, EntityPropertyMapping propertyMapping) {
+    public HistoricalLocationData(HistoricalLocationEntity dataEntity,
+                                  Optional<EntityPropertyMapping> propertyMapping) {
         super(dataEntity, propertyMapping);
     }
 

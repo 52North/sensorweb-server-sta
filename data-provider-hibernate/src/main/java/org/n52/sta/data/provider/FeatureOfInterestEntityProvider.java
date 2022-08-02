@@ -34,7 +34,7 @@ import java.util.Optional;
 import org.n52.series.db.beans.AbstractFeatureEntity;
 import org.n52.shetland.oasis.odata.query.option.QueryOptions;
 import org.n52.sta.api.EntityPage;
-import org.n52.sta.api.ProviderException;
+import org.n52.sta.api.exception.ProviderException;
 import org.n52.sta.api.entity.FeatureOfInterest;
 import org.n52.sta.api.path.Request;
 import org.n52.sta.config.EntityPropertyMapping;
@@ -84,7 +84,7 @@ public class FeatureOfInterestEntityProvider extends BaseEntityProvider<FeatureO
     private Optional<FeatureOfInterest> getEntity(Specification<AbstractFeatureEntity> specification,
             FeatureOfInterestGraphBuilder graphBuilder) {
         Optional<AbstractFeatureEntity> datastream = featureOfInterestRepository.findOne(specification, graphBuilder);
-        return datastream.map(entity -> new FeatureOfInterestData(entity, propertyMapping));
+        return datastream.map(entity -> new FeatureOfInterestData(entity, Optional.of(propertyMapping)));
     }
 
     @Override
@@ -99,6 +99,6 @@ public class FeatureOfInterestEntityProvider extends BaseEntityProvider<FeatureO
         Page<AbstractFeatureEntity> results = featureOfInterestRepository.findAll(spec, pageable, graphBuilder);
         return new StaEntityPage<>(FeatureOfInterest.class,
                                    results,
-                                   entity -> new FeatureOfInterestData(entity, propertyMapping));
+                                   entity -> new FeatureOfInterestData(entity, Optional.of(propertyMapping)));
     }
 }

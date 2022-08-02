@@ -34,7 +34,7 @@ import java.util.Optional;
 import org.n52.series.db.beans.sta.HistoricalLocationEntity;
 import org.n52.shetland.oasis.odata.query.option.QueryOptions;
 import org.n52.sta.api.EntityPage;
-import org.n52.sta.api.ProviderException;
+import org.n52.sta.api.exception.ProviderException;
 import org.n52.sta.api.entity.HistoricalLocation;
 import org.n52.sta.api.path.Request;
 import org.n52.sta.config.EntityPropertyMapping;
@@ -84,7 +84,7 @@ public class HistoricalLocationEntityProvider extends BaseEntityProvider<Histori
     private Optional<HistoricalLocation> getEntity(Specification<HistoricalLocationEntity> spec,
             HistoricalLocationGraphBuilder graphBuilder) {
         Optional<HistoricalLocationEntity> datastream = historicalLocationRepository.findOne(spec, graphBuilder);
-        return datastream.map(entity -> new HistoricalLocationData(entity, propertyMapping));
+        return datastream.map(entity -> new HistoricalLocationData(entity, Optional.of(propertyMapping)));
     }
 
     @Override
@@ -99,7 +99,7 @@ public class HistoricalLocationEntityProvider extends BaseEntityProvider<Histori
         Page<HistoricalLocationEntity> results = historicalLocationRepository.findAll(spec, pageable, graphBuilder);
         return new StaEntityPage<>(HistoricalLocation.class,
                                    results,
-                                   entity -> new HistoricalLocationData(entity, propertyMapping));
+                                   entity -> new HistoricalLocationData(entity, Optional.of(propertyMapping)));
     }
 
 }

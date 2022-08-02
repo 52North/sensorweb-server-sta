@@ -34,7 +34,7 @@ import java.util.Optional;
 import org.n52.series.db.beans.PlatformEntity;
 import org.n52.shetland.oasis.odata.query.option.QueryOptions;
 import org.n52.sta.api.EntityPage;
-import org.n52.sta.api.ProviderException;
+import org.n52.sta.api.exception.ProviderException;
 import org.n52.sta.api.entity.Thing;
 import org.n52.sta.api.path.Request;
 import org.n52.sta.config.EntityPropertyMapping;
@@ -82,7 +82,7 @@ public class ThingEntityProvider extends BaseEntityProvider<Thing> {
 
     private Optional<Thing> extracted(Specification<PlatformEntity> spec, ThingGraphBuilder graphBuilder) {
         Optional<PlatformEntity> platform = thingRepository.findOne(spec, graphBuilder);
-        return platform.map(entity -> new ThingData(entity, propertyMapping));
+        return platform.map(entity -> new ThingData(entity, Optional.of(propertyMapping)));
     }
 
     @Override
@@ -95,7 +95,7 @@ public class ThingEntityProvider extends BaseEntityProvider<Thing> {
                 : ThingGraphBuilder.createWith(options);
         Specification<PlatformEntity> spec = rootSpecification.buildSpecification(request);
         Page<PlatformEntity> results = thingRepository.findAll(spec, pageable, graphBuilder);
-        return new StaEntityPage<>(Thing.class, results, entity -> new ThingData(entity, propertyMapping));
+        return new StaEntityPage<>(Thing.class, results, entity -> new ThingData(entity, Optional.of(propertyMapping)));
     }
 
 }

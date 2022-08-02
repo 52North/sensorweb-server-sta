@@ -34,7 +34,7 @@ import java.util.Optional;
 import org.n52.series.db.beans.DataEntity;
 import org.n52.shetland.oasis.odata.query.option.QueryOptions;
 import org.n52.sta.api.EntityPage;
-import org.n52.sta.api.ProviderException;
+import org.n52.sta.api.exception.ProviderException;
 import org.n52.sta.api.entity.Observation;
 import org.n52.sta.api.path.Request;
 import org.n52.sta.config.EntityPropertyMapping;

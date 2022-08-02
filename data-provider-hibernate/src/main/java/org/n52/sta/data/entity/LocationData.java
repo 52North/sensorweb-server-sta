@@ -29,6 +29,7 @@
 package org.n52.sta.data.entity;
 
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 import org.locationtech.jts.geom.Geometry;
@@ -40,7 +41,7 @@ import org.n52.sta.config.EntityPropertyMapping;
 
 public class LocationData extends StaData<LocationEntity> implements Location {
 
-    public LocationData(LocationEntity dataEntity, EntityPropertyMapping propertyMapping) {
+    public LocationData(LocationEntity dataEntity, Optional<EntityPropertyMapping> propertyMapping) {
         super(dataEntity, propertyMapping);
     }
 

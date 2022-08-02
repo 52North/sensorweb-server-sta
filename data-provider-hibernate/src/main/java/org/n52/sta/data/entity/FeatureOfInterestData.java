@@ -29,6 +29,7 @@
 package org.n52.sta.data.entity;
 
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 import org.locationtech.jts.geom.Geometry;
@@ -40,11 +41,11 @@ import org.n52.sta.config.EntityPropertyMapping;
 
 public class FeatureOfInterestData extends StaData<StaFeatureEntity< ? >> implements FeatureOfInterest {
 
-    public FeatureOfInterestData(AbstractFeatureEntity< ? > dataEntity, EntityPropertyMapping parameterProperties) {
+    public FeatureOfInterestData(AbstractFeatureEntity< ? > dataEntity, Optional<EntityPropertyMapping> parameterProperties) {
         this(tryToCast(dataEntity), parameterProperties);
     }
 
-    public FeatureOfInterestData(StaFeatureEntity< ? > dataEntity, EntityPropertyMapping propertyMapping) {
+    public FeatureOfInterestData(StaFeatureEntity< ? > dataEntity, Optional<EntityPropertyMapping> propertyMapping) {
         super(dataEntity, propertyMapping);
     }
 
@@ -70,7 +71,8 @@ public class FeatureOfInterestData extends StaData<StaFeatureEntity< ? >> implem
 
     @Override
     public Set<Observation> getObservations() {
-        return toSet(data.getObservations(), entity -> new ObservationData(entity, propertyMapping));
+        return toSet(data.getObservations(), entity -> new ObservationData(entity, propertyMapping.orElseThrow(
+                () -> new RuntimeException("no property mapping supplied!"))));
     }
 
     private static StaFeatureEntity< ? > tryToCast(AbstractFeatureEntity< ? > feature) {

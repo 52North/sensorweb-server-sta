@@ -50,9 +50,9 @@ public class StaData<T extends DescribableEntity> implements Identifiable {
 
     protected final T data;
 
-    protected final EntityPropertyMapping propertyMapping;
+    protected final Optional<EntityPropertyMapping> propertyMapping;
 
-    protected StaData(T dataEntity, EntityPropertyMapping propertyMapping) {
+    protected StaData(T dataEntity, Optional<EntityPropertyMapping> propertyMapping) {
         Objects.requireNonNull(dataEntity, "dataEntity must not be null!");
         Objects.requireNonNull(propertyMapping, "propertyMapping must not be null");
         this.data = dataEntity;
