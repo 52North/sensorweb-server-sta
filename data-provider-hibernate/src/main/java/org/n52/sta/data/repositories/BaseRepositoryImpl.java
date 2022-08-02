@@ -139,7 +139,9 @@ public class BaseRepositoryImpl<T>
         });
 
         TypedQuery<T> typedQuery = em.createQuery(query);
-        addEntityGraph(typedQuery, graphBuilder.buildGraph(em));
+        if (graphBuilder != null) {
+            addEntityGraph(typedQuery, graphBuilder.buildGraph(em));
+        }
         return getSingleResult(typedQuery);
     }
 
