@@ -21,13 +21,10 @@ import org.n52.series.db.beans.parameter.observation.ObservationQuantityParamete
 import org.n52.series.db.beans.parameter.observation.ObservationTextParameterEntity;
 import org.n52.shetland.ogc.gml.time.Time;
 import org.n52.shetland.ogc.om.OmConstants;
-import org.n52.sta.api.exception.EditorException;
-import org.n52.sta.api.EntityEditorDelegate;
 import org.n52.sta.api.EntityServiceLookup;
-import org.n52.sta.api.entity.Datastream;
 import org.n52.sta.api.entity.Observation;
+import org.n52.sta.api.exception.EditorException;
 import org.n52.sta.config.EntityPropertyMapping;
-import org.n52.sta.data.entity.DatastreamData;
 import org.n52.sta.data.entity.ObservationData;
 import org.n52.sta.data.repositories.entity.ObservationRepository;
 import org.n52.sta.data.support.GraphBuilder;
@@ -53,6 +50,13 @@ public class ObservationEntityEditor extends DatabaseEntityAdapter<DataEntity>
         super(serviceLookup);
 
         // TODO Auto-generated constructor stub
+    }
+
+    @Override
+    public ObservationData getOrSave(Observation entity) throws EditorException {
+        Optional<DataEntity> stored = getEntity(entity.getId());
+        return stored.map(e -> new ObservationData(e, propertyMapping))
+                     .orElseGet(() -> save(entity));
     }
 
     @Override
@@ -97,8 +101,7 @@ public class ObservationEntityEditor extends DatabaseEntityAdapter<DataEntity>
     }
 
     private AbstractDatasetEntity getDatastreamOf(Observation entity) throws EditorException {
-        DatastreamData datastream = (DatastreamData) getOrSaveMandatory(entity.getDatastream(), Datastream.class);
-        return datastream.getData();
+        return datastreamEditor.getOrSave(entity.getDatastream()).getData();
         // return datastreamEditor.getEntity(datastream.getId())
         // .orElseThrow(() -> new IllegalStateException("Datastream not found for Observation!"));
     }
@@ -223,5 +226,4 @@ public class ObservationEntityEditor extends DatabaseEntityAdapter<DataEntity>
             throw new EditorException("Observation already exists with ID '" + staIdentifier + "'");
         }
     }
-
 }

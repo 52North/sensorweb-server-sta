@@ -28,11 +28,7 @@
 
 package org.n52.sta.config;
 
-import javax.xml.crypto.Data;
-
-import org.geolatte.geom.V;
 import org.n52.sta.api.EntityEditor;
-import org.n52.sta.api.EntityEditorDelegate;
 import org.n52.sta.api.EntityServiceLookup;
 import org.n52.sta.api.entity.Datastream;
 import org.n52.sta.api.entity.Observation;
@@ -45,11 +41,6 @@ import org.n52.sta.data.editor.ObservedPropertyEntityEditor;
 import org.n52.sta.data.editor.SensorEntityEditor;
 import org.n52.sta.data.editor.ThingEntityEditor;
 import org.n52.sta.data.editor.ValueHelper;
-import org.n52.sta.data.entity.DatastreamData;
-import org.n52.sta.data.entity.ObservationData;
-import org.n52.sta.data.entity.ObservedPropertyData;
-import org.n52.sta.data.entity.SensorData;
-import org.n52.sta.data.entity.ThingData;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.context.annotation.Bean;
@@ -67,27 +58,27 @@ public class DataEditorConfiguration {
     private EntityServiceLookup serviceLookup;
 
     @Bean
-    public EntityEditorDelegate<Datastream, DatastreamData> datastreamEntityEditor() {
+    public EntityEditor<Datastream> datastreamEntityEditor() {
         return new DatastreamEntityEditor(serviceLookup);
     }
 
     @Bean
-    public EntityEditorDelegate<Thing, ThingData> thingEntityEditor() {
+    public EntityEditor<Thing> thingEntityEditor() {
         return new ThingEntityEditor(serviceLookup);
     }
 
     @Bean
-    public EntityEditorDelegate<Observation, ObservationData> observationEntityEditor() {
+    public EntityEditor<Observation> observationEntityEditor() {
         return new ObservationEntityEditor(serviceLookup);
     }
 
     @Bean
-    public EntityEditorDelegate<ObservedProperty, ObservedPropertyData> observedPropertyEntityEditor() {
+    public EntityEditor<ObservedProperty> observedPropertyEntityEditor() {
         return new ObservedPropertyEntityEditor(serviceLookup);
     }
 
     @Bean
-    public EntityEditorDelegate<Sensor, SensorData> sensorEntityEditor() {
+    public EntityEditor<Sensor> sensorEntityEditor() {
         return new SensorEntityEditor(serviceLookup);
     }
 

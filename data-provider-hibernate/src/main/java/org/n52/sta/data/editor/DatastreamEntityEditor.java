@@ -1,4 +1,3 @@
-
 package org.n52.sta.data.editor;
 
 import java.math.BigDecimal;
@@ -8,7 +7,6 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import javax.annotation.PostConstruct;
 import javax.transaction.Transactional;
 import javax.transaction.Transactional.TxType;
 
@@ -24,8 +22,6 @@ import org.n52.series.db.beans.parameter.dataset.DatasetParameterEntity;
 import org.n52.series.db.beans.parameter.dataset.DatasetQuantityParameterEntity;
 import org.n52.series.db.beans.parameter.dataset.DatasetTextParameterEntity;
 import org.n52.shetland.ogc.gml.time.Time;
-import org.n52.sta.api.exception.EditorException;
-import org.n52.sta.api.EntityEditorDelegate;
 import org.n52.sta.api.EntityServiceLookup;
 import org.n52.sta.api.domain.aggregate.ThingAggregate;
 import org.n52.sta.api.entity.Datastream;
@@ -33,6 +29,7 @@ import org.n52.sta.api.entity.Observation;
 import org.n52.sta.api.entity.ObservedProperty;
 import org.n52.sta.api.entity.Sensor;
 import org.n52.sta.api.entity.Thing;
+import org.n52.sta.api.exception.EditorException;
 import org.n52.sta.config.EntityPropertyMapping;
 import org.n52.sta.data.entity.DatastreamData;
 import org.n52.sta.data.entity.ObservationData;
@@ -52,7 +49,6 @@ public class DatastreamEntityEditor extends DatabaseEntityAdapter<AbstractDatase
 
     @Autowired
     private DatastreamRepository datastreamRepository;
-
 
     @Autowired
     private OfferingRepository offeringRepository;
@@ -75,21 +71,29 @@ public class DatastreamEntityEditor extends DatabaseEntityAdapter<AbstractDatase
     }
 
     @EventListener
+    @SuppressWarnings("unchecked")
     private void postConstruct(ContextRefreshedEvent event) {
+        // As we are the package providing the EE Implementations, this cast should never fail.
         this.thingEditor =
-                (EntityEditorDelegate<Thing, ThingData>) getService(Thing.class).getEditor();
+                (EntityEditorDelegate<Thing, ThingData>) getService(Thing.class).unwrapEditor();
         this.sensorEditor =
-                (EntityEditorDelegate<Sensor, SensorData>) getService(Sensor.class).getEditor();
+                (EntityEditorDelegate<Sensor, SensorData>) getService(Sensor.class).unwrapEditor();
         this.observedPropertyEditor =
-                (EntityEditorDelegate<ObservedProperty, ObservedPropertyData>) getService(ObservedProperty.class).getEditor();
+                (EntityEditorDelegate<ObservedProperty, ObservedPropertyData>) getService(ObservedProperty.class).unwrapEditor();
         this.observationEditor =
-                (EntityEditorDelegate<Observation, ObservationData>) getService(Observation.class).getEditor();
+                (EntityEditorDelegate<Observation, ObservationData>) getService(Observation.class).unwrapEditor();
+    }
+
+    @Override
+    public DatastreamData getOrSave(Datastream entity) throws EditorException {
+        Optional<AbstractDatasetEntity> stored = getEntity(entity.getId());
+        return stored.map(e -> new DatastreamData(e, Optional.of(propertyMapping)))
+                     .orElseGet(() -> save(entity));
     }
 
     @Override
     public DatastreamData save(Datastream entity) throws EditorException {
         Objects.requireNonNull(entity, "entity must not be null");
-        assertNew(entity);
 
         // DTOTransformerImpl#createDatasetEntity
         // CommonDatastreamService
@@ -118,7 +122,7 @@ public class DatastreamEntityEditor extends DatabaseEntityAdapter<AbstractDatase
         dataset.setOffering(offering);
 
         // references
-        ThingData thing = thingEditor.save(entity.getThing());
+        ThingData thing = thingEditor.getOrSave(entity.getThing());
         ThingAggregate thingAggregate = new ThingAggregate(thing);
         if (thingAggregate.isMobile()) {
             dataset.setDatasetType(DatasetType.trajectory);
@@ -129,11 +133,11 @@ public class DatastreamEntityEditor extends DatabaseEntityAdapter<AbstractDatase
         }
         dataset.setPlatform(thing.getData());
 
-        SensorData sensor = sensorEditor.save(entity.getSensor());
+        SensorData sensor = sensorEditor.getOrSave(entity.getSensor());
         ProcedureEntity sensorEntity = sensor.getData();
         dataset.setProcedure(sensorEntity);
 
-        ObservedPropertyData observedProperty = observedPropertyEditor.save(entity.getObservedProperty());
+        ObservedPropertyData observedProperty = observedPropertyEditor.getOrSave(entity.getObservedProperty());
         dataset.setObservableProperty(observedProperty.getData());
 
         Set<Observation> observations = entity.getObservations();
@@ -159,7 +163,7 @@ public class DatastreamEntityEditor extends DatabaseEntityAdapter<AbstractDatase
 
         // Set Observations
         dataset.setObservations(Streams.stream(observations)
-                                       .map(o -> observationEditor.save(o))
+                                       .map(o -> observationEditor.getOrSave(o))
                                        .map(StaData::getData)
                                        .collect(Collectors.toSet())
         );
@@ -206,7 +210,7 @@ public class DatastreamEntityEditor extends DatabaseEntityAdapter<AbstractDatase
         return offeringRepository.save(offering);
     }
 
-    private DatasetParameterEntity< ? > convertParameter(Map.Entry<String, Object> parameter) {
+    private DatasetParameterEntity<?> convertParameter(Map.Entry<String, Object> parameter) {
         String key = parameter.getKey();
         Object value = parameter.getValue();
 

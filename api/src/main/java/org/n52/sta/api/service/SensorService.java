@@ -28,27 +28,14 @@
 
 package org.n52.sta.api.service;
 
-import java.util.Objects;
-import java.util.Optional;
-
-import org.n52.shetland.oasis.odata.query.option.QueryOptions;
-import org.n52.sta.api.exception.EditorException;
-import org.n52.sta.api.EntityEditor;
-import org.n52.sta.api.EntityPage;
 import org.n52.sta.api.EntityProvider;
-import org.n52.sta.api.exception.ProviderException;
-import org.n52.sta.api.domain.DefaultDomainService;
-import org.n52.sta.api.domain.DomainService;
-import org.n52.sta.api.domain.aggregate.AggregateException;
 import org.n52.sta.api.domain.aggregate.EntityAggregate;
 import org.n52.sta.api.domain.aggregate.SensorAggregate;
 import org.n52.sta.api.entity.Sensor;
-import org.n52.sta.api.path.Request;
-import org.n52.svalbard.odata.core.QueryOptionsFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class SensorService extends EntityService<Sensor> {
+public class SensorService extends AbstractEntityService<Sensor> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SensorService.class);
 

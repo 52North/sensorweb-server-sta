@@ -29,6 +29,7 @@
 package org.n52.sta.api;
 
 import org.n52.sta.api.entity.Identifiable;
+import org.n52.sta.api.service.AbstractEntityService;
 import org.n52.sta.api.service.EntityService;
 
 import java.util.HashMap;
@@ -59,7 +60,7 @@ public final class EntityServiceLookup {
         if (type == null) {
             return Optional.empty();
         }
-        EntityProvider< ? > entityProvider = entityServicesByType.get(type);
+        EntityService< ? > entityProvider = entityServicesByType.get(type);
         return Optional.ofNullable((EntityService<T>) entityProvider);
     }
 

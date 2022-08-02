@@ -4,10 +4,9 @@ package org.n52.sta.data.editor;
 import java.util.Optional;
 
 import org.n52.series.db.beans.PhenomenonEntity;
-import org.n52.sta.api.exception.EditorException;
-import org.n52.sta.api.EntityEditorDelegate;
 import org.n52.sta.api.EntityServiceLookup;
 import org.n52.sta.api.entity.ObservedProperty;
+import org.n52.sta.api.exception.EditorException;
 import org.n52.sta.data.entity.ObservedPropertyData;
 import org.n52.sta.data.repositories.entity.PhenomenonRepository;
 import org.n52.sta.data.support.ObservedPropertyGraphBuilder;
@@ -21,6 +20,11 @@ public class ObservedPropertyEntityEditor extends DatabaseEntityAdapter<Phenomen
 
     public ObservedPropertyEntityEditor(EntityServiceLookup serviceLookup) {
         super(serviceLookup);
+    }
+
+    @Override
+    public ObservedPropertyData getOrSave(ObservedProperty entity) throws EditorException {
+        return null;
     }
 
     @Override
@@ -46,5 +50,4 @@ public class ObservedPropertyEntityEditor extends DatabaseEntityAdapter<Phenomen
         ObservedPropertyGraphBuilder graphBuilder = ObservedPropertyGraphBuilder.createEmpty();
         return phenomenonRepository.findByStaIdentifier(id, graphBuilder);
     }
-
 }

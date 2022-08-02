@@ -30,11 +30,9 @@ package org.n52.sta.config;
 
 import java.util.Optional;
 
-import org.n52.sta.api.EntityEditorDelegate;
+import org.n52.sta.api.EntityEditor;
 import org.n52.sta.api.EntityProvider;
-import org.n52.sta.api.EntityProviderDelegate;
 import org.n52.sta.api.EntityServiceLookup;
-import org.n52.sta.api.domain.DomainService;
 import org.n52.sta.api.entity.Datastream;
 import org.n52.sta.api.entity.FeatureOfInterest;
 import org.n52.sta.api.entity.HistoricalLocation;
@@ -44,7 +42,7 @@ import org.n52.sta.api.entity.ObservedProperty;
 import org.n52.sta.api.entity.Sensor;
 import org.n52.sta.api.entity.Thing;
 import org.n52.sta.api.service.DatastreamService;
-import org.n52.sta.api.service.EntityService;
+import org.n52.sta.api.service.AbstractEntityService;
 import org.n52.sta.api.service.FeatureOfInterestService;
 import org.n52.sta.api.service.HistoricalLocationService;
 import org.n52.sta.api.service.LocationService;
@@ -68,8 +66,8 @@ public class EntityServiceConfiguration {
     }
 
     @Bean
-    public EntityService<Thing> thingService(EntityProviderDelegate<Thing> entityProvider,
-                                             Optional<EntityEditorDelegate<Thing, ?>> entityEditor) {
+    public AbstractEntityService<Thing> thingService(EntityProvider<Thing> entityProvider,
+                                                     Optional<EntityEditor<Thing>> entityEditor) {
         ThingService service = new ThingService(entityProvider);
         entityEditor.ifPresent(service::setEditor);
         serviceLookup.addEntityService(Thing.class, service);
@@ -77,8 +75,8 @@ public class EntityServiceConfiguration {
     }
 
     @Bean
-    public EntityService<Datastream> datastreamService(EntityProviderDelegate<Datastream> entityProvider,
-                                                       Optional<EntityEditorDelegate<Datastream, ?>> entityEditor) {
+    public AbstractEntityService<Datastream> datastreamService(EntityProvider<Datastream> entityProvider,
+                                                               Optional<EntityEditor<Datastream>> entityEditor) {
         DatastreamService service = new DatastreamService(entityProvider);
         entityEditor.ifPresent(service::setEditor);
         serviceLookup.addEntityService(Datastream.class, service);
@@ -86,8 +84,8 @@ public class EntityServiceConfiguration {
     }
 
     @Bean
-    public EntityService<Sensor> sensorService(EntityProviderDelegate<Sensor> entityProvider,
-                                               Optional<EntityEditorDelegate<Sensor, ?>> entityEditor) {
+    public AbstractEntityService<Sensor> sensorService(EntityProvider<Sensor> entityProvider,
+                                                       Optional<EntityEditor<Sensor>> entityEditor) {
         SensorService service = new SensorService(entityProvider);
         entityEditor.ifPresent(service::setEditor);
         serviceLookup.addEntityService(Sensor.class, service);
@@ -95,8 +93,8 @@ public class EntityServiceConfiguration {
     }
 
     @Bean
-    public EntityService<Location> locationService(EntityProviderDelegate<Location> entityProvider,
-                                                   Optional<EntityEditorDelegate<Location, ?>> entityEditor) {
+    public AbstractEntityService<Location> locationService(EntityProvider<Location> entityProvider,
+                                                           Optional<EntityEditor<Location>> entityEditor) {
         LocationService service = new LocationService(entityProvider);
         entityEditor.ifPresent(service::setEditor);
         serviceLookup.addEntityService(Location.class, service);
@@ -104,9 +102,9 @@ public class EntityServiceConfiguration {
     }
 
     @Bean
-    public EntityService<ObservedProperty> observedPropertyService(
-            EntityProviderDelegate<ObservedProperty> entityProvider,
-            Optional<EntityEditorDelegate<ObservedProperty, ?>> entityEditor,
+    public AbstractEntityService<ObservedProperty> observedPropertyService(
+            EntityProvider<ObservedProperty> entityProvider,
+            Optional<EntityEditor<ObservedProperty>> entityEditor,
             EntityServiceLookup serviceLookup) {
         ObservedPropertyService service = new ObservedPropertyService(entityProvider);
         entityEditor.ifPresent(service::setEditor);
@@ -115,9 +113,9 @@ public class EntityServiceConfiguration {
     }
 
     @Bean
-    public EntityService<Observation> observationService(EntityProviderDelegate<Observation> entityProvider,
-                                                         Optional<EntityEditorDelegate<Observation, ?>> entityEditor,
-                                                         EntityServiceLookup serviceLookup) {
+    public AbstractEntityService<Observation> observationService(EntityProvider<Observation> entityProvider,
+                                                                 Optional<EntityEditor<Observation>> entityEditor,
+                                                                 EntityServiceLookup serviceLookup) {
         ObservationService service = new ObservationService(entityProvider);
         entityEditor.ifPresent(service::setEditor);
         serviceLookup.addEntityService(Observation.class, service);
@@ -125,9 +123,9 @@ public class EntityServiceConfiguration {
     }
 
     @Bean
-    public EntityService<FeatureOfInterest> featureOfInterestService(
-            EntityProviderDelegate<FeatureOfInterest> entityProvider,
-            Optional<EntityEditorDelegate<FeatureOfInterest, ?>> entityEditor,
+    public AbstractEntityService<FeatureOfInterest> featureOfInterestService(
+            EntityProvider<FeatureOfInterest> entityProvider,
+            Optional<EntityEditor<FeatureOfInterest>> entityEditor,
             EntityServiceLookup serviceLookup) {
         FeatureOfInterestService service = new FeatureOfInterestService(entityProvider);
         entityEditor.ifPresent(service::setEditor);
@@ -136,9 +134,9 @@ public class EntityServiceConfiguration {
     }
 
     @Bean
-    public EntityService<HistoricalLocation> historicalLocationService(
-            EntityProviderDelegate<HistoricalLocation> entityProvider,
-            Optional<EntityEditorDelegate<HistoricalLocation, ?>> entityEditor,
+    public AbstractEntityService<HistoricalLocation> historicalLocationService(
+            EntityProvider<HistoricalLocation> entityProvider,
+            Optional<EntityEditor<HistoricalLocation>> entityEditor,
             EntityServiceLookup serviceLookup) {
         HistoricalLocationService service = new HistoricalLocationService(entityProvider);
         entityEditor.ifPresent(service::setEditor);

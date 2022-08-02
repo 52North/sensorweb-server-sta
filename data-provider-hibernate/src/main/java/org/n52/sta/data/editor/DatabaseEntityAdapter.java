@@ -5,10 +5,12 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 
+import org.geolatte.geom.V;
 import org.n52.series.db.beans.DescribableEntity;
 import org.n52.sta.api.exception.EditorException;
 import org.n52.sta.api.EntityServiceLookup;
 import org.n52.sta.api.entity.Identifiable;
+import org.n52.sta.api.service.AbstractEntityService;
 import org.n52.sta.api.service.EntityService;
 
 abstract class DatabaseEntityAdapter<T extends DescribableEntity> {
@@ -27,6 +29,7 @@ abstract class DatabaseEntityAdapter<T extends DescribableEntity> {
         return uuid.toString();
     }
 
+    /*
     protected <E extends Identifiable> E getOrSaveMandatory(E input, Class<E> type) throws EditorException {
         if (input == null) {
             String typeName = type.getSimpleName();
@@ -42,12 +45,13 @@ abstract class DatabaseEntityAdapter<T extends DescribableEntity> {
     }
 
     private <E extends Identifiable> E getOrSave(E input, Class<E> type) throws EditorException {
-        EntityService<E> service = getService(type);
+        AbstractEntityService<E> service = getService(type);
         Optional<E> optionalEntity = service.getEntity(input.getId());
         return optionalEntity.isPresent()
                 ? optionalEntity.get()
                 : service.save(input);
     }
+     */
 
     protected <E extends Identifiable> EntityService<E> getService(Class<E> entityType) {
         return serviceLookup.getService(entityType)

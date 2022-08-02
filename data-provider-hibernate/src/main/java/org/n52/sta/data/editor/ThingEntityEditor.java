@@ -12,10 +12,9 @@ import org.n52.series.db.beans.parameter.platform.PlatformBooleanParameterEntity
 import org.n52.series.db.beans.parameter.platform.PlatformParameterEntity;
 import org.n52.series.db.beans.parameter.platform.PlatformQuantityParameterEntity;
 import org.n52.series.db.beans.parameter.platform.PlatformTextParameterEntity;
-import org.n52.sta.api.exception.EditorException;
-import org.n52.sta.api.EntityEditorDelegate;
 import org.n52.sta.api.EntityServiceLookup;
 import org.n52.sta.api.entity.Thing;
+import org.n52.sta.api.exception.EditorException;
 import org.n52.sta.api.service.EntityService;
 import org.n52.sta.data.entity.ThingData;
 import org.n52.sta.data.repositories.entity.PlatformRepository;
@@ -33,12 +32,18 @@ public class ThingEntityEditor extends DatabaseEntityAdapter<PlatformEntity>
     }
 
     @Override
-    public ThingData save(Thing entity) throws EditorException {
+    public ThingData getOrSave(Thing entity) throws EditorException {
+        Optional<PlatformEntity> stored = getEntity(entity.getId());
+        return stored.map(e -> new ThingData(e, Optional.empty()))
+                     .orElseGet(() -> save(entity));
+    }
 
+    @Override
+    public ThingData save(Thing entity) throws EditorException {
         String staIdentifier = entity.getId();
         EntityService<Thing> thingService = getService(Thing.class);
         if (thingService.exists(staIdentifier)) {
-            throw new EditorException("Thing already exists with ID '" + staIdentifier + "'");
+            throw new EditorException("Thing already exists with Id '" + staIdentifier + "'");
         }
 
         String id = entity.getId() == null
@@ -105,5 +110,4 @@ public class ThingEntityEditor extends DatabaseEntityAdapter<PlatformEntity>
         ThingGraphBuilder graphBuilder = ThingGraphBuilder.createEmpty();
         return platformRepository.findByStaIdentifier(id, graphBuilder);
     }
-
 }

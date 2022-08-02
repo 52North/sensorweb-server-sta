@@ -4,10 +4,9 @@ package org.n52.sta.data.editor;
 import java.util.Optional;
 
 import org.n52.series.db.beans.ProcedureEntity;
-import org.n52.sta.api.exception.EditorException;
-import org.n52.sta.api.EntityEditorDelegate;
 import org.n52.sta.api.EntityServiceLookup;
 import org.n52.sta.api.entity.Sensor;
+import org.n52.sta.api.exception.EditorException;
 import org.n52.sta.data.entity.SensorData;
 import org.n52.sta.data.repositories.entity.ProcedureRepository;
 import org.n52.sta.data.support.SensorGraphBuilder;
@@ -21,6 +20,11 @@ public class SensorEntityEditor extends DatabaseEntityAdapter<ProcedureEntity>
 
     public SensorEntityEditor(EntityServiceLookup serviceLookup) {
         super(serviceLookup);
+    }
+
+    @Override
+    public SensorData getOrSave(Sensor entity) throws EditorException {
+        return null;
     }
 
     @Override
@@ -46,5 +50,4 @@ public class SensorEntityEditor extends DatabaseEntityAdapter<ProcedureEntity>
         SensorGraphBuilder graphBuilder = SensorGraphBuilder.createEmpty();
         return procedureRepository.findByStaIdentifier(id, graphBuilder);
     }
-
 }
