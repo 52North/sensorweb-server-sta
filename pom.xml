@@ -31,7 +31,7 @@
         <module>http</module>
         <module>mqtt</module>
         <!--        <module>webapp</module>-->
-        <module>data-provider</module>
+        <!--        <module>data-provider</module>-->
         <module>data-provider-ufz</module>
         <module>data-provider-hibernate</module>
         <module>sta-plus</module>
@@ -206,10 +206,6 @@
                     <exclusion>
                         <groupId>com.google.code.findbugs</groupId>
                         <artifactId>jsr305</artifactId>
-                    </exclusion>
-                    <exclusion>
-                        <groupId>net.java.dev.jna</groupId>
-                        <artifactId>jna</artifactId>
                     </exclusion>
                     <exclusion>
                         <groupId>org.osgi</groupId>
