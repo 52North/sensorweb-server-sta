@@ -32,11 +32,11 @@ import java.util.Objects;
 import java.util.Optional;
 
 import org.n52.shetland.oasis.odata.query.option.QueryOptions;
-import org.n52.sta.api.EditorException;
+import org.n52.sta.api.exception.EditorException;
 import org.n52.sta.api.EntityEditor;
 import org.n52.sta.api.EntityPage;
 import org.n52.sta.api.EntityProvider;
-import org.n52.sta.api.ProviderException;
+import org.n52.sta.api.exception.ProviderException;
 import org.n52.sta.api.domain.DefaultDomainService;
 import org.n52.sta.api.domain.DomainService;
 import org.n52.sta.api.domain.aggregate.AggregateException;
@@ -52,87 +52,12 @@ public class HistoricalLocationService extends EntityService<HistoricalLocation>
 
     private static final Logger LOGGER = LoggerFactory.getLogger(HistoricalLocationService.class);
 
-    private final DomainService<HistoricalLocation> domainService;
-
-    private Optional<EntityEditor<HistoricalLocation>> historicalLocationEditor;
-
     public HistoricalLocationService(EntityProvider<HistoricalLocation> provider) {
-        this(provider, null);
+        super(provider);
     }
 
-    public HistoricalLocationService(EntityProvider<HistoricalLocation> provider,
-                                     DomainService<HistoricalLocation> domainService) {
-        Objects.requireNonNull(provider, "provider must not be null");
-        this.domainService = domainService == null
-                ? new DefaultDomainService<>(provider)
-                : domainService;
-    }
-
-    @Override
-    public boolean exists(String id) throws ProviderException {
-        return domainService.exists(id);
-    }
-
-    @Override
-    public Optional<HistoricalLocation> getEntity(Request req) throws ProviderException {
-        return domainService.getEntity(req);
-    }
-
-    @Override
-    public Optional<HistoricalLocation> getEntity(String id, QueryOptions queryOptions) throws ProviderException {
-        return domainService.getEntity(id, queryOptions);
-    }
-
-    @Override
-    public EntityPage<HistoricalLocation> getEntities(Request req) throws ProviderException {
-        return domainService.getEntities(req);
-    }
-
-    @Override
-    public HistoricalLocation save(HistoricalLocation entity) throws EditorException {
-        try {
-            return createAggregate(entity).save();
-        } catch (AggregateException e) {
-            LOGGER.error("Could not create entity: {}", entity, e);
-            throw new ProviderException("Could not create HistoricalLocation!");
-        }
-    }
-
-    @Override
-    public HistoricalLocation update(HistoricalLocation entity) throws EditorException {
-        Objects.requireNonNull(entity, "entity must not be null!");
-        try {
-            String id = entity.getId();
-            HistoricalLocation historicalLocation = getOrThrow(id);
-            return createAggregate(historicalLocation).save(entity);
-        } catch (AggregateException e) {
-            LOGGER.error("Could not update entity: {}", entity, e);
-            throw new ProviderException("Could not update HistoricalLocation!");
-        }
-    }
-
-    @Override
-    public void delete(String id) throws EditorException {
-        HistoricalLocation entity = getOrThrow(id);
-        try {
-            createAggregate(entity).delete();
-        } catch (AggregateException e) {
-            LOGGER.error("Could not delete entity: {}", entity, e);
-            throw new ProviderException("Could not delete HistoricalLocation!");
-        }
-    }
-
-    public void setHistoricalLocationEditor(EntityEditor<HistoricalLocation> editor) {
-        historicalLocationEditor = Optional.ofNullable(editor);
-    }
-
-    private EntityAggregate<HistoricalLocation> createAggregate(HistoricalLocation entity) {
-        return new HistoricalLocationAggregate(entity, historicalLocationEditor.orElse(null));
-    }
-
-    private HistoricalLocation getOrThrow(String id) throws ProviderException {
-        return domainService.getEntity(id, QueryOptionsFactory.createEmpty())
-                            .orElseThrow(() -> new ProviderException("Id '" + id + "' does not exist."));
+    protected EntityAggregate<HistoricalLocation> createAggregate(HistoricalLocation entity) {
+        return new HistoricalLocationAggregate(entity, editor.orElse(null));
     }
 
 }

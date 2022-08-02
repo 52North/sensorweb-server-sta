@@ -29,6 +29,7 @@
 package org.n52.sta.api;
 
 import org.n52.sta.api.entity.Identifiable;
+import org.n52.sta.api.exception.EditorException;
 
 public interface EntityEditor<T extends Identifiable> {
 

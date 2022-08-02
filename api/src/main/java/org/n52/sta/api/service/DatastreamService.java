@@ -32,11 +32,11 @@ import java.util.Objects;
 import java.util.Optional;
 
 import org.n52.shetland.oasis.odata.query.option.QueryOptions;
-import org.n52.sta.api.EditorException;
+import org.n52.sta.api.exception.EditorException;
 import org.n52.sta.api.EntityEditor;
 import org.n52.sta.api.EntityPage;
 import org.n52.sta.api.EntityProvider;
-import org.n52.sta.api.ProviderException;
+import org.n52.sta.api.exception.ProviderException;
 import org.n52.sta.api.domain.aggregate.AggregateException;
 import org.n52.sta.api.domain.aggregate.DatastreamAggregate;
 import org.n52.sta.api.domain.aggregate.EntityAggregate;
@@ -50,80 +50,12 @@ public class DatastreamService extends EntityService<Datastream> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DatastreamService.class);
 
-    private final EntityProvider<Datastream> datastreamProvider;
-
-    private Optional<EntityEditor<Datastream>> datastreamEditor;
-
     public DatastreamService(EntityProvider<Datastream> provider) {
-        Objects.requireNonNull(provider, "provider must not be null");
-        this.datastreamProvider = provider;
+        super(provider);
     }
 
-    @Override
-    public boolean exists(String id) throws ProviderException {
-        return datastreamProvider.exists(id);
-    }
-
-    @Override
-    public Optional<Datastream> getEntity(String id, QueryOptions queryOptions) throws ProviderException {
-        return datastreamProvider.getEntity(id, queryOptions);
-    }
-
-    @Override
-    public Optional<Datastream> getEntity(Request req) throws ProviderException {
-        return datastreamProvider.getEntity(req);
-    }
-
-    @Override
-    public EntityPage<Datastream> getEntities(Request req) throws ProviderException {
-        return datastreamProvider.getEntities(req);
-    }
-
-    @Override
-    public Datastream save(Datastream entity) throws EditorException {
-        try {
-            return createAggregate(entity).save();
-        } catch (AggregateException e) {
-            LOGGER.error("Could not create entity: {}", entity, e);
-            throw new ProviderException("Could not create Datastream!");
-        }
-    }
-
-    @Override
-    public Datastream update(Datastream entity) throws EditorException {
-        Objects.requireNonNull(entity, "entity must not be null!");
-        try {
-            String id = entity.getId();
-            Datastream thing = getOrThrow(id);
-            return createAggregate(thing).save(entity);
-        } catch (AggregateException e) {
-            LOGGER.error("Could not update entity: {}", entity, e);
-            throw new ProviderException("Could not update Datastream!");
-        }
-    }
-
-    @Override
-    public void delete(String id) throws EditorException {
-        Datastream entity = getOrThrow(id);
-        try {
-            createAggregate(entity).delete();
-        } catch (AggregateException e) {
-            LOGGER.error("Could not delete entity: {}", entity, e);
-            throw new ProviderException("Could not delete Datastream!");
-        }
-    }
-
-    public void setDatastreamEditor(EntityEditor<Datastream> editor) {
-        datastreamEditor = Optional.ofNullable(editor);
-    }
-
-    private EntityAggregate<Datastream> createAggregate(Datastream entity) {
-        return new DatastreamAggregate(entity, datastreamEditor.orElse(null));
-    }
-
-    private Datastream getOrThrow(String id) throws ProviderException {
-        return datastreamProvider.getEntity(id, QueryOptionsFactory.createEmpty())
-                                 .orElseThrow(() -> new ProviderException("Id '" + id + "' does not exist."));
+    protected EntityAggregate<Datastream> createAggregate(Datastream entity) {
+        return new DatastreamAggregate(entity, editor.orElse(null));
     }
 
 }

@@ -30,8 +30,9 @@ package org.n52.sta.config;
 
 import java.util.Optional;
 
-import org.n52.sta.api.EntityEditor;
+import org.n52.sta.api.EntityEditorDelegate;
 import org.n52.sta.api.EntityProvider;
+import org.n52.sta.api.EntityProviderDelegate;
 import org.n52.sta.api.EntityServiceLookup;
 import org.n52.sta.api.domain.DomainService;
 import org.n52.sta.api.entity.Datastream;
@@ -67,86 +68,80 @@ public class EntityServiceConfiguration {
     }
 
     @Bean
-    public EntityService<Thing> thingService(EntityProvider<Thing> entityProvider,
-            Optional<DomainService<Thing>> thingDomainService) {
-        ThingService service = thingDomainService.isPresent()
-                ? new ThingService(entityProvider, thingDomainService.get())
-                : new ThingService(entityProvider);
+    public EntityService<Thing> thingService(EntityProviderDelegate<Thing> entityProvider,
+                                             Optional<EntityEditorDelegate<Thing, ?>> entityEditor) {
+        ThingService service = new ThingService(entityProvider);
+        entityEditor.ifPresent(service::setEditor);
         serviceLookup.addEntityService(Thing.class, service);
         return service;
     }
 
     @Bean
-    public EntityService<Datastream> datastreamService(EntityProvider<Datastream> entityProvider,
-            Optional<EntityEditor<Datastream>> entityEditor) {
+    public EntityService<Datastream> datastreamService(EntityProviderDelegate<Datastream> entityProvider,
+                                                       Optional<EntityEditorDelegate<Datastream, ?>> entityEditor) {
         DatastreamService service = new DatastreamService(entityProvider);
-        entityEditor.ifPresent(service::setDatastreamEditor);
+        entityEditor.ifPresent(service::setEditor);
         serviceLookup.addEntityService(Datastream.class, service);
         return service;
     }
 
     @Bean
-    public EntityService<Sensor> sensorService(EntityProvider<Sensor> entityProvider,
-            Optional<DomainService<Sensor>> sensorDomainService) {
-        SensorService service = sensorDomainService.isPresent()
-                ? new SensorService(entityProvider, sensorDomainService.get())
-                : new SensorService(entityProvider);
+    public EntityService<Sensor> sensorService(EntityProviderDelegate<Sensor> entityProvider,
+                                               Optional<EntityEditorDelegate<Sensor, ?>> entityEditor) {
+        SensorService service = new SensorService(entityProvider);
+        entityEditor.ifPresent(service::setEditor);
         serviceLookup.addEntityService(Sensor.class, service);
         return service;
     }
 
     @Bean
-    public EntityService<Location> locationService(EntityProvider<Location> entityProvider,
-            Optional<DomainService<Location>> locationDomainService) {
-        LocationService service = locationDomainService.isPresent()
-                ? new LocationService(entityProvider, locationDomainService.get())
-                : new LocationService(entityProvider);
+    public EntityService<Location> locationService(EntityProviderDelegate<Location> entityProvider,
+                                                   Optional<EntityEditorDelegate<Location, ?>> entityEditor) {
+        LocationService service = new LocationService(entityProvider);
+        entityEditor.ifPresent(service::setEditor);
         serviceLookup.addEntityService(Location.class, service);
         return service;
     }
 
     @Bean
-    public EntityService<ObservedProperty> observedPropertyService(EntityProvider<ObservedProperty> entityProvider,
-            Optional<DomainService<ObservedProperty>> observedPropertyDomainService,
+    public EntityService<ObservedProperty> observedPropertyService(
+            EntityProviderDelegate<ObservedProperty> entityProvider,
+            Optional<EntityEditorDelegate<ObservedProperty, ?>> entityEditor,
             EntityServiceLookup serviceLookup) {
-        ObservedPropertyService service = observedPropertyDomainService.isPresent()
-                ? new ObservedPropertyService(entityProvider, observedPropertyDomainService.get())
-                : new ObservedPropertyService(entityProvider);
+        ObservedPropertyService service = new ObservedPropertyService(entityProvider);
+        entityEditor.ifPresent(service::setEditor);
         serviceLookup.addEntityService(ObservedProperty.class, service);
         return service;
     }
 
     @Bean
-    public EntityService<Observation> observationService(EntityProvider<Observation> entityProvider,
-            Optional<DomainService<Observation>> observationDomainService,
-            EntityServiceLookup serviceLookup) {
-        ObservationService service = observationDomainService.isPresent()
-                ? new ObservationService(entityProvider, observationDomainService.get())
-                : new ObservationService(entityProvider);
+    public EntityService<Observation> observationService(EntityProviderDelegate<Observation> entityProvider,
+                                                         Optional<EntityEditorDelegate<Observation, ?>> entityEditor,
+                                                         EntityServiceLookup serviceLookup) {
+        ObservationService service = new ObservationService(entityProvider);
+        entityEditor.ifPresent(service::setEditor);
         serviceLookup.addEntityService(Observation.class, service);
         return service;
     }
 
     @Bean
     public EntityService<FeatureOfInterest> featureOfInterestService(
-            EntityProvider<FeatureOfInterest> entityProvider,
-            Optional<DomainService<FeatureOfInterest>> featureOfInterestDomainService,
+            EntityProviderDelegate<FeatureOfInterest> entityProvider,
+            Optional<EntityEditorDelegate<FeatureOfInterest, ?>> entityEditor,
             EntityServiceLookup serviceLookup) {
-        FeatureOfInterestService service = featureOfInterestDomainService.isPresent()
-                ? new FeatureOfInterestService(entityProvider, featureOfInterestDomainService.get())
-                : new FeatureOfInterestService(entityProvider);
+        FeatureOfInterestService service = new FeatureOfInterestService(entityProvider);
+        entityEditor.ifPresent(service::setEditor);
         serviceLookup.addEntityService(FeatureOfInterest.class, service);
         return service;
     }
 
     @Bean
     public EntityService<HistoricalLocation> historicalLocationService(
-            EntityProvider<HistoricalLocation> entityProvider,
-            Optional<DomainService<HistoricalLocation>> historicalLocationDomainService,
+            EntityProviderDelegate<HistoricalLocation> entityProvider,
+            Optional<EntityEditorDelegate<HistoricalLocation, ?>> entityEditor,
             EntityServiceLookup serviceLookup) {
-        HistoricalLocationService service = historicalLocationDomainService.isPresent()
-                ? new HistoricalLocationService(entityProvider, historicalLocationDomainService.get())
-                : new HistoricalLocationService(entityProvider);
+        HistoricalLocationService service = new HistoricalLocationService(entityProvider);
+        entityEditor.ifPresent(service::setEditor);
         serviceLookup.addEntityService(HistoricalLocation.class, service);
         return service;
     }

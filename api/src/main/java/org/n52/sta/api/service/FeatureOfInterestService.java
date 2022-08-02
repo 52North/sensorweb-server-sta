@@ -32,11 +32,11 @@ import java.util.Objects;
 import java.util.Optional;
 
 import org.n52.shetland.oasis.odata.query.option.QueryOptions;
-import org.n52.sta.api.EditorException;
+import org.n52.sta.api.exception.EditorException;
 import org.n52.sta.api.EntityEditor;
 import org.n52.sta.api.EntityPage;
 import org.n52.sta.api.EntityProvider;
-import org.n52.sta.api.ProviderException;
+import org.n52.sta.api.exception.ProviderException;
 import org.n52.sta.api.domain.DefaultDomainService;
 import org.n52.sta.api.domain.DomainService;
 import org.n52.sta.api.domain.aggregate.AggregateException;
@@ -52,87 +52,12 @@ public class FeatureOfInterestService extends EntityService<FeatureOfInterest> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(FeatureOfInterestService.class);
 
-    private final DomainService<FeatureOfInterest> domainService;
-
-    private Optional<EntityEditor<FeatureOfInterest>> featureOfInterestEditor;
-
     public FeatureOfInterestService(EntityProvider<FeatureOfInterest> provider) {
-        this(provider, null);
+        super(provider);
     }
 
-    public FeatureOfInterestService(EntityProvider<FeatureOfInterest> provider,
-                                    DomainService<FeatureOfInterest> domainService) {
-        Objects.requireNonNull(provider, "provider must not be null");
-        this.domainService = domainService == null
-                ? new DefaultDomainService<>(provider)
-                : domainService;
-    }
-
-    @Override
-    public boolean exists(String id) throws ProviderException {
-        return domainService.exists(id);
-    }
-
-    @Override
-    public Optional<FeatureOfInterest> getEntity(Request req) throws ProviderException {
-        return domainService.getEntity(req);
-    }
-
-    @Override
-    public Optional<FeatureOfInterest> getEntity(String id, QueryOptions queryOptions) throws ProviderException {
-        return domainService.getEntity(id, queryOptions);
-    }
-
-    @Override
-    public EntityPage<FeatureOfInterest> getEntities(Request req) throws ProviderException {
-        return domainService.getEntities(req);
-    }
-
-    @Override
-    public FeatureOfInterest save(FeatureOfInterest entity) throws EditorException {
-        try {
-            return createAggregate(entity).save();
-        } catch (AggregateException e) {
-            LOGGER.error("Could not create entity: {}", entity, e);
-            throw new ProviderException("Could not create FeatureOfInterest!");
-        }
-    }
-
-    @Override
-    public FeatureOfInterest update(FeatureOfInterest entity) throws EditorException {
-        Objects.requireNonNull(entity, "entity must not be null!");
-        try {
-            String id = entity.getId();
-            FeatureOfInterest featureOfInterest = getOrThrow(id);
-            return createAggregate(featureOfInterest).save(entity);
-        } catch (AggregateException e) {
-            LOGGER.error("Could not update entity: {}", entity, e);
-            throw new ProviderException("Could not update FeatureOfInterest!");
-        }
-    }
-
-    @Override
-    public void delete(String id) throws EditorException {
-        FeatureOfInterest entity = getOrThrow(id);
-        try {
-            createAggregate(entity).delete();
-        } catch (AggregateException e) {
-            LOGGER.error("Could not delete entity: {}", entity, e);
-            throw new ProviderException("Could not delete FeatureOfInterest!");
-        }
-    }
-
-    public void setFeatureOfInterestEditor(EntityEditor<FeatureOfInterest> editor) {
-        featureOfInterestEditor = Optional.ofNullable(editor);
-    }
-
-    private EntityAggregate<FeatureOfInterest> createAggregate(FeatureOfInterest entity) {
-        return new FeatureOfInterestAggregate(entity, featureOfInterestEditor.orElse(null));
-    }
-
-    private FeatureOfInterest getOrThrow(String id) throws ProviderException {
-        return domainService.getEntity(id, QueryOptionsFactory.createEmpty())
-                            .orElseThrow(() -> new ProviderException("Id '" + id + "' does not exist."));
+    protected EntityAggregate<FeatureOfInterest> createAggregate(FeatureOfInterest entity) {
+        return new FeatureOfInterestAggregate(entity, editor.orElse(null));
     }
 
 }

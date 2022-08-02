@@ -26,7 +26,7 @@
  * Public License for more details.
  */
 
-package org.n52.sta.api;
+package org.n52.sta.api.exception;
 
 public class ProviderException extends RuntimeException {
 

@@ -28,21 +28,107 @@
 
 package org.n52.sta.api.service;
 
+import java.util.Objects;
 import java.util.Optional;
 
+import org.n52.shetland.oasis.odata.query.option.QueryOptions;
+import org.n52.sta.api.EntityPage;
+import org.n52.sta.api.domain.aggregate.AggregateException;
+import org.n52.sta.api.domain.aggregate.EntityAggregate;
+import org.n52.sta.api.exception.EditorException;
 import org.n52.sta.api.EntityEditor;
 import org.n52.sta.api.EntityProvider;
-import org.n52.sta.api.ProviderException;
+import org.n52.sta.api.exception.ProviderException;
 import org.n52.sta.api.entity.Identifiable;
+import org.n52.sta.api.path.Request;
 import org.n52.svalbard.odata.core.QueryOptionsFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public abstract class EntityService<T extends Identifiable> implements EntityProvider<T>, EntityEditor<T> {
 
-    // intermediary interface to let Spring differentiate
-    // between EntityService and DomainService
+    private static final Logger LOGGER = LoggerFactory.getLogger(EntityService.class);
+
+    protected EntityProvider<T> provider;
+
+    protected Optional<EntityEditor<T>> editor;
+
+    public EntityService(EntityProvider<T> provider) {
+        Objects.requireNonNull(provider, "provider must not be null");
+        this.provider = provider;
+    }
 
     public Optional<T> getEntity(String id) throws ProviderException {
         return getEntity(id, QueryOptionsFactory.createEmpty());
+    }
+
+    @Override
+    public boolean exists(String id) throws ProviderException {
+        return provider.exists(id);
+    }
+
+    @Override
+    public Optional<T> getEntity(String id, QueryOptions queryOptions) throws ProviderException {
+        return provider.getEntity(id, queryOptions);
+    }
+
+    @Override
+    public Optional<T> getEntity(Request req) throws ProviderException {
+        return provider.getEntity(req);
+    }
+
+    @Override
+    public EntityPage<T> getEntities(Request req) throws ProviderException {
+        return provider.getEntities(req);
+    }
+
+    @Override
+    public T save(T entity) throws EditorException {
+        try {
+            return createAggregate(entity).save();
+        } catch (AggregateException e) {
+            LOGGER.error("Could not create entity: {}", entity, e);
+            throw new EditorException("Could not create Entity!", e);
+        }
+    }
+
+    @Override
+    public T update(T entity) throws EditorException {
+        Objects.requireNonNull(entity, "entity must not be null!");
+        try {
+            String id = entity.getId();
+            T stored = getOrThrow(id);
+            return createAggregate(stored).save(entity);
+        } catch (AggregateException e) {
+            LOGGER.error("Could not update entity: {}", entity, e);
+            throw new EditorException("Could not update Entity!", e);
+        }
+    }
+
+    @Override
+    public void delete(String id) throws EditorException {
+        T entity = getOrThrow(id);
+        try {
+            createAggregate(entity).delete();
+        } catch (AggregateException e) {
+            LOGGER.error("Could not delete entity: {}", entity, e);
+            throw new EditorException("Could not delete Entity!", e);
+        }
+    }
+
+    protected abstract EntityAggregate<T> createAggregate(T entity);
+
+    protected T getOrThrow(String id) throws ProviderException {
+        return provider.getEntity(id, QueryOptionsFactory.createEmpty())
+                       .orElseThrow(() -> new ProviderException("Id '" + id + "' does not exist."));
+    }
+
+    public void setEditor(EntityEditor<T> editor) {
+        this.editor = Optional.ofNullable(editor);
+    }
+
+    public EntityEditor<T> getEditor() {
+        return editor.orElseThrow(() -> new EditorException("no editor registered"));
     }
 
 }

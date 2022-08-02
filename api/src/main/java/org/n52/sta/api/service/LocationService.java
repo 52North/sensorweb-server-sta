@@ -32,11 +32,11 @@ import java.util.Objects;
 import java.util.Optional;
 
 import org.n52.shetland.oasis.odata.query.option.QueryOptions;
-import org.n52.sta.api.EditorException;
+import org.n52.sta.api.exception.EditorException;
 import org.n52.sta.api.EntityEditor;
 import org.n52.sta.api.EntityPage;
 import org.n52.sta.api.EntityProvider;
-import org.n52.sta.api.ProviderException;
+import org.n52.sta.api.exception.ProviderException;
 import org.n52.sta.api.domain.DefaultDomainService;
 import org.n52.sta.api.domain.DomainService;
 import org.n52.sta.api.domain.aggregate.AggregateException;
@@ -52,86 +52,12 @@ public class LocationService extends EntityService<Location> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(LocationService.class);
 
-    private final DomainService<Location> domainService;
-
-    private Optional<EntityEditor<Location>> locationEditor;
-
     public LocationService(EntityProvider<Location> provider) {
-        this(provider, null);
+        super(provider);
     }
 
-    public LocationService(EntityProvider<Location> provider, DomainService<Location> domainService) {
-        Objects.requireNonNull(provider, "provider must not be null");
-        this.domainService = domainService == null
-                ? new DefaultDomainService<>(provider)
-                : domainService;
-    }
-
-    @Override
-    public boolean exists(String id) throws ProviderException {
-        return domainService.exists(id);
-    }
-
-    @Override
-    public Optional<Location> getEntity(Request req) throws ProviderException {
-        return domainService.getEntity(req);
-    }
-
-    @Override
-    public Optional<Location> getEntity(String id, QueryOptions queryOptions) throws ProviderException {
-        return domainService.getEntity(id, queryOptions);
-    }
-
-    @Override
-    public EntityPage<Location> getEntities(Request req) throws ProviderException {
-        return domainService.getEntities(req);
-    }
-
-    @Override
-    public Location save(Location entity) throws EditorException {
-        try {
-            return createAggregate(entity).save();
-        } catch (AggregateException e) {
-            LOGGER.error("Could not create entity: {}", entity, e);
-            throw new ProviderException("Could not create Location!");
-        }
-    }
-
-    @Override
-    public Location update(Location entity) throws EditorException {
-        Objects.requireNonNull(entity, "entity must not be null!");
-        try {
-            String id = entity.getId();
-            Location location = getOrThrow(id);
-            return createAggregate(location).save(entity);
-        } catch (AggregateException e) {
-            LOGGER.error("Could not update entity: {}", entity, e);
-            throw new ProviderException("Could not update Location!");
-        }
-    }
-
-    @Override
-    public void delete(String id) throws EditorException {
-        Location entity = getOrThrow(id);
-        try {
-            createAggregate(entity).delete();
-        } catch (AggregateException e) {
-            LOGGER.error("Could not delete entity: {}", entity, e);
-            throw new ProviderException("Could not delete Location!");
-        }
-    }
-
-    public void setLocationEditor(EntityEditor<Location> editor) {
-        locationEditor = Optional.ofNullable(editor);
-    }
-
-    private EntityAggregate<Location> createAggregate(Location entity) {
-        return new LocationAggregate(entity, locationEditor.orElse(null));
-    }
-
-    private Location getOrThrow(String id) throws ProviderException {
-        return domainService.getEntity(id, QueryOptionsFactory.createEmpty())
-                            .orElseThrow(() -> new ProviderException("Id '" + id + "' does not exist."));
+    protected EntityAggregate<Location> createAggregate(Location entity) {
+        return new LocationAggregate(entity, editor.orElse(null));
     }
 
 }

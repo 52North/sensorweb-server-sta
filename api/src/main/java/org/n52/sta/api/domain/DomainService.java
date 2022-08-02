@@ -33,7 +33,7 @@ import java.util.Optional;
 import org.n52.shetland.oasis.odata.query.option.QueryOptions;
 import org.n52.sta.api.EntityPage;
 import org.n52.sta.api.EntityProvider;
-import org.n52.sta.api.ProviderException;
+import org.n52.sta.api.exception.ProviderException;
 import org.n52.sta.api.domain.event.DomainEvent;
 import org.n52.sta.api.domain.event.DomainEventService;
 import org.n52.sta.api.entity.Identifiable;
@@ -45,7 +45,7 @@ public interface DomainService<T extends Identifiable> extends EntityProvider<T>
 
     abstract class DomainServiceAdapter<T extends Identifiable> implements DomainService<T> {
 
-        private final EntityProvider<T> entityProvider;
+        protected final EntityProvider<T> entityProvider;
 
         private Optional<DomainEventService> domainEventService;
 

@@ -1,5 +1,5 @@
 
-package org.n52.sta.api;
+package org.n52.sta.api.exception;
 
 public class EditorException extends RuntimeException {
 

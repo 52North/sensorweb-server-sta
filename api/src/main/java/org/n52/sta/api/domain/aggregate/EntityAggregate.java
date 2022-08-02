@@ -31,7 +31,7 @@ package org.n52.sta.api.domain.aggregate;
 import java.util.Objects;
 import java.util.Optional;
 
-import org.n52.sta.api.EditorException;
+import org.n52.sta.api.exception.EditorException;
 import org.n52.sta.api.EntityEditor;
 import org.n52.sta.api.entity.Identifiable;
 
