@@ -28,19 +28,23 @@
 
 package org.n52.sta.http.controller;
 
+import java.io.BufferedOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.util.Objects;
 
 import javax.servlet.http.HttpServletRequest;
 
+import com.fasterxml.jackson.databind.ObjectWriter;
 import org.n52.shetland.ogc.sta.exception.STACRUDException;
 import org.n52.shetland.ogc.sta.exception.STAInvalidUrlException;
-import org.n52.sta.api.EditorException;
+import org.n52.sta.api.exception.EditorException;
 import org.n52.sta.api.EntityServiceLookup;
 import org.n52.sta.api.entity.Identifiable;
 import org.n52.sta.api.path.SelectPath;
 import org.n52.sta.api.service.EntityService;
 import org.n52.sta.http.serialize.in.StaEntityDeserializer;
+import org.n52.sta.http.serialize.out.SerializationContext;
 import org.n52.sta.http.util.path.PathFactory;
 import org.n52.sta.http.util.path.StaPath;
 import org.springframework.beans.factory.annotation.Value;
@@ -56,6 +60,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectReader;
 import com.fasterxml.jackson.databind.module.SimpleModule;
+import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
 
 @RestController
 @ConditionalOnProperty(name = "server.feature.http.writable", havingValue = "true", matchIfMissing = false)
@@ -84,17 +89,29 @@ public class WriteController {
     }
 
     @PostMapping("/**")
-    public ResponseEntity<String> handlePostRequest(@RequestBody JsonNode node, HttpServletRequest request)
-            throws STAInvalidUrlException, STACRUDException, EditorException, IOException {
+    public ResponseEntity<StreamingResponseBody> handlePostRequest(@RequestBody JsonNode node,
+                                                                   HttpServletRequest request)
+            throws STAInvalidUrlException, EditorException, IOException {
+        RequestContext requestContext = RequestContext.create(serviceUri, request, pathFactory);
+        SerializationContext serializationContext = SerializationContext.create(requestContext, mapper);
 
         StaPath< ? extends Identifiable> path = parsePath(request);
         Class< ? extends Identifiable> entityType = path.getEntityType();
-        saveEntityService(node, entityType);
+        Identifiable saved = saveEntityService(node, entityType);
 
         return ResponseEntity.ok()
                              .contentType(MediaType.APPLICATION_JSON)
-                             .body("created");
+                             .body(serializeEntity(saved, serializationContext));
     }
+
+    private <T extends Identifiable> StreamingResponseBody serializeEntity(T entity, SerializationContext context) {
+        return outputStream -> {
+            OutputStream out = new BufferedOutputStream(outputStream);
+            ObjectWriter writer = context.createWriter();
+            writer.writeValue(out, entity);
+        };
+    };
+
 
     private StaPath< ? extends Identifiable> parsePath(HttpServletRequest request) throws STAInvalidUrlException {
         String lookupPath = (String) request.getAttribute(HandlerMapping.LOOKUP_PATH);
@@ -106,7 +123,7 @@ public class WriteController {
         return path;
     }
 
-    private <T extends Identifiable> void saveEntityService(JsonNode node, Class<T> type)
+    private <T extends Identifiable> T saveEntityService(JsonNode node, Class<T> type)
             throws EditorException, IOException {
         EntityService<T> service = lookup.getService(type)
                                          .orElseThrow(() -> {
@@ -117,7 +134,7 @@ public class WriteController {
 
         ObjectMapper mapperConfig = registerTypeDeserializer(type);
         ObjectReader reader = mapperConfig.readerFor(type);
-        service.save(reader.readValue(node));
+        return service.save(reader.readValue(node));
     }
 
     private <T extends Identifiable> ObjectMapper registerTypeDeserializer(Class<T> type) {
