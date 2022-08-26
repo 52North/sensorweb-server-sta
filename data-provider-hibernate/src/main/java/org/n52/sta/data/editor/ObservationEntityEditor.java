@@ -16,7 +16,6 @@ import org.n52.series.db.beans.DatasetEntity;
 import org.n52.series.db.beans.FormatEntity;
 import org.n52.series.db.beans.GeometryEntity;
 import org.n52.series.db.beans.QuantityDataEntity;
-import org.n52.series.db.beans.parameter.dataset.DatasetParameterEntity;
 import org.n52.series.db.beans.parameter.observation.ObservationBooleanParameterEntity;
 import org.n52.series.db.beans.parameter.observation.ObservationParameterEntity;
 import org.n52.series.db.beans.parameter.observation.ObservationQuantityParameterEntity;
@@ -199,7 +198,7 @@ public class ObservationEntityEditor extends DatabaseEntityAdapter<DataEntity>
         throw new UnsupportedOperationException("not implemented yet");
     }
 
-    private ObservationParameterEntity< ? > convertParameter(DataEntity<?> obs, Map.Entry<String, Object> parameter) {
+    private ObservationParameterEntity< ? > convertParameter(DataEntity< ? > obs, Map.Entry<String, Object> parameter) {
         String key = parameter.getKey();
         Object value = parameter.getValue();
 

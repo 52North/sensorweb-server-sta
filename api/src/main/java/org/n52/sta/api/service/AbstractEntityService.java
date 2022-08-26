@@ -74,7 +74,9 @@ public abstract class AbstractEntityService<T extends Identifiable> implements E
 
     @Override
     public boolean exists(String id) throws ProviderException {
-        return (id == null) ? false :  provider.exists(id);
+        return (id == null)
+                ? false
+                : provider.exists(id);
     }
 
     @Override

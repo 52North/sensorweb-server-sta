@@ -1,8 +1,8 @@
+
 package org.n52.sta.data.editor;
 
 import java.math.BigDecimal;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
 
 import org.n52.janmayen.stream.Streams;
@@ -21,7 +21,8 @@ import org.n52.sta.data.support.ThingGraphBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
 
 public class ThingEntityEditor extends DatabaseEntityAdapter<PlatformEntity>
-        implements EntityEditorDelegate<Thing, ThingData> {
+        implements
+        EntityEditorDelegate<Thing, ThingData> {
 
     @Autowired
     private PlatformRepository platformRepository;
@@ -34,7 +35,7 @@ public class ThingEntityEditor extends DatabaseEntityAdapter<PlatformEntity>
     public ThingData getOrSave(Thing entity) throws EditorException {
         Optional<PlatformEntity> stored = getEntity(entity.getId());
         return stored.map(e -> new ThingData(e, Optional.empty()))
-                .orElseGet(() -> save(entity));
+                     .orElseGet(() -> save(entity));
     }
 
     @Override
@@ -57,10 +58,9 @@ public class ThingEntityEditor extends DatabaseEntityAdapter<PlatformEntity>
         // parameters are saved as cascade
         Map<String, Object> properties = entity.getProperties();
         Streams.stream(properties.entrySet())
-                .map(entry -> convertParameter(platformEntity, entry))
-                .forEach(platformEntity::addParameter);
+               .map(entry -> convertParameter(platformEntity, entry))
+               .forEach(platformEntity::addParameter);
 
-        // TODO Auto-generated method stub
         PlatformEntity saved = platformRepository.save(platformEntity);
 
         return new ThingData(saved, Optional.empty());
@@ -78,13 +78,14 @@ public class ThingEntityEditor extends DatabaseEntityAdapter<PlatformEntity>
 
     }
 
-    private PlatformParameterEntity<?> convertParameter(PlatformEntity platform, Map.Entry<String, Object> parameter) {
+    private PlatformParameterEntity< ? > convertParameter(PlatformEntity platform,
+            Map.Entry<String, Object> parameter) {
         String key = parameter.getKey();
         Object value = parameter.getValue();
 
         // TODO review ParameterFactory and DTOTransformerImpl#convertParameters
         PlatformParameterEntity parameterEntity;
-        Class<? extends Object> valueType = value.getClass();
+        Class< ? extends Object> valueType = value.getClass();
         if (Number.class.isAssignableFrom(valueType)) {
             parameterEntity = new PlatformQuantityParameterEntity();
             parameterEntity.setName(key);
@@ -102,7 +103,7 @@ public class ThingEntityEditor extends DatabaseEntityAdapter<PlatformEntity>
             throw new RuntimeException("can not handle parameter with unknown type: " + key);
         }
 
-        // Set backlink to Entity. 
+        // Set backlink to Entity.
         parameterEntity.setDescribeableEntity(platform);
         return parameterEntity;
     }
