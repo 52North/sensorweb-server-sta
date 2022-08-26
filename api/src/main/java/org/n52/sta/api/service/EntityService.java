@@ -1,3 +1,4 @@
+
 package org.n52.sta.api.service;
 
 import java.util.Optional;
@@ -23,8 +24,8 @@ public interface EntityService<T> {
 
     void delete(String id) throws EditorException;
 
-    EntityProvider<?> unwrapProvider();
+    EntityProvider< ? > unwrapProvider();
 
-    EntityEditor<?> unwrapEditor();
+    EntityEditor< ? > unwrapEditor();
 
 }

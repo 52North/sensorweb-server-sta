@@ -96,8 +96,9 @@ public class DatastreamEntityProvider extends BaseEntityProvider<Datastream> {
                 : DatastreamGraphBuilder.createWith(options);
         Specification<AbstractDatasetEntity> spec = rootSpecification.buildSpecification(request);
         Page<AbstractDatasetEntity> results = datastreamRepository.findAll(spec, pageable, graphBuilder);
-        return new StaEntityPage<>(Datastream.class, results, entity -> new DatastreamData(entity,
-                                                                                           Optional.of(propertyMapping)));
+        return new StaEntityPage<>(Datastream.class,
+                                   results,
+                                   entity -> new DatastreamData(entity, Optional.of(propertyMapping)));
     }
 
 }

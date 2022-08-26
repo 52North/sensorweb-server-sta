@@ -68,13 +68,13 @@ public abstract class AbstractEntityService<T extends Identifiable> implements E
     }
 
     @Override
-    public boolean exists(String id) throws ProviderException {
-        return provider.exists(id);
+    public Optional<T> getEntity(Request req) throws ProviderException {
+        return provider.getEntity(req);
     }
 
     @Override
-    public Optional<T> getEntity(Request req) throws ProviderException {
-        return provider.getEntity(req);
+    public boolean exists(String id) throws ProviderException {
+        return provider.exists(id);
     }
 
     @Override

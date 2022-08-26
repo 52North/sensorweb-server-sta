@@ -1,3 +1,4 @@
+
 package org.n52.sta.data.editor;
 
 import java.util.Date;
@@ -63,13 +64,13 @@ public class ValueHelper {
         Objects.requireNonNull(format, "format must not be null");
         Optional<FormatEntity> entity = formatRepository.findByFormat(format);
         entity.ifPresentOrElse(
-                setter::accept,
-                () -> {
-                    FormatEntity formatEntity = new FormatEntity();
-                    formatEntity.setFormat(format);
-                    FormatEntity savedEntity = formatRepository.save(formatEntity);
-                    setter.accept(savedEntity);
-                });
+                               setter::accept,
+                               () -> {
+                                   FormatEntity formatEntity = new FormatEntity();
+                                   formatEntity.setFormat(format);
+                                   FormatEntity savedEntity = formatRepository.save(formatEntity);
+                                   setter.accept(savedEntity);
+                               });
     }
 
     @Transactional(value = TxType.REQUIRES_NEW)
@@ -78,16 +79,15 @@ public class ValueHelper {
         String symbol = uom.getSymbol();
         Optional<UnitEntity> entity = unitRepository.findBySymbol(symbol);
         entity.ifPresentOrElse(
-                setter::accept,
-                () -> {
-                    UnitEntity unitEntity = new UnitEntity();
-                    unitEntity.setLink(uom.getDefinition());
-                    unitEntity.setName(uom.getName());
-                    unitEntity.setSymbol(symbol);
-                    UnitEntity savedUnit = unitRepository.save(unitEntity);
-                    setter.accept(savedUnit);
-                }
-        );
+                               setter::accept,
+                               () -> {
+                                   UnitEntity unitEntity = new UnitEntity();
+                                   unitEntity.setLink(uom.getDefinition());
+                                   unitEntity.setName(uom.getName());
+                                   unitEntity.setSymbol(symbol);
+                                   UnitEntity savedUnit = unitRepository.save(unitEntity);
+                                   setter.accept(savedUnit);
+                               });
     }
 
 }

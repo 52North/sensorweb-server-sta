@@ -41,11 +41,13 @@ import org.n52.sta.config.EntityPropertyMapping;
 
 public class FeatureOfInterestData extends StaData<StaFeatureEntity< ? >> implements FeatureOfInterest {
 
-    public FeatureOfInterestData(AbstractFeatureEntity< ? > dataEntity, Optional<EntityPropertyMapping> parameterProperties) {
+    public FeatureOfInterestData(AbstractFeatureEntity< ? > dataEntity,
+                                 Optional<EntityPropertyMapping> parameterProperties) {
         this(tryToCast(dataEntity), parameterProperties);
     }
 
-    public FeatureOfInterestData(StaFeatureEntity< ? > dataEntity, Optional<EntityPropertyMapping> propertyMapping) {
+    public FeatureOfInterestData(StaFeatureEntity< ? > dataEntity,
+                                 Optional<EntityPropertyMapping> propertyMapping) {
         super(dataEntity, propertyMapping);
     }
 
@@ -71,8 +73,10 @@ public class FeatureOfInterestData extends StaData<StaFeatureEntity< ? >> implem
 
     @Override
     public Set<Observation> getObservations() {
+        //@formatter:off
         return toSet(data.getObservations(), entity -> new ObservationData(entity, propertyMapping.orElseThrow(
                 () -> new RuntimeException("no property mapping supplied!"))));
+        //@formatter:on
     }
 
     private static StaFeatureEntity< ? > tryToCast(AbstractFeatureEntity< ? > feature) {

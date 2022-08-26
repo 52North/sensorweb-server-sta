@@ -95,7 +95,9 @@ public class SensorEntityProvider extends BaseEntityProvider<Sensor> {
                 : SensorGraphBuilder.createWith(options);
         Specification<ProcedureEntity> spec = rootSpecification.buildSpecification(request);
         Page<ProcedureEntity> results = sensorRepository.findAll(spec, pageable, graphBuilder);
-        return new StaEntityPage<>(Sensor.class, results, entity -> new SensorData(entity, Optional.of(propertyMapping)));
+        return new StaEntityPage<>(Sensor.class,
+                                   results,
+                                   entity -> new SensorData(entity, Optional.of(propertyMapping)));
     }
 
 }

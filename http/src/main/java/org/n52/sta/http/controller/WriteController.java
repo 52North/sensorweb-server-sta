@@ -36,7 +36,6 @@ import java.util.Objects;
 import javax.servlet.http.HttpServletRequest;
 
 import com.fasterxml.jackson.databind.ObjectWriter;
-import org.n52.shetland.ogc.sta.exception.STACRUDException;
 import org.n52.shetland.ogc.sta.exception.STAInvalidUrlException;
 import org.n52.sta.api.exception.EditorException;
 import org.n52.sta.api.EntityServiceLookup;
@@ -90,7 +89,7 @@ public class WriteController {
 
     @PostMapping("/**")
     public ResponseEntity<StreamingResponseBody> handlePostRequest(@RequestBody JsonNode node,
-                                                                   HttpServletRequest request)
+            HttpServletRequest request)
             throws STAInvalidUrlException, EditorException, IOException {
         RequestContext requestContext = RequestContext.create(serviceUri, request, pathFactory);
         SerializationContext serializationContext = SerializationContext.create(requestContext, mapper);
@@ -110,8 +109,7 @@ public class WriteController {
             ObjectWriter writer = context.createWriter();
             writer.writeValue(out, entity);
         };
-    };
-
+    }
 
     private StaPath< ? extends Identifiable> parsePath(HttpServletRequest request) throws STAInvalidUrlException {
         String lookupPath = (String) request.getAttribute(HandlerMapping.LOOKUP_PATH);

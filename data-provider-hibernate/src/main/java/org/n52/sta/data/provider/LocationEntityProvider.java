@@ -95,8 +95,10 @@ public class LocationEntityProvider extends BaseEntityProvider<Location> {
                 : LocationGraphBuilder.createWith(request.getQueryOptions());
         Specification<LocationEntity> spec = rootSpecification.buildSpecification(request);
         Page<LocationEntity> results = locationRepository.findAll(spec, pageable, graphBuilder);
-        return new StaEntityPage<>(Location.class, results, entity -> new LocationData(entity,
-                                                                                       Optional.of(propertyMapping)));
+        return new StaEntityPage<>(Location.class,
+                                   results,
+                                   entity -> new LocationData(entity,
+                                                              Optional.of(propertyMapping)));
     }
 
 }

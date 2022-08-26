@@ -28,16 +28,15 @@
 
 package org.n52.sta.api;
 
-import org.n52.sta.api.entity.Identifiable;
-import org.n52.sta.api.service.AbstractEntityService;
-import org.n52.sta.api.service.EntityService;
-
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+
+import org.n52.sta.api.entity.Identifiable;
+import org.n52.sta.api.service.EntityService;
 
 public final class EntityServiceLookup {
 

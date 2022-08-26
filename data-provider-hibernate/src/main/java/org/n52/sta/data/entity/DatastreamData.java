@@ -30,7 +30,6 @@ package org.n52.sta.data.entity;
 
 import java.util.Date;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 
@@ -116,8 +115,10 @@ public class DatastreamData extends StaData<AbstractDatasetEntity> implements Da
 
     @Override
     public Set<Observation> getObservations() {
+        //@formatter:off
         return toSet(data.getObservations(), entity -> new ObservationData(entity, propertyMapping.orElseThrow(
         () -> new RuntimeException("no property mapping supplied!"))));
+        //@formatter:on
     }
 
     private Optional<Datastream.UnitOfMeasurement> createUom(UnitEntity entity) {

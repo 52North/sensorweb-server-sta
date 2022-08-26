@@ -1,3 +1,4 @@
+
 package org.n52.sta.data.editor;
 
 import java.math.BigDecimal;
@@ -32,7 +33,8 @@ import org.n52.sta.data.support.ObservationGraphBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
 
 public class ObservationEntityEditor extends DatabaseEntityAdapter<DataEntity>
-        implements EntityEditorDelegate<Observation, ObservationData> {
+        implements
+        EntityEditorDelegate<Observation, ObservationData> {
 
     @Autowired
     private ObservationRepository observationRepository;
@@ -89,24 +91,25 @@ public class ObservationEntityEditor extends DatabaseEntityAdapter<DataEntity>
         return observationRepository.findByStaIdentifier(id, graphBuilder);
     }
 
-    private Set<DataEntity<?>> saveAll(Set<Observation> observations, DatasetEntity datasetEntity)
+    private Set<DataEntity< ? >> saveAll(Set<Observation> observations, DatasetEntity datasetEntity)
             throws EditorException {
         Objects.requireNonNull(observations, "observations must not be null");
         Objects.requireNonNull(datasetEntity, "datasetEntity must not be null");
-        Set<DataEntity<?>> entities = Streams.stream(observations)
-                                             .map(o -> createEntity(o, datasetEntity))
-                                             .collect(Collectors.toSet());
+        Set<DataEntity< ? >> entities = Streams.stream(observations)
+                                               .map(o -> createEntity(o, datasetEntity))
+                                               .collect(Collectors.toSet());
         return Streams.stream(observationRepository.saveAll(entities))
                       .collect(Collectors.toSet());
     }
 
     private AbstractDatasetEntity getDatastreamOf(Observation entity) throws EditorException {
-        return datastreamEditor.getOrSave(entity.getDatastream()).getData();
+        return datastreamEditor.getOrSave(entity.getDatastream())
+                               .getData();
         // return datastreamEditor.getEntity(datastream.getId())
         // .orElseThrow(() -> new IllegalStateException("Datastream not found for Observation!"));
     }
 
-    private DataEntity<?> createEntity(Observation observation, DatasetEntity datasetEntity) throws EditorException {
+    private DataEntity< ? > createEntity(Observation observation, DatasetEntity datasetEntity) throws EditorException {
         FormatEntity formatEntity = datasetEntity.getOmObservationType();
         Object value = observation.getResult();
         String format = formatEntity.getFormat();
@@ -130,7 +133,7 @@ public class ObservationEntityEditor extends DatabaseEntityAdapter<DataEntity>
         }
     }
 
-    private DataEntity<?> initDataEntity(DataEntity<?> data, Observation observation, DatasetEntity dataset) {
+    private DataEntity< ? > initDataEntity(DataEntity< ? > data, Observation observation, DatasetEntity dataset) {
 
         // metadata
         String id = observation.getId() == null
@@ -196,7 +199,7 @@ public class ObservationEntityEditor extends DatabaseEntityAdapter<DataEntity>
         throw new UnsupportedOperationException("not implemented yet");
     }
 
-    private DatasetParameterEntity<?> convertParameter(Map.Entry<String, Object> parameter) {
+    private DatasetParameterEntity< ? > convertParameter(Map.Entry<String, Object> parameter) {
         String key = parameter.getKey();
         Object value = parameter.getValue();
 

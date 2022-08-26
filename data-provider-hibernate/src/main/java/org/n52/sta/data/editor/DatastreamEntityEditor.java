@@ -1,3 +1,4 @@
+
 package org.n52.sta.data.editor;
 
 import java.math.BigDecimal;
@@ -73,15 +74,17 @@ public class DatastreamEntityEditor extends DatabaseEntityAdapter<AbstractDatase
     @EventListener
     @SuppressWarnings("unchecked")
     private void postConstruct(ContextRefreshedEvent event) {
+        //@formatter:off
         // As we are the package providing the EE Implementations, this cast should never fail.
-        this.thingEditor =
-                (EntityEditorDelegate<Thing, ThingData>) getService(Thing.class).unwrapEditor();
-        this.sensorEditor =
-                (EntityEditorDelegate<Sensor, SensorData>) getService(Sensor.class).unwrapEditor();
-        this.observedPropertyEditor =
-                (EntityEditorDelegate<ObservedProperty, ObservedPropertyData>) getService(ObservedProperty.class).unwrapEditor();
-        this.observationEditor =
-                (EntityEditorDelegate<Observation, ObservationData>) getService(Observation.class).unwrapEditor();
+        this.thingEditor = (EntityEditorDelegate<Thing, ThingData>)
+                getService(Thing.class).unwrapEditor();
+        this.sensorEditor = (EntityEditorDelegate<Sensor, SensorData>)
+                getService(Sensor.class).unwrapEditor();
+        this.observedPropertyEditor = (EntityEditorDelegate<ObservedProperty, ObservedPropertyData>)
+                getService(ObservedProperty.class).unwrapEditor();
+        this.observationEditor = (EntityEditorDelegate<Observation, ObservationData>)
+                getService(Observation.class).unwrapEditor();
+        //@formatter:on
     }
 
     @Override
@@ -165,8 +168,7 @@ public class DatastreamEntityEditor extends DatabaseEntityAdapter<AbstractDatase
         dataset.setObservations(Streams.stream(observations)
                                        .map(o -> observationEditor.getOrSave(o))
                                        .map(StaData::getData)
-                                       .collect(Collectors.toSet())
-        );
+                                       .collect(Collectors.toSet()));
         // TODO explicitly save all references, too? if so, what about CASCADE.PERSIST?
         // sensorEntity.addDatastream(savedEntity);
         // sensorEditor.update(new SensorData(sensorEntity, propertyMapping));
@@ -210,7 +212,7 @@ public class DatastreamEntityEditor extends DatabaseEntityAdapter<AbstractDatase
         return offeringRepository.save(offering);
     }
 
-    private DatasetParameterEntity<?> convertParameter(Map.Entry<String, Object> parameter) {
+    private DatasetParameterEntity< ? > convertParameter(Map.Entry<String, Object> parameter) {
         String key = parameter.getKey();
         Object value = parameter.getValue();
 

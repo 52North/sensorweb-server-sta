@@ -22,7 +22,8 @@ import org.n52.sta.data.support.ThingGraphBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
 
 public class ThingEntityEditor extends DatabaseEntityAdapter<PlatformEntity>
-        implements EntityEditorDelegate<Thing, ThingData> {
+        implements
+        EntityEditorDelegate<Thing, ThingData> {
 
     @Autowired
     private PlatformRepository platformRepository;
@@ -65,7 +66,7 @@ public class ThingEntityEditor extends DatabaseEntityAdapter<PlatformEntity>
         // TODO Auto-generated method stub
         PlatformEntity saved = platformRepository.save(platformEntity);
 
-    return new ThingData(saved,Optional.empty());
+        return new ThingData(saved, Optional.empty());
     }
 
     @Override

@@ -13,7 +13,8 @@ import org.n52.sta.data.support.SensorGraphBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
 
 public class SensorEntityEditor extends DatabaseEntityAdapter<ProcedureEntity>
-        implements EntityEditorDelegate<Sensor, SensorData> {
+        implements
+        EntityEditorDelegate<Sensor, SensorData> {
 
     @Autowired
     private ProcedureRepository procedureRepository;
