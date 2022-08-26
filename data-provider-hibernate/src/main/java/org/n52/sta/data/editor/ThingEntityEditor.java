@@ -1,4 +1,3 @@
-
 package org.n52.sta.data.editor;
 
 import java.math.BigDecimal;
@@ -22,8 +21,7 @@ import org.n52.sta.data.support.ThingGraphBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
 
 public class ThingEntityEditor extends DatabaseEntityAdapter<PlatformEntity>
-        implements
-        EntityEditorDelegate<Thing, ThingData> {
+        implements EntityEditorDelegate<Thing, ThingData> {
 
     @Autowired
     private PlatformRepository platformRepository;
@@ -36,7 +34,7 @@ public class ThingEntityEditor extends DatabaseEntityAdapter<PlatformEntity>
     public ThingData getOrSave(Thing entity) throws EditorException {
         Optional<PlatformEntity> stored = getEntity(entity.getId());
         return stored.map(e -> new ThingData(e, Optional.empty()))
-                     .orElseGet(() -> save(entity));
+                .orElseGet(() -> save(entity));
     }
 
     @Override
@@ -59,9 +57,8 @@ public class ThingEntityEditor extends DatabaseEntityAdapter<PlatformEntity>
         // parameters are saved as cascade
         Map<String, Object> properties = entity.getProperties();
         Streams.stream(properties.entrySet())
-               .map(this::convertParameter)
-               .filter(Objects::nonNull)
-               .forEach(platformEntity::addParameter);
+                .map(entry -> convertParameter(platformEntity, entry))
+                .forEach(platformEntity::addParameter);
 
         // TODO Auto-generated method stub
         PlatformEntity saved = platformRepository.save(platformEntity);
@@ -81,29 +78,33 @@ public class ThingEntityEditor extends DatabaseEntityAdapter<PlatformEntity>
 
     }
 
-    private PlatformParameterEntity< ? > convertParameter(Map.Entry<String, Object> parameter) {
+    private PlatformParameterEntity<?> convertParameter(PlatformEntity platform, Map.Entry<String, Object> parameter) {
         String key = parameter.getKey();
         Object value = parameter.getValue();
 
         // TODO review ParameterFactory and DTOTransformerImpl#convertParameters
-
-        Class< ? extends Object> valueType = value.getClass();
+        PlatformParameterEntity parameterEntity;
+        Class<? extends Object> valueType = value.getClass();
         if (Number.class.isAssignableFrom(valueType)) {
-            PlatformQuantityParameterEntity parameterEntity = new PlatformQuantityParameterEntity();
+            parameterEntity = new PlatformQuantityParameterEntity();
             parameterEntity.setName(key);
             parameterEntity.setValue(BigDecimal.valueOf((Double) value));
         } else if (Boolean.class.isAssignableFrom(valueType)) {
-            PlatformBooleanParameterEntity parameterEntity = new PlatformBooleanParameterEntity();
+            parameterEntity = new PlatformBooleanParameterEntity();
             parameterEntity.setName(key);
-            parameterEntity.setValue((Boolean) value);
+            parameterEntity.setValue(value);
         } else if (String.class.isAssignableFrom(valueType)) {
-            PlatformTextParameterEntity parameterEntity = new PlatformTextParameterEntity();
+            parameterEntity = new PlatformTextParameterEntity();
             parameterEntity.setName(key);
-            parameterEntity.setValue((String) value);
-            // } else {
-            // // TODO handle other cases from DTOTransformerImpl#convertParameters
+            parameterEntity.setValue(value);
+        } else {
+            // TODO handle other cases from DTOTransformerImpl#convertParameters
+            throw new RuntimeException("can not handle parameter with unknown type: " + key);
         }
-        return null;
+
+        // Set backlink to Entity. 
+        parameterEntity.setDescribeableEntity(platform);
+        return parameterEntity;
     }
 
     @Override

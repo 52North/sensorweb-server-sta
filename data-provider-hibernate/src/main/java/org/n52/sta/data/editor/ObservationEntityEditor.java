@@ -18,6 +18,7 @@ import org.n52.series.db.beans.GeometryEntity;
 import org.n52.series.db.beans.QuantityDataEntity;
 import org.n52.series.db.beans.parameter.dataset.DatasetParameterEntity;
 import org.n52.series.db.beans.parameter.observation.ObservationBooleanParameterEntity;
+import org.n52.series.db.beans.parameter.observation.ObservationParameterEntity;
 import org.n52.series.db.beans.parameter.observation.ObservationQuantityParameterEntity;
 import org.n52.series.db.beans.parameter.observation.ObservationTextParameterEntity;
 import org.n52.shetland.ogc.gml.time.Time;
@@ -156,8 +157,7 @@ public class ObservationEntityEditor extends DatabaseEntityAdapter<DataEntity>
 
         Map<String, Object> parameters = observation.getParameters();
         Streams.stream(parameters.entrySet())
-               .map(this::convertParameter)
-               .filter(p -> p != null)
+               .map(e -> convertParameter(data, e))
                .forEach(data::addParameter);
 
         // following parameters have to be set explicitly, too
@@ -199,28 +199,33 @@ public class ObservationEntityEditor extends DatabaseEntityAdapter<DataEntity>
         throw new UnsupportedOperationException("not implemented yet");
     }
 
-    private DatasetParameterEntity< ? > convertParameter(Map.Entry<String, Object> parameter) {
+    private ObservationParameterEntity< ? > convertParameter(DataEntity<?> obs, Map.Entry<String, Object> parameter) {
         String key = parameter.getKey();
         Object value = parameter.getValue();
 
         // TODO review ParameterFactory and DTOTransformerImpl#convertParameters
 
+        ObservationParameterEntity parameterEntity;
         if (value instanceof Number) {
-            ObservationQuantityParameterEntity parameterEntity = new ObservationQuantityParameterEntity();
+            parameterEntity = new ObservationQuantityParameterEntity();
             parameterEntity.setName(key);
             parameterEntity.setValue(BigDecimal.valueOf((Double) value));
         } else if (value instanceof Boolean) {
-            ObservationBooleanParameterEntity parameterEntity = new ObservationBooleanParameterEntity();
+            parameterEntity = new ObservationBooleanParameterEntity();
             parameterEntity.setName(key);
-            parameterEntity.setValue((Boolean) value);
+            parameterEntity.setValue(value);
         } else if (value instanceof String) {
-            ObservationTextParameterEntity parameterEntity = new ObservationTextParameterEntity();
+            parameterEntity = new ObservationTextParameterEntity();
             parameterEntity.setName(key);
-            parameterEntity.setValue((String) value);
-            // } else {
-            // // TODO handle other cases from DTOTransformerImpl#convertParameters
+            parameterEntity.setValue(value);
+        } else {
+            // TODO handle other cases from DTOTransformerImpl#convertParameters
+            throw new RuntimeException("can not handle parameter with unknown type: " + key);
         }
-        return null;
+
+        // Set backlink to Entity.
+        parameterEntity.setDescribeableEntity(obs);
+        return parameterEntity;
     }
 
     private void assertNew(Observation observation) throws EditorException {

@@ -158,8 +158,7 @@ public class DatastreamEntityEditor extends DatabaseEntityAdapter<AbstractDatase
         // parameters are saved as cascade
         Map<String, Object> properties = entity.getProperties();
         Streams.stream(properties.entrySet())
-               .map(this::convertParameter)
-               .filter(p -> p != null)
+               .map(e -> convertParameter(dataset, e))
                .forEach(dataset::addParameter);
 
         DatasetEntity savedEntity = datastreamRepository.save(dataset);
@@ -212,28 +211,32 @@ public class DatastreamEntityEditor extends DatabaseEntityAdapter<AbstractDatase
         return offeringRepository.save(offering);
     }
 
-    private DatasetParameterEntity< ? > convertParameter(Map.Entry<String, Object> parameter) {
+    private DatasetParameterEntity< ? > convertParameter(DatasetEntity dataset, Map.Entry<String, Object> parameter) {
         String key = parameter.getKey();
         Object value = parameter.getValue();
 
         // TODO review ParameterFactory and DTOTransformerImpl#convertParameters
 
+        DatasetParameterEntity parameterEntity;
         if (value instanceof Number) {
-            DatasetQuantityParameterEntity parameterEntity = new DatasetQuantityParameterEntity();
+            parameterEntity = new DatasetQuantityParameterEntity();
             parameterEntity.setName(key);
             parameterEntity.setValue(BigDecimal.valueOf((Double) value));
         } else if (value instanceof Boolean) {
-            DatasetBooleanParameterEntity parameterEntity = new DatasetBooleanParameterEntity();
+            parameterEntity = new DatasetBooleanParameterEntity();
             parameterEntity.setName(key);
-            parameterEntity.setValue((Boolean) value);
+            parameterEntity.setValue(value);
         } else if (value instanceof String) {
-            DatasetTextParameterEntity parameterEntity = new DatasetTextParameterEntity();
+            parameterEntity = new DatasetTextParameterEntity();
             parameterEntity.setName(key);
-            parameterEntity.setValue((String) value);
-            // } else {
+            parameterEntity.setValue(value);
+        } else {
             // TODO handle other cases from DTOTransformerImpl#convertParameters
+            throw new RuntimeException("can not handle parameter with unknown type: " + key);
         }
-        return null;
+        // Set backlink to Entity.
+        parameterEntity.setDescribeableEntity(dataset);
+        return parameterEntity;
     }
 
     private void assertNew(Datastream datastream) throws EditorException {
