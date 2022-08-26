@@ -68,16 +68,15 @@ public class ThingEntityEditor extends DatabaseEntityAdapter<PlatformEntity>
 
     @Override
     public ThingData update(Thing entity) throws EditorException {
-        // TODO Auto-generated method stub
-        return null;
+        throw new EditorException();
     }
 
     @Override
     public void delete(String id) throws EditorException {
-        // TODO Auto-generated method stub
-
+        throw new EditorException();
     }
 
+    @SuppressWarnings("unchecked")
     private PlatformParameterEntity< ? > convertParameter(PlatformEntity platform,
             Map.Entry<String, Object> parameter) {
         String key = parameter.getKey();
@@ -85,25 +84,21 @@ public class ThingEntityEditor extends DatabaseEntityAdapter<PlatformEntity>
 
         // TODO review ParameterFactory and DTOTransformerImpl#convertParameters
         PlatformParameterEntity parameterEntity;
-        Class< ? extends Object> valueType = value.getClass();
+        Class<?> valueType = value.getClass();
         if (Number.class.isAssignableFrom(valueType)) {
             parameterEntity = new PlatformQuantityParameterEntity();
-            parameterEntity.setName(key);
-            parameterEntity.setValue(BigDecimal.valueOf((Double) value));
+            value = BigDecimal.valueOf((Double) value);
         } else if (Boolean.class.isAssignableFrom(valueType)) {
             parameterEntity = new PlatformBooleanParameterEntity();
-            parameterEntity.setName(key);
-            parameterEntity.setValue(value);
         } else if (String.class.isAssignableFrom(valueType)) {
             parameterEntity = new PlatformTextParameterEntity();
-            parameterEntity.setName(key);
-            parameterEntity.setValue(value);
         } else {
             // TODO handle other cases from DTOTransformerImpl#convertParameters
             throw new RuntimeException("can not handle parameter with unknown type: " + key);
         }
 
-        // Set backlink to Entity.
+        parameterEntity.setName(key);
+        parameterEntity.setValue(value);
         parameterEntity.setDescribeableEntity(platform);
         return parameterEntity;
     }

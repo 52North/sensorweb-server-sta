@@ -176,20 +176,17 @@ public class DatastreamEntityEditor extends DatabaseEntityAdapter<AbstractDatase
     }
 
     private ObservationType getObservationType(Observation observation) {
-
-        return null;
+        throw new EditorException();
     }
 
     @Override
     public Datastream update(Datastream entity) throws EditorException {
-        // TODO Auto-generated method stub
-        return null;
+        throw new EditorException();
     }
 
     @Override
     public void delete(String id) throws EditorException {
-        // TODO Auto-generated method stub
-
+        throw new EditorException();
     }
 
     @Override

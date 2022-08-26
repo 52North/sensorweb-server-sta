@@ -24,25 +24,22 @@ public class ObservedPropertyEntityEditor extends DatabaseEntityAdapter<Phenomen
 
     @Override
     public ObservedPropertyData getOrSave(ObservedProperty entity) throws EditorException {
-        return null;
+        throw new EditorException();
     }
 
     @Override
     public ObservedPropertyData save(ObservedProperty entity) throws EditorException {
-        // TODO Auto-generated method stub
-        return null;
+        throw new EditorException();
     }
 
     @Override
     public ObservedPropertyData update(ObservedProperty entity) throws EditorException {
-        // TODO Auto-generated method stub
-        return null;
+        throw new EditorException();
     }
 
     @Override
     public void delete(String id) throws EditorException {
-        // TODO Auto-generated method stub
-
+        throw new EditorException();
     }
 
     @Override

@@ -25,25 +25,22 @@ public class SensorEntityEditor extends DatabaseEntityAdapter<ProcedureEntity>
 
     @Override
     public SensorData getOrSave(Sensor entity) throws EditorException {
-        return null;
+        throw new EditorException();
     }
 
     @Override
     public SensorData save(Sensor entity) throws EditorException {
-        // TODO Auto-generated method stub
-        return null;
+        throw new EditorException();
     }
 
     @Override
     public SensorData update(Sensor entity) throws EditorException {
-        // TODO Auto-generated method stub
-        return null;
+        throw new EditorException();
     }
 
     @Override
     public void delete(String id) throws EditorException {
-        // TODO Auto-generated method stub
-
+        throw new EditorException();
     }
 
     @Override
