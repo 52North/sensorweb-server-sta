@@ -83,6 +83,11 @@ public class DataEditorConfiguration {
     }
 
     @Bean
+    public EntityEditor<Location> locationEntityEditor() {
+        return new LocationEntityEditor(serviceLookup);
+    }
+
+    @Bean
     public ValueHelper valueHelper() {
         return new ValueHelper();
     }

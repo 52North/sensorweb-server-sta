@@ -23,14 +23,18 @@ import org.n52.series.db.beans.parameter.observation.ObservationTextParameterEnt
 import org.n52.shetland.ogc.gml.time.Time;
 import org.n52.shetland.ogc.om.OmConstants;
 import org.n52.sta.api.EntityServiceLookup;
+import org.n52.sta.api.entity.Datastream;
 import org.n52.sta.api.entity.Observation;
 import org.n52.sta.api.exception.EditorException;
 import org.n52.sta.config.EntityPropertyMapping;
+import org.n52.sta.data.entity.DatastreamData;
 import org.n52.sta.data.entity.ObservationData;
 import org.n52.sta.data.repositories.entity.ObservationRepository;
 import org.n52.sta.data.support.GraphBuilder;
 import org.n52.sta.data.support.ObservationGraphBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.event.ContextRefreshedEvent;
+import org.springframework.context.event.EventListener;
 
 public class ObservationEntityEditor extends DatabaseEntityAdapter<DataEntity>
         implements
@@ -40,18 +44,25 @@ public class ObservationEntityEditor extends DatabaseEntityAdapter<DataEntity>
     private ObservationRepository observationRepository;
 
     @Autowired
-    private DatastreamEntityEditor datastreamEditor;
-
-    @Autowired
     private ValueHelper valueHelper;
 
     @Autowired
     private EntityPropertyMapping propertyMapping;
 
+    private EntityEditorDelegate<Datastream, DatastreamData> datastreamEditor;
+
     public ObservationEntityEditor(EntityServiceLookup serviceLookup) {
         super(serviceLookup);
+    }
 
-        // TODO Auto-generated constructor stub
+    @EventListener
+    @SuppressWarnings("unchecked")
+    private void postConstruct (ContextRefreshedEvent event){
+        //@formatter:off
+        // As we are the package providing the EE Implementations, this cast should never fail.
+        this.datastreamEditor = (EntityEditorDelegate<Datastream, DatastreamData>)
+                getService(Datastream.class).unwrapEditor();
+        //@formatter:on
     }
 
     @Override
