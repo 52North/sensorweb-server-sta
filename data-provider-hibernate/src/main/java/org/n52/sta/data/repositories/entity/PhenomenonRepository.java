@@ -35,4 +35,6 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface PhenomenonRepository extends BaseRepository<PhenomenonEntity> {
 
+    // Identifiers must be unique across all phenomena
+    boolean existsByIdentifier(String identifier);
 }

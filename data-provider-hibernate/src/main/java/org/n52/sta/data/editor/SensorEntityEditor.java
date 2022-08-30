@@ -1,16 +1,21 @@
 package org.n52.sta.data.editor;
 
+import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
+import org.n52.janmayen.stream.Streams;
+import org.n52.series.db.beans.ProcedureEntity;
 import org.n52.series.db.beans.ProcedureEntity;
 import org.n52.sta.api.EntityServiceLookup;
 import org.n52.sta.api.entity.Datastream;
 import org.n52.sta.api.entity.Location;
 import org.n52.sta.api.entity.Sensor;
+import org.n52.sta.api.entity.Sensor;
 import org.n52.sta.api.exception.EditorException;
-import org.n52.sta.data.entity.DatastreamData;
-import org.n52.sta.data.entity.LocationData;
-import org.n52.sta.data.entity.SensorData;
+import org.n52.sta.api.service.EntityService;
+import org.n52.sta.data.entity.*;
 import org.n52.sta.data.repositories.entity.ProcedureRepository;
 import org.n52.sta.data.support.SensorGraphBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,6 +28,9 @@ public class SensorEntityEditor extends DatabaseEntityAdapter<ProcedureEntity>
 
     @Autowired
     private ProcedureRepository procedureRepository;
+
+    @Autowired
+    private ValueHelper valueHelper;
 
     private EntityEditorDelegate<Datastream, DatastreamData> datastreamEditor;
 
@@ -42,12 +50,48 @@ public class SensorEntityEditor extends DatabaseEntityAdapter<ProcedureEntity>
 
     @Override
     public SensorData getOrSave(Sensor entity) throws EditorException {
-        throw new EditorException();
+        Optional<ProcedureEntity> stored = getEntity(entity.getId());
+        return stored.map(e -> new SensorData(e, Optional.empty()))
+                .orElseGet(() -> save(entity));
     }
 
     @Override
     public SensorData save(Sensor entity) throws EditorException {
-        throw new EditorException();
+        Objects.requireNonNull(entity, "entity must not be null");
+
+        String staIdentifier = entity.getId();
+        EntityService<Sensor> service = getService(Sensor.class);
+
+        if (service.exists(staIdentifier)) {
+            throw new EditorException("Sensor already exists with Id '" + staIdentifier + "'");
+        }
+
+        String id = entity.getId() == null
+                ? generateId()
+                : entity.getId();
+        ProcedureEntity procedureEntity = new ProcedureEntity();
+        procedureEntity.setStaIdentifier(id);
+        procedureEntity.setName(entity.getName());
+        procedureEntity.setDescription(entity.getDescription());
+
+        valueHelper.setFormat(procedureEntity::setFormat, entity.getEncodingType());
+
+        ProcedureEntity saved = procedureRepository.save(procedureEntity);
+
+        // parameters are saved as cascade
+        Map<String, Object> properties = entity.getProperties();
+        Streams.stream(properties.entrySet())
+                .map(entry -> convertParameter(procedureEntity, entry))
+                .forEach(procedureEntity::addParameter);
+
+
+        // save related entities
+        procedureEntity.setDatasets(Streams.stream(entity.getDatastreams())
+                .map(o -> datastreamEditor.getOrSave(o))
+                .map(StaData::getData).collect(Collectors.toSet()));
+
+        // we need to flush else updates to relations are not persisted
+        procedureRepository.flush();
     }
 
     @Override

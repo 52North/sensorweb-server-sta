@@ -1,8 +1,8 @@
-
 package org.n52.sta.data.editor;
 
 import java.math.BigDecimal;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -30,6 +30,7 @@ public class ThingEntityEditor extends DatabaseEntityAdapter<PlatformEntity>
     private PlatformRepository platformRepository;
 
     private EntityEditorDelegate<Location, LocationData> locationEditor;
+    private EntityEditorDelegate<Datastream, DatastreamData> datastreamEditor;
 
     public ThingEntityEditor(EntityServiceLookup serviceLookup) {
         super(serviceLookup);
@@ -42,6 +43,8 @@ public class ThingEntityEditor extends DatabaseEntityAdapter<PlatformEntity>
         // As we are the package providing the EE Implementations, this cast should never fail.
         this.locationEditor = (EntityEditorDelegate<Location, LocationData>)
                 getService(Location.class).unwrapEditor();
+        this.datastreamEditor = (EntityEditorDelegate<Datastream, DatastreamData>)
+                getService(Datastream.class).unwrapEditor();
         //@formatter:on
     }
 
@@ -49,11 +52,13 @@ public class ThingEntityEditor extends DatabaseEntityAdapter<PlatformEntity>
     public ThingData getOrSave(Thing entity) throws EditorException {
         Optional<PlatformEntity> stored = getEntity(entity.getId());
         return stored.map(e -> new ThingData(e, Optional.empty()))
-                     .orElseGet(() -> save(entity));
+                .orElseGet(() -> save(entity));
     }
 
     @Override
     public ThingData save(Thing entity) throws EditorException {
+        Objects.requireNonNull(entity, "entity must not be null");
+
         String staIdentifier = entity.getId();
         EntityService<Thing> thingService = getService(Thing.class);
         if (thingService.exists(staIdentifier)) {
@@ -72,8 +77,8 @@ public class ThingEntityEditor extends DatabaseEntityAdapter<PlatformEntity>
         // parameters are saved as cascade
         Map<String, Object> properties = entity.getProperties();
         Streams.stream(properties.entrySet())
-               .map(entry -> convertParameter(platformEntity, entry))
-               .forEach(platformEntity::addParameter);
+                .map(entry -> convertParameter(platformEntity, entry))
+                .forEach(platformEntity::addParameter);
 
         // save entity
         PlatformEntity saved = platformRepository.save(platformEntity);
@@ -83,6 +88,10 @@ public class ThingEntityEditor extends DatabaseEntityAdapter<PlatformEntity>
                 .map(o -> locationEditor.getOrSave(o))
                 .map(StaData::getData)
                 .collect(Collectors.toSet()));
+
+        platformEntity.setDatasets(Streams.stream(entity.getDatastreams())
+                .map(o -> datastreamEditor.getOrSave(o))
+                .map(StaData::getData).collect(Collectors.toSet()));
 
         // we need to flush else updates to relations are not persisted
         platformRepository.flush();
@@ -101,8 +110,8 @@ public class ThingEntityEditor extends DatabaseEntityAdapter<PlatformEntity>
     }
 
     @SuppressWarnings("unchecked")
-    private PlatformParameterEntity< ? > convertParameter(PlatformEntity platform,
-            Map.Entry<String, Object> parameter) {
+    private PlatformParameterEntity<?> convertParameter(PlatformEntity platform,
+                                                        Map.Entry<String, Object> parameter) {
         String key = parameter.getKey();
         Object value = parameter.getValue();
 
