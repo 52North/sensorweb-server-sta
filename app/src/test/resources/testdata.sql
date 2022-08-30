@@ -4835,7 +4835,7 @@ ALTER TABLE public.unit_seq OWNER TO postgres;
 
 CREATE TABLE public.value_blob (
     fk_observation_id bigint NOT NULL,
-    value oid
+    value_blob oid
 );
 
 
@@ -4856,7 +4856,7 @@ COMMENT ON COLUMN public.value_blob.fk_observation_id IS 'Reference to the data/
 -- Name: COLUMN value_blob.value; Type: COMMENT; Schema: public; Owner: postgres
 --
 
-COMMENT ON COLUMN public.value_blob.value IS 'The blob value of an observation';
+COMMENT ON COLUMN public.value_blob.value_blob IS 'The blob value of an observation';
 
 
 --
