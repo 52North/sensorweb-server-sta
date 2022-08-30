@@ -70,7 +70,7 @@ public class FeatureOfInterestNode extends StaNode implements FeatureOfInterest 
 
     @Override
     public Geometry getFeature() {
-        throw new UnsupportedOperationException("Not supported yet.");
+        return parseGeometry(StaConstants.PROP_FEATURE);
     }
 
     @Override

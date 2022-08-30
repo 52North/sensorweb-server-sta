@@ -35,6 +35,8 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import org.locationtech.jts.geom.Geometry;
+import org.locationtech.jts.io.ParseException;
+import org.locationtech.jts.io.geojson.GeoJsonReader;
 import org.n52.shetland.ogc.sta.StaConstants;
 import org.n52.sta.api.entity.HistoricalLocation;
 import org.n52.sta.api.entity.Location;
@@ -68,7 +70,7 @@ public class LocationNode extends StaNode implements Location {
 
     @Override
     public Geometry getGeometry() {
-        throw new UnsupportedOperationException("Not supported yet.");
+        return parseGeometry(StaConstants.PROP_LOCATION);
     }
 
     @Override

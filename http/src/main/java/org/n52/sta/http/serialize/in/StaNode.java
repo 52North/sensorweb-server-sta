@@ -89,7 +89,15 @@ abstract class StaNode implements Identifiable {
         GeoJsonReader reader = new GeoJsonReader(geometryFactory);
         JsonNode geometry = propertyNode.get();
         try {
-            return reader.read(geometry.toString());
+            // We might have the geometry embedded or as raw object
+            // see 18-088 Section 8.2.2 Example 2 --> location
+            // see 18-088 Section 8.2.4 Example 4 --> observedArea
+            final String GEOMETRY = "geometry";
+            if (geometry.has(GEOMETRY)) {
+                return reader.read(geometry.get(GEOMETRY).toString());
+            } else {
+                return reader.read(geometry.toString());
+            }
         } catch (ParseException e) {
             LOGGER.debug("Could not parse GeoJson at '{}': {}", property, geometry.toPrettyString());
             throw new InvalidValueException(String.format("Invalid GeoJSON at '%s'!", property));
