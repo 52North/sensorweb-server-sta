@@ -30,17 +30,8 @@ package org.n52.sta.config;
 
 import org.n52.sta.api.EntityEditor;
 import org.n52.sta.api.EntityServiceLookup;
-import org.n52.sta.api.entity.Datastream;
-import org.n52.sta.api.entity.Observation;
-import org.n52.sta.api.entity.ObservedProperty;
-import org.n52.sta.api.entity.Sensor;
-import org.n52.sta.api.entity.Thing;
-import org.n52.sta.data.editor.DatastreamEntityEditor;
-import org.n52.sta.data.editor.ObservationEntityEditor;
-import org.n52.sta.data.editor.ObservedPropertyEntityEditor;
-import org.n52.sta.data.editor.SensorEntityEditor;
-import org.n52.sta.data.editor.ThingEntityEditor;
-import org.n52.sta.data.editor.ValueHelper;
+import org.n52.sta.api.entity.*;
+import org.n52.sta.data.editor.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.context.annotation.Bean;
@@ -87,11 +78,13 @@ public class DataEditorConfiguration {
         return new LocationEntityEditor(serviceLookup);
     }
 
+    @Bean EntityEditor<HistoricalLocation> historicalLocationEntityEditor() {
+        return new HistoricalLocationEntityEditor(serviceLookup);
+    }
+
     @Bean
     public ValueHelper valueHelper() {
         return new ValueHelper();
     }
-
-    // TODO add missing editors
 
 }
