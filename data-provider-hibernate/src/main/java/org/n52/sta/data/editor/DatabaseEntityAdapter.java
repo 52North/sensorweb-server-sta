@@ -1,11 +1,14 @@
-
 package org.n52.sta.data.editor;
 
+import java.math.BigDecimal;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 
 import org.n52.series.db.beans.DescribableEntity;
+import org.n52.series.db.beans.parameter.ParameterEntity;
+import org.n52.series.db.beans.parameter.ParameterFactory;
 import org.n52.sta.api.EntityServiceLookup;
 import org.n52.sta.api.entity.Identifiable;
 import org.n52.sta.api.service.EntityService;
@@ -17,6 +20,32 @@ abstract class DatabaseEntityAdapter<T extends DescribableEntity> {
     protected DatabaseEntityAdapter(EntityServiceLookup serviceLookup) {
         Objects.requireNonNull(serviceLookup, "serviceLookup must not be null");
         this.serviceLookup = serviceLookup;
+    }
+
+    protected ParameterEntity<?> convertParameter(T entity,
+                                                  Map.Entry<String, Object> parameter) {
+
+        String key = parameter.getKey();
+        Object value = parameter.getValue();
+        ParameterEntity parameterEntity;
+
+        Class<?> valueType = value.getClass();
+        if (Number.class.isAssignableFrom(valueType)) {
+            parameterEntity = ParameterFactory.from(entity, ParameterFactory.ValueType.QUANTITY);
+            parameterEntity.setValue(BigDecimal.valueOf((Double) value));
+        } else if (Boolean.class.isAssignableFrom(valueType)) {
+            parameterEntity = ParameterFactory.from(entity, ParameterFactory.ValueType.BOOLEAN);
+            parameterEntity.setValue(BigDecimal.valueOf((Double) value));
+        } else if (String.class.isAssignableFrom(valueType)) {
+            parameterEntity = ParameterFactory.from(entity, ParameterFactory.ValueType.TEXT);
+            parameterEntity.setValue(value);
+        } else {
+            // TODO handle type 'JSON'
+            throw new RuntimeException("can not handle parameter with unknown type: " + key);
+        }
+        parameterEntity.setName(key);
+
+        return parameterEntity;
     }
 
     protected abstract Optional<T> getEntity(String id);
@@ -40,11 +69,11 @@ abstract class DatabaseEntityAdapter<T extends DescribableEntity> {
 
     protected <E extends Identifiable> EntityService<E> getService(Class<E> entityType) {
         return serviceLookup.getService(entityType)
-                            .orElseThrow(() -> {
-                                String msg = String.format("No registered service found for '%s'",
-                                                           entityType.getSimpleName());
-                                return new IllegalStateException(msg);
-                            });
+                .orElseThrow(() -> {
+                    String msg = String.format("No registered service found for '%s'",
+                            entityType.getSimpleName());
+                    return new IllegalStateException(msg);
+                });
     }
 
 }

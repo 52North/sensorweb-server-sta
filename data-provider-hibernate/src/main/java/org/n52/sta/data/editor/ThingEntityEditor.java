@@ -109,33 +109,6 @@ public class ThingEntityEditor extends DatabaseEntityAdapter<PlatformEntity>
         throw new EditorException();
     }
 
-    @SuppressWarnings("unchecked")
-    private PlatformParameterEntity<?> convertParameter(PlatformEntity platform,
-                                                        Map.Entry<String, Object> parameter) {
-        String key = parameter.getKey();
-        Object value = parameter.getValue();
-
-        // TODO review ParameterFactory and DTOTransformerImpl#convertParameters
-        PlatformParameterEntity parameterEntity;
-        Class<?> valueType = value.getClass();
-        if (Number.class.isAssignableFrom(valueType)) {
-            parameterEntity = new PlatformQuantityParameterEntity();
-            value = BigDecimal.valueOf((Double) value);
-        } else if (Boolean.class.isAssignableFrom(valueType)) {
-            parameterEntity = new PlatformBooleanParameterEntity();
-        } else if (String.class.isAssignableFrom(valueType)) {
-            parameterEntity = new PlatformTextParameterEntity();
-        } else {
-            // TODO handle other cases from DTOTransformerImpl#convertParameters
-            throw new RuntimeException("can not handle parameter with unknown type: " + key);
-        }
-
-        parameterEntity.setName(key);
-        parameterEntity.setValue(value);
-        parameterEntity.setDescribeableEntity(platform);
-        return parameterEntity;
-    }
-
     @Override
     protected Optional<PlatformEntity> getEntity(String id) {
         ThingGraphBuilder graphBuilder = ThingGraphBuilder.createEmpty();

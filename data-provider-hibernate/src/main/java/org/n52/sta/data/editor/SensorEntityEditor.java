@@ -92,6 +92,8 @@ public class SensorEntityEditor extends DatabaseEntityAdapter<ProcedureEntity>
 
         // we need to flush else updates to relations are not persisted
         procedureRepository.flush();
+
+        return new SensorData(saved, Optional.empty());
     }
 
     @Override

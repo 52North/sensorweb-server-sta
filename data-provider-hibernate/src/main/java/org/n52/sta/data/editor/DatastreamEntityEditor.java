@@ -208,34 +208,6 @@ public class DatastreamEntityEditor extends DatabaseEntityAdapter<AbstractDatase
         return offeringRepository.save(offering);
     }
 
-    private DatasetParameterEntity< ? > convertParameter(DatasetEntity dataset, Map.Entry<String, Object> parameter) {
-        String key = parameter.getKey();
-        Object value = parameter.getValue();
-
-        // TODO review ParameterFactory and DTOTransformerImpl#convertParameters
-
-        DatasetParameterEntity parameterEntity;
-        if (value instanceof Number) {
-            parameterEntity = new DatasetQuantityParameterEntity();
-            parameterEntity.setName(key);
-            parameterEntity.setValue(BigDecimal.valueOf((Double) value));
-        } else if (value instanceof Boolean) {
-            parameterEntity = new DatasetBooleanParameterEntity();
-            parameterEntity.setName(key);
-            parameterEntity.setValue(value);
-        } else if (value instanceof String) {
-            parameterEntity = new DatasetTextParameterEntity();
-            parameterEntity.setName(key);
-            parameterEntity.setValue(value);
-        } else {
-            // TODO handle other cases from DTOTransformerImpl#convertParameters
-            throw new RuntimeException("can not handle parameter with unknown type: " + key);
-        }
-        // Set backlink to Entity.
-        parameterEntity.setDescribeableEntity(dataset);
-        return parameterEntity;
-    }
-
     private void assertNew(Datastream datastream) throws EditorException {
         String staIdentifier = datastream.getId();
         if (getEntity(staIdentifier).isPresent()) {

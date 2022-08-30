@@ -1,7 +1,6 @@
 package org.n52.sta.data.editor;
 
 import org.n52.janmayen.stream.Streams;
-import org.n52.series.db.beans.PlatformEntity;
 import org.n52.series.db.beans.parameter.ParameterEntity;
 import org.n52.series.db.beans.sta.LocationEntity;
 import org.n52.sta.api.EntityServiceLookup;
@@ -100,7 +99,4 @@ public class LocationEntityEditor extends DatabaseEntityAdapter<LocationEntity>
         return locationRepository.findByStaIdentifier(id, graphBuilder);
     }
 
-    private ParameterEntity<?> convertParameter(LocationEntity locationEntity, Map.Entry<String, Object> entry) {
-        throw new EditorException();
-    }
 }

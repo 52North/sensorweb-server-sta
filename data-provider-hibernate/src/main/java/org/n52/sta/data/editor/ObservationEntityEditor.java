@@ -207,35 +207,6 @@ public class ObservationEntityEditor extends DatabaseEntityAdapter<DataEntity>
         throw new UnsupportedOperationException("not implemented yet");
     }
 
-    private ObservationParameterEntity< ? > convertParameter(DataEntity< ? > obs, Map.Entry<String, Object> parameter) {
-        String key = parameter.getKey();
-        Object value = parameter.getValue();
-
-        // TODO review ParameterFactory and DTOTransformerImpl#convertParameters
-
-        ObservationParameterEntity parameterEntity;
-        if (value instanceof Number) {
-            parameterEntity = new ObservationQuantityParameterEntity();
-            parameterEntity.setName(key);
-            parameterEntity.setValue(BigDecimal.valueOf((Double) value));
-        } else if (value instanceof Boolean) {
-            parameterEntity = new ObservationBooleanParameterEntity();
-            parameterEntity.setName(key);
-            parameterEntity.setValue(value);
-        } else if (value instanceof String) {
-            parameterEntity = new ObservationTextParameterEntity();
-            parameterEntity.setName(key);
-            parameterEntity.setValue(value);
-        } else {
-            // TODO handle other cases from DTOTransformerImpl#convertParameters
-            throw new RuntimeException("can not handle parameter with unknown type: " + key);
-        }
-
-        // Set backlink to Entity.
-        parameterEntity.setDescribeableEntity(obs);
-        return parameterEntity;
-    }
-
     private void assertNew(Observation observation) throws EditorException {
         String staIdentifier = observation.getId();
         if (getEntity(staIdentifier).isPresent()) {

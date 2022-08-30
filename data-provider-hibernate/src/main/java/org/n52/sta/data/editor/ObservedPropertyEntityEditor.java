@@ -1,20 +1,11 @@
 
 package org.n52.sta.data.editor;
 
-import java.math.BigDecimal;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.n52.janmayen.stream.Streams;
 import org.n52.series.db.beans.PhenomenonEntity;
-import org.n52.series.db.beans.parameter.ParameterEntity;
-import org.n52.series.db.beans.parameter.ParameterFactory;
-import org.n52.series.db.beans.parameter.phenomenon.PhenomenonBooleanParameterEntity;
-import org.n52.series.db.beans.parameter.phenomenon.PhenomenonParameterEntity;
-import org.n52.series.db.beans.parameter.phenomenon.PhenomenonQuantityParameterEntity;
-import org.n52.series.db.beans.parameter.phenomenon.PhenomenonTextParameterEntity;
 import org.n52.sta.api.EntityServiceLookup;
 import org.n52.sta.api.entity.Datastream;
 import org.n52.sta.api.entity.ObservedProperty;
@@ -88,7 +79,7 @@ public class ObservedPropertyEntityEditor extends DatabaseEntityAdapter<Phenomen
         // parameters are saved as cascade
         Map<String, Object> properties = entity.getProperties();
         Streams.stream(properties.entrySet())
-                .map(entry -> convertParameters(phenomenonEntity, entry))
+                .map(entry -> convertParameter(phenomenonEntity, entry))
                 .forEach(phenomenonEntity::addParameter);
 
 
@@ -101,32 +92,6 @@ public class ObservedPropertyEntityEditor extends DatabaseEntityAdapter<Phenomen
         phenomenonRepository.flush();
 
         return new ObservedPropertyData(saved, Optional.empty());
-    }
-
-    protected ParameterEntity<?> convertParameters(PhenomenonEntity entity,
-                                                            Map.Entry<String, Object> parameter) {
-
-        String key = parameter.getKey();
-        Object value = parameter.getValue();
-        ParameterEntity parameterEntity;
-
-        Class<?> valueType = value.getClass();
-        if (Number.class.isAssignableFrom(valueType)) {
-            parameterEntity = ParameterFactory.from(entity, ParameterFactory.ValueType.QUANTITY);
-            parameterEntity.setValue(BigDecimal.valueOf((Double) value));
-        } else if (Boolean.class.isAssignableFrom(valueType)) {
-            parameterEntity = ParameterFactory.from(entity, ParameterFactory.ValueType.BOOLEAN);
-            parameterEntity.setValue(BigDecimal.valueOf((Double) value));
-        } else if (String.class.isAssignableFrom(valueType)) {
-            parameterEntity = ParameterFactory.from(entity, ParameterFactory.ValueType.TEXT);
-            parameterEntity.setValue(value);
-        } else {
-            // TODO handle type 'JSON'
-            throw new RuntimeException("can not handle parameter with unknown type: " + key);
-        }
-        parameterEntity.setName(key);
-
-        return parameterEntity;
     }
 
     @Override
