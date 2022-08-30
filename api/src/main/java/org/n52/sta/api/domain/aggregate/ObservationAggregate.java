@@ -48,6 +48,9 @@ public class ObservationAggregate extends EntityAggregate<Observation> implement
         super(observation, editor);
         this.observation = observation;
         assertRequired(observation.getDatastream(), "Datastream is mandatory!");
+
+        //TODO: implement auto-generation of FOI based on Thing-Location
+        //TODO: see 18-088 Section 10.2 Special Case #1
         assertRequired(observation.getFeatureOfInterest(), "FeatureOfInterest is mandatory!");
     }
 
