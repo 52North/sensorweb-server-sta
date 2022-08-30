@@ -67,9 +67,8 @@ public class ObservationJsonSerializer extends StaBaseSerializer<Observation> {
                     gen.writeStartObject();
                     String id = item.getId();
 
-                    // TODO: is serializing this useful in any way if the individual observations are not
-                    // available
-                    // via STA anyway?
+                    // TODO: is serializing id and selfLink useful in any way if the individual observations are not
+                    // available via STA anyway?
                     // writeProperty("id", n -> gen.writeStringField(StaConstants.AT_IOT_ID, id));
                     // writeStringProperty(StaConstants.AT_IOT_SELFLINK, () -> createSelfLink(id), gen);
                     writeObjectProperty(StaConstants.PROP_PARAMETERS, value::getParameters, gen);
@@ -88,9 +87,8 @@ public class ObservationJsonSerializer extends StaBaseSerializer<Observation> {
                 for (Observation item : items) {
                     gen.writeStartObject();
                     String id = item.getId();
-                    // TODO: is serializing this useful in any way if the individual observations are not
-                    // available
-                    // via STA anyway?
+                    // TODO: is serializing id and selfLink useful in any way if the individual observations are not
+                    // available via STA anyway?
                     // writeProperty("id", n -> gen.writeStringField(StaConstants.AT_IOT_ID, id));
                     // writeStringProperty(StaConstants.AT_IOT_SELFLINK, () -> createSelfLink(id), gen);
                     writeObjectProperty(StaConstants.PROP_PARAMETERS, value::getParameters, gen);
@@ -101,6 +99,8 @@ public class ObservationJsonSerializer extends StaBaseSerializer<Observation> {
 
                 gen.writeEndArray();
             });
+        } else {
+            throw new RuntimeException("Could not serialize result with type: " + valueType);
         }
     }
 
