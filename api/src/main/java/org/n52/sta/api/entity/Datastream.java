@@ -62,13 +62,13 @@ public interface Datastream extends Identifiable {
 
     class UnitOfMeasurement {
 
-        private final String symbol;
         private final String name;
+        private final String symbol;
         private final String definition;
 
         public UnitOfMeasurement(String symbol, String name, String definition) {
-            this.symbol = symbol;
             this.name = name;
+            this.symbol = symbol;
             this.definition = definition;
         }
 

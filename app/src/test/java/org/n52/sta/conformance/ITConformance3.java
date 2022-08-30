@@ -123,7 +123,7 @@ public class ITConformance3 extends ConformanceTests implements TestUtil {
         urlParameters = "{\n"
                 + "  \"name\": \"A weather station.\",\n"
                 + "  \"description\": \"A weather station.\",\n"
-                + "  \"encodingType\": \"application/vnd.geo+json\",\n"
+                + "  \"encodingType\": \"application/geo+json\",\n"
                 + "  \"feature\": {\n"
                 + "    \"type\": \"Point\",\n"
                 + "    \"coordinates\": [\n"
