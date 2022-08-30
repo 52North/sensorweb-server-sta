@@ -47,6 +47,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.context.TestPropertySource;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
 /**
@@ -59,6 +60,7 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 @Testcontainers
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
+@TestPropertySource(locations = "classpath:application-test.properties")
 public class ITConformance3 extends ConformanceTests implements TestUtil {
 
     private static final Logger logger = LoggerFactory.getLogger(ITConformance3.class);
@@ -1450,64 +1452,6 @@ public class ITConformance3 extends ConformanceTests implements TestUtil {
      * Create entities as a pre-process for testing DELETE.
      */
     private Map<EntityType, String[]> createEntitiesForDelete() throws Exception {
-        deleteEverythings();
-
-        // First Thing
-        String urlParameters = "{\n"
-                + "    \"name\": \"thing 1\",\n"
-                + "    \"description\": \"thing 1\",\n"
-                + "    \"properties\": {\n"
-                + "        \"reference\": \"first\"\n"
-                + "    },\n"
-                + "    \"Locations\": [\n"
-                + "        {\n"
-                + "            \"name\": \"location 1\",\n"
-                + "            \"description\": \"location 1\",\n"
-                + "            \"location\": {\n"
-                + "                \"type\": \"Point\",\n"
-                + "                \"coordinates\": [\n"
-                + "                    -117.05,\n"
-                + "                    51.05\n"
-                + "                ]\n"
-                + "            },\n"
-                + "            \"encodingType\": \"application/vnd.geo+json\"\n"
-                + "        }\n"
-                + "    ],\n"
-                + "    \"Datastreams\": [\n"
-                + "        {\n"
-                + "            \"unitOfMeasurement\": {\n"
-                + "                \"name\": \"Lumen\",\n"
-                + "                \"symbol\": \"lm\",\n"
-                + "                \"definition\": \"http://www.qudt.org/qudt/owl/1.0.0/unit/Instances.html#Lumen\"\n"
-                + "            },\n"
-                + "            \"name\": \"datastream 1\",\n"
-                + "            \"description\": \"datastream 1\",\n"
-                +
-                "            \"observationType\": \"http://www.opengis.net/def/observationType/OGC-OM/2"
-                +
-                ".0/OM_Measurement\",\n"
-                + "            \"ObservedProperty\": {\n"
-                + "                \"name\": \"Luminous Flux\",\n"
-                +
-                "                \"definition\": \"http://www.qudt.org/qudt/owl/1.0.0/quantity/Instances"
-                +
-                ".html#LuminousFlux\",\n"
-                + "                \"description\": \"observedProperty 1\"\n"
-                + "            },\n"
-                + "            \"Sensor\": {\n"
-                + "                \"name\": \"sensor 1\",\n"
-                + "                \"description\": \"sensor 1\",\n"
-                + "                \"encodingType\": \"application/pdf\",\n"
-                + "                \"metadata\": \"Light flux sensor\"\n"
-                + "            },\n"
-                + "            \"Observations\": [{\n"
-                + "                  \"phenomenonTime\": \"2015-03-01T00:00:00Z\",\n"
-                + "                  \"result\": 1 \n"
-                + "             }]"
-                + "        }\n"
-                + "    ]\n"
-                + "}";
-        postEntity(EntityType.THING, urlParameters);
 
         HashMap<EntityType, String[]> map = new HashMap<>();
         for (EntityType type : EntityType.values()) {
