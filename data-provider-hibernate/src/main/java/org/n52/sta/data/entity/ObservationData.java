@@ -44,9 +44,9 @@ import org.n52.sta.api.entity.Observation;
 import org.n52.sta.config.EntityPropertyMapping;
 import org.n52.sta.old.utils.TimeUtil;
 
-public class ObservationData extends StaData<DataEntity< ? >> implements Observation {
+public class ObservationData extends StaData<DataEntity<?>> implements Observation {
 
-    public ObservationData(DataEntity< ? > dataEntity, EntityPropertyMapping parameterProperties) {
+    public ObservationData(DataEntity<?> dataEntity, EntityPropertyMapping parameterProperties) {
         super(dataEntity, Optional.of(parameterProperties));
     }
 
@@ -55,28 +55,28 @@ public class ObservationData extends StaData<DataEntity< ? >> implements Observa
         Date samplingTimeStart = data.getSamplingTimeStart();
         Date samplingTimeEnd = data.getSamplingTimeEnd();
         Optional<DateTime> sStart = Optional.ofNullable(samplingTimeStart)
-                                            .map(TimeUtil::createDateTime);
+                .map(TimeUtil::createDateTime);
         Optional<DateTime> sEnd = Optional.ofNullable(samplingTimeEnd)
-                                          .map(TimeUtil::createDateTime);
+                .map(TimeUtil::createDateTime);
         return sStart.map(start -> TimeUtil.createTime(start, sEnd.orElse(null)))
-                     .orElse(null);
+                .orElse(null);
     }
 
     @Override
     public Time getResultTime() {
-        return toTime(data.getResultTime());
+        return (data.getResultTime() != null) ? toTime(data.getResultTime()) : null;
     }
 
     @Override
     public Object getResult() {
         Object value = data.getValue();
-        Class< ? extends Object> type = value.getClass();
+        Class<? extends Object> type = value.getClass();
         if (Collection.class.isAssignableFrom(type)) {
             @SuppressWarnings("unchecked")
-            Collection<DataEntity< ? >> items = (Collection<DataEntity< ? >>) value;
+            Collection<DataEntity<?>> items = (Collection<DataEntity<?>>) value;
             return items.stream()
-                        .map(v -> new ObservationData(v, propertyMapping.get()))
-                        .collect(Collectors.toSet());
+                    .map(v -> new ObservationData(v, propertyMapping.get()))
+                    .collect(Collectors.toSet());
         } else {
             return value;
         }
@@ -99,7 +99,7 @@ public class ObservationData extends StaData<DataEntity< ? >> implements Observa
     public Map<String, Object> getParameters() {
         Map<String, Object> parameters = toMap(data.getParameters());
         String samplingGeometry = propertyMapping.get()
-                                                 .getSamplingGeometry();
+                .getSamplingGeometry();
         if (samplingGeometry != null) {
             Optional<GeometryEntity> optionalSamplingGeometry = Optional.ofNullable(data.getGeometryEntity());
             optionalSamplingGeometry.ifPresent(entity -> parameters.put(samplingGeometry, entity.getGeometry()));
@@ -107,13 +107,13 @@ public class ObservationData extends StaData<DataEntity< ? >> implements Observa
 
         if ("profile".equals(getValueType())) {
             String verticalFrom = propertyMapping.get()
-                                                 .getVerticalFrom();
+                    .getVerticalFrom();
             if (verticalFrom != null) {
                 Optional.ofNullable(data.getVerticalFrom())
                         .ifPresent(entity -> parameters.put(verticalFrom, entity));
             }
             String verticalTo = propertyMapping.get()
-                                               .getVerticalTo();
+                    .getVerticalTo();
             if (verticalTo != null) {
                 Optional.ofNullable(data.getVerticalTo())
                         .ifPresent(entity -> parameters.put(verticalTo, entity));

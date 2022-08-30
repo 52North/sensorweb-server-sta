@@ -4,11 +4,14 @@ import org.n52.janmayen.stream.Streams;
 import org.n52.series.db.beans.parameter.ParameterEntity;
 import org.n52.series.db.beans.sta.LocationEntity;
 import org.n52.sta.api.EntityServiceLookup;
+import org.n52.sta.api.entity.HistoricalLocation;
 import org.n52.sta.api.entity.Location;
 import org.n52.sta.api.entity.Thing;
 import org.n52.sta.api.exception.EditorException;
 import org.n52.sta.api.service.EntityService;
+import org.n52.sta.data.entity.HistoricalLocationData;
 import org.n52.sta.data.entity.LocationData;
+import org.n52.sta.data.entity.StaData;
 import org.n52.sta.data.entity.ThingData;
 import org.n52.sta.data.repositories.entity.LocationRepository;
 import org.n52.sta.data.support.LocationGraphBuilder;
@@ -18,6 +21,7 @@ import org.springframework.context.event.EventListener;
 
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 public class LocationEntityEditor extends DatabaseEntityAdapter<LocationEntity>
         implements
@@ -30,6 +34,7 @@ public class LocationEntityEditor extends DatabaseEntityAdapter<LocationEntity>
     private ValueHelper valueHelper;
 
     private EntityEditorDelegate<Thing, ThingData> thingEditor;
+    private EntityEditorDelegate<HistoricalLocation, HistoricalLocationData> historicalLocationEditor;
 
     public LocationEntityEditor(EntityServiceLookup serviceLookup) {
         super(serviceLookup);
@@ -42,6 +47,8 @@ public class LocationEntityEditor extends DatabaseEntityAdapter<LocationEntity>
         // As we are the package providing the EE Implementations, this cast should never fail.
         this.thingEditor = (EntityEditorDelegate<Thing, ThingData>)
                 getService(Thing.class).unwrapEditor();
+        this.historicalLocationEditor = (EntityEditorDelegate<HistoricalLocation, HistoricalLocationData>)
+                getService(HistoricalLocation.class).unwrapEditor();
         //@formatter:on
     }
 
@@ -70,7 +77,13 @@ public class LocationEntityEditor extends DatabaseEntityAdapter<LocationEntity>
         locationEntity.setStaIdentifier(id);
         locationEntity.setName(entity.getName());
         locationEntity.setDescription(entity.getDescription());
+        locationEntity.setGeometry(entity.getGeometry());
+        //TODO: check if this String representation is legacy or actually used.
+        locationEntity.setLocation(entity.getGeometry().toString());
+
         valueHelper.setFormat(locationEntity::setLocationEncoding, entity.getEncodingType());
+
+        LocationEntity saved = locationRepository.save(locationEntity);
 
         // parameters are saved as cascade
         Map<String, Object> properties = entity.getProperties();
@@ -78,7 +91,18 @@ public class LocationEntityEditor extends DatabaseEntityAdapter<LocationEntity>
                 .map(entry -> convertParameter(locationEntity, entry))
                 .forEach(locationEntity::addParameter);
 
-        LocationEntity saved = locationRepository.save(locationEntity);
+        locationEntity.setPlatforms(Streams.stream(entity.getThings())
+                .map(thingEditor::getOrSave)
+                .map(StaData::getData)
+                .collect(Collectors.toSet()));
+
+        locationEntity.setHistoricalLocations(Streams.stream(entity.getHistoricalLocations())
+                .map(historicalLocationEditor::getOrSave)
+                .map(StaData::getData)
+                .collect(Collectors.toSet()));
+
+        // we need to flush else updates to relations are not persisted
+        locationRepository.flush();
 
         return new LocationData(saved, Optional.empty());
     }

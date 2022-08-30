@@ -12,10 +12,7 @@ import javax.transaction.Transactional;
 import javax.transaction.Transactional.TxType;
 
 import org.n52.janmayen.stream.Streams;
-import org.n52.series.db.beans.AbstractDatasetEntity;
-import org.n52.series.db.beans.DatasetEntity;
-import org.n52.series.db.beans.OfferingEntity;
-import org.n52.series.db.beans.ProcedureEntity;
+import org.n52.series.db.beans.*;
 import org.n52.series.db.beans.dataset.DatasetType;
 import org.n52.series.db.beans.dataset.ObservationType;
 import org.n52.series.db.beans.parameter.dataset.DatasetBooleanParameterEntity;
@@ -23,6 +20,7 @@ import org.n52.series.db.beans.parameter.dataset.DatasetParameterEntity;
 import org.n52.series.db.beans.parameter.dataset.DatasetQuantityParameterEntity;
 import org.n52.series.db.beans.parameter.dataset.DatasetTextParameterEntity;
 import org.n52.shetland.ogc.gml.time.Time;
+import org.n52.shetland.ogc.sta.exception.STACRUDException;
 import org.n52.sta.api.EntityServiceLookup;
 import org.n52.sta.api.domain.aggregate.ThingAggregate;
 import org.n52.sta.api.entity.Datastream;
@@ -38,9 +36,13 @@ import org.n52.sta.data.entity.ObservedPropertyData;
 import org.n52.sta.data.entity.SensorData;
 import org.n52.sta.data.entity.StaData;
 import org.n52.sta.data.entity.ThingData;
+import org.n52.sta.data.old.service.CategoryService;
 import org.n52.sta.data.repositories.entity.DatastreamRepository;
+import org.n52.sta.data.repositories.value.CategoryRepository;
 import org.n52.sta.data.repositories.value.OfferingRepository;
 import org.n52.sta.data.support.DatastreamGraphBuilder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.context.event.EventListener;
@@ -48,11 +50,16 @@ import org.springframework.context.event.EventListener;
 public class DatastreamEntityEditor extends DatabaseEntityAdapter<AbstractDatasetEntity> implements
         EntityEditorDelegate<Datastream, DatastreamData> {
 
+    private static final Logger logger = LoggerFactory.getLogger(DatastreamEntityEditor.class);
+
     @Autowired
     private DatastreamRepository datastreamRepository;
 
     @Autowired
     private OfferingRepository offeringRepository;
+
+    @Autowired
+    private CategoryRepository categoryRepository;
 
     @Autowired
     private ValueHelper valueHelper;
@@ -64,6 +71,8 @@ public class DatastreamEntityEditor extends DatabaseEntityAdapter<AbstractDatase
     private EntityEditorDelegate<Sensor, SensorData> sensorEditor;
     private EntityEditorDelegate<ObservedProperty, ObservedPropertyData> observedPropertyEditor;
     private EntityEditorDelegate<Observation, ObservationData> observationEditor;
+
+    private CategoryEntity defaultCategory;
 
     public DatastreamEntityEditor(EntityServiceLookup serviceLookup) {
         super(serviceLookup);
@@ -85,10 +94,22 @@ public class DatastreamEntityEditor extends DatabaseEntityAdapter<AbstractDatase
         this.observationEditor = (EntityEditorDelegate<Observation, ObservationData>)
                 getService(Observation.class).unwrapEditor();
         //@formatter:on
+
+        // Persist or get default category on startup
+        final String DEFAULT_CATEGORY = "DEFAULT_STA_CATEGORY";
+        defaultCategory = categoryRepository.findByIdentifier(DEFAULT_CATEGORY).orElseGet(() -> {
+            CategoryEntity category = new CategoryEntity();
+            category.setIdentifier(DEFAULT_CATEGORY);
+            category.setName(DEFAULT_CATEGORY);
+            category.setDescription("Default STA category");
+            logger.debug("Persisting default CategoryEntity: " + category.getName());
+            return categoryRepository.save(category);
+        });
     }
 
     @Override
     public DatastreamData getOrSave(Datastream entity) throws EditorException {
+        Objects.requireNonNull(entity, "entity must not be null");
         Optional<AbstractDatasetEntity> stored = getEntity(entity.getId());
         return stored.map(e -> new DatastreamData(e, Optional.of(propertyMapping)))
                      .orElseGet(() -> save(entity));
@@ -121,8 +142,7 @@ public class DatastreamEntityEditor extends DatabaseEntityAdapter<AbstractDatase
         valueHelper.setEndTime(dataset::setResultTimeEnd, resultTime);
         valueHelper.setFormat(dataset::setOMObservationType, entity.getObservationType());
         valueHelper.setUnit(dataset::setUnit, entity.getUnitOfMeasurement());
-        OfferingEntity offering = getOrSaveOfferingValue(entity.getSensor());
-        dataset.setOffering(offering);
+
 
         // references
         ThingData thing = thingEditor.getOrSave(entity.getThing());
@@ -139,6 +159,11 @@ public class DatastreamEntityEditor extends DatabaseEntityAdapter<AbstractDatase
         SensorData sensor = sensorEditor.getOrSave(entity.getSensor());
         ProcedureEntity sensorEntity = sensor.getData();
         dataset.setProcedure(sensorEntity);
+
+        // 52N-DB-model specific entries
+        OfferingEntity offering = getOrSaveOfferingValue(sensor);
+        dataset.setOffering(offering);
+        dataset.setCategory(defaultCategory);
 
         ObservedPropertyData observedProperty = observedPropertyEditor.getOrSave(entity.getObservedProperty());
         dataset.setObservableProperty(observedProperty.getData());

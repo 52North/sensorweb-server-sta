@@ -82,6 +82,10 @@ public class DataEditorConfiguration {
         return new HistoricalLocationEntityEditor(serviceLookup);
     }
 
+    @Bean EntityEditor<FeatureOfInterest> featureOfInterestEntityEditor() {
+        return new FeatureOfInterestEntityEditor(serviceLookup);
+    }
+
     @Bean
     public ValueHelper valueHelper() {
         return new ValueHelper();

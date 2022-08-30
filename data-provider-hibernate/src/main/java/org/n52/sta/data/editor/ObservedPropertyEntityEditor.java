@@ -53,17 +53,7 @@ public class ObservedPropertyEntityEditor extends DatabaseEntityAdapter<Phenomen
     public ObservedPropertyData save(ObservedProperty entity) throws EditorException {
         Objects.requireNonNull(entity, "entity must not be null");
 
-        String staIdentifier = entity.getId();
-        EntityService<ObservedProperty> service = getService(ObservedProperty.class);
-
-        if (service.exists(staIdentifier)) {
-            throw new EditorException("ObservedProperty already exists with Id '" + staIdentifier + "'");
-        }
-
-        // definition (mapped in the data model as identifier) must be unique
-        if (phenomenonRepository.existsByIdentifier(entity.getDefinition())) {
-            throw new EditorException("ObservedProperty with given definition already exists!");
-        }
+        assertNew(entity);
 
         String id = entity.getId() == null
                 ? generateId()
@@ -85,8 +75,9 @@ public class ObservedPropertyEntityEditor extends DatabaseEntityAdapter<Phenomen
 
         // save related entities
         phenomenonEntity.setDatasets(Streams.stream(entity.getDatastreams())
-                .map(o -> datastreamEditor.getOrSave(o))
-                .map(StaData::getData).collect(Collectors.toSet()));
+                .map(datastreamEditor::getOrSave)
+                .map(StaData::getData)
+                .collect(Collectors.toSet()));
 
         // we need to flush else updates to relations are not persisted
         phenomenonRepository.flush();
@@ -108,5 +99,18 @@ public class ObservedPropertyEntityEditor extends DatabaseEntityAdapter<Phenomen
     protected Optional<PhenomenonEntity> getEntity(String id) {
         ObservedPropertyGraphBuilder graphBuilder = ObservedPropertyGraphBuilder.createEmpty();
         return phenomenonRepository.findByStaIdentifier(id, graphBuilder);
+    }
+
+    private void assertNew(ObservedProperty observedProperty) throws EditorException {
+        EntityService<ObservedProperty> service = getService(ObservedProperty.class);
+        String staIdentifier = observedProperty.getId();
+        if (service.exists(staIdentifier)) {
+            throw new EditorException("ObservedProperty already exists with ID '" + staIdentifier + "'");
+        }
+
+        // definition (mapped in the data model as identifier) must be unique
+        if (phenomenonRepository.existsByIdentifier(observedProperty.getDefinition())) {
+            throw new EditorException("ObservedProperty with given definition already exists!");
+        }
     }
 }

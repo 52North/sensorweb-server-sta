@@ -70,8 +70,10 @@ public class SensorEntityEditor extends DatabaseEntityAdapter<ProcedureEntity>
                 ? generateId()
                 : entity.getId();
         ProcedureEntity procedureEntity = new ProcedureEntity();
+        procedureEntity.setIdentifier(id);
         procedureEntity.setStaIdentifier(id);
         procedureEntity.setName(entity.getName());
+        procedureEntity.setDescriptionFile(entity.getMetadata());
         procedureEntity.setDescription(entity.getDescription());
 
         valueHelper.setFormat(procedureEntity::setFormat, entity.getEncodingType());
@@ -87,8 +89,9 @@ public class SensorEntityEditor extends DatabaseEntityAdapter<ProcedureEntity>
 
         // save related entities
         procedureEntity.setDatasets(Streams.stream(entity.getDatastreams())
-                .map(o -> datastreamEditor.getOrSave(o))
-                .map(StaData::getData).collect(Collectors.toSet()));
+                .map(datastreamEditor::getOrSave)
+                .map(StaData::getData)
+                .collect(Collectors.toSet()));
 
         // we need to flush else updates to relations are not persisted
         procedureRepository.flush();

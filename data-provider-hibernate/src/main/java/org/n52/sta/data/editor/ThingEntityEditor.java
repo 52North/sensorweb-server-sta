@@ -31,6 +31,7 @@ public class ThingEntityEditor extends DatabaseEntityAdapter<PlatformEntity>
 
     private EntityEditorDelegate<Location, LocationData> locationEditor;
     private EntityEditorDelegate<Datastream, DatastreamData> datastreamEditor;
+    private EntityEditorDelegate<HistoricalLocation, HistoricalLocationData> historicalLocationEditor;
 
     public ThingEntityEditor(EntityServiceLookup serviceLookup) {
         super(serviceLookup);
@@ -45,6 +46,8 @@ public class ThingEntityEditor extends DatabaseEntityAdapter<PlatformEntity>
                 getService(Location.class).unwrapEditor();
         this.datastreamEditor = (EntityEditorDelegate<Datastream, DatastreamData>)
                 getService(Datastream.class).unwrapEditor();
+        this.historicalLocationEditor = (EntityEditorDelegate<HistoricalLocation, HistoricalLocationData>)
+                getService(HistoricalLocation.class).unwrapEditor();
         //@formatter:on
     }
 
@@ -85,13 +88,19 @@ public class ThingEntityEditor extends DatabaseEntityAdapter<PlatformEntity>
 
         // save related entities
         platformEntity.setLocations(Streams.stream(entity.getLocations())
-                .map(o -> locationEditor.getOrSave(o))
+                .map(locationEditor::getOrSave)
                 .map(StaData::getData)
                 .collect(Collectors.toSet()));
 
         platformEntity.setDatasets(Streams.stream(entity.getDatastreams())
-                .map(o -> datastreamEditor.getOrSave(o))
-                .map(StaData::getData).collect(Collectors.toSet()));
+                .map(datastreamEditor::getOrSave)
+                .map(StaData::getData)
+                .collect(Collectors.toSet()));
+
+        platformEntity.setHistoricalLocations(Streams.stream(entity.getHistoricalLocations())
+                .map(historicalLocationEditor::getOrSave)
+                .map(StaData::getData)
+                .collect(Collectors.toSet()));
 
         // we need to flush else updates to relations are not persisted
         platformRepository.flush();
