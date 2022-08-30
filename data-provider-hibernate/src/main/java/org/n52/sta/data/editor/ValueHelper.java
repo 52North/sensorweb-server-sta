@@ -33,7 +33,7 @@ public class ValueHelper {
         if (time == null) {
             return;
         } else if (time instanceof TimeInstant) {
-            setTime(setter, time);
+            setTime(setter, (TimeInstant) time);
         } else {
             TimePeriod period = (TimePeriod) time;
             DateTime startTime = period.getStart();
@@ -45,7 +45,7 @@ public class ValueHelper {
         if (time == null) {
             return;
         } else if (time instanceof TimeInstant) {
-            setTime(setter, time);
+            setTime(setter, (TimeInstant) time);
         } else {
             TimePeriod period = (TimePeriod) time;
             DateTime endTime = period.getEnd();
@@ -53,9 +53,8 @@ public class ValueHelper {
         }
     }
 
-    public void setTime(Consumer<Date> setter, Time time) {
-        TimeInstant instant = (TimeInstant) time;
-        DateTime startTime = instant.getValue();
+    public void setTime(Consumer<Date> setter, TimeInstant time) {
+        DateTime startTime = time.getValue();
         setter.accept(startTime.toDate());
     }
 
