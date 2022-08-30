@@ -48,11 +48,10 @@ import org.n52.sta.http.util.path.PathFactory;
 import org.n52.sta.http.util.path.StaPath;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.HandlerMapping;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -86,6 +85,20 @@ public class WriteController {
         this.pathFactory = pathFactory;
         this.mapper = mapper;
     }
+
+    @PatchMapping
+    public ResponseEntity<StreamingResponseBody> handlePatchRequest(@RequestBody JsonNode node,
+                                                                   HttpServletRequest request)
+            throws STAInvalidUrlException, EditorException, IOException {
+        return ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED).build();
+    }
+
+    @DeleteMapping("/**")
+    public ResponseEntity<StreamingResponseBody> handleDeleteRequest(HttpServletRequest request)
+            throws STAInvalidUrlException, EditorException, IOException {
+        return ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED).build();
+    }
+
 
     @PostMapping("/**")
     public ResponseEntity<StreamingResponseBody> handlePostRequest(@RequestBody JsonNode node,
