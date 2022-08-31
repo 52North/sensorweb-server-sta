@@ -1141,7 +1141,9 @@ public class ITConformance3 extends ConformanceTests implements TestUtil {
     @Test
     public void deleteThing() throws Exception {
         Map<EntityType, String[]> entitiesForDelete = getAllEntities();
-        deleteEntity(EntityType.THING, entitiesForDelete.get(EntityType.THING)[0], false);
+        for (String id : entitiesForDelete.get(EntityType.THING)) {
+            deleteEntity(EntityType.THING, id, false);
+        }
         Set<EntityType> entityTypes = new HashSet<>();
         entityTypes.add(EntityType.THING);
         entityTypes.add(EntityType.DATASTREAM);
@@ -1162,7 +1164,9 @@ public class ITConformance3 extends ConformanceTests implements TestUtil {
         Set<EntityType> entityTypes = new HashSet<>();
 
         // Datastream
-        deleteEntity(EntityType.DATASTREAM, entitiesForDelete.get(EntityType.DATASTREAM)[0], false);
+        for (String id : entitiesForDelete.get(EntityType.DATASTREAM)) {
+            deleteEntity(EntityType.DATASTREAM, id, false);
+        }
         entityTypes.clear();
         entityTypes.add(EntityType.DATASTREAM);
         entityTypes.add(EntityType.OBSERVATION);
@@ -1183,7 +1187,9 @@ public class ITConformance3 extends ConformanceTests implements TestUtil {
         Set<EntityType> entityTypes = new HashSet<>();
 
         // Location
-        deleteEntity(EntityType.LOCATION, entitiesForDelete.get(EntityType.LOCATION)[0], false);
+        for (String id : entitiesForDelete.get(EntityType.LOCATION)) {
+            deleteEntity(EntityType.LOCATION, id, false);
+        }
         entityTypes.clear();
         entityTypes.add(EntityType.LOCATION);
         entityTypes.add(EntityType.HISTORICAL_LOCATION);
@@ -1204,7 +1210,9 @@ public class ITConformance3 extends ConformanceTests implements TestUtil {
         Map<EntityType, String[]> entitiesForDelete = getAllEntities();
         Set<EntityType> entityTypes = new HashSet<>();
         // HistoricalLoation
-        deleteEntity(EntityType.HISTORICAL_LOCATION, entitiesForDelete.get(EntityType.HISTORICAL_LOCATION)[0], false);
+        for (String id : entitiesForDelete.get(EntityType.HISTORICAL_LOCATION)) {
+            deleteEntity(EntityType.HISTORICAL_LOCATION, id, false);
+        }
         entityTypes.clear();
         entityTypes.add(EntityType.HISTORICAL_LOCATION);
         checkNotExisting(entityTypes);
@@ -1225,7 +1233,9 @@ public class ITConformance3 extends ConformanceTests implements TestUtil {
         Map<EntityType, String[]> entitiesForDelete = getAllEntities();
         Set<EntityType> entityTypes = new HashSet<>();
         // Sensor
-        deleteEntity(EntityType.SENSOR, entitiesForDelete.get(EntityType.SENSOR)[0], false);
+        for (String id : entitiesForDelete.get(EntityType.SENSOR)) {
+            deleteEntity(EntityType.SENSOR, id, false);
+        }
         entityTypes.clear();
         entityTypes.add(EntityType.SENSOR);
         entityTypes.add(EntityType.DATASTREAM);
@@ -1246,7 +1256,9 @@ public class ITConformance3 extends ConformanceTests implements TestUtil {
         Map<EntityType, String[]> entitiesForDelete = getAllEntities();
         Set<EntityType> entityTypes = new HashSet<>();
         // ObservedProperty
-        deleteEntity(EntityType.OBSERVED_PROPERTY, entitiesForDelete.get(EntityType.OBSERVED_PROPERTY)[0], false);
+        for (String id : entitiesForDelete.get(EntityType.OBSERVED_PROPERTY)) {
+            deleteEntity(EntityType.OBSERVED_PROPERTY, id, false);
+        }
         entityTypes.clear();
         entityTypes.add(EntityType.OBSERVED_PROPERTY);
         entityTypes.add(EntityType.DATASTREAM);
@@ -1267,7 +1279,9 @@ public class ITConformance3 extends ConformanceTests implements TestUtil {
         Map<EntityType, String[]> entitiesForDelete = getAllEntities();
         Set<EntityType> entityTypes = new HashSet<>();
         // FeatureOfInterest
-        deleteEntity(EntityType.FEATURE_OF_INTEREST, entitiesForDelete.get(EntityType.FEATURE_OF_INTEREST)[0], false);
+        for (String id : entitiesForDelete.get(EntityType.FEATURE_OF_INTEREST)) {
+            deleteEntity(EntityType.FEATURE_OF_INTEREST, id, false);
+        }
         entityTypes.clear();
         entityTypes.add(EntityType.FEATURE_OF_INTEREST);
         entityTypes.add(EntityType.OBSERVATION);

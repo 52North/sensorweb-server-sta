@@ -39,7 +39,6 @@ import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpGet;
@@ -49,6 +48,7 @@ import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testcontainers.junit.jupiter.Container;
@@ -66,6 +66,27 @@ abstract class ConformanceTests implements TestUtil {
 
     ConformanceTests(String rootUrl) {
         this.rootUrl = rootUrl;
+    }
+
+    @BeforeEach
+    public void resetDatabase() throws Exception {
+        // Truncate database
+        org.testcontainers.containers.Container.ExecResult truncateCmds = run(
+                "SELECT 'TRUNCATE TABLE ' || tablename || ' CASCADE;' " +
+                        "FROM pg_catalog.pg_tables WHERE schemaname='public';");
+
+        String[] commands = truncateCmds.getStdout().split("\n");
+        for (int i = 2; i < commands.length - 1; i++) {
+            run(commands[i]);
+        }
+
+        org.testcontainers.containers.Container.ExecResult execResult =
+                POSTGIS_DB.execInContainer("psql", "-U", "postgres", "-d", "sta-test", "-f", "/tmp/data.sql");
+    }
+
+    private org.testcontainers.containers.Container.ExecResult run(String sql)
+            throws IOException, InterruptedException {
+        return POSTGIS_DB.execInContainer("psql", "-U", "postgres", "-d", "sta-test", "-c", sql);
     }
 
     JsonNode postEntity(EntityType type, String body) throws IOException {

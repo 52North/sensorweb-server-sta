@@ -28,6 +28,7 @@
 
 package org.n52.sta.conformance;
 
+import org.testcontainers.containers.BindMode;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.utility.DockerImageName;
 
@@ -49,9 +50,11 @@ public class STAPostgresContainer extends PostgreSQLContainer<STAPostgresContain
     public static STAPostgresContainer instance() {
         if (container == null) {
             container = new STAPostgresContainer()
-                                                  .withInitScript("testdata.sql")
-                                                  .withUsername("postgres")
-                                                  .withPassword("postgres");
+                    .withDatabaseName("sta-test")
+                    .withClasspathResourceMapping("data.sql", "/tmp/data.sql", BindMode.READ_ONLY)
+                    .withInitScript("schema.sql")
+                    .withUsername("postgres")
+                    .withPassword("postgres");
         }
         return container;
     }
