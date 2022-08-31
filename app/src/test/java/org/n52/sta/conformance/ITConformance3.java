@@ -1138,9 +1138,9 @@ public class ITConformance3 extends ConformanceTests implements TestUtil {
      * This method is testing DELETE and its integrity constraint. The response should be 200. After DELETE
      * the GET request to that entity should return 404.
      */
-    @Test()
-    public void deleteEntities() throws Exception {
-        Map<EntityType, String[]> entitiesForDelete = createEntitiesForDelete();
+    @Test
+    public void deleteThing() throws Exception {
+        Map<EntityType, String[]> entitiesForDelete = getAllEntities();
         deleteEntity(EntityType.THING, entitiesForDelete.get(EntityType.THING)[0], false);
         Set<EntityType> entityTypes = new HashSet<>();
         entityTypes.add(EntityType.THING);
@@ -1154,9 +1154,14 @@ public class ITConformance3 extends ConformanceTests implements TestUtil {
         entityTypes.add(EntityType.OBSERVED_PROPERTY);
         entityTypes.add(EntityType.FEATURE_OF_INTEREST);
         checkExisting(entityTypes);
+    }
+
+    @Test()
+    public void deleteDatastream() throws Exception {
+        Map<EntityType, String[]> entitiesForDelete = getAllEntities();
+        Set<EntityType> entityTypes = new HashSet<>();
 
         // Datastream
-        entitiesForDelete = createEntitiesForDelete();
         deleteEntity(EntityType.DATASTREAM, entitiesForDelete.get(EntityType.DATASTREAM)[0], false);
         entityTypes.clear();
         entityTypes.add(EntityType.DATASTREAM);
@@ -1170,9 +1175,14 @@ public class ITConformance3 extends ConformanceTests implements TestUtil {
         entityTypes.add(EntityType.LOCATION);
         entityTypes.add(EntityType.HISTORICAL_LOCATION);
         checkExisting(entityTypes);
+    }
+
+    @Test()
+    public void deleteLocation() throws Exception {
+        Map<EntityType, String[]> entitiesForDelete = getAllEntities();
+        Set<EntityType> entityTypes = new HashSet<>();
 
         // Location
-        entitiesForDelete = createEntitiesForDelete();
         deleteEntity(EntityType.LOCATION, entitiesForDelete.get(EntityType.LOCATION)[0], false);
         entityTypes.clear();
         entityTypes.add(EntityType.LOCATION);
@@ -1187,8 +1197,13 @@ public class ITConformance3 extends ConformanceTests implements TestUtil {
         entityTypes.add(EntityType.OBSERVATION);
         checkExisting(entityTypes);
 
+    }
+
+    @Test()
+    public void deleteHistoricalLocations() throws Exception {
+        Map<EntityType, String[]> entitiesForDelete = getAllEntities();
+        Set<EntityType> entityTypes = new HashSet<>();
         // HistoricalLoation
-        entitiesForDelete = createEntitiesForDelete();
         deleteEntity(EntityType.HISTORICAL_LOCATION, entitiesForDelete.get(EntityType.HISTORICAL_LOCATION)[0], false);
         entityTypes.clear();
         entityTypes.add(EntityType.HISTORICAL_LOCATION);
@@ -1203,8 +1218,13 @@ public class ITConformance3 extends ConformanceTests implements TestUtil {
         entityTypes.add(EntityType.LOCATION);
         checkExisting(entityTypes);
 
+    }
+
+    @Test()
+    public void deleteSensor() throws Exception {
+        Map<EntityType, String[]> entitiesForDelete = getAllEntities();
+        Set<EntityType> entityTypes = new HashSet<>();
         // Sensor
-        entitiesForDelete = createEntitiesForDelete();
         deleteEntity(EntityType.SENSOR, entitiesForDelete.get(EntityType.SENSOR)[0], false);
         entityTypes.clear();
         entityTypes.add(EntityType.SENSOR);
@@ -1219,8 +1239,13 @@ public class ITConformance3 extends ConformanceTests implements TestUtil {
         entityTypes.add(EntityType.HISTORICAL_LOCATION);
         checkExisting(entityTypes);
 
+    }
+
+    @Test()
+    public void deleteObservedProperty() throws Exception {
+        Map<EntityType, String[]> entitiesForDelete = getAllEntities();
+        Set<EntityType> entityTypes = new HashSet<>();
         // ObservedProperty
-        entitiesForDelete = createEntitiesForDelete();
         deleteEntity(EntityType.OBSERVED_PROPERTY, entitiesForDelete.get(EntityType.OBSERVED_PROPERTY)[0], false);
         entityTypes.clear();
         entityTypes.add(EntityType.OBSERVED_PROPERTY);
@@ -1235,8 +1260,13 @@ public class ITConformance3 extends ConformanceTests implements TestUtil {
         entityTypes.add(EntityType.HISTORICAL_LOCATION);
         checkExisting(entityTypes);
 
+    }
+
+    @Test()
+    public void deleteFOI() throws Exception {
+        Map<EntityType, String[]> entitiesForDelete = getAllEntities();
+        Set<EntityType> entityTypes = new HashSet<>();
         // FeatureOfInterest
-        entitiesForDelete = createEntitiesForDelete();
         deleteEntity(EntityType.FEATURE_OF_INTEREST, entitiesForDelete.get(EntityType.FEATURE_OF_INTEREST)[0], false);
         entityTypes.clear();
         entityTypes.add(EntityType.FEATURE_OF_INTEREST);
@@ -1251,8 +1281,13 @@ public class ITConformance3 extends ConformanceTests implements TestUtil {
         entityTypes.add(EntityType.DATASTREAM);
         checkExisting(entityTypes);
 
+    }
+
+    @Test()
+    public void deleteObservation() throws Exception {
+        Map<EntityType, String[]> entitiesForDelete = getAllEntities();
+        Set<EntityType> entityTypes = new HashSet<>();
         // Observation
-        entitiesForDelete = createEntitiesForDelete();
         deleteEntity(EntityType.OBSERVATION, entitiesForDelete.get(EntityType.OBSERVATION)[0], false);
         entityTypes.clear();
         entityTypes.add(EntityType.OBSERVATION);
@@ -1449,9 +1484,9 @@ public class ITConformance3 extends ConformanceTests implements TestUtil {
     }
 
     /**
-     * Create entities as a pre-process for testing DELETE.
+     * Get all entities. Used as a base set for testing DELETE.
      */
-    private Map<EntityType, String[]> createEntitiesForDelete() throws Exception {
+    private Map<EntityType, String[]> getAllEntities() throws Exception {
 
         HashMap<EntityType, String[]> map = new HashMap<>();
         for (EntityType type : EntityType.values()) {
