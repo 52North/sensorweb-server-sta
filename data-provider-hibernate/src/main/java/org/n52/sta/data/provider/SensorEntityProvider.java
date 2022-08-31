@@ -77,7 +77,8 @@ public class SensorEntityProvider extends BaseEntityProvider<Sensor> {
     @Override
     public Optional<Sensor> getEntity(String id, QueryOptions queryOptions) throws ProviderException {
         SensorGraphBuilder graphBuilder = SensorGraphBuilder.createEmpty();
-        return getEntity(rootSpecification.buildSpecification(queryOptions), graphBuilder);
+        return getEntity(rootSpecification.buildSpecification(queryOptions)
+                                          .and(rootSpecification.equalsStaIdentifier(id)), graphBuilder);
     }
 
     private Optional<Sensor> getEntity(Specification<ProcedureEntity> spec, SensorGraphBuilder graphBuilder) {

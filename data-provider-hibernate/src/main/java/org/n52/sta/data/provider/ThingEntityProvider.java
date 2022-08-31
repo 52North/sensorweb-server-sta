@@ -71,16 +71,17 @@ public class ThingEntityProvider extends BaseEntityProvider<Thing> {
         ThingGraphBuilder graphBuilder = request.isRefRequest()
                 ? ThingGraphBuilder.createEmpty()
                 : ThingGraphBuilder.createWith(request.getQueryOptions());
-        return extracted(rootSpecification.buildSpecification(request), graphBuilder);
+        return getEntity(rootSpecification.buildSpecification(request), graphBuilder);
     }
 
     @Override
     public Optional<Thing> getEntity(String id, QueryOptions queryOptions) throws ProviderException {
         ThingGraphBuilder graphBuilder = ThingGraphBuilder.createEmpty();
-        return extracted(rootSpecification.buildSpecification(queryOptions), graphBuilder);
+        return getEntity(rootSpecification.buildSpecification(queryOptions)
+                                          .and(rootSpecification.equalsStaIdentifier(id)), graphBuilder);
     }
 
-    private Optional<Thing> extracted(Specification<PlatformEntity> spec, ThingGraphBuilder graphBuilder) {
+    private Optional<Thing> getEntity(Specification<PlatformEntity> spec, ThingGraphBuilder graphBuilder) {
         Optional<PlatformEntity> platform = thingRepository.findOne(spec, graphBuilder);
         return platform.map(entity -> new ThingData(entity, Optional.of(propertyMapping)));
     }

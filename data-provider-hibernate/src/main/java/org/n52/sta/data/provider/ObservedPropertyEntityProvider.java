@@ -78,7 +78,8 @@ public class ObservedPropertyEntityProvider extends BaseEntityProvider<ObservedP
     @Override
     public Optional<ObservedProperty> getEntity(String id, QueryOptions queryOptions) throws ProviderException {
         ObservedPropertyGraphBuilder graphBuilder = ObservedPropertyGraphBuilder.createEmpty();
-        return getEntity(rootSpecification.buildSpecification(queryOptions), graphBuilder);
+        return getEntity(rootSpecification.buildSpecification(queryOptions)
+                                          .and(rootSpecification.equalsStaIdentifier(id)), graphBuilder);
     }
 
     private Optional<ObservedProperty> getEntity(Specification<PhenomenonEntity> spec,

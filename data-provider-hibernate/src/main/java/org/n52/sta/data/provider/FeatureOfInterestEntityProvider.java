@@ -78,7 +78,8 @@ public class FeatureOfInterestEntityProvider extends BaseEntityProvider<FeatureO
     @Override
     public Optional<FeatureOfInterest> getEntity(String id, QueryOptions queryOptions) throws ProviderException {
         FeatureOfInterestGraphBuilder graphBuilder = FeatureOfInterestGraphBuilder.createEmpty();
-        return getEntity(rootSpecification.buildSpecification(queryOptions), graphBuilder);
+        return getEntity(rootSpecification.buildSpecification(queryOptions)
+                                          .and(rootSpecification.equalsStaIdentifier(id)), graphBuilder);
     }
 
     private Optional<FeatureOfInterest> getEntity(Specification<AbstractFeatureEntity> specification,

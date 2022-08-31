@@ -77,7 +77,8 @@ public class LocationEntityProvider extends BaseEntityProvider<Location> {
     @Override
     public Optional<Location> getEntity(String id, QueryOptions queryOptions) throws ProviderException {
         LocationGraphBuilder graphBuilder = LocationGraphBuilder.createEmpty();
-        return getEntity(rootSpecification.buildSpecification(queryOptions), graphBuilder);
+        return getEntity(rootSpecification.buildSpecification(queryOptions)
+                                          .and(rootSpecification.equalsStaIdentifier(id)), graphBuilder);
     }
 
     private Optional<Location> getEntity(Specification<LocationEntity> spec, LocationGraphBuilder graphBuilder) {
