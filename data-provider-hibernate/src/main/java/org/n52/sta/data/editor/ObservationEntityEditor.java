@@ -2,7 +2,11 @@
 package org.n52.sta.data.editor;
 
 import java.math.BigDecimal;
-import java.util.*;
+import java.util.Collections;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.n52.janmayen.stream.Streams;
@@ -12,10 +16,6 @@ import org.n52.series.db.beans.DatasetEntity;
 import org.n52.series.db.beans.FormatEntity;
 import org.n52.series.db.beans.GeometryEntity;
 import org.n52.series.db.beans.QuantityDataEntity;
-import org.n52.series.db.beans.parameter.observation.ObservationBooleanParameterEntity;
-import org.n52.series.db.beans.parameter.observation.ObservationParameterEntity;
-import org.n52.series.db.beans.parameter.observation.ObservationQuantityParameterEntity;
-import org.n52.series.db.beans.parameter.observation.ObservationTextParameterEntity;
 import org.n52.shetland.ogc.gml.time.Time;
 import org.n52.shetland.ogc.gml.time.TimeInstant;
 import org.n52.shetland.ogc.om.OmConstants;
@@ -35,7 +35,7 @@ import org.springframework.context.event.EventListener;
 
 public class ObservationEntityEditor extends DatabaseEntityAdapter<DataEntity>
         implements
-        EntityEditorDelegate<Observation, ObservationData> {
+        ObservationEditorDelegate<Observation, ObservationData> {
 
     @Autowired
     private ObservationRepository observationRepository;
@@ -88,7 +88,7 @@ public class ObservationEntityEditor extends DatabaseEntityAdapter<DataEntity>
 
     @Override
     public void delete(String id) throws EditorException {
-        throw new EditorException();
+        observationRepository.deleteByStaIdentifier(id);
     }
 
     @Override
@@ -97,6 +97,7 @@ public class ObservationEntityEditor extends DatabaseEntityAdapter<DataEntity>
         return observationRepository.findByStaIdentifier(id, graphBuilder);
     }
 
+    //TODO: check why we need this method. Currently only called with Collection.singleton in #save
     private Set<DataEntity< ? >> saveAll(Set<Observation> observations, DatasetEntity datasetEntity)
             throws EditorException {
         Objects.requireNonNull(observations, "observations must not be null");
@@ -219,5 +220,10 @@ public class ObservationEntityEditor extends DatabaseEntityAdapter<DataEntity>
         if (getEntity(staIdentifier).isPresent()) {
             throw new EditorException("Observation already exists with ID '" + staIdentifier + "'");
         }
+    }
+
+    @Override
+    public void deleteObservationsByDatasetId(Set<Long> ids) {
+        observationRepository.deleteAllByDatasetIdIn(ids);
     }
 }

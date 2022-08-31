@@ -1,7 +1,9 @@
 
 package org.n52.sta.data.editor;
 
-import java.util.*;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.n52.janmayen.stream.Streams;
@@ -92,7 +94,14 @@ public class ObservedPropertyEntityEditor extends DatabaseEntityAdapter<Phenomen
 
     @Override
     public void delete(String id) throws EditorException {
-        throw new EditorException();
+        PhenomenonEntity phenomenon = getEntity(id)
+                .orElseThrow(() -> new EditorException("could not find entity with id: " + id));
+
+        phenomenon.getDatasets().forEach(ds -> {
+            datastreamEditor.delete(ds.getStaIdentifier());
+        });
+
+        phenomenonRepository.delete(phenomenon);
     }
 
     @Override

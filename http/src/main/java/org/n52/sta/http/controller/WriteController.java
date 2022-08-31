@@ -94,9 +94,11 @@ public class WriteController {
     }
 
     @DeleteMapping("/**")
-    public ResponseEntity<StreamingResponseBody> handleDeleteRequest(HttpServletRequest request)
+    public ResponseEntity<String> handleDeleteRequest(HttpServletRequest request)
             throws STAInvalidUrlException, EditorException, IOException {
-        return ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED).build();
+        StaPath< ? extends Identifiable> path = parsePath(request);
+        Class< ? extends Identifiable> entityType = path.getEntityType();
+        return delete(path, entityType);
     }
 
 
@@ -109,7 +111,7 @@ public class WriteController {
 
         StaPath< ? extends Identifiable> path = parsePath(request);
         Class< ? extends Identifiable> entityType = path.getEntityType();
-        Identifiable saved = saveEntityService(node, entityType);
+        Identifiable saved = save(node, entityType);
 
         return ResponseEntity.ok()
                              .contentType(MediaType.APPLICATION_JSON)
@@ -134,18 +136,30 @@ public class WriteController {
         return path;
     }
 
-    private <T extends Identifiable> T saveEntityService(JsonNode node, Class<T> type)
+    private <T extends Identifiable> T save(JsonNode node, Class<T> type)
             throws EditorException, IOException {
-        EntityService<T> service = lookup.getService(type)
-                                         .orElseThrow(() -> {
-                                             String typeName = type.getSimpleName();
-                                             String msg = "No service registered for type '%s'";
-                                             return new IllegalStateException(String.format(msg, typeName));
-                                         });
-
         ObjectMapper mapperConfig = registerTypeDeserializer(type);
         ObjectReader reader = mapperConfig.readerFor(type);
-        return service.save(reader.readValue(node));
+        return getService(type).save(reader.readValue(node));
+    }
+
+    private <T extends Identifiable> ResponseEntity<String> delete(StaPath<T> path, Class<? extends Identifiable> type) {
+
+        if (path.getPathType() != SelectPath.PathType.entity) {
+            return ResponseEntity.badRequest().body("illegal path. can only delete entities!");
+        }
+
+        //TODO: Implement deletion of related Enties
+        //TODO: e.g. /Datastreams(13)/Sensor
+        if (path.getPathSegments().size() > 1 || path.getPathSegments().get(0).getIdentifier().isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED).body("Deletion of entities addressed indirectly " +
+                                                                                  "is not implemented yet!");
+        }
+
+        String identifier = path.getPathSegments().get(0).getIdentifier().get();
+        getService(type).delete(identifier);
+
+        return ResponseEntity.ok("");
     }
 
     private <T extends Identifiable> ObjectMapper registerTypeDeserializer(Class<T> type) {
@@ -153,5 +167,15 @@ public class WriteController {
         SimpleModule module = new SimpleModule();
         module.addDeserializer(type, new StaEntityDeserializer<>(type, mapperConfig));
         return mapperConfig.registerModule(module);
+    }
+
+    private <T extends Identifiable> EntityService<T> getService(Class<T> type) {
+        return lookup.getService(type)
+                     .orElseThrow(() -> {
+                         String typeName = type.getSimpleName();
+                         String msg = "No service registered for type '%s'";
+                         return new IllegalStateException(String.format(msg, typeName));
+                     });
+
     }
 }

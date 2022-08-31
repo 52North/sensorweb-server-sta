@@ -1,5 +1,7 @@
 package org.n52.sta.data.editor;
 
+import java.util.Optional;
+
 import org.n52.series.db.beans.sta.HistoricalLocationEntity;
 import org.n52.sta.api.EntityServiceLookup;
 import org.n52.sta.api.entity.HistoricalLocation;
@@ -12,8 +14,6 @@ import org.n52.sta.data.support.HistoricalLocationGraphBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.context.event.EventListener;
-
-import java.util.Optional;
 
 public class HistoricalLocationEntityEditor extends DatabaseEntityAdapter<HistoricalLocationEntity>
         implements
@@ -55,7 +55,8 @@ public class HistoricalLocationEntityEditor extends DatabaseEntityAdapter<Histor
 
     @Override
     public void delete(String id) throws EditorException {
-        throw new EditorException();
+
+        historicalLocationRepository.deleteByStaIdentifier(id);
     }
 
     @Override

@@ -30,11 +30,14 @@ package org.n52.sta.data.repositories.entity;
 
 import java.util.Set;
 
+import javax.transaction.Transactional;
+
 import org.n52.series.db.beans.DataEntity;
 import org.n52.sta.data.repositories.BaseRepository;
 import org.springframework.stereotype.Repository;
 
 @Repository
+@Transactional
 public interface ObservationRepository extends BaseRepository<DataEntity> {
 
     DataEntity<DataEntity> findFirstByDataset_idOrderBySamplingTimeStartAsc(Long datasetIdentifier);

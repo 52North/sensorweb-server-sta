@@ -1,7 +1,10 @@
 package org.n52.sta.data.editor;
 
+import java.util.Map;
+import java.util.Optional;
+import java.util.stream.Collectors;
+
 import org.n52.janmayen.stream.Streams;
-import org.n52.series.db.beans.parameter.ParameterEntity;
 import org.n52.series.db.beans.sta.LocationEntity;
 import org.n52.sta.api.EntityServiceLookup;
 import org.n52.sta.api.entity.HistoricalLocation;
@@ -18,10 +21,6 @@ import org.n52.sta.data.support.LocationGraphBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.context.event.EventListener;
-
-import java.util.Map;
-import java.util.Optional;
-import java.util.stream.Collectors;
 
 public class LocationEntityEditor extends DatabaseEntityAdapter<LocationEntity>
         implements
@@ -56,7 +55,7 @@ public class LocationEntityEditor extends DatabaseEntityAdapter<LocationEntity>
     public LocationData getOrSave(Location entity) throws EditorException {
         Optional<LocationEntity> stored = getEntity(entity.getId());
         return stored.map(e -> new LocationData(e, Optional.empty()))
-                .orElseGet(() -> save(entity));
+                     .orElseGet(() -> save(entity));
     }
 
     @Override
@@ -88,18 +87,18 @@ public class LocationEntityEditor extends DatabaseEntityAdapter<LocationEntity>
         // parameters are saved as cascade
         Map<String, Object> properties = entity.getProperties();
         Streams.stream(properties.entrySet())
-                .map(entry -> convertParameter(locationEntity, entry))
-                .forEach(locationEntity::addParameter);
+               .map(entry -> convertParameter(locationEntity, entry))
+               .forEach(locationEntity::addParameter);
 
         locationEntity.setPlatforms(Streams.stream(entity.getThings())
-                .map(thingEditor::getOrSave)
-                .map(StaData::getData)
-                .collect(Collectors.toSet()));
+                                           .map(thingEditor::getOrSave)
+                                           .map(StaData::getData)
+                                           .collect(Collectors.toSet()));
 
         locationEntity.setHistoricalLocations(Streams.stream(entity.getHistoricalLocations())
-                .map(historicalLocationEditor::getOrSave)
-                .map(StaData::getData)
-                .collect(Collectors.toSet()));
+                                                     .map(historicalLocationEditor::getOrSave)
+                                                     .map(StaData::getData)
+                                                     .collect(Collectors.toSet()));
 
         // we need to flush else updates to relations are not persisted
         locationRepository.flush();
@@ -114,7 +113,14 @@ public class LocationEntityEditor extends DatabaseEntityAdapter<LocationEntity>
 
     @Override
     public void delete(String id) throws EditorException {
-        throw new EditorException();
+        LocationEntity location = getEntity(id)
+                .orElseThrow(() -> new EditorException("could not find entity with id: " + id));
+
+        location.getHistoricalLocations().forEach(hl -> {
+            historicalLocationEditor.delete(hl.getStaIdentifier());
+        });
+
+        locationRepository.delete(location);
     }
 
     @Override

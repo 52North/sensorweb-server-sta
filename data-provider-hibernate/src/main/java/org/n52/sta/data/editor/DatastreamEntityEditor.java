@@ -1,7 +1,6 @@
-
 package org.n52.sta.data.editor;
 
-import java.math.BigDecimal;
+import java.util.Collections;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
@@ -12,15 +11,16 @@ import javax.transaction.Transactional;
 import javax.transaction.Transactional.TxType;
 
 import org.n52.janmayen.stream.Streams;
-import org.n52.series.db.beans.*;
+import org.n52.series.db.beans.AbstractDatasetEntity;
+import org.n52.series.db.beans.CategoryEntity;
+import org.n52.series.db.beans.DatasetAggregationEntity;
+import org.n52.series.db.beans.DatasetEntity;
+import org.n52.series.db.beans.IdEntity;
+import org.n52.series.db.beans.OfferingEntity;
+import org.n52.series.db.beans.ProcedureEntity;
 import org.n52.series.db.beans.dataset.DatasetType;
 import org.n52.series.db.beans.dataset.ObservationType;
-import org.n52.series.db.beans.parameter.dataset.DatasetBooleanParameterEntity;
-import org.n52.series.db.beans.parameter.dataset.DatasetParameterEntity;
-import org.n52.series.db.beans.parameter.dataset.DatasetQuantityParameterEntity;
-import org.n52.series.db.beans.parameter.dataset.DatasetTextParameterEntity;
 import org.n52.shetland.ogc.gml.time.Time;
-import org.n52.shetland.ogc.sta.exception.STACRUDException;
 import org.n52.sta.api.EntityServiceLookup;
 import org.n52.sta.api.domain.aggregate.ThingAggregate;
 import org.n52.sta.api.entity.Datastream;
@@ -36,7 +36,6 @@ import org.n52.sta.data.entity.ObservedPropertyData;
 import org.n52.sta.data.entity.SensorData;
 import org.n52.sta.data.entity.StaData;
 import org.n52.sta.data.entity.ThingData;
-import org.n52.sta.data.old.service.CategoryService;
 import org.n52.sta.data.repositories.entity.DatastreamRepository;
 import org.n52.sta.data.repositories.value.CategoryRepository;
 import org.n52.sta.data.repositories.value.OfferingRepository;
@@ -70,7 +69,7 @@ public class DatastreamEntityEditor extends DatabaseEntityAdapter<AbstractDatase
     private EntityEditorDelegate<Thing, ThingData> thingEditor;
     private EntityEditorDelegate<Sensor, SensorData> sensorEditor;
     private EntityEditorDelegate<ObservedProperty, ObservedPropertyData> observedPropertyEditor;
-    private EntityEditorDelegate<Observation, ObservationData> observationEditor;
+    private ObservationEditorDelegate<Observation, ObservationData> observationEditor;
 
     private CategoryEntity defaultCategory;
 
@@ -91,7 +90,7 @@ public class DatastreamEntityEditor extends DatabaseEntityAdapter<AbstractDatase
                 getService(Sensor.class).unwrapEditor();
         this.observedPropertyEditor = (EntityEditorDelegate<ObservedProperty, ObservedPropertyData>)
                 getService(ObservedProperty.class).unwrapEditor();
-        this.observationEditor = (EntityEditorDelegate<Observation, ObservationData>)
+        this.observationEditor = (ObservationEditorDelegate<Observation, ObservationData>)
                 getService(Observation.class).unwrapEditor();
         //@formatter:on
 
@@ -142,7 +141,6 @@ public class DatastreamEntityEditor extends DatabaseEntityAdapter<AbstractDatase
         valueHelper.setEndTime(dataset::setResultTimeEnd, resultTime);
         valueHelper.setFormat(dataset::setOMObservationType, entity.getObservationType());
         valueHelper.setUnit(dataset::setUnit, entity.getUnitOfMeasurement());
-
 
         // references
         ThingData thing = thingEditor.getOrSave(entity.getThing());
@@ -211,7 +209,37 @@ public class DatastreamEntityEditor extends DatabaseEntityAdapter<AbstractDatase
 
     @Override
     public void delete(String id) throws EditorException {
-        throw new EditorException();
+        AbstractDatasetEntity dataset = getEntity(id)
+                .orElseThrow(() -> new EditorException("could not find entity with id: " + id));
+
+        // Delete first/last to be able to delete observations
+        dataset.setFirstObservation(null);
+        dataset.setLastObservation(null);
+
+        // Delete subdatasets and their observations if we are aggregation
+        if (dataset instanceof DatasetAggregationEntity) {
+            Set<AbstractDatasetEntity> allByAggregationId = datastreamRepository.findAllByAggregationId(dataset.getId());
+            Set<Long> datasetIds = allByAggregationId.stream()
+                                                     .map(IdEntity::getId)
+                                                     .collect(Collectors.toSet());
+            allByAggregationId.forEach(ds -> {
+                ds.setFirstObservation(null);
+                ds.setLastObservation(null);
+            });
+
+            // Flush to disk
+            datastreamRepository.saveAll(allByAggregationId);
+            datastreamRepository.flush();
+            // delete observations
+            observationEditor.deleteObservationsByDatasetId(datasetIds);
+            // delete subdatastreams
+            datasetIds.forEach(datasetId -> datastreamRepository.deleteById(datasetId));
+        } else {
+            // delete observations
+            observationEditor.deleteObservationsByDatasetId(Collections.singleton(dataset.getId()));
+        }
+
+        datastreamRepository.delete(dataset);
     }
 
     @Override

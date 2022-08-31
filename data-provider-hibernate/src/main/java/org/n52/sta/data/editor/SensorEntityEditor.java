@@ -7,15 +7,14 @@ import java.util.stream.Collectors;
 
 import org.n52.janmayen.stream.Streams;
 import org.n52.series.db.beans.ProcedureEntity;
-import org.n52.series.db.beans.ProcedureEntity;
 import org.n52.sta.api.EntityServiceLookup;
 import org.n52.sta.api.entity.Datastream;
-import org.n52.sta.api.entity.Location;
-import org.n52.sta.api.entity.Sensor;
 import org.n52.sta.api.entity.Sensor;
 import org.n52.sta.api.exception.EditorException;
 import org.n52.sta.api.service.EntityService;
-import org.n52.sta.data.entity.*;
+import org.n52.sta.data.entity.DatastreamData;
+import org.n52.sta.data.entity.SensorData;
+import org.n52.sta.data.entity.StaData;
 import org.n52.sta.data.repositories.entity.ProcedureRepository;
 import org.n52.sta.data.support.SensorGraphBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -52,7 +51,7 @@ public class SensorEntityEditor extends DatabaseEntityAdapter<ProcedureEntity>
     public SensorData getOrSave(Sensor entity) throws EditorException {
         Optional<ProcedureEntity> stored = getEntity(entity.getId());
         return stored.map(e -> new SensorData(e, Optional.empty()))
-                .orElseGet(() -> save(entity));
+                     .orElseGet(() -> save(entity));
     }
 
     @Override
@@ -83,15 +82,14 @@ public class SensorEntityEditor extends DatabaseEntityAdapter<ProcedureEntity>
         // parameters are saved as cascade
         Map<String, Object> properties = entity.getProperties();
         Streams.stream(properties.entrySet())
-                .map(entry -> convertParameter(procedureEntity, entry))
-                .forEach(procedureEntity::addParameter);
-
+               .map(entry -> convertParameter(procedureEntity, entry))
+               .forEach(procedureEntity::addParameter);
 
         // save related entities
         procedureEntity.setDatasets(Streams.stream(entity.getDatastreams())
-                .map(datastreamEditor::getOrSave)
-                .map(StaData::getData)
-                .collect(Collectors.toSet()));
+                                           .map(datastreamEditor::getOrSave)
+                                           .map(StaData::getData)
+                                           .collect(Collectors.toSet()));
 
         // we need to flush else updates to relations are not persisted
         procedureRepository.flush();
@@ -106,7 +104,14 @@ public class SensorEntityEditor extends DatabaseEntityAdapter<ProcedureEntity>
 
     @Override
     public void delete(String id) throws EditorException {
-        throw new EditorException();
+        ProcedureEntity procedure = getEntity(id)
+                .orElseThrow(() -> new EditorException("could not find entity with id: " + id));
+
+        procedure.getDatasets().forEach(ds -> {
+            datastreamEditor.delete(ds.getStaIdentifier());
+        });
+
+        procedureRepository.delete(procedure);
     }
 
     @Override

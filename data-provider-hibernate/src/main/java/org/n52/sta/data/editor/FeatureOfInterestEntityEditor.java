@@ -1,5 +1,9 @@
 package org.n52.sta.data.editor;
 
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+
 import org.n52.janmayen.stream.Streams;
 import org.n52.series.db.beans.AbstractFeatureEntity;
 import org.n52.series.db.beans.FeatureEntity;
@@ -15,10 +19,6 @@ import org.n52.sta.data.support.FeatureOfInterestGraphBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.context.event.EventListener;
-
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
 
 public class FeatureOfInterestEntityEditor extends DatabaseEntityAdapter<AbstractFeatureEntity>
         implements
@@ -103,7 +103,13 @@ public class FeatureOfInterestEntityEditor extends DatabaseEntityAdapter<Abstrac
 
     @Override
     public void delete(String id) throws EditorException {
-        throw new EditorException();
+        AbstractFeatureEntity foi = getEntity(id)
+                .orElseThrow(() -> new EditorException("could not find entity with id: " + id));
+
+        // TODO: Implmement Deletion of related observations + update of related Datasets
+        // TODO: See FeatureOfInterestService#deleteRelatedObservationsAndUpdateDatasets
+
+        throw new EditorException("not implemented!");
     }
 
     @Override

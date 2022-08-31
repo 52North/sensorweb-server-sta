@@ -1,6 +1,5 @@
 package org.n52.sta.data.editor;
 
-import java.math.BigDecimal;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
@@ -8,15 +7,18 @@ import java.util.stream.Collectors;
 
 import org.n52.janmayen.stream.Streams;
 import org.n52.series.db.beans.PlatformEntity;
-import org.n52.series.db.beans.parameter.platform.PlatformBooleanParameterEntity;
-import org.n52.series.db.beans.parameter.platform.PlatformParameterEntity;
-import org.n52.series.db.beans.parameter.platform.PlatformQuantityParameterEntity;
-import org.n52.series.db.beans.parameter.platform.PlatformTextParameterEntity;
 import org.n52.sta.api.EntityServiceLookup;
-import org.n52.sta.api.entity.*;
+import org.n52.sta.api.entity.Datastream;
+import org.n52.sta.api.entity.HistoricalLocation;
+import org.n52.sta.api.entity.Location;
+import org.n52.sta.api.entity.Thing;
 import org.n52.sta.api.exception.EditorException;
 import org.n52.sta.api.service.EntityService;
-import org.n52.sta.data.entity.*;
+import org.n52.sta.data.entity.DatastreamData;
+import org.n52.sta.data.entity.HistoricalLocationData;
+import org.n52.sta.data.entity.LocationData;
+import org.n52.sta.data.entity.StaData;
+import org.n52.sta.data.entity.ThingData;
 import org.n52.sta.data.repositories.entity.PlatformRepository;
 import org.n52.sta.data.support.ThingGraphBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -55,7 +57,7 @@ public class ThingEntityEditor extends DatabaseEntityAdapter<PlatformEntity>
     public ThingData getOrSave(Thing entity) throws EditorException {
         Optional<PlatformEntity> stored = getEntity(entity.getId());
         return stored.map(e -> new ThingData(e, Optional.empty()))
-                .orElseGet(() -> save(entity));
+                     .orElseGet(() -> save(entity));
     }
 
     @Override
@@ -80,27 +82,27 @@ public class ThingEntityEditor extends DatabaseEntityAdapter<PlatformEntity>
         // parameters are saved as cascade
         Map<String, Object> properties = entity.getProperties();
         Streams.stream(properties.entrySet())
-                .map(entry -> convertParameter(platformEntity, entry))
-                .forEach(platformEntity::addParameter);
+               .map(entry -> convertParameter(platformEntity, entry))
+               .forEach(platformEntity::addParameter);
 
         // save entity
         PlatformEntity saved = platformRepository.save(platformEntity);
 
         // save related entities
         platformEntity.setLocations(Streams.stream(entity.getLocations())
-                .map(locationEditor::getOrSave)
-                .map(StaData::getData)
-                .collect(Collectors.toSet()));
+                                           .map(locationEditor::getOrSave)
+                                           .map(StaData::getData)
+                                           .collect(Collectors.toSet()));
 
         platformEntity.setDatasets(Streams.stream(entity.getDatastreams())
-                .map(datastreamEditor::getOrSave)
-                .map(StaData::getData)
-                .collect(Collectors.toSet()));
+                                          .map(datastreamEditor::getOrSave)
+                                          .map(StaData::getData)
+                                          .collect(Collectors.toSet()));
 
         platformEntity.setHistoricalLocations(Streams.stream(entity.getHistoricalLocations())
-                .map(historicalLocationEditor::getOrSave)
-                .map(StaData::getData)
-                .collect(Collectors.toSet()));
+                                                     .map(historicalLocationEditor::getOrSave)
+                                                     .map(StaData::getData)
+                                                     .collect(Collectors.toSet()));
 
         // we need to flush else updates to relations are not persisted
         platformRepository.flush();
@@ -115,7 +117,20 @@ public class ThingEntityEditor extends DatabaseEntityAdapter<PlatformEntity>
 
     @Override
     public void delete(String id) throws EditorException {
-        throw new EditorException();
+        PlatformEntity platform = getEntity(id)
+                .orElseThrow(() -> new EditorException("could not find entity with id: " + id));
+
+        platform.getDatasets().forEach(ds -> {
+            datastreamEditor.delete(ds.getStaIdentifier());
+        });
+
+        platform.getHistoricalLocations().forEach(hl -> {
+            platform.setHistoricalLocations(null);
+            platform.getLocations().forEach(loc -> loc.setHistoricalLocations(null));
+            historicalLocationEditor.delete(hl.getStaIdentifier());
+        });
+
+        platformRepository.delete(platform);
     }
 
     @Override
