@@ -2,9 +2,11 @@ package org.n52.sta.data.editor;
 
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.n52.janmayen.stream.Streams;
+import org.n52.series.db.beans.sta.HistoricalLocationEntity;
 import org.n52.series.db.beans.sta.LocationEntity;
 import org.n52.sta.api.EntityServiceLookup;
 import org.n52.sta.api.entity.HistoricalLocation;
@@ -116,9 +118,17 @@ public class LocationEntityEditor extends DatabaseEntityAdapter<LocationEntity>
         LocationEntity location = getEntity(id)
                 .orElseThrow(() -> new EditorException("could not find entity with id: " + id));
 
-        location.getHistoricalLocations().forEach(hl -> {
+        Set<HistoricalLocationEntity> historicalLocations = location.getHistoricalLocations();
+
+        location.setHistoricalLocations(null);
+        historicalLocations.forEach(hl -> {
             historicalLocationEditor.delete(hl.getStaIdentifier());
         });
+
+        location.getPlatforms().forEach(thing -> {
+            thing.getLocations().remove(location);
+        });
+        location.setPlatforms(null);
 
         locationRepository.delete(location);
     }

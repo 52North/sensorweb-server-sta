@@ -3,6 +3,7 @@ package org.n52.sta.data.editor;
 import java.util.Optional;
 
 import org.n52.series.db.beans.sta.HistoricalLocationEntity;
+import org.n52.series.db.beans.sta.LocationEntity;
 import org.n52.sta.api.EntityServiceLookup;
 import org.n52.sta.api.entity.HistoricalLocation;
 import org.n52.sta.api.entity.Thing;
@@ -55,6 +56,11 @@ public class HistoricalLocationEntityEditor extends DatabaseEntityAdapter<Histor
 
     @Override
     public void delete(String id) throws EditorException {
+        HistoricalLocationEntity historicalLocation = getEntity(id)
+                .orElseThrow(() -> new EditorException("could not find entity with id: " + id));
+
+        updateLocations(historicalLocation);
+        updateThing(historicalLocation);
 
         historicalLocationRepository.deleteByStaIdentifier(id);
     }
@@ -63,5 +69,16 @@ public class HistoricalLocationEntityEditor extends DatabaseEntityAdapter<Histor
     protected Optional<HistoricalLocationEntity> getEntity(String id) {
         HistoricalLocationGraphBuilder graphBuilder = HistoricalLocationGraphBuilder.createEmpty();
         return historicalLocationRepository.findByStaIdentifier(id, graphBuilder);
+    }
+
+    private void updateLocations(HistoricalLocationEntity historicalLocation) {
+        for (LocationEntity location : historicalLocation.getLocations()) {
+            location.getHistoricalLocations()
+                    .remove(historicalLocation);
+        }
+    }
+
+    private void updateThing(HistoricalLocationEntity historicalLocation) {
+        historicalLocation.getThing().setHistoricalLocations(null);
     }
 }
