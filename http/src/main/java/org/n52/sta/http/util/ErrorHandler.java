@@ -33,6 +33,7 @@ import org.n52.shetland.ogc.sta.exception.STAInvalidFilterExpressionException;
 import org.n52.shetland.ogc.sta.exception.STAInvalidQueryException;
 import org.n52.shetland.ogc.sta.exception.STAInvalidUrlException;
 import org.n52.shetland.ogc.sta.exception.STANotFoundException;
+import org.n52.sta.api.domain.aggregate.InvalidAggregateException;
 import org.n52.sta.api.exception.ProviderException;
 import org.n52.sta.http.serialize.in.InvalidValueException;
 import org.slf4j.Logger;
@@ -85,6 +86,7 @@ public class ErrorHandler {
         InvalidValueException.class,
         STAInvalidUrlException.class
     })
+
     public ResponseEntity<Object> staInvalidUrlException(STAInvalidUrlException exception) {
         String msg = createErrorMessage(exception);
         LOGGER.debug(msg, exception);
@@ -101,6 +103,15 @@ public class ErrorHandler {
                                     headers,
                                     HttpStatus.valueOf(exception.getResponseStatus()
                                                                 .getCode()));
+    }
+
+    @ExceptionHandler(value = InvalidAggregateException.class)
+    public ResponseEntity<Object> staInvalidAggregateException(InvalidAggregateException exception) {
+        String msg = createErrorMessage(exception);
+        LOGGER.debug(msg, exception);
+        return new ResponseEntity<>(msg,
+                                    headers,
+                                    HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler(value = {
