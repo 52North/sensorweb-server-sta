@@ -5038,6 +5038,285 @@ CREATE SEQUENCE public.value_profile_seq
     CACHE 1;
 
 
+--
+-- TOC entry 4969 (class 0 OID 0)
+-- Dependencies: 259
+-- Name: category_i18n_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+--
+
+SELECT pg_catalog.setval('public.category_i18n_seq', 1, false);
+
+
+--
+-- TOC entry 4970 (class 0 OID 0)
+-- Dependencies: 260
+-- Name: category_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+--
+
+SELECT pg_catalog.setval('public.category_seq', 1, true);
+
+
+--
+-- TOC entry 4971 (class 0 OID 0)
+-- Dependencies: 261
+-- Name: codespace_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+--
+
+SELECT pg_catalog.setval('public.codespace_seq', 1, false);
+
+
+--
+-- TOC entry 4972 (class 0 OID 0)
+-- Dependencies: 262
+-- Name: dataset_i18n_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+--
+
+SELECT pg_catalog.setval('public.dataset_i18n_seq', 1, false);
+
+
+--
+-- TOC entry 4973 (class 0 OID 0)
+-- Dependencies: 263
+-- Name: dataset_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+--
+
+SELECT pg_catalog.setval('public.dataset_seq', 2, true);
+
+
+--
+-- TOC entry 4974 (class 0 OID 0)
+-- Dependencies: 264
+-- Name: feature_i18n_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+--
+
+SELECT pg_catalog.setval('public.feature_i18n_seq', 1, false);
+
+
+--
+-- TOC entry 4975 (class 0 OID 0)
+-- Dependencies: 265
+-- Name: feature_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+--
+
+SELECT pg_catalog.setval('public.feature_seq', 1, true);
+
+
+--
+-- TOC entry 4976 (class 0 OID 0)
+-- Dependencies: 266
+-- Name: format_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+--
+
+SELECT pg_catalog.setval('public.format_seq', 14, true);
+
+
+--
+-- TOC entry 4977 (class 0 OID 0)
+-- Dependencies: 267
+-- Name: historical_location_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+--
+
+SELECT pg_catalog.setval('public.historical_location_seq', 1, true);
+
+
+--
+-- TOC entry 4978 (class 0 OID 0)
+-- Dependencies: 268
+-- Name: location_i18n_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+--
+
+SELECT pg_catalog.setval('public.location_i18n_seq', 1, false);
+
+
+--
+-- TOC entry 4979 (class 0 OID 0)
+-- Dependencies: 269
+-- Name: location_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+--
+
+SELECT pg_catalog.setval('public.location_seq', 1, true);
+
+
+--
+-- TOC entry 4980 (class 0 OID 0)
+-- Dependencies: 270
+-- Name: observation_i18n_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+--
+
+SELECT pg_catalog.setval('public.observation_i18n_seq', 1, false);
+
+
+--
+-- TOC entry 4981 (class 0 OID 0)
+-- Dependencies: 271
+-- Name: observation_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+--
+
+SELECT pg_catalog.setval('public.observation_seq', 4, true);
+
+
+--
+-- TOC entry 4982 (class 0 OID 0)
+-- Dependencies: 272
+-- Name: offering_i18n_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+--
+
+SELECT pg_catalog.setval('public.offering_i18n_seq', 1, false);
+
+
+--
+-- TOC entry 4983 (class 0 OID 0)
+-- Dependencies: 273
+-- Name: offering_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+--
+
+SELECT pg_catalog.setval('public.offering_seq', 2, true);
+
+
+--
+-- TOC entry 4984 (class 0 OID 0)
+-- Dependencies: 274
+-- Name: parameter_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+--
+
+SELECT pg_catalog.setval('public.parameter_seq', 1, true);
+
+
+--
+-- TOC entry 4985 (class 0 OID 0)
+-- Dependencies: 275
+-- Name: phenomenon_i18n_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+--
+
+SELECT pg_catalog.setval('public.phenomenon_i18n_seq', 1, false);
+
+
+--
+-- TOC entry 4986 (class 0 OID 0)
+-- Dependencies: 276
+-- Name: phenomenon_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+--
+
+SELECT pg_catalog.setval('public.phenomenon_seq', 2, true);
+
+
+--
+-- TOC entry 4987 (class 0 OID 0)
+-- Dependencies: 277
+-- Name: platform_i18n_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+--
+
+SELECT pg_catalog.setval('public.platform_i18n_seq', 1, false);
+
+
+--
+-- TOC entry 4988 (class 0 OID 0)
+-- Dependencies: 278
+-- Name: platform_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+--
+
+SELECT pg_catalog.setval('public.platform_seq', 1, true);
+
+
+--
+-- TOC entry 4989 (class 0 OID 0)
+-- Dependencies: 279
+-- Name: procedure_history_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+--
+
+SELECT pg_catalog.setval('public.procedure_history_seq', 1, false);
+
+
+--
+-- TOC entry 4990 (class 0 OID 0)
+-- Dependencies: 280
+-- Name: procedure_i18n_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+--
+
+SELECT pg_catalog.setval('public.procedure_i18n_seq', 1, false);
+
+
+--
+-- TOC entry 4991 (class 0 OID 0)
+-- Dependencies: 281
+-- Name: procedure_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+--
+
+SELECT pg_catalog.setval('public.procedure_seq', 2, true);
+
+
+--
+-- TOC entry 4992 (class 0 OID 0)
+-- Dependencies: 282
+-- Name: related_feature_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+--
+
+SELECT pg_catalog.setval('public.related_feature_seq', 1, false);
+
+
+--
+-- TOC entry 4993 (class 0 OID 0)
+-- Dependencies: 283
+-- Name: result_template_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+--
+
+SELECT pg_catalog.setval('public.result_template_seq', 1, false);
+
+
+--
+-- TOC entry 4994 (class 0 OID 0)
+-- Dependencies: 284
+-- Name: tag_i18n_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+--
+
+SELECT pg_catalog.setval('public.tag_i18n_seq', 1, false);
+
+
+--
+-- TOC entry 4995 (class 0 OID 0)
+-- Dependencies: 285
+-- Name: tag_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+--
+
+SELECT pg_catalog.setval('public.tag_seq', 1, false);
+
+
+--
+-- TOC entry 4996 (class 0 OID 0)
+-- Dependencies: 286
+-- Name: unit_i18n_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+--
+
+SELECT pg_catalog.setval('public.unit_i18n_seq', 1, false);
+
+
+--
+-- TOC entry 4997 (class 0 OID 0)
+-- Dependencies: 287
+-- Name: unit_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+--
+
+SELECT pg_catalog.setval('public.unit_seq', 2, true);
+
+
+--
+-- TOC entry 4998 (class 0 OID 0)
+-- Dependencies: 288
+-- Name: value_profile_i18n_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+--
+
+SELECT pg_catalog.setval('public.value_profile_i18n_seq', 1, false);
+
+
+--
+-- TOC entry 4999 (class 0 OID 0)
+-- Dependencies: 289
+-- Name: value_profile_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+--
+
+SELECT pg_catalog.setval('public.value_profile_seq', 1, false);
+
+
 ALTER TABLE public.value_profile_seq OWNER TO postgres;
 
 
