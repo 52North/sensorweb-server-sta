@@ -28,6 +28,7 @@
 
 package org.n52.sta.data.repositories.entity;
 
+import java.util.Optional;
 import java.util.Set;
 
 import javax.transaction.Transactional;
@@ -40,9 +41,23 @@ import org.springframework.stereotype.Repository;
 @Transactional
 public interface ObservationRepository extends BaseRepository<DataEntity> {
 
-    DataEntity<DataEntity> findFirstByDataset_idOrderBySamplingTimeStartAsc(Long datasetIdentifier);
+    /**
+     * Gets the (temporally) first observation for given datastream. Used for updating Dataset->lastObservation
+     * and associated fields.
+     *
+     * @param id id of the datastream
+     * @return temporally latest observation. Optional.empty if there are not observations in this dataset
+     */
+    Optional<DataEntity<?>> findFirstByDataset_idOrderBySamplingTimeStartAsc(Long id);
 
-    DataEntity<DataEntity> findFirstByDataset_idOrderBySamplingTimeEndDesc(Long datasetIdentifier);
+    /**
+     * Gets the (temporally) last observation for given datastream. Used for updating Dataset->lastObservation
+     * and associated fields
+     *
+     * @param id id of the datastream
+     * @return temporally latest observation. Optional.empty if there are not observations in this dataset
+     */
+    Optional<DataEntity<?>> findFirstByDataset_idOrderBySamplingTimeEndDesc(Long id);
 
     void deleteAllByDatasetIdIn(Set<Long> datasetId);
 }

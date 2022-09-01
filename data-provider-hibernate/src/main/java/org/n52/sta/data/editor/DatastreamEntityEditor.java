@@ -10,14 +10,18 @@ import java.util.stream.Collectors;
 import javax.transaction.Transactional;
 import javax.transaction.Transactional.TxType;
 
+import org.hibernate.Hibernate;
 import org.n52.janmayen.stream.Streams;
 import org.n52.series.db.beans.AbstractDatasetEntity;
 import org.n52.series.db.beans.CategoryEntity;
+import org.n52.series.db.beans.DataEntity;
+import org.n52.series.db.beans.Dataset;
 import org.n52.series.db.beans.DatasetAggregationEntity;
 import org.n52.series.db.beans.DatasetEntity;
 import org.n52.series.db.beans.IdEntity;
 import org.n52.series.db.beans.OfferingEntity;
 import org.n52.series.db.beans.ProcedureEntity;
+import org.n52.series.db.beans.QuantityDataEntity;
 import org.n52.series.db.beans.dataset.DatasetType;
 import org.n52.series.db.beans.dataset.ObservationType;
 import org.n52.shetland.ogc.gml.time.Time;
@@ -47,7 +51,7 @@ import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.context.event.EventListener;
 
 public class DatastreamEntityEditor extends DatabaseEntityAdapter<AbstractDatasetEntity> implements
-        EntityEditorDelegate<Datastream, DatastreamData> {
+        DatastreamEditorDelegate<Datastream, DatastreamData> {
 
     private static final Logger logger = LoggerFactory.getLogger(DatastreamEntityEditor.class);
 
@@ -265,6 +269,72 @@ public class DatastreamEntityEditor extends DatabaseEntityAdapter<AbstractDatase
         String staIdentifier = datastream.getId();
         if (getEntity(staIdentifier).isPresent()) {
             throw new EditorException("Datastream already exists with ID '" + staIdentifier + "'");
+        }
+    }
+
+    public boolean deleteReferenceFromDatasetFirst(DataEntity<?> observation) {
+        DatasetEntity dataset = observation.getDataset();
+        if (dataset.getFirstObservation() != null
+                && dataset.getFirstObservation()
+                          .getStaIdentifier()
+                          .equals(observation.getStaIdentifier())) {
+            dataset.setFirstObservation(null);
+            dataset.setFirstQuantityValue(null);
+            dataset.setFirstValueAt(null);
+            observation.setDataset(datastreamRepository.saveAndFlush(dataset));
+            return true;
+        }
+        return false;
+    }
+
+    @Override
+    public boolean deleteReferenceFromDatasetLast(DataEntity<?> observation) {
+        DatasetEntity dataset = observation.getDataset();
+        if (dataset.getLastObservation() != null
+                && dataset.getLastObservation()
+                          .getStaIdentifier()
+                          .equals(observation.getStaIdentifier())) {
+            dataset.setLastObservation(null);
+            dataset.setLastQuantityValue(null);
+            dataset.setLastValueAt(null);
+            observation.setDataset(datastreamRepository.saveAndFlush(dataset));
+            return true;
+        }
+        return false;
+    }
+
+    public void updateDatastreamFirstLast(AbstractDatasetEntity datastreamEntity,
+                                          DataEntity<?> first,
+                                          DataEntity<?> last) {
+        if (first != null
+                && (!datastreamEntity.isSetFirstValueAt()
+                || first.getSamplingTimeStart().before(datastreamEntity.getSamplingTimeStart()))) {
+            datastreamEntity.setFirstObservation(first);
+            datastreamEntity.setFirstValueAt(first.getSamplingTimeStart());
+            DataEntity unwrapped = (DataEntity) Hibernate.unproxy(first);
+            if (unwrapped instanceof QuantityDataEntity) {
+                datastreamEntity.setFirstQuantityValue(((QuantityDataEntity) unwrapped).getValue());
+            }
+        }
+
+        if (last != null
+                && (!datastreamEntity.isSetLastValueAt()
+                || last.getSamplingTimeEnd().after(datastreamEntity.getSamplingTimeEnd()))) {
+            datastreamEntity.setLastObservation(last);
+            datastreamEntity.setFirstValueAt(last.getSamplingTimeEnd());
+
+            DataEntity unwrapped = (DataEntity) Hibernate.unproxy(last);
+            if (unwrapped instanceof QuantityDataEntity) {
+                datastreamEntity.setLastQuantityValue(((QuantityDataEntity) unwrapped).getValue());
+            }
+        }
+
+        datastreamRepository.save((Dataset) datastreamEntity);
+
+        // update parent if datastream is part of aggregation
+        if (datastreamEntity.isSetAggregation()) {
+            updateDatastreamFirstLast(
+                    datastreamRepository.findById(datastreamEntity.getAggregation().getId()).get(), first, last);
         }
     }
 }

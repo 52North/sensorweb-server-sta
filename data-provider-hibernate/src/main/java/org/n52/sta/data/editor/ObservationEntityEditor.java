@@ -46,7 +46,7 @@ public class ObservationEntityEditor extends DatabaseEntityAdapter<DataEntity>
     @Autowired
     private EntityPropertyMapping propertyMapping;
 
-    private EntityEditorDelegate<Datastream, DatastreamData> datastreamEditor;
+    private DatastreamEditorDelegate<Datastream, DatastreamData> datastreamEditor;
 
     public ObservationEntityEditor(EntityServiceLookup serviceLookup) {
         super(serviceLookup);
@@ -57,7 +57,7 @@ public class ObservationEntityEditor extends DatabaseEntityAdapter<DataEntity>
     private void postConstruct (ContextRefreshedEvent event){
         //@formatter:off
         // As we are the package providing the EE Implementations, this cast should never fail.
-        this.datastreamEditor = (EntityEditorDelegate<Datastream, DatastreamData>)
+        this.datastreamEditor = (DatastreamEditorDelegate<Datastream, DatastreamData>)
                 getService(Datastream.class).unwrapEditor();
         //@formatter:on
     }
@@ -88,7 +88,33 @@ public class ObservationEntityEditor extends DatabaseEntityAdapter<DataEntity>
 
     @Override
     public void delete(String id) throws EditorException {
+        DataEntity<?> data = getEntity(id)
+                .orElseThrow(() -> new EditorException("could not find entity with id: " + id));
+
+        // Delete from first/last if present there
+        boolean changedFirst = datastreamEditor.deleteReferenceFromDatasetFirst(data);
+        boolean changedLast = datastreamEditor.deleteReferenceFromDatasetLast(data);
+
+        // Delete observation
         observationRepository.deleteByStaIdentifier(id);
+
+        // We have deleted First/Last Observation so we need to refresh it
+        // Optimized to reduce Database queries over observations table
+        DataEntity<?> start = null;
+        DataEntity<?> end = null;
+        if (changedFirst) {
+            start = observationRepository.findFirstByDataset_idOrderBySamplingTimeStartAsc(
+                    data.getDatasetId()).orElse(null);
+        }
+        if (changedLast) {
+            end = observationRepository.findFirstByDataset_idOrderBySamplingTimeEndDesc(
+                    data.getDatasetId()).orElse(null);
+        }
+
+        if (changedFirst || changedLast) {
+            // we have other observations that now form first/last observation
+            datastreamEditor.updateDatastreamFirstLast(data.getDataset(), start, end);
+        }
     }
 
     @Override
@@ -226,4 +252,5 @@ public class ObservationEntityEditor extends DatabaseEntityAdapter<DataEntity>
     public void deleteObservationsByDatasetId(Set<Long> ids) {
         observationRepository.deleteAllByDatasetIdIn(ids);
     }
+
 }
