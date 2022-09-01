@@ -92,8 +92,8 @@ public class ObservationEntityEditor extends DatabaseEntityAdapter<DataEntity>
                 .orElseThrow(() -> new EditorException("could not find entity with id: " + id));
 
         // Delete from first/last if present there
-        boolean changedFirst = datastreamEditor.deleteReferenceFromDatasetFirst(data);
-        boolean changedLast = datastreamEditor.deleteReferenceFromDatasetLast(data);
+        boolean changedFirst = datastreamEditor.removeAsFirstObservation(data);
+        boolean changedLast = datastreamEditor.removeAsLastObservation(data);
 
         // Delete observation
         observationRepository.deleteByStaIdentifier(id);
@@ -113,7 +113,7 @@ public class ObservationEntityEditor extends DatabaseEntityAdapter<DataEntity>
 
         if (changedFirst || changedLast) {
             // we have other observations that now form first/last observation
-            datastreamEditor.updateDatastreamFirstLast(data.getDataset(), start, end);
+            datastreamEditor.updateFirstLastObservation(data.getDataset(), start, end);
         }
     }
 

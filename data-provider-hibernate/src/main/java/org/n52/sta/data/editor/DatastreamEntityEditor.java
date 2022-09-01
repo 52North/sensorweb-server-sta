@@ -272,15 +272,13 @@ public class DatastreamEntityEditor extends DatabaseEntityAdapter<AbstractDatase
         }
     }
 
-    public boolean deleteReferenceFromDatasetFirst(DataEntity<?> observation) {
+    public boolean removeAsFirstObservation(DataEntity<?> observation) {
         DatasetEntity dataset = observation.getDataset();
         if (dataset.getFirstObservation() != null
                 && dataset.getFirstObservation()
                           .getStaIdentifier()
                           .equals(observation.getStaIdentifier())) {
-            dataset.setFirstObservation(null);
-            dataset.setFirstQuantityValue(null);
-            dataset.setFirstValueAt(null);
+            deleteFirstObservation(dataset);
             observation.setDataset(datastreamRepository.saveAndFlush(dataset));
             return true;
         }
@@ -288,24 +286,22 @@ public class DatastreamEntityEditor extends DatabaseEntityAdapter<AbstractDatase
     }
 
     @Override
-    public boolean deleteReferenceFromDatasetLast(DataEntity<?> observation) {
+    public boolean removeAsLastObservation(DataEntity<?> observation) {
         DatasetEntity dataset = observation.getDataset();
         if (dataset.getLastObservation() != null
                 && dataset.getLastObservation()
                           .getStaIdentifier()
                           .equals(observation.getStaIdentifier())) {
-            dataset.setLastObservation(null);
-            dataset.setLastQuantityValue(null);
-            dataset.setLastValueAt(null);
+            deleteLastObservation(dataset);
             observation.setDataset(datastreamRepository.saveAndFlush(dataset));
             return true;
         }
         return false;
     }
 
-    public void updateDatastreamFirstLast(AbstractDatasetEntity datastreamEntity,
-                                          DataEntity<?> first,
-                                          DataEntity<?> last) {
+    public void updateFirstLastObservation(AbstractDatasetEntity datastreamEntity,
+                                           DataEntity<?> first,
+                                           DataEntity<?> last) {
         if (first != null
                 && (!datastreamEntity.isSetFirstValueAt()
                 || first.getSamplingTimeStart().before(datastreamEntity.getSamplingTimeStart()))) {
@@ -333,8 +329,28 @@ public class DatastreamEntityEditor extends DatabaseEntityAdapter<AbstractDatase
 
         // update parent if datastream is part of aggregation
         if (datastreamEntity.isSetAggregation()) {
-            updateDatastreamFirstLast(
+            updateFirstLastObservation(
                     datastreamRepository.findById(datastreamEntity.getAggregation().getId()).get(), first, last);
         }
+    }
+
+    public void clearFirstObservationLastObservationFeature(DatasetEntity dataset) {
+        deleteFirstObservation(dataset);
+        deleteLastObservation(dataset);
+        dataset.setFeature(null);
+
+        datastreamRepository.saveAndFlush(dataset);
+    }
+
+    private void deleteFirstObservation(DatasetEntity dataset) {
+        dataset.setFirstObservation(null);
+        dataset.setFirstQuantityValue(null);
+        dataset.setFirstValueAt(null);
+    }
+
+    private void deleteLastObservation(DatasetEntity dataset) {
+        dataset.setLastObservation(null);
+        dataset.setLastQuantityValue(null);
+        dataset.setLastValueAt(null);
     }
 }

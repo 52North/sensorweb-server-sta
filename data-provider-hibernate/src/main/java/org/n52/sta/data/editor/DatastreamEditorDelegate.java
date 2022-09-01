@@ -2,6 +2,7 @@ package org.n52.sta.data.editor;
 
 import org.n52.series.db.beans.AbstractDatasetEntity;
 import org.n52.series.db.beans.DataEntity;
+import org.n52.series.db.beans.DatasetEntity;
 import org.n52.sta.api.entity.Identifiable;
 
 /**
@@ -17,7 +18,7 @@ public interface DatastreamEditorDelegate<T extends Identifiable, R extends T> e
      * @param old DataEntity to be removed
      * @return true if dataset was changed
      */
-    boolean deleteReferenceFromDatasetFirst(DataEntity<?> old);
+    boolean removeAsFirstObservation(DataEntity<?> old);
 
     /**
      * Removes the given observation from first observation field if present there.
@@ -25,7 +26,7 @@ public interface DatastreamEditorDelegate<T extends Identifiable, R extends T> e
      * @param old DataEntity to be removed
      * @return true if dataset was changed
      */
-    boolean deleteReferenceFromDatasetLast(DataEntity<?> old);
+    boolean removeAsLastObservation(DataEntity<?> old);
 
     /**
      * Recalculates a new first/last observation and associated values.
@@ -35,8 +36,12 @@ public interface DatastreamEditorDelegate<T extends Identifiable, R extends T> e
      * @param first            Temporally first observation
      * @param last             Temporally last observation
      */
-    void updateDatastreamFirstLast(AbstractDatasetEntity datastreamEntity,
-                                   DataEntity<?> first,
-                                   DataEntity<?> last);
+    void updateFirstLastObservation(AbstractDatasetEntity datastreamEntity,
+                                    DataEntity<?> first,
+                                    DataEntity<?> last);
+
+
+
+    void clearFirstObservationLastObservationFeature(DatasetEntity dataset);
 
 }

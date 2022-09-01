@@ -1,5 +1,6 @@
 package org.n52.sta.data.editor;
 
+import java.util.Collections;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
@@ -8,10 +9,12 @@ import org.n52.janmayen.stream.Streams;
 import org.n52.series.db.beans.AbstractFeatureEntity;
 import org.n52.series.db.beans.FeatureEntity;
 import org.n52.sta.api.EntityServiceLookup;
+import org.n52.sta.api.entity.Datastream;
 import org.n52.sta.api.entity.FeatureOfInterest;
 import org.n52.sta.api.entity.Observation;
 import org.n52.sta.api.exception.EditorException;
 import org.n52.sta.api.service.EntityService;
+import org.n52.sta.data.entity.DatastreamData;
 import org.n52.sta.data.entity.FeatureOfInterestData;
 import org.n52.sta.data.entity.ObservationData;
 import org.n52.sta.data.repositories.entity.FeatureOfInterestRepository;
@@ -30,7 +33,8 @@ public class FeatureOfInterestEntityEditor extends DatabaseEntityAdapter<Abstrac
     @Autowired
     private ValueHelper valueHelper;
 
-    private EntityEditorDelegate<Observation, ObservationData> observationEditor;
+    private ObservationEditorDelegate<Observation, ObservationData> observationEditor;
+    private DatastreamEditorDelegate<Datastream, DatastreamData> datastreamEditor;
 
     public FeatureOfInterestEntityEditor(EntityServiceLookup serviceLookup) {
         super(serviceLookup);
@@ -41,8 +45,10 @@ public class FeatureOfInterestEntityEditor extends DatabaseEntityAdapter<Abstrac
     private void postConstruct(ContextRefreshedEvent event) {
         //@formatter:off
         // As we are the package providing the EE Implementations, this cast should never fail.
-        this.observationEditor = (EntityEditorDelegate<Observation, ObservationData>)
+        this.observationEditor = (ObservationEditorDelegate<Observation, ObservationData>)
                 getService(Observation.class).unwrapEditor();
+        this.datastreamEditor = (DatastreamEditorDelegate<Datastream, DatastreamData>)
+                getService(Datastream.class).unwrapEditor();
         //@formatter:on
     }
 
@@ -51,7 +57,7 @@ public class FeatureOfInterestEntityEditor extends DatabaseEntityAdapter<Abstrac
         Objects.requireNonNull(entity, "entity must be set!");
         Optional<AbstractFeatureEntity> stored = getEntity(entity.getId());
         return stored.map(e -> new FeatureOfInterestData(e, Optional.empty()))
-                .orElseGet(() -> save(entity));
+                     .orElseGet(() -> save(entity));
     }
 
     @Override
@@ -87,8 +93,8 @@ public class FeatureOfInterestEntityEditor extends DatabaseEntityAdapter<Abstrac
         // parameters are saved as cascade
         Map<String, Object> properties = entity.getProperties();
         Streams.stream(properties.entrySet())
-                .map(entry -> convertParameter(featureEntity, entry))
-                .forEach(featureEntity::addParameter);
+               .map(entry -> convertParameter(featureEntity, entry))
+               .forEach(featureEntity::addParameter);
 
         // we need to flush else updates to relations are not persisted
         featureOfInterestRepository.flush();
@@ -103,13 +109,20 @@ public class FeatureOfInterestEntityEditor extends DatabaseEntityAdapter<Abstrac
 
     @Override
     public void delete(String id) throws EditorException {
-        AbstractFeatureEntity foi = getEntity(id)
+        AbstractFeatureEntity<?> foi = getEntity(id)
                 .orElseThrow(() -> new EditorException("could not find entity with id: " + id));
+
+        foi.getDatasets().forEach(ds -> {
+            // delete foreign keys in dataset table
+            datastreamEditor.clearFirstObservationLastObservationFeature(ds);
+            // delete observations without updating first/last observation
+            observationEditor.deleteObservationsByDatasetId(Collections.singleton(ds.getId()));
+        });
+
+        featureOfInterestRepository.deleteByStaIdentifier(id);
 
         // TODO: Implmement Deletion of related observations + update of related Datasets
         // TODO: See FeatureOfInterestService#deleteRelatedObservationsAndUpdateDatasets
-
-        throw new EditorException("not implemented!");
     }
 
     @Override
