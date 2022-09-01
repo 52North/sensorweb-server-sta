@@ -52,10 +52,10 @@ public abstract class EntityAggregate<T extends Identifiable> {
     }
 
     public T save() throws AggregateException {
-        return save(null);
+        return saveOrUpdate(null);
     }
 
-    public T save(T oldEntity) throws AggregateException {
+    public T saveOrUpdate(T oldEntity) throws AggregateException {
         assertEditor();
         EntityEditor<T> editor = optionalEditor.get();
         try {

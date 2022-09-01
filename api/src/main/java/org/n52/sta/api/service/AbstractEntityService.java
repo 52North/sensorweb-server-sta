@@ -100,7 +100,7 @@ public abstract class AbstractEntityService<T extends Identifiable> implements E
         try {
             String id = entity.getId();
             T stored = getOrThrow(id);
-            return createAggregate(stored).save(entity);
+            return createAggregate(stored).saveOrUpdate(entity);
         } catch (AggregateException e) {
             LOGGER.error("Could not update entity: {}", entity, e);
             throw new EditorException("Could not update Entity!", e);
@@ -109,10 +109,13 @@ public abstract class AbstractEntityService<T extends Identifiable> implements E
 
     @Override
     public void delete(String id) throws EditorException {
+        if (editor.isEmpty()) {
+            throw new IllegalStateException("Aggregate is read only!");
+        }
         T entity = getOrThrow(id);
         try {
-            createAggregate(entity).delete();
-        } catch (AggregateException e) {
+            editor.get().delete(id);
+        } catch (EditorException e) {
             LOGGER.error("Could not delete entity: {}", entity, e);
             throw new EditorException("Could not delete Entity!", e);
         }
