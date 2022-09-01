@@ -5053,7 +5053,7 @@ SELECT pg_catalog.setval('public.category_i18n_seq', 1, false);
 -- Name: category_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.category_seq', 1, true);
+-- SELECT pg_catalog.setval('public.category_seq', 1, true);
 
 
 --
