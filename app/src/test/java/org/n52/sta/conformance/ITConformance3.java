@@ -1302,7 +1302,9 @@ public class ITConformance3 extends ConformanceTests implements TestUtil {
         Map<EntityType, String[]> entitiesForDelete = getAllEntities();
         Set<EntityType> entityTypes = new HashSet<>();
         // Observation
-        deleteEntity(EntityType.OBSERVATION, entitiesForDelete.get(EntityType.OBSERVATION)[0], false);
+        for (String id : entitiesForDelete.get(EntityType.OBSERVATION)) {
+            deleteEntity(EntityType.OBSERVATION, id, false);
+        }
         entityTypes.clear();
         entityTypes.add(EntityType.OBSERVATION);
         checkNotExisting(entityTypes);
