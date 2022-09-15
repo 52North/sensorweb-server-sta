@@ -55,13 +55,13 @@ public abstract class EntityAggregate<T extends Identifiable> {
         return saveOrUpdate(null);
     }
 
-    public T saveOrUpdate(T oldEntity) throws AggregateException {
+    public T saveOrUpdate(T updateEntity) throws AggregateException {
         assertEditor();
         EntityEditor<T> editor = optionalEditor.get();
         try {
-            T newEntity = oldEntity == null
+            T newEntity = updateEntity == null
                     ? editor.save(entity)
-                    : editor.update(entity);
+                    : editor.update(entity, updateEntity);
             return newEntity;
         } catch (EditorException e) {
             throw new AggregateException("Could not save entity!", e);

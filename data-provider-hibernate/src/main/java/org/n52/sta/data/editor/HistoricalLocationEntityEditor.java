@@ -93,7 +93,8 @@ public class HistoricalLocationEntityEditor extends DatabaseEntityAdapter<Histor
     }
 
     @Override
-    public HistoricalLocationData update(HistoricalLocation entity) throws EditorException {
+    public HistoricalLocationData update(HistoricalLocation oldEntity,
+                                         HistoricalLocation updateEntity) throws EditorException {
         throw new EditorException();
     }
 

@@ -5,12 +5,15 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.function.Consumer;
+import java.util.function.Supplier;
 
 import org.n52.series.db.beans.DescribableEntity;
 import org.n52.series.db.beans.parameter.ParameterEntity;
 import org.n52.series.db.beans.parameter.ParameterFactory;
 import org.n52.sta.api.EntityServiceLookup;
 import org.n52.sta.api.entity.Identifiable;
+import org.n52.sta.api.exception.EditorException;
 import org.n52.sta.api.service.EntityService;
 
 abstract class DatabaseEntityAdapter<T extends DescribableEntity> {
@@ -74,6 +77,20 @@ abstract class DatabaseEntityAdapter<T extends DescribableEntity> {
                             entityType.getSimpleName());
                     return new IllegalStateException(msg);
                 });
+    }
+
+
+    protected static <T> void setIfNotNull(Supplier<T> supplier, Consumer<T> consumer) {
+        T value = supplier.get();
+        if (value != null) {
+            consumer.accept(value);
+        }
+    }
+
+    protected static <T> void errorIfNotNull(Supplier<T> supplier, String property) throws EditorException {
+        if (supplier.get() != null) {
+            throw new EditorException("Patch not implemented on given property: " + property);
+        }
     }
 
 }

@@ -109,7 +109,7 @@ public class LocationEntityEditor extends DatabaseEntityAdapter<LocationEntity>
     }
 
     @Override
-    public LocationData update(Location entity) throws EditorException {
+    public LocationData update(Location oldEntity, Location updateEntity) throws EditorException {
         throw new EditorException();
     }
 

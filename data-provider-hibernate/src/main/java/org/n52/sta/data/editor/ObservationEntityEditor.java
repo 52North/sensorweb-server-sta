@@ -82,7 +82,7 @@ public class ObservationEntityEditor extends DatabaseEntityAdapter<DataEntity>
     }
 
     @Override
-    public ObservationData update(Observation entity) throws EditorException {
+    public ObservationData update(Observation oldEntity, Observation updateEntity) throws EditorException {
         throw new EditorException();
     }
 

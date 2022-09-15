@@ -88,7 +88,7 @@ public class ObservedPropertyEntityEditor extends DatabaseEntityAdapter<Phenomen
     }
 
     @Override
-    public ObservedPropertyData update(ObservedProperty entity) throws EditorException {
+    public ObservedPropertyData update(ObservedProperty oldEntity, ObservedProperty updateEntity) throws EditorException {
         throw new EditorException();
     }
 

@@ -111,8 +111,21 @@ public class ThingEntityEditor extends DatabaseEntityAdapter<PlatformEntity>
     }
 
     @Override
-    public ThingData update(Thing entity) throws EditorException {
-        throw new EditorException();
+    public ThingData update(Thing oldEntity, Thing updateEntity) throws EditorException {
+        Objects.requireNonNull(oldEntity, "no entity to patch found");
+        Objects.requireNonNull(updateEntity, "no patches found");
+
+        PlatformEntity data = ((ThingData) oldEntity).getData();
+
+        setIfNotNull(updateEntity::getName, data::setName);
+        setIfNotNull(updateEntity::getDescription, data::setDescription);
+
+        //errorIfNotNull(updateEntity::getProperties, "properties");
+        //errorIfNotNull(updateEntity::getLocations, "locations");
+        //errorIfNotNull(updateEntity::getHistoricalLocations, "historicalLocations");
+        //errorIfNotNull(updateEntity::getDatastreams, "datastreams");
+
+        return new ThingData(platformRepository.save(data), Optional.empty());
     }
 
     @Override

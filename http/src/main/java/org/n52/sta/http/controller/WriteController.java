@@ -35,11 +35,15 @@ import java.util.Objects;
 
 import javax.servlet.http.HttpServletRequest;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectReader;
 import com.fasterxml.jackson.databind.ObjectWriter;
+import com.fasterxml.jackson.databind.module.SimpleModule;
 import org.n52.shetland.ogc.sta.exception.STAInvalidUrlException;
-import org.n52.sta.api.exception.EditorException;
 import org.n52.sta.api.EntityServiceLookup;
 import org.n52.sta.api.entity.Identifiable;
+import org.n52.sta.api.exception.EditorException;
 import org.n52.sta.api.path.SelectPath;
 import org.n52.sta.api.service.EntityService;
 import org.n52.sta.http.serialize.in.StaEntityDeserializer;
@@ -51,13 +55,12 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.HandlerMapping;
-
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.ObjectReader;
-import com.fasterxml.jackson.databind.module.SimpleModule;
 import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
 
 @RestController
@@ -72,10 +75,12 @@ public class WriteController {
 
     private final PathFactory pathFactory;
 
-    public WriteController(@Value("${server.config.service-root-url}") String serviceUri,
-                           EntityServiceLookup lookup,
-                           PathFactory pathFactory,
-                           ObjectMapper mapper) {
+    public WriteController(
+            @Value("${server.config.service-root-url}")
+                    String serviceUri,
+            EntityServiceLookup lookup,
+            PathFactory pathFactory,
+            ObjectMapper mapper) {
         Objects.requireNonNull(serviceUri, "serviceUri must not be null!");
         Objects.requireNonNull(lookup, "lookup must not be null!");
         Objects.requireNonNull(pathFactory, "pathFactory must not be null!");
@@ -86,31 +91,59 @@ public class WriteController {
         this.mapper = mapper;
     }
 
-    @PatchMapping
-    public ResponseEntity<StreamingResponseBody> handlePatchRequest(@RequestBody JsonNode node,
-                                                                   HttpServletRequest request)
+    @PatchMapping("/**")
+    public ResponseEntity<String> handlePatchRequest(@RequestBody JsonNode node,
+                                                                    HttpServletRequest request)
             throws STAInvalidUrlException, EditorException, IOException {
-        return ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED).build();
+        RequestContext requestContext = RequestContext.create(serviceUri, request, pathFactory);
+        SerializationContext serializationContext = SerializationContext.create(requestContext, mapper);
+
+        StaPath<? extends Identifiable> path = parsePath(request);
+        Class<? extends Identifiable> entityType = path.getEntityType();
+
+        if (path.getPathType() != SelectPath.PathType.entity) {
+            return ResponseEntity.badRequest().body("illegal path. can only patch entities!");
+        }
+
+        //TODO: Implement patching of related Enties
+        //TODO: e.g. /Datastreams(13)/Sensor
+        if (path.getPathSegments().size() > 1 || path.getPathSegments().get(0).getIdentifier().isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED).body("Patching of entities addressed indirectly " +
+                                                                                  "is not implemented yet!");
+        }
+
+        String identifier = path.getPathSegments().get(0).getIdentifier().get();
+
+        ObjectMapper mapperConfig = registerTypeDeserializer(entityType);
+        ObjectReader reader = mapperConfig.readerFor(entityType);
+        Identifiable updated = getService(entityType).update(identifier, reader.readValue(node));
+
+        ObjectWriter writer = serializationContext.createWriter();
+
+        return ResponseEntity.ok()
+                             .contentType(MediaType.APPLICATION_JSON)
+                             .body(writer.writeValueAsString(updated));
     }
 
     @DeleteMapping("/**")
     public ResponseEntity<String> handleDeleteRequest(HttpServletRequest request)
             throws STAInvalidUrlException, EditorException, IOException {
-        StaPath< ? extends Identifiable> path = parsePath(request);
-        Class< ? extends Identifiable> entityType = path.getEntityType();
+        StaPath<? extends Identifiable> path = parsePath(request);
+        Class<? extends Identifiable> entityType = path.getEntityType();
         return delete(path, entityType);
     }
 
-
     @PostMapping("/**")
-    public ResponseEntity<StreamingResponseBody> handlePostRequest(@RequestBody JsonNode node,
+    public ResponseEntity<StreamingResponseBody> handlePostRequest(
+            @RequestBody
+                    JsonNode node,
             HttpServletRequest request)
             throws STAInvalidUrlException, EditorException, IOException {
         RequestContext requestContext = RequestContext.create(serviceUri, request, pathFactory);
         SerializationContext serializationContext = SerializationContext.create(requestContext, mapper);
 
-        StaPath< ? extends Identifiable> path = parsePath(request);
-        Class< ? extends Identifiable> entityType = path.getEntityType();
+        StaPath<? extends Identifiable> path = parsePath(request);
+        Class<? extends Identifiable> entityType = path.getEntityType();
         Identifiable saved = save(node, entityType);
 
         return ResponseEntity.ok()
@@ -126,9 +159,9 @@ public class WriteController {
         };
     }
 
-    private StaPath< ? extends Identifiable> parsePath(HttpServletRequest request) throws STAInvalidUrlException {
+    private StaPath<? extends Identifiable> parsePath(HttpServletRequest request) throws STAInvalidUrlException {
         String lookupPath = (String) request.getAttribute(HandlerMapping.LOOKUP_PATH);
-        StaPath< ? extends Identifiable> path = pathFactory.parse(lookupPath);
+        StaPath<? extends Identifiable> path = pathFactory.parse(lookupPath);
         SelectPath.PathType pathType = path.getPathType();
         if (pathType == SelectPath.PathType.property) {
             throw new STAInvalidUrlException("Invalid path for POST request: " + path);
@@ -143,7 +176,8 @@ public class WriteController {
         return getService(type).save(reader.readValue(node));
     }
 
-    private <T extends Identifiable> ResponseEntity<String> delete(StaPath<T> path, Class<? extends Identifiable> type) {
+    private <T extends Identifiable> ResponseEntity<String> delete(StaPath<T> path,
+                                                                   Class<? extends Identifiable> type) {
 
         if (path.getPathType() != SelectPath.PathType.entity) {
             return ResponseEntity.badRequest().body("illegal path. can only delete entities!");

@@ -35,7 +35,7 @@ public interface EntityEditor<T extends Identifiable> {
 
     T save(T entity) throws EditorException;
 
-    T update(T entity) throws EditorException;
+    T update(T sourceEntity, T updateEntity) throws EditorException;
 
     void delete(String id) throws EditorException;
 

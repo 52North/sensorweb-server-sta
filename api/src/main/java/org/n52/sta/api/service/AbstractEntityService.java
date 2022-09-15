@@ -95,10 +95,9 @@ public abstract class AbstractEntityService<T extends Identifiable> implements E
     }
 
     @Override
-    public T update(T entity) throws EditorException {
+    public T update(String id, T entity) throws EditorException {
         Objects.requireNonNull(entity, "entity must not be null!");
         try {
-            String id = entity.getId();
             T stored = getOrThrow(id);
             return createAggregate(stored).saveOrUpdate(entity);
         } catch (AggregateException e) {

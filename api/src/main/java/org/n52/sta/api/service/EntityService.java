@@ -20,7 +20,7 @@ public interface EntityService<T> {
 
     T save(T entity) throws EditorException;
 
-    T update(T entity) throws EditorException;
+    T update(String id, T entity) throws EditorException;
 
     void delete(String id) throws EditorException;
 

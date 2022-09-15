@@ -203,7 +203,7 @@ public class DatastreamEntityEditor extends DatabaseEntityAdapter<AbstractDatase
     }
 
     @Override
-    public Datastream update(Datastream entity) throws EditorException {
+    public Datastream update(Datastream oldEntity, Datastream updateEntity) throws EditorException {
         throw new EditorException();
     }
 

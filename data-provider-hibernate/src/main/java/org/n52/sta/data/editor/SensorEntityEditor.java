@@ -98,7 +98,7 @@ public class SensorEntityEditor extends DatabaseEntityAdapter<ProcedureEntity>
     }
 
     @Override
-    public SensorData update(Sensor entity) throws EditorException {
+    public SensorData update(Sensor oldEntity, Sensor updateEntity) throws EditorException {
         throw new EditorException();
     }
 

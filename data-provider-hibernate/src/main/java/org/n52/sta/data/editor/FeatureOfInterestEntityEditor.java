@@ -103,7 +103,7 @@ public class FeatureOfInterestEntityEditor extends DatabaseEntityAdapter<Abstrac
     }
 
     @Override
-    public FeatureOfInterestData update(FeatureOfInterest entity) throws EditorException {
+    public FeatureOfInterestData update(FeatureOfInterest oldEntity, FeatureOfInterest updateEntity) throws EditorException {
         throw new EditorException();
     }
 
