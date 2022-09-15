@@ -112,7 +112,7 @@ public class DatastreamEntityEditor extends DatabaseEntityAdapter<AbstractDatase
 
     @Override
     public DatastreamData getOrSave(Datastream entity) throws EditorException {
-        Objects.requireNonNull(entity, "entity must not be null");
+        Objects.requireNonNull(entity, "entity must be present");
         Optional<AbstractDatasetEntity> stored = getEntity(entity.getId());
         return stored.map(e -> new DatastreamData(e, Optional.of(propertyMapping)))
                      .orElseGet(() -> save(entity));
@@ -178,10 +178,6 @@ public class DatastreamEntityEditor extends DatabaseEntityAdapter<AbstractDatase
 
         // TODO create aggregate on multiple FOIs <- observation
 
-        // TODO update first/last observation
-        // -> decoupling via updateFirstLastObservationHandler?
-        // -> enable event handling
-
         // parameters are saved as cascade
         Map<String, Object> properties = entity.getProperties();
         Streams.stream(properties.entrySet())
@@ -222,7 +218,8 @@ public class DatastreamEntityEditor extends DatabaseEntityAdapter<AbstractDatase
 
         // Delete subdatasets and their observations if we are aggregation
         if (dataset instanceof DatasetAggregationEntity) {
-            Set<AbstractDatasetEntity> allByAggregationId = datastreamRepository.findAllByAggregationId(dataset.getId());
+            Set<AbstractDatasetEntity> allByAggregationId =
+                    datastreamRepository.findAllByAggregationId(dataset.getId());
             Set<Long> datasetIds = allByAggregationId.stream()
                                                      .map(IdEntity::getId)
                                                      .collect(Collectors.toSet());

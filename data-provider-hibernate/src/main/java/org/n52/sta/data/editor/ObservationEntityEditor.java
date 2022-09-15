@@ -54,7 +54,7 @@ public class ObservationEntityEditor extends DatabaseEntityAdapter<DataEntity>
 
     @EventListener
     @SuppressWarnings("unchecked")
-    private void postConstruct (ContextRefreshedEvent event){
+    private void postConstruct (ContextRefreshedEvent event) {
         //@formatter:off
         // As we are the package providing the EE Implementations, this cast should never fail.
         this.datastreamEditor = (DatastreamEditorDelegate<Datastream, DatastreamData>)
