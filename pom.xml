@@ -47,7 +47,7 @@
         <hamcrest.version>2.2</hamcrest.version>
         <locationtech-jts.version>1.18.2</locationtech-jts.version>
         <h2database.version>2.1.212</h2database.version>
-        <testcontainers.jupiter.version>1.17.1</testcontainers.jupiter.version>
+        <testcontainers.jupiter.version>1.17.5</testcontainers.jupiter.version>
         <testcontainers.postgres.version>1.17.1</testcontainers.postgres.version>
         <spotbugs.version>4.7.0</spotbugs.version>
         <paho.version>1.2.5</paho.version>
