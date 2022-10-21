@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2018-2020 52°North Initiative for Geospatial Open Source
+ * Copyright (C) 2018-2022 52°North Initiative for Geospatial Open Source
  * Software GmbH
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -26,7 +26,6 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
-
 package org.n52.sta.url;
 
 import org.springframework.web.util.UrlPathHelper;
