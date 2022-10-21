@@ -63,6 +63,15 @@ server:
     # All HTTP POST & PUT Requests will be dropped with a HTTP Status 405 NOT Allowed
     httpReadOnly: false
 
+    # Enables authentication using HTTP Basic. This applies to all methods but HTTP GET.
+    authentication:
+      httpbasic:
+        enabled: false
+        # Demo credentials are test:test and test2:test
+        credentials: >
+          test:9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08,
+          test2:9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08
+
 # Database Configuration
 database:
   jpa:
@@ -131,6 +140,7 @@ http:
 # MQTT Configuration
 mqtt:
   broker:
+    # demo credentials are test:test and test2:test
     credentials: >
       test:9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08,
       test2:9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08
