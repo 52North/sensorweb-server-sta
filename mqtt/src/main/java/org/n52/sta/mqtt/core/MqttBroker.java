@@ -29,10 +29,19 @@
 
 package org.n52.sta.mqtt.core;
 
+import java.io.File;
+import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Properties;
+
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import io.moquette.BrokerConstants;
 import io.moquette.broker.Server;
 import io.moquette.broker.config.IConfig;
 import io.moquette.broker.config.MemoryConfig;
+import io.moquette.broker.security.IAuthenticator;
 import io.moquette.broker.subscriptions.Subscription;
 import io.moquette.interception.AbstractInterceptHandler;
 import io.moquette.interception.InterceptHandler;
@@ -42,6 +51,7 @@ import io.moquette.interception.messages.InterceptDisconnectMessage;
 import io.moquette.interception.messages.InterceptPublishMessage;
 import io.moquette.interception.messages.InterceptSubscribeMessage;
 import io.moquette.interception.messages.InterceptUnsubscribeMessage;
+import org.apache.commons.codec.digest.DigestUtils;
 import org.h2.mvstore.Cursor;
 import org.h2.mvstore.MVMap;
 import org.h2.mvstore.MVStore;
@@ -53,14 +63,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
-
-import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
-
-import java.io.File;
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
-import java.util.Properties;
 
 /**
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
@@ -94,6 +96,9 @@ public class MqttBroker {
 
     @Value("${mqtt.broker.plain_tcp.port:1883}")
     private String MOQUETTE_PLAINTCP_PORT;
+
+    @Value("${mqtt.broker.credentials:}")
+    private String[] MQTT_CREDENTIALS;
 
     @Autowired
     private MqttSubscriptionEventHandler handler;
@@ -141,11 +146,50 @@ public class MqttBroker {
         }
 
         try {
-            mqttServer.startServer(brokerConfig, Arrays.asList(initMessageHandler()));
+            mqttServer.startServer(brokerConfig,
+                                   Arrays.asList(initMessageHandler()),
+                                   null,
+                                   (MQTT_CREDENTIALS.length > 0) ? getAuthenticator() : null,
+                                   null);
             Runtime.getRuntime().addShutdownHook(new Thread(mqttServer::stopServer));
-        } catch (IOException e) {
+        } catch (Exception e) {
             LOGGER.error("Error starting/stopping MQTT Broker: {}", e.getMessage());
         }
+
+    }
+
+    private IAuthenticator getAuthenticator() {
+        return new IAuthenticator() {
+
+            private Map<String, String> users = new HashMap<>();
+
+            {
+                for (String cred : MQTT_CREDENTIALS) {
+                    String[] split = cred.split(":");
+                    if (split.length != 2) {
+                        LOGGER.error("Could not parse credentials. Invalid format!");
+                    }
+                    users.put(split[0], split[1]);
+                }
+            }
+
+            // Copied from Moquette ResourceAuthenticator
+            @Override
+            public boolean checkValid(String clientId, String username, byte[] password) {
+                if (username != null && password != null) {
+                    String foundPwq = this.users.get(username);
+                    if (foundPwq == null) {
+                        return false;
+                    } else {
+                        String encodedPasswd = DigestUtils.sha256Hex(password);
+                        return foundPwq.equals(encodedPasswd);
+                    }
+                } else {
+                    LOGGER.info("username or password was null");
+                    return false;
+                }
+            }
+        };
     }
 
     private InterceptHandler initMessageHandler() {
@@ -234,12 +278,17 @@ public class MqttBroker {
             props.put(BrokerConstants.PERSISTENT_STORE_PROPERTY_NAME, "");
         }
 
+        if (MQTT_CREDENTIALS.length > 0) {
+            props.put(BrokerConstants.ALLOW_ANONYMOUS_PROPERTY_NAME, Boolean.FALSE.toString());
+        } else {
+            props.put(BrokerConstants.ALLOW_ANONYMOUS_PROPERTY_NAME, Boolean.TRUE.toString());
+        }
+
         props.put(BrokerConstants.WEB_SOCKET_PORT_PROPERTY_NAME,
                   MOQUETTE_WEBSOCKET_ENABLED ? MOQUETTE_WEBSOCKET_PORT : BrokerConstants.DISABLED_PORT_BIND);
         props.put(BrokerConstants.PORT_PROPERTY_NAME,
                   MOQUETTE_PLAINTCP_ENABLED ? MOQUETTE_PLAINTCP_PORT : BrokerConstants.DISABLED_PORT_BIND);
 
-        props.put(BrokerConstants.ALLOW_ANONYMOUS_PROPERTY_NAME, Boolean.TRUE.toString());
         return new MemoryConfig(props);
     }
 
