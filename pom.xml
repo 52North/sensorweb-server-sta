@@ -419,7 +419,6 @@
                     <licenseSets>
 						<licenseSet>
 		                    <header>etc/52N_GPLv2_License.xt</header>
-		
 		                    <includes>
 		                        <include>**/src/**/*.java</include>
 		                    </includes>
@@ -428,7 +427,6 @@
 		                        <exclude>**/logback-test.xml</exclude>
 		                        <exclude>etc/**</exclude>
 		                    </excludes>
-		                    <strictCheck>true</strictCheck>
 		                    <properties>
 		                        <year>${project.inceptionYear}-${currentYear}</year>
 		                    </properties>
