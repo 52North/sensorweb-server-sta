@@ -38,6 +38,9 @@
         <java.version>1.8</java.version>
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
+        <timestamp>${maven.build.timestamp}</timestamp>
+        <maven.build.timestamp.format>yyyy</maven.build.timestamp.format>
+        <currentYear>${maven.build.timestamp}</currentYear>
         <db-model.version>4.0.0-PR.9</db-model.version>
         <arctic-sea.version>9.5.3</arctic-sea.version>
         <spring-boot.version>2.6.7</spring-boot.version>
@@ -403,46 +406,34 @@
                 </executions>
             </plugin>
             <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>build-helper-maven-plugin</artifactId>
-                <version>3.3.0-SNAPSHOT</version>
-                <executions>
-                    <execution>
-                        <id>timestamp-property</id>
-                        <goals>
-                            <goal>timestamp-property</goal>
-                        </goals>
-                        <configuration>
-                            <locale>en_US</locale>
-                            <name>currentYearDynamic</name>
-                            <pattern>yyyy</pattern>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
                 <!-- license headers -->
                 <groupId>com.mycila</groupId>
                 <artifactId>license-maven-plugin</artifactId>
+                <inherited>false</inherited>
                 <configuration>
                     <aggregate>true</aggregate>
-                    <header>etc/52N_GPLv2_License.xt</header>
-
-                    <includes>
-                        <include>**/src/**/*.java</include>
-                    </includes>
-                    <excludes>
-                        <exclude>**/logback.xml</exclude>
-                        <exclude>**/logback-test.xml</exclude>
-                        <exclude>etc/**</exclude>
-                    </excludes>
                     <strictCheck>true</strictCheck>
-                    <properties>
-                        <year>${project.inceptionYear}-2022</year>
-                    </properties>
                     <mapping>
                         <java>SLASHSTAR_STYLE</java>
                     </mapping>
+                    <licenseSets>
+						<licenseSet>
+		                    <header>etc/52N_GPLv2_License.xt</header>
+		
+		                    <includes>
+		                        <include>**/src/**/*.java</include>
+		                    </includes>
+		                    <excludes>
+		                        <exclude>**/logback.xml</exclude>
+		                        <exclude>**/logback-test.xml</exclude>
+		                        <exclude>etc/**</exclude>
+		                    </excludes>
+		                    <strictCheck>true</strictCheck>
+		                    <properties>
+		                        <year>${project.inceptionYear}-${currentYear}</year>
+		                    </properties>
+	                	</licenseSet>
+					</licenseSets>
                 </configuration>
             </plugin>
         </plugins>
