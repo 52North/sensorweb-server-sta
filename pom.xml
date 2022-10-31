@@ -41,7 +41,7 @@
         <timestamp>${maven.build.timestamp}</timestamp>
         <maven.build.timestamp.format>yyyy</maven.build.timestamp.format>
         <currentYear>${maven.build.timestamp}</currentYear>
-        <db-model.version>4.0.0-PR.9</db-model.version>
+        <db-model.version>4.0.0-PR.12</db-model.version>
         <arctic-sea.version>9.5.3</arctic-sea.version>
         <spring-boot.version>2.6.7</spring-boot.version>
         <geolatte-geom.version>1.8.2</geolatte-geom.version>
