@@ -12,10 +12,6 @@ on:
   push:
     tags:
       - 'v*'
-  pull_request:
-    branches:
-      - 'master'
-      - 'maintenance/3.x'
 
 jobs:
   push_to_registry:
