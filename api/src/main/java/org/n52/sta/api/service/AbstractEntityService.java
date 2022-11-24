@@ -113,7 +113,8 @@ public abstract class AbstractEntityService<T extends Identifiable> implements E
         }
         T entity = getOrThrow(id);
         try {
-            editor.get().delete(id);
+            editor.get()
+                  .delete(id);
         } catch (EditorException e) {
             LOGGER.error("Could not delete entity: {}", entity, e);
             throw new EditorException("Could not delete Entity!", e);
