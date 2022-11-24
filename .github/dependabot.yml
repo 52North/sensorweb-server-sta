@@ -40,10 +40,11 @@ updates:
   - dependency-name: "pl.project13.maven:git-commit-id-plugin"
     versions: "4.0.3"
 - package-ecosystem: "maven"
-  directory: "sta-slicing"
+  directory: "/"
   schedule:
     interval: "daily"
     time: "04:30"
+  target-branch: "sta-slicing"
   open-pull-requests-limit: 10
   ignore:
   - dependency-name: "io.moquette:moquette-broker"
