@@ -20,7 +20,7 @@ updates:
   - dependency-name: "org.antlr:antlr4-runtime"
     versions: "4.9.1"
   - dependency-name: "pl.project13.maven:git-commit-id-plugin"
-    versions:"4.0.3"
+    versions: "4.0.3"
 - package-ecosystem: "maven"
   directory: "/"
   schedule:
@@ -38,7 +38,7 @@ updates:
   - dependency-name: "org.antlr:antlr4-runtime"
     versions: "4.9.1"
   - dependency-name: "pl.project13.maven:git-commit-id-plugin"
-    versions:"4.0.3"
+    versions: "4.0.3"
 - package-ecosystem: "maven"
   directory: "sta-slicing"
   schedule:
@@ -55,4 +55,4 @@ updates:
   - dependency-name: "org.antlr:antlr4-runtime"
     versions: "4.9.1"
   - dependency-name: "pl.project13.maven:git-commit-id-plugin"
-    versions:"4.0.3"
+    versions :"4.0.3"
