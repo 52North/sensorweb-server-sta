@@ -3,14 +3,14 @@ name: Java CI on Push
 on:
   push:
     branches:
-      - 'sta-slicing'
+      - 'maintenance/3.x'
   workflow_dispatch:
 
 jobs:
   build:
     strategy:
       matrix:
-        java: [ 11, 17 ]
+        java: [ 11 ]
     runs-on: ubuntu-latest
     name: Java ${{ matrix.java }} compile
     
