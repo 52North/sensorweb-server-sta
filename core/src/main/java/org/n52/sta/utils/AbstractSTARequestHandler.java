@@ -34,6 +34,7 @@ import org.n52.shetland.ogc.sta.exception.STAInvalidUrlException;
 import org.n52.shetland.ogc.sta.exception.STANotFoundException;
 import org.n52.shetland.ogc.sta.model.STAEntityDefinition;
 import org.n52.sta.data.service.EntityServiceRepository;
+import org.n52.svalbard.odata.core.QueryOptionsFactory;
 
 import javax.servlet.http.HttpServletRequest;
 import java.net.URLDecoder;
@@ -59,9 +60,9 @@ public abstract class AbstractSTARequestHandler implements RequestUtils {
     protected QueryOptions decodeQueryString(HttpServletRequest request) {
         if (request.getQueryString() != null) {
             String decoded = URLDecoder.decode(request.getQueryString());
-            return QUERY_OPTIONS_FACTORY.createQueryOptions(decoded);
+            return QueryOptionsFactory.createQueryOptions(decoded);
         } else {
-            return QUERY_OPTIONS_FACTORY.createDummy();
+            return QueryOptionsFactory.createDummy();
         }
     }
 

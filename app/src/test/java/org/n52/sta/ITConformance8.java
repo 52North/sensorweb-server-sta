@@ -631,6 +631,7 @@ public class ITConformance8 extends ConformanceTests implements TestUtil {
 
     static class MessageListener implements MqttCallback {
 
+        private static final int MAX_COUNT = 10;
         final ArrayList<MqttMessage> messages;
 
         MessageListener() {
@@ -639,9 +640,12 @@ public class ITConformance8 extends ConformanceTests implements TestUtil {
 
         MqttMessage next() {
             synchronized (messages) {
-                if (messages.size() == 0) {
+                int count = 0;
+                while (messages.size() == 0 && count++ < MAX_COUNT) {
+//                if (messages.size() == 0) {
                     try {
-                        messages.wait(3000);
+                        LOGGER.info("Wait one second: {} of {}", count - 1, MAX_COUNT);
+                        messages.wait(1000);
                     } catch (InterruptedException ignored) {
                     }
                 }

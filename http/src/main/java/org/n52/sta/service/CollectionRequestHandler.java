@@ -36,6 +36,7 @@ import org.n52.sta.data.service.EntityServiceRepository;
 import org.n52.sta.data.service.util.CollectionWrapper;
 import org.n52.sta.utils.AbstractSTARequestHandler;
 import org.n52.sta.utils.RequestUtils;
+import org.n52.svalbard.odata.core.QueryOptionsFactory;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.util.UrlPathHelper;
 
@@ -96,7 +97,7 @@ public abstract class CollectionRequestHandler<T extends RequestUtils> extends A
         filters.add(new SelectFilter(ID));
         return serviceRepository
             .getEntityService(collectionName)
-            .getEntityCollection(QUERY_OPTIONS_FACTORY.createQueryOptions(filters))
+            .getEntityCollection(QueryOptionsFactory.createQueryOptions(filters))
             .setRequestURL(rootUrl + collectionName);
     }
 
@@ -162,7 +163,7 @@ public abstract class CollectionRequestHandler<T extends RequestUtils> extends A
         return serviceRepository.getEntityService(target)
             .getEntityCollectionByRelatedEntity(sourceId,
                                                 sourceType,
-                                                QUERY_OPTIONS_FACTORY.createQueryOptions(filters))
+                                                QueryOptionsFactory.createQueryOptions(filters))
             .setRequestURL(rootUrl + entity + "/" + target);
     }
 }

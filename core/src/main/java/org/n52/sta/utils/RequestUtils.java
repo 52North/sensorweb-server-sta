@@ -46,11 +46,8 @@ import org.n52.sta.serdes.ObservationSerDes;
 import org.n52.sta.serdes.ObservedPropertySerDes;
 import org.n52.sta.serdes.SensorSerDes;
 import org.n52.sta.serdes.ThingSerDes;
-import org.n52.svalbard.odata.core.QueryOptionsFactory;
 
 public interface RequestUtils extends StaConstants {
-
-    QueryOptionsFactory QUERY_OPTIONS_FACTORY = new QueryOptionsFactory();
 
     String INTERNAL_CLIENT_ID = "POC";
     String MQTT_PREFIX = "v1.1/";
