@@ -33,11 +33,9 @@
             <artifactId>antlr4-runtime</artifactId>
             <scope>runtime</scope>
         </dependency>
-
         <dependency>
-            <groupId>io.moquette</groupId>
+            <groupId>de.fraunhofer.iosb.io.moquette</groupId>
             <artifactId>moquette-broker</artifactId>
-            <version>0.15</version>
             <exclusions>
                 <exclusion>
                     <groupId>org.slf4j</groupId>
