@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - 'sta-slicing'
+      - 'maintenance/3.x'
   workflow_dispatch:
 
 jobs:
