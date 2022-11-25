@@ -40,7 +40,7 @@ public class STAPostgresContainer extends PostgreSQLContainer<STAPostgresContain
 
     private static final DockerImageName DEFAULT_IMAGE_NAME =
             DockerImageName.parse("postgis/postgis").asCompatibleSubstituteFor("postgres");
-    private static final String DEFAULT_TAG = "12-3.0";
+    private static final String DEFAULT_TAG = "14-3.3";
     private static STAPostgresContainer container;
 
     private STAPostgresContainer() {
