@@ -40,10 +40,10 @@
         <maven.build.timestamp.format>yyyy</maven.build.timestamp.format>
         <currentYear>${maven.build.timestamp}</currentYear>
         <db-model.version>4.0.0-PR.9</db-model.version>
-        <arctic-sea.version>9.5.3</arctic-sea.version>
-        <spring-boot.version>2.6.7</spring-boot.version>
+        <arctic-sea.version>10.0.2</arctic-sea.version>
+        <spring-boot.version>2.7.6</spring-boot.version>
         <geolatte-geom.version>1.9.0</geolatte-geom.version>
-        <hibernate.version>5.6.9.Final</hibernate.version>
+        <hibernate.version>5.6.14.Final</hibernate.version>
         <jackson.version>2.14.1</jackson.version>
         <hamcrest.version>2.2</hamcrest.version>
         <locationtech-jts.version>1.18.2</locationtech-jts.version>
