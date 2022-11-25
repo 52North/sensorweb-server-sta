@@ -4,6 +4,7 @@ on:
   pull_request:
    branches:
       - 'sta-slicing'
+      - 'maintenance/3.x'
   workflow_dispatch:
 
 
