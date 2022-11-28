@@ -49,7 +49,7 @@
         <locationtech-jts.version>1.18.2</locationtech-jts.version>
         <h2database.version>2.1.214</h2database.version>
         <testcontainers.jupiter.version>1.17.6</testcontainers.jupiter.version>
-        <testcontainers.postgres.version>1.17.1</testcontainers.postgres.version>
+        <testcontainers.postgres.version>1.17.6</testcontainers.postgres.version>
         <spotbugs.version>4.7.3</spotbugs.version>
         <paho.version>1.2.5</paho.version>
         <antlr-runtime.version>4.11.1</antlr-runtime.version>
