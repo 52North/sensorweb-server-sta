@@ -33,6 +33,8 @@ package org.n52.sta.mqtt;
  */
 public class MqttHandlerException extends Exception {
 
+    private static final long serialVersionUID = 4312310089074360179L;
+
     public MqttHandlerException(String message) {
         super(message);
     }
