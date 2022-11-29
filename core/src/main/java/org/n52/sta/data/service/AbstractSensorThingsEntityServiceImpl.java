@@ -159,7 +159,7 @@ public abstract class AbstractSensorThingsEntityServiceImpl<T extends StaIdentif
     @Override
     public CollectionWrapper getEntityCollection(QueryOptions queryOptions) throws STACRUDException {
         try {
-            Page<S> pages = getRepository().findAll(getFilterPredicate(entityClass, queryOptions),
+            Page<S> pages = getRepository().findAll(getFilterPredicate(queryOptions),
                                                     createPageableRequest(queryOptions),
                                                     queryOptions.hasCountFilter() &&
                                                         queryOptions.getCountFilter().getValue(),
@@ -278,7 +278,7 @@ public abstract class AbstractSensorThingsEntityServiceImpl<T extends StaIdentif
         try {
             Optional<S> elem =
                 getRepository().findOne(byRelatedEntityFilter(relatedId, relatedType, ownId)
-                                            .and(getFilterPredicate(entityClass, queryOptions)),
+                                            .and(getFilterPredicate(queryOptions)),
                                         createFetchGraph(queryOptions.getExpandFilter()));
             if (elem.isPresent()) {
                 if (queryOptions.hasExpandFilter()) {
@@ -311,7 +311,7 @@ public abstract class AbstractSensorThingsEntityServiceImpl<T extends StaIdentif
         try {
             Page<S> pages = getRepository()
                 .findAll(byRelatedEntityFilter(relatedId, relatedType, null)
-                             .and(getFilterPredicate(entityClass, queryOptions)),
+                             .and(getFilterPredicate(queryOptions)),
                          createPageableRequest(queryOptions),
                          queryOptions.hasCountFilter() && queryOptions.getCountFilter().getValue(),
                          createFetchGraph(queryOptions.getExpandFilter()));
@@ -471,11 +471,10 @@ public abstract class AbstractSensorThingsEntityServiceImpl<T extends StaIdentif
     /**
      * Constructs FilterPredicate based on given queryOptions.
      *
-     * @param entityClass  Class of the requested Entity
      * @param queryOptions QueryOptions Object
      * @return Predicate based on FilterOption from queryOptions
      */
-    public Specification<S> getFilterPredicate(Class entityClass, QueryOptions queryOptions) {
+    protected Specification<S> getFilterPredicate(QueryOptions queryOptions) {
         return (root, query, builder) -> {
             if (!queryOptions.hasFilterFilter()) {
                 // Filter out non-root observations
