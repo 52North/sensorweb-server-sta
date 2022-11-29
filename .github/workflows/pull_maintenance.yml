@@ -1,10 +1,9 @@
-name: Java CI on Pull Request Java 8
+name: Java CI on Pull Request
 
 on:
   pull_request:
-    branches:
-      - 'master'
-      - 'develop'
+   branches:
+      - 'maintenance/3.x'
   workflow_dispatch:
 
 
@@ -12,7 +11,7 @@ jobs:
   build:
     strategy:
       matrix:
-        java: [ 8, 11, 17 ]
+        java: [ 11 ]
     runs-on: ubuntu-latest
     name: Java ${{ matrix.java }} compile
     
