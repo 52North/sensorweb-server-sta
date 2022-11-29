@@ -269,7 +269,7 @@ public class MessageBusRepository<T, I extends Serializable>
                 Map<String, Object> oldProperties = getPropertyMap(oldEntity);
                 S entity = em.merge(newEntity);
                 em.flush();
-                this.mqttHandler.handleEvent(newEntity,
+                this.mqttHandler.handleEvent(entity,
                                              entityType,
                                              computeDifference(oldProperties, getPropertyMap(newEntity)),
                                              getRelatedCollections(entity));

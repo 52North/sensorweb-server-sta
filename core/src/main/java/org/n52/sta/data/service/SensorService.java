@@ -231,9 +231,10 @@ public class SensorService extends AbstractSensorThingsEntityServiceImpl<Procedu
                     }
                     checkFormat(merged, entity);
                     checkProcedureHistory(merged);
-                    getRepository().save(merged);
-                    Hibernate.initialize(merged.getParameters());
-                    return merged;
+                    ProcedureEntity result = getRepository().save(merged);
+                    Hibernate.initialize(result.getParameters());
+                    Hibernate.initialize(result.getDatasets());
+                    return result;
                 }
             }
             throw new STACRUDException(UNABLE_TO_UPDATE_ENTITY_NOT_FOUND, HTTPStatus.NOT_FOUND);

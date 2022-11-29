@@ -250,7 +250,7 @@ public class ThingService
                     }
                     PlatformEntity result = getRepository().save(merged);
                     Hibernate.initialize(result.getParameters());
-                    return merged;
+                    return result;
                 } else {
                     throw new STACRUDException(UNABLE_TO_UPDATE_ENTITY_NOT_FOUND, HTTPStatus.NOT_FOUND);
                 }
