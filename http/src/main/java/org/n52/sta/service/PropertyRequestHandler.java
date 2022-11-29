@@ -118,7 +118,7 @@ public abstract class PropertyRequestHandler extends AbstractSTARequestHandler {
         return readRelatedEntityProperty(entity, target, property, lookupPath);
     }
 
-    private ElementWithQueryOptions readRelatedEntityProperty(String entity,
+    private ElementWithQueryOptions<?> readRelatedEntityProperty(String entity,
                                                               String target,
                                                               String property,
                                                               String url) throws Exception {

@@ -69,10 +69,9 @@ import org.springframework.transaction.annotation.Transactional;
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
  */
 @Component
-@DependsOn({"springApplicationContext"})
+@DependsOn({ "springApplicationContext" })
 @Transactional
-public class SensorService
-    extends AbstractSensorThingsEntityServiceImpl<ProcedureRepository, ProcedureEntity> {
+public class SensorService extends AbstractSensorThingsEntityServiceImpl<ProcedureRepository, ProcedureEntity> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SensorService.class);
 
@@ -85,12 +84,9 @@ public class SensorService
     private final ProcedureParameterRepository parameterRepository;
 
     @Autowired
-    public SensorService(ProcedureRepository repository,
-                         FormatRepository formatRepository,
-                         ProcedureHistoryRepository procedureHistoryRepository,
-                         DatastreamRepository datastreamRepository,
-                         ProcedureParameterRepository parameterRepository,
-                         EntityManager em) {
+    public SensorService(ProcedureRepository repository, FormatRepository formatRepository,
+            ProcedureHistoryRepository procedureHistoryRepository, DatastreamRepository datastreamRepository,
+            ProcedureParameterRepository parameterRepository, EntityManager em) {
         super(repository, em, ProcedureEntity.class);
         this.formatRepository = formatRepository;
         this.procedureHistoryRepository = procedureHistoryRepository;
@@ -98,8 +94,9 @@ public class SensorService
         this.parameterRepository = parameterRepository;
     }
 
-    @Override protected EntityGraphRepository.FetchGraph[] createFetchGraph(ExpandFilter expandOption)
-        throws STAInvalidQueryException {
+    @Override
+    protected EntityGraphRepository.FetchGraph[] createFetchGraph(ExpandFilter expandOption)
+            throws STAInvalidQueryException {
         if (expandOption != null) {
             for (ExpandItem expandItem : expandOption.getItems()) {
                 // We cannot handle nested $filter or $expand
@@ -108,27 +105,23 @@ public class SensorService
                 }
                 String expandProperty = expandItem.getPath();
                 if (SensorEntityDefinition.DATASTREAMS.equals(expandProperty)) {
-                    return new EntityGraphRepository.FetchGraph[] {
-                        EntityGraphRepository.FetchGraph.FETCHGRAPH_FORMAT,
-                        EntityGraphRepository.FetchGraph.FETCHGRAPH_PROCEDUREHISTORY,
-                        EntityGraphRepository.FetchGraph.FETCHGRAPH_DATASETS,
-                        EntityGraphRepository.FetchGraph.FETCHGRAPH_PARAMETERS,
-                    };
+                    return new EntityGraphRepository.FetchGraph[] { EntityGraphRepository.FetchGraph.FETCHGRAPH_FORMAT,
+                            EntityGraphRepository.FetchGraph.FETCHGRAPH_PROCEDUREHISTORY,
+                            EntityGraphRepository.FetchGraph.FETCHGRAPH_DATASETS,
+                            EntityGraphRepository.FetchGraph.FETCHGRAPH_PARAMETERS, };
                 }
-                throw new STAInvalidQueryException(String.format(INVALID_EXPAND_OPTION_SUPPLIED,
-                                                                 expandProperty,
-                                                                 StaConstants.SENSOR));
+                throw new STAInvalidQueryException(
+                        String.format(INVALID_EXPAND_OPTION_SUPPLIED, expandProperty, StaConstants.SENSOR));
             }
         }
-        return new EntityGraphRepository.FetchGraph[] {
-            EntityGraphRepository.FetchGraph.FETCHGRAPH_FORMAT,
-            EntityGraphRepository.FetchGraph.FETCHGRAPH_PROCEDUREHISTORY,
-            EntityGraphRepository.FetchGraph.FETCHGRAPH_PARAMETERS,
-        };
+        return new EntityGraphRepository.FetchGraph[] { EntityGraphRepository.FetchGraph.FETCHGRAPH_FORMAT,
+                EntityGraphRepository.FetchGraph.FETCHGRAPH_PROCEDUREHISTORY,
+                EntityGraphRepository.FetchGraph.FETCHGRAPH_PARAMETERS, };
     }
 
-    @Override protected ProcedureEntity fetchExpandEntitiesWithFilter(ProcedureEntity entity, ExpandFilter expandOption)
-        throws STACRUDException, STAInvalidQueryException {
+    @Override
+    protected ProcedureEntity fetchExpandEntitiesWithFilter(ProcedureEntity entity, ExpandFilter expandOption)
+            throws STACRUDException, STAInvalidQueryException {
         for (ExpandItem expandItem : expandOption.getItems()) {
             // We have already handled $expand without filter and expand
             if (!(expandItem.getQueryOptions().hasFilterFilter() || expandItem.getQueryOptions().hasExpandFilter())) {
@@ -136,24 +129,20 @@ public class SensorService
             }
             String expandProperty = expandItem.getPath();
             if (SensorEntityDefinition.DATASTREAMS.equals(expandProperty)) {
-                Page<AbstractDatasetEntity> datastreams = getDatastreamService()
-                    .getEntityCollectionByRelatedEntityRaw(entity.getStaIdentifier(),
-                                                           STAEntityDefinition.SENSORS,
-                                                           expandItem.getQueryOptions());
+                Page<AbstractDatasetEntity> datastreams = getDatastreamService().getEntityCollectionByRelatedEntityRaw(
+                        entity.getStaIdentifier(), STAEntityDefinition.SENSORS, expandItem.getQueryOptions());
                 entity.setDatasets(datastreams.get().collect(Collectors.toSet()));
             } else {
-                throw new STAInvalidQueryException(String.format(INVALID_EXPAND_OPTION_SUPPLIED,
-                                                                 expandProperty,
-                                                                 StaConstants.SENSOR));
+                throw new STAInvalidQueryException(
+                        String.format(INVALID_EXPAND_OPTION_SUPPLIED, expandProperty, StaConstants.SENSOR));
             }
         }
         return entity;
     }
 
     @Override
-    protected Specification<ProcedureEntity> byRelatedEntityFilter(String relatedId,
-                                                                   String relatedType,
-                                                                   String ownId) {
+    protected Specification<ProcedureEntity> byRelatedEntityFilter(String relatedId, String relatedType,
+            String ownId) {
         Specification<ProcedureEntity> filter;
         switch (relatedType) {
             case STAEntityDefinition.DATASTREAMS: {
@@ -173,22 +162,19 @@ public class SensorService
     @Override
     public ProcedureEntity createOrfetch(ProcedureEntity sensor) throws STACRUDException {
         if (sensor.getStaIdentifier() != null && !sensor.isSetName()) {
-            Optional<ProcedureEntity> optionalEntity =
-                getRepository().findByStaIdentifier(sensor.getStaIdentifier(),
-                                                    EntityGraphRepository.FetchGraph.FETCHGRAPH_FORMAT);
+            Optional<ProcedureEntity> optionalEntity = getRepository().findByStaIdentifier(sensor.getStaIdentifier(),
+                    EntityGraphRepository.FetchGraph.FETCHGRAPH_FORMAT);
             if (optionalEntity.isPresent()) {
                 return optionalEntity.get();
             } else {
-                throw new STACRUDException(String.format(NO_S_WITH_ID_S_FOUND,
-                                                         StaConstants.SENSOR,
-                                                         sensor.getStaIdentifier()));
+                throw new STACRUDException(
+                        String.format(NO_S_WITH_ID_S_FOUND, StaConstants.SENSOR, sensor.getStaIdentifier()));
             }
         }
         if (sensor.getStaIdentifier() == null) {
             if (getRepository().existsByName(sensor.getName())) {
                 Optional<ProcedureEntity> optional = getRepository()
-                    .findOne(sQS.withStaIdentifier(sensor.getStaIdentifier())
-                                 .or(sQS.withName(sensor.getName())));
+                        .findOne(sQS.withStaIdentifier(sensor.getStaIdentifier()).or(sQS.withName(sensor.getName())));
                 return optional.isPresent() ? optional.get() : null;
             } else {
                 // Autogenerate Identifier
@@ -203,8 +189,10 @@ public class SensorService
                 throw new STACRUDException(IDENTIFIER_ALREADY_EXISTS, HTTPStatus.CONFLICT);
             }
             checkFormat(sensor, sensor);
-            // Intermediate save to allow DatastreamService->createOrUpdate to use this entity. Does not trigger
-            // intercept handling (e.g. mqtt). Needed as Datastream<->Procedure connection is not yet set but
+            // Intermediate save to allow DatastreamService->createOrUpdate to
+            // use this entity. Does not trigger
+            // intercept handling (e.g. mqtt). Needed as Datastream<->Procedure
+            // connection is not yet set but
             // required by interceptors
             getRepository().intermediateSave(sensor);
             checkProcedureHistory(sensor);
@@ -214,7 +202,7 @@ public class SensorService
                         getDatastreamService().createOrUpdate(datastreamEntity);
                     } catch (STACRUDException e) {
                         // Datastream might be currently processing.
-                        //TODO: check if we need to do something here
+                        // TODO: check if we need to do something here
                     }
                 }
             }
@@ -226,22 +214,18 @@ public class SensorService
     }
 
     @Override
-    public ProcedureEntity updateEntity(String id, ProcedureEntity entity, HttpMethod method) throws
-        STACRUDException {
+    public ProcedureEntity updateEntity(String id, ProcedureEntity entity, HttpMethod method) throws STACRUDException {
         checkUpdate(entity);
         if (HttpMethod.PATCH.equals(method)) {
             synchronized (getLock(id)) {
                 Optional<ProcedureEntity> existing =
-                    getRepository()
-                        .findByStaIdentifier(id,
-                                             EntityGraphRepository.FetchGraph.FETCHGRAPH_FORMAT,
-                                             EntityGraphRepository.FetchGraph.FETCHGRAPH_PROCEDUREHISTORY);
+                        getRepository().findByStaIdentifier(id, EntityGraphRepository.FetchGraph.FETCHGRAPH_FORMAT,
+                                EntityGraphRepository.FetchGraph.FETCHGRAPH_PROCEDUREHISTORY);
                 if (existing.isPresent()) {
                     ProcedureEntity merged = merge(existing.get(), entity);
                     if (entity.hasDatastreams()) {
                         AbstractSensorThingsEntityService dsService = getDatastreamService();
-                        for (AbstractDatasetEntity datastreamEntity :
-                            entity.getDatasets()) {
+                        for (AbstractDatasetEntity datastreamEntity : entity.getDatasets()) {
                             ((DatastreamService) dsService).createOrUpdate(datastreamEntity);
                         }
                     }
@@ -279,17 +263,15 @@ public class SensorService
             existing.setDescriptionFile(toMerge.getDescriptionFile());
         }
         /*
-        if (toMerge.isSetFormat()) {
-            existing.setFormat(toMerge.getFormat());
-        }
-        */
+         * if (toMerge.isSetFormat()) { existing.setFormat(toMerge.getFormat());
+         * }
+         */
         if (toMerge.hasParameters()) {
             existing.getParameters().clear();
             toMerge.getParameters().forEach(p -> {
-                                                p.setDescribeableEntity(existing);
-                                                existing.addParameter(p);
-                                            }
-            );
+                p.setDescribeableEntity(existing);
+                existing.addParameter(p);
+            });
         }
 
         return existing;
@@ -308,7 +290,8 @@ public class SensorService
         synchronized (getLock(identifier)) {
             if (getRepository().existsByStaIdentifier(identifier)) {
                 // delete datastreams
-                for (AbstractDatasetEntity ds : datastreamRepository.findAll(dQS.withSensorStaIdentifier(identifier))) {
+                for (AbstractDatasetEntity ds : datastreamRepository
+                        .findAll(dQS.withSensorStaIdentifier(identifier))) {
                     getDatastreamService().delete(ds.getStaIdentifier());
                 }
 

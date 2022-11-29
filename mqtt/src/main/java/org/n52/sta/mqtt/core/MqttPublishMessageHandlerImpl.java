@@ -79,7 +79,7 @@ public class MqttPublishMessageHandlerImpl extends AbstractSTARequestHandler
         super(rootUrl, shouldEscapeId, serviceRepository);
         this.mapper = mapper;
         this.readOnly = readOnly;
-        Set topics = new HashSet<>(publishTopics);
+        Set<String> topics = new HashSet<>(publishTopics);
 
         // Fallback to default if parameter was invalid
         if (!validateTopics(topics)) {
