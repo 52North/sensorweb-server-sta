@@ -104,7 +104,8 @@ public class MqttPublishMessageHandlerImpl extends AbstractSTARequestHandler
         return valid;
     }
 
-    @Override public <T extends IdEntity> void processPublishMessage(InterceptPublishMessage msg) {
+    @Override
+    public <T extends IdEntity> void processPublishMessage(InterceptPublishMessage msg) {
         try {
             if (msg.getClientID().equals(INTERNAL_CLIENT_ID) || readOnly) {
                 return;
