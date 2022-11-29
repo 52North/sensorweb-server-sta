@@ -58,6 +58,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -104,6 +106,7 @@ public class MqttSubscriptionEventHandlerImpl extends AbstractSTARequestHandler
 
     @Override
     @Async
+    @Transactional(propagation = Propagation.REQUIRED, readOnly = true)
     public void handleEvent(Object rawObject,
                             String entityType,
                             Set<String> differenceMap,
