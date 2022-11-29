@@ -102,12 +102,12 @@ public class RootRequestHandler {
         // parse Endpoints
         addToArray(rootUrl, mapper, endpoints, STAEntityDefinition.ALLCOLLECTIONS);
         ObjectNode node = mapper.createObjectNode();
-        node.put("value", endpoints);
+        node.set("value", endpoints);
 
         // parse ServerSettings based on application.properties
         ObjectNode serverSettings = mapper.createObjectNode();
         ArrayNode conformanceClasses = mapper.createArrayNode();
-        serverSettings.put("conformance", conformanceClasses);
+        serverSettings.set("conformance", conformanceClasses);
         conformanceClasses.add(
             HTTP_WWW_OPENGIS_NET_SPEC_IOT_SENSING_1_1_REQ_DATAMODEL);
         conformanceClasses.add(
@@ -123,12 +123,12 @@ public class RootRequestHandler {
         // 52N Extensions
         conformanceClasses.add(
             HTTPS_GITHUB_COM_52_NORTH_SENSORWEB_SERVER_STA_EXTENSION_SERVER_PROPERTIES_MD);
-        serverSettings.put(HTTPS_GITHUB_COM_52_NORTH_SENSORWEB_SERVER_STA_EXTENSION_SERVER_PROPERTIES_MD,
+        serverSettings.set(HTTPS_GITHUB_COM_52_NORTH_SENSORWEB_SERVER_STA_EXTENSION_SERVER_PROPERTIES_MD,
                            serverProperties.getFeatureInformation(mapper));
 
         conformanceClasses.add(
             HTTPS_GITHUB_COM_52_NORTH_SENSORWEB_SERVER_STA_EXTENSION_SERVER_VERSION_MD);
-        serverSettings.put(HTTPS_GITHUB_COM_52_NORTH_SENSORWEB_SERVER_STA_EXTENSION_SERVER_VERSION_MD,
+        serverSettings.set(HTTPS_GITHUB_COM_52_NORTH_SENSORWEB_SERVER_STA_EXTENSION_SERVER_VERSION_MD,
                            serverProperties.getVersionInformation(mapper));
 
         if (environment.getRequiredProperty("server.feature.variableEncodingType", Boolean.class)) {
@@ -169,30 +169,30 @@ public class RootRequestHandler {
 
             // MQTT Updates are always active if mqtt is active
             ObjectNode mqttEndpointsArray = mapper.createObjectNode();
-            mqttEndpointsArray.put(ENDPOINTS, mqttEndpoints);
-            serverSettings.put(
+            mqttEndpointsArray.set(ENDPOINTS, mqttEndpoints);
+            serverSettings.set(
                 HTTP_WWW_OPENGIS_NET_SPEC_IOT_SENSING_1_1_REQ_RECEIVE_UPDATES_VIA_MQTT_RECEIVE_UPDATES,
                 mqttEndpointsArray);
 
             // MQTT Publish
             if (!serverProperties.getMqttReadOnly()) {
                 ObjectNode mqttPublishSettings = mapper.createObjectNode();
-                mqttPublishSettings.put(ENDPOINTS, mqttEndpoints);
-                serverSettings.put(
+                mqttPublishSettings.set(ENDPOINTS, mqttEndpoints);
+                serverSettings.set(
                     HTTP_WWW_OPENGIS_NET_SPEC_IOT_SENSING_1_1_REQ_CREATE_OBSERVATIONS_VIA_MQTT_OBSERVATIONS_CREATION,
                     mqttEndpointsArray);
 
                 ObjectNode mqttCustomPublishSettings = mapper.createObjectNode();
                 ArrayNode availableMqttPublishEndpoints = mapper.createArrayNode();
                 serverProperties.getMqttPublishTopics().forEach(availableMqttPublishEndpoints::add);
-                mqttCustomPublishSettings.put(ENDPOINTS, mqttEndpoints);
-                mqttCustomPublishSettings.put("entities", availableMqttPublishEndpoints);
-                serverSettings.put(
+                mqttCustomPublishSettings.set(ENDPOINTS, mqttEndpoints);
+                mqttCustomPublishSettings.set("entities", availableMqttPublishEndpoints);
+                serverSettings.set(
                     HTTPS_GITHUB_COM_52_NORTH_SENSORWEB_SERVER_STA_EXTENSION_CREATE_VIA_MQTT_MD,
                     mqttCustomPublishSettings);
             }
         }
-        node.put("serverSettings", serverSettings);
+        node.set("serverSettings", serverSettings);
         return node.toString();
     }
 
