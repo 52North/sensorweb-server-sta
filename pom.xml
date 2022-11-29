@@ -40,6 +40,7 @@
         <maven.build.timestamp.format>yyyy</maven.build.timestamp.format>
         <currentYear>${maven.build.timestamp}</currentYear>
         <db-model.version>4.0.0-PR.14</db-model.version>
+        <adapters.version>2.0.0-SNAPSHOT</adapters.version>
         <arctic-sea.version>10.1.0-SNAPSHOT</arctic-sea.version>
         <spring-boot.version>2.7.6</spring-boot.version>
         <geolatte-geom.version>1.9.0</geolatte-geom.version>
@@ -125,6 +126,26 @@
                 <groupId>org.n52.sensorweb-server.db-model</groupId>
                 <artifactId>db-model-types</artifactId>
                 <version>${db-model.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.n52.sensorweb-server.helgoland-adapters</groupId>
+                <artifactId>http</artifactId>
+                <version>${adapters.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.n52.sensorweb-server.helgoland-adapters</groupId>
+                <artifactId>helgoland-adapters-http</artifactId>
+                <version>${adapters.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.n52.sensorweb-server.helgoland-adapters</groupId>
+                <artifactId>helgoland-adapters-config</artifactId>
+                <version>${adapters.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.n52.sensorweb-server.helgoland-adapters</groupId>
+                <artifactId>helgoland-adapters-hereon-common</artifactId>
+                <version>${adapters.version}</version>
             </dependency>
 
             <dependency>
