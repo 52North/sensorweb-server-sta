@@ -101,7 +101,6 @@ public class ObservationService
     protected final ObservationParameterRepository parameterRepository;
     private final String OBS_TYPE_SENSORML_OBSERVATION =
             "http://www.52north.org/def/observationType/OGC-OM/2.0/OM_SensorML20Observation";
-    private final Class entityClass;
 
     @Autowired
     public ObservationService(ObservationRepository<DataEntity<?>> repository,
@@ -109,7 +108,6 @@ public class ObservationService
                               DatastreamRepository datastreamRepository,
                               ObservationParameterRepository parameterRepository) {
         super(repository, em, DataEntity.class);
-        this.entityClass = DataEntity.class;
         this.datastreamRepository = datastreamRepository;
         this.parameterRepository = parameterRepository;
     }
@@ -134,7 +132,7 @@ public class ObservationService
     @Override
     public CollectionWrapper getEntityCollection(QueryOptions queryOptions) throws STACRUDException {
         try {
-            Page<DataEntity<?>> pages = getRepository().findAll(getFilterPredicate(entityClass, queryOptions),
+            Page<DataEntity<?>> pages = getRepository().findAll(getFilterPredicate(queryOptions),
                                                                 createPageableRequest(queryOptions),
                                                                 queryOptions.hasCountFilter() &&
                                                                         queryOptions.getCountFilter().getValue(),
@@ -154,7 +152,7 @@ public class ObservationService
         try {
             Page<DataEntity<?>> pages = getRepository()
                     .findAll(byRelatedEntityFilter(relatedId, relatedType, null)
-                                     .and(getFilterPredicate(entityClass, queryOptions)),
+                                     .and(getFilterPredicate(queryOptions)),
                              createPageableRequest(queryOptions),
                              queryOptions.hasCountFilter() && queryOptions.getCountFilter().getValue(),
                              createFetchGraph(queryOptions.getExpandFilter()));
@@ -356,7 +354,7 @@ public class ObservationService
     }
 
     @Override
-    public Specification<DataEntity<?>> getFilterPredicate(Class entityClass, QueryOptions queryOptions) {
+    protected Specification<DataEntity<?>> getFilterPredicate(QueryOptions queryOptions) {
         return (root, query, builder) -> {
             Predicate defaultFilter = builder.isNull(root.get(DataEntity.PROPERTY_PARENT));
             if (!queryOptions.hasFilterFilter()) {
@@ -497,32 +495,32 @@ public class ObservationService
      */
     protected void updateDatastreamPhenomenonTimeOnObservationUpdate(AbstractDatasetEntity datastreamEntity,
                                                                      DataEntity<?> observation) {
-        if (datastreamEntity.getPhenomenonTimeStart() == null ||
-                datastreamEntity.getPhenomenonTimeEnd() == null ||
-                observation.getPhenomenonTimeStart().compareTo(datastreamEntity.getPhenomenonTimeStart()) != 1 ||
-                observation.getPhenomenonTimeEnd().compareTo(datastreamEntity.getPhenomenonTimeEnd()) != -1
+        if (datastreamEntity.getSamplingTimeStart() == null ||
+                datastreamEntity.getSamplingTimeEnd() == null ||
+                observation.getSamplingTimeStart().compareTo(datastreamEntity.getSamplingTimeStart()) != 1 ||
+                observation.getSamplingTimeEnd().compareTo(datastreamEntity.getSamplingTimeEnd()) != -1
         ) {
             // Setting new phenomenonTimeStart
             DataEntity<?> firstObservation = getRepository()
                     .findFirstByDataset_idOrderBySamplingTimeStartAsc(datastreamEntity.getId());
-            Date newPhenomenonStart = (firstObservation == null) ? null : firstObservation.getPhenomenonTimeStart();
+            Date newPhenomenonStart = (firstObservation == null) ? null : firstObservation.getSamplingTimeStart();
 
             // Set Start and End to null if there is no observation.
             if (newPhenomenonStart == null) {
-                datastreamEntity.setPhenomenonTimeStart(null);
-                datastreamEntity.setPhenomenonTimeEnd(null);
+                datastreamEntity.setSamplingTimeStart(null);
+                datastreamEntity.setSamplingTimeEnd(null);
             } else {
-                datastreamEntity.setPhenomenonTimeStart(newPhenomenonStart);
+                datastreamEntity.setSamplingTimeStart(newPhenomenonStart);
 
                 // Setting new phenomenonTimeEnd
                 DataEntity<?> lastObservation = getRepository()
                         .findFirstByDataset_idOrderBySamplingTimeEndDesc(datastreamEntity.getId());
-                Date newPhenomenonEnd = (lastObservation == null) ? null : lastObservation.getPhenomenonTimeEnd();
+                Date newPhenomenonEnd = (lastObservation == null) ? null : lastObservation.getSamplingTimeEnd();
                 if (newPhenomenonEnd != null) {
-                    datastreamEntity.setPhenomenonTimeEnd(newPhenomenonEnd);
+                    datastreamEntity.setSamplingTimeEnd(newPhenomenonEnd);
                 } else {
-                    datastreamEntity.setPhenomenonTimeStart(null);
-                    datastreamEntity.setPhenomenonTimeEnd(null);
+                    datastreamEntity.setSamplingTimeStart(null);
+                    datastreamEntity.setSamplingTimeEnd(null);
                 }
             }
             datastreamRepository.save(datastreamEntity);
@@ -644,15 +642,15 @@ public class ObservationService
                     }
                 }
                 // Update phenomenonTime
-                if (dataset.getPhenomenonTimeStart() == null) {
-                    dataset.setPhenomenonTimeStart(data.getPhenomenonTimeStart());
-                    dataset.setPhenomenonTimeEnd(data.getPhenomenonTimeEnd());
+                if (dataset.getSamplingTimeStart() == null) {
+                    dataset.setSamplingTimeStart(data.getSamplingTimeStart());
+                    dataset.setSamplingTimeEnd(data.getSamplingTimeEnd());
                 } else {
-                    if (dataset.getPhenomenonTimeStart().after(data.getPhenomenonTimeStart())) {
-                        dataset.setPhenomenonTimeStart(data.getPhenomenonTimeStart());
+                    if (dataset.getSamplingTimeStart().after(data.getSamplingTimeStart())) {
+                        dataset.setSamplingTimeStart(data.getSamplingTimeStart());
                     }
-                    if (dataset.getPhenomenonTimeEnd().before(data.getPhenomenonTimeEnd())) {
-                        dataset.setPhenomenonTimeEnd(data.getPhenomenonTimeEnd());
+                    if (dataset.getSamplingTimeEnd().before(data.getSamplingTimeEnd())) {
+                        dataset.setSamplingTimeEnd(data.getSamplingTimeEnd());
                     }
                 }
                 // Update aggregation if present

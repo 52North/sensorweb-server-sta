@@ -299,7 +299,7 @@ public class ObservationSerDes {
 
         private TreeSet sortValuesByPhenomenonTime(Set<DataEntity<?>> values) {
             ArrayList<DataEntity<?>> vals = new ArrayList<>(values);
-            vals.sort(Comparator.comparing(HibernateRelations.HasPhenomenonTime::getPhenomenonTimeStart));
+            vals.sort(Comparator.comparing(HibernateRelations.HasPhenomenonTime::getSamplingTimeStart));
             return new TreeSet(vals);
         }
 
