@@ -46,7 +46,6 @@ import org.n52.sta.mqtt.old.subscription.MqttEntityCollectionSubscription;
 import org.n52.sta.mqtt.old.subscription.MqttEntitySubscription;
 import org.n52.sta.mqtt.old.subscription.MqttPropertySubscription;
 import org.n52.sta.mqtt.old.subscription.MqttSelectSubscription;
-import org.n52.sta.old.utils.AbstractSTARequestHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.annotation.Async;
@@ -65,7 +64,7 @@ import io.netty.handler.codec.mqtt.MqttQoS;
 /**
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
  */
-public class MqttSubscriptionEventHandlerImpl extends AbstractSTARequestHandler
+public class MqttSubscriptionEventHandlerImpl /* extends AbstractSTARequestHandler*/
         implements
         MqttSubscriptionEventHandler,
         CoreRequestUtils {
@@ -88,7 +87,7 @@ public class MqttSubscriptionEventHandlerImpl extends AbstractSTARequestHandler
     private Set<String> watchedEntityTypes = new HashSet<>();
 
     public MqttSubscriptionEventHandlerImpl(String rootUrl, boolean escapeId, ObjectMapper mapper) {
-        super(rootUrl, escapeId, null);
+        // super(rootUrl, escapeId, null);
         this.mapper = mapper;
     }
 
@@ -196,7 +195,9 @@ public class MqttSubscriptionEventHandlerImpl extends AbstractSTARequestHandler
             // Check topic for syntax+semantics
             if (topic.contains("?")) {
                 // only check path part of the topic (excluding the select parameter)
-                validateResource(topic.substring(0, topic.indexOf("?")));
+                // Comment to prevent compilation errors
+                // validateResource(topic.substring(0, topic.indexOf("?")));
+
                 for (Pattern namedSelectPattern : NAMED_SELECT_PATTERNS) {
                     mt = namedSelectPattern.matcher(topic);
                     if (mt.matches()) {
@@ -208,7 +209,8 @@ public class MqttSubscriptionEventHandlerImpl extends AbstractSTARequestHandler
                 // check full topic
                 // This will fail if we have a PropertySubscription
                 try {
-                    validateResource(topic);
+                    // Comment to prevent compilation errors
+                    // validateResource(topic);
                     for (Pattern collectionPattern : NAMED_COLL_PATTERNS) {
                         mt = collectionPattern.matcher(topic);
                         if (mt.matches()) {
@@ -231,7 +233,8 @@ public class MqttSubscriptionEventHandlerImpl extends AbstractSTARequestHandler
                             // OGC-15-078r6 14.2.3
                             // Only check path part of the topic (excluding the property)
                             String path = topic.substring(0, topic.lastIndexOf("/"));
-                            validateResource(path);
+                            // Comment to prevent compilation errors
+                            // validateResource(path);
                             return new MqttPropertySubscription(topic, mt);
                         }
                     }

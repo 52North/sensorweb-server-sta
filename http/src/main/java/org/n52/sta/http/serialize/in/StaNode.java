@@ -51,7 +51,6 @@ import org.n52.janmayen.stream.Streams;
 import org.n52.shetland.ogc.gml.time.Time;
 import org.n52.shetland.ogc.sta.StaConstants;
 import org.n52.sta.api.entity.Identifiable;
-import org.n52.sta.old.utils.TimeUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -111,7 +110,7 @@ abstract class StaNode implements Identifiable {
         }
         JsonNode time = propertyNode.get();
         try {
-            return TimeUtil.parseTime(time.asText());
+            return parseTime(time.asText());
         } catch (IllegalArgumentException e) {
             LOGGER.debug("Could not parse Time at '{}': {}", property, time.toPrettyString());
             throw new InvalidValueException(String.format("Invalid Time at '%s'!", property));

@@ -30,7 +30,7 @@ package org.n52.sta.config;
 
 import javax.servlet.Filter;
 
-import org.n52.sta.http.old.filter.CorsFilter;
+import org.n52.sta.http.util.CorsFilter;
 import org.n52.sta.http.util.CustomUrlPathHelper;
 import org.n52.sta.http.util.path.DefaultStaPathFactory;
 import org.n52.sta.http.util.path.PathFactory;

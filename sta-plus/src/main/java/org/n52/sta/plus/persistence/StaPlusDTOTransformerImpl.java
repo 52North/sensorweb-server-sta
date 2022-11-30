@@ -485,7 +485,7 @@ public class StaPlusDTOTransformerImpl<R extends StaDTO, S extends HibernateRela
             dataset.setUnit(unit);
         }
 
-        Time time = TimeUtil.parseTime(raw.getResultTime());
+        Time time = parseTime(raw.getResultTime());
         if (time instanceof TimeInstant) {
             dataset.setResultTimeStart(((TimeInstant) time).getValue()
                                                            .toDate());
@@ -596,8 +596,8 @@ public class StaPlusDTOTransformerImpl<R extends StaDTO, S extends HibernateRela
         datastream.setName(raw.getName());
 
         if (raw.getSamplingTimeStart() != null) {
-            datastream.setPhenomenonTime(TimeUtil.createTime(TimeUtil.createDateTime(raw.getSamplingTimeStart()),
-                                                             TimeUtil.createDateTime(raw.getSamplingTimeEnd())));
+            datastream.setPhenomenonTime(createTime(createDateTime(raw.getSamplingTimeStart()),
+                                                             createDateTime(raw.getSamplingTimeEnd())));
         }
         datastream.setDescription(raw.getDescription());
         datastream.setObservedArea(raw.getGeometry());
@@ -606,8 +606,8 @@ public class StaPlusDTOTransformerImpl<R extends StaDTO, S extends HibernateRela
         datastream.setProperties(parseProperties(raw));
 
         if (raw.getResultTimeStart() != null) {
-            datastream.setResultTime(TimeUtil.createTime(TimeUtil.createDateTime(raw.getResultTimeStart()),
-                                                         TimeUtil.createDateTime(raw.getResultTimeEnd())));
+            datastream.setResultTime(createTime(createDateTime(raw.getResultTimeStart()),
+                                                         createDateTime(raw.getResultTimeEnd())));
         }
 
         datastream.setUnitOfMeasurement(new DatastreamDTO.UnitOfMeasurement(
@@ -726,11 +726,11 @@ public class StaPlusDTOTransformerImpl<R extends StaDTO, S extends HibernateRela
         observation.setId(raw.getStaIdentifier());
         observation.setResult(parseObservationResult(raw));
 
-        observation.setPhenomenonTime(TimeUtil.createTime(TimeUtil.createDateTime(raw.getPhenomenonTimeStart()),
-                                                          TimeUtil.createDateTime(raw.getPhenomenonTimeEnd())));
+        observation.setPhenomenonTime(createTime(createDateTime(raw.getPhenomenonTimeStart()),
+                                                          createDateTime(raw.getPhenomenonTimeEnd())));
         if (raw.getValidTimeStart() != null) {
-            observation.setValidTime(TimeUtil.createTime(TimeUtil.createDateTime(raw.getValidTimeStart()),
-                                                         TimeUtil.createDateTime(raw.getValidTimeStart())));
+            observation.setValidTime(createTime(createDateTime(raw.getValidTimeStart()),
+                                                         createDateTime(raw.getValidTimeStart())));
         }
         if (raw.getResultTime() != null) {
             observation.setResultTime(new TimeInstant(raw.getResultTime()));
@@ -974,10 +974,10 @@ public class StaPlusDTOTransformerImpl<R extends StaDTO, S extends HibernateRela
         dto.setTermsOfUse(raw.getTermsOfUse());
         dto.setPrivacyPolicy(raw.getPrivacyPolicy());
         if (raw.getStartTime() != null) {
-            dto.setCreationTime(TimeUtil.createTime(TimeUtil.createDateTime(raw.getCreationTime())));
+            dto.setCreationTime(createTime(createDateTime(raw.getCreationTime())));
         }
         if (raw.getEndTime() != null) {
-            dto.setStartTime(TimeUtil.createTime(TimeUtil.createDateTime(raw.getEndTime())));
+            dto.setStartTime(createTime(createDateTime(raw.getEndTime())));
         }
         dto.setUrl(raw.getUrl());
 
@@ -1026,10 +1026,10 @@ public class StaPlusDTOTransformerImpl<R extends StaDTO, S extends HibernateRela
         dto.setDescription(raw.getDescription());
         dto.setPurpose(raw.getPurpose());
         if (raw.getCreationTime() != null) {
-            dto.setCreationTime(TimeUtil.createTime(TimeUtil.createDateTime(raw.getCreationTime())));
+            dto.setCreationTime(createTime(createDateTime(raw.getCreationTime())));
         }
         if (raw.getEndTime() != null) {
-            dto.setEndTime(TimeUtil.createTime(TimeUtil.createDateTime(raw.getEndTime())));
+            dto.setEndTime(createTime(createDateTime(raw.getEndTime())));
         }
 
         dto.setProperties(parseProperties(raw));

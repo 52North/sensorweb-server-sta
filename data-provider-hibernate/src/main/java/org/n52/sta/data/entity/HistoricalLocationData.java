@@ -39,7 +39,6 @@ import org.n52.sta.api.entity.HistoricalLocation;
 import org.n52.sta.api.entity.Location;
 import org.n52.sta.api.entity.Thing;
 import org.n52.sta.config.EntityPropertyMapping;
-import org.n52.sta.old.utils.TimeUtil;
 
 public class HistoricalLocationData extends StaData<HistoricalLocationEntity> implements HistoricalLocation {
 
@@ -51,8 +50,8 @@ public class HistoricalLocationData extends StaData<HistoricalLocationEntity> im
     @Override
     public Time getTime() {
         Date time = data.getTime();
-        DateTime dateTime = TimeUtil.createDateTime(time);
-        return TimeUtil.createTime(dateTime);
+        DateTime dateTime = createDateTime(time);
+        return createTime(dateTime);
     }
 
     @Override

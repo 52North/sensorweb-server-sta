@@ -19,10 +19,6 @@
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>sta-data-provider</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>${project.groupId}</groupId>
             <artifactId>sta-data-provider-hibernate</artifactId>
         </dependency>
         <dependency>

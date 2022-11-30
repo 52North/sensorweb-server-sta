@@ -86,7 +86,7 @@ import org.n52.sta.api.old.entity.ObservedPropertyDTO;
 import org.n52.sta.api.old.entity.SensorDTO;
 import org.n52.sta.api.old.entity.ThingDTO;
 import org.n52.sta.data.old.service.ServiceUtils;
-import org.n52.sta.old.utils.TimeUtil;
+import org.n52.sta.utils.TimeUtil;
 import org.springframework.util.Assert;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -101,7 +101,8 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
  *
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
  */
-public class DTOTransformerImpl<R extends StaDTO, S extends HibernateRelations.HasId> implements DTOTransformer<R, S> {
+public class DTOTransformerImpl<R extends StaDTO, S extends HibernateRelations.HasId> implements DTOTransformer<R, S>,
+        TimeUtil {
 
     protected static final String ENCODINGTYPE_GEOJSON = "application/vnd.geo+json";
     protected static final String STA_SENSORML_2 = "http://www.opengis.net/doc/IS/SensorML/2.0";
@@ -476,7 +477,7 @@ public class DTOTransformerImpl<R extends StaDTO, S extends HibernateRelations.H
             dataset.setUnit(unit);
         }
 
-        Time time = TimeUtil.parseTime(raw.getResultTime());
+        Time time = parseTime(raw.getResultTime());
         if (time instanceof TimeInstant) {
             dataset.setResultTimeStart(((TimeInstant) time).getValue()
                     .toDate());
@@ -583,8 +584,8 @@ public class DTOTransformerImpl<R extends StaDTO, S extends HibernateRelations.H
         datastream.setName(raw.getName());
 
         if (raw.getSamplingTimeStart() != null) {
-            datastream.setPhenomenonTime(TimeUtil.createTime(TimeUtil.createDateTime(raw.getSamplingTimeStart()),
-                    TimeUtil.createDateTime(raw.getSamplingTimeEnd())));
+            datastream.setPhenomenonTime(createTime(createDateTime(raw.getSamplingTimeStart()),
+                    createDateTime(raw.getSamplingTimeEnd())));
         }
         datastream.setDescription(raw.getDescription());
         datastream.setObservedArea(raw.getGeometry());
@@ -593,8 +594,8 @@ public class DTOTransformerImpl<R extends StaDTO, S extends HibernateRelations.H
         datastream.setProperties(parseProperties(raw));
 
         if (raw.getResultTimeStart() != null) {
-            datastream.setResultTime(TimeUtil.createTime(TimeUtil.createDateTime(raw.getResultTimeStart()),
-                    TimeUtil.createDateTime(raw.getResultTimeEnd())));
+            datastream.setResultTime(createTime(createDateTime(raw.getResultTimeStart()),
+                    createDateTime(raw.getResultTimeEnd())));
         }
 
         datastream.setUnitOfMeasurement(new DatastreamDTO.UnitOfMeasurement(
@@ -683,11 +684,11 @@ public class DTOTransformerImpl<R extends StaDTO, S extends HibernateRelations.H
         observation.setId(raw.getStaIdentifier());
         observation.setResult(parseObservationResult(raw));
 
-        observation.setPhenomenonTime(TimeUtil.createTime(TimeUtil.createDateTime(raw.getPhenomenonTimeStart()),
-                TimeUtil.createDateTime(raw.getPhenomenonTimeEnd())));
+        observation.setPhenomenonTime(createTime(createDateTime(raw.getPhenomenonTimeStart()),
+                createDateTime(raw.getPhenomenonTimeEnd())));
         if (raw.getValidTimeStart() != null) {
-            observation.setValidTime(TimeUtil.createTime(TimeUtil.createDateTime(raw.getValidTimeStart()),
-                    TimeUtil.createDateTime(raw.getValidTimeStart())));
+            observation.setValidTime(createTime(createDateTime(raw.getValidTimeStart()),
+                    createDateTime(raw.getValidTimeStart())));
         }
         if (raw.getResultTime() != null) {
             observation.setResultTime(new TimeInstant(raw.getResultTime()));

@@ -29,12 +29,12 @@
         <module>app</module>
         <module>api</module>
         <module>http</module>
-        <module>mqtt</module>
+        <!--        <module>mqtt</module>-->
         <!--        <module>webapp</module>-->
         <!--        <module>data-provider</module>-->
         <module>data-provider-ufz</module>
         <module>data-provider-hibernate</module>
-        <module>sta-plus</module>
+        <!--        <module>sta-plus</module>-->
     </modules>
 
     <properties>
@@ -64,11 +64,6 @@
             <dependency>
                 <groupId>${project.groupId}</groupId>
                 <artifactId>sta-api</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>${project.groupId}</groupId>
-                <artifactId>sta-data-provider</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
@@ -337,7 +332,7 @@
                         <goals>
                             <goal>revision</goal>
                         </goals>
-                        <phase>validate</phase>
+                        <phase>package</phase>
                     </execution>
                 </executions>
                 <configuration>

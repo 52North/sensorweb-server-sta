@@ -56,6 +56,7 @@ import io.moquette.interception.messages.InterceptPublishMessage;
 /**
  * @author <a href="mailto:s.drost@52north.org">Sebastian Drost</a>
  */
+
 @SuppressWarnings("checkstyle:linelength")
 public class MqttPublishMessageHandlerImpl extends AbstractSTARequestHandler
         implements
@@ -179,3 +180,4 @@ public class MqttPublishMessageHandlerImpl extends AbstractSTARequestHandler
         }
     }
 }
+*/

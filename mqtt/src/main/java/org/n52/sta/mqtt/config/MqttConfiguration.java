@@ -36,7 +36,6 @@ import org.n52.sta.mqtt.old.MqttPublishMessageHandler;
 import org.n52.sta.mqtt.old.MqttPublishMessageHandlerImpl;
 import org.n52.sta.mqtt.old.MqttSubscriptionEventHandler;
 import org.n52.sta.mqtt.old.MqttSubscriptionEventHandlerImpl;
-import org.n52.sta.old.utils.DTOMapper;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.ConfigurationProperties;
