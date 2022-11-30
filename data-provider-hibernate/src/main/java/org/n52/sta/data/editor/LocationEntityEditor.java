@@ -25,6 +25,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
+
 package org.n52.sta.data.editor;
 
 import java.util.Map;
@@ -106,8 +107,9 @@ public class LocationEntityEditor extends DatabaseEntityAdapter<LocationEntity>
         locationEntity.setName(entity.getName());
         locationEntity.setDescription(entity.getDescription());
         locationEntity.setGeometry(entity.getGeometry());
-        //TODO: check if this String representation is legacy or actually used.
-        locationEntity.setLocation(entity.getGeometry().toString());
+        // TODO: check if this String representation is legacy or actually used.
+        locationEntity.setLocation(entity.getGeometry()
+                                         .toString());
 
         valueHelper.setFormat(locationEntity::setLocationEncoding, entity.getEncodingType());
 
@@ -143,7 +145,8 @@ public class LocationEntityEditor extends DatabaseEntityAdapter<LocationEntity>
     @Override
     public void delete(String id) throws EditorException {
         LocationEntity location = getEntity(id)
-                .orElseThrow(() -> new EditorException("could not find entity with id: " + id));
+                                               .orElseThrow(() -> new EditorException("could not find entity with id: "
+                                                       + id));
 
         Set<HistoricalLocationEntity> historicalLocations = location.getHistoricalLocations();
 
@@ -152,9 +155,11 @@ public class LocationEntityEditor extends DatabaseEntityAdapter<LocationEntity>
             historicalLocationEditor.delete(hl.getStaIdentifier());
         });
 
-        location.getPlatforms().forEach(thing -> {
-            thing.getLocations().remove(location);
-        });
+        location.getPlatforms()
+                .forEach(thing -> {
+                    thing.getLocations()
+                         .remove(location);
+                });
         location.setPlatforms(null);
 
         locationRepository.delete(location);

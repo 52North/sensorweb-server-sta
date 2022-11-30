@@ -75,7 +75,7 @@ public class ObservedPropertyEntityEditor extends DatabaseEntityAdapter<Phenomen
     public ObservedPropertyData getOrSave(ObservedProperty entity) throws EditorException {
         Optional<PhenomenonEntity> stored = getEntity(entity.getId());
         return stored.map(e -> new ObservedPropertyData(e, Optional.empty()))
-                .orElseGet(() -> save(entity));
+                     .orElseGet(() -> save(entity));
     }
 
     @Override
@@ -98,15 +98,14 @@ public class ObservedPropertyEntityEditor extends DatabaseEntityAdapter<Phenomen
         // parameters are saved as cascade
         Map<String, Object> properties = entity.getProperties();
         Streams.stream(properties.entrySet())
-                .map(entry -> convertParameter(phenomenonEntity, entry))
-                .forEach(phenomenonEntity::addParameter);
-
+               .map(entry -> convertParameter(phenomenonEntity, entry))
+               .forEach(phenomenonEntity::addParameter);
 
         // save related entities
         phenomenonEntity.setDatasets(Streams.stream(entity.getDatastreams())
-                .map(datastreamEditor::getOrSave)
-                .map(StaData::getData)
-                .collect(Collectors.toSet()));
+                                            .map(datastreamEditor::getOrSave)
+                                            .map(StaData::getData)
+                                            .collect(Collectors.toSet()));
 
         // we need to flush else updates to relations are not persisted
         phenomenonRepository.flush();
@@ -115,7 +114,8 @@ public class ObservedPropertyEntityEditor extends DatabaseEntityAdapter<Phenomen
     }
 
     @Override
-    public ObservedPropertyData update(ObservedProperty oldEntity, ObservedProperty updateEntity) throws EditorException {
+    public ObservedPropertyData update(ObservedProperty oldEntity, ObservedProperty updateEntity)
+            throws EditorException {
         throw new EditorException();
     }
 
@@ -124,9 +124,10 @@ public class ObservedPropertyEntityEditor extends DatabaseEntityAdapter<Phenomen
         PhenomenonEntity phenomenon = getEntity(id)
                 .orElseThrow(() -> new EditorException("could not find entity with id: " + id));
 
-        phenomenon.getDatasets().forEach(ds -> {
-            datastreamEditor.delete(ds.getStaIdentifier());
-        });
+        phenomenon.getDatasets()
+                  .forEach(ds -> {
+                      datastreamEditor.delete(ds.getStaIdentifier());
+                  });
 
         phenomenonRepository.delete(phenomenon);
     }

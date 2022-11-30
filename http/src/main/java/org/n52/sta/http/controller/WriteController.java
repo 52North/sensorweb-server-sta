@@ -109,7 +109,7 @@ public class WriteController {
         //TODO: e.g. /Datastreams(13)/Sensor
         if (path.getPathSegments().size() > 1 || path.getPathSegments().get(0).getIdentifier().isEmpty()) {
             return ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED).body("Patching of entities addressed indirectly " +
-                                                                                  "is not implemented yet!");
+                                                                                  "is not implemented yet.");
         }
 
         String identifier = path.getPathSegments().get(0).getIdentifier().get();

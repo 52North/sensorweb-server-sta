@@ -78,7 +78,8 @@ public class DatastreamEntityProvider extends BaseEntityProvider<Datastream> {
     public Optional<Datastream> getEntity(String id, QueryOptions queryOptions) throws ProviderException {
         DatastreamGraphBuilder graphBuilder = DatastreamGraphBuilder.createEmpty();
         return getEntity(rootSpecification.buildSpecification(queryOptions)
-                                          .and(rootSpecification.equalsStaIdentifier(id)), graphBuilder);
+                                          .and(rootSpecification.equalsStaIdentifier(id)),
+                         graphBuilder);
     }
 
     private Optional<Datastream> getEntity(Specification<AbstractDatasetEntity> specification,

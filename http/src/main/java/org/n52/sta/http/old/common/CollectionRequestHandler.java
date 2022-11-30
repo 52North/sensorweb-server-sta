@@ -41,6 +41,7 @@ import org.n52.sta.api.old.CollectionWrapper;
 import org.n52.sta.api.old.EntityServiceFactory;
 import org.n52.sta.api.old.RequestUtils;
 import org.n52.sta.old.utils.AbstractSTARequestHandler;
+import org.n52.svalbard.odata.core.QueryOptionsFactory;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.servlet.HandlerMapping;
 
@@ -58,9 +59,9 @@ public abstract class CollectionRequestHandler<T extends RequestUtils> extends A
     protected QueryOptions decodeQueryString(HttpServletRequest request) {
         if (request.getQueryString() != null) {
             String decoded = URLDecoder.decode(request.getQueryString());
-            return QUERY_OPTIONS_FACTORY.createQueryOptions(decoded);
+            return QueryOptionsFactory.createQueryOptions(decoded);
         } else {
-            return QUERY_OPTIONS_FACTORY.createEmpty();
+            return QueryOptionsFactory.createEmpty();
         }
     }
 
@@ -110,7 +111,7 @@ public abstract class CollectionRequestHandler<T extends RequestUtils> extends A
         filters.add(new SelectFilter(ID));
         return serviceRepository
                                 .getEntityService(collectionName)
-                                .getEntityCollection(QUERY_OPTIONS_FACTORY.createQueryOptions(filters))
+                                .getEntityCollection(QueryOptionsFactory.createQueryOptions(filters))
                                 .setRequestURL(rootUrl + collectionName);
     }
 
@@ -180,7 +181,7 @@ public abstract class CollectionRequestHandler<T extends RequestUtils> extends A
         return serviceRepository.getEntityService(target)
                                 .getEntityCollectionByRelatedEntity(sourceId,
                                                                     sourceType,
-                                                                    QUERY_OPTIONS_FACTORY.createQueryOptions(filters))
+                                                                    QueryOptionsFactory.createQueryOptions(filters))
                                 .setRequestURL(rootUrl + entity + "/" + target);
     }
 }

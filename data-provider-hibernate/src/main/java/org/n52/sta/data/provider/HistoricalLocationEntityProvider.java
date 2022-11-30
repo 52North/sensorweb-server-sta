@@ -79,7 +79,8 @@ public class HistoricalLocationEntityProvider extends BaseEntityProvider<Histori
     public Optional<HistoricalLocation> getEntity(String id, QueryOptions queryOptions) throws ProviderException {
         HistoricalLocationGraphBuilder graphBuilder = HistoricalLocationGraphBuilder.createEmpty();
         return getEntity(rootSpecification.buildSpecification(queryOptions)
-                                          .and(rootSpecification.equalsStaIdentifier(id)), graphBuilder);
+                                          .and(rootSpecification.equalsStaIdentifier(id)),
+                         graphBuilder);
     }
 
     private Optional<HistoricalLocation> getEntity(Specification<HistoricalLocationEntity> spec,

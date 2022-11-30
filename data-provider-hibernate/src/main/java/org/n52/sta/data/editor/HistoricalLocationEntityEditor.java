@@ -25,6 +25,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
+
 package org.n52.sta.data.editor;
 
 import java.util.Objects;
@@ -106,7 +107,8 @@ public class HistoricalLocationEntityEditor extends DatabaseEntityAdapter<Histor
         historicalLocationEntity.setStaIdentifier(id);
         valueHelper.setStartTime(historicalLocationEntity::setTime, entity.getTime());
 
-        PlatformEntity thing = thingEditor.getOrSave(entity.getThing()).getData();
+        PlatformEntity thing = thingEditor.getOrSave(entity.getThing())
+                                          .getData();
         historicalLocationEntity.setThing(thing);
 
         historicalLocationEntity.setLocations(Streams.stream(entity.getLocations())
@@ -121,7 +123,7 @@ public class HistoricalLocationEntityEditor extends DatabaseEntityAdapter<Histor
 
     @Override
     public HistoricalLocationData update(HistoricalLocation oldEntity,
-                                         HistoricalLocation updateEntity) throws EditorException {
+            HistoricalLocation updateEntity) throws EditorException {
         throw new EditorException();
     }
 
@@ -150,6 +152,7 @@ public class HistoricalLocationEntityEditor extends DatabaseEntityAdapter<Histor
     }
 
     private void updateThing(HistoricalLocationEntity historicalLocation) {
-        historicalLocation.getThing().setHistoricalLocations(null);
+        historicalLocation.getThing()
+                          .setHistoricalLocations(null);
     }
 }

@@ -39,6 +39,7 @@ import org.n52.shetland.ogc.filter.FilterClause;
 import org.n52.sta.api.old.EntityServiceFactory;
 import org.n52.sta.api.old.dto.common.StaDTO;
 import org.n52.sta.old.utils.AbstractSTARequestHandler;
+import org.n52.svalbard.odata.core.QueryOptionsFactory;
 import org.springframework.web.servlet.HandlerMapping;
 
 /**
@@ -58,9 +59,9 @@ public abstract class EntityRequestHandler extends AbstractSTARequestHandler {
     protected QueryOptions decodeQueryString(HttpServletRequest request) {
         if (request.getQueryString() != null) {
             String decoded = URLDecoder.decode(request.getQueryString());
-            return QUERY_OPTIONS_FACTORY.createQueryOptions(decoded);
+            return QueryOptionsFactory.createQueryOptions(decoded);
         } else {
-            return QUERY_OPTIONS_FACTORY.createEmpty();
+            return QueryOptionsFactory.createEmpty();
         }
     }
 
@@ -113,7 +114,7 @@ public abstract class EntityRequestHandler extends AbstractSTARequestHandler {
         // Overwrite select filter with filter only returning id
         filters.add(new SelectFilter(ID));
         return serviceRepository.getEntityService(entity)
-                                .getEntity(entityId, QUERY_OPTIONS_FACTORY.createQueryOptions(filters));
+                                .getEntity(entityId, QueryOptionsFactory.createQueryOptions(filters));
     }
 
     /**
@@ -173,6 +174,6 @@ public abstract class EntityRequestHandler extends AbstractSTARequestHandler {
                                 .getEntityByRelatedEntity(sourceId,
                                                           sourceType,
                                                           null,
-                                                          QUERY_OPTIONS_FACTORY.createQueryOptions(filters));
+                                                          QueryOptionsFactory.createQueryOptions(filters));
     }
 }

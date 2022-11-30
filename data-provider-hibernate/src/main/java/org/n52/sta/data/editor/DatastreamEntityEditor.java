@@ -25,6 +25,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
+
 package org.n52.sta.data.editor;
 
 import java.util.Collections;
@@ -127,14 +128,16 @@ public class DatastreamEntityEditor extends DatabaseEntityAdapter<AbstractDatase
 
         // Persist or get default category on startup
         final String DEFAULT_CATEGORY = "DEFAULT_STA_CATEGORY";
-        defaultCategory = categoryRepository.findByIdentifier(DEFAULT_CATEGORY).orElseGet(() -> {
-            CategoryEntity category = new CategoryEntity();
-            category.setIdentifier(DEFAULT_CATEGORY);
-            category.setName(DEFAULT_CATEGORY);
-            category.setDescription("Default STA category");
-            logger.debug("Persisting default CategoryEntity: " + category.getName());
-            return categoryRepository.save(category);
-        });
+        defaultCategory = categoryRepository.findByIdentifier(DEFAULT_CATEGORY)
+                                            .orElseGet(() -> {
+                                                CategoryEntity category = new CategoryEntity();
+                                                category.setIdentifier(DEFAULT_CATEGORY);
+                                                category.setName(DEFAULT_CATEGORY);
+                                                category.setDescription("Default STA category");
+                                                logger.debug("Persisting default CategoryEntity: "
+                                                        + category.getName());
+                                                return categoryRepository.save(category);
+                                            });
     }
 
     @Override
@@ -296,7 +299,7 @@ public class DatastreamEntityEditor extends DatabaseEntityAdapter<AbstractDatase
         }
     }
 
-    public boolean removeAsFirstObservation(DataEntity<?> observation) {
+    public boolean removeAsFirstObservation(DataEntity< ? > observation) {
         DatasetEntity dataset = observation.getDataset();
         if (dataset.getFirstObservation() != null
                 && dataset.getFirstObservation()
@@ -310,7 +313,7 @@ public class DatastreamEntityEditor extends DatabaseEntityAdapter<AbstractDatase
     }
 
     @Override
-    public boolean removeAsLastObservation(DataEntity<?> observation) {
+    public boolean removeAsLastObservation(DataEntity< ? > observation) {
         DatasetEntity dataset = observation.getDataset();
         if (dataset.getLastObservation() != null
                 && dataset.getLastObservation()
@@ -324,11 +327,12 @@ public class DatastreamEntityEditor extends DatabaseEntityAdapter<AbstractDatase
     }
 
     public void updateFirstLastObservation(AbstractDatasetEntity datastreamEntity,
-                                           DataEntity<?> first,
-                                           DataEntity<?> last) {
+            DataEntity< ? > first,
+            DataEntity< ? > last) {
         if (first != null
                 && (!datastreamEntity.isSetFirstValueAt()
-                || first.getSamplingTimeStart().before(datastreamEntity.getSamplingTimeStart()))) {
+                        || first.getSamplingTimeStart()
+                                .before(datastreamEntity.getSamplingTimeStart()))) {
             datastreamEntity.setFirstObservation(first);
             datastreamEntity.setFirstValueAt(first.getSamplingTimeStart());
             DataEntity unwrapped = (DataEntity) Hibernate.unproxy(first);
@@ -339,7 +343,8 @@ public class DatastreamEntityEditor extends DatabaseEntityAdapter<AbstractDatase
 
         if (last != null
                 && (!datastreamEntity.isSetLastValueAt()
-                || last.getSamplingTimeEnd().after(datastreamEntity.getSamplingTimeEnd()))) {
+                        || last.getSamplingTimeEnd()
+                               .after(datastreamEntity.getSamplingTimeEnd()))) {
             datastreamEntity.setLastObservation(last);
             datastreamEntity.setFirstValueAt(last.getSamplingTimeEnd());
 
@@ -354,7 +359,11 @@ public class DatastreamEntityEditor extends DatabaseEntityAdapter<AbstractDatase
         // update parent if datastream is part of aggregation
         if (datastreamEntity.isSetAggregation()) {
             updateFirstLastObservation(
-                    datastreamRepository.findById(datastreamEntity.getAggregation().getId()).get(), first, last);
+                                       datastreamRepository.findById(datastreamEntity.getAggregation()
+                                                                                     .getId())
+                                                           .get(),
+                                       first,
+                                       last);
         }
     }
 
