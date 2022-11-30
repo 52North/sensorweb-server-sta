@@ -44,7 +44,7 @@
         <!-- maven-parents switches version syntax -->
         <version.java>${java.version}</version.java>
         <antlr-runtime.version>4.10.1</antlr-runtime.version>
-        <arctic-sea.version>8.1.0-SNAPSHOT</arctic-sea.version>
+        <arctic-sea.version>10.0.2</arctic-sea.version>
         <db-model.version>4.2.0-STA-SNAPSHOT</db-model.version>
         <findbugs.version>3.0.2</findbugs.version>
         <guava.version>30.1-jre</guava.version>
