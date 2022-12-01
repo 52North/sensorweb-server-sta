@@ -28,6 +28,9 @@
 
 package org.n52.sta.data.support;
 
+import java.util.LinkedHashSet;
+import java.util.Set;
+
 enum GraphText {
     GRAPH_DEFAULT("identifier"),
     GRAPH_PLATFORMS("platforms(parameters)"),
@@ -52,13 +55,31 @@ enum GraphText {
     GRAPH_LOCATIONHISTLOCATION("locations(historicalLocations)");
 
     private final String value;
+    private final Set<String> values = new LinkedHashSet<>();
 
     GraphText(String graphText) {
         this.value = graphText;
+        createValues(graphText);
+    }
+
+    void createValues(String graphText) {
+        if (value.contains("(")) {
+            String[] split = value.replace(")", "").split("\\(");
+            String prefix = split[0];
+            String[] parameter = split[1].split(",");
+            for (int i = 0; i < parameter.length; i++) {
+                values.add(prefix + "." + parameter[i]);
+            }
+        } else {
+            values.add(value);
+        }
     }
 
     String value() {
         return value;
     }
 
+    Set<String> paths() {
+        return values;
+    }
 }
