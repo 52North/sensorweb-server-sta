@@ -1,0 +1,10 @@
+
+## Service Configuration
+service:
+  connector:
+    # hereon config
+    hereon:
+      username:
+      password:
+      url:
+        token:

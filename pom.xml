@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>org.n52</groupId>
@@ -98,12 +99,12 @@
                 <artifactId>javaee-api</artifactId>
                 <version>8.0.1</version>
                 <scope>provided</scope>
-				<exclusions>
-					<exclusion>
-						<groupId>javax.activation</groupId>
-						<artifactId>activation</artifactId>
-					</exclusion>
-				</exclusions>
+                <exclusions>
+                    <exclusion>
+                        <groupId>javax.activation</groupId>
+                        <artifactId>activation</artifactId>
+                    </exclusion>
+                </exclusions>
             </dependency>
 
             <dependency>
@@ -134,6 +135,11 @@
             </dependency>
             <dependency>
                 <groupId>org.n52.sensorweb-server.helgoland-adapters</groupId>
+                <artifactId>web</artifactId>
+                <version>${adapters.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.n52.sensorweb-server.helgoland-adapters</groupId>
                 <artifactId>helgoland-adapters-http</artifactId>
                 <version>${adapters.version}</version>
             </dependency>
@@ -154,13 +160,13 @@
                 <version>${h2database.version}</version>
             </dependency>
 
-			<dependency>
-				<groupId>com.fasterxml.jackson</groupId>
-				<artifactId>jackson-bom</artifactId>
-				<version>${jackson.version}</version>
-				<scope>import</scope>
-				<type>pom</type>
-			</dependency>
+            <dependency>
+                <groupId>com.fasterxml.jackson</groupId>
+                <artifactId>jackson-bom</artifactId>
+                <version>${jackson.version}</version>
+                <scope>import</scope>
+                <type>pom</type>
+            </dependency>
 
             <dependency>
                 <groupId>org.geolatte</groupId>
@@ -201,11 +207,11 @@
                 <version>${hibernate.version}</version>
             </dependency>
             <dependency>
-	            <groupId>com.google.guava</groupId>
-	            <artifactId>guava</artifactId>
-	            <version>31.1-jre</version>
-	        </dependency>
-	        <dependency>
+                <groupId>com.google.guava</groupId>
+                <artifactId>guava</artifactId>
+                <version>31.1-jre</version>
+            </dependency>
+            <dependency>
                 <groupId>org.checkerframework</groupId>
                 <artifactId>checker-qual</artifactId>
                 <version>3.27.0</version>
@@ -233,20 +239,20 @@
                 <artifactId>junit-jupiter</artifactId>
                 <version>${testcontainers.jupiter.version}</version>
                 <scope>test</scope>
-				<exclusions>
-					<exclusion>
-						<groupId>org.jetbrains</groupId>
-						<artifactId>annotations</artifactId>
-					</exclusion>
-					<exclusion>
-						<groupId>com.google.code.findbugs</groupId>
-						<artifactId>jsr305</artifactId>
-					</exclusion>
-					<exclusion>
-						<groupId>com.google.code.findbugs</groupId>
-						<artifactId>annotations</artifactId>
-					</exclusion>
-				</exclusions>
+                <exclusions>
+                    <exclusion>
+                        <groupId>org.jetbrains</groupId>
+                        <artifactId>annotations</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>com.google.code.findbugs</groupId>
+                        <artifactId>jsr305</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>com.google.code.findbugs</groupId>
+                        <artifactId>annotations</artifactId>
+                    </exclusion>
+                </exclusions>
             </dependency>
             <dependency>
                 <groupId>org.testcontainers</groupId>
@@ -296,23 +302,43 @@
                 <artifactId>svalbard-odata</artifactId>
                 <version>${arctic-sea.version}</version>
             </dependency>
-	       
-	        <dependency>
-	        <groupId>de.fraunhofer.iosb.io.moquette</groupId>
-	            <artifactId>moquette-broker</artifactId>
-	            <version>0.15.1</version>
-	            <exclusions>
-	                <exclusion>
-	                    <groupId>org.slf4j</groupId>
-	                    <artifactId>slf4j-log4j12</artifactId>
-	                </exclusion>
-	                <exclusion>
-	                    <groupId>com.bugsnag</groupId>
-	                    <artifactId>bugsnag</artifactId>
-	                </exclusion>
-	            </exclusions>
-	        </dependency>
-	         
+
+            <dependency>
+                <groupId>de.fraunhofer.iosb.io.moquette</groupId>
+                <artifactId>moquette-broker</artifactId>
+                <version>0.15.1</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>org.slf4j</groupId>
+                        <artifactId>slf4j-log4j12</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>com.bugsnag</groupId>
+                        <artifactId>bugsnag</artifactId>
+                    </exclusion>
+                </exclusions>
+            </dependency>
+
+            <dependency>
+                <groupId>org.apache.httpcomponents</groupId>
+                <artifactId>httpclient</artifactId>
+                <version>4.5.13</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>org.apache.httpcomponents</groupId>
+                        <artifactId>httpcore</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>commons-logging</groupId>
+                        <artifactId>commons-logging</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>commons-codec</groupId>
+                        <artifactId>commons-codec</artifactId>
+                    </exclusion>
+                </exclusions>
+            </dependency>
+
         </dependencies>
     </dependencyManagement>
 
@@ -361,6 +387,7 @@
                                 </allowedRepositories>
                             </requireNoRepositories>
                         </rules>
+                        <skip>true</skip>
                     </configuration>
                 </plugin>
                 <plugin>
@@ -450,6 +477,24 @@
                 </executions>
             </plugin>
             <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>build-helper-maven-plugin</artifactId>
+                <version>3.2.0</version>
+                <executions>
+                    <execution>
+                        <id>timestamp-property</id>
+                        <goals>
+                            <goal>timestamp-property</goal>
+                        </goals>
+                        <configuration>
+                            <locale>en_US</locale>
+                            <name>currentYearDynamic</name>
+                            <pattern>yyyy</pattern>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
                 <!-- license headers -->
                 <groupId>com.mycila</groupId>
                 <artifactId>license-maven-plugin</artifactId>
@@ -461,26 +506,26 @@
                         <java>SLASHSTAR_STYLE</java>
                     </mapping>
                     <licenseSets>
-						<licenseSet>
-		                    <header>etc/52N_GPLv2_License.xt</header>
-		                    <includes>
-		                        <include>**/src/**/*.java</include>
-		                    </includes>
-		                    <excludes>
-		                        <exclude>**/logback.xml</exclude>
-		                        <exclude>**/logback-test.xml</exclude>
-		                        <exclude>etc/**</exclude>
-		                    </excludes>
-		                    <properties>
-		                        <year>${project.inceptionYear}-${currentYear}</year>
-		                    </properties>
-	                	</licenseSet>
-					</licenseSets>
+                        <licenseSet>
+                            <header>etc/52N_GPLv2_License.xt</header>
+                            <includes>
+                                <include>**/src/**/*.java</include>
+                            </includes>
+                            <excludes>
+                                <exclude>**/logback.xml</exclude>
+                                <exclude>**/logback-test.xml</exclude>
+                                <exclude>etc/**</exclude>
+                            </excludes>
+                            <properties>
+                                <year>${project.inceptionYear}-${currentYear}</year>
+                            </properties>
+                        </licenseSet>
+                    </licenseSets>
                 </configuration>
             </plugin>
         </plugins>
     </build>
-     <repositories>
+    <repositories>
         <repository>
             <id>central</id>
             <name>Maven Central</name>

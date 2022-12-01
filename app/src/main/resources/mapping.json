@@ -1,0 +1,120 @@
+{
+	"thing": {
+		"name": "platform",
+		"description": "platform_description",
+		"properties": []
+	},
+	"sensor": {
+		"name": "sensor",
+		"description": "sensor_description",
+		"metadata": "sensor_url",
+		"encodingType": "text/html",
+		"properties": [
+			"url_maintenance_info"
+		]
+	},
+	"observedProperty": {
+		"name": "para_standard_name",
+		"description": "para_standard_name_description",
+		"definition": "para_standard_name_url",
+		"properties": []
+	},
+	"feature": {
+		"name": "platform,feature_of_interest,transect",
+		"description": "",
+		"encodingType": "application/geo+json",
+		"feature": "data.extent",
+		"properties": [],
+		"formats": [
+			{
+				"name": "name",
+				"fields": "platform,feature_of_interest,transect",
+				"format": {
+					"separator": "_"
+				}
+			},
+			{
+				"name": "description",
+				"format": {
+					"prefix": "Feature for ",
+					"optionals": [
+						{
+							"field": "platform",
+							"value": "Platform: "
+						},
+						{
+							"field": "feature_of_interest",
+							"value": "Feature: "
+						},
+						{
+							"field": "transect",
+							"value": "Transect: "
+						}
+					],
+					"separator": ";"
+				}
+			}
+		]
+	},
+	"datastream": {
+		"identifier": "metadata_id",
+		"name": "platform,para_standard_name,sensor,platform,feature_of_interest,transect",
+		"description": "",
+		"unit": "unit",
+		"phenomenonStartTime": "time_start_harbor",
+		"phenomenonEndTime": "time_end_harbor",
+		"resultTime": "time_end_harbor",
+		"observedArea": "data.extent",
+		"properties": [
+			"link_to_metadata",
+			"url_data_service",
+			"license",
+			"doi_pid",
+			"resp_scien_orcid"
+		],
+		"formats": [
+			{
+				"name": "name",
+				"fields": "platform,para_standard_name,sensor,platform,feature_of_interest,transect",
+				"format": {
+					"separator": "_"
+				}
+			},
+			{
+				"name": "description",
+				"format": {
+					"prefix": "Datastream for ",
+					"optionals": [
+						{
+							"field": "platform",
+							"value": "Platform: "
+						},
+						{
+							"field": "para_standard_name",
+							"value": "Parameter: "
+						},
+						{
+							"field": "sensor",
+							"value": "Sensor: "
+						},
+						{
+							"field": "platform,feature_of_interest,transect",
+							"value": "Feature: ",
+							"separator": "_"
+						}
+					],
+					"separator": ";"
+				}
+			}
+		]
+	},
+	"general": {
+		"dataServiceUrl": "url_data_service",
+		"dataServiceUrlPostfix": "/0/",
+		"metadataId": "metadata_id",
+		"dataServicePrefix": "data.",
+		"stringFormatPrefix": "format.",
+		"dataServiceTokenUrlPostfix": "/portal/sharing/rest/generateToken",
+		"resultLimit": 0
+	}
+}

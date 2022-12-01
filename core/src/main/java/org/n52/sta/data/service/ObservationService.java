@@ -112,6 +112,12 @@ public class ObservationService
         this.parameterRepository = parameterRepository;
     }
 
+    public ObservationService() {
+        super();
+        this.datastreamRepository = null;
+        this.parameterRepository = null;
+    }
+
     @Override
     public ElementWithQueryOptions getEntity(String id, QueryOptions queryOptions) throws STACRUDException {
         try {

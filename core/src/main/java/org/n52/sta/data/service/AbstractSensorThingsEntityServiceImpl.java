@@ -115,6 +115,12 @@ public abstract class AbstractSensorThingsEntityServiceImpl<T extends StaIdentif
         this.repository = repository;
     }
 
+    public AbstractSensorThingsEntityServiceImpl() {
+        this.em = null;
+        this.entityClass = null;
+        this.repository = null;
+    }
+
     public void setServiceRepository(EntityServiceRepository serviceRepository) {
         this.serviceRepository = serviceRepository;
     }
@@ -565,7 +571,7 @@ public abstract class AbstractSensorThingsEntityServiceImpl<T extends StaIdentif
         return (HistoricalLocationService) serviceRepository.getEntityServiceRaw(EntityTypes.HistoricalLocation);
     }
 
-    DatastreamService getDatastreamService() {
+    protected DatastreamService getDatastreamService() {
         return (DatastreamService) serviceRepository.getEntityServiceRaw(EntityTypes.Datastream);
     }
 

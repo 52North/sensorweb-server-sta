@@ -90,6 +90,11 @@
         </dependency>
 
         <dependency>
+            <groupId>org.n52.sensorweb-server.helgoland-adapters</groupId>
+            <artifactId>helgoland-adapters-hereon-common</artifactId>
+        </dependency>
+
+        <dependency>
             <groupId>org.springframework.data</groupId>
             <artifactId>spring-data-jpa</artifactId>
         </dependency>
@@ -128,7 +133,12 @@
             <artifactId>jackson-module-afterburner</artifactId>
         </dependency>
 
- 		<dependency>
+        <dependency>
+            <groupId>org.apache.httpcomponents</groupId>
+            <artifactId>httpclient</artifactId>
+        </dependency>
+
+        <dependency>
             <groupId>com.google.guava</groupId>
             <artifactId>guava</artifactId>
         </dependency>
