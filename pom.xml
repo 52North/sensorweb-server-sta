@@ -43,7 +43,7 @@
         <java.version>11</java.version>
         <!-- maven-parents switches version syntax -->
         <version.java>${java.version}</version.java>
-        <antlr-runtime.version>4.10.1</antlr-runtime.version>
+        <antlr-runtime.version>4.11.1</antlr-runtime.version>
         <arctic-sea.version>10.1.0-SNAPSHOT</arctic-sea.version>
         <db-model.version>4.2.0-STA-SNAPSHOT</db-model.version>
         <findbugs.version>3.0.2</findbugs.version>
