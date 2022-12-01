@@ -78,11 +78,13 @@ public class DataEditorConfiguration {
         return new LocationEntityEditor(serviceLookup);
     }
 
-    @Bean EntityEditor<HistoricalLocation> historicalLocationEntityEditor() {
+    @Bean
+    EntityEditor<HistoricalLocation> historicalLocationEntityEditor() {
         return new HistoricalLocationEntityEditor(serviceLookup);
     }
 
-    @Bean EntityEditor<FeatureOfInterest> featureOfInterestEntityEditor() {
+    @Bean
+    EntityEditor<FeatureOfInterest> featureOfInterestEntityEditor() {
         return new FeatureOfInterestEntityEditor(serviceLookup);
     }
 

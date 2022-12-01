@@ -25,6 +25,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
+
 package org.n52.sta.data.editor;
 
 import java.util.Map;
@@ -134,9 +135,10 @@ public class SensorEntityEditor extends DatabaseEntityAdapter<ProcedureEntity>
         ProcedureEntity procedure = getEntity(id)
                 .orElseThrow(() -> new EditorException("could not find entity with id: " + id));
 
-        procedure.getDatasets().forEach(ds -> {
-            datastreamEditor.delete(ds.getStaIdentifier());
-        });
+        procedure.getDatasets()
+                 .forEach(ds -> {
+                     datastreamEditor.delete(ds.getStaIdentifier());
+                 });
 
         procedureRepository.delete(procedure);
     }

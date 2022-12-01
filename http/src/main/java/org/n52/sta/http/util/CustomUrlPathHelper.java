@@ -34,7 +34,6 @@ import java.util.Map;
 import java.util.regex.Pattern;
 
 import javax.servlet.http.HttpServletRequest;
-import org.n52.sta.http.old.common.ExtendableUrlPathHelper;
 
 import org.springframework.util.StringUtils;
 import org.springframework.web.util.UriUtils;

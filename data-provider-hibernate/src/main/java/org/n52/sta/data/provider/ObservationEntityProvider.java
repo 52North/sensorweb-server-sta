@@ -79,7 +79,8 @@ public class ObservationEntityProvider extends BaseEntityProvider<Observation> {
     public Optional<Observation> getEntity(String id, QueryOptions queryOptions) throws ProviderException {
         ObservationGraphBuilder graphBuilder = ObservationGraphBuilder.createEmpty();
         return getEntity(rootSpecification.buildSpecification(queryOptions)
-                                          .and(rootSpecification.equalsStaIdentifier(id)), graphBuilder);
+                                          .and(rootSpecification.equalsStaIdentifier(id)),
+                         graphBuilder);
     }
 
     private Optional<Observation> getEntity(Specification<DataEntity> spec,

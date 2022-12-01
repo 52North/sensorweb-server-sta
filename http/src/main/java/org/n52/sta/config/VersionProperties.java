@@ -38,9 +38,6 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class VersionProperties {
 
-    @Value("${project.version}")
-    private String projectVersion;
-
     @Value("${git.build.time}")
     private String buildTime;
 

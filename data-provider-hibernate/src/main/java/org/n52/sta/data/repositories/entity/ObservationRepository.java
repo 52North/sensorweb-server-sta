@@ -42,22 +42,24 @@ import org.springframework.stereotype.Repository;
 public interface ObservationRepository extends BaseRepository<DataEntity> {
 
     /**
-     * Gets the (temporally) first observation for given datastream. Used for updating Dataset->lastObservation
-     * and associated fields.
+     * Gets the (temporally) first observation for given datastream. Used for updating
+     * Dataset->lastObservation and associated fields.
      *
-     * @param id id of the datastream
+     * @param id
+     *        id of the datastream
      * @return temporally latest observation. Optional.empty if there are not observations in this dataset
      */
-    Optional<DataEntity<?>> findFirstByDataset_idOrderBySamplingTimeStartAsc(Long id);
+    Optional<DataEntity< ? >> findFirstByDataset_idOrderBySamplingTimeStartAsc(Long id);
 
     /**
      * Gets the (temporally) last observation for given datastream. Used for updating Dataset->lastObservation
      * and associated fields
      *
-     * @param id id of the datastream
+     * @param id
+     *        id of the datastream
      * @return temporally latest observation. Optional.empty if there are not observations in this dataset
      */
-    Optional<DataEntity<?>> findFirstByDataset_idOrderBySamplingTimeEndDesc(Long id);
+    Optional<DataEntity< ? >> findFirstByDataset_idOrderBySamplingTimeEndDesc(Long id);
 
     void deleteAllByDatasetIdIn(Set<Long> datasetId);
 }

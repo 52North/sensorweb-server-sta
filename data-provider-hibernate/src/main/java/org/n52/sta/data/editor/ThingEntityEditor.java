@@ -25,6 +25,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
+
 package org.n52.sta.data.editor;
 
 import java.util.Map;
@@ -53,7 +54,8 @@ import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.context.event.EventListener;
 
 public class ThingEntityEditor extends DatabaseEntityAdapter<PlatformEntity>
-        implements EntityEditorDelegate<Thing, ThingData> {
+        implements
+        EntityEditorDelegate<Thing, ThingData> {
 
     @Autowired
     private PlatformRepository platformRepository;
@@ -158,17 +160,21 @@ public class ThingEntityEditor extends DatabaseEntityAdapter<PlatformEntity>
     @Override
     public void delete(String id) throws EditorException {
         PlatformEntity platform = getEntity(id)
-                .orElseThrow(() -> new EditorException("could not find entity with id: " + id));
+                                               .orElseThrow(() -> new EditorException("could not find entity with id: "
+                                                       + id));
 
-        platform.getDatasets().forEach(ds -> {
-            datastreamEditor.delete(ds.getStaIdentifier());
-        });
+        platform.getDatasets()
+                .forEach(ds -> {
+                    datastreamEditor.delete(ds.getStaIdentifier());
+                });
 
-        platform.getHistoricalLocations().forEach(hl -> {
-            platform.setHistoricalLocations(null);
-            platform.getLocations().forEach(loc -> loc.setHistoricalLocations(null));
-            historicalLocationEditor.delete(hl.getStaIdentifier());
-        });
+        platform.getHistoricalLocations()
+                .forEach(hl -> {
+                    platform.setHistoricalLocations(null);
+                    platform.getLocations()
+                            .forEach(loc -> loc.setHistoricalLocations(null));
+                    historicalLocationEditor.delete(hl.getStaIdentifier());
+                });
 
         platformRepository.delete(platform);
     }

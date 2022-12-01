@@ -25,6 +25,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
+
 package org.n52.sta.data.editor;
 
 import java.util.Collections;
@@ -110,10 +111,10 @@ public class FeatureOfInterestEntityEditor extends DatabaseEntityAdapter<Abstrac
 
         valueHelper.setFormat(featureEntity::setFeatureType, entity.getEncodingType());
 
-        //TODO: Autogenerate Feature based on Location
-        //TODO: Implement updating of Geometry via 'updateFOI' Feature
-        //TODO: evaluate if functionality of FeatureOfInterestService#alreadyExistsFeature is needed here
-        //TODO: Implement persisting nested observations
+        // TODO: Autogenerate Feature based on Location
+        // TODO: Implement updating of Geometry via 'updateFOI' Feature
+        // TODO: evaluate if functionality of FeatureOfInterestService#alreadyExistsFeature is needed here
+        // TODO: Implement persisting nested observations
 
         FeatureEntity saved = featureOfInterestRepository.save(featureEntity);
 
@@ -130,7 +131,8 @@ public class FeatureOfInterestEntityEditor extends DatabaseEntityAdapter<Abstrac
     }
 
     @Override
-    public FeatureOfInterestData update(FeatureOfInterest oldEntity, FeatureOfInterest updateEntity) throws EditorException {
+    public FeatureOfInterestData update(FeatureOfInterest oldEntity, FeatureOfInterest updateEntity)
+            throws EditorException {
         throw new EditorException();
     }
 
@@ -139,12 +141,13 @@ public class FeatureOfInterestEntityEditor extends DatabaseEntityAdapter<Abstrac
         AbstractFeatureEntity<?> foi = getEntity(id)
                 .orElseThrow(() -> new EditorException("could not find entity with id: " + id));
 
-        foi.getDatasets().forEach(ds -> {
-            // delete foreign keys in dataset table
-            datastreamEditor.clearFirstObservationLastObservationFeature(ds);
-            // delete observations without updating first/last observation
-            observationEditor.deleteObservationsByDatasetId(Collections.singleton(ds.getId()));
-        });
+        foi.getDatasets()
+           .forEach(ds -> {
+               // delete foreign keys in dataset table
+               datastreamEditor.clearFirstObservationLastObservationFeature(ds);
+               // delete observations without updating first/last observation
+               observationEditor.deleteObservationsByDatasetId(Collections.singleton(ds.getId()));
+           });
 
         featureOfInterestRepository.deleteByStaIdentifier(id);
 

@@ -25,6 +25,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
+
 package org.n52.sta.data.editor;
 
 import java.math.BigDecimal;
@@ -52,14 +53,14 @@ abstract class DatabaseEntityAdapter<T extends DescribableEntity> {
         this.serviceLookup = serviceLookup;
     }
 
-    protected ParameterEntity<?> convertParameter(T entity,
-                                                  Map.Entry<String, Object> parameter) {
+    protected ParameterEntity< ? > convertParameter(T entity,
+            Map.Entry<String, Object> parameter) {
 
         String key = parameter.getKey();
         Object value = parameter.getValue();
         ParameterEntity parameterEntity;
 
-        Class<?> valueType = value.getClass();
+        Class< ? > valueType = value.getClass();
         if (Number.class.isAssignableFrom(valueType)) {
             parameterEntity = ParameterFactory.from(entity, ParameterFactory.ValueType.QUANTITY);
             parameterEntity.setValue(BigDecimal.valueOf((Double) value));
@@ -99,13 +100,12 @@ abstract class DatabaseEntityAdapter<T extends DescribableEntity> {
 
     protected <E extends Identifiable> EntityService<E> getService(Class<E> entityType) {
         return serviceLookup.getService(entityType)
-                .orElseThrow(() -> {
-                    String msg = String.format("No registered service found for '%s'",
-                            entityType.getSimpleName());
-                    return new IllegalStateException(msg);
-                });
+                            .orElseThrow(() -> {
+                                String msg = String.format("No registered service found for '%s'",
+                                                           entityType.getSimpleName());
+                                return new IllegalStateException(msg);
+                            });
     }
-
 
     protected static <T> void setIfNotNull(Supplier<T> supplier, Consumer<T> consumer) {
         T value = supplier.get();

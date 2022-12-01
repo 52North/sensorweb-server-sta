@@ -78,7 +78,8 @@ public class ThingEntityProvider extends BaseEntityProvider<Thing> {
     public Optional<Thing> getEntity(String id, QueryOptions queryOptions) throws ProviderException {
         ThingGraphBuilder graphBuilder = ThingGraphBuilder.createEmpty();
         return getEntity(rootSpecification.buildSpecification(queryOptions)
-                                          .and(rootSpecification.equalsStaIdentifier(id)), graphBuilder);
+                                          .and(rootSpecification.equalsStaIdentifier(id)),
+                         graphBuilder);
     }
 
     private Optional<Thing> getEntity(Specification<PlatformEntity> spec, ThingGraphBuilder graphBuilder) {

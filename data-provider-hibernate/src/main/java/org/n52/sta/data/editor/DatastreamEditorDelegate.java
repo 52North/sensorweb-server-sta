@@ -25,6 +25,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
+
 package org.n52.sta.data.editor;
 
 import org.n52.series.db.beans.AbstractDatasetEntity;
@@ -38,36 +39,38 @@ import org.n52.sta.api.entity.Identifiable;
  */
 public interface DatastreamEditorDelegate<T extends Identifiable, R extends T> extends EntityEditorDelegate<T, R> {
 
+    /**
+     * Removes the given observation from first observation field if present there.
+     *
+     * @param old
+     *        DataEntity to be removed
+     * @return true if dataset was changed
+     */
+    boolean removeAsFirstObservation(DataEntity< ? > old);
 
     /**
      * Removes the given observation from first observation field if present there.
      *
-     * @param old DataEntity to be removed
+     * @param old
+     *        DataEntity to be removed
      * @return true if dataset was changed
      */
-    boolean removeAsFirstObservation(DataEntity<?> old);
+    boolean removeAsLastObservation(DataEntity< ? > old);
 
     /**
-     * Removes the given observation from first observation field if present there.
+     * Recalculates a new first/last observation and associated values. Needed when observations are deleted
+     * from the database
      *
-     * @param old DataEntity to be removed
-     * @return true if dataset was changed
-     */
-    boolean removeAsLastObservation(DataEntity<?> old);
-
-    /**
-     * Recalculates a new first/last observation and associated values.
-     * Needed when observations are deleted from the database
-     *
-     * @param datastreamEntity Datastream to be updated
-     * @param first            Temporally first observation
-     * @param last             Temporally last observation
+     * @param datastreamEntity
+     *        Datastream to be updated
+     * @param first
+     *        Temporally first observation
+     * @param last
+     *        Temporally last observation
      */
     void updateFirstLastObservation(AbstractDatasetEntity datastreamEntity,
-                                    DataEntity<?> first,
-                                    DataEntity<?> last);
-
-
+            DataEntity< ? > first,
+            DataEntity< ? > last);
 
     void clearFirstObservationLastObservationFeature(DatasetEntity dataset);
 

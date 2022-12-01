@@ -73,7 +73,6 @@ import org.n52.sta.data.old.DTOTransformer;
 import org.n52.sta.data.old.DTOTransformerImpl;
 import org.n52.sta.data.old.SerDesConfig;
 import org.n52.sta.data.old.query.DatastreamQuerySpecifications;
-import org.n52.sta.old.SpringApplicationContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
@@ -95,19 +94,19 @@ public class MessageBusRepository<T, I extends Serializable>
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MessageBusRepository.class);
 
-    private final Map<String, String> entityTypeToStaType;
+    private final Map<String, String> entityTypeToStaType = null;
     private final String FETCHGRAPH_HINT = "javax.persistence.fetchgraph";
     private final String IDENTIFIER = DescribableEntity.PROPERTY_IDENTIFIER;
     private final String STAIDENTIFIER = DescribableEntity.PROPERTY_STA_IDENTIFIER;
     private final String ID = IdEntity.PROPERTY_ID;
 
-    private final JpaEntityInformation entityInformation;
-    private final STAEventHandler mqttHandler;
-    private final EntityManager em;
-    private final EntityManager databaseEm;
-    private final Class<T> entityClass;
-    private final CriteriaBuilder criteriaBuilder;
-    private final SerDesConfig config;
+    private final JpaEntityInformation entityInformation = null;
+    private final STAEventHandler mqttHandler = null;
+    private final EntityManager em = null;
+    private final EntityManager databaseEm = null;
+    private final Class<T> entityClass = null;
+    private final CriteriaBuilder criteriaBuilder = null;
+    private final SerDesConfig config = null;
 
     // Is set in Repositories that need it to get related Collections for mqtt
     // handling
@@ -118,6 +117,7 @@ public class MessageBusRepository<T, I extends Serializable>
     MessageBusRepository(JpaEntityInformation<T, Long> entityInformation,
             EntityManager entityManager) {
         super(entityInformation, entityManager);
+        /*
         this.em = entityManager;
 
         EntityManagerFactory factory = (EntityManagerFactory) SpringApplicationContext
@@ -142,6 +142,7 @@ public class MessageBusRepository<T, I extends Serializable>
         }
 
         this.config = (SerDesConfig) SpringApplicationContext.getBean(SerDesConfig.class);
+         */
     }
 
     private TypedQuery<T> createIdentifierQuery(String identifier, String column) {
