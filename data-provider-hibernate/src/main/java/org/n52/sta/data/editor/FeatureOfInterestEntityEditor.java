@@ -40,7 +40,7 @@ import org.n52.sta.api.EntityServiceLookup;
 import org.n52.sta.api.entity.Datastream;
 import org.n52.sta.api.entity.FeatureOfInterest;
 import org.n52.sta.api.entity.Observation;
-import org.n52.sta.api.exception.EditorException;
+import org.n52.sta.api.exception.editor.EditorException;
 import org.n52.sta.api.service.EntityService;
 import org.n52.sta.data.entity.DatastreamData;
 import org.n52.sta.data.entity.FeatureOfInterestData;

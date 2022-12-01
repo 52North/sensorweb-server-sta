@@ -45,6 +45,8 @@ public interface BaseQuerySpecifications<T> {
     /**
      * Filters out Database Entities that are not valid STA Entities. e.g. Datasets in state: not_initialized
      * Defaults to not filter out any entities
+     *
+     * @return Default {@link Optional#empty()}
      */
     default Optional<Specification<T>> isStaEntity() {
         return Optional.empty();

@@ -30,7 +30,7 @@ package org.n52.sta.data.editor;
 
 import org.n52.sta.api.EntityEditor;
 import org.n52.sta.api.entity.Identifiable;
-import org.n52.sta.api.exception.EditorException;
+import org.n52.sta.api.exception.editor.EditorException;
 
 /**
  * Interface for Entity Editor Implementations that can be delegated to.

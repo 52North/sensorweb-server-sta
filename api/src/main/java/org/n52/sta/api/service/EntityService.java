@@ -33,8 +33,8 @@ import java.util.Optional;
 import org.n52.sta.api.EntityEditor;
 import org.n52.sta.api.EntityPage;
 import org.n52.sta.api.EntityProvider;
-import org.n52.sta.api.exception.EditorException;
 import org.n52.sta.api.exception.ProviderException;
+import org.n52.sta.api.exception.editor.EditorException;
 import org.n52.sta.api.path.Request;
 
 public interface EntityService<T> {

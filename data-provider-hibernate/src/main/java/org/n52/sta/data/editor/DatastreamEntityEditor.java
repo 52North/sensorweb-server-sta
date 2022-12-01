@@ -60,7 +60,7 @@ import org.n52.sta.api.entity.Observation;
 import org.n52.sta.api.entity.ObservedProperty;
 import org.n52.sta.api.entity.Sensor;
 import org.n52.sta.api.entity.Thing;
-import org.n52.sta.api.exception.EditorException;
+import org.n52.sta.api.exception.editor.EditorException;
 import org.n52.sta.config.EntityPropertyMapping;
 import org.n52.sta.data.entity.DatastreamData;
 import org.n52.sta.data.entity.ObservationData;

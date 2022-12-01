@@ -112,15 +112,13 @@ public class UfzAggregataObservationService extends ObservationService {
         headers.setContentType(MediaType.APPLICATION_JSON);
         headers.setBasicAuth(aggregataToken);
 
-        QueryOptionsFactory factory = new QueryOptionsFactory();
-
         // Add select filter with filter only returning available properties
         HashSet<FilterClause> filters = new HashSet<>();
         HashSet<String> items = new HashSet<>();
         items.add("phenomenonTime");
         items.add("result");
         filters.add(new SelectFilter(items));
-        selectQueryOptions = factory.createQueryOptions(filters);
+        selectQueryOptions = QueryOptionsFactory.createQueryOptions(filters);
     }
 
     @Override

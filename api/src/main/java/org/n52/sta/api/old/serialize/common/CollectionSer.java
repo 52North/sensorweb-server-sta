@@ -41,6 +41,7 @@ import org.n52.shetland.ogc.filter.FilterClause;
 import org.n52.shetland.ogc.filter.FilterConstants;
 import org.n52.sta.api.old.CollectionWrapper;
 import org.n52.sta.api.old.dto.common.StaDTO;
+import org.n52.svalbard.odata.core.QueryOptionsFactory;
 
 /**
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
@@ -79,7 +80,7 @@ public class CollectionSer extends StdSerializer<CollectionWrapper> {
             gen.writeStringField("@iot.nextLink",
                                  value.getRequestURL()
                                          + "?"
-                                         + new QueryOptions(allFilters).toString());
+                                         + QueryOptionsFactory.createQueryOptions(allFilters).toString());
         }
 
         gen.writeArrayFieldStart("value");

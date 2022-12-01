@@ -169,8 +169,8 @@ public class ThingJsonSerializerTest {
     }
 
     private QueryOptions createQueryOptions(String options) {
-        QueryOptions queryOptions = new QueryOptionsFactory().createQueryOptions(options);
-        return new QueryOptions(queryOptions.getAllFilters());
+        QueryOptions queryOptions = QueryOptionsFactory.createQueryOptions(options);
+        return QueryOptionsFactory.createQueryOptions(queryOptions.getAllFilters());
     }
 
     private SerializationContext createContext(QueryOptions query) {

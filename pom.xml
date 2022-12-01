@@ -5,7 +5,7 @@
     <parent>
         <groupId>org.n52</groupId>
         <artifactId>parent</artifactId>
-        <version>24</version>
+        <version>27</version>
     </parent>
 
     <groupId>org.n52.sensorweb-server.sta</groupId>
@@ -44,7 +44,7 @@
         <!-- maven-parents switches version syntax -->
         <version.java>${java.version}</version.java>
         <antlr-runtime.version>4.10.1</antlr-runtime.version>
-        <arctic-sea.version>8.1.0-SNAPSHOT</arctic-sea.version>
+        <arctic-sea.version>10.1.0-SNAPSHOT</arctic-sea.version>
         <db-model.version>4.2.0-STA-SNAPSHOT</db-model.version>
         <findbugs.version>3.0.2</findbugs.version>
         <guava.version>30.1-jre</guava.version>
@@ -438,4 +438,26 @@
             </plugin>
         </plugins>
     </build>
+    <repositories>
+        <repository>
+            <id>central</id>
+            <name>Maven Central</name>
+            <url>https://repo.maven.apache.org/maven2/</url>
+        </repository>
+        <repository>
+            <id>geotools</id>
+            <name>Open Source Geospatial Foundation Repository</name>
+            <url>https://repo.osgeo.org/repository/release/</url>
+        </repository>
+        <repository>
+            <id>sonatype-nexus-snapshots</id>
+            <url>https://oss.sonatype.org/content/repositories/snapshots</url>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
+            <releases>
+                <enabled>false</enabled>
+            </releases>
+        </repository>
+    </repositories>
 </project>

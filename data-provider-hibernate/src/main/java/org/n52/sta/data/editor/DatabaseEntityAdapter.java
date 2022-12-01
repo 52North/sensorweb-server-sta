@@ -41,7 +41,7 @@ import org.n52.series.db.beans.parameter.ParameterEntity;
 import org.n52.series.db.beans.parameter.ParameterFactory;
 import org.n52.sta.api.EntityServiceLookup;
 import org.n52.sta.api.entity.Identifiable;
-import org.n52.sta.api.exception.EditorException;
+import org.n52.sta.api.exception.editor.EditorException;
 import org.n52.sta.api.service.EntityService;
 
 abstract class DatabaseEntityAdapter<T extends DescribableEntity> {

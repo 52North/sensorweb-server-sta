@@ -49,7 +49,7 @@ import org.n52.shetland.ogc.om.OmConstants;
 import org.n52.sta.api.EntityServiceLookup;
 import org.n52.sta.api.entity.Datastream;
 import org.n52.sta.api.entity.Observation;
-import org.n52.sta.api.exception.EditorException;
+import org.n52.sta.api.exception.editor.EditorException;
 import org.n52.sta.config.EntityPropertyMapping;
 import org.n52.sta.data.entity.DatastreamData;
 import org.n52.sta.data.entity.ObservationData;
