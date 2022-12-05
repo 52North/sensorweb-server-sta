@@ -55,7 +55,7 @@
         <spotbugs.version>4.7.3</spotbugs.version>
         <spring-boot.version>2.3.12.RELEASE</spring-boot.version>
         <testcontainers.jupiter.version>1.17.3</testcontainers.jupiter.version>
-        <testcontainers.postgres.version>1.17.3</testcontainers.postgres.version>
+        <testcontainers.postgres.version>1.17.6</testcontainers.postgres.version>
     </properties>
 
     <dependencyManagement>
