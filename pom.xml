@@ -49,7 +49,7 @@
         <findbugs.version>3.0.2</findbugs.version>
         <guava.version>31.1-jre</guava.version>
         <hamcrest.version>2.2</hamcrest.version>
-        <joda.version>2.10.8</joda.version>
+        <joda.version>2.12.2</joda.version>
         <locationtech-jts.version>1.16.1</locationtech-jts.version>
         <paho.version>1.2.5</paho.version>
         <spotbugs.version>4.7.3</spotbugs.version>
