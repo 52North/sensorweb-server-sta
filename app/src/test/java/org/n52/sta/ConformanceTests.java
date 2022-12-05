@@ -151,7 +151,7 @@ abstract class ConformanceTests implements TestUtil {
         Assertions.assertEquals(
             200,
             statusCode,
-            "Error: PATCH does not work properly for " + request.getURI()
+            String.format("Error: PATCH does not work properly for URI: %s. Error %s", request.getURI(), result.toPrettyString())
         );
         return result;
     }
