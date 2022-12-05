@@ -37,6 +37,7 @@ import org.n52.shetland.ogc.filter.FilterClause;
 import org.n52.shetland.ogc.filter.FilterConstants;
 import org.n52.sta.data.service.util.CollectionWrapper;
 import org.n52.sta.serdes.util.ElementWithQueryOptions;
+import org.n52.svalbard.odata.core.QueryOptionsFactory;
 
 import java.io.IOException;
 import java.util.Set;
