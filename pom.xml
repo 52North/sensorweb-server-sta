@@ -53,7 +53,7 @@
         <locationtech-jts.version>1.19.0</locationtech-jts.version>
         <paho.version>1.2.5</paho.version>
         <spotbugs.version>4.7.3</spotbugs.version>
-        <spring-boot.version>2.3.12.RELEASE</spring-boot.version>
+        <spring-boot.version>2.7.6</spring-boot.version>
         <testcontainers.jupiter.version>1.17.6</testcontainers.jupiter.version>
         <testcontainers.postgres.version>1.17.6</testcontainers.postgres.version>
     </properties>
