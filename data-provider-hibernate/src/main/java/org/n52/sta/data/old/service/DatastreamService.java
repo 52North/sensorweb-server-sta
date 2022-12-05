@@ -35,7 +35,6 @@ import javax.persistence.EntityManager;
 import org.n52.series.db.beans.AbstractDatasetEntity;
 import org.n52.series.db.beans.AbstractFeatureEntity;
 import org.n52.series.db.beans.CategoryEntity;
-import org.n52.series.db.beans.Dataset;
 import org.n52.series.db.beans.DatasetAggregationEntity;
 import org.n52.series.db.beans.DatasetEntity;
 import org.n52.series.db.beans.OfferingEntity;
@@ -87,11 +86,11 @@ public class DatastreamService extends CommonDatastreamService<AbstractDatasetEn
     }
 
     @Override
-    protected Dataset createDataset(AbstractDatasetEntity datastream,
+    protected AbstractDatasetEntity createDataset(AbstractDatasetEntity datastream,
             AbstractFeatureEntity<?> feature,
             String staIdentifier)
             throws STACRUDException {
-        return (Dataset) fillDataset(new DatasetEntity(), datastream, feature, staIdentifier);
+        return (AbstractDatasetEntity) fillDataset(new DatasetEntity(), datastream, feature, staIdentifier);
     }
 
     private AbstractDatasetEntity fillDataset(DatasetEntity shell,

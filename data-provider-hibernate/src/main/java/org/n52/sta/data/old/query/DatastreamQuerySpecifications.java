@@ -51,9 +51,8 @@ import org.n52.series.db.beans.PlatformEntity;
 import org.n52.series.db.beans.ProcedureEntity;
 import org.n52.series.db.beans.parameter.ParameterFactory;
 import org.n52.series.db.beans.parameter.dataset.DatasetParameterEntity;
-import org.n52.series.db.beans.sta.plus.PartyEntity;
-import org.n52.series.db.beans.sta.plus.ProjectEntity;
-import org.n52.series.db.beans.sta.plus.StaPlusAbstractDatasetEntity;
+import org.n52.series.db.beans.sta.PartyEntity;
+import org.n52.series.db.beans.sta.ProjectEntity;
 import org.n52.shetland.ogc.filter.FilterConstants;
 import org.n52.shetland.ogc.sta.StaConstants;
 import org.n52.shetland.ogc.sta.exception.STAInvalidFilterExpressionException;
@@ -320,14 +319,14 @@ public class DatastreamQuerySpecifications<T> extends EntityQuerySpecifications<
 
     public Specification<AbstractDatasetEntity> withPartyStaIdentifier(
             final String partyIdentifier) {
-        return (root, query, builder) -> builder.equal(root.get(StaPlusAbstractDatasetEntity.PROPERTY_PARTY)
+        return (root, query, builder) -> builder.equal(root.get(AbstractDatasetEntity.PROPERTY_PARTY)
                 .get(PartyEntity.STA_IDENTIFIER),
                 partyIdentifier);
     }
 
     public Specification<AbstractDatasetEntity> withProjectStaIdentifier(
             final String projectIdentifier) {
-        return (root, query, builder) -> builder.equal(root.get(StaPlusAbstractDatasetEntity.PROPERTY_PROJECT)
+        return (root, query, builder) -> builder.equal(root.get(AbstractDatasetEntity.PROPERTY_PROJECT)
                 .get(ProjectEntity.STA_IDENTIFIER),
                 projectIdentifier);
     }

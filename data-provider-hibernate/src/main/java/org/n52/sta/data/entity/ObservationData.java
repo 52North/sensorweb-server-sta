@@ -136,7 +136,8 @@ public class ObservationData extends StaData<DataEntity< ? >> implements Observa
 
     @Override
     public String getValueType() {
-        return data.getValueType();
+        // TODO Auto-generated method stub
+        return null;
     }
 
 }

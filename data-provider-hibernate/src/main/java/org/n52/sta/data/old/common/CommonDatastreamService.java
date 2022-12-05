@@ -51,7 +51,6 @@ import org.n52.series.db.beans.DatasetAggregationEntity;
 import org.n52.series.db.beans.IdEntity;
 import org.n52.series.db.beans.UnitEntity;
 import org.n52.series.db.beans.parameter.dataset.DatasetParameterEntity;
-import org.n52.series.db.beans.sta.AggregationEntity;
 import org.n52.shetland.filter.ExpandFilter;
 import org.n52.shetland.filter.ExpandItem;
 import org.n52.shetland.filter.FilterFilter;
@@ -490,7 +489,7 @@ public abstract class CommonDatastreamService<S extends AbstractDatasetEntity, T
         }
     }
 
-    protected abstract AggregationEntity createAggregation();
+    protected abstract DatasetAggregationEntity createAggregation();
 
     /**
      * Creates a DatasetAggregation or expands the existing Aggregation with a new dataset.
@@ -510,7 +509,7 @@ public abstract class CommonDatastreamService<S extends AbstractDatasetEntity, T
             LOGGER.debug("Creating new DatasetAggregation");
             // We need to create a new aggregation and link the existing datastream with it
 
-            AggregationEntity parent = createAggregation();
+            DatasetAggregationEntity parent = createAggregation();
             parent.copy(datastream);
             parent.setIdentifier(UUID.randomUUID()
                                      .toString());

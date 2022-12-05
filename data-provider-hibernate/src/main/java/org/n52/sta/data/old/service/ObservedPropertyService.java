@@ -38,7 +38,6 @@ import org.hibernate.Hibernate;
 import org.hibernate.HibernateException;
 import org.n52.janmayen.http.HTTPStatus;
 import org.n52.series.db.beans.AbstractDatasetEntity;
-import org.n52.series.db.beans.Dataset;
 import org.n52.series.db.beans.PhenomenonEntity;
 import org.n52.series.db.beans.parameter.phenomenon.PhenomenonParameterEntity;
 import org.n52.shetland.filter.ExpandFilter;
@@ -74,7 +73,7 @@ public class ObservedPropertyService
 
     private static final Logger logger = LoggerFactory.getLogger(ObservedPropertyService.class);
 
-    private static final DatastreamQuerySpecifications<Dataset> dQS = new DatastreamQuerySpecifications<>();
+    private static final DatastreamQuerySpecifications<AbstractDatasetEntity> dQS = new DatastreamQuerySpecifications<>();
     private static final ObservedPropertyQuerySpecifications oQS = new ObservedPropertyQuerySpecifications();
 
     private final DatastreamRepository datastreamRepository;

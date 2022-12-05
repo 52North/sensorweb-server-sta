@@ -43,7 +43,6 @@ import org.n52.janmayen.stream.Streams;
 import org.n52.series.db.beans.AbstractDatasetEntity;
 import org.n52.series.db.beans.CategoryEntity;
 import org.n52.series.db.beans.DataEntity;
-import org.n52.series.db.beans.Dataset;
 import org.n52.series.db.beans.DatasetAggregationEntity;
 import org.n52.series.db.beans.DatasetEntity;
 import org.n52.series.db.beans.IdEntity;
@@ -354,7 +353,7 @@ public class DatastreamEntityEditor extends DatabaseEntityAdapter<AbstractDatase
             }
         }
 
-        datastreamRepository.save((Dataset) datastreamEntity);
+        datastreamRepository.save(datastreamEntity);
 
         // update parent if datastream is part of aggregation
         if (datastreamEntity.isSetAggregation()) {

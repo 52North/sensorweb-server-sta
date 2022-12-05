@@ -5,14 +5,14 @@
              http://xmlns.jcp.org/xml/ns/persistence/persistence_2_1.xsd"
              version="2.1">
     <persistence-unit name="default-unit">
-        <description>SensorThings Mappings</description>
+        <description>SensorThings Plus Mappings</description>
         <mapping-file>/hbm/transactional/core/CategoryResource.hbm.xml</mapping-file>
         <mapping-file>/hbm/transactional/core/CodespaceResource.hbm.xml</mapping-file>
         <mapping-file>/hbm/transactional/core/FeatureResource.hbm.xml</mapping-file>
         <mapping-file>/hbm/transactional/core/FormatResource.hbm.xml</mapping-file>
+        <mapping-file>/hbm/transactional/core/LocationResource.hbm.xml</mapping-file>
         <mapping-file>/hbm/transactional/core/OfferingResource.hbm.xml</mapping-file>
         <mapping-file>/hbm/transactional/core/PhenomenonResource.hbm.xml</mapping-file>
-
         <mapping-file>/hbm/transactional/core/ProcedureHistoryResource.hbm.xml</mapping-file>
         <mapping-file>/hbm/transactional/core/ProcedureResource.hbm.xml</mapping-file>
         <mapping-file>/hbm/transactional/core/RelatedDataResource.hbm.xml</mapping-file>
@@ -21,36 +21,29 @@
         <mapping-file>/hbm/transactional/core/ResultTemplateResource.hbm.xml</mapping-file>
         <mapping-file>/hbm/transactional/core/UnitResource.hbm.xml</mapping-file>
         <mapping-file>/hbm/transactional/core/VerticalMetadataResource.hbm.xml</mapping-file>
+		<mapping-file>/hbm/transactional/core/TagResource.hbm.xml</mapping-file>
 
-        <mapping-file>/hbm/staplus/StaPlusDataResource.hbm.xml</mapping-file>
-        <mapping-file>/hbm/staplus/StaPlusDatasetResource.hbm.xml</mapping-file>
-        <mapping-file>/hbm/staplus/StaPlusPlatformResource.hbm.xml</mapping-file>
+        <mapping-file>/hbm/transactional/staplus/DataResource.hbm.xml</mapping-file>
+        <mapping-file>/hbm/transactional/staplus/DatasetResource.hbm.xml</mapping-file>
+        <mapping-file>/hbm/transactional/staplus/PlatformResource.hbm.xml</mapping-file>
 
-        <mapping-file>/hbm/staplus/DatasetResource.hbm.xml</mapping-file>
-        <mapping-file>/hbm/transactional/dataset/DataResource.hbm.xml</mapping-file>
-
-        <mapping-file>/hbm/transactional/core/TagResource.hbm.xml</mapping-file>
-
-        <mapping-file>/hbm/transactional/core/LocationResource.hbm.xml</mapping-file>
-        <mapping-file>/hbm/transactional/core/PlatformResource.hbm.xml</mapping-file>
-
-        <mapping-file>/hbm/parameter/PlatformParameterResource.hbm.xml</mapping-file>
         <mapping-file>/hbm/parameter/DatasetParameterResource.hbm.xml</mapping-file>
-        <mapping-file>/hbm/parameter/ObservationParameterResource.hbm.xml</mapping-file>
-        <mapping-file>/hbm/parameter/LocationParameterResource.hbm.xml</mapping-file>
-        <mapping-file>/hbm/parameter/PhenomenonParameterResource.hbm.xml</mapping-file>
-        <mapping-file>/hbm/parameter/ProcedureParameterResource.hbm.xml</mapping-file>
         <mapping-file>/hbm/parameter/FeatureParameterResource.hbm.xml</mapping-file>
-        <mapping-file>/hbm/parameter/ObservationGroupParameterResource.hbm.xml</mapping-file>
-        <mapping-file>/hbm/parameter/LicenseParameterResource.hbm.xml</mapping-file>
-        <mapping-file>/hbm/parameter/ProjectParameterResource.hbm.xml</mapping-file>
-        <mapping-file>/hbm/parameter/PartyParameterResource.hbm.xml</mapping-file>
+        <mapping-file>/hbm/parameter/LocationParameterResource.hbm.xml</mapping-file>
+        <mapping-file>/hbm/parameter/ObservationParameterResource.hbm.xml</mapping-file>
+        <mapping-file>/hbm/parameter/PhenomenonParameterResource.hbm.xml</mapping-file>
+        <mapping-file>/hbm/parameter/PlatformParameterResource.hbm.xml</mapping-file>
+        <mapping-file>/hbm/parameter/ProcedureParameterResource.hbm.xml</mapping-file>
 
-        <class>org.n52.series.db.beans.sta.plus.GroupEntity</class>
-        <class>org.n52.series.db.beans.sta.plus.RelationEntity</class>
-        <class>org.n52.series.db.beans.sta.plus.LicenseEntity</class>
-        <class>org.n52.series.db.beans.sta.plus.PartyEntity</class>
-        <class>org.n52.series.db.beans.sta.plus.ProjectEntity</class>
+        <mapping-file>/hbm/staplus/GroupParameterResource.hbm.xml</mapping-file>
+        <mapping-file>/hbm/staplus/GroupResource.hbm.xml</mapping-file>
+        <mapping-file>/hbm/staplus/LicenseParameterResource.hbm.xml</mapping-file>
+        <mapping-file>/hbm/staplus/LicenseResource.hbm.xml</mapping-file>
+        <mapping-file>/hbm/staplus/PartyResource.hbm.xml</mapping-file>
+        <mapping-file>/hbm/staplus/ProjectParameterResource.hbm.xml</mapping-file>
+        <mapping-file>/hbm/staplus/ProjectResource.hbm.xml</mapping-file>
+        <mapping-file>/hbm/staplus/RelationParameterResource.hbm.xml</mapping-file>
+        <mapping-file>/hbm/staplus/RelationResource.hbm.xml</mapping-file>
 
         <exclude-unlisted-classes>true</exclude-unlisted-classes>
         <properties>

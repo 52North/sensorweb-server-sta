@@ -51,7 +51,6 @@ import org.n52.series.db.beans.CategoryDataEntity;
 import org.n52.series.db.beans.CompositeDataEntity;
 import org.n52.series.db.beans.CountDataEntity;
 import org.n52.series.db.beans.DataEntity;
-import org.n52.series.db.beans.Dataset;
 import org.n52.series.db.beans.DatasetAggregationEntity;
 import org.n52.series.db.beans.DatasetEntity;
 import org.n52.series.db.beans.PlatformEntity;
@@ -297,7 +296,7 @@ public class ObservationService
                 check(observation);
 
                 // Fetch dataset and check if FOI matches to reuse existing dataset
-                Dataset datastream = (Dataset) datastreamRepository
+                AbstractDatasetEntity datastream = datastreamRepository
                                                                    .findByStaIdentifier(entity.getDataset()
                                                                                               .getStaIdentifier(),
                                                                                         EntityGraphRepository.FetchGraph.FETCHGRAPH_FEATURE)
@@ -681,7 +680,7 @@ public class ObservationService
                     datastreamEntity.setPhenomenonTimeEnd(null);
                 }
             }
-            datastreamRepository.save((Dataset) datastreamEntity);
+            datastreamRepository.save(datastreamEntity);
             // update parent if its part of the aggregation
             if (datastreamEntity.isSetAggregation()) {
                 updateDatastreamPhenomenonTimeOnObservationUpdate(
@@ -814,7 +813,7 @@ public class ObservationService
                     updateDataset(dataset.getAggregation(), data);
                 }
 
-                return datastreamRepository.save((Dataset) dataset);
+                return datastreamRepository.save(dataset);
             }
         } else {
             throw new STACRUDException("Could not update Dataset->firstObservation or Dataset->firstObservation. "

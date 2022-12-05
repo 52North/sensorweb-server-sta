@@ -12,7 +12,7 @@
         <mapping-file>/hbm/transactional/core/FormatResource.hbm.xml</mapping-file>
         <mapping-file>/hbm/transactional/core/OfferingResource.hbm.xml</mapping-file>
         <mapping-file>/hbm/transactional/core/PhenomenonResource.hbm.xml</mapping-file>
-
+		<mapping-file>/hbm/transactional/core/LocationResource.hbm.xml</mapping-file>
         <mapping-file>/hbm/transactional/core/ProcedureHistoryResource.hbm.xml</mapping-file>
         <mapping-file>/hbm/transactional/core/ProcedureResource.hbm.xml</mapping-file>
         <mapping-file>/hbm/transactional/core/RelatedDataResource.hbm.xml</mapping-file>
@@ -21,13 +21,11 @@
         <mapping-file>/hbm/transactional/core/ResultTemplateResource.hbm.xml</mapping-file>
         <mapping-file>/hbm/transactional/core/UnitResource.hbm.xml</mapping-file>
         <mapping-file>/hbm/transactional/core/VerticalMetadataResource.hbm.xml</mapping-file>
+ 		<mapping-file>/hbm/transactional/core/TagResource.hbm.xml</mapping-file>
 
         <mapping-file>/hbm/transactional/dataset/DataResource.hbm.xml</mapping-file>
-        <mapping-file>/hbm/staplus/DatasetResource.hbm.xml</mapping-file>
-        <mapping-file>/hbm/transactional/core/TagResource.hbm.xml</mapping-file>
-
-        <mapping-file>/hbm/transactional/core/LocationResource.hbm.xml</mapping-file>
-        <mapping-file>/hbm/transactional/core/PlatformResource.hbm.xml</mapping-file>
+        <mapping-file>/hbm/transactional/dataset/PlatformResource.hbm.xml</mapping-file>
+        <mapping-file>/hbm/transactional/dataset/DatasetResource.hbm.xml</mapping-file>
 
         <mapping-file>/hbm/parameter/PlatformParameterResource.hbm.xml</mapping-file>
         <mapping-file>/hbm/parameter/DatasetParameterResource.hbm.xml</mapping-file>

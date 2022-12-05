@@ -43,7 +43,6 @@ import org.hibernate.HibernateException;
 import org.joda.time.DateTime;
 import org.n52.janmayen.http.HTTPStatus;
 import org.n52.series.db.beans.AbstractDatasetEntity;
-import org.n52.series.db.beans.Dataset;
 import org.n52.series.db.beans.PlatformEntity;
 import org.n52.series.db.beans.parameter.platform.PlatformParameterEntity;
 import org.n52.series.db.beans.sta.HistoricalLocationEntity;
@@ -362,7 +361,7 @@ public class ThingService
             Set<AbstractDatasetEntity> datastreams = new HashSet<>();
             for (AbstractDatasetEntity datastream : thing.getDatasets()) {
                 datastream.setThing(thing);
-                datastreams.add(getDatastreamService().createOrfetch((Dataset) datastream));
+                datastreams.add(getDatastreamService().createOrfetch(datastream));
             }
             thing.setDatasets(datastreams);
         }
