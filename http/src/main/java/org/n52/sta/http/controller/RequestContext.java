@@ -48,7 +48,7 @@ import org.n52.sta.api.path.SelectPath;
 import org.n52.sta.http.util.path.PathFactory;
 import org.n52.sta.http.util.path.StaPath;
 import org.n52.svalbard.odata.core.QueryOptionsFactory;
-import org.springframework.web.servlet.HandlerMapping;
+import org.springframework.web.util.UrlPathHelper;
 
 public final class RequestContext {
 
@@ -88,7 +88,7 @@ public final class RequestContext {
 
     private static StaPath< ? extends Identifiable> parsePath(HttpServletRequest request, PathFactory pathFactory)
             throws STAInvalidUrlException {
-        return pathFactory.parse((String) request.getAttribute(HandlerMapping.LOOKUP_PATH));
+        return pathFactory.parse((String) request.getAttribute(UrlPathHelper.PATH_ATTRIBUTE));
     }
 
     private static Function<String, String> decodeQueryString() {
