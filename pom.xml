@@ -50,7 +50,7 @@
         <guava.version>31.1-jre</guava.version>
         <hamcrest.version>2.2</hamcrest.version>
         <joda.version>2.12.2</joda.version>
-        <locationtech-jts.version>1.16.1</locationtech-jts.version>
+        <locationtech-jts.version>1.19.0</locationtech-jts.version>
         <paho.version>1.2.5</paho.version>
         <spotbugs.version>4.7.3</spotbugs.version>
         <spring-boot.version>2.3.12.RELEASE</spring-boot.version>
