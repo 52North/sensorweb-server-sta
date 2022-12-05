@@ -71,6 +71,7 @@ import org.n52.sta.serdes.json.JSONBase;
 import org.n52.sta.serdes.json.JSONObservation;
 import org.n52.sta.serdes.util.ElementWithQueryOptions.ObservationWithQueryOptions;
 import org.n52.sta.serdes.util.EntityPatch;
+import org.n52.svalbard.odata.core.QueryOptionsFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -134,7 +135,7 @@ public class ObservationSerDes {
                 gen.writeFieldName(STAEntityDefinition.PROP_RESULT);
                 if (observation instanceof ProfileDataEntity) {
                     QueryOptions profileResultSchema =
-                        new QueryOptions("",
+                            QueryOptionsFactory.createQueryOptions(
                                          Collections.singleton(new SelectFilter(new HashSet<>(
                                              Arrays.asList(StaConstants.PROP_RESULT,
                                                            StaConstants.PROP_PARAMETERS,
@@ -145,7 +146,7 @@ public class ObservationSerDes {
                                           serializers);
                 } else if (observation instanceof TrajectoryDataEntity) {
                     QueryOptions trajectoryResultSchema =
-                        new QueryOptions("",
+                            QueryOptionsFactory.createQueryOptions(
                                          Collections.singleton(new SelectFilter(new HashSet<>(
                                              Arrays.asList(StaConstants.PROP_RESULT,
                                                            StaConstants.PROP_PARAMETERS,

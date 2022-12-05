@@ -69,7 +69,7 @@ public class CollectionSer extends StdSerializer<CollectionWrapper> {
             gen.writeStringField("@iot.nextLink",
                                  value.getRequestURL()
                                      + "?"
-                                     + new QueryOptions("", allFilters).toString()
+                                     + QueryOptionsFactory.createQueryOptions(allFilters).toString()
             );
         }
 
