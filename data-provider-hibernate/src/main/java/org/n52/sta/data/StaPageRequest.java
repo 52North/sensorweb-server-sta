@@ -128,6 +128,11 @@ public final class StaPageRequest extends AbstractPageRequest {
         return sort;
     }
 
+    @Override
+    public Pageable withPage(int pageNumber) {
+        return new StaPageRequest(pageNumber, getPageSize(), getSort());
+    }
+
     private static final class StaPageRequestFactory {
 
         private static StaPageRequest create(QueryOptions queryOptions) {

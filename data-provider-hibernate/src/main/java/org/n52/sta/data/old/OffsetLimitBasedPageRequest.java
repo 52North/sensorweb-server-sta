@@ -139,4 +139,9 @@ public class OffsetLimitBasedPageRequest extends AbstractPageRequest {
         return sort;
     }
 
+    @Override
+    public Pageable withPage(int pageNumber) {
+        return new OffsetLimitBasedPageRequest(pageNumber, getPageSize(), getSort());
+    }
+
 }
