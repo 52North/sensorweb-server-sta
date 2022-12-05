@@ -52,7 +52,7 @@
         <joda.version>2.10.8</joda.version>
         <locationtech-jts.version>1.16.1</locationtech-jts.version>
         <paho.version>1.2.5</paho.version>
-        <spotbugs.version>4.1.4</spotbugs.version>
+        <spotbugs.version>4.7.3</spotbugs.version>
         <spring-boot.version>2.3.12.RELEASE</spring-boot.version>
         <testcontainers.jupiter.version>1.17.3</testcontainers.jupiter.version>
         <testcontainers.postgres.version>1.17.3</testcontainers.postgres.version>
