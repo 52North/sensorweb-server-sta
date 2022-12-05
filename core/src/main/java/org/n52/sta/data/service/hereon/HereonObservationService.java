@@ -31,7 +31,6 @@ package org.n52.sta.data.service.hereon;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.n52.sensorweb.server.helgoland.adapters.connector.hereon.HereonConfig;
-import org.n52.sensorweb.server.helgoland.adapters.connector.response.Attributes;
 import org.n52.sensorweb.server.helgoland.adapters.connector.response.ErrorResponse;
 import org.n52.sensorweb.server.helgoland.adapters.connector.response.MetadataResponse;
 import org.n52.sensorweb.server.helgoland.adapters.web.ArcgisRestHttpClient;
@@ -60,6 +59,9 @@ import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.HashMap;
+import java.util.Map;
+
 /**
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
  */
@@ -72,11 +74,10 @@ public class HereonObservationService extends ObservationService {
 
     private final ObjectMapper OM = new ObjectMapper();
     private final String not_supported = "not supported for HEREON backend!";
-    private final ArcgisRestHttpClient connectorFactory;
+    private Map<String, ArcgisRestHttpClient> featureServiceConnectors = new HashMap<>(5);
     private final HereonConfig config;
 
     public HereonObservationService(HereonConfig config) {
-        this.connectorFactory = new ArcgisRestHttpClient(config.getCredentials());
         this.config = config;
     }
 
@@ -108,14 +109,15 @@ public class HereonObservationService extends ObservationService {
             case StaConstants.DATASTREAMS:
                 // Fetch datastream to lookup url_data_service
                 DatastreamService datastreamService = getDatastreamService();
-                AbstractDatasetEntity entityByIdRaw = datastreamService.getEntityByIdRaw(
-                        Long.valueOf(relatedId),
-                        QueryOptionsFactory.createEmpty());
+                AbstractDatasetEntity dataset = (AbstractDatasetEntity) datastreamService.getEntity(
+                        relatedId,
+                        QueryOptionsFactory.createEmpty()).getEntity();
 
                 String url_data_service = null;
-                for (ParameterEntity<?> parameterEntity : entityByIdRaw.getParameters()) {
+                for (ParameterEntity<?> parameterEntity : dataset.getParameters()) {
                     if (parameterEntity.getName().equals("url_data_service")) {
                         url_data_service = String.valueOf(parameterEntity.getValue());
+                        break;
                     }
                 }
                 if (url_data_service == null) {
@@ -125,15 +127,25 @@ public class HereonObservationService extends ObservationService {
 
                 try {
                     String url = config.createDataServiceUrl(url_data_service);
-                    Response response = connectorFactory.execute(url, new GetFeaturesRequest());
 
+                    //TODO: This can be refactored into a single client when all featureServices are integrated into
+                    // a single portal
+                    String tokenUrl = config.createTokenUrl(url);
+                    ArcgisRestHttpClient client = this.featureServiceConnectors.get(tokenUrl);
+                    if (client == null) {
+                        client = new ArcgisRestHttpClient(
+                                config.getCredentials().getUsername(),
+                                config.getCredentials().getPassword(),
+                                tokenUrl);
+                        this.featureServiceConnectors.put(tokenUrl, client);
+                    }
+                    Response response = client.execute(url, new GetFeaturesRequest(relatedId));
                     MetadataResponse responseCollection = encodeResponse(response.getEntity(), MetadataResponse.class);
 
                     return new CollectionWrapper(responseCollection.getFeatures().size(),
                             ObservationMapper.toDataEntities(responseCollection.getFeatures()),
                             responseCollection.getExceededTransferLimit());
                 } catch (ProxyHttpClientException | DecodingException | JsonProcessingException e) {
-                    e.printStackTrace();
                     throw new STACRUDException("error retrieving observations", e);
                 }
             default:

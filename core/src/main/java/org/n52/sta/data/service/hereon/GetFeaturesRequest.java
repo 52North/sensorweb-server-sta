@@ -32,14 +32,16 @@ import org.n52.sensorweb.server.helgoland.adapters.connector.request.AbstractHer
 
 public class GetFeaturesRequest extends AbstractHereonRequest {
 
-    public GetFeaturesRequest() {
+    public GetFeaturesRequest(String metadata_id) {
         //TODO: only request fields needed for serializing to reduce payload size
         withOutField("*");
 
         //TODO: make this dependant on actual QueryOptions
         withResultRecordCount(1000L);
 
+        withWhere(String.format("metadata_id = '%s'", metadata_id));
+
         //TODO: implement $skip
-        // withResultOffset()
+        // withResultOffset(9990L);
     }
 }
