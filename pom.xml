@@ -47,7 +47,7 @@
         <arctic-sea.version>10.1.0-SNAPSHOT</arctic-sea.version>
         <db-model.version>4.0.0-SNAPSHOT</db-model.version>
         <findbugs.version>3.0.2</findbugs.version>
-        <guava.version>30.1-jre</guava.version>
+        <guava.version>31.1-jre</guava.version>
         <hamcrest.version>2.2</hamcrest.version>
         <joda.version>2.10.8</joda.version>
         <locationtech-jts.version>1.16.1</locationtech-jts.version>
