@@ -66,9 +66,10 @@ public class MqttPropertySubscription extends MqttEntitySubscription {
         Assert.notNull(watchedProperty, "Unable to parse topic. Could not extract watchedProperty");
         LOGGER.debug(this.toString());
 
+        QueryOptionsFactory qof = new QueryOptionsFactory();
         HashSet<FilterClause> filters = new HashSet<>();
         filters.add(new SelectFilter(watchedProperty));
-        queryOptions = QueryOptionsFactory.createQueryOptions(filters);
+        queryOptions = qof.createQueryOptions(filters);
     }
 
     @Override

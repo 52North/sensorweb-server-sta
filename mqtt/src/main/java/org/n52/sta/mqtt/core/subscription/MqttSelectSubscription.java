@@ -58,11 +58,12 @@ public class MqttSelectSubscription extends MqttEntityCollectionSubscription {
         selectOption = mt.group(RequestUtils.GROUPNAME_SELECT);
         Assert.notNull(selectOption, "Unable to parse topic. Could not extract selectOption");
 
+        QueryOptionsFactory qof = new QueryOptionsFactory();
         HashSet<FilterClause> filters = new HashSet<>();
         HashSet<String> filterItems = new HashSet<>();
         Collections.addAll(filterItems, mt.group(RequestUtils.GROUPNAME_SELECT).split(","));
         filters.add(new SelectFilter(filterItems));
-        queryOptions = QueryOptionsFactory.createQueryOptions(filters);
+        queryOptions = qof.createQueryOptions(filters);
         LOGGER.debug(this.toString());
     }
 

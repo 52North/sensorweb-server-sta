@@ -173,6 +173,7 @@ public class ErrorHandler {
 
     private String createErrorMessage(Exception e) {
         ObjectNode err = formatError(e);
+        err.put("timestamp", System.currentTimeMillis());
         return err.toPrettyString();
     }
 
