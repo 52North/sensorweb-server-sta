@@ -91,7 +91,7 @@ public class ObservationMapper {
     }
 
     public static List<ElementWithQueryOptions> toDataEntities(List<MetadataFeature> features) {
-        QueryOptions qo = QueryOptionsFactory.createEmpty();
+        QueryOptions qo = new QueryOptionsFactory().createDummy();
         return features.stream()
                 .map(ObservationMapper::toDataEntity)
                 .map(entity -> ElementWithQueryOptions.from(entity, qo))

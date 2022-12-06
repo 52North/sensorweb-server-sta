@@ -76,6 +76,7 @@ public class HereonObservationService extends ObservationService {
     private final String not_supported = "not supported for HEREON backend!";
     private Map<String, ArcgisRestHttpClient> featureServiceConnectors = new HashMap<>(5);
     private final HereonConfig config;
+    private final QueryOptionsFactory QOF = new QueryOptionsFactory();
 
     public HereonObservationService(HereonConfig config) {
         this.config = config;
@@ -111,7 +112,7 @@ public class HereonObservationService extends ObservationService {
                 DatastreamService datastreamService = getDatastreamService();
                 AbstractDatasetEntity dataset = (AbstractDatasetEntity) datastreamService.getEntity(
                         relatedId,
-                        QueryOptionsFactory.createEmpty()).getEntity();
+                        QOF.createDummy()).getEntity();
 
                 String url_data_service = null;
                 for (ParameterEntity<?> parameterEntity : dataset.getParameters()) {
