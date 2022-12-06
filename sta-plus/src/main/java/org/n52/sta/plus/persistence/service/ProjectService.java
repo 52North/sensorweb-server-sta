@@ -35,9 +35,9 @@ import java.util.stream.Collectors;
 import javax.persistence.EntityManager;
 
 import org.n52.janmayen.http.HTTPStatus;
-import org.n52.series.db.beans.sta.plus.ProjectEntity;
-import org.n52.series.db.beans.sta.plus.StaPlusAbstractDatasetEntity;
-import org.n52.series.db.beans.sta.plus.StaPlusDataset;
+import org.n52.series.db.beans.sta.ProjectEntity;
+import org.n52.series.db.beans.AbstractDatasetEntity;
+import org.n52.series.db.beans.DatasetEntity;
 import org.n52.shetland.filter.ExpandFilter;
 import org.n52.shetland.filter.ExpandItem;
 import org.n52.shetland.ogc.sta.StaConstants;
@@ -112,10 +112,10 @@ public class ProjectService
             String expandProperty = expandItem.getPath();
             if (ProjectEntityDefinition.NAVIGATION_PROPERTIES.contains(expandProperty)) {
                 DatastreamService datastreamService = getDatastreamService();
-                Page<StaPlusDataset> datastreams = datastreamService.getEntityCollectionByRelatedEntityRaw(entity.getStaIdentifier(),
+                Page<DatasetEntity> datastreams = datastreamService.getEntityCollectionByRelatedEntityRaw(entity.getStaIdentifier(),
                                                                                                            STAEntityDefinition.PROJECTS,
                                                                                                            expandItem.getQueryOptions());
-                entity.setDatastreams(datastreams.get()
+                entity.setDatasets(datastreams.get()
                                                  .collect(Collectors.toSet()));
                 return entity;
             } else {
@@ -169,9 +169,9 @@ public class ProjectService
             if (getRepository().existsByStaIdentifier(project.getStaIdentifier())) {
                 throw new STACRUDException(IDENTIFIER_ALREADY_EXISTS, HTTPStatus.CONFLICT);
             } else {
-                if (project.getDatastreams() != null) {
-                    for (StaPlusDataset datastream : project.getDatastreams()) {
-                        getStaPlusDatastreamService().create(datastream);
+                if (project.hasDatasets()) {
+                    for (DatasetEntity datastream : project.getDatasets()) {
+                        getDatastreamService().create(datastream);
                     }
                 }
                 getRepository().save(project);
@@ -247,7 +247,7 @@ public class ProjectService
                 ProjectEntity project = getRepository().findByStaIdentifier(id)
                                                        .get();
                 // Delete related Datastreams
-                for (StaPlusAbstractDatasetEntity ds : project.getDatastreams()) {
+                for (AbstractDatasetEntity ds : project.getDatasets()) {
                     getDatastreamService().delete(ds.getStaIdentifier());
                 }
                 getRepository().deleteByStaIdentifier(id);

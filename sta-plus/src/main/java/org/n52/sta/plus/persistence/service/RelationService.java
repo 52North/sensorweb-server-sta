@@ -37,8 +37,8 @@ import java.util.stream.Collectors;
 import javax.persistence.EntityManager;
 
 import org.n52.janmayen.http.HTTPStatus;
-import org.n52.series.db.beans.sta.plus.GroupEntity;
-import org.n52.series.db.beans.sta.plus.RelationEntity;
+import org.n52.series.db.beans.sta.GroupEntity;
+import org.n52.series.db.beans.sta.RelationEntity;
 import org.n52.shetland.filter.ExpandFilter;
 import org.n52.shetland.filter.ExpandItem;
 import org.n52.shetland.ogc.sta.StaConstants;

@@ -36,8 +36,8 @@ import javax.persistence.criteria.Subquery;
 
 import org.n52.series.db.beans.AbstractDatasetEntity;
 import org.n52.series.db.beans.DescribableEntity;
-import org.n52.series.db.beans.sta.plus.ProjectEntity;
-import org.n52.series.db.beans.sta.plus.StaPlusDatasetEntity;
+import org.n52.series.db.beans.sta.ProjectEntity;
+import org.n52.series.db.beans.DatasetEntity;
 import org.n52.shetland.ogc.filter.FilterConstants;
 import org.n52.shetland.ogc.sta.StaConstants;
 import org.n52.shetland.ogc.sta.exception.STAInvalidFilterExpressionException;
@@ -51,7 +51,7 @@ public class ProjectQuerySpecifications extends EntityQuerySpecifications<Projec
 
     public Specification<ProjectEntity> withDatastreamStaIdentifier(final String identifier) {
         return (root, query, builder) -> {
-            final Join<ProjectEntity, AbstractDatasetEntity> join = root.join(ProjectEntity.PROPERTY_DATASTREAMS,
+            final Join<ProjectEntity, AbstractDatasetEntity> join = root.join(ProjectEntity.PROPERTY_DATASETS,
                                                                               JoinType.INNER);
             return builder.equal(join.get(DescribableEntity.PROPERTY_STA_IDENTIFIER), identifier);
         };
@@ -64,11 +64,11 @@ public class ProjectQuerySpecifications extends EntityQuerySpecifications<Projec
             if (StaConstants.DATASTREAMS.equals(propertyName)) {
                 Subquery<ProjectEntity> subq = query.subquery(ProjectEntity.class);
                 Root<AbstractDatasetEntity> datastream = subq.from(AbstractDatasetEntity.class);
-                subq.select(datastream.get(StaPlusDatasetEntity.PROPERTY_PROJECT))
+                subq.select(datastream.get(DatasetEntity.PROPERTY_PROJECT))
                     .where(((Specification<AbstractDatasetEntity>) propertyValue).toPredicate(datastream,
                                                                                               query,
                                                                                               builder));
-                return builder.in(root.get(ProjectEntity.ID))
+                return builder.in(root.get(ProjectEntity.PROPERTY_ID))
                               .value(subq);
             } else {
                 throw new RuntimeException("Could not find related property: " + propertyName);

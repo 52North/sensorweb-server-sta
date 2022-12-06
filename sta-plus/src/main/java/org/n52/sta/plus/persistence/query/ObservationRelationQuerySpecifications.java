@@ -36,8 +36,8 @@ import javax.persistence.criteria.Subquery;
 
 import org.n52.series.db.beans.DataEntity;
 import org.n52.series.db.beans.DescribableEntity;
-import org.n52.series.db.beans.sta.plus.GroupEntity;
-import org.n52.series.db.beans.sta.plus.RelationEntity;
+import org.n52.series.db.beans.sta.GroupEntity;
+import org.n52.series.db.beans.sta.RelationEntity;
 import org.n52.shetland.ogc.filter.FilterConstants;
 import org.n52.shetland.ogc.sta.StaConstants;
 import org.n52.shetland.ogc.sta.exception.STAInvalidFilterExpressionException;
@@ -82,7 +82,7 @@ public class ObservationRelationQuerySpecifications extends EntityQuerySpecifica
             if (StaConstants.GROUP.equals(propertyName)) {
                 Subquery<RelationEntity> subq = query.subquery(RelationEntity.class);
                 Root<GroupEntity> obsGroup = subq.from(GroupEntity.class);
-                subq.select(obsGroup.get(GroupEntity.ID))
+                subq.select(obsGroup.get(GroupEntity.PROPERTY_ID))
                     .where(((Specification<GroupEntity>) propertyValue).toPredicate(obsGroup,
                                                                                     query,
                                                                                     builder));

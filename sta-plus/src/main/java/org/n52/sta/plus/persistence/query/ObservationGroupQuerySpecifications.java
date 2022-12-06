@@ -37,10 +37,10 @@ import javax.persistence.criteria.Subquery;
 import org.n52.series.db.beans.DataEntity;
 import org.n52.series.db.beans.DescribableEntity;
 import org.n52.series.db.beans.parameter.ParameterFactory;
-import org.n52.series.db.beans.parameter.observationgroup.ObservationGroupParameterEntity;
-import org.n52.series.db.beans.sta.plus.GroupEntity;
-import org.n52.series.db.beans.sta.plus.LicenseEntity;
-import org.n52.series.db.beans.sta.plus.RelationEntity;
+import org.n52.series.db.beans.parameter.relation.RelationParameterEntity;
+import org.n52.series.db.beans.sta.GroupEntity;
+import org.n52.series.db.beans.sta.LicenseEntity;
+import org.n52.series.db.beans.sta.RelationEntity;
 import org.n52.shetland.ogc.filter.FilterConstants;
 import org.n52.shetland.ogc.sta.StaConstants;
 import org.n52.shetland.ogc.sta.exception.STAInvalidFilterExpressionException;
@@ -54,7 +54,7 @@ public class ObservationGroupQuerySpecifications extends EntityQuerySpecificatio
 
     public static Specification<GroupEntity> withRelationStaIdentifier(final String relationIdentifier) {
         return (root, query, builder) -> {
-            final Join<GroupEntity, RelationEntity> join = root.join(GroupEntity.PROP_RELATIONS, JoinType.INNER);
+            final Join<GroupEntity, RelationEntity> join = root.join(GroupEntity.PROPERTY_RELATIONS, JoinType.INNER);
             return builder.equal(join.get(DescribableEntity.PROPERTY_STA_IDENTIFIER), relationIdentifier);
         };
     }
@@ -85,7 +85,7 @@ public class ObservationGroupQuerySpecifications extends EntityQuerySpecificatio
                     .where(((Specification<RelationEntity>) propertyValue).toPredicate(obsRelation,
                                                                                        query,
                                                                                        builder));
-                return builder.in(root.get(GroupEntity.ID))
+                return builder.in(root.get(GroupEntity.PROPERTY_ID))
                               .value(subq);
             } else {
                 throw new RuntimeException("Could not find related property: " + propertyName);
@@ -130,8 +130,8 @@ public class ObservationGroupQuerySpecifications extends EntityQuerySpecificatio
                                                     propertyValue,
                                                     operator,
                                                     switched,
-                                                    ObservationGroupParameterEntity.PROP_OBS_GROUP_ID,
-                                                    ParameterFactory.EntityType.OBS_GROUP);
+                                                    RelationParameterEntity.PROPERTY_RELATION_ID,
+                                                    ParameterFactory.EntityType.RELATION);
                         } else {
                             throw new RuntimeException(String.format(ERROR_GETTING_FILTER_NO_PROP, propertyName));
                         }

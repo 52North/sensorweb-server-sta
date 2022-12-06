@@ -28,7 +28,7 @@
 
 package org.n52.sta.plus.persistence.repositories;
 
-import org.n52.series.db.beans.sta.plus.LicenseEntity;
+import org.n52.series.db.beans.sta.LicenseEntity;
 import org.n52.shetland.ogc.sta.StaConstants;
 import org.n52.sta.data.old.repositories.StaIdentifierRepository;
 import org.springframework.context.annotation.Profile;

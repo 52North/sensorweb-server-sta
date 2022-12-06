@@ -29,11 +29,11 @@
 package org.n52.sta.plus.persistence.service;
 
 import org.n52.series.db.beans.HibernateRelations;
-import org.n52.series.db.beans.sta.plus.GroupEntity;
-import org.n52.series.db.beans.sta.plus.LicenseEntity;
-import org.n52.series.db.beans.sta.plus.PartyEntity;
-import org.n52.series.db.beans.sta.plus.ProjectEntity;
-import org.n52.series.db.beans.sta.plus.RelationEntity;
+import org.n52.series.db.beans.sta.GroupEntity;
+import org.n52.series.db.beans.sta.LicenseEntity;
+import org.n52.series.db.beans.sta.PartyEntity;
+import org.n52.series.db.beans.sta.ProjectEntity;
+import org.n52.series.db.beans.sta.RelationEntity;
 import org.n52.sta.api.old.dto.common.StaDTO;
 import org.n52.sta.data.old.DaoSemaphore;
 import org.n52.sta.data.old.SerDesConfig;

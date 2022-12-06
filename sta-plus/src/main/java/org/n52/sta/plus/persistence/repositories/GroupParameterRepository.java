@@ -28,7 +28,7 @@
 
 package org.n52.sta.plus.persistence.repositories;
 
-import org.n52.series.db.beans.parameter.observationgroup.ObservationGroupParameterEntity;
+import org.n52.series.db.beans.parameter.group.GroupParameterEntity;
 import org.n52.shetland.ogc.sta.StaConstants;
 import org.springframework.context.annotation.Profile;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -41,6 +41,6 @@ import org.springframework.transaction.annotation.Transactional;
 @Repository
 @Profile(StaConstants.STAPLUS)
 @Transactional
-public interface GroupParameterRepository extends JpaRepository<ObservationGroupParameterEntity, Long> {
+public interface GroupParameterRepository extends JpaRepository<GroupParameterEntity, Long> {
 
 }

@@ -34,7 +34,7 @@ import java.util.UUID;
 import javax.persistence.EntityManager;
 
 import org.n52.janmayen.http.HTTPStatus;
-import org.n52.series.db.beans.sta.plus.LicenseEntity;
+import org.n52.series.db.beans.sta.LicenseEntity;
 import org.n52.shetland.filter.ExpandFilter;
 import org.n52.shetland.filter.ExpandItem;
 import org.n52.shetland.ogc.sta.StaConstants;
