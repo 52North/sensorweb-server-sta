@@ -9,7 +9,7 @@
 #    && cd sensorweb-server-db-model \
 #    && git checkout develop
 
-FROM maven:3.6.1-jdk-8-slim as buildstage
+FROM maven:3-eclipse-temurin-11-alpine as buildstage
 WORKDIR /app
 #COPY --from=gitstage /app /app
 COPY . /app/sensorweb-server-sta/
@@ -23,7 +23,7 @@ COPY . /app/sensorweb-server-sta/
 RUN cd sensorweb-server-sta \
     && mvn package
 
-FROM adoptopenjdk/openjdk8:alpine-slim as runstage
+FROM adoptopenjdk/openjdk11:alpine-slim as runstage
 
 ARG DEPENDENCY=/app/sensorweb-server-sta/app/target/unpacked
 COPY --from=buildstage ${DEPENDENCY}/BOOT-INF/lib /app/lib
