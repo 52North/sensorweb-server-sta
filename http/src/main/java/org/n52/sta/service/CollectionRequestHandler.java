@@ -36,7 +36,6 @@ import org.n52.sta.data.service.EntityServiceRepository;
 import org.n52.sta.data.service.util.CollectionWrapper;
 import org.n52.sta.utils.AbstractSTARequestHandler;
 import org.n52.sta.utils.RequestUtils;
-import org.n52.svalbard.odata.core.QueryOptionsFactory;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.util.UrlPathHelper;
 

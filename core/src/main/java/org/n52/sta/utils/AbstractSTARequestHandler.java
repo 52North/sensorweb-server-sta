@@ -34,7 +34,6 @@ import org.n52.shetland.ogc.sta.exception.STAInvalidUrlException;
 import org.n52.shetland.ogc.sta.exception.STANotFoundException;
 import org.n52.shetland.ogc.sta.model.STAEntityDefinition;
 import org.n52.sta.data.service.EntityServiceRepository;
-import org.n52.svalbard.odata.core.QueryOptionsFactory;
 
 import javax.servlet.http.HttpServletRequest;
 import java.net.URLDecoder;
