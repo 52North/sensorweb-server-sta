@@ -150,7 +150,7 @@ logging:
     #    org.hibernate.type: INFO
     #     org.hibernate: DEBUG
     #     io.moquette: OFF
-    org.n52: TRACE
+    #     org.n52: TRACE
     #org.hibernate.event.internal: TRACE
     #org.hibernate.engine.spi: TRACE
     #org.hibernate.type: TRACE

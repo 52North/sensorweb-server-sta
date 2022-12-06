@@ -247,8 +247,24 @@ public abstract class AbstractSensorThingsEntityServiceImpl<T extends StaIdentif
     }
 
     protected CollectionWrapper createCollectionWrapperAndExpand(QueryOptions queryOptions, Page<S> pages) {
+        long count = -1;
+        boolean hasNext = true;
+        if (queryOptions.hasCountFilter() && queryOptions.getCountFilter().getValue()) {
+            // We know total elements
+            count = pages.getTotalElements();
+            hasNext = pages.hasNext();
+        } else {
+            // we have a semi-full page so we are last Page
+            // we might be last page even if number == topfilter.value but we have no way of detecting that as
+            // getTotalElements only returns offset+skip
+            if (pages.getNumberOfElements() < queryOptions.getTopFilter().getValue()) {
+                hasNext = false;
+            }
+        }
+
+        Page<S> result;
         if (queryOptions.hasExpandFilter()) {
-            Page<S> expanded = pages.map(e -> {
+            result = pages.map(e -> {
                 try {
                     em.detach(e);
                     return fetchExpandEntitiesWithFilter(e, queryOptions.getExpandFilter());
@@ -256,24 +272,13 @@ public abstract class AbstractSensorThingsEntityServiceImpl<T extends StaIdentif
                     throw new RuntimeException(ex);
                 }
             });
-            long count = (queryOptions.hasCountFilter() && queryOptions.getCountFilter().getValue()) ?
-                expanded.getTotalElements() :
-                -1;
-            boolean hasNext = expanded.getTotalElements() == queryOptions.getTopFilter().getValue();
-            return new CollectionWrapper(count,
-                                         expanded.map(e -> createWrapper(e, queryOptions))
-                                             .getContent(),
-                                         hasNext);
         } else {
-            long count = (queryOptions.hasCountFilter() && queryOptions.getCountFilter().getValue()) ?
-                pages.getTotalElements() :
-                -1;
-            boolean hasNext = pages.getTotalElements() == queryOptions.getTopFilter().getValue();
-            return new CollectionWrapper(count,
-                                         pages.map(e -> createWrapper(e, queryOptions))
-                                             .getContent(),
-                                         hasNext);
+            result = pages;
         }
+        return new CollectionWrapper(count,
+                                     result.map(e -> createWrapper(e, queryOptions))
+                                         .getContent(),
+                                     hasNext);
     }
 
     public S getEntityByRelatedEntityRaw(String relatedId,

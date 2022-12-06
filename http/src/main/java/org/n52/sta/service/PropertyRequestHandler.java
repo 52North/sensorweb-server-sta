@@ -37,7 +37,6 @@ import org.n52.shetland.ogc.filter.FilterClause;
 import org.n52.sta.data.service.EntityServiceRepository;
 import org.n52.sta.serdes.util.ElementWithQueryOptions;
 import org.n52.sta.utils.AbstractSTARequestHandler;
-import org.n52.svalbard.odata.core.QueryOptionsFactory;
 import org.springframework.web.util.UrlPathHelper;
 
 import javax.servlet.http.HttpServletRequest;
@@ -96,7 +95,7 @@ public abstract class PropertyRequestHandler extends AbstractSTARequestHandler {
         // Add select filter with filter only returning property
         filters.add(new SelectFilter(property));
         return serviceRepository.getEntityService(entity)
-            .getEntity(entityId, QueryOptionsFactory.createQueryOptions(filters));
+            .getEntity(entityId, QUERY_OPTIONS_FACTORY.createQueryOptions(filters));
     }
 
     /**
@@ -138,7 +137,7 @@ public abstract class PropertyRequestHandler extends AbstractSTARequestHandler {
             .getEntityByRelatedEntity(sourceId,
                                       sourceType,
                                       null,
-                                      QueryOptionsFactory.createQueryOptions(filters));
+                                      QUERY_OPTIONS_FACTORY.createQueryOptions(filters));
     }
 
     /**
