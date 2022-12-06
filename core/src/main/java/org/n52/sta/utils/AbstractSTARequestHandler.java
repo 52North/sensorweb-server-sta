@@ -60,9 +60,9 @@ public abstract class AbstractSTARequestHandler implements RequestUtils {
     protected QueryOptions decodeQueryString(HttpServletRequest request) {
         if (request.getQueryString() != null) {
             String decoded = URLDecoder.decode(request.getQueryString());
-            return QueryOptionsFactory.createQueryOptions(decoded);
+            return QUERY_OPTIONS_FACTORY.createQueryOptions(decoded);
         } else {
-            return QueryOptionsFactory.createDummy();
+            return QUERY_OPTIONS_FACTORY.createDummy();
         }
     }
 

@@ -96,7 +96,7 @@ public abstract class PropertyRequestHandler extends AbstractSTARequestHandler {
         // Add select filter with filter only returning property
         filters.add(new SelectFilter(property));
         return serviceRepository.getEntityService(entity)
-            .getEntity(entityId, QueryOptionsFactory.createQueryOptions(filters));
+            .getEntity(entityId, QUERY_OPTIONS_FACTORY.createQueryOptions(filters));
     }
 
     /**
@@ -138,7 +138,7 @@ public abstract class PropertyRequestHandler extends AbstractSTARequestHandler {
             .getEntityByRelatedEntity(sourceId,
                                       sourceType,
                                       null,
-                                      QueryOptionsFactory.createQueryOptions(filters));
+                                      QUERY_OPTIONS_FACTORY.createQueryOptions(filters));
     }
 
     /**

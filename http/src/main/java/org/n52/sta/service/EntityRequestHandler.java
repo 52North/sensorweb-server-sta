@@ -96,7 +96,7 @@ public abstract class EntityRequestHandler extends AbstractSTARequestHandler {
         // Overwrite select filter with filter only returning id
         filters.add(new SelectFilter(ID));
         return serviceRepository.getEntityService(entity)
-            .getEntity(entityId, QueryOptionsFactory.createQueryOptions(filters));
+            .getEntity(entityId, QUERY_OPTIONS_FACTORY.createQueryOptions(filters));
     }
 
     /**
@@ -153,6 +153,6 @@ public abstract class EntityRequestHandler extends AbstractSTARequestHandler {
             .getEntityByRelatedEntity(sourceId,
                                       sourceType,
                                       null,
-                                      QueryOptionsFactory.createQueryOptions(filters));
+                                      QUERY_OPTIONS_FACTORY.createQueryOptions(filters));
     }
 }

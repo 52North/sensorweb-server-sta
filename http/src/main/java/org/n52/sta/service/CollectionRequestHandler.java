@@ -97,7 +97,7 @@ public abstract class CollectionRequestHandler<T extends RequestUtils> extends A
         filters.add(new SelectFilter(ID));
         return serviceRepository
             .getEntityService(collectionName)
-            .getEntityCollection(QueryOptionsFactory.createQueryOptions(filters))
+            .getEntityCollection(QUERY_OPTIONS_FACTORY.createQueryOptions(filters))
             .setRequestURL(rootUrl + collectionName);
     }
 
@@ -163,7 +163,7 @@ public abstract class CollectionRequestHandler<T extends RequestUtils> extends A
         return serviceRepository.getEntityService(target)
             .getEntityCollectionByRelatedEntity(sourceId,
                                                 sourceType,
-                                                QueryOptionsFactory.createQueryOptions(filters))
+                                                QUERY_OPTIONS_FACTORY.createQueryOptions(filters))
             .setRequestURL(rootUrl + entity + "/" + target);
     }
 }
