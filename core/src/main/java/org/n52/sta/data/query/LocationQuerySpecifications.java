@@ -232,7 +232,7 @@ public class LocationQuerySpecifications extends EntityQuerySpecifications<Locat
                                                                 switched);
                     case StaConstants.PROP_ENCODINGTYPE:
                         Join<LocationEntity, FormatEntity> join =
-                            root.join(LocationEntity.PROPERTY_LOCATION_ENCODINT);
+                            root.join(LocationEntity.PROPERTY_LOCATION_ENCODING);
                         return handleDirectStringPropertyFilter(join.get(FormatEntity.FORMAT),
                                                                 propertyValue,
                                                                 operator,
