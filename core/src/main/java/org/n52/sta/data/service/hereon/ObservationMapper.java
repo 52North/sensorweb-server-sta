@@ -32,13 +32,10 @@ import org.joda.time.DateTime;
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.GeometryFactory;
 import org.locationtech.jts.geom.PrecisionModel;
-import org.n52.sensorweb.server.helgoland.adapters.connector.response.Geometry;
 import org.n52.sensorweb.server.helgoland.adapters.connector.response.MetadataFeature;
 import org.n52.series.db.beans.DataEntity;
 import org.n52.series.db.beans.GeometryEntity;
-import org.n52.series.db.beans.QuantityDataEntity;
 import org.n52.series.db.beans.TextDataEntity;
-import org.n52.series.db.beans.parameter.ParameterEntity;
 import org.n52.series.db.beans.parameter.observation.ObservationTextParameterEntity;
 import org.n52.shetland.oasis.odata.query.option.QueryOptions;
 import org.n52.shetland.util.DateTimeHelper;
@@ -51,17 +48,19 @@ import java.util.stream.Collectors;
 public class ObservationMapper {
 
     //TODO: do we need to set the EPSG dynamically?
-    private static final GeometryFactory geometryFactory =
-        new GeometryFactory(new PrecisionModel(PrecisionModel.FLOATING), 4326);
+    private static final GeometryFactory GEOMETRY_FACTORY =
+            new GeometryFactory(new PrecisionModel(PrecisionModel.FLOATING), 4326);
 
     static DataEntity<?> toDataEntity(MetadataFeature esriFeature) {
         //TODO: make this configurable via mapping file
         TextDataEntity dataEntity = new TextDataEntity();
 
         dataEntity.setId(Long.valueOf(esriFeature.getAttributes().getValue("objectid")));
-        dataEntity.setIdentifier(esriFeature.getAttributes().getValue("globalid"));
-        dataEntity.setStaIdentifier(esriFeature.getAttributes().getValue("globalid"));
-        dataEntity.setName(esriFeature.getAttributes().getValue("globalId"));
+
+        String globalId = esriFeature.getAttributes().getValue("globalid");
+        dataEntity.setIdentifier(globalId);
+        dataEntity.setStaIdentifier(globalId);
+        dataEntity.setName(globalId);
 
         Date samplingTime = getDate(esriFeature.getAttributes().getValue("date_time"));
         dataEntity.setSamplingTimeStart(samplingTime);
@@ -73,12 +72,12 @@ public class ObservationMapper {
         double lat = esriFeature.getGeometry().getX();
         double lon = esriFeature.getGeometry().getY();
         GeometryEntity geometryEntity = new GeometryEntity();
-        geometryEntity.setGeometry(geometryFactory.createPoint(new Coordinate(lat, lon)));
+        geometryEntity.setGeometry(GEOMETRY_FACTORY.createPoint(new Coordinate(lat, lon)));
         dataEntity.setGeometryEntity(geometryEntity);
 
         //TODO: read mapping and only add requested fields
         dataEntity.setParameters(esriFeature.getAttributes().getAdditionalProperties().entrySet().stream().map(
-                        (entry) -> {
+                        entry -> {
                             ObservationTextParameterEntity param = new ObservationTextParameterEntity();
                             param.setName(entry.getKey());
                             param.setValue(String.valueOf(entry.getValue()));
