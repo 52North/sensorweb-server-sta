@@ -28,27 +28,19 @@
 
 package org.n52.sta.plus.persistence.repositories;
 
-import java.util.Set;
-
-import org.n52.series.db.beans.DataEntity;
+import org.n52.series.db.beans.parameter.relation.RelationParameterEntity;
 import org.n52.shetland.ogc.sta.StaConstants;
-import org.n52.sta.data.old.repositories.IdentifierRepository;
-import org.n52.sta.data.old.repositories.StaIdentifierRepository;
 import org.springframework.context.annotation.Profile;
+import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
-@Transactional
-@Profile(StaConstants.STAPLUS)
+/**
+ * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
+ */
 @Repository
-public interface StaPlusObservationRepository<T extends DataEntity< ? >>
-        extends
-        IdentifierRepository<T, Long>,
-        StaIdentifierRepository<T> {
+@Profile(StaConstants.STAPLUS)
+@Transactional
+public interface ObservationRelationParameterRepository extends JpaRepository<RelationParameterEntity, Long> {
 
-    DataEntity<T> findFirstByDataset_idOrderBySamplingTimeStartAsc(Long datasetIdentifier);
-
-    DataEntity<T> findFirstByDataset_idOrderBySamplingTimeEndDesc(Long datasetIdentifier);
-
-    void deleteAllByDatasetIdIn(Set<Long> datasetId);
 }

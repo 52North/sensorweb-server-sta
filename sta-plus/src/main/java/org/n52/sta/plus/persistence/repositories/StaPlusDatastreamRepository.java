@@ -28,7 +28,7 @@
 
 package org.n52.sta.plus.persistence.repositories;
 
-import org.n52.series.db.beans.sta.plus.StaPlusDataset;
+import org.n52.series.db.beans.DatasetEntity;
 import org.n52.shetland.ogc.sta.StaConstants;
 import org.n52.sta.data.old.repositories.AggregateRepository;
 import org.n52.sta.data.old.repositories.NameRepository;
@@ -44,7 +44,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Profile(StaConstants.STAPLUS)
 public interface StaPlusDatastreamRepository
         extends
-        NameRepository<StaPlusDataset>,
-        AggregateRepository<StaPlusDataset> {
+        NameRepository<DatasetEntity>,
+        AggregateRepository<DatasetEntity> {
 
 }

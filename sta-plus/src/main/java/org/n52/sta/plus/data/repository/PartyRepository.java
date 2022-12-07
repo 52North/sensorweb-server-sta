@@ -28,7 +28,7 @@
 
 package org.n52.sta.plus.data.repository;
 
-import org.n52.series.db.beans.sta.plus.PartyEntity;
+import org.n52.series.db.beans.sta.PartyEntity;
 import org.n52.sta.data.repositories.BaseRepository;
 import org.springframework.stereotype.Repository;
 

@@ -34,9 +34,8 @@ import java.util.Set;
 
 import org.n52.series.db.beans.DataEntity;
 import org.n52.series.db.beans.DatasetEntity;
-import org.n52.series.db.beans.sta.plus.RelationEntity;
-import org.n52.series.db.beans.sta.plus.StaPlusDataEntity;
-import org.n52.series.db.beans.sta.plus.StaPlusQuantityDataEntity;
+import org.n52.series.db.beans.QuantityDataEntity;
+import org.n52.series.db.beans.sta.RelationEntity;
 import org.n52.shetland.ogc.om.OmConstants;
 import org.n52.shetland.ogc.sta.exception.STACRUDException;
 import org.n52.sta.data.old.service.ObservationService;
@@ -58,7 +57,7 @@ public class CitSciObservationService extends ObservationService {
         switch (dataset.getOMObservationType()
                        .getFormat()) {
             case OmConstants.OBS_TYPE_MEASUREMENT:
-                StaPlusQuantityDataEntity quantityObservationEntity = new StaPlusQuantityDataEntity();
+                QuantityDataEntity quantityObservationEntity = new QuantityDataEntity();
                 if (value.equals("NaN") || value.equals("Inf") || value.equals("-Inf")) {
                     quantityObservationEntity.setValue(null);
                 } else {
@@ -88,14 +87,13 @@ public class CitSciObservationService extends ObservationService {
     @Override
     protected DataEntity< ? > saveObservation(DataEntity< ? > observation, DatasetEntity dataset)
             throws STACRUDException {
-        StaPlusDataEntity< ? > obs = (StaPlusDataEntity< ? >) observation;
 
-        if (obs.getSubjects() != null) {
+        if (observation.getSubjects() != null) {
             Set<RelationEntity> subjects = new HashSet<>();
-            for (RelationEntity subject : obs.getSubjects()) {
+            for (RelationEntity subject : observation.getSubjects()) {
                 subjects.add(getObservationRelationService().createOrUpdate(subject));
             }
-            obs.setSubjects(subjects);
+            observation.setSubjects(subjects);
         }
 
         return super.saveObservation(observation, dataset);
@@ -106,13 +104,12 @@ public class CitSciObservationService extends ObservationService {
             DataEntity< ? > observation,
             DatasetEntity dataset)
             throws STACRUDException {
-        StaPlusDataEntity< ? > plusData = (StaPlusDataEntity< ? >) super.fillConcreteObservationType(data,
+       DataEntity< ? > plusData = super.fillConcreteObservationType(data,
                                                                                                      observation,
                                                                                                      dataset);
-        StaPlusDataEntity< ? > plusObservation = (StaPlusDataEntity< ? >) observation;
-        plusData.setSubjects(plusObservation.getSubjects());
-        plusData.setObjects(plusObservation.getObjects());
-        plusData.setGroups(plusObservation.getGroups());
+        plusData.setSubjects(observation.getSubjects());
+        plusData.setObjects(observation.getObjects());
+        plusData.setGroups(observation.getGroups());
         return data;
     }
 

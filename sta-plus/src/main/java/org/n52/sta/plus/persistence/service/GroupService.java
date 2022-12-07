@@ -37,9 +37,9 @@ import java.util.stream.Collectors;
 import javax.persistence.EntityManager;
 
 import org.n52.janmayen.http.HTTPStatus;
-import org.n52.series.db.beans.parameter.observationgroup.ObservationGroupParameterEntity;
-import org.n52.series.db.beans.sta.plus.GroupEntity;
-import org.n52.series.db.beans.sta.plus.RelationEntity;
+import org.n52.series.db.beans.parameter.group.GroupParameterEntity;
+import org.n52.series.db.beans.sta.GroupEntity;
+import org.n52.series.db.beans.sta.RelationEntity;
 import org.n52.shetland.filter.ExpandFilter;
 import org.n52.shetland.filter.ExpandItem;
 import org.n52.shetland.ogc.sta.StaConstants;
@@ -221,12 +221,12 @@ public class GroupService
 
                     if (obsGroup.getParameters() != null) {
                         GroupEntity finalObsGroup = obsGroup;
-                        Set<ObservationGroupParameterEntity> parameters = obsGroup.getParameters()
+                        Set<GroupParameterEntity> parameters = obsGroup.getParameters()
                                                                                   .stream()
-                                                                                  .filter(o -> o instanceof ObservationGroupParameterEntity)
+                                                                                  .filter(o -> o instanceof GroupParameterEntity)
                                                                                   .map(t -> {
-                                                                                      ((ObservationGroupParameterEntity) t).setObsGroup(finalObsGroup);
-                                                                                      return (ObservationGroupParameterEntity) t;
+                                                                                      ((GroupParameterEntity) t).setGroup(finalObsGroup);
+                                                                                      return (GroupParameterEntity) t;
                                                                                   })
                                                                                   .collect(Collectors.toSet());
                         parameterRepository.saveAll(parameters);
@@ -292,16 +292,16 @@ public class GroupService
                                                          .hashCode()))) {
                 parameterRepository.saveAll(toMerge.getParameters()
                                                    .stream()
-                                                   .filter(o -> o instanceof ObservationGroupParameterEntity)
+                                                   .filter(o -> o instanceof GroupParameterEntity)
                                                    .map(t -> {
-                                                       ((ObservationGroupParameterEntity) t).setObsGroup(existing);
-                                                       return (ObservationGroupParameterEntity) t;
+                                                       ((GroupParameterEntity) t).setGroup(existing);
+                                                       return (GroupParameterEntity) t;
                                                    })
                                                    .collect(Collectors.toSet()));
                 existing.getParameters()
                         .stream()
-                        .filter(o -> o instanceof ObservationGroupParameterEntity)
-                        .map(o -> (ObservationGroupParameterEntity) o)
+                        .filter(o -> o instanceof GroupParameterEntity)
+                        .map(o -> (GroupParameterEntity) o)
                         .forEach(parameterRepository::delete);
                 existing.setParameters(toMerge.getParameters());
             }

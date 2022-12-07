@@ -60,8 +60,8 @@ import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.servlet.HandlerMapping;
 import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
+import org.springframework.web.util.UrlPathHelper;
 
 @RestController
 @ConditionalOnProperty(name = "server.feature.http.writable", havingValue = "true", matchIfMissing = false)
@@ -160,7 +160,7 @@ public class WriteController {
     }
 
     private StaPath<? extends Identifiable> parsePath(HttpServletRequest request) throws STAInvalidUrlException {
-        String lookupPath = (String) request.getAttribute(HandlerMapping.LOOKUP_PATH);
+        String lookupPath = (String) request.getAttribute(UrlPathHelper.PATH_ATTRIBUTE);
         StaPath<? extends Identifiable> path = pathFactory.parse(lookupPath);
         SelectPath.PathType pathType = path.getPathType();
         if (pathType == SelectPath.PathType.property) {
