@@ -4,7 +4,7 @@
     <parent>
         <groupId>org.n52.sensorweb-server.sta</groupId>
         <artifactId>sta-parent</artifactId>
-        <version>3.3.3-HEREON</version>
+        <version>3.3.4-HEREON-SNAPSHOT</version>
     </parent>
     <artifactId>sta-http</artifactId>
     <packaging>jar</packaging>
