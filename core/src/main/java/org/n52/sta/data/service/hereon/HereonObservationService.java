@@ -31,6 +31,7 @@ package org.n52.sta.data.service.hereon;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.n52.sensorweb.server.helgoland.adapters.connector.hereon.HereonConfig;
+import org.n52.sensorweb.server.helgoland.adapters.connector.mapping.Observation;
 import org.n52.sensorweb.server.helgoland.adapters.connector.response.ErrorResponse;
 import org.n52.sensorweb.server.helgoland.adapters.connector.response.MetadataResponse;
 import org.n52.sensorweb.server.helgoland.adapters.web.ArcgisRestHttpClient;
@@ -74,12 +75,16 @@ public class HereonObservationService extends ObservationService {
 
     private final ObjectMapper OM = new ObjectMapper();
     private final String not_supported = "not supported for HEREON backend!";
+    private final Observation observationMapping;
+    private final String dataServiceUrl;
     private Map<String, ArcgisRestHttpClient> featureServiceConnectors = new HashMap<>(5);
     private final HereonConfig config;
     private final QueryOptionsFactory QOF = new QueryOptionsFactory();
 
     public HereonObservationService(HereonConfig config) {
         this.config = config;
+        this.observationMapping = config.getMapping().getObservation();
+        this.dataServiceUrl = config.getMapping().getGeneral().getDataServiceUrl();
     }
 
     @Override
@@ -116,14 +121,14 @@ public class HereonObservationService extends ObservationService {
 
                 String url_data_service = null;
                 for (ParameterEntity<?> parameterEntity : dataset.getParameters()) {
-                    if (parameterEntity.getName().equals("url_data_service")) {
+                    if (parameterEntity.getName().equals(dataServiceUrl)) {
                         url_data_service = String.valueOf(parameterEntity.getValue());
                         break;
                     }
                 }
                 if (url_data_service == null) {
                     throw new STACRUDException("Could not find observations. " +
-                            "Datastream has no linked url_data_service!");
+                            "Datastream has no linked " + dataServiceUrl);
                 }
 
                 try {
@@ -144,7 +149,7 @@ public class HereonObservationService extends ObservationService {
                     MetadataResponse responseCollection = encodeResponse(response.getEntity(), MetadataResponse.class);
 
                     return new CollectionWrapper(responseCollection.getFeatures().size(),
-                            ObservationMapper.toDataEntities(responseCollection.getFeatures()),
+                            ObservationMapper.toDataEntities(observationMapping, responseCollection.getFeatures()),
                             responseCollection.getExceededTransferLimit());
                 } catch (ProxyHttpClientException | DecodingException | JsonProcessingException e) {
                     throw new STACRUDException("error retrieving observations", e);

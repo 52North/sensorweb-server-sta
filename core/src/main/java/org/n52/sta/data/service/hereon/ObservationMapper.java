@@ -26,12 +26,14 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
+
 package org.n52.sta.data.service.hereon;
 
 import org.joda.time.DateTime;
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.GeometryFactory;
 import org.locationtech.jts.geom.PrecisionModel;
+import org.n52.sensorweb.server.helgoland.adapters.connector.mapping.Observation;
 import org.n52.sensorweb.server.helgoland.adapters.connector.response.MetadataFeature;
 import org.n52.series.db.beans.DataEntity;
 import org.n52.series.db.beans.GeometryEntity;
@@ -51,8 +53,7 @@ public class ObservationMapper {
     private static final GeometryFactory GEOMETRY_FACTORY =
             new GeometryFactory(new PrecisionModel(PrecisionModel.FLOATING), 4326);
 
-    static DataEntity<?> toDataEntity(MetadataFeature esriFeature) {
-        //TODO: make this configurable via mapping file
+    static DataEntity<?> toDataEntity(Observation mapping, MetadataFeature esriFeature) {
         TextDataEntity dataEntity = new TextDataEntity();
 
         dataEntity.setId(Long.valueOf(esriFeature.getAttributes().getValue("objectid")));
@@ -62,12 +63,19 @@ public class ObservationMapper {
         dataEntity.setStaIdentifier(globalId);
         dataEntity.setName(globalId);
 
-        Date samplingTime = getDate(esriFeature.getAttributes().getValue("date_time"));
+        Date samplingTime = getDate(esriFeature.getAttributes().getValue(mapping.getPhenomenonTime()));
         dataEntity.setSamplingTimeStart(samplingTime);
         dataEntity.setSamplingTimeEnd(samplingTime);
 
-        String measure_val = esriFeature.getAttributes().getValue("measure_val");
+        String measure_val = esriFeature.getAttributes().getValue(mapping.getResult());
         dataEntity.setValue(measure_val);
+
+        Date validTime = getDate(esriFeature.getAttributes().getValue(mapping.getValidTime()));
+        dataEntity.setValidTimeStart(validTime);
+        dataEntity.setValidTimeEnd(validTime);
+
+        Date resultTime = getDate(esriFeature.getAttributes().getValue(mapping.getResultTime()));
+        dataEntity.setResultTime(resultTime);
 
         double lat = esriFeature.getGeometry().getX();
         double lon = esriFeature.getGeometry().getY();
@@ -75,26 +83,28 @@ public class ObservationMapper {
         geometryEntity.setGeometry(GEOMETRY_FACTORY.createPoint(new Coordinate(lat, lon)));
         dataEntity.setGeometryEntity(geometryEntity);
 
-        //TODO: read mapping and only add requested fields
-        dataEntity.setParameters(esriFeature.getAttributes().getAdditionalProperties().entrySet().stream().map(
-                        entry -> {
-                            ObservationTextParameterEntity param = new ObservationTextParameterEntity();
-                            param.setName(entry.getKey());
-                            param.setValue(String.valueOf(entry.getValue()));
-                            return param;
-                        }
-                ).collect(Collectors.toSet())
+        dataEntity.setParameters(esriFeature.getAttributes().getAdditionalProperties().entrySet().stream()
+                                            .filter(entry -> mapping.getParameters().contains(entry.getKey()))
+                                            .map(
+                                                    entry -> {
+                                                        ObservationTextParameterEntity param =
+                                                                new ObservationTextParameterEntity();
+                                                        param.setName(entry.getKey());
+                                                        param.setValue(String.valueOf(entry.getValue()));
+                                                        return param;
+                                                    }
+                                            ).collect(Collectors.toSet())
         );
 
         return dataEntity;
     }
 
-    public static List<ElementWithQueryOptions> toDataEntities(List<MetadataFeature> features) {
+    public static List<ElementWithQueryOptions> toDataEntities(Observation mapping, List<MetadataFeature> features) {
         QueryOptions qo = new QueryOptionsFactory().createDummy();
         return features.stream()
-                .map(ObservationMapper::toDataEntity)
-                .map(entity -> ElementWithQueryOptions.from(entity, qo))
-                .collect(Collectors.toList());
+                       .map(feature -> toDataEntity(mapping, feature))
+                       .map(entity -> ElementWithQueryOptions.from(entity, qo))
+                       .collect(Collectors.toList());
     }
 
     private static Date getDate(String time) {
