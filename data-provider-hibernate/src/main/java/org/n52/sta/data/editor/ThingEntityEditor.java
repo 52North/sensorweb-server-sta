@@ -35,7 +35,6 @@ import java.util.stream.Collectors;
 
 import org.n52.janmayen.stream.Streams;
 import org.n52.series.db.beans.PlatformEntity;
-import org.n52.shetland.ogc.sta.StaConstants;
 import org.n52.sta.api.EntityServiceLookup;
 import org.n52.sta.api.entity.Datastream;
 import org.n52.sta.api.entity.HistoricalLocation;
