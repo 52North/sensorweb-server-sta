@@ -32,4 +32,7 @@ public interface Identifiable {
 
     String getId();
 
+    default boolean hasId() {
+        return getId() != null && !getId().isEmpty();
+    }
 }
