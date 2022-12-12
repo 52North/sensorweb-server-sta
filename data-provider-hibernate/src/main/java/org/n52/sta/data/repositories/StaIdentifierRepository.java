@@ -28,9 +28,6 @@
 
 package org.n52.sta.data.repositories;
 
-import java.util.Optional;
-
-import org.n52.sta.data.old.repositories.EntityGraphRepository;
 import org.springframework.data.repository.NoRepositoryBean;
 
 /**
@@ -40,8 +37,6 @@ import org.springframework.data.repository.NoRepositoryBean;
 public interface StaIdentifierRepository<T> {
 
     boolean existsByStaIdentifier(String identifier);
-
-    Optional<T> findByStaIdentifier(String identifier, EntityGraphRepository.FetchGraph... relatedEntities);
 
     void deleteByStaIdentifier(String identifier);
 
