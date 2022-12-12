@@ -29,36 +29,17 @@
 package org.n52.sta.config;
 
 import org.n52.shetland.ogc.sta.StaConstants;
-import org.n52.sta.data.old.common.service.CommonEntityServiceRepository;
-import org.n52.sta.data.old.service.ObservationService;
-import org.n52.sta.plus.persistence.service.CitSciEntityServiceRepository;
-import org.n52.sta.plus.persistence.service.CitSciObservationService;
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Primary;
 import org.springframework.context.annotation.Profile;
 
 /**
- * Loads an alternate implementations for {@link ObservationService} and
- * {@link CommonEntityServiceRepository}.
+ * May load/overwrite Beans used when running in STAPlus Profile
  *
- * @see CitSciObservationService
- * @see CitSciEntityServiceRepository
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
  */
 @Configuration
 @Profile(StaConstants.STAPLUS)
 public class StaPlusConfiguration {
 
-    @Bean
-    @Primary
-    public ObservationService getObservationService() {
-        return new CitSciObservationService();
-    }
 
-    @Bean
-    @Primary
-    public CitSciEntityServiceRepository getEntityServiceRepository() {
-        return new CitSciEntityServiceRepository();
-    }
 }

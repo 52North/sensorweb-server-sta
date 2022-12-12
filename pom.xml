@@ -32,7 +32,7 @@
         <!--        <module>mqtt</module>-->
         <!--        <module>webapp</module>-->
         <!--        <module>data-provider</module>-->
-        <module>data-provider-ufz</module>
+        <!--        <module>data-provider-ufz</module>-->
         <module>data-provider-hibernate</module>
         <module>sta-plus</module>
     </modules>

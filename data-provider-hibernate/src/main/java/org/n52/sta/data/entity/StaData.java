@@ -44,9 +44,9 @@ import org.n52.series.db.beans.parameter.ParameterEntity;
 import org.n52.shetland.ogc.gml.time.Time;
 import org.n52.sta.api.entity.Identifiable;
 import org.n52.sta.config.EntityPropertyMapping;
-import org.n52.sta.utils.TimeUtil;
+import org.n52.sta.api.utils.TimeUtil;
 
-public class StaData<T extends DescribableEntity> implements Identifiable, TimeUtil {
+public class StaData<T extends DescribableEntity> implements Identifiable {
 
     protected final T data;
 
@@ -69,16 +69,16 @@ public class StaData<T extends DescribableEntity> implements Identifiable, TimeU
     }
 
     protected Time toTime(Date time) {
-        DateTime dateTime = createDateTime(time);
-        return createTime(dateTime);
+        DateTime dateTime = TimeUtil.createDateTime(time);
+        return TimeUtil.createTime(dateTime);
     }
 
     protected Time toTimeInterval(Date start, Date optionalEnd) {
         Optional<DateTime> begin = Optional.ofNullable(start)
-                                           .map(this::createDateTime);
+                                           .map(TimeUtil::createDateTime);
         Optional<DateTime> end = Optional.ofNullable(optionalEnd)
-                                         .map(this::createDateTime);
-        return begin.map(b -> createTime(b, end.orElse(null)))
+                                         .map(TimeUtil::createDateTime);
+        return begin.map(b -> TimeUtil.createTime(b, end.orElse(null)))
                     .orElse(null);
     }
 

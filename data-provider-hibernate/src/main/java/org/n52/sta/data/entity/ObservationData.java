@@ -42,9 +42,9 @@ import org.n52.sta.api.entity.Datastream;
 import org.n52.sta.api.entity.FeatureOfInterest;
 import org.n52.sta.api.entity.Observation;
 import org.n52.sta.config.EntityPropertyMapping;
-import org.n52.sta.utils.TimeUtil;
+import org.n52.sta.api.utils.TimeUtil;
 
-public class ObservationData extends StaData<DataEntity< ? >> implements Observation, TimeUtil {
+public class ObservationData extends StaData<DataEntity< ? >> implements Observation {
 
     public ObservationData(DataEntity< ? > dataEntity, EntityPropertyMapping parameterProperties) {
         super(dataEntity, Optional.of(parameterProperties));
@@ -55,10 +55,10 @@ public class ObservationData extends StaData<DataEntity< ? >> implements Observa
         Date samplingTimeStart = data.getSamplingTimeStart();
         Date samplingTimeEnd = data.getSamplingTimeEnd();
         Optional<DateTime> sStart = Optional.ofNullable(samplingTimeStart)
-                                            .map(this::createDateTime);
+                                            .map(TimeUtil::createDateTime);
         Optional<DateTime> sEnd = Optional.ofNullable(samplingTimeEnd)
-                                          .map(this::createDateTime);
-        return sStart.map(start -> createTime(start, sEnd.orElse(null)))
+                                          .map(TimeUtil::createDateTime);
+        return sStart.map(start -> TimeUtil.createTime(start, sEnd.orElse(null)))
                      .orElse(null);
     }
 

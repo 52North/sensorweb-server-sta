@@ -38,6 +38,7 @@ import org.n52.shetland.ogc.gml.time.Time;
 import org.n52.sta.api.entity.HistoricalLocation;
 import org.n52.sta.api.entity.Location;
 import org.n52.sta.api.entity.Thing;
+import org.n52.sta.api.utils.TimeUtil;
 import org.n52.sta.config.EntityPropertyMapping;
 
 public class HistoricalLocationData extends StaData<HistoricalLocationEntity> implements HistoricalLocation {
@@ -50,8 +51,8 @@ public class HistoricalLocationData extends StaData<HistoricalLocationEntity> im
     @Override
     public Time getTime() {
         Date time = data.getTime();
-        DateTime dateTime = createDateTime(time);
-        return createTime(dateTime);
+        DateTime dateTime = TimeUtil.createDateTime(time);
+        return TimeUtil.createTime(dateTime);
     }
 
     @Override
