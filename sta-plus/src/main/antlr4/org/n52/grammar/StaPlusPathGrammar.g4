@@ -16,11 +16,12 @@
  */
 
 /* ----------------------------------------------------------------------------
- * Grammar for parsing OGC SensorthingsAPI 1.1 URIs.
+ * Grammar for parsing STAPlus URIs
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
  * ----------------------------------------------------------------------------
  */
 parser grammar StaPlusPathGrammar;
+
 
 import StaPathGrammar;
 
@@ -55,14 +56,92 @@ resource
    | relations
    ;
 
-party: PARTY;
-project: PROJECT;
-license: LICENSE;
-group: GROUP;
-relation: RELATION;
+party
+  : PARTY
+  | PARTIES identifier (SLASH (group | groups | datastream | datastreams | thing | things | partyProperty))?
+  ;
 
-parties: PARTIES;
-projects: PROJECTS;
-licenses: LICENSES;
-groups: GROUPS;
-relations: RELATIONS;
+project
+  : PROJECT
+  | PROJECTS identifier (SLASH (datastream | datastreams | projectProperty))?
+  ;
+
+license
+  : LICENSE
+  | LICENSES identifier (SLASH (group | groups | datastream | datastreams | licenseProperty))?
+  ;
+
+group
+  : GROUP
+  | GROUPS identifier (SLASH (party | parties | license | licenses | relation | relations | observation | observations | groupProperty))?
+  ;
+
+
+relation
+  : RELATION
+  | RELATIONS identifier (SLASH (group | groups | SUBJECT | OBJECT | relationProperty))?
+  ;
+
+////////////////////////////////////////////////////////////////
+
+// properties
+
+////////////////////////////////////////////////////////////////
+
+
+partyProperty
+  : (PROP_ID | PROP_NAME | PROP_DESCRIPTION | PROP_AUTH_ID | PROP_ROLE | PROP_DISPLAY_NAME) (SLASH VALUE)?
+  ;
+
+projectProperty
+  : (PROP_ID | PROP_NAME | PROP_DESCRIPTION | PROP_CLASSIFICATION | PROP_TERMS_OF_USE | PROP_PRIVACY_POLICY | PROP_CREATIONTIME | PROP_RUNTIME | PROP_URL | PROP_PROPERTIES) (SLASH VALUE)?
+  ;
+
+licenseProperty
+  : (PROP_ID | PROP_NAME | PROP_DESCRIPTION | PROP_DEFINITION | PROP_LOGO | PROP_PROPERTIES) (SLASH VALUE)?
+  ;
+
+groupProperty
+  : (PROP_ID | PROP_NAME | PROP_DESCRIPTION | PROP_PURPOSE | PROP_RUNTIME | PROP_CREATIONTIME |PROP_PROPERTIES) (SLASH VALUE)?
+  ;
+
+relationProperty
+  : (PROP_ID | PROP_DESCRIPTION | PROP_EXTERNAL_OBJECT | PROP_PROPERTIES) (SLASH VALUE)?
+  ;
+
+////////////////////////////////////////////////////////////////
+
+// Collections
+
+////////////////////////////////////////////////////////////////
+
+
+parties
+  : PARTIES
+  ;
+
+projects
+  : PROJECTS
+  ;
+
+licenses
+  : LICENSES
+  ;
+
+groups
+  : GROUPS
+  ;
+
+relations
+  : RELATIONS
+  ;
+
+////////////////////////////////////////////////////////////////
+
+// General
+
+////////////////////////////////////////////////////////////////
+
+identifier
+   : IDENTIFIER
+   ;

@@ -49,3 +49,6 @@ PROP_URL: 'url';
 PROP_LOGO: 'logo';
 PROP_PURPOSE: 'purpose';
 PROP_EXTERNAL_OBJECT: 'externalObject';
+
+PROP_SUBJECT: 'subject';
+PROP_OBJECT: 'object';
