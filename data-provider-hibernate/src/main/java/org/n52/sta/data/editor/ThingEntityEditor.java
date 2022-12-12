@@ -35,6 +35,7 @@ import java.util.stream.Collectors;
 
 import org.n52.janmayen.stream.Streams;
 import org.n52.series.db.beans.PlatformEntity;
+import org.n52.shetland.ogc.sta.StaConstants;
 import org.n52.sta.api.EntityServiceLookup;
 import org.n52.sta.api.entity.Datastream;
 import org.n52.sta.api.entity.HistoricalLocation;
@@ -95,15 +96,17 @@ public class ThingEntityEditor extends DatabaseEntityAdapter<PlatformEntity>
     public ThingData save(Thing entity) throws EditorException {
         Objects.requireNonNull(entity, "entity must not be null");
 
-        String staIdentifier = entity.getId();
-        EntityService<Thing> thingService = getService(Thing.class);
-        if (thingService.exists(staIdentifier)) {
-            throw new EditorException("Thing already exists with Id '" + staIdentifier + "'");
+        if (entity.hasId()) {
+            String staIdentifier = entity.getId();
+            EntityService<Thing> thingService = getService(Thing.class);
+            if (thingService.exists(staIdentifier)) {
+                throw new EditorException("Thing already exists with Id '" + staIdentifier + "'");
+            }
         }
 
-        String id = entity.getId() == null
-                ? generateId()
-                : entity.getId();
+        String id = entity.hasId()
+                ? entity.getId()
+                : generateId();
         PlatformEntity platformEntity = new PlatformEntity();
         platformEntity.setIdentifier(id);
         platformEntity.setStaIdentifier(id);
