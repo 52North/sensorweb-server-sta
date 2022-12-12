@@ -84,9 +84,11 @@ public class ThingEntityEditor extends DatabaseEntityAdapter<PlatformEntity>
 
     @Override
     public ThingData getOrSave(Thing entity) throws EditorException {
-        Optional<PlatformEntity> stored = getEntity(entity.getId());
-        return stored.map(e -> new ThingData(e, Optional.empty()))
-                     .orElseGet(() -> save(entity));
+        if (entity != null) {
+            Optional<PlatformEntity> stored = getEntity(entity.getId());
+            return stored.map(e -> new ThingData(e, Optional.empty())).orElseGet(() -> save(entity));
+        }
+        throw new EditorException("The Thing to get or save is NULL!");
     }
 
     @Override
