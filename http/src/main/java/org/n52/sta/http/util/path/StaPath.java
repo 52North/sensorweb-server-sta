@@ -80,7 +80,7 @@ public class StaPath<T extends Identifiable> implements SelectPath<T> {
         return pathSegments;
     }
 
-    void addPathSegment(PathSegment pathSegment) {
+    public void addPathSegment(PathSegment pathSegment) {
         if (pathSegment != null) {
             pathSegments.add(pathSegment);
         }

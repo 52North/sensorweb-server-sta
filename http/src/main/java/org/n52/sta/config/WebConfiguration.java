@@ -30,10 +30,11 @@ package org.n52.sta.config;
 
 import javax.servlet.Filter;
 
+import org.n52.grammar.StaPathGrammar;
 import org.n52.sta.http.util.CorsFilter;
 import org.n52.sta.http.util.CustomUrlPathHelper;
-import org.n52.sta.http.util.path.DefaultStaPathFactory;
 import org.n52.sta.http.util.path.PathFactory;
+import org.n52.sta.http.util.path.StaPathVisitor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -60,7 +61,7 @@ public class WebConfiguration implements WebMvcConfigurer {
 
     @Bean
     public PathFactory pathFactory() {
-        return new DefaultStaPathFactory();
+        return new PathFactory(StaPathGrammar::new, StaPathVisitor::new);
     }
 
     @Bean

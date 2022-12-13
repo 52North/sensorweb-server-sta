@@ -28,16 +28,41 @@
 
 package org.n52.sta.http.util.path;
 
-import org.antlr.v4.runtime.BaseErrorListener;
-import org.antlr.v4.runtime.RecognitionException;
-import org.antlr.v4.runtime.Recognizer;
-import org.antlr.v4.runtime.Vocabulary;
+import org.antlr.v4.runtime.*;
+import org.antlr.v4.runtime.tree.ParseTreeVisitor;
+import org.n52.grammar.StaPathLexer;
 import org.n52.shetland.ogc.sta.exception.STAInvalidUrlException;
 import org.n52.sta.api.entity.Identifiable;
 
-public abstract class PathFactory {
+import java.lang.reflect.Method;
+import java.util.function.Function;
+import java.util.function.Supplier;
 
-    public abstract StaPath< ? extends Identifiable> parse(String url) throws STAInvalidUrlException;
+public class PathFactory {
+
+    private final Function<TokenStream, Parser> parser;
+    private final Supplier<ParseTreeVisitor<StaPath<?>>> visitor;
+
+    public PathFactory(Function<TokenStream, Parser> parser, Supplier<ParseTreeVisitor<StaPath<?>>> visitor) {
+        this.parser = parser;
+        this.visitor = visitor;
+    }
+
+    public StaPath< ? extends Identifiable> parse(String url) throws STAInvalidUrlException {
+        CodePointCharStream charStream = CharStreams.fromString(url.trim());
+        Lexer lexer = new StaPathLexer(charStream);
+        TokenStream tokenStream = new CommonTokenStream(lexer);
+        replaceErrorListener(lexer);
+        Parser grammar = parser.apply(tokenStream);
+
+        try {
+            Method firstRuleMethod = grammar.getClass()
+                    .getDeclaredMethod("path");
+            return ((ParserRuleContext) firstRuleMethod.invoke(grammar)).accept(visitor.get());
+        } catch (Exception e) {
+            throw new STAInvalidUrlException("Invalid URL: " + url);
+        }
+    }
 
     protected void replaceErrorListener(Recognizer< ? , ? > recognizer) {
         recognizer.removeErrorListeners();
