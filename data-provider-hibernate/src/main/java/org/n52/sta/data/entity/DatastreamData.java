@@ -28,18 +28,25 @@
 
 package org.n52.sta.data.entity;
 
-import java.util.Date;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
-
 import org.locationtech.jts.geom.Geometry;
 import org.n52.series.db.beans.AbstractDatasetEntity;
 import org.n52.series.db.beans.FormatEntity;
 import org.n52.series.db.beans.UnitEntity;
 import org.n52.shetland.ogc.gml.time.Time;
-import org.n52.sta.api.entity.*;
+import org.n52.sta.api.entity.Datastream;
+import org.n52.sta.api.entity.License;
+import org.n52.sta.api.entity.Observation;
+import org.n52.sta.api.entity.ObservedProperty;
+import org.n52.sta.api.entity.Party;
+import org.n52.sta.api.entity.Project;
+import org.n52.sta.api.entity.Sensor;
+import org.n52.sta.api.entity.Thing;
 import org.n52.sta.config.EntityPropertyMapping;
+
+import java.util.Date;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
 
 public class DatastreamData extends StaData<AbstractDatasetEntity> implements Datastream {
 
@@ -117,8 +124,8 @@ public class DatastreamData extends StaData<AbstractDatasetEntity> implements Da
     }
 
     @Override
-    public Set<Project> getProjects() {
-        return toSet(data.getProject(), projectEntity -> new ProjectData(projectEntity, propertyMapping));
+    public Project getProject() {
+        return new ProjectData(data.getProject(), propertyMapping);
     }
 
     @Override

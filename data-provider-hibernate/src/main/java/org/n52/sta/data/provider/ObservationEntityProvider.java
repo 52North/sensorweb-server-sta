@@ -28,14 +28,11 @@
 
 package org.n52.sta.data.provider;
 
-import java.util.Objects;
-import java.util.Optional;
-
 import org.n52.series.db.beans.DataEntity;
 import org.n52.shetland.oasis.odata.query.option.QueryOptions;
 import org.n52.sta.api.EntityPage;
-import org.n52.sta.api.exception.ProviderException;
 import org.n52.sta.api.entity.Observation;
+import org.n52.sta.api.exception.ProviderException;
 import org.n52.sta.api.path.Request;
 import org.n52.sta.config.EntityPropertyMapping;
 import org.n52.sta.data.StaEntityPage;
@@ -47,6 +44,9 @@ import org.n52.sta.data.support.ObservationGraphBuilder;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
+
+import java.util.Objects;
+import java.util.Optional;
 
 public class ObservationEntityProvider extends BaseEntityProvider<Observation> {
 
@@ -86,7 +86,7 @@ public class ObservationEntityProvider extends BaseEntityProvider<Observation> {
     private Optional<Observation> getEntity(Specification<DataEntity> spec,
             ObservationGraphBuilder graphBuilder) {
         Optional<DataEntity> platform = observationRepository.findOne(spec, graphBuilder);
-        return platform.map(entity -> new ObservationData(entity, propertyMapping));
+        return platform.map(entity -> new ObservationData(entity, Optional.of(propertyMapping)));
     }
 
     @Override
@@ -99,7 +99,8 @@ public class ObservationEntityProvider extends BaseEntityProvider<Observation> {
                 : ObservationGraphBuilder.createWith(options);
         Specification<DataEntity> spec = rootSpecification.buildSpecification(request);
         Page<DataEntity> results = observationRepository.findAll(spec, pageable, graphBuilder);
-        return new StaEntityPage<>(Observation.class, results, data -> new ObservationData(data, propertyMapping));
+        return new StaEntityPage<>(Observation.class, results,
+                data -> new ObservationData(data, Optional.of(propertyMapping)));
     }
 
 }

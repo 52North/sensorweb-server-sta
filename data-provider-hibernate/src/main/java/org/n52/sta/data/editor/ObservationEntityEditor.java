@@ -28,14 +28,6 @@
 
 package org.n52.sta.data.editor;
 
-import java.math.BigDecimal;
-import java.util.Collections;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Set;
-import java.util.stream.Collectors;
-
 import org.n52.janmayen.stream.Streams;
 import org.n52.series.db.beans.AbstractDatasetEntity;
 import org.n52.series.db.beans.DataEntity;
@@ -59,6 +51,14 @@ import org.n52.sta.data.support.ObservationGraphBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.context.event.EventListener;
+
+import java.math.BigDecimal;
+import java.util.Collections;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 public class ObservationEntityEditor extends DatabaseEntityAdapter<DataEntity>
         implements
@@ -92,7 +92,7 @@ public class ObservationEntityEditor extends DatabaseEntityAdapter<DataEntity>
     @Override
     public ObservationData getOrSave(Observation entity) throws EditorException {
         Optional<DataEntity> stored = getEntity(entity.getId());
-        return stored.map(e -> new ObservationData(e, propertyMapping))
+        return stored.map(e -> new ObservationData(e, Optional.of(propertyMapping)))
                      .orElseGet(() -> save(entity));
     }
 
@@ -103,7 +103,7 @@ public class ObservationEntityEditor extends DatabaseEntityAdapter<DataEntity>
 
         DatasetEntity datastream = (DatasetEntity) getDatastreamOf(entity);
         return Streams.stream(saveAll(Collections.singleton(entity), datastream))
-                      .map(savedEntity -> new ObservationData(savedEntity, propertyMapping))
+                      .map(savedEntity -> new ObservationData(savedEntity, Optional.of(propertyMapping)))
                       .findFirst()
                       .orElseThrow();
     }

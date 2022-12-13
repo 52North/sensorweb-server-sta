@@ -28,16 +28,16 @@
 
 package org.n52.sta.data.entity;
 
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
-
 import org.locationtech.jts.geom.Geometry;
 import org.n52.series.db.beans.AbstractFeatureEntity;
 import org.n52.series.db.beans.sta.StaFeatureEntity;
 import org.n52.sta.api.entity.FeatureOfInterest;
 import org.n52.sta.api.entity.Observation;
 import org.n52.sta.config.EntityPropertyMapping;
+
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
 
 public class FeatureOfInterestData extends StaData<StaFeatureEntity< ? >> implements FeatureOfInterest {
 
@@ -74,8 +74,7 @@ public class FeatureOfInterestData extends StaData<StaFeatureEntity< ? >> implem
     @Override
     public Set<Observation> getObservations() {
         //@formatter:off
-        return toSet(data.getObservations(), entity -> new ObservationData(entity, propertyMapping.orElseThrow(
-                () -> new RuntimeException("no property mapping supplied!"))));
+        return toSet(data.getObservations(), entity -> new ObservationData(entity, propertyMapping));
         //@formatter:on
     }
 

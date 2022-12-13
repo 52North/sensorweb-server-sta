@@ -28,16 +28,24 @@
 
 package org.n52.sta.data.entity;
 
-import java.util.*;
-import java.util.stream.Collectors;
-
 import org.joda.time.DateTime;
 import org.n52.series.db.beans.DataEntity;
 import org.n52.series.db.beans.GeometryEntity;
 import org.n52.shetland.ogc.gml.time.Time;
-import org.n52.sta.api.entity.*;
-import org.n52.sta.config.EntityPropertyMapping;
+import org.n52.sta.api.entity.Datastream;
+import org.n52.sta.api.entity.FeatureOfInterest;
+import org.n52.sta.api.entity.Group;
+import org.n52.sta.api.entity.Observation;
+import org.n52.sta.api.entity.Relation;
 import org.n52.sta.api.utils.TimeUtil;
+import org.n52.sta.config.EntityPropertyMapping;
+
+import java.util.Collection;
+import java.util.Date;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 public class ObservationData extends StaData<DataEntity< ? >> implements Observation {
 
@@ -74,7 +82,7 @@ public class ObservationData extends StaData<DataEntity< ? >> implements Observa
             @SuppressWarnings("unchecked")
             Collection<DataEntity< ? >> items = (Collection<DataEntity< ? >>) value;
             return items.stream()
-                        .map(v -> new ObservationData(v, propertyMapping.get()))
+                        .map(v -> new ObservationData(v, propertyMapping))
                         .collect(Collectors.toSet());
         } else {
             return value;
