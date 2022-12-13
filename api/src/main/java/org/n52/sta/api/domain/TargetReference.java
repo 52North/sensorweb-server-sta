@@ -26,18 +26,18 @@
  * Public License for more details.
  */
 
-package org.n52.sta.plus.domain;
+package org.n52.sta.api.domain;
+
+import org.n52.sta.api.entity.Observation;
+import org.n52.sta.api.entity.Relation;
 
 import java.util.Objects;
 import java.util.Optional;
 
-import org.n52.sta.api.entity.Observation;
-import org.n52.sta.plus.data.entity.StaPlusRelation;
-
 /**
  * References either an external object or an internal observation.
  * <p>
- * Used in combination with {@link StaPlusRelation} to ensure both properties are mutually exclusive.
+ * Used in combination with {@link Relation} to ensure both properties are mutually exclusive.
  */
 public final class TargetReference {
 

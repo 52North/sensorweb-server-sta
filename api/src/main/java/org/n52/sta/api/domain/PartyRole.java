@@ -26,32 +26,15 @@
  * Public License for more details.
  */
 
-package org.n52.sta.api.dto;
+package org.n52.sta.api.domain;
 
-import org.n52.sta.api.entity.Identifiable;
+public enum PartyRole {
+    INDIVIDUAL,
+    INSTITUTION;
 
-public abstract class StaDto implements Identifiable {
-
-    private String id;
-
-    public String getId() {
-        return id;
+    @Override
+    public String toString() {
+        return this.name()
+                   .toLowerCase();
     }
-
-    public void setId(String id) {
-        this.id = id;
-    }
-
-    protected void assertNonEmpty(String toAssert, String errorMessage) {
-        if (toAssert == null || toAssert.isEmpty()) {
-            throw new IllegalArgumentException(errorMessage);
-        }
-    }
-
-    protected void assertNonNull(Object toAssert, String errorMessage) {
-        if (toAssert == null) {
-            throw new IllegalArgumentException(errorMessage);
-        }
-    }
-
 }

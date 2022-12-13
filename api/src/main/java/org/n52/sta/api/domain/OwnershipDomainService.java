@@ -26,47 +26,16 @@
  * Public License for more details.
  */
 
-package org.n52.sta.api.dto;
+package org.n52.sta.api.domain;
 
-import java.util.HashSet;
-import java.util.Set;
+import org.n52.sta.api.EntityProvider;
+import org.n52.sta.api.domain.DomainService.DomainServiceAdapter;
+import org.n52.sta.api.entity.Thing;
 
-import org.locationtech.jts.geom.Geometry;
-import org.n52.sta.api.entity.FeatureOfInterest;
-import org.n52.sta.api.entity.Observation;
+public class OwnershipDomainService extends DomainServiceAdapter<Thing> {
 
-/**
- * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
- */
-public class FeatureOfInterestDto extends BaseDto implements FeatureOfInterest {
-
-    private Geometry feature;
-
-    private Set<Observation> observations;
-
-    public FeatureOfInterestDto() {
-        this.observations = new HashSet<>();
+    public OwnershipDomainService(EntityProvider<Thing> entityProvider) {
+        super(entityProvider);
     }
 
-    @Override
-    public Geometry getFeature() {
-        return feature;
-    }
-
-    public void setFeature(Geometry feature) {
-        this.feature = feature;
-    }
-
-    @Override
-    public Set<Observation> getObservations() {
-        return new HashSet<>(observations);
-    }
-
-    public void setObservations(Set<Observation> observations) {
-        this.observations = new HashSet<>(observations);
-    }
-
-    public void addObservation(Observation observation) {
-        this.observations.add(observation);
-    }
 }

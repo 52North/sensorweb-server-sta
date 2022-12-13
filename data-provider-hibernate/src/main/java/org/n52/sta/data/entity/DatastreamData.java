@@ -38,11 +38,7 @@ import org.n52.series.db.beans.AbstractDatasetEntity;
 import org.n52.series.db.beans.FormatEntity;
 import org.n52.series.db.beans.UnitEntity;
 import org.n52.shetland.ogc.gml.time.Time;
-import org.n52.sta.api.entity.Datastream;
-import org.n52.sta.api.entity.Observation;
-import org.n52.sta.api.entity.ObservedProperty;
-import org.n52.sta.api.entity.Sensor;
-import org.n52.sta.api.entity.Thing;
+import org.n52.sta.api.entity.*;
 import org.n52.sta.config.EntityPropertyMapping;
 
 public class DatastreamData extends StaData<AbstractDatasetEntity> implements Datastream {
@@ -116,9 +112,23 @@ public class DatastreamData extends StaData<AbstractDatasetEntity> implements Da
     @Override
     public Set<Observation> getObservations() {
         //@formatter:off
-        return toSet(data.getObservations(), entity -> new ObservationData(entity, propertyMapping.orElseThrow(
-        () -> new RuntimeException("no property mapping supplied!"))));
+        return toSet(data.getObservations(), entity -> new ObservationData(entity, propertyMapping));
         //@formatter:on
+    }
+
+    @Override
+    public Set<Project> getProjects() {
+        return toSet(data.getProject(), projectEntity -> new ProjectData(projectEntity, propertyMapping));
+    }
+
+    @Override
+    public Party getParty() {
+        return new PartyData(data.getParty(), propertyMapping);
+    }
+
+    @Override
+    public License getLicense() {
+        return new LicenseData(data.getLicense(), propertyMapping);
     }
 
     private Optional<Datastream.UnitOfMeasurement> createUom(UnitEntity entity) {

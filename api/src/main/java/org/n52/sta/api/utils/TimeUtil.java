@@ -47,6 +47,10 @@ public final class TimeUtil {
         return new TimeInstant(time);
     }
 
+    public static Time createTime(Date time) {
+        return new TimeInstant(time);
+    }
+
     /**
      * Create {@link Time} from {@link DateTime}s
      *
@@ -57,6 +61,14 @@ public final class TimeUtil {
      * @return Resulting {@link Time}
      */
     public static Time createTime(DateTime start, DateTime end) {
+        if (start.equals(end)) {
+            return createTime(start);
+        } else {
+            return new TimePeriod(start, end);
+        }
+    }
+
+    public static Time createTime(Date start, Date end) {
         if (start.equals(end)) {
             return createTime(start);
         } else {

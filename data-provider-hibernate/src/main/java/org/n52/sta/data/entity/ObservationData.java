@@ -28,26 +28,23 @@
 
 package org.n52.sta.data.entity;
 
-import java.util.Collection;
-import java.util.Date;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import org.joda.time.DateTime;
 import org.n52.series.db.beans.DataEntity;
 import org.n52.series.db.beans.GeometryEntity;
 import org.n52.shetland.ogc.gml.time.Time;
-import org.n52.sta.api.entity.Datastream;
-import org.n52.sta.api.entity.FeatureOfInterest;
-import org.n52.sta.api.entity.Observation;
+import org.n52.sta.api.entity.*;
 import org.n52.sta.config.EntityPropertyMapping;
 import org.n52.sta.api.utils.TimeUtil;
 
 public class ObservationData extends StaData<DataEntity< ? >> implements Observation {
 
-    public ObservationData(DataEntity< ? > dataEntity, EntityPropertyMapping parameterProperties) {
-        super(dataEntity, Optional.of(parameterProperties));
+    public ObservationData(DataEntity< ? > dataEntity, Optional<EntityPropertyMapping> parameterProperties) {
+        super(dataEntity, parameterProperties);
+        // propertyMapping is required.
+        propertyMapping.orElseThrow(() -> new RuntimeException("no property mapping supplied!"));
     }
 
     @Override
@@ -132,6 +129,21 @@ public class ObservationData extends StaData<DataEntity< ? >> implements Observa
     @Override
     public Datastream getDatastream() {
         return new DatastreamData(data.getDataset(), propertyMapping);
+    }
+
+    @Override
+    public Set<Group> getGroups() {
+        return toSet(data.getGroups(), groupEntity -> new GroupData(groupEntity, propertyMapping));
+    }
+
+    @Override
+    public Set<Relation> getSubjects() {
+        return toSet(data.getSubjects(), relationEntity -> new RelationData(relationEntity, propertyMapping));
+    }
+
+    @Override
+    public Set<Relation> getObjects() {
+        return toSet(data.getObjects(), relationEntity -> new RelationData(relationEntity, propertyMapping));
     }
 
     @Override

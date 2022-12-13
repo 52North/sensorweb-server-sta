@@ -45,4 +45,5 @@ public interface Thing extends Identifiable {
 
     Set<Datastream> getDatastreams();
 
+    Party getParty();
 }

@@ -28,11 +28,11 @@
 
 package org.n52.sta.api.entity;
 
-import java.util.Map;
-import java.util.Set;
-
 import org.locationtech.jts.geom.Geometry;
 import org.n52.shetland.ogc.gml.time.Time;
+
+import java.util.Map;
+import java.util.Set;
 
 public interface Datastream extends Identifiable {
 
@@ -59,6 +59,12 @@ public interface Datastream extends Identifiable {
     ObservedProperty getObservedProperty();
 
     Set<Observation> getObservations();
+
+    Set<Project> getProjects();
+
+    Party getParty();
+
+    License getLicense();
 
     class UnitOfMeasurement {
 

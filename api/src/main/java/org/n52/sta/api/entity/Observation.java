@@ -29,6 +29,7 @@
 package org.n52.sta.api.entity;
 
 import java.util.Map;
+import java.util.Set;
 
 import org.n52.shetland.ogc.gml.time.Time;
 
@@ -58,5 +59,11 @@ public interface Observation extends Identifiable {
     FeatureOfInterest getFeatureOfInterest();
 
     Datastream getDatastream();
+
+    Set<Group> getGroups();
+
+    Set<Relation> getSubjects();
+
+    Set<Relation> getObjects();
 
 }

@@ -33,10 +33,7 @@ import java.util.Optional;
 import java.util.Set;
 
 import org.n52.series.db.beans.PlatformEntity;
-import org.n52.sta.api.entity.Datastream;
-import org.n52.sta.api.entity.HistoricalLocation;
-import org.n52.sta.api.entity.Location;
-import org.n52.sta.api.entity.Thing;
+import org.n52.sta.api.entity.*;
 import org.n52.sta.config.EntityPropertyMapping;
 
 public class ThingData extends StaData<PlatformEntity> implements Thing {
@@ -73,5 +70,10 @@ public class ThingData extends StaData<PlatformEntity> implements Thing {
     @Override
     public Set<Datastream> getDatastreams() {
         return toSet(data.getDatasets(), entity -> new DatastreamData(entity, propertyMapping));
+    }
+
+    @Override
+    public Party getParty() {
+        return new PartyData(data.getParty(), propertyMapping);
     }
 }
