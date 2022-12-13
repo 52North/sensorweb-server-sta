@@ -28,20 +28,22 @@
 
 package org.n52.sta.http.serialize.in;
 
-import java.util.Map;
-import java.util.Set;
-
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-
 import org.locationtech.jts.geom.Geometry;
 import org.n52.shetland.ogc.gml.time.Time;
 import org.n52.shetland.ogc.sta.StaConstants;
 import org.n52.sta.api.entity.Datastream;
+import org.n52.sta.api.entity.License;
 import org.n52.sta.api.entity.Observation;
 import org.n52.sta.api.entity.ObservedProperty;
+import org.n52.sta.api.entity.Party;
+import org.n52.sta.api.entity.Project;
 import org.n52.sta.api.entity.Sensor;
 import org.n52.sta.api.entity.Thing;
+
+import java.util.Map;
+import java.util.Set;
 
 public class DatastreamNode extends StaNode implements Datastream {
 
@@ -115,6 +117,24 @@ public class DatastreamNode extends StaNode implements Datastream {
     @Override
     public Set<Observation> getObservations() {
         return toSet(StaConstants.OBSERVATIONS, n -> new ObservationNode(n, mapper));
+    }
+
+    @Override
+    public Project getProject() {
+        throw new RuntimeException(NIY);
+        //return toSet(StaConstants.PROJECTS, n -> new ProjectNode(n, mapper));
+    }
+
+    @Override
+    public Party getParty() {
+        throw new RuntimeException(NIY);
+        //return getOrNull(StaConstants.PARTY, n -> new PartyNode(n, mapper));
+    }
+
+    @Override
+    public License getLicense() {
+        throw new RuntimeException(NIY);
+        //return getOrNull(StaConstants.LICENSE, n -> new LicenseNode(n, mapper));
     }
 
 }

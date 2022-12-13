@@ -28,17 +28,20 @@
 
 package org.n52.sta.api.domain.aggregate;
 
-import java.util.Map;
-import java.util.Set;
-
 import org.locationtech.jts.geom.Geometry;
 import org.n52.shetland.ogc.gml.time.Time;
 import org.n52.sta.api.EntityEditor;
 import org.n52.sta.api.entity.Datastream;
+import org.n52.sta.api.entity.License;
 import org.n52.sta.api.entity.Observation;
 import org.n52.sta.api.entity.ObservedProperty;
+import org.n52.sta.api.entity.Party;
+import org.n52.sta.api.entity.Project;
 import org.n52.sta.api.entity.Sensor;
 import org.n52.sta.api.entity.Thing;
+
+import java.util.Map;
+import java.util.Set;
 
 public class DatastreamAggregate extends EntityAggregate<Datastream> implements Datastream {
 
@@ -106,6 +109,21 @@ public class DatastreamAggregate extends EntityAggregate<Datastream> implements 
 
     public Set<Observation> getObservations() {
         return datastream.getObservations();
+    }
+
+    @Override
+    public Project getProject() {
+        return datastream.getProject();
+    }
+
+    @Override
+    public Party getParty() {
+        return datastream.getParty();
+    }
+
+    @Override
+    public License getLicense() {
+        return datastream.getLicense();
     }
 
     private boolean isTrajectory(Datastream entity) {

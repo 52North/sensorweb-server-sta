@@ -28,17 +28,17 @@
 
 package org.n52.sta.http.serialize.in;
 
-import java.util.Map;
-import java.util.Set;
-
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-
 import org.n52.shetland.ogc.sta.StaConstants;
 import org.n52.sta.api.entity.Datastream;
 import org.n52.sta.api.entity.HistoricalLocation;
 import org.n52.sta.api.entity.Location;
+import org.n52.sta.api.entity.Party;
 import org.n52.sta.api.entity.Thing;
+
+import java.util.Map;
+import java.util.Set;
 
 public class ThingNode extends StaNode implements Thing {
 
@@ -74,6 +74,11 @@ public class ThingNode extends StaNode implements Thing {
     @Override
     public Set<Datastream> getDatastreams() {
         return toSet(StaConstants.DATASTREAMS, n -> new DatastreamNode(n, mapper));
+    }
+
+    @Override
+    public Party getParty() {
+        throw new RuntimeException(NIY);
     }
 
 }

@@ -28,14 +28,15 @@
 
 package org.n52.sta.api.domain.aggregate;
 
-import java.util.Map;
-import java.util.Set;
-
 import org.n52.sta.api.EntityEditor;
 import org.n52.sta.api.entity.Datastream;
 import org.n52.sta.api.entity.HistoricalLocation;
 import org.n52.sta.api.entity.Location;
+import org.n52.sta.api.entity.Party;
 import org.n52.sta.api.entity.Thing;
+
+import java.util.Map;
+import java.util.Set;
 
 public class ThingAggregate extends EntityAggregate<Thing> implements Thing {
 
@@ -78,6 +79,11 @@ public class ThingAggregate extends EntityAggregate<Thing> implements Thing {
 
     public Set<Datastream> getDatastreams() {
         return thing.getDatastreams();
+    }
+
+    @Override
+    public Party getParty() {
+        return thing.getParty();
     }
 
     public boolean isMobile() {

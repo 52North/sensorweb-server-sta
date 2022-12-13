@@ -28,13 +28,16 @@
 
 package org.n52.sta.api.domain.aggregate;
 
-import java.util.Map;
-
 import org.n52.shetland.ogc.gml.time.Time;
 import org.n52.sta.api.EntityEditor;
 import org.n52.sta.api.entity.Datastream;
 import org.n52.sta.api.entity.FeatureOfInterest;
+import org.n52.sta.api.entity.Group;
 import org.n52.sta.api.entity.Observation;
+import org.n52.sta.api.entity.Relation;
+
+import java.util.Map;
+import java.util.Set;
 
 public class ObservationAggregate extends EntityAggregate<Observation> implements Observation {
 
@@ -97,6 +100,21 @@ public class ObservationAggregate extends EntityAggregate<Observation> implement
     @Override
     public Datastream getDatastream() {
         return observation.getDatastream();
+    }
+
+    @Override
+    public Set<Group> getGroups() {
+        return observation.getGroups();
+    }
+
+    @Override
+    public Set<Relation> getSubjects() {
+        return observation.getSubjects();
+    }
+
+    @Override
+    public Set<Relation> getObjects() {
+        return observation.getObjects();
     }
 
     @Override

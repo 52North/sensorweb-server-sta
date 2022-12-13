@@ -28,16 +28,18 @@
 
 package org.n52.sta.http.serialize.in;
 
-import java.util.Map;
-
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-
 import org.n52.shetland.ogc.gml.time.Time;
 import org.n52.shetland.ogc.sta.StaConstants;
 import org.n52.sta.api.entity.Datastream;
 import org.n52.sta.api.entity.FeatureOfInterest;
+import org.n52.sta.api.entity.Group;
 import org.n52.sta.api.entity.Observation;
+import org.n52.sta.api.entity.Relation;
+
+import java.util.Map;
+import java.util.Set;
 
 public class ObservationNode extends StaNode implements Observation {
 
@@ -87,10 +89,23 @@ public class ObservationNode extends StaNode implements Observation {
     }
 
     @Override
+    public Set<Group> getGroups() {
+        throw new RuntimeException(NIY);
+    }
+
+    @Override
+    public Set<Relation> getSubjects() {
+        throw new RuntimeException(NIY);
+    }
+
+    @Override
+    public Set<Relation> getObjects() {
+        throw new RuntimeException(NIY);
+    }
+
+    @Override
     public String getValueType() {
-
+        throw new RuntimeException(NIY);
         // TODO determine type
-
-        return null;
     }
 }

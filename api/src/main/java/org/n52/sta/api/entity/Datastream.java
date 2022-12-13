@@ -60,7 +60,7 @@ public interface Datastream extends Identifiable {
 
     Set<Observation> getObservations();
 
-    Set<Project> getProjects();
+    Project getProject();
 
     Party getParty();
 

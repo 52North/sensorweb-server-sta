@@ -33,7 +33,7 @@ import java.util.Optional;
 import java.util.Set;
 
 public interface Party extends Identifiable {
-    
+
     String getName();
 
     String getDescription();

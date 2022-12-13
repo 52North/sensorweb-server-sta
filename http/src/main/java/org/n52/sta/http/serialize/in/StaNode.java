@@ -28,20 +28,10 @@
 
 package org.n52.sta.http.serialize.in;
 
-import java.util.Collections;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Set;
-import java.util.function.Function;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-
 import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.geom.GeometryFactory;
 import org.locationtech.jts.geom.PrecisionModel;
@@ -55,12 +45,21 @@ import org.n52.sta.api.utils.TimeUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Collections;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.Set;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
 abstract class StaNode implements Identifiable {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(StaNode.class);
 
     protected final ObjectMapper mapper;
-
+    protected final String NIY = "not implemented yet!";
     private final JsonNode node;
 
     protected StaNode(JsonNode node, ObjectMapper mapper) {

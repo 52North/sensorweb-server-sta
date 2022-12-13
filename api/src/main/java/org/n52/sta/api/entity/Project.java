@@ -54,4 +54,5 @@ public interface Project extends Identifiable {
     Map<String, Object> getProperties();
 
     Set<Datastream> getDatastreams();
+
 }

@@ -28,10 +28,19 @@
 
 package org.n52.sta.http.serialize.out;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.is;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectWriter;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.n52.shetland.oasis.odata.query.option.QueryOptions;
+import org.n52.sta.api.entity.Datastream;
+import org.n52.sta.api.entity.HistoricalLocation;
+import org.n52.sta.api.entity.Location;
+import org.n52.sta.api.entity.Party;
+import org.n52.sta.api.entity.Thing;
+import org.n52.sta.http.serialize.in.ThingNode;
+import org.n52.svalbard.odata.core.QueryOptionsFactory;
 
 import java.io.InputStream;
 import java.util.HashMap;
@@ -39,19 +48,10 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.ObjectWriter;
-
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.n52.shetland.oasis.odata.query.option.QueryOptions;
-import org.n52.sta.api.entity.Datastream;
-import org.n52.sta.api.entity.HistoricalLocation;
-import org.n52.sta.api.entity.Location;
-import org.n52.sta.api.entity.Thing;
-import org.n52.sta.http.serialize.in.ThingNode;
-import org.n52.svalbard.odata.core.QueryOptionsFactory;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.is;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class ThingJsonSerializerTest {
 
@@ -249,6 +249,12 @@ public class ThingJsonSerializerTest {
         @Override
         public Set<Datastream> getDatastreams() {
             return this.datastreams;
+        }
+
+        @Override
+        public Party getParty() {
+            // TODO Auto-generated method stub
+            return null;
         }
 
     }
