@@ -25,7 +25,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
-package org.n52.sta.plus.config;
+package org.n52.sta.config;
 
 import org.n52.grammar.StaPlusPathGrammar;
 import org.n52.sta.http.util.path.PathFactory;
@@ -33,8 +33,10 @@ import org.n52.sta.http.util.path.StaPlusPathVisitor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
+import org.springframework.context.annotation.Profile;
 
 @Configuration
+@Profile("sta-plus")
 public class StaPlusWebConfiguration {
 
     @Bean

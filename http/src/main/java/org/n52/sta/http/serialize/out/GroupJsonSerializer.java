@@ -26,15 +26,13 @@
  * Public License for more details.
  */
 
-package org.n52.sta.plus.http.serialize.out;
+package org.n52.sta.http.serialize.out;
 
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import org.n52.shetland.ogc.sta.StaConstants;
 import org.n52.sta.api.entity.Group;
 import org.n52.sta.api.entity.Relation;
-import org.n52.sta.http.serialize.out.SerializationContext;
-import org.n52.sta.http.serialize.out.StaBaseSerializer;
 
 import java.io.IOException;
 

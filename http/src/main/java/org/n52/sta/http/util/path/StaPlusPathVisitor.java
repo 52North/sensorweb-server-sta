@@ -25,7 +25,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
-package org.n52.sta.plus.http.util.path;
+package org.n52.sta.http.util.path;
 
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.tree.TerminalNode;
@@ -57,12 +57,6 @@ import org.n52.sta.http.serialize.out.SensorJsonSerializer;
 import org.n52.sta.http.serialize.out.SerializationContext;
 import org.n52.sta.http.serialize.out.StaBaseSerializer;
 import org.n52.sta.http.serialize.out.ThingJsonSerializer;
-import org.n52.sta.http.util.path.StaPath;
-import org.n52.sta.plus.http.serialize.out.GroupJsonSerializer;
-import org.n52.sta.plus.http.serialize.out.LicenseJsonSerializer;
-import org.n52.sta.plus.http.serialize.out.PartyJsonSerializer;
-import org.n52.sta.plus.http.serialize.out.ProjectJsonSerializer;
-import org.n52.sta.plus.http.serialize.out.RelationJsonSerializer;
 
 import java.util.function.Function;
 

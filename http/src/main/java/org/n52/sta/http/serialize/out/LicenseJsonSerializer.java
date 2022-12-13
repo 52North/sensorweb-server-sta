@@ -26,27 +26,25 @@
  * Public License for more details.
  */
 
-package org.n52.sta.plus.http.serialize.out;
+package org.n52.sta.http.serialize.out;
 
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import org.n52.shetland.ogc.sta.StaConstants;
+import org.n52.sta.api.entity.Datastream;
 import org.n52.sta.api.entity.Group;
-import org.n52.sta.api.entity.Relation;
-import org.n52.sta.http.serialize.out.ObservationJsonSerializer;
-import org.n52.sta.http.serialize.out.SerializationContext;
-import org.n52.sta.http.serialize.out.StaBaseSerializer;
+import org.n52.sta.api.entity.License;
 
 import java.io.IOException;
 
-public class RelationJsonSerializer extends StaBaseSerializer<Relation> {
+public class LicenseJsonSerializer extends StaBaseSerializer<License> {
 
-    public RelationJsonSerializer(SerializationContext context) {
-        super(context, StaConstants.RELATIONS, Relation.class);
+    public LicenseJsonSerializer(SerializationContext context) {
+        super(context, StaConstants.LICENSES, License.class);
     }
 
     @Override
-    public void serialize(Relation value, JsonGenerator gen, SerializerProvider serializers) throws IOException {
+    public void serialize(License value, JsonGenerator gen, SerializerProvider serializers) throws IOException {
         gen.writeStartObject();
         String id = value.getId();
 
@@ -54,25 +52,25 @@ public class RelationJsonSerializer extends StaBaseSerializer<Relation> {
         writeProperty(StaConstants.PROP_ID, name -> gen.writeStringField(StaConstants.AT_IOT_ID, id));
         writeProperty(StaConstants.PROP_SELF_LINK,
                 name -> gen.writeStringField(StaConstants.AT_IOT_SELFLINK, createSelfLink(id)));
-        writeStringProperty(StaConstants.PROP_ROLE, value::getRole, gen);
-        writeStringProperty(StaConstants.PROP_DESCRIPTION, () -> value.getDescription().orElse(null), gen);
-        writeStringProperty(StaConstants.PROP_EXTERNAL_OBJECT, () -> value.getObject().getExternalObject(), gen);
+        writeStringProperty(StaConstants.PROP_NAME, value::getName, gen);
+        writeStringProperty(StaConstants.PROP_DESCRIPTION, value::getDescription, gen);
+        writeStringProperty(StaConstants.PROP_DEFINITION, value::getDefinition, gen);
+        writeStringProperty(StaConstants.PROP_LOGO, () -> value.getLogo().orElse(null), gen);
         writeObjectProperty(StaConstants.PROP_PROPERTIES, value::getProperties, gen);
 
         // entity members
+        String datastreams = StaConstants.DATASTREAMS;
+        writeMemberCollection(datastreams, id, gen, DatastreamJsonSerializer::new, serializer -> {
+            for (Datastream item : value.getDatastreams()) {
+                serializer.serialize(item, gen, serializers);
+            }
+        });
+
         writeMemberCollection(StaConstants.GROUPS, id, gen, GroupJsonSerializer::new, serializer -> {
             for (Group item : value.getGroups()) {
                 serializer.serialize(item, gen, serializers);
             }
         });
-
-        writeMember(
-                StaConstants.SUBJECT,
-                id,
-                gen,
-                ObservationJsonSerializer::new,
-                serializer -> serializer.serialize(value.getSubject(), gen, serializers)
-        );
 
         gen.writeEndObject();
     }

@@ -26,7 +26,7 @@
  * Public License for more details.
  */
 
-package org.n52.sta.plus.http.serialize.out;
+package org.n52.sta.http.serialize.out;
 
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.SerializerProvider;
@@ -35,10 +35,6 @@ import org.n52.sta.api.entity.Datastream;
 import org.n52.sta.api.entity.Group;
 import org.n52.sta.api.entity.Party;
 import org.n52.sta.api.entity.Thing;
-import org.n52.sta.http.serialize.out.DatastreamJsonSerializer;
-import org.n52.sta.http.serialize.out.SerializationContext;
-import org.n52.sta.http.serialize.out.StaBaseSerializer;
-import org.n52.sta.http.serialize.out.ThingJsonSerializer;
 
 import java.io.IOException;
 

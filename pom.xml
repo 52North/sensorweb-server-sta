@@ -34,7 +34,7 @@
         <!--        <module>data-provider</module>-->
         <!--        <module>data-provider-ufz</module>-->
         <module>data-provider-hibernate</module>
-        <module>sta-plus</module>
+        <!--        <module>sta-plus</module>-->
     </modules>
 
     <properties>
