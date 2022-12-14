@@ -52,7 +52,7 @@ public class RelationJsonSerializer extends StaBaseSerializer<Relation> {
         writeProperty(StaConstants.PROP_SELF_LINK,
                 name -> gen.writeStringField(StaConstants.AT_IOT_SELFLINK, createSelfLink(id)));
         writeStringProperty(StaConstants.PROP_ROLE, value::getRole, gen);
-        writeStringProperty(StaConstants.PROP_DESCRIPTION, () -> value.getDescription().orElse(null), gen);
+        writeStringProperty(StaConstants.PROP_DESCRIPTION, value::getDescription, gen);
         writeStringProperty(StaConstants.PROP_EXTERNAL_OBJECT, () -> value.getObject().getExternalObject(), gen);
         writeObjectProperty(StaConstants.PROP_PROPERTIES, value::getProperties, gen);
 

@@ -121,20 +121,17 @@ public class DatastreamNode extends StaNode implements Datastream {
 
     @Override
     public Project getProject() {
-        throw new RuntimeException(NIY);
-        //return toSet(StaConstants.PROJECTS, n -> new ProjectNode(n, mapper));
+        return getOrNull(StaConstants.PROJECTS, n -> new ProjectNode(n, mapper));
     }
 
     @Override
     public Party getParty() {
-        throw new RuntimeException(NIY);
-        //return getOrNull(StaConstants.PARTY, n -> new PartyNode(n, mapper));
+        return getOrNull(StaConstants.PARTY, n -> new PartyNode(n, mapper));
     }
 
     @Override
     public License getLicense() {
-        throw new RuntimeException(NIY);
-        //return getOrNull(StaConstants.LICENSE, n -> new LicenseNode(n, mapper));
+        return getOrNull(StaConstants.LICENSE, n -> new LicenseNode(n, mapper));
     }
 
 }

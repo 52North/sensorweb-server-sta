@@ -31,24 +31,23 @@ package org.n52.sta.http.serialize.in;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.n52.shetland.ogc.sta.StaConstants;
-import org.n52.sta.api.entity.Datastream;
-import org.n52.sta.api.entity.HistoricalLocation;
-import org.n52.sta.api.entity.Location;
-import org.n52.sta.api.entity.Party;
-import org.n52.sta.api.entity.Thing;
+import org.n52.sta.api.domain.TargetReference;
+import org.n52.sta.api.entity.Group;
+import org.n52.sta.api.entity.Observation;
+import org.n52.sta.api.entity.Relation;
 
 import java.util.Map;
 import java.util.Set;
 
-public class ThingNode extends StaNode implements Thing {
+public class RelationNode extends StaNode implements Relation {
 
-    public ThingNode(JsonNode node, ObjectMapper mapper) {
+    public RelationNode(JsonNode node, ObjectMapper mapper) {
         super(node, mapper);
     }
 
     @Override
-    public String getName() {
-        return getOrNull(StaConstants.PROP_NAME, JsonNode::asText);
+    public String getRole() {
+        return getOrNull(StaConstants.PROP_ROLE, JsonNode::asText);
     }
 
     @Override
@@ -62,23 +61,18 @@ public class ThingNode extends StaNode implements Thing {
     }
 
     @Override
-    public Set<HistoricalLocation> getHistoricalLocations() {
-        return toSet(StaConstants.HISTORICAL_LOCATIONS, n -> new HistoricalLocationNode(n, mapper));
+    public Observation getSubject() {
+        return getOrNull(StaConstants.SUBJECT, node -> new ObservationNode(node, mapper));
     }
 
     @Override
-    public Set<Location> getLocations() {
-        return toSet(StaConstants.LOCATIONS, n -> new LocationNode(n, mapper));
+    public TargetReference getObject() {
+        throw new RuntimeException("parsing of Observation->Object not yet implemented!");
     }
 
     @Override
-    public Set<Datastream> getDatastreams() {
-        return toSet(StaConstants.DATASTREAMS, n -> new DatastreamNode(n, mapper));
-    }
-
-    @Override
-    public Party getParty() {
-        return getOrNull(StaConstants.PARTY, node -> new PartyNode(node, mapper));
+    public Set<Group> getGroups() {
+        return toSet(StaConstants.GROUPS, n -> new GroupNode(n, mapper));
     }
 
 }

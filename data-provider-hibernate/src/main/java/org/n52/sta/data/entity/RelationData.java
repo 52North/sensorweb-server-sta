@@ -50,8 +50,8 @@ public class RelationData extends StaData<RelationEntity> implements Relation {
     }
 
     @Override
-    public Optional<String> getDescription() {
-        return Optional.of(data.getDescription());
+    public String getDescription() {
+        return data.getDescription();
     }
 
     @Override

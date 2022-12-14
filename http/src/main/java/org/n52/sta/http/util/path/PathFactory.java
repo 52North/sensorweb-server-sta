@@ -28,9 +28,18 @@
 
 package org.n52.sta.http.util.path;
 
-import org.antlr.v4.runtime.*;
+import org.antlr.v4.runtime.BaseErrorListener;
+import org.antlr.v4.runtime.CharStreams;
+import org.antlr.v4.runtime.CodePointCharStream;
+import org.antlr.v4.runtime.CommonTokenStream;
+import org.antlr.v4.runtime.Lexer;
+import org.antlr.v4.runtime.Parser;
+import org.antlr.v4.runtime.ParserRuleContext;
+import org.antlr.v4.runtime.RecognitionException;
+import org.antlr.v4.runtime.Recognizer;
+import org.antlr.v4.runtime.TokenStream;
+import org.antlr.v4.runtime.Vocabulary;
 import org.antlr.v4.runtime.tree.ParseTreeVisitor;
-import org.n52.grammar.StaPathLexer;
 import org.n52.shetland.ogc.sta.exception.STAInvalidUrlException;
 import org.n52.sta.api.entity.Identifiable;
 
@@ -41,19 +50,25 @@ import java.util.function.Supplier;
 public class PathFactory {
 
     private final Function<TokenStream, Parser> parser;
-    private final Supplier<ParseTreeVisitor<StaPath<?>>> visitor;
+    private final Supplier<ParseTreeVisitor<StaPath<? extends Identifiable>>> visitor;
+    private final Function<CodePointCharStream, Lexer> lexer;
 
-    public PathFactory(Function<TokenStream, Parser> parser, Supplier<ParseTreeVisitor<StaPath<?>>> visitor) {
+    public PathFactory(Function<TokenStream, Parser> parser,
+                       Supplier<ParseTreeVisitor<StaPath<? extends Identifiable>>> visitor,
+                       Function<CodePointCharStream, Lexer> lexer) {
         this.parser = parser;
         this.visitor = visitor;
+        this.lexer = lexer;
     }
 
     public StaPath< ? extends Identifiable> parse(String url) throws STAInvalidUrlException {
         CodePointCharStream charStream = CharStreams.fromString(url.trim());
-        Lexer lexer = new StaPathLexer(charStream);
-        TokenStream tokenStream = new CommonTokenStream(lexer);
-        replaceErrorListener(lexer);
+        Lexer lex = lexer.apply(charStream);
+        TokenStream tokenStream = new CommonTokenStream(lex);
+        replaceErrorListener(lex);
         Parser grammar = parser.apply(tokenStream);
+
+        // grammar.setTrace(true);
 
         try {
             Method firstRuleMethod = grammar.getClass()

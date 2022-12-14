@@ -30,14 +30,13 @@ package org.n52.sta.api.entity;
 import org.n52.sta.api.domain.TargetReference;
 
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 
 public interface Relation extends Identifiable {
 
     String getRole();
 
-    Optional<String> getDescription();
+    String getDescription();
 
     Map<String, Object> getProperties();
 

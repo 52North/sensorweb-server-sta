@@ -24,17 +24,17 @@ lexer grammar StaPlusPathLexer;
 
 import StaPathLexer;
 
-PARTY: 'party';
-PROJECT: 'project';
-LICENSE:'license';
-GROUP:'group';
-RELATION:'relation';
+PARTY: 'Party';
+PROJECT: 'Project';
+LICENSE:'License';
+GROUP:'Group';
+RELATION:'Relation';
 
-PARTIES:'parties';
-PROJECTS:'projects';
-LICENSES:'licenses';
-GROUPS:'groups';
-RELATIONS:'relations';
+PARTIES:'Parties';
+PROJECTS:'Projects';
+LICENSES:'Licenses';
+GROUPS:'Groups';
+RELATIONS:'Relations';
 
 PROP_AUTH_ID: 'authId';
 PROP_ROLE: 'role';
@@ -50,5 +50,5 @@ PROP_LOGO: 'logo';
 PROP_PURPOSE: 'purpose';
 PROP_EXTERNAL_OBJECT: 'externalObject';
 
-PROP_SUBJECT: 'subject';
-PROP_OBJECT: 'object';
+SUBJECT: 'Subject';
+OBJECT: 'Object';

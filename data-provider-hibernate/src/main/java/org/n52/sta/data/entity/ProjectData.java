@@ -55,8 +55,8 @@ public class ProjectData extends StaData<ProjectEntity> implements Project {
     }
 
     @Override
-    public Optional<String> getClassification() {
-        return Optional.of(data.getClassification());
+    public String getClassification() {
+        return data.getClassification();
     }
 
     @Override
@@ -65,8 +65,8 @@ public class ProjectData extends StaData<ProjectEntity> implements Project {
     }
 
     @Override
-    public Optional<String> getPrivacyPolicy() {
-        return Optional.of(data.getPrivacyPolicy());
+    public String getPrivacyPolicy() {
+        return data.getPrivacyPolicy();
     }
 
     @Override
@@ -75,13 +75,13 @@ public class ProjectData extends StaData<ProjectEntity> implements Project {
     }
 
     @Override
-    public Optional<Time> getRunTime() {
-        return Optional.of(TimeUtil.createTime(data.getRunTimeStart(), data.getRunTimeEnd()));
+    public Time getRunTime() {
+        return TimeUtil.createTime(data.getRunTimeStart(), data.getRunTimeEnd());
     }
 
     @Override
-    public Optional<String> getUrl() {
-        return Optional.of(data.getUrl());
+    public String getUrl() {
+        return data.getUrl();
     }
 
     @Override

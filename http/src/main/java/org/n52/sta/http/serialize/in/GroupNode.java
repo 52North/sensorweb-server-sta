@@ -79,22 +79,22 @@ public class GroupNode extends StaNode implements Group {
 
     @Override
     public Set<Relation> getRelations() {
-        return null;
+        return toSet(StaConstants.RELATIONS, node -> new RelationNode(node, mapper));
     }
 
     @Override
     public License getLicense() {
-        return null;
+        return getOrNull(StaConstants.LICENSE, n -> new LicenseNode(n, mapper));
     }
 
     @Override
     public Party getParty() {
-        return null;
+        return getOrNull(StaConstants.PARTY, n -> new PartyNode(n, mapper));
     }
 
     @Override
     public Set<Observation> getObservations() {
-        return null;
+        return toSet(StaConstants.OBSERVATIONS, node -> new ObservationNode(node, mapper));
     }
 
 }
