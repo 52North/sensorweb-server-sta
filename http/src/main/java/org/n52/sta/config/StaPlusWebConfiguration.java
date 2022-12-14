@@ -28,20 +28,20 @@
 package org.n52.sta.config;
 
 import org.n52.grammar.StaPlusPathGrammar;
+import org.n52.grammar.StaPlusPathLexer;
+import org.n52.shetland.ogc.sta.StaConstants;
 import org.n52.sta.http.util.path.PathFactory;
 import org.n52.sta.http.util.path.StaPlusPathVisitor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Primary;
 import org.springframework.context.annotation.Profile;
 
 @Configuration
-@Profile("sta-plus")
+@Profile(StaConstants.STAPLUS)
 public class StaPlusWebConfiguration {
 
     @Bean
-    @Primary
     public PathFactory pathFactory() {
-        return new PathFactory(StaPlusPathGrammar::new, StaPlusPathVisitor::new);
+        return new PathFactory(StaPlusPathGrammar::new, StaPlusPathVisitor::new, StaPlusPathLexer::new);
     }
 }
