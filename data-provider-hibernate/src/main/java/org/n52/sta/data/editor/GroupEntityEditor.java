@@ -1,0 +1,177 @@
+/*
+ * Copyright (C) 2018-2022 52°North Spatial Information Research GmbH
+ *
+ * This program is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License version 2 as published
+ * by the Free Software Foundation.
+ *
+ * If the program is linked with libraries which are licensed under one of
+ * the following licenses, the combination of the program with the linked
+ * library is not considered a "derivative work" of the program:
+ *
+ *     - Apache License, version 2.0
+ *     - Apache Software License, version 1.0
+ *     - GNU Lesser General Public License, version 3
+ *     - Mozilla Public License, versions 1.0, 1.1 and 2.0
+ *     - Common Development and Distribution License (CDDL), version 1.0
+ *
+ * Therefore the distribution of the program linked with libraries licensed
+ * under the aforementioned licenses, is permitted by the copyright holders
+ * if the distribution is compliant with both the GNU General Public
+ * License version 2 and the aforementioned licenses.
+ *
+ * This program is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
+ * Public License for more details.
+ */
+
+package org.n52.sta.data.editor;
+
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+
+import org.n52.janmayen.stream.Streams;
+import org.n52.series.db.beans.sta.GroupEntity;
+import org.n52.sta.api.EntityServiceLookup;
+import org.n52.sta.api.entity.Group;
+import org.n52.sta.api.exception.editor.EditorException;
+import org.n52.sta.data.entity.GroupData;
+import org.n52.sta.data.repositories.entity.GroupRepository;
+import org.n52.sta.data.support.GroupGraphBuilder;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.event.ContextRefreshedEvent;
+import org.springframework.context.event.EventListener;
+
+public class GroupEntityEditor extends DatabaseEntityAdapter<GroupEntity>
+        implements
+        EntityEditorDelegate<Group, GroupData> {
+
+    @Autowired
+    private GroupRepository groupRepository;
+
+//    private EntityEditorDelegate<Location, LocationData> locationEditor;
+//    private EntityEditorDelegate<Datastream, DatastreamData> datastreamEditor;
+//    private EntityEditorDelegate<HistoricalLocation, HistoricalLocationData> historicalLocationEditor;
+
+    public GroupEntityEditor(EntityServiceLookup serviceLookup) {
+        super(serviceLookup);
+    }
+
+    @EventListener
+    @SuppressWarnings("unchecked")
+    private void postConstruct(ContextRefreshedEvent event) {
+        //@formatter:off
+        // As we are the package providing the EE Implementations, this cast should never fail.
+//        this.locationEditor = (EntityEditorDelegate<Location, LocationData>)
+//                getService(Location.class).unwrapEditor();
+//        this.datastreamEditor = (EntityEditorDelegate<Datastream, DatastreamData>)
+//                getService(Datastream.class).unwrapEditor();
+//        this.historicalLocationEditor = (EntityEditorDelegate<HistoricalLocation, HistoricalLocationData>)
+//                getService(HistoricalLocation.class).unwrapEditor();
+        //@formatter:on
+    }
+
+    @Override
+    public GroupData getOrSave(Group entity) throws EditorException {
+        if (entity != null) {
+            Optional<GroupEntity> stored = getEntity(entity.getId());
+            return stored.map(e -> new GroupData(e, Optional.empty())).orElseGet(() -> save(entity));
+        }
+        throw new EditorException("The Group to get or save is NULL!");
+    }
+
+    @Override
+    public GroupData save(Group entity) throws EditorException {
+        Objects.requireNonNull(entity, "entity must not be null");
+
+        String id = checkExistsOrGetId(entity, Group.class);
+        GroupEntity platformEntity = new GroupEntity();
+        platformEntity.setIdentifier(id);
+        platformEntity.setStaIdentifier(id);
+        platformEntity.setName(entity.getName());
+        platformEntity.setDescription(entity.getDescription());
+
+        // parameters are saved as cascade
+        Map<String, Object> properties = entity.getProperties();
+        Streams.stream(properties.entrySet())
+               .map(entry -> convertParameter(platformEntity, entry))
+               .forEach(platformEntity::addParameter);
+
+        // save entity
+        GroupEntity saved = groupRepository.save(platformEntity);
+
+//        if (platformEntity.hasLocations() || platformEntity.hasDatastreams()
+//                || platformEntity.hasHistoricalLocations()) {
+//            throw new EditorException("Insertion of nested entities is nt yet supported!");
+//        }
+
+        // save related entities
+//        platformEntity.setLocations(Streams.stream(entity.getLocations())
+//                                           .map(locationEditor::getOrSave)
+//                                           .map(StaData::getData)
+//                                           .collect(Collectors.toSet()));
+//
+//        platformEntity.setDatasets(Streams.stream(entity.getDatastreams())
+//                                          .map(datastreamEditor::getOrSave)
+//                                          .map(StaData::getData)
+//                                          .collect(Collectors.toSet()));
+//
+//        platformEntity.setHistoricalLocations(Streams.stream(entity.getHistoricalLocations())
+//                                                     .map(historicalLocationEditor::getOrSave)
+//                                                     .map(StaData::getData)
+//                                                     .collect(Collectors.toSet()));
+
+        // we need to flush else updates to relations are not persisted
+        groupRepository.flush();
+
+        return new GroupData(saved, Optional.empty());
+    }
+
+    @Override
+    public GroupData update(Group oldEntity, Group updateEntity) throws EditorException {
+        Objects.requireNonNull(oldEntity, "no entity to patch found");
+        Objects.requireNonNull(updateEntity, "no patches found");
+
+        GroupEntity data = ((GroupData) oldEntity).getData();
+
+        setIfNotNull(updateEntity::getName, data::setName);
+        setIfNotNull(updateEntity::getDescription, data::setDescription);
+
+        errorIfNotNull(updateEntity::getProperties, "properties");
+//        errorIfNotNull(updateEntity::getLocations, "locations");
+//        errorIfNotNull(updateEntity::getHistoricalLocations, "historicalLocations");
+//        errorIfNotNull(updateEntity::getDatastreams, "datastreams");
+
+        return new GroupData(groupRepository.save(data), Optional.empty());
+    }
+
+    @Override
+    public void delete(String id) throws EditorException {
+        GroupEntity platform = getEntity(id)
+                                               .orElseThrow(() -> new EditorException("could not find entity with id: "
+                                                       + id));
+
+//        platform.getDatasets()
+//                .forEach(ds -> {
+//                    datastreamEditor.delete(ds.getStaIdentifier());
+//                });
+//
+//        platform.getHistoricalLocations()
+//                .forEach(hl -> {
+//                    platform.setHistoricalLocations(null);
+//                    platform.getLocations()
+//                            .forEach(loc -> loc.setHistoricalLocations(null));
+//                    historicalLocationEditor.delete(hl.getStaIdentifier());
+//                });
+
+        groupRepository.delete(platform);
+    }
+
+    @Override
+    protected Optional<GroupEntity> getEntity(String id) {
+        GroupGraphBuilder graphBuilder = GroupGraphBuilder.createEmpty();
+        return groupRepository.findByStaIdentifier(id, graphBuilder);
+    }
+}
