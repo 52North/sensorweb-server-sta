@@ -28,7 +28,6 @@
 package org.n52.sta.api.entity;
 
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 
 public interface License extends Identifiable {
@@ -39,7 +38,7 @@ public interface License extends Identifiable {
 
     String getDefinition();
 
-    Optional<String> getLogo();
+    String getLogo();
 
     Map<String, Object> getProperties();
 

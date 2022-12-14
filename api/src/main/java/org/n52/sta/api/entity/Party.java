@@ -29,7 +29,6 @@ package org.n52.sta.api.entity;
 
 import org.n52.sta.api.domain.PartyRole;
 
-import java.util.Optional;
 import java.util.Set;
 
 public interface Party extends Identifiable {
@@ -42,7 +41,7 @@ public interface Party extends Identifiable {
 
     PartyRole getRole();
 
-    Optional<String> getDisplayName();
+    String getDisplayName();
 
     Set<Datastream> getDatastreams();
 

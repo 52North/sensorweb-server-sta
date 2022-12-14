@@ -57,7 +57,7 @@ public class PartyJsonSerializer extends StaBaseSerializer<Party> {
         writeStringProperty(StaConstants.PROP_DESCRIPTION, value::getDescription, gen);
         writeStringProperty(StaConstants.PROP_AUTH_ID, value::getAuthId, gen);
         writeStringProperty(StaConstants.PROP_ROLE, () -> value.getRole().toString(), gen);
-        writeStringProperty(StaConstants.PROP_DISPLAY_NAME, () -> value.getDisplayName().orElse(null), gen);
+        writeStringProperty(StaConstants.PROP_DISPLAY_NAME, value::getDisplayName, gen);
 
         // entity members
         String datastreams = StaConstants.DATASTREAMS;

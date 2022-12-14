@@ -55,7 +55,7 @@ public class LicenseJsonSerializer extends StaBaseSerializer<License> {
         writeStringProperty(StaConstants.PROP_NAME, value::getName, gen);
         writeStringProperty(StaConstants.PROP_DESCRIPTION, value::getDescription, gen);
         writeStringProperty(StaConstants.PROP_DEFINITION, value::getDefinition, gen);
-        writeStringProperty(StaConstants.PROP_LOGO, () -> value.getLogo().orElse(null), gen);
+        writeStringProperty(StaConstants.PROP_LOGO, value::getLogo, gen);
         writeObjectProperty(StaConstants.PROP_PROPERTIES, value::getProperties, gen);
 
         // entity members

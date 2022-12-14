@@ -90,22 +90,22 @@ public class ObservationNode extends StaNode implements Observation {
 
     @Override
     public Set<Group> getGroups() {
-        throw new RuntimeException(NIY);
+        return toSet(StaConstants.GROUPS, node -> new GroupNode(node, mapper));
     }
 
     @Override
     public Set<Relation> getSubjects() {
-        throw new RuntimeException(NIY);
+        return toSet(StaConstants.SUBJECTS, node -> new RelationNode(node, mapper));
     }
 
     @Override
     public Set<Relation> getObjects() {
-        throw new RuntimeException(NIY);
+        return toSet(StaConstants.OBJECTS, node -> new RelationNode(node, mapper));
     }
 
     @Override
     public String getValueType() {
-        throw new RuntimeException(NIY);
+        throw new RuntimeException("not yet implemented");
         // TODO determine type
     }
 }

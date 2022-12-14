@@ -53,12 +53,12 @@ public class ProjectJsonSerializer extends StaBaseSerializer<Project> {
                 name -> gen.writeStringField(StaConstants.AT_IOT_SELFLINK, createSelfLink(id)));
         writeStringProperty(StaConstants.PROP_NAME, value::getName, gen);
         writeStringProperty(StaConstants.PROP_DESCRIPTION, value::getDescription, gen);
-        writeStringProperty(StaConstants.PROP_CLASSIFICATION, () -> value.getClassification().orElse(null), gen);
+        writeStringProperty(StaConstants.PROP_CLASSIFICATION, value::getClassification, gen);
         writeStringProperty(StaConstants.PROP_TERMS_OF_USE, value::getTermsOfUse, gen);
-        writeStringProperty(StaConstants.PROP_PRIVACY_POLICY, () -> value.getPrivacyPolicy().orElse(null), gen);
+        writeStringProperty(StaConstants.PROP_PRIVACY_POLICY, value::getPrivacyPolicy, gen);
         writeTimeProperty(StaConstants.PROP_CREATION_TIME, value::getCreationTime, gen);
-        writeTimeProperty(StaConstants.PROP_RUNTIME, () -> value.getRunTime().orElse(null), gen);
-        writeStringProperty(StaConstants.PROP_URL, () -> value.getUrl().orElse(null), gen);
+        writeTimeProperty(StaConstants.PROP_RUNTIME, value::getRunTime, gen);
+        writeStringProperty(StaConstants.PROP_URL, value::getUrl, gen);
         writeObjectProperty(StaConstants.PROP_PROPERTIES, value::getProperties, gen);
 
         // entity members

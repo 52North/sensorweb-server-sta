@@ -62,8 +62,8 @@ public class PartyData extends StaData<PartyEntity> implements Party {
     }
 
     @Override
-    public Optional<String> getDisplayName() {
-        return Optional.of(data.getDisplayName());
+    public String getDisplayName() {
+        return data.getDisplayName();
     }
 
     @Override

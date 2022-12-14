@@ -59,7 +59,6 @@ abstract class StaNode implements Identifiable {
     private static final Logger LOGGER = LoggerFactory.getLogger(StaNode.class);
 
     protected final ObjectMapper mapper;
-    protected final String NIY = "not implemented yet!";
     private final JsonNode node;
 
     protected StaNode(JsonNode node, ObjectMapper mapper) {

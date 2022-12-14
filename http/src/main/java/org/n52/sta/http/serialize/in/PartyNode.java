@@ -31,18 +31,17 @@ package org.n52.sta.http.serialize.in;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.n52.shetland.ogc.sta.StaConstants;
+import org.n52.sta.api.domain.PartyRole;
 import org.n52.sta.api.entity.Datastream;
-import org.n52.sta.api.entity.HistoricalLocation;
-import org.n52.sta.api.entity.Location;
+import org.n52.sta.api.entity.Group;
 import org.n52.sta.api.entity.Party;
 import org.n52.sta.api.entity.Thing;
 
-import java.util.Map;
 import java.util.Set;
 
-public class ThingNode extends StaNode implements Thing {
+public class PartyNode extends StaNode implements Party {
 
-    public ThingNode(JsonNode node, ObjectMapper mapper) {
+    public PartyNode(JsonNode node, ObjectMapper mapper) {
         super(node, mapper);
     }
 
@@ -57,18 +56,18 @@ public class ThingNode extends StaNode implements Thing {
     }
 
     @Override
-    public Map<String, Object> getProperties() {
-        return toMap(StaConstants.PROP_PROPERTIES);
+    public String getAuthId() {
+        return getOrNull(StaConstants.PROP_AUTH_ID, JsonNode::asText);
     }
 
     @Override
-    public Set<HistoricalLocation> getHistoricalLocations() {
-        return toSet(StaConstants.HISTORICAL_LOCATIONS, n -> new HistoricalLocationNode(n, mapper));
+    public PartyRole getRole() {
+        return getOrNull(StaConstants.PROP_ROLE, node -> PartyRole.valueOf(node.asText()));
     }
 
     @Override
-    public Set<Location> getLocations() {
-        return toSet(StaConstants.LOCATIONS, n -> new LocationNode(n, mapper));
+    public String getDisplayName() {
+        return getOrNull(StaConstants.PROP_DISPLAY_NAME, JsonNode::asText);
     }
 
     @Override
@@ -77,8 +76,12 @@ public class ThingNode extends StaNode implements Thing {
     }
 
     @Override
-    public Party getParty() {
-        return getOrNull(StaConstants.PARTY, node -> new PartyNode(node, mapper));
+    public Set<Thing> getThings() {
+        return toSet(StaConstants.THINGS, n -> new ThingNode(n, mapper));
     }
 
+    @Override
+    public Set<Group> getGroups() {
+        return toSet(StaConstants.GROUPS, n -> new GroupNode(n, mapper));
+    }
 }

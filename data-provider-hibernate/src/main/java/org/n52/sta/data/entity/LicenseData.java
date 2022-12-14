@@ -60,8 +60,8 @@ public class LicenseData extends StaData<LicenseEntity> implements License {
     }
 
     @Override
-    public Optional<String> getLogo() {
-        return Optional.of(data.getLogo());
+    public String getLogo() {
+        return data.getLogo();
     }
 
     @Override

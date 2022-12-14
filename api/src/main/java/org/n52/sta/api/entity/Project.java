@@ -30,7 +30,6 @@ package org.n52.sta.api.entity;
 import org.n52.shetland.ogc.gml.time.Time;
 
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 
 public interface Project extends Identifiable {
@@ -39,17 +38,17 @@ public interface Project extends Identifiable {
 
     String getDescription();
 
-    Optional<String> getClassification();
+    String getClassification();
 
     String getTermsOfUse();
 
-    Optional<String> getPrivacyPolicy();
+    String getPrivacyPolicy();
 
     Time getCreationTime();
 
-    Optional<Time> getRunTime();
+    Time getRunTime();
 
-    Optional<String> getUrl();
+    String getUrl();
 
     Map<String, Object> getProperties();
 
