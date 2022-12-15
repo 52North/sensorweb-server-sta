@@ -81,6 +81,19 @@ abstract class DatabaseEntityAdapter<T extends DescribableEntity> {
 
     protected abstract Optional<T> getEntity(String id);
 
+    protected <E extends Identifiable> String checkExistsOrGetId(Identifiable entity, Class<E> clazz) {
+        if (entity.hasId()) {
+            String id = entity.getId();
+            EntityService<E> service = getService(clazz);
+            if (service.exists(id)) {
+                throw new EditorException(clazz.getSimpleName() + " already exists with Id '" + id + "'");
+            }
+            return id;
+        }
+        return generateId();
+    }
+
+
     protected String generateId() {
         UUID uuid = UUID.randomUUID();
         return uuid.toString();
