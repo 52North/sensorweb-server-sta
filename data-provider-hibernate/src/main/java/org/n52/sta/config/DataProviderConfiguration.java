@@ -30,6 +30,7 @@ package org.n52.sta.config;
 
 import org.n52.sta.data.provider.DatastreamEntityProvider;
 import org.n52.sta.data.provider.FeatureOfInterestEntityProvider;
+import org.n52.sta.data.provider.GroupEntityProvider;
 import org.n52.sta.data.provider.HistoricalLocationEntityProvider;
 import org.n52.sta.data.provider.LocationEntityProvider;
 import org.n52.sta.data.provider.ObservationEntityProvider;
@@ -39,6 +40,7 @@ import org.n52.sta.data.provider.ThingEntityProvider;
 import org.n52.sta.data.repositories.BaseRepositoryImpl;
 import org.n52.sta.data.repositories.entity.DatastreamRepository;
 import org.n52.sta.data.repositories.entity.FeatureOfInterestRepository;
+import org.n52.sta.data.repositories.entity.GroupRepository;
 import org.n52.sta.data.repositories.entity.HistoricalLocationRepository;
 import org.n52.sta.data.repositories.entity.LocationRepository;
 import org.n52.sta.data.repositories.entity.ObservationRepository;
@@ -96,6 +98,11 @@ public class DataProviderConfiguration {
     @Bean
     public FeatureOfInterestEntityProvider featureOfInterestEntityProvider(FeatureOfInterestRepository repository) {
         return new FeatureOfInterestEntityProvider(repository, propertyMapping);
+    }
+
+    @Bean
+    public GroupEntityProvider groupEntityProvider(GroupRepository repository) {
+        return new GroupEntityProvider(repository, propertyMapping);
     }
 
     @Configuration

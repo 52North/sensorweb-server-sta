@@ -89,6 +89,11 @@ public class DataEditorConfiguration {
     }
 
     @Bean
+    EntityEditor<Group> groupEntityEditor() {
+        return new GroupEntityEditor(serviceLookup);
+    }
+
+    @Bean
     public ValueHelper valueHelper() {
         return new ValueHelper();
     }
