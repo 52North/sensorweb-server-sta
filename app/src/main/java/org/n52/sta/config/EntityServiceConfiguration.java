@@ -30,11 +30,13 @@ package org.n52.sta.config;
 
 import java.util.Optional;
 
+import org.n52.shetland.ogc.sta.StaConstants;
 import org.n52.sta.api.EntityEditor;
 import org.n52.sta.api.EntityProvider;
 import org.n52.sta.api.EntityServiceLookup;
 import org.n52.sta.api.entity.Datastream;
 import org.n52.sta.api.entity.FeatureOfInterest;
+import org.n52.sta.api.entity.Group;
 import org.n52.sta.api.entity.HistoricalLocation;
 import org.n52.sta.api.entity.Location;
 import org.n52.sta.api.entity.Observation;
@@ -44,6 +46,7 @@ import org.n52.sta.api.entity.Thing;
 import org.n52.sta.api.service.DatastreamService;
 import org.n52.sta.api.service.AbstractEntityService;
 import org.n52.sta.api.service.FeatureOfInterestService;
+import org.n52.sta.api.service.GroupService;
 import org.n52.sta.api.service.HistoricalLocationService;
 import org.n52.sta.api.service.LocationService;
 import org.n52.sta.api.service.ObservationService;
@@ -53,6 +56,7 @@ import org.n52.sta.api.service.ThingService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Profile;
 
 @Configuration
 public class EntityServiceConfiguration {
@@ -141,6 +145,16 @@ public class EntityServiceConfiguration {
         HistoricalLocationService service = new HistoricalLocationService(entityProvider);
         entityEditor.ifPresent(service::setEditor);
         serviceLookup.addEntityService(HistoricalLocation.class, service);
+        return service;
+    }
+
+    @Bean
+    @Profile(StaConstants.STAPLUS)
+    public AbstractEntityService<Group> groupService(EntityProvider<Group> entityProvider,
+            Optional<EntityEditor<Group>> entityEditor) {
+        GroupService service = new GroupService(entityProvider);
+        entityEditor.ifPresent(service::setEditor);
+        serviceLookup.addEntityService(Group.class, service);
         return service;
     }
 }
