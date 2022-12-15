@@ -53,7 +53,7 @@ datastream
    ;
 
 observation
-   : OBSERVATIONS identifier (SLASH (datastream | featuresOfInterest | observationProperty))?
+   : OBSERVATIONS identifier (SLASH (datastream | featureOfInterest | observationProperty))?
    ;
 
 thing
