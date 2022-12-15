@@ -33,6 +33,7 @@ import java.util.function.BiFunction;
 
 import org.n52.sta.api.entity.Datastream;
 import org.n52.sta.api.entity.FeatureOfInterest;
+import org.n52.sta.api.entity.Group;
 import org.n52.sta.api.entity.HistoricalLocation;
 import org.n52.sta.api.entity.Identifiable;
 import org.n52.sta.api.entity.Location;
@@ -90,6 +91,8 @@ public class StaEntityDeserializer<T extends Identifiable> extends StdDeserializ
             return ObservationNode::new;
         } else if (FeatureOfInterest.class.isAssignableFrom(handledType())) {
             return FeatureOfInterestNode::new;
+        } else if (Group.class.isAssignableFrom(handledType())) {
+            return GroupNode::new;
         } else {
             LOGGER.debug("Unknown input type '{}'", handledType());
             throw new IllegalStateException("Unknown type to serialize: " + handledType());

@@ -32,6 +32,7 @@ import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import org.n52.shetland.ogc.sta.StaConstants;
 import org.n52.sta.api.entity.Group;
+import org.n52.sta.api.entity.Observation;
 import org.n52.sta.api.entity.Relation;
 
 import java.io.IOException;
@@ -59,6 +60,12 @@ public class GroupJsonSerializer extends StaBaseSerializer<Group> {
         writeObjectProperty(StaConstants.PROP_PROPERTIES, value::getProperties, gen);
 
         // entity members
+        writeMemberCollection(StaConstants.OBSERVATIONS, id, gen, ObservationJsonSerializer::new, serializer -> {
+            for (Observation item : value.getObservations()) {
+                serializer.serialize(item, gen, serializers);
+            }
+        });
+
         writeMemberCollection(StaConstants.RELATIONS, id, gen, RelationJsonSerializer::new, serializer -> {
             for (Relation item : value.getRelations()) {
                 serializer.serialize(item, gen, serializers);
