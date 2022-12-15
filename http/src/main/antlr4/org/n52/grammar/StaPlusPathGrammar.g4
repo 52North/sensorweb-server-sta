@@ -56,6 +56,10 @@ resource
    | relations
    ;
 
+observation
+   : OBSERVATIONS identifier (SLASH (datastream | featureOfInterest | observationProperty | groups))?
+   ;
+
 party
   : PARTY
   | PARTIES identifier (SLASH (group | groups | datastream | datastreams | thing | things | partyProperty))?
