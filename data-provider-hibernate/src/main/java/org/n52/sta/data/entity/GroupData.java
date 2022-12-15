@@ -39,7 +39,7 @@ import java.util.Set;
 
 public class GroupData extends StaData<GroupEntity> implements Group {
 
-    protected GroupData(GroupEntity dataEntity, Optional<EntityPropertyMapping> propertyMapping) {
+    public GroupData(GroupEntity dataEntity, Optional<EntityPropertyMapping> propertyMapping) {
         super(dataEntity, propertyMapping);
     }
 
@@ -60,12 +60,14 @@ public class GroupData extends StaData<GroupEntity> implements Group {
 
     @Override
     public Time getRunTime() {
-        return TimeUtil.createTime(data.getRunTimeStart(), data.getRunTimeEnd());
+        return data.isSetRunTimeSart() && data.isSetRunTimeEnd()
+                ? TimeUtil.createTime(data.getRunTimeStart(), data.getRunTimeEnd())
+                : null;
     }
 
     @Override
     public Time getCreationTime() {
-        return TimeUtil.createTime(data.getCreationTime());
+        return data.isSetCreationTime() ? TimeUtil.createTime(data.getCreationTime()) : null;
     }
 
     @Override

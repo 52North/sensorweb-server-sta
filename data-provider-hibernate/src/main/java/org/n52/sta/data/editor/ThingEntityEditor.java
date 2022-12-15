@@ -41,7 +41,6 @@ import org.n52.sta.api.entity.HistoricalLocation;
 import org.n52.sta.api.entity.Location;
 import org.n52.sta.api.entity.Thing;
 import org.n52.sta.api.exception.editor.EditorException;
-import org.n52.sta.api.service.EntityService;
 import org.n52.sta.data.entity.DatastreamData;
 import org.n52.sta.data.entity.HistoricalLocationData;
 import org.n52.sta.data.entity.LocationData;
@@ -95,17 +94,7 @@ public class ThingEntityEditor extends DatabaseEntityAdapter<PlatformEntity>
     public ThingData save(Thing entity) throws EditorException {
         Objects.requireNonNull(entity, "entity must not be null");
 
-        if (entity.hasId()) {
-            String staIdentifier = entity.getId();
-            EntityService<Thing> thingService = getService(Thing.class);
-            if (thingService.exists(staIdentifier)) {
-                throw new EditorException("Thing already exists with Id '" + staIdentifier + "'");
-            }
-        }
-
-        String id = entity.hasId()
-                ? entity.getId()
-                : generateId();
+        String id = checkExistsOrGetId(entity, Thing.class);
         PlatformEntity platformEntity = new PlatformEntity();
         platformEntity.setIdentifier(id);
         platformEntity.setStaIdentifier(id);
@@ -120,6 +109,11 @@ public class ThingEntityEditor extends DatabaseEntityAdapter<PlatformEntity>
 
         // save entity
         PlatformEntity saved = platformRepository.save(platformEntity);
+
+        if (platformEntity.hasLocations() || platformEntity.hasDatastreams()
+                || platformEntity.hasHistoricalLocations()) {
+            throw new EditorException("Insertion of nested entities is nt yet supported!");
+        }
 
         // save related entities
         platformEntity.setLocations(Streams.stream(entity.getLocations())

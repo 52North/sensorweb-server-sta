@@ -28,6 +28,14 @@
 
 package org.n52.sta.data.editor;
 
+import java.math.BigDecimal;
+import java.util.Collections;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
+
 import org.n52.janmayen.stream.Streams;
 import org.n52.series.db.beans.AbstractDatasetEntity;
 import org.n52.series.db.beans.DataEntity;
@@ -40,25 +48,20 @@ import org.n52.shetland.ogc.gml.time.TimeInstant;
 import org.n52.shetland.ogc.om.OmConstants;
 import org.n52.sta.api.EntityServiceLookup;
 import org.n52.sta.api.entity.Datastream;
+import org.n52.sta.api.entity.Group;
 import org.n52.sta.api.entity.Observation;
 import org.n52.sta.api.exception.editor.EditorException;
 import org.n52.sta.config.EntityPropertyMapping;
 import org.n52.sta.data.entity.DatastreamData;
+import org.n52.sta.data.entity.GroupData;
 import org.n52.sta.data.entity.ObservationData;
+import org.n52.sta.data.entity.StaData;
 import org.n52.sta.data.repositories.entity.ObservationRepository;
 import org.n52.sta.data.support.GraphBuilder;
 import org.n52.sta.data.support.ObservationGraphBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.context.event.EventListener;
-
-import java.math.BigDecimal;
-import java.util.Collections;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 public class ObservationEntityEditor extends DatabaseEntityAdapter<DataEntity>
         implements
@@ -74,6 +77,7 @@ public class ObservationEntityEditor extends DatabaseEntityAdapter<DataEntity>
     private EntityPropertyMapping propertyMapping;
 
     private DatastreamEditorDelegate<Datastream, DatastreamData> datastreamEditor;
+    private EntityEditorDelegate<Group, GroupData> groupEditor;
 
     public ObservationEntityEditor(EntityServiceLookup serviceLookup) {
         super(serviceLookup);
@@ -86,6 +90,8 @@ public class ObservationEntityEditor extends DatabaseEntityAdapter<DataEntity>
         // As we are the package providing the EE Implementations, this cast should never fail.
         this.datastreamEditor = (DatastreamEditorDelegate<Datastream, DatastreamData>)
                 getService(Datastream.class).unwrapEditor();
+        this.groupEditor = (EntityEditorDelegate<Group, GroupData>)
+                getService(Group.class).unwrapEditor();
         //@formatter:on
     }
 
@@ -102,6 +108,7 @@ public class ObservationEntityEditor extends DatabaseEntityAdapter<DataEntity>
         assertNew(entity);
 
         DatasetEntity datastream = (DatasetEntity) getDatastreamOf(entity);
+
         return Streams.stream(saveAll(Collections.singleton(entity), datastream))
                       .map(savedEntity -> new ObservationData(savedEntity, Optional.of(propertyMapping)))
                       .findFirst()
@@ -165,6 +172,14 @@ public class ObservationEntityEditor extends DatabaseEntityAdapter<DataEntity>
                       .collect(Collectors.toSet());
     }
 
+    private DataEntity<?> addGroups(DataEntity<?> entity, Observation observation) {
+        entity.setGroups(Streams.stream(observation.getGroups())
+                .map(groupEditor::getOrSave)
+                .map(StaData::getData)
+                .collect(Collectors.toSet()));
+        return entity;
+    }
+
     private AbstractDatasetEntity getDatastreamOf(Observation entity) throws EditorException {
         return datastreamEditor.getOrSave(entity.getDatastream())
                                .getData();
@@ -200,7 +215,7 @@ public class ObservationEntityEditor extends DatabaseEntityAdapter<DataEntity>
                 throw new EditorException("Unknown OMObservation type: " + format);
         }
 
-        return dataEntity;
+        return addGroups(dataEntity, observation);
     }
 
     private DataEntity< ? > initDataEntity(DataEntity< ? > data, Observation observation, DatasetEntity dataset) {

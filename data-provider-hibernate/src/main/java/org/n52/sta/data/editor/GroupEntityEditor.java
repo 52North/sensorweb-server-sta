@@ -34,6 +34,8 @@ import java.util.Optional;
 
 import org.n52.janmayen.stream.Streams;
 import org.n52.series.db.beans.sta.GroupEntity;
+import org.n52.shetland.ogc.gml.time.Time;
+import org.n52.shetland.ogc.gml.time.TimeInstant;
 import org.n52.sta.api.EntityServiceLookup;
 import org.n52.sta.api.entity.Group;
 import org.n52.sta.api.exception.editor.EditorException;
@@ -51,9 +53,9 @@ public class GroupEntityEditor extends DatabaseEntityAdapter<GroupEntity>
     @Autowired
     private GroupRepository groupRepository;
 
-//    private EntityEditorDelegate<Location, LocationData> locationEditor;
-//    private EntityEditorDelegate<Datastream, DatastreamData> datastreamEditor;
-//    private EntityEditorDelegate<HistoricalLocation, HistoricalLocationData> historicalLocationEditor;
+    @Autowired
+    private ValueHelper valueHelper;
+
 
     public GroupEntityEditor(EntityServiceLookup serviceLookup) {
         super(serviceLookup);
@@ -63,13 +65,6 @@ public class GroupEntityEditor extends DatabaseEntityAdapter<GroupEntity>
     @SuppressWarnings("unchecked")
     private void postConstruct(ContextRefreshedEvent event) {
         //@formatter:off
-        // As we are the package providing the EE Implementations, this cast should never fail.
-//        this.locationEditor = (EntityEditorDelegate<Location, LocationData>)
-//                getService(Location.class).unwrapEditor();
-//        this.datastreamEditor = (EntityEditorDelegate<Datastream, DatastreamData>)
-//                getService(Datastream.class).unwrapEditor();
-//        this.historicalLocationEditor = (EntityEditorDelegate<HistoricalLocation, HistoricalLocationData>)
-//                getService(HistoricalLocation.class).unwrapEditor();
         //@formatter:on
     }
 
@@ -87,41 +82,31 @@ public class GroupEntityEditor extends DatabaseEntityAdapter<GroupEntity>
         Objects.requireNonNull(entity, "entity must not be null");
 
         String id = checkExistsOrGetId(entity, Group.class);
-        GroupEntity platformEntity = new GroupEntity();
-        platformEntity.setIdentifier(id);
-        platformEntity.setStaIdentifier(id);
-        platformEntity.setName(entity.getName());
-        platformEntity.setDescription(entity.getDescription());
+        GroupEntity group = new GroupEntity();
+        group.setIdentifier(id);
+        group.setStaIdentifier(id);
+        group.setName(entity.getName());
+        group.setDescription(entity.getDescription());
+
+        group.setPurpose(entity.getPurpose());
+        if (entity.getRunTime() != null) {
+        Time resultTime = entity.getRunTime();
+            valueHelper.setStartTime(group::setRunTimeStart, resultTime);
+            valueHelper.setEndTime(group::setRunTimeEnd, resultTime);
+        }
+
+        Time creationTime = entity.getCreationTime();
+        valueHelper.setTime(group::setCreationTime, (TimeInstant) creationTime);
 
         // parameters are saved as cascade
         Map<String, Object> properties = entity.getProperties();
         Streams.stream(properties.entrySet())
-               .map(entry -> convertParameter(platformEntity, entry))
-               .forEach(platformEntity::addParameter);
+               .map(entry -> convertParameter(group, entry))
+               .forEach(group::addParameter);
 
         // save entity
-        GroupEntity saved = groupRepository.save(platformEntity);
+        GroupEntity saved = groupRepository.save(group);
 
-//        if (platformEntity.hasLocations() || platformEntity.hasDatastreams()
-//                || platformEntity.hasHistoricalLocations()) {
-//            throw new EditorException("Insertion of nested entities is nt yet supported!");
-//        }
-
-        // save related entities
-//        platformEntity.setLocations(Streams.stream(entity.getLocations())
-//                                           .map(locationEditor::getOrSave)
-//                                           .map(StaData::getData)
-//                                           .collect(Collectors.toSet()));
-//
-//        platformEntity.setDatasets(Streams.stream(entity.getDatastreams())
-//                                          .map(datastreamEditor::getOrSave)
-//                                          .map(StaData::getData)
-//                                          .collect(Collectors.toSet()));
-//
-//        platformEntity.setHistoricalLocations(Streams.stream(entity.getHistoricalLocations())
-//                                                     .map(historicalLocationEditor::getOrSave)
-//                                                     .map(StaData::getData)
-//                                                     .collect(Collectors.toSet()));
 
         // we need to flush else updates to relations are not persisted
         groupRepository.flush();
@@ -140,9 +125,6 @@ public class GroupEntityEditor extends DatabaseEntityAdapter<GroupEntity>
         setIfNotNull(updateEntity::getDescription, data::setDescription);
 
         errorIfNotNull(updateEntity::getProperties, "properties");
-//        errorIfNotNull(updateEntity::getLocations, "locations");
-//        errorIfNotNull(updateEntity::getHistoricalLocations, "historicalLocations");
-//        errorIfNotNull(updateEntity::getDatastreams, "datastreams");
 
         return new GroupData(groupRepository.save(data), Optional.empty());
     }
@@ -152,19 +134,6 @@ public class GroupEntityEditor extends DatabaseEntityAdapter<GroupEntity>
         GroupEntity platform = getEntity(id)
                                                .orElseThrow(() -> new EditorException("could not find entity with id: "
                                                        + id));
-
-//        platform.getDatasets()
-//                .forEach(ds -> {
-//                    datastreamEditor.delete(ds.getStaIdentifier());
-//                });
-//
-//        platform.getHistoricalLocations()
-//                .forEach(hl -> {
-//                    platform.setHistoricalLocations(null);
-//                    platform.getLocations()
-//                            .forEach(loc -> loc.setHistoricalLocations(null));
-//                    historicalLocationEditor.delete(hl.getStaIdentifier());
-//                });
 
         groupRepository.delete(platform);
     }
