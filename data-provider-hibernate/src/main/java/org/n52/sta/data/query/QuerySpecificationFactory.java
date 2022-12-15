@@ -32,6 +32,7 @@ import org.n52.shetland.ogc.sta.exception.STAInvalidFilterExpressionException;
 import org.n52.sta.data.query.specifications.BaseQuerySpecifications;
 import org.n52.sta.data.query.specifications.DatastreamQuerySpecification;
 import org.n52.sta.data.query.specifications.FeatureOfInterestQuerySpecification;
+import org.n52.sta.data.query.specifications.GroupQuerySpecification;
 import org.n52.sta.data.query.specifications.HistoricalLocationQuerySpecification;
 import org.n52.sta.data.query.specifications.LocationQuerySpecification;
 import org.n52.sta.data.query.specifications.ObservationQuerySpecification;
@@ -107,6 +108,11 @@ public class QuerySpecificationFactory {
             case "ObservedProperty":
             case "ObservedProperties": {
                 return new ObservedPropertyQuerySpecification();
+            }
+            case "GroupEntity":
+            case "Group":
+            case "Groups": {
+                return new GroupQuerySpecification();
             }
             default:
                 throw new STAInvalidFilterExpressionException("Unable to find QuerySpecification for type: " + name);

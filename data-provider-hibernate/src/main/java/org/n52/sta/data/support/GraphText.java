@@ -52,7 +52,11 @@ enum GraphText {
     GRAPH_CATEGORY("category"),
 
     GRAPH_PLATFORMSHISTLOCATION("platforms(historicalLocations)"),
-    GRAPH_LOCATIONHISTLOCATION("locations(historicalLocations)");
+    GRAPH_LOCATIONHISTLOCATION("locations(historicalLocations)"),
+    GRAPH_GROUP_OBSERVATIONS("group(observations)"),
+    GRAPH_GROUP_RELATIONS("group(relations)"),
+    GRAPH_GROUP_LICENSE("group(licnese)"),
+    GRAPH_GROUP_PARTY("group(party)");
 
     private final String value;
     private final Set<String> values = new LinkedHashSet<>();

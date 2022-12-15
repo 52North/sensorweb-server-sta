@@ -30,6 +30,8 @@ package org.n52.sta.data.query.specifications;
 
 import java.util.Optional;
 
+import javax.persistence.criteria.Join;
+import javax.persistence.criteria.JoinType;
 import javax.persistence.criteria.Root;
 import javax.persistence.criteria.Subquery;
 
@@ -37,7 +39,10 @@ import org.n52.series.db.beans.AbstractDatasetEntity;
 import org.n52.series.db.beans.DataEntity;
 import org.n52.series.db.beans.DatasetEntity;
 import org.n52.series.db.beans.FeatureEntity;
+import org.n52.series.db.beans.IdEntity;
+import org.n52.series.db.beans.sta.GroupEntity;
 import org.n52.shetland.ogc.sta.StaConstants;
+import org.n52.sta.data.query.specifications.BaseQuerySpecifications.EntityQuery;
 import org.springframework.data.jpa.domain.Specification;
 
 public class ObservationQuerySpecification extends QuerySpecification<DataEntity> {
@@ -46,6 +51,7 @@ public class ObservationQuerySpecification extends QuerySpecification<DataEntity
         super();
         this.filterByMember.put(StaConstants.DATASTREAMS, createDatastreamFilter());
         this.filterByMember.put(StaConstants.FEATURES_OF_INTEREST, createFeatureOfInterestFilter());
+        this.filterByMember.put(StaConstants.GROUPS, createGroupsFilter());
     }
 
     @Override
@@ -75,6 +81,17 @@ public class ObservationQuerySpecification extends QuerySpecification<DataEntity
                         .where(builder.equal(dataset.get(DatasetEntity.PROPERTY_FEATURE), featureQuery));
             return builder.in(root.get(DataEntity.PROPERTY_DATASET))
                           .value(datasetQuery);
+        };
+    }
+
+    private MemberFilter<DataEntity> createGroupsFilter() {
+        return specification -> (root, query, builder) -> {
+            EntityQuery memberQuery = createQuery(IdEntity.PROPERTY_ID, GroupEntity.class);
+            Subquery< ? > subquery = memberQuery.create(specification, query, builder);
+            // m..n
+            Join< ? , ? > join = root.join(DataEntity.PROPERTY_GROUPS, JoinType.INNER);
+            return builder.in(join.get(IdEntity.PROPERTY_ID))
+                          .value(subquery);
         };
     }
 }

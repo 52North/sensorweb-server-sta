@@ -28,11 +28,20 @@
 
 package org.n52.sta.data.query.specifications;
 
+import javax.persistence.criteria.Join;
+import javax.persistence.criteria.JoinType;
+import javax.persistence.criteria.Subquery;
+
+import org.n52.series.db.beans.DataEntity;
 import org.n52.series.db.beans.HibernateRelations.HasDescription;
 import org.n52.series.db.beans.HibernateRelations.HasName;
+import org.n52.series.db.beans.IdEntity;
 import org.n52.series.db.beans.sta.GroupEntity;
+import org.n52.series.db.beans.sta.LicenseEntity;
+import org.n52.series.db.beans.sta.PartyEntity;
 import org.n52.shetland.ogc.sta.StaConstants;
 import org.n52.sta.data.query.specifications.util.SimplePropertyComparator;
+import org.n52.sta.data.query.specifications.util.TimePropertyComparator;
 
 public class GroupQuerySpecification extends QuerySpecification<GroupEntity> {
 
@@ -46,28 +55,28 @@ public class GroupQuerySpecification extends QuerySpecification<GroupEntity> {
         this.entityPathByProperty.put(StaConstants.PROP_NAME, new SimplePropertyComparator<>(HasName.PROPERTY_NAME));
         this.entityPathByProperty.put(StaConstants.PROP_DESCRIPTION,
                 new SimplePropertyComparator<>(HasDescription.PROPERTY_DESCRIPTION));
-        // this.entityPathByProperty.put(StaConstants.PROP_PURPOSE, new
-        // SimplePropertyComparator<>(GroupEntity.PROPERTY_PURPUSE)));
-        // this.entityPathByProperty.put(StaConstants.PROP_CREATION_TIME, new
-        // SimplePropertyComparator<>(GroupEntity.PROPERTY_PURPUSE)));
-        // this.entityPathByProperty.put(StaConstants.PROP_RUNTIME, new
-        // SimplePropertyComparator<>(GroupEntity.PROPERTY_PURPUSE)));
+         this.entityPathByProperty.put(StaConstants.PROP_PURPOSE, new
+         SimplePropertyComparator<>(GroupEntity.PROPERTY_PURPOSE));
+         this.entityPathByProperty.put(StaConstants.PROP_CREATION_TIME, new
+         SimplePropertyComparator<>(GroupEntity.PROPERTY_CREATION_TIME));
+         this.entityPathByProperty.put(StaConstants.PROP_RUNTIME,
+                 new TimePropertyComparator<>(
+                         GroupEntity.PROPERTY_RUN_TIME_START,
+                         GroupEntity.PROPERTY_RUN_TIME_ENDT));
     }
 
     // TODO discuss: split multiple (tiny) subqueries so that we are able to use
     // kind of a DSL query language
 
     private MemberFilter<GroupEntity> createObservationFilter() {
-        // add member specification on root specfication
-//        return specification -> (root, query, builder) -> {
-//            EntityQuery memberQuery = createQuery(IdEntity.PROPERTY_ID, DataEntity.class);
-//            Subquery<?> subquery = memberQuery.create(specification, query, builder);
-//            // m..n
-//            Join<?, ?> join = root.join(GroupEntity.PROPERTY_, JoinType.INNER);
-//            return builder.in(join.get(IdEntity.PROPERTY_ID)).value(subquery);
-//
-//        };
-        return null;
+        return specification -> (root, query, builder) -> {
+            EntityQuery memberQuery = createQuery(IdEntity.PROPERTY_ID, DataEntity.class);
+            Subquery< ? > subquery = memberQuery.create(specification, query, builder);
+            // m..n
+            Join< ? , ? > join = root.join(GroupEntity.PROPERTY_OBSERVATIONS, JoinType.INNER);
+            return builder.in(join.get(IdEntity.PROPERTY_ID))
+                          .value(subquery);
+        };
     }
 
     private MemberFilter<GroupEntity> createRelationFilter() {
@@ -76,13 +85,27 @@ public class GroupQuerySpecification extends QuerySpecification<GroupEntity> {
     }
 
     private MemberFilter<GroupEntity> createLicenseFilter() {
-        // TODO Auto-generated method stub
-        return null;
+        return specification -> (root, query, builder) -> {
+            EntityQuery memberQuery = createQuery(IdEntity.PROPERTY_ID, LicenseEntity.class);
+            Subquery< ? > subquery = memberQuery.create(specification, query, builder);
+            // m..n
+            Join< ? , ? > join = root.join(GroupEntity.PROPERTY_LICENSE, JoinType.INNER);
+            return builder.in(join.get(IdEntity.PROPERTY_ID))
+                          .value(subquery);
+
+        };
     }
 
     private MemberFilter<GroupEntity> createPartyFilter() {
-        // TODO Auto-generated method stub
-        return null;
+        return specification -> (root, query, builder) -> {
+            EntityQuery memberQuery = createQuery(IdEntity.PROPERTY_ID, PartyEntity.class);
+            Subquery< ? > subquery = memberQuery.create(specification, query, builder);
+            // m..n
+            Join< ? , ? > join = root.join(GroupEntity.PROPERTY_PARTY, JoinType.INNER);
+            return builder.in(join.get(IdEntity.PROPERTY_ID))
+                          .value(subquery);
+
+        };
     }
 
 //    private MemberFilter<PlatformEntity> createHistoricalLocationFilter() {
