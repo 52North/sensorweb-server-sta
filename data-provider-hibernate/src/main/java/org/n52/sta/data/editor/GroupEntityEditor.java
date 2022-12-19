@@ -31,6 +31,7 @@ package org.n52.sta.data.editor;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.n52.janmayen.stream.Streams;
 import org.n52.series.db.beans.sta.GroupEntity;
@@ -38,8 +39,17 @@ import org.n52.shetland.ogc.gml.time.Time;
 import org.n52.shetland.ogc.gml.time.TimeInstant;
 import org.n52.sta.api.EntityServiceLookup;
 import org.n52.sta.api.entity.Group;
+import org.n52.sta.api.entity.License;
+import org.n52.sta.api.entity.Observation;
+import org.n52.sta.api.entity.Party;
+import org.n52.sta.api.entity.Relation;
 import org.n52.sta.api.exception.editor.EditorException;
 import org.n52.sta.data.entity.GroupData;
+import org.n52.sta.data.entity.LicenseData;
+import org.n52.sta.data.entity.ObservationData;
+import org.n52.sta.data.entity.PartyData;
+import org.n52.sta.data.entity.RelationData;
+import org.n52.sta.data.entity.StaData;
 import org.n52.sta.data.repositories.entity.GroupRepository;
 import org.n52.sta.data.support.GroupGraphBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -56,6 +66,11 @@ public class GroupEntityEditor extends DatabaseEntityAdapter<GroupEntity>
     @Autowired
     private ValueHelper valueHelper;
 
+    private EntityEditorDelegate<Observation, ObservationData> observationEditor;
+    private EntityEditorDelegate<License, LicenseData> licenseEditor;
+    private EntityEditorDelegate<Party, PartyData> partyEditor;
+    private EntityEditorDelegate<Relation, RelationData> relationEditor;
+
 
     public GroupEntityEditor(EntityServiceLookup serviceLookup) {
         super(serviceLookup);
@@ -65,6 +80,14 @@ public class GroupEntityEditor extends DatabaseEntityAdapter<GroupEntity>
     @SuppressWarnings("unchecked")
     private void postConstruct(ContextRefreshedEvent event) {
         //@formatter:off
+        this.observationEditor = (EntityEditorDelegate<Observation, ObservationData>)
+                getService(Observation.class).unwrapEditor();
+        this.licenseEditor = (EntityEditorDelegate<License, LicenseData>)
+                getService(License.class).unwrapEditor();
+        this.partyEditor = (EntityEditorDelegate<Party, PartyData>)
+                getService(Party.class).unwrapEditor();
+        this.relationEditor = (EntityEditorDelegate<Relation, RelationData>)
+                getService(Relation.class).unwrapEditor();
         //@formatter:on
     }
 
@@ -90,9 +113,9 @@ public class GroupEntityEditor extends DatabaseEntityAdapter<GroupEntity>
 
         group.setPurpose(entity.getPurpose());
         if (entity.getRunTime() != null) {
-        Time resultTime = entity.getRunTime();
-            valueHelper.setStartTime(group::setRunTimeStart, resultTime);
-            valueHelper.setEndTime(group::setRunTimeEnd, resultTime);
+            Time runTime = entity.getRunTime();
+            valueHelper.setStartTime(group::setRunTimeStart, runTime);
+            valueHelper.setEndTime(group::setRunTimeEnd, runTime);
         }
 
         Time creationTime = entity.getCreationTime();
@@ -107,6 +130,25 @@ public class GroupEntityEditor extends DatabaseEntityAdapter<GroupEntity>
         // save entity
         GroupEntity saved = groupRepository.save(group);
 
+        saved.setObservations(Streams.stream(entity.getObservations())
+                .map(observationEditor::getOrSave)
+                .map(StaData::getData)
+                .collect(Collectors.toSet()));
+
+        if (entity.getLicense() != null) {
+            LicenseData licence = licenseEditor.getOrSave(entity.getLicense());
+            saved.setLicense(licence.getData());
+        }
+
+        if (entity.getParty() != null) {
+            PartyData party = partyEditor.getOrSave(entity.getParty());
+            saved.setParty(party.getData());
+        }
+
+        saved.setRelations(Streams.stream(entity.getRelations())
+                .map(relationEditor::getOrSave)
+                .map(StaData::getData)
+                .collect(Collectors.toSet()));
 
         // we need to flush else updates to relations are not persisted
         groupRepository.flush();
@@ -131,11 +173,10 @@ public class GroupEntityEditor extends DatabaseEntityAdapter<GroupEntity>
 
     @Override
     public void delete(String id) throws EditorException {
-        GroupEntity platform = getEntity(id)
+        GroupEntity group = getEntity(id)
                                                .orElseThrow(() -> new EditorException("could not find entity with id: "
                                                        + id));
-
-        groupRepository.delete(platform);
+        groupRepository.delete(group);
     }
 
     @Override
