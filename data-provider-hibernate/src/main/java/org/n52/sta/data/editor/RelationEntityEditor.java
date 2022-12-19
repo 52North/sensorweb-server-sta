@@ -31,6 +31,7 @@ package org.n52.sta.data.editor;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.n52.janmayen.stream.Streams;
 import org.n52.series.db.beans.sta.RelationEntity;
@@ -42,6 +43,7 @@ import org.n52.sta.api.exception.editor.EditorException;
 import org.n52.sta.data.entity.GroupData;
 import org.n52.sta.data.entity.ObservationData;
 import org.n52.sta.data.entity.RelationData;
+import org.n52.sta.data.entity.StaData;
 import org.n52.sta.data.repositories.entity.RelationRepository;
 import org.n52.sta.data.support.RelationGraphBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -115,6 +117,11 @@ public class RelationEntityEditor extends DatabaseEntityAdapter<RelationEntity>
 
         // save entity
         RelationEntity saved = relationRepository.save(relation);
+
+        saved.setGroups(Streams.stream(entity.getGroups())
+                .map(groupEditor::getOrSave)
+                .map(StaData::getData)
+                .collect(Collectors.toSet()));
 
         // we need to flush else updates to relations are not persisted
         relationRepository.flush();
