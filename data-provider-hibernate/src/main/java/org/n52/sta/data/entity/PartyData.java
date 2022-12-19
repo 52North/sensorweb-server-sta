@@ -58,7 +58,7 @@ public class PartyData extends StaData<PartyEntity> implements Party {
 
     @Override
     public PartyRole getRole() {
-        return PartyRole.valueOf(data.getRole().name());
+        return PartyRole.getIgnoreCase(data.getRole().name());
     }
 
     @Override

@@ -70,13 +70,15 @@ public class ProjectData extends StaData<ProjectEntity> implements Project {
     }
 
     @Override
-    public Time getCreationTime() {
-        return TimeUtil.createTime(data.getCreationTime());
+    public Time getRunTime() {
+        return data.isSetRunTimeSart() && data.isSetRunTimeEnd()
+                ? TimeUtil.createTime(data.getRunTimeStart(), data.getRunTimeEnd())
+                : null;
     }
 
     @Override
-    public Time getRunTime() {
-        return TimeUtil.createTime(data.getRunTimeStart(), data.getRunTimeEnd());
+    public Time getCreationTime() {
+        return data.isSetCreationTime() ? TimeUtil.createTime(data.getCreationTime()) : null;
     }
 
     @Override

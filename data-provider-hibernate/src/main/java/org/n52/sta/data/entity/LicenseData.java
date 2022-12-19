@@ -39,8 +39,7 @@ import java.util.Set;
 
 public class LicenseData extends StaData<LicenseEntity> implements License {
 
-
-    protected LicenseData(LicenseEntity dataEntity, Optional<EntityPropertyMapping> propertyMapping) {
+    public LicenseData(LicenseEntity dataEntity, Optional<EntityPropertyMapping> propertyMapping) {
         super(dataEntity, propertyMapping);
     }
 
