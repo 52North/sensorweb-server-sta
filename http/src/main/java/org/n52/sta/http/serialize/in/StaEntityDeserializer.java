@@ -36,9 +36,13 @@ import org.n52.sta.api.entity.FeatureOfInterest;
 import org.n52.sta.api.entity.Group;
 import org.n52.sta.api.entity.HistoricalLocation;
 import org.n52.sta.api.entity.Identifiable;
+import org.n52.sta.api.entity.License;
 import org.n52.sta.api.entity.Location;
 import org.n52.sta.api.entity.Observation;
 import org.n52.sta.api.entity.ObservedProperty;
+import org.n52.sta.api.entity.Party;
+import org.n52.sta.api.entity.Project;
+import org.n52.sta.api.entity.Relation;
 import org.n52.sta.api.entity.Sensor;
 import org.n52.sta.api.entity.Thing;
 import org.slf4j.Logger;
@@ -93,6 +97,14 @@ public class StaEntityDeserializer<T extends Identifiable> extends StdDeserializ
             return FeatureOfInterestNode::new;
         } else if (Group.class.isAssignableFrom(handledType())) {
             return GroupNode::new;
+        } else if (License.class.isAssignableFrom(handledType())) {
+            return LicenseNode::new;
+        } else if (Party.class.isAssignableFrom(handledType())) {
+            return PartyNode::new;
+        } else if (Project.class.isAssignableFrom(handledType())) {
+            return ProjectNode::new;
+        } else if (Relation.class.isAssignableFrom(handledType())) {
+            return RelationNode::new;
         } else {
             LOGGER.debug("Unknown input type '{}'", handledType());
             throw new IllegalStateException("Unknown type to serialize: " + handledType());
