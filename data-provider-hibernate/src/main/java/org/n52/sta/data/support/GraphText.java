@@ -53,10 +53,25 @@ enum GraphText {
 
     GRAPH_PLATFORMSHISTLOCATION("platforms(historicalLocations)"),
     GRAPH_LOCATIONHISTLOCATION("locations(historicalLocations)"),
+
     GRAPH_GROUP_OBSERVATIONS("group(observations)"),
     GRAPH_GROUP_RELATIONS("group(relations)"),
     GRAPH_GROUP_LICENSE("group(licnese)"),
-    GRAPH_GROUP_PARTY("group(party)");
+    GRAPH_GROUP_PARTY("group(party)"),
+
+    GRAPH_LICENSE_DATASTREAMS("license(datastreams)"),
+    GRAPH_LICENSE_GROUPS("license(groups)"),
+
+
+    GRAPH_PARTY_THINGS("party(things)"),
+    GRAPH_PARTY_DATASTREAMS("party(datastreams)"),
+    GRAPH_PARTY_GROUPS("party(groups)"),
+
+    GRAPH_PROJECT_DATASTREAMS("project(datastreams)"),
+
+    GRAPH_RELATION_OBEJCTS("relation(objects)"),
+    GRAPH_RELATION_SUBJECTS("relation(subjects)"),
+    GRAPH_RELATION_GROUPS("relation(groups)");
 
     private final String value;
     private final Set<String> values = new LinkedHashSet<>();
