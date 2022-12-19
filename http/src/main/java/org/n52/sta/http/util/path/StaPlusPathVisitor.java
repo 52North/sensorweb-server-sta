@@ -156,8 +156,8 @@ public class StaPlusPathVisitor extends StaPlusPathGrammarBaseVisitor<StaPath<? 
     @Override
     public StaPath<? extends Identifiable> visitProject(StaPlusPathGrammar.ProjectContext ctx) {
         return parseEntity((ctx.PROJECT() != null)
-                        ? StaPlusPathGrammar.DATASTREAM
-                        : StaPlusPathGrammar.DATASTREAMS,
+                        ? StaPlusPathGrammar.PROJECT
+                        : StaPlusPathGrammar.PROJECTS,
                 ctx.projectProperty(),
                 ctx,
                 ProjectJsonSerializer::new,
