@@ -38,19 +38,27 @@ import org.n52.sta.api.entity.Datastream;
 import org.n52.sta.api.entity.FeatureOfInterest;
 import org.n52.sta.api.entity.Group;
 import org.n52.sta.api.entity.HistoricalLocation;
+import org.n52.sta.api.entity.License;
 import org.n52.sta.api.entity.Location;
 import org.n52.sta.api.entity.Observation;
 import org.n52.sta.api.entity.ObservedProperty;
+import org.n52.sta.api.entity.Party;
+import org.n52.sta.api.entity.Project;
+import org.n52.sta.api.entity.Relation;
 import org.n52.sta.api.entity.Sensor;
 import org.n52.sta.api.entity.Thing;
-import org.n52.sta.api.service.DatastreamService;
 import org.n52.sta.api.service.AbstractEntityService;
+import org.n52.sta.api.service.DatastreamService;
 import org.n52.sta.api.service.FeatureOfInterestService;
 import org.n52.sta.api.service.GroupService;
 import org.n52.sta.api.service.HistoricalLocationService;
+import org.n52.sta.api.service.LicenseService;
 import org.n52.sta.api.service.LocationService;
 import org.n52.sta.api.service.ObservationService;
 import org.n52.sta.api.service.ObservedPropertyService;
+import org.n52.sta.api.service.PartyService;
+import org.n52.sta.api.service.ProjectService;
+import org.n52.sta.api.service.RelationService;
 import org.n52.sta.api.service.SensorService;
 import org.n52.sta.api.service.ThingService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -155,6 +163,46 @@ public class EntityServiceConfiguration {
         GroupService service = new GroupService(entityProvider);
         entityEditor.ifPresent(service::setEditor);
         serviceLookup.addEntityService(Group.class, service);
+        return service;
+    }
+
+    @Bean
+    @Profile(StaConstants.STAPLUS)
+    public AbstractEntityService<License> licenseService(EntityProvider<License> entityProvider,
+            Optional<EntityEditor<License>> entityEditor) {
+        LicenseService service = new LicenseService(entityProvider);
+        entityEditor.ifPresent(service::setEditor);
+        serviceLookup.addEntityService(License.class, service);
+        return service;
+    }
+
+    @Bean
+    @Profile(StaConstants.STAPLUS)
+    public AbstractEntityService<Party> partyService(EntityProvider<Party> entityProvider,
+            Optional<EntityEditor<Party>> entityEditor) {
+        PartyService service = new PartyService(entityProvider);
+        entityEditor.ifPresent(service::setEditor);
+        serviceLookup.addEntityService(Party.class, service);
+        return service;
+    }
+
+    @Bean
+    @Profile(StaConstants.STAPLUS)
+    public AbstractEntityService<Project> projectService(EntityProvider<Project> entityProvider,
+            Optional<EntityEditor<Project>> entityEditor) {
+        ProjectService service = new ProjectService(entityProvider);
+        entityEditor.ifPresent(service::setEditor);
+        serviceLookup.addEntityService(Project.class, service);
+        return service;
+    }
+
+    @Bean
+    @Profile(StaConstants.STAPLUS)
+    public AbstractEntityService<Relation> relationService(EntityProvider<Relation> entityProvider,
+            Optional<EntityEditor<Relation>> entityEditor) {
+        RelationService service = new RelationService(entityProvider);
+        entityEditor.ifPresent(service::setEditor);
+        serviceLookup.addEntityService(Relation.class, service);
         return service;
     }
 }
