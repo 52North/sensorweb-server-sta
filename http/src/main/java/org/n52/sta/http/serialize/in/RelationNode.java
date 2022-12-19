@@ -67,7 +67,13 @@ public class RelationNode extends StaNode implements Relation {
 
     @Override
     public TargetReference getObject() {
-        throw new RuntimeException("parsing of Observation->Object not yet implemented!");
+        if (get(StaConstants.PROP_EXTERNAL_OBJECT).isPresent()) {
+            return TargetReference.objectExternal(getOrNull(StaConstants.PROP_EXTERNAL_OBJECT, JsonNode::asText));
+        }
+        return TargetReference
+                .objectInternal(getOrNull(StaConstants.OBJECT, node -> new ObservationNode(node, mapper)));
+        // throw new RuntimeException("parsing of Observation->Object not yet
+        // implemented!");
     }
 
     @Override

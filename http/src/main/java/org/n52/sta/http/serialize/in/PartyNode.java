@@ -62,7 +62,7 @@ public class PartyNode extends StaNode implements Party {
 
     @Override
     public PartyRole getRole() {
-        return getOrNull(StaConstants.PROP_ROLE, node -> PartyRole.valueOf(node.asText()));
+        return getOrNull(StaConstants.PROP_ROLE, node -> PartyRole.getIgnoreCase(node.asText()));
     }
 
     @Override
