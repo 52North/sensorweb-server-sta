@@ -50,11 +50,13 @@ import org.n52.sta.api.EntityServiceLookup;
 import org.n52.sta.api.entity.Datastream;
 import org.n52.sta.api.entity.Group;
 import org.n52.sta.api.entity.Observation;
+import org.n52.sta.api.entity.Relation;
 import org.n52.sta.api.exception.editor.EditorException;
 import org.n52.sta.config.EntityPropertyMapping;
 import org.n52.sta.data.entity.DatastreamData;
 import org.n52.sta.data.entity.GroupData;
 import org.n52.sta.data.entity.ObservationData;
+import org.n52.sta.data.entity.RelationData;
 import org.n52.sta.data.entity.StaData;
 import org.n52.sta.data.repositories.entity.ObservationRepository;
 import org.n52.sta.data.support.GraphBuilder;
@@ -78,6 +80,7 @@ public class ObservationEntityEditor extends DatabaseEntityAdapter<DataEntity>
 
     private DatastreamEditorDelegate<Datastream, DatastreamData> datastreamEditor;
     private EntityEditorDelegate<Group, GroupData> groupEditor;
+    private EntityEditorDelegate<Relation, RelationData> relationEditor;
 
     public ObservationEntityEditor(EntityServiceLookup serviceLookup) {
         super(serviceLookup);
@@ -92,6 +95,8 @@ public class ObservationEntityEditor extends DatabaseEntityAdapter<DataEntity>
                 getService(Datastream.class).unwrapEditor();
         this.groupEditor = (EntityEditorDelegate<Group, GroupData>)
                 getService(Group.class).unwrapEditor();
+        this.relationEditor = (EntityEditorDelegate<Relation, RelationData>)
+                getService(Relation.class).unwrapEditor();
         //@formatter:on
     }
 
@@ -172,13 +177,6 @@ public class ObservationEntityEditor extends DatabaseEntityAdapter<DataEntity>
                       .collect(Collectors.toSet());
     }
 
-    private DataEntity<?> addGroups(DataEntity<?> entity, Observation observation) {
-        entity.setGroups(Streams.stream(observation.getGroups())
-                .map(groupEditor::getOrSave)
-                .map(StaData::getData)
-                .collect(Collectors.toSet()));
-        return entity;
-    }
 
     private AbstractDatasetEntity getDatastreamOf(Observation entity) throws EditorException {
         return datastreamEditor.getOrSave(entity.getDatastream())
@@ -215,7 +213,27 @@ public class ObservationEntityEditor extends DatabaseEntityAdapter<DataEntity>
                 throw new EditorException("Unknown OMObservation type: " + format);
         }
 
-        return addGroups(dataEntity, observation);
+        return addAddtitionals(dataEntity, observation);
+    }
+
+    private DataEntity<?> addAddtitionals(DataEntity<?> entity, Observation observation) {
+        entity.setGroups(Streams.stream(observation.getGroups())
+                .map(groupEditor::getOrSave)
+                .map(StaData::getData)
+                .collect(Collectors.toSet()));
+
+        // TODO set this DataEntity in relation as subject!
+        entity.setSubjects(Streams.stream(observation.getSubjects())
+                .map(relationEditor::getOrSave)
+                .map(StaData::getData)
+                .collect(Collectors.toSet()));
+
+        entity.setObjects(Streams.stream(observation.getObjects())
+                .map(relationEditor::getOrSave)
+                .map(StaData::getData)
+                .collect(Collectors.toSet()));
+
+        return entity;
     }
 
     private DataEntity< ? > initDataEntity(DataEntity< ? > data, Observation observation, DatasetEntity dataset) {
