@@ -121,7 +121,7 @@ public class DatastreamNode extends StaNode implements Datastream {
 
     @Override
     public Project getProject() {
-        return getOrNull(StaConstants.PROJECTS, n -> new ProjectNode(n, mapper));
+        return getOrNull(StaConstants.PROJECT, n -> new ProjectNode(n, mapper));
     }
 
     @Override
