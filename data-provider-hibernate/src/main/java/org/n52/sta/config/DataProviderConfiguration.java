@@ -28,13 +28,18 @@
 
 package org.n52.sta.config;
 
+import org.n52.shetland.ogc.sta.StaConstants;
 import org.n52.sta.data.provider.DatastreamEntityProvider;
 import org.n52.sta.data.provider.FeatureOfInterestEntityProvider;
 import org.n52.sta.data.provider.GroupEntityProvider;
 import org.n52.sta.data.provider.HistoricalLocationEntityProvider;
+import org.n52.sta.data.provider.LicenseEntityProvider;
 import org.n52.sta.data.provider.LocationEntityProvider;
 import org.n52.sta.data.provider.ObservationEntityProvider;
 import org.n52.sta.data.provider.ObservedPropertyEntityProvider;
+import org.n52.sta.data.provider.PartyEntityProvider;
+import org.n52.sta.data.provider.ProjectEntityProvider;
+import org.n52.sta.data.provider.RelationEntityProvider;
 import org.n52.sta.data.provider.SensorEntityProvider;
 import org.n52.sta.data.provider.ThingEntityProvider;
 import org.n52.sta.data.repositories.BaseRepositoryImpl;
@@ -42,14 +47,19 @@ import org.n52.sta.data.repositories.entity.DatastreamRepository;
 import org.n52.sta.data.repositories.entity.FeatureOfInterestRepository;
 import org.n52.sta.data.repositories.entity.GroupRepository;
 import org.n52.sta.data.repositories.entity.HistoricalLocationRepository;
+import org.n52.sta.data.repositories.entity.LicenseRepository;
 import org.n52.sta.data.repositories.entity.LocationRepository;
 import org.n52.sta.data.repositories.entity.ObservationRepository;
+import org.n52.sta.data.repositories.entity.PartyRepository;
 import org.n52.sta.data.repositories.entity.PhenomenonRepository;
 import org.n52.sta.data.repositories.entity.PlatformRepository;
 import org.n52.sta.data.repositories.entity.ProcedureRepository;
+import org.n52.sta.data.repositories.entity.ProjectRepository;
+import org.n52.sta.data.repositories.entity.RelationRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Profile;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
@@ -101,8 +111,33 @@ public class DataProviderConfiguration {
     }
 
     @Bean
+    @Profile(StaConstants.STAPLUS)
     public GroupEntityProvider groupEntityProvider(GroupRepository repository) {
         return new GroupEntityProvider(repository, propertyMapping);
+    }
+
+    @Bean
+    @Profile(StaConstants.STAPLUS)
+    public LicenseEntityProvider licenseEntityProvider(LicenseRepository repository) {
+        return new LicenseEntityProvider(repository, propertyMapping);
+    }
+
+    @Bean
+    @Profile(StaConstants.STAPLUS)
+    public PartyEntityProvider partyEntityProvider(PartyRepository repository) {
+        return new PartyEntityProvider(repository, propertyMapping);
+    }
+
+    @Bean
+    @Profile(StaConstants.STAPLUS)
+    public ProjectEntityProvider projectEntityProvider(ProjectRepository repository) {
+        return new ProjectEntityProvider(repository, propertyMapping);
+    }
+
+    @Bean
+    @Profile(StaConstants.STAPLUS)
+    public RelationEntityProvider relationEntityProvider(RelationRepository repository) {
+        return new RelationEntityProvider(repository, propertyMapping);
     }
 
     @Configuration
