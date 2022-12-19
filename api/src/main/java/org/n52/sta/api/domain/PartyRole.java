@@ -37,4 +37,13 @@ public enum PartyRole {
         return this.name()
                    .toLowerCase();
     }
+
+    public static PartyRole getIgnoreCase(String value) {
+        for (PartyRole rpc : values()) {
+            if (rpc.name().equalsIgnoreCase(value)) {
+                return rpc;
+            }
+        }
+        return null;
+    }
 }
