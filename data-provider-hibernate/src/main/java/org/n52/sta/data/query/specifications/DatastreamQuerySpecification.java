@@ -45,6 +45,9 @@ import org.n52.series.db.beans.IdEntity;
 import org.n52.series.db.beans.PhenomenonEntity;
 import org.n52.series.db.beans.PlatformEntity;
 import org.n52.series.db.beans.ProcedureEntity;
+import org.n52.series.db.beans.sta.LicenseEntity;
+import org.n52.series.db.beans.sta.PartyEntity;
+import org.n52.series.db.beans.sta.ProjectEntity;
 import org.n52.shetland.ogc.sta.StaConstants;
 import org.n52.sta.data.query.specifications.util.SimplePropertyComparator;
 import org.n52.sta.data.query.specifications.util.TimePropertyComparator;
@@ -57,6 +60,9 @@ public class DatastreamQuerySpecification extends QuerySpecification<AbstractDat
         this.filterByMember.put(StaConstants.OBSERVED_PROPERTIES, createObservedPropertyFilter());
         this.filterByMember.put(StaConstants.THINGS, createThingfilter());
         this.filterByMember.put(StaConstants.OBSERVATIONS, createObservationFilter());
+        this.filterByMember.put(StaConstants.PARTIES, createPartyfilter());
+        this.filterByMember.put(StaConstants.PROJECTS, createProjectfilter());
+        this.filterByMember.put(StaConstants.LICENSES, createLicensefilter());
 
         this.entityPathByProperty.put(StaConstants.PROP_NAME, new SimplePropertyComparator<>(HasName.PROPERTY_NAME));
         this.entityPathByProperty.put(StaConstants.PROP_DESCRIPTION,
@@ -164,6 +170,42 @@ public class DatastreamQuerySpecification extends QuerySpecification<AbstractDat
             // n..1
             return builder.in(subquery)
                           .value(root.get(AbstractDatasetEntity.PROPERTY_PLATFORM));
+
+        };
+    }
+
+    private MemberFilter<AbstractDatasetEntity> createPartyfilter() {
+        return specification -> (root, query, builder) -> {
+            EntityQuery memberQuery = createQuery(IdEntity.PROPERTY_ID,
+                                                  PartyEntity.class);
+            Subquery< ? > subquery = memberQuery.create(specification, query, builder);
+            // n..1
+            return builder.in(subquery)
+                          .value(root.get(AbstractDatasetEntity.PROPERTY_PARTY));
+
+        };
+    }
+
+    private MemberFilter<AbstractDatasetEntity> createProjectfilter() {
+        return specification -> (root, query, builder) -> {
+            EntityQuery memberQuery = createQuery(IdEntity.PROPERTY_ID,
+                                                  ProjectEntity.class);
+            Subquery< ? > subquery = memberQuery.create(specification, query, builder);
+            // n..1
+            return builder.in(subquery)
+                          .value(root.get(AbstractDatasetEntity.PROPERTY_PROJECT));
+
+        };
+    }
+
+    private MemberFilter<AbstractDatasetEntity> createLicensefilter() {
+        return specification -> (root, query, builder) -> {
+            EntityQuery memberQuery = createQuery(IdEntity.PROPERTY_ID,
+                                                  LicenseEntity.class);
+            Subquery< ? > subquery = memberQuery.create(specification, query, builder);
+            // n..1
+            return builder.in(subquery)
+                          .value(root.get(AbstractDatasetEntity.PROPERTY_LICENSE));
 
         };
     }

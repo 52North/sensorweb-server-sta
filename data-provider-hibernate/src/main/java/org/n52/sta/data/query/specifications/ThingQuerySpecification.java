@@ -39,7 +39,9 @@ import org.n52.series.db.beans.IdEntity;
 import org.n52.series.db.beans.PlatformEntity;
 import org.n52.series.db.beans.sta.HistoricalLocationEntity;
 import org.n52.series.db.beans.sta.LocationEntity;
+import org.n52.series.db.beans.sta.PartyEntity;
 import org.n52.shetland.ogc.sta.StaConstants;
+import org.n52.sta.data.query.specifications.BaseQuerySpecifications.EntityQuery;
 import org.n52.sta.data.query.specifications.util.SimplePropertyComparator;
 
 public class ThingQuerySpecification extends QuerySpecification<PlatformEntity> {
@@ -49,11 +51,14 @@ public class ThingQuerySpecification extends QuerySpecification<PlatformEntity> 
         this.filterByMember.put(StaConstants.DATASTREAMS, createDatastreamFilter());
         this.filterByMember.put(StaConstants.HISTORICAL_LOCATIONS, createHistoricalLocationFilter());
         this.filterByMember.put(StaConstants.LOCATIONS, createLocationFilter());
+        this.filterByMember.put(StaConstants.PARTIES, createPartyFilter());
 
         this.entityPathByProperty.put(StaConstants.PROP_NAME, new SimplePropertyComparator<>(HasName.PROPERTY_NAME));
         this.entityPathByProperty.put(StaConstants.PROP_DESCRIPTION,
                                       new SimplePropertyComparator<>(HasDescription.PROPERTY_DESCRIPTION));
     }
+
+
 
     // TODO discuss: split multiple (tiny) subqueries so that we are able to use
     // kind of a DSL query language
@@ -88,6 +93,18 @@ public class ThingQuerySpecification extends QuerySpecification<PlatformEntity> 
             Subquery< ? > subquery = memberQuery.create(specification, query, builder);
             // m..n
             Join< ? , ? > join = root.join(PlatformEntity.PROPERTY_LOCATIONS, JoinType.INNER);
+            return builder.in(join.get(IdEntity.PROPERTY_ID))
+                          .value(subquery);
+
+        };
+    }
+
+    private MemberFilter<PlatformEntity> createPartyFilter() {
+        return specification -> (root, query, builder) -> {
+            EntityQuery memberQuery = createQuery(IdEntity.PROPERTY_ID, PartyEntity.class);
+            Subquery< ? > subquery = memberQuery.create(specification, query, builder);
+            // m..n
+            Join< ? , ? > join = root.join(PlatformEntity.PROPERTY_PARTY, JoinType.INNER);
             return builder.in(join.get(IdEntity.PROPERTY_ID))
                           .value(subquery);
 

@@ -42,7 +42,6 @@ import org.n52.series.db.beans.FeatureEntity;
 import org.n52.series.db.beans.IdEntity;
 import org.n52.series.db.beans.sta.GroupEntity;
 import org.n52.shetland.ogc.sta.StaConstants;
-import org.n52.sta.data.query.specifications.BaseQuerySpecifications.EntityQuery;
 import org.springframework.data.jpa.domain.Specification;
 
 public class ObservationQuerySpecification extends QuerySpecification<DataEntity> {

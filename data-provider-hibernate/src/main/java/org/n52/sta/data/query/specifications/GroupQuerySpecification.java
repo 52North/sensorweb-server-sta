@@ -39,6 +39,7 @@ import org.n52.series.db.beans.IdEntity;
 import org.n52.series.db.beans.sta.GroupEntity;
 import org.n52.series.db.beans.sta.LicenseEntity;
 import org.n52.series.db.beans.sta.PartyEntity;
+import org.n52.series.db.beans.sta.RelationEntity;
 import org.n52.shetland.ogc.sta.StaConstants;
 import org.n52.sta.data.query.specifications.util.SimplePropertyComparator;
 import org.n52.sta.data.query.specifications.util.TimePropertyComparator;
@@ -49,8 +50,8 @@ public class GroupQuerySpecification extends QuerySpecification<GroupEntity> {
         super();
         this.filterByMember.put(StaConstants.OBSERVATIONS, createObservationFilter());
         this.filterByMember.put(StaConstants.RELATIONS, createRelationFilter());
-        this.filterByMember.put(StaConstants.LICENSE, createLicenseFilter());
-        this.filterByMember.put(StaConstants.PARTY, createPartyFilter());
+        this.filterByMember.put(StaConstants.LICENSES, createLicenseFilter());
+        this.filterByMember.put(StaConstants.PARTIES, createPartyFilter());
 
         this.entityPathByProperty.put(StaConstants.PROP_NAME, new SimplePropertyComparator<>(HasName.PROPERTY_NAME));
         this.entityPathByProperty.put(StaConstants.PROP_DESCRIPTION,
@@ -80,8 +81,15 @@ public class GroupQuerySpecification extends QuerySpecification<GroupEntity> {
     }
 
     private MemberFilter<GroupEntity> createRelationFilter() {
-        // TODO Auto-generated method stub
-        return null;
+        return specification -> (root, query, builder) -> {
+            EntityQuery memberQuery = createQuery(IdEntity.PROPERTY_ID, RelationEntity.class);
+            Subquery< ? > subquery = memberQuery.create(specification, query, builder);
+            // m..n
+            Join< ? , ? > join = root.join(GroupEntity.PROPERTY_RELATIONS, JoinType.INNER);
+            return builder.in(join.get(IdEntity.PROPERTY_ID))
+                          .value(subquery);
+
+        };
     }
 
     private MemberFilter<GroupEntity> createLicenseFilter() {
@@ -107,27 +115,5 @@ public class GroupQuerySpecification extends QuerySpecification<GroupEntity> {
 
         };
     }
-
-//    private MemberFilter<PlatformEntity> createHistoricalLocationFilter() {
-//        return specification -> (root, query, builder) -> {
-//            EntityQuery memberQuery = createQuery(IdEntity.PROPERTY_ID, HistoricalLocationEntity.class);
-//            Subquery<?> subquery = memberQuery.create(specification, query, builder);
-//            // m..n
-//            Join<?, ?> join = root.join(PlatformEntity.PROPERTY_HISTORICAL_LOCATIONS, JoinType.INNER);
-//            return builder.in(join.get(IdEntity.PROPERTY_ID)).value(subquery);
-//
-//        };
-//    }
-//
-//    private MemberFilter<PlatformEntity> createLocationFilter() {
-//        return specification -> (root, query, builder) -> {
-//            EntityQuery memberQuery = createQuery(IdEntity.PROPERTY_ID, LocationEntity.class);
-//            Subquery<?> subquery = memberQuery.create(specification, query, builder);
-//            // m..n
-//            Join<?, ?> join = root.join(PlatformEntity.PROPERTY_LOCATIONS, JoinType.INNER);
-//            return builder.in(join.get(IdEntity.PROPERTY_ID)).value(subquery);
-//
-//        };
-//    }
 
 }
