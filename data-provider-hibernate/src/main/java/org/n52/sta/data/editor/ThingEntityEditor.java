@@ -39,11 +39,13 @@ import org.n52.sta.api.EntityServiceLookup;
 import org.n52.sta.api.entity.Datastream;
 import org.n52.sta.api.entity.HistoricalLocation;
 import org.n52.sta.api.entity.Location;
+import org.n52.sta.api.entity.Party;
 import org.n52.sta.api.entity.Thing;
 import org.n52.sta.api.exception.editor.EditorException;
 import org.n52.sta.data.entity.DatastreamData;
 import org.n52.sta.data.entity.HistoricalLocationData;
 import org.n52.sta.data.entity.LocationData;
+import org.n52.sta.data.entity.PartyData;
 import org.n52.sta.data.entity.StaData;
 import org.n52.sta.data.entity.ThingData;
 import org.n52.sta.data.repositories.entity.PlatformRepository;
@@ -62,6 +64,7 @@ public class ThingEntityEditor extends DatabaseEntityAdapter<PlatformEntity>
     private EntityEditorDelegate<Location, LocationData> locationEditor;
     private EntityEditorDelegate<Datastream, DatastreamData> datastreamEditor;
     private EntityEditorDelegate<HistoricalLocation, HistoricalLocationData> historicalLocationEditor;
+    private EntityEditorDelegate<Party, PartyData> partyEditor;
 
     public ThingEntityEditor(EntityServiceLookup serviceLookup) {
         super(serviceLookup);
@@ -78,6 +81,8 @@ public class ThingEntityEditor extends DatabaseEntityAdapter<PlatformEntity>
                 getService(Datastream.class).unwrapEditor();
         this.historicalLocationEditor = (EntityEditorDelegate<HistoricalLocation, HistoricalLocationData>)
                 getService(HistoricalLocation.class).unwrapEditor();
+        this.partyEditor = (EntityEditorDelegate<Party, PartyData>)
+                getService(Party.class).unwrapEditor();
         //@formatter:on
     }
 
@@ -130,6 +135,11 @@ public class ThingEntityEditor extends DatabaseEntityAdapter<PlatformEntity>
                                                      .map(historicalLocationEditor::getOrSave)
                                                      .map(StaData::getData)
                                                      .collect(Collectors.toSet()));
+
+        if (entity.getParty() != null) {
+            PartyData party = partyEditor.getOrSave(entity.getParty());
+            saved.setParty(party.getData());
+        }
 
         // we need to flush else updates to relations are not persisted
         platformRepository.flush();

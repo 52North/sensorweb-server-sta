@@ -55,15 +55,21 @@ import org.n52.shetland.ogc.gml.time.Time;
 import org.n52.sta.api.EntityServiceLookup;
 import org.n52.sta.api.domain.aggregate.ThingAggregate;
 import org.n52.sta.api.entity.Datastream;
+import org.n52.sta.api.entity.License;
 import org.n52.sta.api.entity.Observation;
 import org.n52.sta.api.entity.ObservedProperty;
+import org.n52.sta.api.entity.Party;
+import org.n52.sta.api.entity.Project;
 import org.n52.sta.api.entity.Sensor;
 import org.n52.sta.api.entity.Thing;
 import org.n52.sta.api.exception.editor.EditorException;
 import org.n52.sta.config.EntityPropertyMapping;
 import org.n52.sta.data.entity.DatastreamData;
+import org.n52.sta.data.entity.LicenseData;
 import org.n52.sta.data.entity.ObservationData;
 import org.n52.sta.data.entity.ObservedPropertyData;
+import org.n52.sta.data.entity.PartyData;
+import org.n52.sta.data.entity.ProjectData;
 import org.n52.sta.data.entity.SensorData;
 import org.n52.sta.data.entity.StaData;
 import org.n52.sta.data.entity.ThingData;
@@ -101,6 +107,9 @@ public class DatastreamEntityEditor extends DatabaseEntityAdapter<AbstractDatase
     private EntityEditorDelegate<Sensor, SensorData> sensorEditor;
     private EntityEditorDelegate<ObservedProperty, ObservedPropertyData> observedPropertyEditor;
     private ObservationEditorDelegate<Observation, ObservationData> observationEditor;
+    private EntityEditorDelegate<License, LicenseData> licenseEditor;
+    private EntityEditorDelegate<Party, PartyData> partyEditor;
+    private EntityEditorDelegate<Project, ProjectData> projectEditor;
 
     private CategoryEntity defaultCategory;
 
@@ -123,6 +132,12 @@ public class DatastreamEntityEditor extends DatabaseEntityAdapter<AbstractDatase
                 getService(ObservedProperty.class).unwrapEditor();
         this.observationEditor = (ObservationEditorDelegate<Observation, ObservationData>)
                 getService(Observation.class).unwrapEditor();
+        this.licenseEditor = (EntityEditorDelegate<License, LicenseData>)
+                getService(License.class).unwrapEditor();
+        this.partyEditor = (EntityEditorDelegate<Party, PartyData>)
+                getService(Party.class).unwrapEditor();
+        this.projectEditor = (EntityEditorDelegate<Project, ProjectData>)
+                getService(Project.class).unwrapEditor();
         //@formatter:on
 
         // Persist or get default category on startup
@@ -220,9 +235,26 @@ public class DatastreamEntityEditor extends DatabaseEntityAdapter<AbstractDatase
                                        .map(o -> observationEditor.getOrSave(o))
                                        .map(StaData::getData)
                                        .collect(Collectors.toSet()));
+
+        if (entity.getLicense() != null) {
+            LicenseData licence = licenseEditor.getOrSave(entity.getLicense());
+            savedEntity.setLicense(licence.getData());
+        }
+
+        if (entity.getParty() != null) {
+            PartyData party = partyEditor.getOrSave(entity.getParty());
+            savedEntity.setParty(party.getData());
+        }
+
+        if (entity.getProject() != null) {
+            ProjectData project = projectEditor.getOrSave(entity.getProject());
+            savedEntity.setProject(project.getData());
+        }
         // TODO explicitly save all references, too? if so, what about CASCADE.PERSIST?
         // sensorEntity.addDatastream(savedEntity);
         // sensorEditor.update(new SensorData(sensorEntity, propertyMapping));
+
+        datastreamRepository.flush();
 
         return new DatastreamData(savedEntity, Optional.ofNullable(propertyMapping));
     }
