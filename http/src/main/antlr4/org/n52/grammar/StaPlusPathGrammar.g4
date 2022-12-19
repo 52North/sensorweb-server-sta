@@ -57,7 +57,17 @@ resource
    ;
 
 observation
-   : OBSERVATIONS identifier (SLASH (datastream | featureOfInterest | observationProperty | groups))?
+   : OBSERVATIONS identifier (SLASH (datastream | featureOfInterest | observationProperty | group | groups))?
+   ;
+   
+datastream
+   : DATASTREAM
+   | DATASTREAMS identifier (SLASH (observations | observation | observedProperties | observedProperty | sensor | thing | datastreamProperty | party | parties | license | licenses | project | projects))?
+   ;
+
+thing
+   : THING
+   | THINGS identifier (SLASH (datastream | datastreams | location | locations | historicalLocation | historicalLocations | thingProperty | party | parties))?
    ;
 
 party

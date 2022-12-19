@@ -26,15 +26,15 @@ import StaPathLexer;
 
 PARTY: 'Party';
 PROJECT: 'Project';
-LICENSE:'License';
-GROUP:'Group';
-RELATION:'Relation';
+LICENSE: 'License';
+GROUP: 'Group';
+RELATION: 'Relation';
 
-PARTIES:'Parties';
-PROJECTS:'Projects';
-LICENSES:'Licenses';
-GROUPS:'Groups';
-RELATIONS:'Relations';
+PARTIES: 'Parties';
+PROJECTS: 'Projects';
+LICENSES: 'Licenses';
+GROUPS: 'Groups';
+RELATIONS: 'Relations';
 
 PROP_AUTH_ID: 'authId';
 PROP_ROLE: 'role';
