@@ -28,15 +28,20 @@
 
 package org.n52.sta.data.query;
 
+import org.n52.shetland.ogc.sta.StaConstants;
 import org.n52.shetland.ogc.sta.exception.STAInvalidFilterExpressionException;
 import org.n52.sta.data.query.specifications.BaseQuerySpecifications;
 import org.n52.sta.data.query.specifications.DatastreamQuerySpecification;
 import org.n52.sta.data.query.specifications.FeatureOfInterestQuerySpecification;
 import org.n52.sta.data.query.specifications.GroupQuerySpecification;
 import org.n52.sta.data.query.specifications.HistoricalLocationQuerySpecification;
+import org.n52.sta.data.query.specifications.LicenseQuerySpecification;
 import org.n52.sta.data.query.specifications.LocationQuerySpecification;
 import org.n52.sta.data.query.specifications.ObservationQuerySpecification;
 import org.n52.sta.data.query.specifications.ObservedPropertyQuerySpecification;
+import org.n52.sta.data.query.specifications.PartyQuerySpecification;
+import org.n52.sta.data.query.specifications.ProjectQuerySpecification;
+import org.n52.sta.data.query.specifications.RelationQuerySpecification;
 import org.n52.sta.data.query.specifications.SensorQuerySpecification;
 import org.n52.sta.data.query.specifications.ThingQuerySpecification;
 
@@ -66,53 +71,73 @@ public class QuerySpecificationFactory {
             throws STAInvalidFilterExpressionException {
         switch (name) {
             case "PlatformEntity":
-            case "Thing":
-            case "Things": {
+            case StaConstants.THING:
+            case StaConstants.THINGS: {
                 return new ThingQuerySpecification();
             }
             case "LocationEntity":
-            case "Location":
-            case "Locations": {
+            case StaConstants.LOCATION:
+            case StaConstants.LOCATIONS: {
                 return new LocationQuerySpecification();
             }
             case "HistoricalLocationEntity":
-            case "HistoricalLocation":
-            case "HistoricalLocations": {
+            case StaConstants.HISTORICAL_LOCATION:
+            case StaConstants.HISTORICAL_LOCATIONS: {
                 return new HistoricalLocationQuerySpecification();
             }
             case "AbstractDatasetEntity":
             case "DatasetEntity":
             case "DatasetAggregationEntity":
-            case "Datastream":
-            case "Datastreams": {
+            case StaConstants.DATASTREAM:
+            case StaConstants.DATASTREAMS: {
                 return new DatastreamQuerySpecification();
             }
             case "ProcedureEntity":
-            case "Sensor":
-            case "Sensors": {
+            case StaConstants.SENSOR:
+            case StaConstants.SENSORS: {
                 return new SensorQuerySpecification();
             }
             case "ObservationEntity":
             case "DataEntity":
-            case "Observation":
-            case "Observations": {
+            case StaConstants.OBSERVATION:
+            case StaConstants.OBSERVATIONS: {
                 return new ObservationQuerySpecification();
             }
             case "FeatureEntity":
             case "AbstractFeatureEntity":
-            case "FeatureOfInterest":
-            case "FeaturesOfInterest": {
+            case StaConstants.FEATURE_OF_INTEREST:
+            case StaConstants.FEATURES_OF_INTEREST: {
                 return new FeatureOfInterestQuerySpecification();
             }
             case "PhenomenonEntity":
-            case "ObservedProperty":
-            case "ObservedProperties": {
+            case StaConstants.OBSERVED_PROPERTY:
+            case StaConstants.OBSERVED_PROPERTIES: {
                 return new ObservedPropertyQuerySpecification();
             }
             case "GroupEntity":
-            case "Group":
-            case "Groups": {
+            case StaConstants.GROUP:
+            case StaConstants.GROUPS: {
                 return new GroupQuerySpecification();
+            }
+            case "LicenseEntity":
+            case StaConstants.LICENSE:
+            case StaConstants.LICENSES: {
+                return new LicenseQuerySpecification();
+            }
+            case "PartyEntity":
+            case StaConstants.PARTY:
+            case StaConstants.PARTIES: {
+                return new PartyQuerySpecification();
+            }
+            case "ProjectEntity":
+            case StaConstants.PROJECT:
+            case StaConstants.PROJECTS: {
+                return new ProjectQuerySpecification();
+            }
+            case "RelatioEntity":
+            case StaConstants.RELATION:
+            case StaConstants.RELATIONS: {
+                return new RelationQuerySpecification();
             }
             default:
                 throw new STAInvalidFilterExpressionException("Unable to find QuerySpecification for type: " + name);
