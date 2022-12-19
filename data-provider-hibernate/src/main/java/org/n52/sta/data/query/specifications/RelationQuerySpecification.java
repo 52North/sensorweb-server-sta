@@ -31,6 +31,7 @@ import javax.persistence.criteria.Join;
 import javax.persistence.criteria.JoinType;
 import javax.persistence.criteria.Subquery;
 
+import org.n52.series.db.beans.DataEntity;
 import org.n52.series.db.beans.IdEntity;
 import org.n52.series.db.beans.HibernateRelations.HasDescription;
 import org.n52.series.db.beans.HibernateRelations.HasName;
@@ -38,6 +39,7 @@ import org.n52.series.db.beans.sta.GroupEntity;
 import org.n52.series.db.beans.sta.RelationEntity;
 import org.n52.shetland.ogc.sta.StaConstants;
 import org.n52.sta.data.query.specifications.BaseQuerySpecifications.EntityQuery;
+import org.n52.sta.data.query.specifications.BaseQuerySpecifications.MemberFilter;
 import org.n52.sta.data.query.specifications.util.SimplePropertyComparator;
 
 public class RelationQuerySpecification extends QuerySpecification<RelationEntity> {
@@ -45,6 +47,9 @@ public class RelationQuerySpecification extends QuerySpecification<RelationEntit
     public RelationQuerySpecification() {
         super();
         this.filterByMember.put(StaConstants.GROUPS, createGroupsFilter());
+        this.filterByMember.put(StaConstants.SUBJECTS, createSubjectFilter());
+        this.filterByMember.put(StaConstants.OBJECTS, createObjectFilter());
+
         this.entityPathByProperty.put(StaConstants.PROP_NAME, new SimplePropertyComparator<>(HasName.PROPERTY_NAME));
         this.entityPathByProperty.put(StaConstants.PROP_DESCRIPTION,
                 new SimplePropertyComparator<>(HasDescription.PROPERTY_DESCRIPTION));
@@ -62,6 +67,30 @@ public class RelationQuerySpecification extends QuerySpecification<RelationEntit
             Join< ? , ? > join = root.join(RelationEntity.PROPERTY_GROUPS, JoinType.INNER);
             return builder.in(join.get(IdEntity.PROPERTY_ID))
                           .value(subquery);
+
+        };
+    }
+
+    private MemberFilter<RelationEntity> createSubjectFilter() {
+        return specification -> (root, query, builder) -> {
+            EntityQuery memberQuery = createQuery(IdEntity.PROPERTY_ID,
+                                                  DataEntity.class);
+            Subquery< ? > subquery = memberQuery.create(specification, query, builder);
+            // n..1
+            return builder.in(subquery)
+                          .value(root.get(RelationEntity.PROPERTY_SUBJECT));
+
+        };
+    }
+
+    private MemberFilter<RelationEntity> createObjectFilter() {
+        return specification -> (root, query, builder) -> {
+            EntityQuery memberQuery = createQuery(IdEntity.PROPERTY_ID,
+                    DataEntity.class);
+            Subquery< ? > subquery = memberQuery.create(specification, query, builder);
+            // n..1
+            return builder.in(subquery)
+                          .value(root.get(RelationEntity.PROPERTY_OBJECT));
 
         };
     }
