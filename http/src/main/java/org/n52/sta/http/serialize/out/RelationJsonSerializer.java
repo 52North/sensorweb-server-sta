@@ -71,6 +71,17 @@ public class RelationJsonSerializer extends StaBaseSerializer<Relation> {
                 serializer -> serializer.serialize(value.getSubject(), gen, serializers)
         );
 
+        // TODO check if this should always present in response!
+        if (value.getObject().isObjectPresent()) {
+            writeMember(
+                    StaConstants.OBJECT,
+                    id,
+                    gen,
+                    ObservationJsonSerializer::new,
+                    serializer -> serializer.serialize(value.getObject().getObject(), gen, serializers)
+            );
+        }
+
         gen.writeEndObject();
     }
 

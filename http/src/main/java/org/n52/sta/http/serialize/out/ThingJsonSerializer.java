@@ -78,6 +78,13 @@ public class ThingJsonSerializer extends StaBaseSerializer<Thing> {
                 serializer.serialize(item, gen, serializers);
             }
         });
+        // sta-plus entity members
+        writeMember(
+                    StaConstants.PARTY,
+                    id,
+                    gen,
+                    PartyJsonSerializer::new,
+                    serializer -> serializer.serialize(value.getParty(), gen, serializers));
 
         gen.writeEndObject();
     }

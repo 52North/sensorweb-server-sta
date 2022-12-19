@@ -37,6 +37,7 @@ import com.fasterxml.jackson.databind.SerializerProvider;
 import org.n52.shetland.ogc.sta.StaConstants;
 import org.n52.sta.api.entity.Group;
 import org.n52.sta.api.entity.Observation;
+import org.n52.sta.api.entity.Relation;
 
 @SuppressWarnings("MultipleStringLiterals")
 public class ObservationJsonSerializer extends StaBaseSerializer<Observation> {
@@ -138,11 +139,25 @@ public class ObservationJsonSerializer extends StaBaseSerializer<Observation> {
                     FeatureOfInterestJsonSerializer::new,
                     serializer -> serializer.serialize(value.getFeatureOfInterest(), gen, serializers));
 
+        // sta-plus entity members
         writeMemberCollection(StaConstants.GROUPS, id, gen, GroupJsonSerializer::new, serializer -> {
             for (Group item : value.getGroups()) {
                 serializer.serialize(item, gen, serializers);
             }
         });
+
+        writeMemberCollection(StaConstants.SUBJECTS, id, gen, RelationJsonSerializer::new, serializer -> {
+            for (Relation item : value.getSubjects()) {
+                serializer.serialize(item, gen, serializers);
+            }
+        });
+
+        writeMemberCollection(StaConstants.OBJECTS, id, gen, RelationJsonSerializer::new, serializer -> {
+            for (Relation item : value.getObjects()) {
+                serializer.serialize(item, gen, serializers);
+            }
+        });
+
         gen.writeEndObject();
     }
 

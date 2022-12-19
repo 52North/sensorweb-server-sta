@@ -88,6 +88,27 @@ public class DatastreamJsonSerializer extends StaBaseSerializer<Datastream> {
                     gen,
                     ObservedPropertyJsonSerializer::new,
                     serializer -> serializer.serialize(value.getObservedProperty(), gen, serializers));
+        // sta-plus entity members
+        writeMember(
+                    StaConstants.LICENSE,
+                    id,
+                    gen,
+                    LicenseJsonSerializer::new,
+                    serializer -> serializer.serialize(value.getLicense(), gen, serializers));
+
+        writeMember(
+                    StaConstants.PARTY,
+                    id,
+                    gen,
+                    PartyJsonSerializer::new,
+                    serializer -> serializer.serialize(value.getParty(), gen, serializers));
+
+        writeMember(
+                    StaConstants.PROJECT,
+                    id,
+                    gen,
+                    ProjectJsonSerializer::new,
+                    serializer -> serializer.serialize(value.getProject(), gen, serializers));
 
         gen.writeEndObject();
     }
