@@ -120,7 +120,7 @@ groupProperty
   ;
 
 relationProperty
-  : (PROP_ID | PROP_DESCRIPTION | PROP_EXTERNAL_OBJECT | PROP_PROPERTIES) (SLASH VALUE)?
+  : (PROP_ID | PROP_DESCRIPTION | PROP_ROLE | PROP_EXTERNAL_OBJECT | PROP_PROPERTIES) (SLASH VALUE)?
   ;
 
 ////////////////////////////////////////////////////////////////
