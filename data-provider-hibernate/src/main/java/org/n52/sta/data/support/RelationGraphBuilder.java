@@ -58,10 +58,10 @@ public final class RelationGraphBuilder extends GraphBuilder<RelationEntity> {
         if (expandItem != null) {
             switch (expandItem.getPath()) {
                 case StaConstants.OBJECTS:
-                    addGraphText(GraphText.GRAPH_RELATION_OBEJCTS);
+                    addGraphText(GraphText.GRAPH_RELATION_OBJECT);
                     break;
                 case StaConstants.SUBJECTS:
-                    addGraphText(GraphText.GRAPH_RELATION_SUBJECTS);
+                    addGraphText(GraphText.GRAPH_RELATION_SUBJECT);
                     break;
                 case StaConstants.GROUPS:
                     addGraphText(GraphText.GRAPH_RELATION_GROUPS);

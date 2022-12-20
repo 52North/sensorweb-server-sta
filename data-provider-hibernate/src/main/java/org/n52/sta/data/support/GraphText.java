@@ -69,8 +69,8 @@ enum GraphText {
 
     GRAPH_PROJECT_DATASTREAMS("project(datastreams)"),
 
-    GRAPH_RELATION_OBEJCTS("relation(objects)"),
-    GRAPH_RELATION_SUBJECTS("relation(subjects)"),
+    GRAPH_RELATION_OBJECT("relation(object)"),
+    GRAPH_RELATION_SUBJECT("relation(subject)"),
     GRAPH_RELATION_GROUPS("relation(groups)");
 
     private final String value;
