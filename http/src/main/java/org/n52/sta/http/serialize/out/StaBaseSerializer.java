@@ -130,7 +130,11 @@ public abstract class StaBaseSerializer<T extends Identifiable> extends StdSeria
             Function<SerializationContext, StaBaseSerializer<E>> serializerFactory,
             ThrowingMemberWriter<E> memberWriter)
             throws IOException {
-        writeMemberInternal(member, parentId, gen, serializerFactory, memberWriter);
+//        writeMemberInternal(member, parentId, gen, serializerFactory, memberWriter);
+        writeMemberInternal(member, parentId, gen, serializerFactory, serializer -> {
+            gen.writeFieldName(member);
+            memberWriter.writeIfSelected(serializer);
+        });
     }
 
     private <E extends Identifiable> void writeMemberInternal(String member,
