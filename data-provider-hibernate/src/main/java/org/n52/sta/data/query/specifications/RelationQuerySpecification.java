@@ -47,8 +47,8 @@ public class RelationQuerySpecification extends QuerySpecification<RelationEntit
     public RelationQuerySpecification() {
         super();
         this.filterByMember.put(StaConstants.GROUPS, createGroupsFilter());
-        this.filterByMember.put(StaConstants.SUBJECTS, createSubjectFilter());
-        this.filterByMember.put(StaConstants.OBJECTS, createObjectFilter());
+        this.filterByMember.put(StaConstants.SUBJECT, createSubjectFilter());
+        this.filterByMember.put(StaConstants.OBJECT, createObjectFilter());
 
         this.entityPathByProperty.put(StaConstants.PROP_NAME, new SimplePropertyComparator<>(HasName.PROPERTY_NAME));
         this.entityPathByProperty.put(StaConstants.PROP_DESCRIPTION,

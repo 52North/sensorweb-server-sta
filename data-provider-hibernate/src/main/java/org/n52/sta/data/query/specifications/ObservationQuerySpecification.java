@@ -41,6 +41,7 @@ import org.n52.series.db.beans.DatasetEntity;
 import org.n52.series.db.beans.FeatureEntity;
 import org.n52.series.db.beans.IdEntity;
 import org.n52.series.db.beans.sta.GroupEntity;
+import org.n52.series.db.beans.sta.RelationEntity;
 import org.n52.shetland.ogc.sta.StaConstants;
 import org.springframework.data.jpa.domain.Specification;
 
@@ -51,6 +52,8 @@ public class ObservationQuerySpecification extends QuerySpecification<DataEntity
         this.filterByMember.put(StaConstants.DATASTREAMS, createDatastreamFilter());
         this.filterByMember.put(StaConstants.FEATURES_OF_INTEREST, createFeatureOfInterestFilter());
         this.filterByMember.put(StaConstants.GROUPS, createGroupsFilter());
+        this.filterByMember.put(StaConstants.SUBJECT, createSubjectsFilter());
+        this.filterByMember.put(StaConstants.OBJECTS, createObjectsFilter());
     }
 
     @Override
@@ -89,6 +92,28 @@ public class ObservationQuerySpecification extends QuerySpecification<DataEntity
             Subquery< ? > subquery = memberQuery.create(specification, query, builder);
             // m..n
             Join< ? , ? > join = root.join(DataEntity.PROPERTY_GROUPS, JoinType.INNER);
+            return builder.in(join.get(IdEntity.PROPERTY_ID))
+                          .value(subquery);
+        };
+    }
+
+    private MemberFilter<DataEntity> createSubjectsFilter() {
+        return specification -> (root, query, builder) -> {
+            EntityQuery memberQuery = createQuery(IdEntity.PROPERTY_ID, RelationEntity.class);
+            Subquery< ? > subquery = memberQuery.create(specification, query, builder);
+            // m..n
+            Join< ? , ? > join = root.join(DataEntity.PROPERTY_SUBJECTS, JoinType.INNER);
+            return builder.in(join.get(IdEntity.PROPERTY_ID))
+                          .value(subquery);
+        };
+    }
+
+    private MemberFilter<DataEntity> createObjectsFilter() {
+        return specification -> (root, query, builder) -> {
+            EntityQuery memberQuery = createQuery(IdEntity.PROPERTY_ID, RelationEntity.class);
+            Subquery< ? > subquery = memberQuery.create(specification, query, builder);
+            // m..n
+            Join< ? , ? > join = root.join(DataEntity.PROPERTY_OBJECTS, JoinType.INNER);
             return builder.in(join.get(IdEntity.PROPERTY_ID))
                           .value(subquery);
         };

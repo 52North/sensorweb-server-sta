@@ -233,7 +233,6 @@ public class StaPlusPathVisitor extends StaPlusPathGrammarBaseVisitor<StaPath<? 
                 Relation.class);
     }
 
-
     @Override
     public StaPath<Datastream> visitDatastream(StaPlusPathGrammar.DatastreamContext ctx) {
         return parseEntity((ctx.DATASTREAM() != null)
