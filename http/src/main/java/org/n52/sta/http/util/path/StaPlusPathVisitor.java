@@ -31,6 +31,10 @@ import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.tree.TerminalNode;
 import org.n52.grammar.StaPlusPathGrammar;
 import org.n52.grammar.StaPlusPathGrammarBaseVisitor;
+import org.n52.grammar.StaPlusPathGrammar.ObjectContext;
+import org.n52.grammar.StaPlusPathGrammar.ObjectsContext;
+import org.n52.grammar.StaPlusPathGrammar.SubjectContext;
+import org.n52.grammar.StaPlusPathGrammar.SubjectsContext;
 import org.n52.sta.api.entity.Datastream;
 import org.n52.sta.api.entity.FeatureOfInterest;
 import org.n52.sta.api.entity.Group;
@@ -263,6 +267,28 @@ public class StaPlusPathVisitor extends StaPlusPathGrammarBaseVisitor<StaPath<? 
     }
 
     @Override
+    public StaPath<Observation> visitSubject(SubjectContext ctx) {
+        return parseEntity((ctx.SUBJECT() != null)
+                        ? StaPlusPathGrammar.SUBJECT
+                        : StaPlusPathGrammar.SUBJECTS,
+                null,
+                ctx,
+                ObservationJsonSerializer::new,
+                Observation.class);
+    }
+
+    @Override
+    public StaPath<Observation> visitObject(ObjectContext ctx) {
+        return parseEntity((ctx.OBJECT() != null)
+                        ? StaPlusPathGrammar.OBJECT
+                        : StaPlusPathGrammar.OBJECTS,
+                null,
+                ctx,
+                ObservationJsonSerializer::new,
+                Observation.class);
+    }
+
+    @Override
     public StaPath<Thing> visitThing(StaPlusPathGrammar.ThingContext ctx) {
         return parseEntity((ctx.THING() != null)
                         ? StaPlusPathGrammar.THING
@@ -333,6 +359,24 @@ public class StaPlusPathVisitor extends StaPlusPathGrammarBaseVisitor<StaPath<? 
                 new PathSegment(segment.getText()),
                 ObservationJsonSerializer::new,
                 Observation.class);
+    }
+
+    @Override
+    public StaPath<Relation> visitSubjects(SubjectsContext ctx) {
+        TerminalNode segment = ctx.SUBJECTS();
+        return new StaPath<>(SelectPath.PathType.collection,
+                new PathSegment(segment.getText()),
+                RelationJsonSerializer::new,
+                Relation.class);
+    }
+
+    @Override
+    public StaPath<Relation> visitObjects(ObjectsContext ctx) {
+        TerminalNode segment = ctx.OBJECTS();
+        return new StaPath<>(SelectPath.PathType.collection,
+                new PathSegment(segment.getText()),
+                RelationJsonSerializer::new,
+                Relation.class);
     }
 
     @Override
