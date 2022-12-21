@@ -42,6 +42,8 @@ import org.antlr.v4.runtime.Vocabulary;
 import org.antlr.v4.runtime.tree.ParseTreeVisitor;
 import org.n52.shetland.ogc.sta.exception.STAInvalidUrlException;
 import org.n52.sta.api.entity.Identifiable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.Method;
 import java.util.function.Function;
@@ -49,6 +51,7 @@ import java.util.function.Supplier;
 
 public class PathFactory {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(PathFactory.class);
     private final Function<TokenStream, Parser> parser;
     private final Supplier<ParseTreeVisitor<StaPath<? extends Identifiable>>> visitor;
     private final Function<CodePointCharStream, Lexer> lexer;
@@ -75,6 +78,7 @@ public class PathFactory {
                     .getDeclaredMethod("path");
             return ((ParserRuleContext) firstRuleMethod.invoke(grammar)).accept(visitor.get());
         } catch (Exception e) {
+            LOGGER.error("Error parsin URL!", e);
             throw new STAInvalidUrlException("Invalid URL: " + url);
         }
     }
