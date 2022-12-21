@@ -27,6 +27,10 @@
  */
 package org.n52.sta.data.query.specifications;
 
+import java.util.List;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
+
 import javax.persistence.criteria.Join;
 import javax.persistence.criteria.JoinType;
 import javax.persistence.criteria.Subquery;
@@ -38,17 +42,21 @@ import org.n52.series.db.beans.HibernateRelations.HasName;
 import org.n52.series.db.beans.sta.GroupEntity;
 import org.n52.series.db.beans.sta.RelationEntity;
 import org.n52.shetland.ogc.sta.StaConstants;
+import org.n52.sta.api.exception.ProviderException;
+import org.n52.sta.api.path.PathSegment;
+import org.n52.sta.api.path.VeiledPathSegment;
 import org.n52.sta.data.query.specifications.BaseQuerySpecifications.EntityQuery;
 import org.n52.sta.data.query.specifications.BaseQuerySpecifications.MemberFilter;
 import org.n52.sta.data.query.specifications.util.SimplePropertyComparator;
+import org.springframework.data.jpa.domain.Specification;
 
 public class RelationQuerySpecification extends QuerySpecification<RelationEntity> {
 
     public RelationQuerySpecification() {
         super();
         this.filterByMember.put(StaConstants.GROUPS, createGroupsFilter());
-        this.filterByMember.put(StaConstants.SUBJECT, createSubjectFilter());
-        this.filterByMember.put(StaConstants.OBJECT, createObjectFilter());
+        this.filterByMember.put(StaConstants.SUBJECTS, createSubjectFilter());
+        this.filterByMember.put(StaConstants.OBJECTS, createObjectFilter());
 
         this.entityPathByProperty.put(StaConstants.PROP_NAME, new SimplePropertyComparator<>(HasName.PROPERTY_NAME));
         this.entityPathByProperty.put(StaConstants.PROP_DESCRIPTION,
@@ -59,46 +67,88 @@ public class RelationQuerySpecification extends QuerySpecification<RelationEntit
                 new SimplePropertyComparator<>(RelationEntity.PROPERTY_ROLE));
     }
 
+    @Override
+    protected Specification<RelationEntity> parsePath(List<PathSegment> segments) throws ProviderException {
+        if (!segments.isEmpty() && RelationVeiledPathPredicates.subjects().test(segments.get(0))
+                || RelationVeiledPathPredicates.objects().test(segments.get(0))) {
+            return super.parsePath(segments.stream().map(s -> RelationVeiledPathPredicates.observations().test(s)
+                    ? VeiledPathSegment.of(s,
+                            RelationVeiledPathPredicates.subjects().test(segments.get(0)) ? StaConstants.SUBJECTS
+                                    : StaConstants.OBJECTS)
+                    : s).collect(Collectors.toList()));
+        }
+        return super.parsePath(segments);
+    }
+
     private MemberFilter<RelationEntity> createGroupsFilter() {
         return specification -> (root, query, builder) -> {
             EntityQuery memberQuery = createQuery(IdEntity.PROPERTY_ID, GroupEntity.class);
-            Subquery< ? > subquery = memberQuery.create(specification, query, builder);
+            Subquery<?> subquery = memberQuery.create(specification, query, builder);
             // m..n
-            Join< ? , ? > join = root.join(RelationEntity.PROPERTY_GROUPS, JoinType.INNER);
-            return builder.in(join.get(IdEntity.PROPERTY_ID))
-                          .value(subquery);
+            Join<?, ?> join = root.join(RelationEntity.PROPERTY_GROUPS, JoinType.INNER);
+            return builder.in(join.get(IdEntity.PROPERTY_ID)).value(subquery);
 
         };
     }
 
     private MemberFilter<RelationEntity> createSubjectFilter() {
         return specification -> (root, query, builder) -> {
-            EntityQuery memberQuery = createQuery(IdEntity.PROPERTY_ID,
-                                                  DataEntity.class);
-            Subquery< ? > subquery = memberQuery.create(specification, query, builder);
+            EntityQuery memberQuery = createQuery(IdEntity.PROPERTY_ID, DataEntity.class);
+            Subquery<?> subquery = memberQuery.create(specification, query, builder);
             // n..1
-            return builder.in(subquery)
-                          .value(root.get(RelationEntity.PROPERTY_SUBJECT));
+            return builder.in(subquery).value(root.get(RelationEntity.PROPERTY_SUBJECT));
 
         };
     }
 
     private MemberFilter<RelationEntity> createObjectFilter() {
         return specification -> (root, query, builder) -> {
-            EntityQuery memberQuery = createQuery(IdEntity.PROPERTY_ID,
-                    DataEntity.class);
-            Subquery< ? > subquery = memberQuery.create(specification, query, builder);
+            EntityQuery memberQuery = createQuery(IdEntity.PROPERTY_ID, DataEntity.class);
+            Subquery<?> subquery = memberQuery.create(specification, query, builder);
             // n..1
-            return builder.in(subquery)
-                          .value(root.get(RelationEntity.PROPERTY_OBJECT));
+            return builder.in(subquery).value(root.get(RelationEntity.PROPERTY_OBJECT));
 
         };
     }
 
-
     // TODO discuss: split multiple (tiny) subqueries so that we are able to use
     // kind of a DSL query language
 
+    private static final class RelationVeiledPathPredicates {
 
+        private RelationVeiledPathPredicates() {
+        }
+
+        public static Predicate<PathSegment> observations() {
+            return new Predicate<PathSegment>() {
+
+                @Override
+                public boolean test(PathSegment input) {
+                    return StaConstants.OBSERVATIONS.equals(input.getCollection());
+                }
+            };
+        }
+
+        public static Predicate<PathSegment> subjects() {
+            return new Predicate<PathSegment>() {
+
+                @Override
+                public boolean test(PathSegment input) {
+                    return StaConstants.SUBJECTS.equals(input.getCollection());
+                }
+            };
+        }
+
+        public static Predicate<PathSegment> objects() {
+            return new Predicate<PathSegment>() {
+
+                @Override
+                public boolean test(PathSegment input) {
+                    return StaConstants.OBJECTS.equals(input.getCollection());
+                }
+            };
+        }
+
+    }
 
 }

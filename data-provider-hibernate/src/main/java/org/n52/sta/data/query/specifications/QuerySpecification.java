@@ -50,6 +50,7 @@ import org.n52.sta.api.entity.Identifiable;
 import org.n52.sta.api.path.PathSegment;
 import org.n52.sta.api.path.Request;
 import org.n52.sta.api.path.SelectPath;
+import org.n52.sta.api.path.VeiledPathSegment;
 import org.n52.sta.data.query.FilterQueryParser;
 import org.n52.sta.data.query.QuerySpecificationFactory;
 import org.n52.sta.data.query.specifications.util.PropertyComparator;
@@ -92,7 +93,7 @@ public abstract class QuerySpecification<T> implements BaseQuerySpecifications<T
                    .orElse(querySpec);
     }
 
-    private Specification<T> parsePath(List<PathSegment> segments) throws ProviderException {
+    protected Specification<T> parsePath(List<PathSegment> segments) throws ProviderException {
         Specification<T> specification = null;
         try {
             // Segment of requested Entity
@@ -111,13 +112,15 @@ public abstract class QuerySpecification<T> implements BaseQuerySpecifications<T
             if (segments.size() > 1) {
                 current = segments.get(1);
                 String currentCollection = current.getCollection();
-                BaseQuerySpecifications< ? > bqs = QuerySpecificationFactory.createSpecification(currentCollection);
+                BaseQuerySpecifications<?> bqs =
+                        QuerySpecificationFactory.createSpecification(currentCollection);
 
                 String id = current.getIdentifier()
                                    .orElse(null);
                 Specification< ? > equalsStaIdentifier = bqs.equalsStaIdentifier(id);
-                Specification<T> segmentSpec = applyOnMember(currentCollection,
-                                                             equalsStaIdentifier);
+                Specification<T> segmentSpec = applyOnMember(current instanceof VeiledPathSegment
+                        ? ((VeiledPathSegment) current).getVeiledCollection()
+                        : currentCollection, equalsStaIdentifier);
 
                 return segmentSpec;
             } else {
