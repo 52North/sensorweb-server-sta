@@ -54,10 +54,12 @@ resource
    | groups
    | relation
    | relations
+   | subject
+   | subjects
    ;
 
 observation
-   : OBSERVATIONS identifier (SLASH (datastream | featureOfInterest | observationProperty | group | groups))?
+   : OBSERVATIONS identifier (SLASH (datastream | featureOfInterest | observationProperty | group | groups | subjects | objects))?
    ;
    
 datastream
@@ -93,7 +95,17 @@ group
 
 relation
   : RELATION
-  | RELATIONS identifier (SLASH (group | groups | SUBJECT | OBJECT | relationProperty))?
+  | RELATIONS identifier (SLASH (group | groups | subject | object | relationProperty))?
+  ;
+  
+subject
+  : SUBJECT
+  | SUBJECTS
+  ;
+  
+object
+  : OBJECT
+  | OBJECTS
   ;
 
 ////////////////////////////////////////////////////////////////
@@ -148,6 +160,14 @@ groups
 
 relations
   : RELATIONS
+  ;
+
+subjects
+  : SUBJECTS
+  ;
+
+objects
+  : OBJECTS
   ;
 
 ////////////////////////////////////////////////////////////////

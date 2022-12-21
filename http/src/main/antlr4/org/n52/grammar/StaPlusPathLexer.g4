@@ -52,3 +52,5 @@ PROP_EXTERNAL_OBJECT: 'externalObject';
 
 SUBJECT: 'Subject';
 OBJECT: 'Object';
+SUBJECTS: 'Subjects';
+OBJECTS: 'Objects';
