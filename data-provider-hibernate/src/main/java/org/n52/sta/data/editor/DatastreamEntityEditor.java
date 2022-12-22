@@ -41,6 +41,7 @@ import javax.transaction.Transactional.TxType;
 import org.hibernate.Hibernate;
 import org.n52.janmayen.stream.Streams;
 import org.n52.series.db.beans.AbstractDatasetEntity;
+import org.n52.series.db.beans.AbstractFeatureEntity;
 import org.n52.series.db.beans.CategoryEntity;
 import org.n52.series.db.beans.DataEntity;
 import org.n52.series.db.beans.DatasetAggregationEntity;
@@ -355,6 +356,14 @@ public class DatastreamEntityEditor extends DatabaseEntityAdapter<AbstractDatase
             return true;
         }
         return false;
+    }
+
+    public DatasetEntity updateFeature(DatasetEntity datastreamEntity, AbstractFeatureEntity feature) {
+        if (datastreamEntity.getFeature() == null) {
+            datastreamEntity.setFeature(feature);
+            return datastreamRepository.save(datastreamEntity);
+        }
+        return datastreamEntity;
     }
 
     public void updateFirstLastObservation(AbstractDatasetEntity datastreamEntity,

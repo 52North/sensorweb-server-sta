@@ -79,6 +79,7 @@ public class ObservationEntityEditor extends DatabaseEntityAdapter<DataEntity>
     private EntityPropertyMapping propertyMapping;
 
     private DatastreamEditorDelegate<Datastream, DatastreamData> datastreamEditor;
+    private EntityEditorDelegate<FeatureOfInterest, FeatureOfInterestData> featureofInterestEditor;
     private EntityEditorDelegate<Group, GroupData> groupEditor;
     private EntityEditorDelegate<Relation, RelationData> relationEditor;
 
@@ -93,18 +94,18 @@ public class ObservationEntityEditor extends DatabaseEntityAdapter<DataEntity>
         // As we are the package providing the EE Implementations, this cast should never fail.
         this.datastreamEditor = (DatastreamEditorDelegate<Datastream, DatastreamData>)
                 getService(Datastream.class).unwrapEditor();
-        this.groupEditor = (EntityEditorDelegate<Group, GroupData>)
-                getService(Group.class).unwrapEditor();
-        this.relationEditor = (EntityEditorDelegate<Relation, RelationData>)
-                getService(Relation.class).unwrapEditor();
-        //@formatter:on
+        this.featureofInterestEditor =
+                (EntityEditorDelegate<FeatureOfInterest, FeatureOfInterestData>) getService(FeatureOfInterest.class)
+                        .unwrapEditor();
+        this.groupEditor = (EntityEditorDelegate<Group, GroupData>) getService(Group.class).unwrapEditor();
+        this.relationEditor = (EntityEditorDelegate<Relation, RelationData>) getService(Relation.class).unwrapEditor();
+        // @formatter:on
     }
 
     @Override
     public ObservationData getOrSave(Observation entity) throws EditorException {
         Optional<DataEntity> stored = getEntity(entity.getId());
-        return stored.map(e -> new ObservationData(e, Optional.of(propertyMapping)))
-                     .orElseGet(() -> save(entity));
+        return stored.map(e -> new ObservationData(e, Optional.of(propertyMapping))).orElseGet(() -> save(entity));
     }
 
     @Override
@@ -113,6 +114,7 @@ public class ObservationEntityEditor extends DatabaseEntityAdapter<DataEntity>
         assertNew(entity);
 
         DatasetEntity datastream = (DatasetEntity) getDatastreamOf(entity);
+        datastream = datastreamEditor.updateFeature(datastream, getFeatureOfInterestOf(entity));
 
         return Streams.stream(saveAll(Collections.singleton(entity), datastream))
                       .map(savedEntity -> new ObservationData(savedEntity, Optional.of(propertyMapping)))

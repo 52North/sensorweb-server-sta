@@ -29,6 +29,7 @@
 package org.n52.sta.data.editor;
 
 import org.n52.series.db.beans.AbstractDatasetEntity;
+import org.n52.series.db.beans.AbstractFeatureEntity;
 import org.n52.series.db.beans.DataEntity;
 import org.n52.series.db.beans.DatasetEntity;
 import org.n52.sta.api.entity.Identifiable;
@@ -73,5 +74,7 @@ public interface DatastreamEditorDelegate<T extends Identifiable, R extends T> e
             DataEntity< ? > last);
 
     void clearFirstObservationLastObservationFeature(DatasetEntity dataset);
+
+    DatasetEntity updateFeature(DatasetEntity datastream, AbstractFeatureEntity<?> featureOfInterestOf);
 
 }
