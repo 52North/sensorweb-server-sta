@@ -165,8 +165,18 @@ public class GroupEntityEditor extends DatabaseEntityAdapter<GroupEntity>
 
         setIfNotNull(updateEntity::getName, data::setName);
         setIfNotNull(updateEntity::getDescription, data::setDescription);
+        setIfNotNull(updateEntity::getPurpose, data::setPurpose);
 
-        errorIfNotNull(updateEntity::getProperties, "properties");
+        if (updateEntity.getCreationTime() != null) {
+            valueHelper.setTime(data::setCreationTime, (TimeInstant) updateEntity.getCreationTime());
+        }
+        if (updateEntity.getRunTime() != null) {
+            Time runTime = updateEntity.getRunTime();
+            valueHelper.setStartTime(data::setRunTimeStart, runTime);
+            valueHelper.setEndTime(data::setRunTimeEnd, runTime);
+        }
+
+        errorIfNotEmptyMap(updateEntity::getProperties, "properties");
 
         return new GroupData(groupRepository.save(data), Optional.empty());
     }

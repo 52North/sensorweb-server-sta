@@ -40,6 +40,7 @@ import org.n52.sta.api.entity.Group;
 import org.n52.sta.api.entity.Observation;
 import org.n52.sta.api.entity.Relation;
 import org.n52.sta.api.exception.editor.EditorException;
+import org.n52.sta.config.EntityPropertyMapping;
 import org.n52.sta.data.entity.GroupData;
 import org.n52.sta.data.entity.ObservationData;
 import org.n52.sta.data.entity.RelationData;
@@ -139,9 +140,15 @@ public class RelationEntityEditor extends DatabaseEntityAdapter<RelationEntity>
 
         RelationEntity data = ((RelationData) oldEntity).getData();
 
+        setIfNotNull(updateEntity::getRole, data::setRole);
         setIfNotNull(updateEntity::getDescription, data::setDescription);
 
-        errorIfNotNull(updateEntity::getProperties, "properties");
+        if (updateEntity.getObject().isObjectPresent()) {
+            data.setObject(observationEditor.getOrSave(updateEntity.getObject().getObject()).getData());
+        } else {
+            data.setExternalObject(updateEntity.getObject().getExternalObject());
+        }
+        errorIfNotEmptyMap(updateEntity::getProperties, "properties");
 
         return new RelationData(relationRepository.save(data), Optional.of(propertyMapping));
     }

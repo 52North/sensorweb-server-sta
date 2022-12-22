@@ -133,7 +133,18 @@ public class FeatureOfInterestEntityEditor extends DatabaseEntityAdapter<Abstrac
     @Override
     public FeatureOfInterestData update(FeatureOfInterest oldEntity, FeatureOfInterest updateEntity)
             throws EditorException {
-        throw new EditorException();
+        Objects.requireNonNull(oldEntity, "no entity to patch found");
+        Objects.requireNonNull(updateEntity, "no patches found");
+
+        AbstractFeatureEntity<?> data = ((FeatureOfInterestData) oldEntity).getData();
+
+        setIfNotNull(updateEntity::getName, data::setName);
+        setIfNotNull(updateEntity::getDescription, data::setDescription);
+        setIfNotNull(updateEntity::getFeature, data::setGeometry);
+
+        errorIfNotEmptyMap(updateEntity::getProperties, "properties");
+
+        return new FeatureOfInterestData(featureOfInterestRepository.save(data), Optional.empty());
     }
 
     @Override

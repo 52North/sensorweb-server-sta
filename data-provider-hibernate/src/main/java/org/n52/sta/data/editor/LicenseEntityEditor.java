@@ -135,8 +135,10 @@ public class LicenseEntityEditor extends DatabaseEntityAdapter<LicenseEntity>
 
         setIfNotNull(updateEntity::getName, data::setName);
         setIfNotNull(updateEntity::getDescription, data::setDescription);
+        setIfNotNull(updateEntity::getDefinition, data::setDefinition);
+        setIfNotNull(updateEntity::getLogo, data::setLogo);
 
-        errorIfNotNull(updateEntity::getProperties, "properties");
+        errorIfNotEmptyMap(updateEntity::getProperties, "properties");
 
         return new LicenseData(licenseRepository.save(data), Optional.empty());
     }

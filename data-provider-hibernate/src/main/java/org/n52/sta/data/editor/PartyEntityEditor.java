@@ -143,6 +143,11 @@ public class PartyEntityEditor extends DatabaseEntityAdapter<PartyEntity>
 
         setIfNotNull(updateEntity::getName, data::setName);
         setIfNotNull(updateEntity::getDescription, data::setDescription);
+        setIfNotNull(updateEntity::getAuthId, data::setAuthId);
+        if (updateEntity.getRole() != null) {
+            data.setRole(RolePartyCode.valueOf(updateEntity.getRole().toString()));
+        }
+        setIfNotNull(updateEntity::getDisplayName, data::setDisplayName);
 
         return new PartyData(partyRepository.save(data), Optional.empty());
     }

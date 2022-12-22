@@ -127,7 +127,17 @@ public class SensorEntityEditor extends DatabaseEntityAdapter<ProcedureEntity>
 
     @Override
     public SensorData update(Sensor oldEntity, Sensor updateEntity) throws EditorException {
-        throw new EditorException();
+        Objects.requireNonNull(oldEntity, "no entity to patch found");
+        Objects.requireNonNull(updateEntity, "no patches found");
+
+        ProcedureEntity data = ((SensorData) oldEntity).getData();
+
+        setIfNotNull(updateEntity::getName, data::setName);
+        setIfNotNull(updateEntity::getDescription, data::setDescription);
+
+        errorIfNotEmptyMap(updateEntity::getProperties, "properties");
+
+        return new SensorData(procedureRepository.save(data), Optional.empty());
     }
 
     @Override

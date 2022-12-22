@@ -38,6 +38,7 @@ import java.util.stream.Collectors;
 
 import org.n52.janmayen.stream.Streams;
 import org.n52.series.db.beans.AbstractDatasetEntity;
+import org.n52.series.db.beans.AbstractFeatureEntity;
 import org.n52.series.db.beans.DataEntity;
 import org.n52.series.db.beans.DatasetEntity;
 import org.n52.series.db.beans.FormatEntity;
@@ -48,12 +49,14 @@ import org.n52.shetland.ogc.gml.time.TimeInstant;
 import org.n52.shetland.ogc.om.OmConstants;
 import org.n52.sta.api.EntityServiceLookup;
 import org.n52.sta.api.entity.Datastream;
+import org.n52.sta.api.entity.FeatureOfInterest;
 import org.n52.sta.api.entity.Group;
 import org.n52.sta.api.entity.Observation;
 import org.n52.sta.api.entity.Relation;
 import org.n52.sta.api.exception.editor.EditorException;
 import org.n52.sta.config.EntityPropertyMapping;
 import org.n52.sta.data.entity.DatastreamData;
+import org.n52.sta.data.entity.FeatureOfInterestData;
 import org.n52.sta.data.entity.GroupData;
 import org.n52.sta.data.entity.ObservationData;
 import org.n52.sta.data.entity.RelationData;
@@ -124,7 +127,29 @@ public class ObservationEntityEditor extends DatabaseEntityAdapter<DataEntity>
 
     @Override
     public ObservationData update(Observation oldEntity, Observation updateEntity) throws EditorException {
-        throw new EditorException();
+        Objects.requireNonNull(oldEntity, "no entity to patch found");
+        Objects.requireNonNull(updateEntity, "no patches found");
+
+        DataEntity<?> data = ((ObservationData) oldEntity).getData();
+
+        addTimeValues(data, updateEntity);
+
+        if (updateEntity.getResult() != null) {
+            Object value = updateEntity.getResult();
+            switch (data.getValueType()) {
+                case "quantity":
+                    addQuantityValue(value, (QuantityDataEntity) data);
+                    break;
+
+                default:
+                    throw new EditorException("Unknown value type: " + data.getValueType());
+            }
+
+        }
+
+        addParameters(data, updateEntity);
+
+        return new ObservationData(observationRepository.save(data), Optional.of(propertyMapping));
     }
 
     @Override
@@ -167,47 +192,43 @@ public class ObservationEntityEditor extends DatabaseEntityAdapter<DataEntity>
         return observationRepository.findByStaIdentifier(id, graphBuilder);
     }
 
-    // TODO: check why we need this method. Currently only called with Collection.singleton in #save
-    private Set<DataEntity< ? >> saveAll(Set<Observation> observations, DatasetEntity datasetEntity)
+    // TODO: check why we need this method. Currently only called with
+    // Collection.singleton in #save
+    private Set<DataEntity<?>> saveAll(Set<Observation> observations, DatasetEntity datasetEntity)
             throws EditorException {
         Objects.requireNonNull(observations, "observations must not be null");
         Objects.requireNonNull(datasetEntity, "datasetEntity must not be null");
-        Set<DataEntity< ? >> entities = Streams.stream(observations)
-                                               .map(o -> createEntity(o, datasetEntity))
-                                               .collect(Collectors.toSet());
-        return Streams.stream(observationRepository.saveAll(entities))
-                      .collect(Collectors.toSet());
+        Set<DataEntity<?>> entities =
+                Streams.stream(observations).map(o -> createEntity(o, datasetEntity)).collect(Collectors.toSet());
+        return Streams.stream(observationRepository.saveAll(entities)).collect(Collectors.toSet());
     }
-
 
     private AbstractDatasetEntity getDatastreamOf(Observation entity) throws EditorException {
-        return datastreamEditor.getOrSave(entity.getDatastream())
-                               .getData();
+        return datastreamEditor.getOrSave(entity.getDatastream()).getData();
         // return datastreamEditor.getEntity(datastream.getId())
-        // .orElseThrow(() -> new IllegalStateException("Datastream not found for Observation!"));
+        // .orElseThrow(() -> new IllegalStateException("Datastream not found
+        // for Observation!"));
     }
 
-    private DataEntity< ? > createEntity(Observation observation, DatasetEntity datasetEntity) throws EditorException {
+    private AbstractFeatureEntity<?> getFeatureOfInterestOf(Observation entity) {
+        return featureofInterestEditor.getOrSave(entity.getFeatureOfInterest()).getData();
+    }
+
+    private DataEntity<?> createEntity(Observation observation, DatasetEntity datasetEntity) throws EditorException {
         FormatEntity formatEntity = datasetEntity.getOmObservationType();
         Object value = observation.getResult();
         String format = formatEntity.getFormat();
-        DataEntity< ? > dataEntity;
+        DataEntity<?> dataEntity;
         switch (format) {
             case OmConstants.OBS_TYPE_MEASUREMENT:
-                QuantityDataEntity quantityObservationEntity = new QuantityDataEntity();
-                if (value == null || value.equals("NaN") || value.equals("Inf") || value.equals("-Inf")) {
-                    quantityObservationEntity.setValue(null);
-                } else {
-                    double doubleValue = value instanceof String
-                            ? Double.parseDouble((String) value)
-                            : (double) value;
-                    quantityObservationEntity.setValue(BigDecimal.valueOf(doubleValue));
-                }
-                dataEntity = initDataEntity(quantityObservationEntity, observation, datasetEntity);
-//                // we need to set valueType manually as it is not yet autogenerated by the DB but needed for
-//                // response
-//                // serialization.
-//                dataEntity.setValueType(ValueType.quantity.name());
+                QuantityDataEntity quantityDataEntity = new QuantityDataEntity();
+                addQuantityValue(value, new QuantityDataEntity());
+                dataEntity = initDataEntity(quantityDataEntity, observation, datasetEntity);
+                // // we need to set valueType manually as it is not yet
+                // autogenerated by the DB but needed for
+                // // response
+                // // serialization.
+                // dataEntity.setValueType(ValueType.quantity.name());
                 break;
 
             // TODO add further observation types
@@ -219,87 +240,97 @@ public class ObservationEntityEditor extends DatabaseEntityAdapter<DataEntity>
     }
 
     private DataEntity<?> addAddtitionals(DataEntity<?> entity, Observation observation) {
-        entity.setGroups(Streams.stream(observation.getGroups())
-                .map(groupEditor::getOrSave)
-                .map(StaData::getData)
+        entity.setGroups(Streams.stream(observation.getGroups()).map(groupEditor::getOrSave).map(StaData::getData)
                 .collect(Collectors.toSet()));
 
         // TODO set this DataEntity in relation as subject!
-        entity.setSubjects(Streams.stream(observation.getSubjects())
-                .map(relationEditor::getOrSave)
-                .map(StaData::getData)
-                .collect(Collectors.toSet()));
+        entity.setSubjects(Streams.stream(observation.getSubjects()).map(relationEditor::getOrSave)
+                .map(StaData::getData).collect(Collectors.toSet()));
 
-        entity.setObjects(Streams.stream(observation.getObjects())
-                .map(relationEditor::getOrSave)
-                .map(StaData::getData)
+        entity.setObjects(Streams.stream(observation.getObjects()).map(relationEditor::getOrSave).map(StaData::getData)
                 .collect(Collectors.toSet()));
 
         return entity;
     }
 
-    private DataEntity< ? > initDataEntity(DataEntity< ? > data, Observation observation, DatasetEntity dataset) {
+    private DataEntity<?> initDataEntity(DataEntity<?> data, Observation observation, DatasetEntity dataset) {
 
         // metadata
-        String id = observation.getId() == null
-                ? generateId()
-                : observation.getId();
+        String id = observation.getId() == null ? generateId() : observation.getId();
         data.setIdentifier(id);
         data.setStaIdentifier(id);
 
         // values
-        Time phenomenonTime = observation.getPhenomenonTime();
-        valueHelper.setStartTime(data::setSamplingTimeStart, phenomenonTime);
-        valueHelper.setEndTime(data::setSamplingTimeEnd, phenomenonTime);
-
-        Time validTime = observation.getValidTime();
-        valueHelper.setStartTime(data::setValidTimeStart, validTime);
-        valueHelper.setEndTime(data::setValidTimeEnd, validTime);
-
-        // SHOULD assign null value
-        // see 18-088 Section 10.2 Special case #2
-        if (observation.getResultTime() != null) {
-            Time resultTime = observation.getResultTime();
-            valueHelper.setTime(data::setResultTime, (TimeInstant) resultTime);
-
-        }
-        Map<String, Object> parameters = observation.getParameters();
-        Streams.stream(parameters.entrySet())
-               .map(e -> convertParameter(data, e))
-               .forEach(data::addParameter);
-
-        // following parameters have to be set explicitly, too
-        if (parameters.containsKey(propertyMapping.getSamplingGeometry())) {
-            GeometryEntity geometryEntity = valueToGeometry(propertyMapping.getSamplingGeometry(), parameters);
-            data.setGeometryEntity(geometryEntity);
-        }
-
-        if (parameters.containsKey(propertyMapping.getVerticalFrom())) {
-            BigDecimal verticalFrom = valueToDouble(propertyMapping.getVerticalFrom(), parameters);
-            data.setVerticalFrom(verticalFrom);
-        }
-
-        if (parameters.containsKey(propertyMapping.getVerticalTo())) {
-            BigDecimal verticalTo = valueToDouble(propertyMapping.getVerticalTo(), parameters);
-            data.setVerticalFrom(verticalTo);
-        }
-
-        if (parameters.containsKey(propertyMapping.getVerticalFromTo())) {
-            BigDecimal verticalFromTo = valueToDouble(propertyMapping.getVerticalFromTo(), parameters);
-            data.setVerticalFrom(verticalFromTo);
-            data.setVerticalTo(verticalFromTo);
-        }
+        addTimeValues(data, observation);
+        addParameters(data, observation);
 
         // references
         data.setDataset(dataset);
         return data;
     }
 
+    private void addQuantityValue(Object value, QuantityDataEntity data) {
+        if (value == null || value.equals("NaN") || value.equals("Inf") || value.equals("-Inf")) {
+            data.setValue(null);
+        } else {
+            double doubleValue = value instanceof String ? Double.parseDouble((String) value) : (double) value;
+            data.setValue(BigDecimal.valueOf(doubleValue));
+        }
+    }
+
+    private void addTimeValues(DataEntity<?> data, Observation observation) {
+        if (observation.getPhenomenonTime() != null) {
+            Time phenomenonTime = observation.getPhenomenonTime();
+            valueHelper.setStartTime(data::setSamplingTimeStart, phenomenonTime);
+            valueHelper.setEndTime(data::setSamplingTimeEnd, phenomenonTime);
+        }
+
+        if (observation.getValidTime() != null) {
+            Time validTime = observation.getValidTime();
+            valueHelper.setStartTime(data::setValidTimeStart, validTime);
+            valueHelper.setEndTime(data::setValidTimeEnd, validTime);
+        }
+
+        // SHOULD assign null value
+        // see 18-088 Section 10.2 Special case #2
+        if (observation.getResultTime() != null) {
+            Time resultTime = observation.getResultTime();
+            valueHelper.setTime(data::setResultTime, (TimeInstant) resultTime);
+        }
+    }
+
+    private void addParameters(DataEntity<?> data, Observation observation) {
+        if (observation.getParameters() != null) {
+            Map<String, Object> parameters = observation.getParameters();
+            Streams.stream(parameters.entrySet()).map(e -> convertParameter(data, e)).forEach(data::addParameter);
+
+            // following parameters have to be set explicitly, too
+            if (parameters.containsKey(propertyMapping.getSamplingGeometry())) {
+                GeometryEntity geometryEntity = valueToGeometry(propertyMapping.getSamplingGeometry(), parameters);
+                data.setGeometryEntity(geometryEntity);
+            }
+
+            if (parameters.containsKey(propertyMapping.getVerticalFrom())) {
+                BigDecimal verticalFrom = valueToDouble(propertyMapping.getVerticalFrom(), parameters);
+                data.setVerticalFrom(verticalFrom);
+            }
+
+            if (parameters.containsKey(propertyMapping.getVerticalTo())) {
+                BigDecimal verticalTo = valueToDouble(propertyMapping.getVerticalTo(), parameters);
+                data.setVerticalFrom(verticalTo);
+            }
+
+            if (parameters.containsKey(propertyMapping.getVerticalFromTo())) {
+                BigDecimal verticalFromTo = valueToDouble(propertyMapping.getVerticalFromTo(), parameters);
+                data.setVerticalFrom(verticalFromTo);
+                data.setVerticalTo(verticalFromTo);
+            }
+        }
+    }
+
     private BigDecimal valueToDouble(String parameter, Map<String, Object> parameters) {
         Object value = parameters.get(parameter);
-        Double doubleValue = value instanceof String
-                ? Double.parseDouble((String) value)
-                : (Double) value;
+        Double doubleValue = value instanceof String ? Double.parseDouble((String) value) : (Double) value;
         return BigDecimal.valueOf(doubleValue);
     }
 

@@ -36,6 +36,7 @@ import org.n52.janmayen.stream.Streams;
 import org.n52.series.db.beans.PlatformEntity;
 import org.n52.series.db.beans.sta.HistoricalLocationEntity;
 import org.n52.series.db.beans.sta.LocationEntity;
+import org.n52.shetland.ogc.gml.time.TimeInstant;
 import org.n52.sta.api.EntityServiceLookup;
 import org.n52.sta.api.entity.HistoricalLocation;
 import org.n52.sta.api.entity.Location;
@@ -124,7 +125,16 @@ public class HistoricalLocationEntityEditor extends DatabaseEntityAdapter<Histor
     @Override
     public HistoricalLocationData update(HistoricalLocation oldEntity,
             HistoricalLocation updateEntity) throws EditorException {
-        throw new EditorException();
+        Objects.requireNonNull(oldEntity, "no entity to patch found");
+        Objects.requireNonNull(updateEntity, "no patches found");
+
+        HistoricalLocationEntity data = ((HistoricalLocationData) oldEntity).getData();
+
+        if (updateEntity.getTime() != null) {
+            valueHelper.setTime(data::setTime, (TimeInstant) updateEntity.getTime());
+        }
+
+        return new HistoricalLocationData(historicalLocationRepository.save(data), Optional.empty());
     }
 
     @Override

@@ -29,6 +29,7 @@
 package org.n52.sta.data.editor;
 
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -139,7 +140,17 @@ public class LocationEntityEditor extends DatabaseEntityAdapter<LocationEntity>
 
     @Override
     public LocationData update(Location oldEntity, Location updateEntity) throws EditorException {
-        throw new EditorException();
+        Objects.requireNonNull(oldEntity, "no entity to patch found");
+        Objects.requireNonNull(updateEntity, "no patches found");
+
+        LocationEntity data = ((LocationData) oldEntity).getData();
+
+        setIfNotNull(updateEntity::getName, data::setName);
+        setIfNotNull(updateEntity::getDescription, data::setDescription);
+
+        errorIfNotEmptyMap(updateEntity::getProperties, "properties");
+
+        return new LocationData(locationRepository.save(data), Optional.empty());
     }
 
     @Override

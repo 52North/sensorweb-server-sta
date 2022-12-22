@@ -29,6 +29,7 @@
 package org.n52.sta.data.editor;
 
 import java.math.BigDecimal;
+import java.util.Collection;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
@@ -129,8 +130,26 @@ abstract class DatabaseEntityAdapter<T extends DescribableEntity> {
 
     protected static <T> void errorIfNotNull(Supplier<T> supplier, String property) throws EditorException {
         if (supplier.get() != null) {
-            throw new EditorException("Patch not implemented on given property: " + property);
+            throwPatchNotImplementedExcption(property);
         }
+    }
+
+    protected static <T extends Collection> void errorIfNotEmptyCollection(Supplier<T> supplier, String property)
+            throws EditorException {
+        if (supplier.get() != null && !supplier.get().isEmpty()) {
+            throwPatchNotImplementedExcption(property);
+        }
+    }
+
+    protected static <T extends Map> void errorIfNotEmptyMap(Supplier<T> supplier, String property)
+            throws EditorException {
+        if (supplier.get() != null && !supplier.get().isEmpty()) {
+            throwPatchNotImplementedExcption(property);
+        }
+    }
+
+    private static void throwPatchNotImplementedExcption(String property) throws EditorException {
+        throw new EditorException("Patch not implemented on given property: " + property);
     }
 
 }

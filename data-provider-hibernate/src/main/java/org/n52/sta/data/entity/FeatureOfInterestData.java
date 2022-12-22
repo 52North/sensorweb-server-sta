@@ -30,7 +30,6 @@ package org.n52.sta.data.entity;
 
 import org.locationtech.jts.geom.Geometry;
 import org.n52.series.db.beans.AbstractFeatureEntity;
-import org.n52.series.db.beans.sta.StaFeatureEntity;
 import org.n52.sta.api.entity.FeatureOfInterest;
 import org.n52.sta.api.entity.Observation;
 import org.n52.sta.config.EntityPropertyMapping;
@@ -39,14 +38,9 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
-public class FeatureOfInterestData extends StaData<StaFeatureEntity< ? >> implements FeatureOfInterest {
+public class FeatureOfInterestData extends StaData<AbstractFeatureEntity< ? >> implements FeatureOfInterest {
 
     public FeatureOfInterestData(AbstractFeatureEntity< ? > dataEntity,
-                                 Optional<EntityPropertyMapping> parameterProperties) {
-        this(tryToCast(dataEntity), parameterProperties);
-    }
-
-    public FeatureOfInterestData(StaFeatureEntity< ? > dataEntity,
                                  Optional<EntityPropertyMapping> propertyMapping) {
         super(dataEntity, propertyMapping);
     }
@@ -77,11 +71,4 @@ public class FeatureOfInterestData extends StaData<StaFeatureEntity< ? >> implem
         return toSet(data.getObservations(), entity -> new ObservationData(entity, propertyMapping));
         //@formatter:on
     }
-
-    private static StaFeatureEntity< ? > tryToCast(AbstractFeatureEntity< ? > feature) {
-        return feature instanceof StaFeatureEntity
-                ? (StaFeatureEntity< ? >) feature
-                : new StaFeatureEntity<>(feature);
-    }
-
 }

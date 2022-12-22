@@ -141,6 +141,19 @@ public class ProjectEntityEditor extends DatabaseEntityAdapter<ProjectEntity>
 
         setIfNotNull(updateEntity::getName, data::setName);
         setIfNotNull(updateEntity::getDescription, data::setDescription);
+        if (updateEntity.getCreationTime() != null) {
+            valueHelper.setTime(data::setCreationTime, (TimeInstant) updateEntity.getCreationTime());
+        }
+        if (updateEntity.getRunTime() != null) {
+            Time runTime = updateEntity.getRunTime();
+            valueHelper.setStartTime(data::setRunTimeStart, runTime);
+            valueHelper.setEndTime(data::setRunTimeEnd, runTime);
+        }
+        setIfNotNull(updateEntity::getClassification, data::setClassification);
+        setIfNotNull(updateEntity::getTermsOfUse, data::setTermsOfUse);
+        setIfNotNull(updateEntity::getPrivacyPolicy, data::setPrivacyPolicy);
+        setIfNotNull(updateEntity::getUrl, data::setUrl);
+        errorIfNotEmptyMap(updateEntity::getProperties, "properties");
 
         return new ProjectData(projectRepository.save(data), Optional.empty());
     }

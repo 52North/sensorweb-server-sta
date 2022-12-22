@@ -116,7 +116,18 @@ public class ObservedPropertyEntityEditor extends DatabaseEntityAdapter<Phenomen
     @Override
     public ObservedPropertyData update(ObservedProperty oldEntity, ObservedProperty updateEntity)
             throws EditorException {
-        throw new EditorException();
+        Objects.requireNonNull(oldEntity, "no entity to patch found");
+        Objects.requireNonNull(updateEntity, "no patches found");
+
+        PhenomenonEntity data = ((ObservedPropertyData) oldEntity).getData();
+
+        setIfNotNull(updateEntity::getName, data::setName);
+        setIfNotNull(updateEntity::getDescription, data::setDescription);
+        setIfNotNull(updateEntity::getDefinition, data::setIdentifier);
+
+        errorIfNotEmptyMap(updateEntity::getProperties, "properties");
+
+        return new ObservedPropertyData(phenomenonRepository.save(data), Optional.empty());
     }
 
     @Override

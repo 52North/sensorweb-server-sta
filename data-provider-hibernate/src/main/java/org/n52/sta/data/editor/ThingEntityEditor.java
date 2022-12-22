@@ -157,10 +157,10 @@ public class ThingEntityEditor extends DatabaseEntityAdapter<PlatformEntity>
         setIfNotNull(updateEntity::getName, data::setName);
         setIfNotNull(updateEntity::getDescription, data::setDescription);
 
-        errorIfNotNull(updateEntity::getProperties, "properties");
-        errorIfNotNull(updateEntity::getLocations, "locations");
-        errorIfNotNull(updateEntity::getHistoricalLocations, "historicalLocations");
-        errorIfNotNull(updateEntity::getDatastreams, "datastreams");
+        errorIfNotEmptyMap(updateEntity::getProperties, "properties");
+        errorIfNotEmptyCollection(updateEntity::getLocations, "locations");
+        errorIfNotEmptyCollection(updateEntity::getHistoricalLocations, "historicalLocations");
+        errorIfNotEmptyCollection(updateEntity::getDatastreams, "datastreams");
 
         return new ThingData(platformRepository.save(data), Optional.empty());
     }
