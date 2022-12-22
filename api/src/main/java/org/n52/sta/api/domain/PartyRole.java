@@ -30,7 +30,7 @@ package org.n52.sta.api.domain;
 
 public enum PartyRole {
     INDIVIDUAL,
-    INSTITUTION;
+    INSTITUTIONAL;
 
     @Override
     public String toString() {
