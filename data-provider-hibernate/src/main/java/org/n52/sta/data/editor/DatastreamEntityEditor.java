@@ -265,8 +265,27 @@ public class DatastreamEntityEditor extends DatabaseEntityAdapter<AbstractDatase
     }
 
     @Override
-    public Datastream update(Datastream oldEntity, Datastream updateEntity) throws EditorException {
-        throw new EditorException();
+    public DatastreamData update(Datastream oldEntity, Datastream updateEntity) throws EditorException {
+        Objects.requireNonNull(oldEntity, "no entity to patch found");
+        Objects.requireNonNull(updateEntity, "no patches found");
+
+        AbstractDatasetEntity data = ((DatastreamData) oldEntity).getData();
+
+        setIfNotNull(updateEntity::getName, data::setName);
+        setIfNotNull(updateEntity::getDescription, data::setDescription);
+
+        if (updateEntity.getUnitOfMeasurement() != null) {
+            valueHelper.setUnit(data::setUnit, updateEntity.getUnitOfMeasurement());
+        }
+        if (updateEntity.getPhenomenonTime() != null) {
+            Time phenomenonTime = updateEntity.getPhenomenonTime();
+            valueHelper.setStartTime(data::setSamplingTimeStart, phenomenonTime);
+            valueHelper.setEndTime(data::setSamplingTimeEnd, phenomenonTime);
+        }
+        setIfNotNull(updateEntity::getObservedArea, data::setGeometry);
+        errorIfNotEmptyMap(updateEntity::getProperties, "properties");
+
+        return new DatastreamData(datastreamRepository.save(data), Optional.empty());
     }
 
     @Override
