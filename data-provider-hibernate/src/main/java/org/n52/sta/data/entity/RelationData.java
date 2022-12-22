@@ -42,6 +42,8 @@ public class RelationData extends StaData<RelationEntity> implements Relation {
 
     public RelationData(RelationEntity dataEntity, Optional<EntityPropertyMapping> propertyMapping) {
         super(dataEntity, propertyMapping);
+     // propertyMapping is required for Object
+        propertyMapping.orElseThrow(() -> new RuntimeException("no property mapping supplied!"));
     }
 
     @Override

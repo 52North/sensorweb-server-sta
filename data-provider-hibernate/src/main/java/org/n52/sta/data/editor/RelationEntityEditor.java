@@ -60,6 +60,9 @@ public class RelationEntityEditor extends DatabaseEntityAdapter<RelationEntity>
     @Autowired
     private ValueHelper valueHelper;
 
+    @Autowired
+    private EntityPropertyMapping propertyMapping;
+
     private EntityEditorDelegate<Observation, ObservationData> observationEditor;
     private EntityEditorDelegate<Group, GroupData> groupEditor;
 
@@ -83,7 +86,7 @@ public class RelationEntityEditor extends DatabaseEntityAdapter<RelationEntity>
     public RelationData getOrSave(Relation entity) throws EditorException {
         if (entity != null) {
             Optional<RelationEntity> stored = getEntity(entity.getId());
-            return stored.map(e -> new RelationData(e, Optional.empty())).orElseGet(() -> save(entity));
+            return stored.map(e -> new RelationData(e, Optional.of(propertyMapping))).orElseGet(() -> save(entity));
         }
         throw new EditorException("The Relation to get or save is NULL!");
     }
@@ -126,7 +129,7 @@ public class RelationEntityEditor extends DatabaseEntityAdapter<RelationEntity>
         // we need to flush else updates to relations are not persisted
         relationRepository.flush();
 
-        return new RelationData(saved, Optional.empty());
+        return new RelationData(saved, Optional.of(propertyMapping));
     }
 
     @Override
@@ -140,7 +143,7 @@ public class RelationEntityEditor extends DatabaseEntityAdapter<RelationEntity>
 
         errorIfNotNull(updateEntity::getProperties, "properties");
 
-        return new RelationData(relationRepository.save(data), Optional.empty());
+        return new RelationData(relationRepository.save(data), Optional.of(propertyMapping));
     }
 
     @Override
