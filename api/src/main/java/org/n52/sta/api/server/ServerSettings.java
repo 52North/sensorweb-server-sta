@@ -62,10 +62,17 @@ public interface ServerSettings {
             this.url = url;
         }
 
+        public String getName() {
+            return name;
+        }
+        
+        public String getUrl() {
+            return url;
+        }
+        
         @Override
         public int hashCode() {
-            int hash = 7;
-            return hash;
+            return Objects.hash(9, getName());
         }
 
         @Override
@@ -80,7 +87,7 @@ public interface ServerSettings {
                 return false;
             }
             final EntitySet other = (EntitySet) obj;
-            return Objects.equals(this.name, other.name);
+            return Objects.equals(this.getName(), other.getName());
         }
 
     }
