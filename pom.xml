@@ -45,7 +45,7 @@
         <version.java>${java.version}</version.java>
         <antlr-runtime.version>4.11.1</antlr-runtime.version>
         <arctic-sea.version>10.2.0-SNAPSHOT</arctic-sea.version>
-        <db-model.version>4.0.0-SNAPSHOT</db-model.version>
+        <db-model.version>4.0.1</db-model.version>
         <findbugs.version>3.0.2</findbugs.version>
         <guava.version>31.1-jre</guava.version>
         <hamcrest.version>2.2</hamcrest.version>
