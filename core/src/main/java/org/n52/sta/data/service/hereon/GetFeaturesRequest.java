@@ -28,14 +28,26 @@
  */
 package org.n52.sta.data.service.hereon;
 
+import java.util.List;
+import java.util.Map;
+import java.util.function.Supplier;
+
 import javax.management.Query;
 
+import org.n52.sensorweb.server.helgoland.adapters.connector.HereonConstants;
+import org.n52.sensorweb.server.helgoland.adapters.connector.hereon.HereonConfig;
+import org.n52.sensorweb.server.helgoland.adapters.connector.mapping.Observation;
 import org.n52.sensorweb.server.helgoland.adapters.connector.request.AbstractHereonRequest;
+import org.n52.shetland.filter.OrderProperty;
 import org.n52.shetland.oasis.odata.query.option.QueryOptions;
+import org.n52.shetland.ogc.sta.exception.STACRUDException;
 
 public class GetFeaturesRequest extends AbstractHereonRequest {
 
-    public GetFeaturesRequest(QueryOptions queryOptions, String metadata_id) {
+    private String orderByFields = null;
+
+    public GetFeaturesRequest(QueryOptions queryOptions, String metadata_id, HereonConfig config)
+            throws STACRUDException {
         //TODO: only request fields needed for serializing to reduce payload size
         withOutField("*");
 
@@ -49,6 +61,70 @@ public class GetFeaturesRequest extends AbstractHereonRequest {
 
         //TODO: construct via
         // https://github.com/52North/arctic-sea/blob/master/shetland/arcgis/src/main/java/org/n52/shetland/arcgis/service/feature/FeatureServiceConstants.java
-        withWhere(String.format("metadata_id = '%s'", metadata_id));
+        withWhere(String.format("%s = '%s'", MetadataFields.METADATA_ID, metadata_id));
+
+        if (queryOptions.hasOrderByFilter()) {
+            Observation observationMapping = config.getMapping().getObservation();
+            this.orderByFields = constructOrderBy(queryOptions.getOrderByFilter().getSortProperties(),
+                                                  observationMapping);
+        }
+
+    }
+
+    private String constructOrderBy(List<OrderProperty> orderProperties, Observation observationMapping)
+            throws STACRUDException {
+        StringBuilder orderString = new StringBuilder();
+        for (OrderProperty elem : orderProperties) {
+            // Map STA property to Feature Service property
+            switch (elem.getValueReference()) {
+                case "result":
+                    orderString.append(getOrError(observationMapping::getResult, elem.getValueReference()));
+                    break;
+                case "phenomenonTime":
+                    orderString.append(getOrError(observationMapping::getPhenomenonTime, elem.getValueReference()));
+                    break;
+                case "resultTime":
+                    orderString.append(getOrError(observationMapping::getResultTime, elem.getValueReference()));
+                    break;
+                case "validTime":
+                    orderString.append(getOrError(observationMapping::getValidTime, elem.getValueReference()));
+                    break;
+                case "id":
+                    orderString.append(DataFields.GLOBAL_ID);
+                    break;
+                case "resultQuality":
+                    orderString.append(getOrError(observationMapping::getResultQuality, elem.getValueReference()));
+                    break;
+                default:
+                    throw new STACRUDException(String.format("cannot order by %s. No such property!",
+                                                             elem.getValueReference()));
+            }
+            orderString.append(" ");
+            if (elem.isSetSortOrder()) {
+                orderString.append(elem.getSortOrder().toString());
+            } else {
+                // Default to ascending as specified in STA v1.1 Section 9.3.3.1
+                orderString.append("asc");
+            }
+        }
+
+        return orderString.toString();
+    }
+
+    private String getOrError(Supplier<String> supplier, String property) throws STACRUDException {
+        String value = supplier.get();
+        if (value == null || value.equals("")) {
+            throw new STACRUDException(String.format("cannot order by %s. property is not mapped!", property));
+        } else {
+            return value;
+        }
+    }
+
+    @Override
+    protected void addQueryParameters(Map<String, String> map) {
+        super.addQueryParameters(map);
+        if (orderByFields != null) {
+            map.put(Parameter.ORDER_BY_FIELDS, orderByFields);
+        }
     }
 }

@@ -33,6 +33,7 @@ import org.joda.time.DateTime;
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.GeometryFactory;
 import org.locationtech.jts.geom.PrecisionModel;
+import org.n52.sensorweb.server.helgoland.adapters.connector.HereonConstants;
 import org.n52.sensorweb.server.helgoland.adapters.connector.mapping.Observation;
 import org.n52.sensorweb.server.helgoland.adapters.connector.response.MetadataFeature;
 import org.n52.series.db.beans.DataEntity;
@@ -55,9 +56,9 @@ public class ObservationMapper {
     static DataEntity<?> toDataEntity(Observation mapping, MetadataFeature esriFeature) {
         TextDataEntity dataEntity = new TextDataEntity();
 
-        dataEntity.setId(Long.valueOf(esriFeature.getAttributes().getValue("objectid")));
+        dataEntity.setId(Long.valueOf(esriFeature.getAttributes().getValue(HereonConstants.Fields.OBJECT_ID)));
 
-        String globalId = esriFeature.getAttributes().getValue("globalid");
+        String globalId = esriFeature.getAttributes().getValue(HereonConstants.DataFields.GLOBAL_ID);
         dataEntity.setIdentifier(globalId);
         dataEntity.setStaIdentifier(globalId);
         dataEntity.setName(globalId);

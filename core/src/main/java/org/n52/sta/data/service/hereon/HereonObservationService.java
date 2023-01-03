@@ -170,7 +170,9 @@ public class HereonObservationService extends ObservationService {
         if (StaConstants.DATASTREAMS.equals(relatedType)) {
             try {
                 ArcgisRestHttpClient client = getClient(featureServiceUrl);
-                Response response = client.execute(featureServiceUrl, new GetFeaturesRequest(queryOptions, relatedId));
+                Response response = client.execute(featureServiceUrl, new GetFeaturesRequest(queryOptions,
+                                                                                             relatedId,
+                                                                                             config));
                 return encodeResponse(response.getEntity(), MetadataResponse.class);
             } catch (ProxyHttpClientException | DecodingException | JsonProcessingException e) {
                 throw new STACRUDException("error retrieving observations", e);
