@@ -26,12 +26,14 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
+
 package org.n52.sta.data.service.hereon;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.n52.sensorweb.server.helgoland.adapters.connector.hereon.HereonConfig;
 import org.n52.sensorweb.server.helgoland.adapters.connector.mapping.Observation;
+import org.n52.sensorweb.server.helgoland.adapters.connector.response.CountResponse;
 import org.n52.sensorweb.server.helgoland.adapters.connector.response.ErrorResponse;
 import org.n52.sensorweb.server.helgoland.adapters.connector.response.MetadataResponse;
 import org.n52.sensorweb.server.helgoland.adapters.web.ArcgisRestHttpClient;
@@ -55,6 +57,8 @@ import org.springframework.context.annotation.DependsOn;
 import org.springframework.context.annotation.Primary;
 import org.springframework.context.annotation.Profile;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Component;
@@ -77,7 +81,7 @@ public class HereonObservationService extends ObservationService {
     private final String not_supported = "not supported for HEREON backend!";
     private final Observation observationMapping;
     private final String dataServiceUrl;
-    private Map<String, ArcgisRestHttpClient> featureServiceConnectors = new HashMap<>(5);
+    private final Map<String, ArcgisRestHttpClient> featureServiceConnectors = new HashMap<>(5);
     private final HereonConfig config;
     private final QueryOptionsFactory QOF = new QueryOptionsFactory();
 
@@ -85,6 +89,11 @@ public class HereonObservationService extends ObservationService {
         this.config = config;
         this.observationMapping = config.getMapping().getObservation();
         this.dataServiceUrl = config.getMapping().getGeneral().getDataServiceUrl();
+    }
+
+    @Override
+    public boolean existsEntity(String id) {
+        return true;
     }
 
     @Override
@@ -97,13 +106,98 @@ public class HereonObservationService extends ObservationService {
         throw new STACRUDException(not_supported);
     }
 
+    public int getFeatureCount(QueryOptions queryOptions,
+                               String featureServiceUrl,
+                               String relatedId) throws STACRUDException {
+
+        // Request total entity Count from API
+        int totalCount = -1;
+        if (queryOptions.hasCountFilter()) {
+            String url = config.createDataServiceUrl(featureServiceUrl);
+            ArcgisRestHttpClient client = getClient(url);
+            Response countResponse = null;
+            try {
+                countResponse = client.execute(url, new GetFeatureCountRequest(relatedId));
+                CountResponse count = encodeResponse(countResponse.getEntity(), CountResponse.class);
+                totalCount = count.getCount();
+            } catch (ProxyHttpClientException | DecodingException | JsonProcessingException e) {
+                throw new STACRUDException("error retrieving observation count", e);
+            }
+        }
+        return totalCount;
+    }
+
+    public ArcgisRestHttpClient getClient(String url) {
+        //TODO: This can be refactored into a single client when all featureServices are integrated into
+        // a single portal
+        String tokenUrl = config.createTokenUrl(url);
+        ArcgisRestHttpClient client = this.featureServiceConnectors.get(tokenUrl);
+        if (client == null) {
+            client = new ArcgisRestHttpClient(
+                    config.getCredentials().getUsername(),
+                    config.getCredentials().getPassword(),
+                    tokenUrl);
+            this.featureServiceConnectors.put(tokenUrl, client);
+        }
+        return client;
+    }
+
+    private String getFeatureServiceUrl(String relatedId) throws STACRUDException {
+        // Fetch datastream to lookup url_data_service
+        DatastreamService datastreamService = getDatastreamService();
+        AbstractDatasetEntity dataset = (AbstractDatasetEntity) datastreamService.getEntity(
+                relatedId,
+                QOF.createDummy()).getEntity();
+
+        String featureServiceUrl = null;
+        for (ParameterEntity<?> parameterEntity : dataset.getParameters()) {
+            if (parameterEntity.getName().equals(dataServiceUrl)) {
+                featureServiceUrl = String.valueOf(parameterEntity.getValue());
+                break;
+            }
+        }
+        if (featureServiceUrl == null) {
+            throw new STACRUDException("Could not find observations. " +
+                                               "Datastream has no linked " + dataServiceUrl);
+        }
+        return featureServiceUrl;
+    }
+
+    private MetadataResponse getCollectionFromFeatureService(String featureServiceUrl,
+                                                             String relatedId,
+                                                             String relatedType,
+                                                             QueryOptions queryOptions) throws STACRUDException {
+        if (StaConstants.DATASTREAMS.equals(relatedType)) {
+            try {
+                ArcgisRestHttpClient client = getClient(featureServiceUrl);
+                Response response = client.execute(featureServiceUrl, new GetFeaturesRequest(queryOptions, relatedId));
+                return encodeResponse(response.getEntity(), MetadataResponse.class);
+            } catch (ProxyHttpClientException | DecodingException | JsonProcessingException e) {
+                throw new STACRUDException("error retrieving observations", e);
+            }
+        }
+        throw new STACRUDException(not_supported);
+
+    }
+
     @Override
     protected Page getEntityCollectionByRelatedEntityRaw(String relatedId,
                                                          String relatedType,
                                                          QueryOptions queryOptions)
             throws STACRUDException {
-        throw new STACRUDException(not_supported);
 
+        String featureServiceUrl = config.createDataServiceUrl(getFeatureServiceUrl(relatedId));
+        MetadataResponse responseCollection = getCollectionFromFeatureService(featureServiceUrl,
+                                                                              relatedId,
+                                                                              relatedType,
+                                                                              queryOptions);
+        // Page is always $top large
+        Pageable pageable = Pageable.ofSize(Math.toIntExact(queryOptions.getTopFilter().getValue()));
+
+        return new PageImpl(
+                ObservationMapper.toDataEntity(observationMapping, responseCollection.getFeatures()),
+                pageable,
+                0);
     }
 
     @Override
@@ -111,55 +205,21 @@ public class HereonObservationService extends ObservationService {
                                                                 String relatedType,
                                                                 QueryOptions queryOptions)
             throws STACRUDException {
-        switch (relatedType) {
-            case StaConstants.DATASTREAMS:
-                // Fetch datastream to lookup url_data_service
-                DatastreamService datastreamService = getDatastreamService();
-                AbstractDatasetEntity dataset = (AbstractDatasetEntity) datastreamService.getEntity(
-                        relatedId,
-                        QOF.createDummy()).getEntity();
 
-                String url_data_service = null;
-                for (ParameterEntity<?> parameterEntity : dataset.getParameters()) {
-                    if (parameterEntity.getName().equals(dataServiceUrl)) {
-                        url_data_service = String.valueOf(parameterEntity.getValue());
-                        break;
-                    }
-                }
-                if (url_data_service == null) {
-                    throw new STACRUDException("Could not find observations. " +
-                            "Datastream has no linked " + dataServiceUrl);
-                }
-
-                try {
-                    String url = config.createDataServiceUrl(url_data_service);
-
-                    //TODO: This can be refactored into a single client when all featureServices are integrated into
-                    // a single portal
-                    String tokenUrl = config.createTokenUrl(url);
-                    ArcgisRestHttpClient client = this.featureServiceConnectors.get(tokenUrl);
-                    if (client == null) {
-                        client = new ArcgisRestHttpClient(
-                                config.getCredentials().getUsername(),
-                                config.getCredentials().getPassword(),
-                                tokenUrl);
-                        this.featureServiceConnectors.put(tokenUrl, client);
-                    }
-                    Response response = client.execute(url, new GetFeaturesRequest(relatedId));
-                    MetadataResponse responseCollection = encodeResponse(response.getEntity(), MetadataResponse.class);
-
-                    return new CollectionWrapper(responseCollection.getFeatures().size(),
-                            ObservationMapper.toDataEntities(observationMapping, responseCollection.getFeatures()),
-                            responseCollection.getExceededTransferLimit());
-                } catch (ProxyHttpClientException | DecodingException | JsonProcessingException e) {
-                    throw new STACRUDException("error retrieving observations", e);
-                }
-            default:
-                throw new STACRUDException(not_supported);
-        }
+        String featureServiceUrl = config.createDataServiceUrl(getFeatureServiceUrl(relatedId));
+        MetadataResponse responseCollection = getCollectionFromFeatureService(featureServiceUrl,
+                                                                              relatedId,
+                                                                              relatedType,
+                                                                              queryOptions);
+        return new CollectionWrapper(getFeatureCount(queryOptions, featureServiceUrl, relatedId),
+                                     ObservationMapper.toElementWithQO(observationMapping,
+                                                                      responseCollection.getFeatures(),
+                                                                      queryOptions),
+                                     responseCollection.getExceededTransferLimit());
     }
 
-    private <T> T encodeResponse(String response, Class<T> clazz) throws JsonProcessingException, DecodingException {
+    private <T> T encodeResponse(String response, Class<T> clazz) throws
+            JsonProcessingException, DecodingException {
         try {
             return OM.readValue(response, clazz);
         } catch (JsonProcessingException e) {

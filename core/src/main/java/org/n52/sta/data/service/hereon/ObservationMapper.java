@@ -42,7 +42,6 @@ import org.n52.series.db.beans.parameter.observation.ObservationTextParameterEnt
 import org.n52.shetland.oasis.odata.query.option.QueryOptions;
 import org.n52.shetland.util.DateTimeHelper;
 import org.n52.sta.serdes.util.ElementWithQueryOptions;
-import org.n52.svalbard.odata.core.QueryOptionsFactory;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -99,11 +98,19 @@ public class ObservationMapper {
         return dataEntity;
     }
 
-    public static List<ElementWithQueryOptions> toDataEntities(Observation mapping, List<MetadataFeature> features) {
-        QueryOptions qo = new QueryOptionsFactory().createDummy();
+    public static List<ElementWithQueryOptions> toElementWithQO(Observation mapping,
+                                                                List<MetadataFeature> features,
+                                                                QueryOptions qo) {
         return features.stream()
                        .map(feature -> toDataEntity(mapping, feature))
                        .map(entity -> ElementWithQueryOptions.from(entity, qo))
+                       .collect(Collectors.toList());
+    }
+
+    public static List<DataEntity<?>> toDataEntity(Observation mapping,
+                                                   List<MetadataFeature> features) {
+        return features.stream()
+                       .map(feature -> toDataEntity(mapping, feature))
                        .collect(Collectors.toList());
     }
 

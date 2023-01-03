@@ -28,27 +28,25 @@
  */
 package org.n52.sta.data.service.hereon;
 
-import javax.management.Query;
+import java.util.Map;
 
 import org.n52.sensorweb.server.helgoland.adapters.connector.request.AbstractHereonRequest;
-import org.n52.shetland.oasis.odata.query.option.QueryOptions;
 
-public class GetFeaturesRequest extends AbstractHereonRequest {
+public class GetFeatureCountRequest extends AbstractHereonRequest {
 
-    public GetFeaturesRequest(QueryOptions queryOptions, String metadata_id) {
-        //TODO: only request fields needed for serializing to reduce payload size
-        withOutField("*");
-
-        if (queryOptions.hasTopFilter()) {
-            withResultRecordCount(queryOptions.getTopFilter().getValue());
-        }
-
-        if (queryOptions.hasSkipFilter()) {
-            withResultOffset(queryOptions.getSkipFilter().getValue());
-        }
+    public GetFeatureCountRequest(String metadata_id) {
+        //TODO: make this dependant on actual QueryOptions
+        withResultRecordCount(1000L);
 
         //TODO: construct via
         // https://github.com/52North/arctic-sea/blob/master/shetland/arcgis/src/main/java/org/n52/shetland/arcgis/service/feature/FeatureServiceConstants.java
         withWhere(String.format("metadata_id = '%s'", metadata_id));
+
+    }
+
+    @Override
+    protected void addQueryParameters(Map<String, String> map) {
+        super.addQueryParameters(map);
+        map.put(Parameter.RETURN_COUNT_ONLY, "true");
     }
 }
