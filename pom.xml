@@ -55,7 +55,7 @@
         <spotbugs.version>4.7.3</spotbugs.version>
         <spring-boot.version>2.7.7</spring-boot.version>
         <postgresql.version>42.5.1</postgresql.version>
-        <checker-qual.version>3.27.0</checker-qual.version>
+        <checker-qual.version>3.29.0</checker-qual.version>
         <testcontainers.version>1.17.6</testcontainers.version>
         <testcontainers.jupiter.version>${testcontainers.version}</testcontainers.jupiter.version>
         <testcontainers.postgres.version>${testcontainers.version}</testcontainers.postgres.version>
