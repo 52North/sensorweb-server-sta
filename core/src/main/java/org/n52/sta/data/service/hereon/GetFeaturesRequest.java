@@ -32,15 +32,15 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Supplier;
 
-import javax.management.Query;
-
-import org.n52.sensorweb.server.helgoland.adapters.connector.HereonConstants;
 import org.n52.sensorweb.server.helgoland.adapters.connector.hereon.HereonConfig;
 import org.n52.sensorweb.server.helgoland.adapters.connector.mapping.Observation;
 import org.n52.sensorweb.server.helgoland.adapters.connector.request.AbstractHereonRequest;
 import org.n52.shetland.filter.OrderProperty;
 import org.n52.shetland.oasis.odata.query.option.QueryOptions;
+import org.n52.shetland.ogc.sta.StaConstants;
 import org.n52.shetland.ogc.sta.exception.STACRUDException;
+import org.n52.shetland.ogc.sta.exception.STAInvalidQueryException;
+import org.n52.svalbard.odata.core.expr.Expr;
 
 public class GetFeaturesRequest extends AbstractHereonRequest {
 
@@ -48,27 +48,51 @@ public class GetFeaturesRequest extends AbstractHereonRequest {
 
     public GetFeaturesRequest(QueryOptions queryOptions, String metadata_id, HereonConfig config)
             throws STACRUDException {
-        //TODO: only request fields needed for serializing to reduce payload size
-        withOutField("*");
+        Observation observationMapping = config.getMapping().getObservation();
 
+        // only retrieve fields that are actually mapped
+        withOutField(DataFields.GLOBAL_ID + "," + String.join(",", observationMapping.getFields()));
+        // filter features by metadata_id (and possibly more restrictions)
+        withWhere(constructWhere(queryOptions, observationMapping, metadata_id));
+
+        // limit number of results returned if $top is present
         if (queryOptions.hasTopFilter()) {
             withResultRecordCount(queryOptions.getTopFilter().getValue());
         }
 
+        // offset result number if $skip is present
         if (queryOptions.hasSkipFilter()) {
             withResultOffset(queryOptions.getSkipFilter().getValue());
         }
 
-        //TODO: construct via
-        // https://github.com/52North/arctic-sea/blob/master/shetland/arcgis/src/main/java/org/n52/shetland/arcgis/service/feature/FeatureServiceConstants.java
-        withWhere(String.format("%s = '%s'", MetadataFields.METADATA_ID, metadata_id));
-
+        // add custom ordering
         if (queryOptions.hasOrderByFilter()) {
-            Observation observationMapping = config.getMapping().getObservation();
             this.orderByFields = constructOrderBy(queryOptions.getOrderByFilter().getSortProperties(),
                                                   observationMapping);
         }
 
+    }
+
+    private String constructWhere(QueryOptions queryOptions, Observation mapping, String metadata_id)
+            throws STACRUDException {
+
+        StringBuilder builder = new StringBuilder();
+        builder.append(String.format("%s = '%s'", MetadataFields.METADATA_ID, metadata_id));
+
+        // We have $filter clause
+        if (queryOptions.hasFilterFilter()) {
+            Expr filter = (Expr) queryOptions.getFilterFilter().getFilter();
+            try {
+                String filterExpression = filter.accept(new FilterExprVisitor<>(mapping));
+                builder.append(" AND ");
+                builder.append(filterExpression);
+                System.out.println(filterExpression);
+            } catch (STAInvalidQueryException e) {
+                throw new STACRUDException("unable to parse $filter", e);
+            }
+        }
+        System.out.println(builder.toString());
+        return builder.toString();
     }
 
     private String constructOrderBy(List<OrderProperty> orderProperties, Observation observationMapping)
@@ -77,22 +101,22 @@ public class GetFeaturesRequest extends AbstractHereonRequest {
         for (OrderProperty elem : orderProperties) {
             // Map STA property to Feature Service property
             switch (elem.getValueReference()) {
-                case "result":
+                case StaConstants.PROP_RESULT:
                     orderString.append(getOrError(observationMapping::getResult, elem.getValueReference()));
                     break;
-                case "phenomenonTime":
+                case StaConstants.PROP_PHENOMENON_TIME:
                     orderString.append(getOrError(observationMapping::getPhenomenonTime, elem.getValueReference()));
                     break;
-                case "resultTime":
+                case StaConstants.PROP_RESULT_TIME:
                     orderString.append(getOrError(observationMapping::getResultTime, elem.getValueReference()));
                     break;
-                case "validTime":
+                case StaConstants.PROP_VALID_TIME:
                     orderString.append(getOrError(observationMapping::getValidTime, elem.getValueReference()));
                     break;
-                case "id":
+                case StaConstants.PROP_ID:
                     orderString.append(DataFields.GLOBAL_ID);
                     break;
-                case "resultQuality":
+                case StaConstants.PROP_RESULT_QUALITY:
                     orderString.append(getOrError(observationMapping::getResultQuality, elem.getValueReference()));
                     break;
                 default:
@@ -111,7 +135,7 @@ public class GetFeaturesRequest extends AbstractHereonRequest {
         return orderString.toString();
     }
 
-    private String getOrError(Supplier<String> supplier, String property) throws STACRUDException {
+    private static String getOrError(Supplier<String> supplier, String property) throws STACRUDException {
         String value = supplier.get();
         if (value == null || value.equals("")) {
             throw new STACRUDException(String.format("cannot order by %s. property is not mapped!", property));
@@ -119,7 +143,6 @@ public class GetFeaturesRequest extends AbstractHereonRequest {
             return value;
         }
     }
-
     @Override
     protected void addQueryParameters(Map<String, String> map) {
         super.addQueryParameters(map);
