@@ -116,7 +116,6 @@
 		"validTime": "",
 		"parameters": [
 			"method_err_val",
-			"method_err_val",
 			"variance",
 			"raw_measure_val",
 			"metadata_id",
