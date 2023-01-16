@@ -71,7 +71,7 @@ public class CollectionSer extends StdSerializer<CollectionWrapper> {
 
             String encoded =
                     URLEncoder.encode(new QueryOptions("", allFilters).toString(), Charset.defaultCharset());
-            gen.writeStringField("@iot.nextLink",value.getRequestURL() + "?" + encoded
+            gen.writeStringField("@iot.nextLink", value.getRequestURL() + "?" + encoded
             );
         }
 
