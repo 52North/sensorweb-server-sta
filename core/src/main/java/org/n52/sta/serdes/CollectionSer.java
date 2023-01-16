@@ -39,6 +39,8 @@ import org.n52.sta.data.service.util.CollectionWrapper;
 import org.n52.sta.serdes.util.ElementWithQueryOptions;
 
 import java.io.IOException;
+import java.net.URLEncoder;
+import java.nio.charset.Charset;
 import java.util.Set;
 
 /**
@@ -66,10 +68,10 @@ public class CollectionSer extends StdSerializer<CollectionWrapper> {
             Set<FilterClause> allFilters = queryOptions.getAllFilters();
             allFilters.remove(queryOptions.getSkipFilter());
             allFilters.add(new SkipTopFilter(FilterConstants.SkipTopOperator.Skip, oldSkip + oldTop));
-            gen.writeStringField("@iot.nextLink",
-                                 value.getRequestURL()
-                                     + "?"
-                                     + new QueryOptions("", allFilters).toString()
+
+            String encoded =
+                    URLEncoder.encode(new QueryOptions("", allFilters).toString(), Charset.defaultCharset());
+            gen.writeStringField("@iot.nextLink",value.getRequestURL() + "?" + encoded
             );
         }
 
