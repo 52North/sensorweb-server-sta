@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2018-2022 52°North Initiative for Geospatial Open Source
+ * Copyright (C) 2018-2023 52°North Initiative for Geospatial Open Source
  * Software GmbH
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -232,7 +232,7 @@ public class LocationQuerySpecifications extends EntityQuerySpecifications<Locat
                                                                 switched);
                     case StaConstants.PROP_ENCODINGTYPE:
                         Join<LocationEntity, FormatEntity> join =
-                            root.join(LocationEntity.PROPERTY_LOCATION_ENCODINT);
+                            root.join(LocationEntity.PROPERTY_LOCATION_ENCODING);
                         return handleDirectStringPropertyFilter(join.get(FormatEntity.FORMAT),
                                                                 propertyValue,
                                                                 operator,
