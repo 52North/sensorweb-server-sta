@@ -56,6 +56,7 @@
         <paho.version>1.2.5</paho.version>
         <antlr-runtime.version>4.11.1</antlr-runtime.version>
         <joda.version>2.12.1</joda.version>
+        <esri-geometry.version>2.2.4</esri-geometry.version>
     </properties>
 
     <dependencyManagement>
@@ -317,7 +318,11 @@
                     </exclusion>
                 </exclusions>
             </dependency>
-
+            <dependency>
+                <groupId>com.esri.geometry</groupId>
+                <artifactId>esri-geometry-api</artifactId>
+                <version>${esri-geometry.version}</version>
+            </dependency>
             <dependency>
                 <groupId>org.apache.httpcomponents</groupId>
                 <artifactId>httpclient</artifactId>

@@ -1,4 +1,11 @@
 
+
+server:
+  feature:
+    observation:
+      # Key that holds information about the samplingGeometry
+      samplingGeometry: geometry
+
 ## Service Configuration
 service:
   connector:

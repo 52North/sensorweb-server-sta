@@ -99,19 +99,19 @@ public class ObservationMapper {
         return dataEntity;
     }
 
+    public static List<DataEntity<?>> toDataEntity(Observation mapping,
+                                                   List<MetadataFeature> features) {
+        return features.stream()
+                .map(feature -> toDataEntity(mapping, feature))
+                .collect(Collectors.toList());
+    }
+
     public static List<ElementWithQueryOptions> toElementWithQO(Observation mapping,
                                                                 List<MetadataFeature> features,
                                                                 QueryOptions qo) {
         return features.stream()
                        .map(feature -> toDataEntity(mapping, feature))
                        .map(entity -> ElementWithQueryOptions.from(entity, qo))
-                       .collect(Collectors.toList());
-    }
-
-    public static List<DataEntity<?>> toDataEntity(Observation mapping,
-                                                   List<MetadataFeature> features) {
-        return features.stream()
-                       .map(feature -> toDataEntity(mapping, feature))
                        .collect(Collectors.toList());
     }
 

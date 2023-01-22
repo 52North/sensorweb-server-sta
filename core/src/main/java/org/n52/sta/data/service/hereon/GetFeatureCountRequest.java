@@ -35,13 +35,7 @@ import org.n52.sensorweb.server.helgoland.adapters.connector.request.AbstractHer
 public class GetFeatureCountRequest extends AbstractHereonRequest {
 
     public GetFeatureCountRequest(String metadata_id) {
-        //TODO: make this dependant on actual QueryOptions
-        withResultRecordCount(1000L);
-
-        //TODO: construct via
-        // https://github.com/52North/arctic-sea/blob/master/shetland/arcgis/src/main/java/org/n52/shetland/arcgis/service/feature/FeatureServiceConstants.java
-        withWhere(String.format("metadata_id = '%s'", metadata_id));
-
+        withWhere(String.format("%s = '%s'", MetadataFields.METADATA_ID, metadata_id));
     }
 
     @Override

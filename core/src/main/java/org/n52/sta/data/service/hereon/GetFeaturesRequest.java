@@ -44,7 +44,8 @@ import org.n52.svalbard.odata.core.expr.Expr;
 
 public class GetFeaturesRequest extends AbstractHereonRequest {
 
-    private String orderByFields = null;
+    private String orderByFields;
+    private FilterExprVisitor.FeatureQuery filterQuery;
 
     public GetFeaturesRequest(QueryOptions queryOptions, String metadata_id, HereonConfig config)
             throws STACRUDException {
@@ -53,7 +54,8 @@ public class GetFeaturesRequest extends AbstractHereonRequest {
         // only retrieve fields that are actually mapped
         withOutField(DataFields.GLOBAL_ID + "," + String.join(",", observationMapping.getFields()));
         // filter features by metadata_id (and possibly more restrictions)
-        withWhere(constructWhere(queryOptions, observationMapping, metadata_id));
+        parseFilter(queryOptions, observationMapping, metadata_id);
+        withWhere(filterQuery.getWhere());
 
         // limit number of results returned if $top is present
         if (queryOptions.hasTopFilter()) {
@@ -68,31 +70,28 @@ public class GetFeaturesRequest extends AbstractHereonRequest {
         // add custom ordering
         if (queryOptions.hasOrderByFilter()) {
             this.orderByFields = constructOrderBy(queryOptions.getOrderByFilter().getSortProperties(),
-                                                  observationMapping);
+                    observationMapping);
         }
 
     }
 
-    private String constructWhere(QueryOptions queryOptions, Observation mapping, String metadata_id)
+    private void parseFilter(QueryOptions queryOptions, Observation mapping, String metadata_id)
             throws STACRUDException {
 
-        StringBuilder builder = new StringBuilder();
-        builder.append(String.format("%s = '%s'", MetadataFields.METADATA_ID, metadata_id));
+        FilterExprVisitor.FeatureQuery query = new FilterExprVisitor.FeatureQuery(
+                String.format("(%s = '%s')", MetadataFields.METADATA_ID, metadata_id));
 
         // We have $filter clause
         if (queryOptions.hasFilterFilter()) {
             Expr filter = (Expr) queryOptions.getFilterFilter().getFilter();
             try {
-                String filterExpression = filter.accept(new FilterExprVisitor<>(mapping));
-                builder.append(" AND ");
-                builder.append(filterExpression);
-                System.out.println(filterExpression);
+                FilterExprVisitor.FeatureQuery filterExpression = filter.accept(new FilterExprVisitor<>(mapping));
+                query.and(filterExpression);
             } catch (STAInvalidQueryException e) {
                 throw new STACRUDException("unable to parse $filter", e);
             }
         }
-        System.out.println(builder.toString());
-        return builder.toString();
+        this.filterQuery = query;
     }
 
     private String constructOrderBy(List<OrderProperty> orderProperties, Observation observationMapping)
@@ -121,7 +120,7 @@ public class GetFeaturesRequest extends AbstractHereonRequest {
                     break;
                 default:
                     throw new STACRUDException(String.format("cannot order by %s. No such property!",
-                                                             elem.getValueReference()));
+                            elem.getValueReference()));
             }
             orderString.append(" ");
             if (elem.isSetSortOrder()) {
@@ -143,11 +142,17 @@ public class GetFeaturesRequest extends AbstractHereonRequest {
             return value;
         }
     }
+
     @Override
     protected void addQueryParameters(Map<String, String> map) {
         super.addQueryParameters(map);
         if (orderByFields != null) {
             map.put(Parameter.ORDER_BY_FIELDS, orderByFields);
+        }
+        if (filterQuery.getGeometry() != null) {
+            map.put(Parameter.GEOMETRY, filterQuery.getGeometry());
+            map.put(Parameter.GEOMETRY_TYPE, filterQuery.getGeometryType());
+            map.put(Parameter.SPATIAL_RELATIONSHIP, filterQuery.getSpatialRel());
         }
     }
 }
