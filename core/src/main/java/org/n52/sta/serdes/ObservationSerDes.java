@@ -107,9 +107,14 @@ public class ObservationSerDes {
         protected static final String VERTICAL = "vertical";
         private static final long serialVersionUID = -4575044340713191285L;
         private static final GeoJsonWriter GEO_JSON_WRITER = new GeoJsonWriter();
+        private final String samplingGeometryKey;
 
-        public ObservationSerializer(String rootUrl, boolean implicitExpand, String... activeExtensions) {
+        public ObservationSerializer(String rootUrl,
+                                     boolean implicitExpand,
+                                     String samplingGeometry,
+                                     String... activeExtensions) {
             super(ObservationWithQueryOptions.class, implicitExpand, activeExtensions);
+            this.samplingGeometryKey = samplingGeometry;
             this.rootUrl = rootUrl;
             this.entitySetName = ObservationEntityDefinition.ENTITY_SET_NAME;
         }
@@ -209,7 +214,7 @@ public class ObservationSerDes {
                         gen.writeNumberField("verticalTo", observation.getVerticalTo());
                     }
                     if (observation.isSetGeometryEntity()) {
-                        gen.writeFieldName("http://www.opengis.net/def/param-name/OGC-OM/2.0/samplingGeometry");
+                        gen.writeFieldName(samplingGeometryKey);
                         gen.writeRawValue(GEO_JSON_WRITER.write(observation.getGeometryEntity().getGeometry()));
                     }
                     if (observation.hasParameters()) {

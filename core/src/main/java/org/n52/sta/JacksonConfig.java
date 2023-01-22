@@ -106,6 +106,7 @@ public class JacksonConfig {
         serializers.addSerializer(
             new ObservationSerDes.ObservationSerializer(rootUrl,
                                                         implicitExpand,
+                                                        samplingGeometryMapping,
                                                         activeProfiles));
         serializers.addSerializer(
             new ObservedPropertySerDes.ObservedPropertySerializer(rootUrl,
