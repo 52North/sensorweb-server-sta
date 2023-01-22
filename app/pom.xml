@@ -73,12 +73,11 @@
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>sta-mqtt</artifactId>
-            <scope>runtime</scope>
+            <artifactId>sta-http</artifactId>
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>sta-http</artifactId>
+            <artifactId>sta-mqtt</artifactId>
             <scope>runtime</scope>
         </dependency>
         <dependency>
