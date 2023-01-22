@@ -34,10 +34,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.n52.sensorweb.server.helgoland.adapters.connector.hereon.HereonConfig;
 import org.n52.sensorweb.server.helgoland.adapters.connector.mapping.Observation;
 import org.n52.sensorweb.server.helgoland.adapters.connector.response.CountResponse;
-import org.n52.sensorweb.server.helgoland.adapters.connector.response.ErrorResponse;
 import org.n52.sensorweb.server.helgoland.adapters.connector.response.MetadataResponse;
 import org.n52.sensorweb.server.helgoland.adapters.web.ArcgisRestHttpClient;
 import org.n52.sensorweb.server.helgoland.adapters.web.ProxyHttpClientException;
+import org.n52.sensorweb.server.helgoland.adapters.web.response.ArcgisErrorResponse;
 import org.n52.sensorweb.server.helgoland.adapters.web.response.Response;
 import org.n52.series.db.beans.AbstractDatasetEntity;
 import org.n52.series.db.beans.DataEntity;
@@ -225,8 +225,8 @@ public class HereonObservationService extends ObservationService {
         try {
             return OM.readValue(response, clazz);
         } catch (JsonProcessingException e) {
-            if (!clazz.isInstance(ErrorResponse.class)) {
-                ErrorResponse errorResponse = encodeResponse(response, ErrorResponse.class);
+            if (!clazz.isInstance(ArcgisErrorResponse.class)) {
+                ArcgisErrorResponse errorResponse = encodeResponse(response, ArcgisErrorResponse.class);
                 throw new DecodingException(errorResponse.toString());
             } else {
                 throw e;
