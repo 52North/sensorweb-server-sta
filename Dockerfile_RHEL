@@ -1,14 +1,17 @@
-# Alpine Linux
-FROM maven:3-eclipse-temurin-11-alpine as buildstage
-
+# via https://catalog.redhat.com/software/containers/ubi9/openjdk-11/61ee7bafed74b2ffb22b07ab
+FROM registry.access.redhat.com/ubi9/openjdk-11 as buildstage
+USER root
 WORKDIR /app
+
 COPY . /app
 RUN mvn clean package
 
 #######################################################################################################
 
-# Alpine Linux
-FROM eclipse-temurin:11-jre-alpine as runstage
+# via https://catalog.redhat.com/software/containers/ubi9/openjdk-11-runtime/61ee7d1c33f211c45407a91c
+FROM registry.access.redhat.com/ubi9/openjdk-11-runtime as runstage
+USER 1001
+WORKDIR /app
 
 LABEL maintainer="Jan Speckamp <j.speckamp@52north.org>" \
       org.opencontainers.image.title="52°North SensorThingsAPI" \
@@ -19,7 +22,6 @@ LABEL maintainer="Jan Speckamp <j.speckamp@52north.org>" \
       org.opencontainers.image.source="https://github.com/52North/sensorweb-server-sta.git" \
       org.opencontainers.image.authors="Jan Speckamp <j.speckamp@52north.org>"
 
-WORKDIR /app
 ARG DEPENDENCY=/app/app/target/unpacked
 COPY --from=buildstage ${DEPENDENCY}/BOOT-INF/lib /app/lib
 COPY --from=buildstage ${DEPENDENCY}/META-INF /app/META-INF
