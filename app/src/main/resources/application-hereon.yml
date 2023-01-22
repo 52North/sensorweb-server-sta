@@ -1,12 +1,25 @@
-
-
+# Settings
 server:
   feature:
+    httpReadOnly: true
+    mqttReadOnly: true
     observation:
-      # Key that holds information about the samplingGeometry
+      # Key that holds information about Observation->samplingGeometry
       samplingGeometry: geometry
 
-## Service Configuration
+
+spring:
+  profiles:
+    active: hereon
+
+# MQTT is disabled
+mqtt:
+  broker:
+    plaintcp:
+      enabled: false
+    websocket:
+      enabled: false
+
 service:
   connector:
     # hereon config

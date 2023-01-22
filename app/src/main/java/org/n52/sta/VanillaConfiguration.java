@@ -29,43 +29,29 @@
 package org.n52.sta;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.n52.sensorweb.server.helgoland.adapters.connector.hereon.HereonConfig;
 import org.n52.sta.service.RootResponse;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Profile;
 import org.springframework.core.env.Environment;
 
 @Configuration
-@Import(value = HereonConfig.class)
-@Profile("hereon")
-public class HereonConfiguration {
+@Profile("vanilla")
+public class VanillaConfiguration {
 
     @Bean
-    public RootResponse hereonRootResponse(ObjectMapper mapper,
-                                           Environment environment,
-                                           ServerProperties serverProperties) {
-        HereonRootResponse response = new HereonRootResponse(mapper, environment, serverProperties);
+    public RootResponse vanillaRootResponse(ObjectMapper mapper,
+                                            Environment environment,
+                                            ServerProperties serverProperties) {
+        RootResponse response = new RootResponse(mapper, environment, serverProperties);
         response.addDatamodel();
         response.addRequestData();
         response.addResourcePath();
+        response.addCUD();
+        response.addMQTT();
         response.addServerPropertiesExtension();
         response.addServerVersionExtension();
         response.addVariableEncodingTypeExtension();
-        response.addHereonBackend();
-
         return response;
-    }
-
-    static class HereonRootResponse extends RootResponse {
-
-        HereonRootResponse(ObjectMapper mapper, Environment environment, ServerProperties serverProperties) {
-            super(mapper, environment, serverProperties);
-        }
-
-        public void addHereonBackend() {
-            conformanceClasses.add("https://github.com/52North/sensorweb-server-sta/extension/hereon-backend.md");
-        }
     }
 }
