@@ -81,7 +81,7 @@ public final class FilterQueryParser {
             return filterPredicate.isEmpty()
                     ? defaultPredicate.orElse(null)
                     : defaultPredicate.map(predicate -> builder.and(predicate, filterPredicate.get()))
-                                      .orElse(null);
+                                      .orElse(filterPredicate.get());
 
         };
     }
