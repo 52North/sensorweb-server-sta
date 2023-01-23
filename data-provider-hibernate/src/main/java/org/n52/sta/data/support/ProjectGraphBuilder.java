@@ -58,7 +58,7 @@ public final class ProjectGraphBuilder extends GraphBuilder<ProjectEntity> {
         if (expandItem != null) {
             switch (expandItem.getPath()) {
                 case StaConstants.DATASTREAMS:
-                    addGraphText(GraphText.GRAPH_PROJECT_DATASTREAMS);
+                    addGraphText(GraphText.GRAPH_DATASTREAMS);
                     break;
                 default:
                     // no expand

@@ -58,10 +58,10 @@ public final class LicenseGraphBuilder extends GraphBuilder<LicenseEntity> {
         if (expandItem != null) {
             switch (expandItem.getPath()) {
                 case StaConstants.DATASTREAMS:
-                    addGraphText(GraphText.GRAPH_LICENSE_DATASTREAMS);
+                    addGraphText(GraphText.GRAPH_DATASTREAMS);
                     break;
                 case StaConstants.GROUPS:
-                    addGraphText(GraphText.GRAPH_LICENSE_GROUPS);
+                    addGraphText(GraphText.GRAPH_GROUPS);
                     break;
                 default:
                     // no expand

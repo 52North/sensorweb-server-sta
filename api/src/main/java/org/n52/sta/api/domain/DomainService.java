@@ -30,7 +30,6 @@ package org.n52.sta.api.domain;
 
 import java.util.Optional;
 
-import org.n52.shetland.oasis.odata.query.option.QueryOptions;
 import org.n52.sta.api.EntityEditor;
 import org.n52.sta.api.EntityPage;
 import org.n52.sta.api.EntityProvider;

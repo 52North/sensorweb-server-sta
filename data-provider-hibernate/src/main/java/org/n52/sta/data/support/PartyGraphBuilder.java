@@ -57,10 +57,10 @@ public final class PartyGraphBuilder extends GraphBuilder<PartyEntity> {
         if (expandItem != null) {
             switch (expandItem.getPath()) {
                 case StaConstants.THINGS:
-                    addGraphText(GraphText.GRAPH_PARTY_THINGS);
+                    addGraphText(GraphText.GRAPH_THINGS);
                     break;
                 case StaConstants.DATASTREAMS:
-                    addGraphText(GraphText.GRAPH_PARTY_DATASTREAMS);
+                    addGraphText(GraphText.GRAPH_DATASTREAMS);
                     break;
                 case StaConstants.GROUPS:
                     addGraphText(GraphText.GRAPH_PARTY_GROUPS);

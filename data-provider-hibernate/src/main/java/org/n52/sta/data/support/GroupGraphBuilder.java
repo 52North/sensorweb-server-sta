@@ -58,16 +58,16 @@ public final class GroupGraphBuilder extends GraphBuilder<GroupEntity> {
         if (expandItem != null) {
             switch (expandItem.getPath()) {
                 case StaConstants.OBSERVATIONS:
-                    addGraphText(GraphText.GRAPH_GROUP_OBSERVATIONS);
+                    addGraphText(GraphText.GRAPH_OBSERVATIONS);
                     break;
                 case StaConstants.RELATIONS:
-                    addGraphText(GraphText.GRAPH_GROUP_RELATIONS);
+                    addGraphText(GraphText.GRAPH_RELATIONS);
                     break;
                 case StaConstants.LICENSE:
-                    addGraphText(GraphText.GRAPH_GROUP_LICENSE);
+                    addGraphText(GraphText.GRAPH_LICENSE);
                     break;
                 case StaConstants.PARTY:
-                    addGraphText(GraphText.GRAPH_GROUP_PARTY);
+                    addGraphText(GraphText.GRAPH_PARTY);
                     break;
                 default:
                     // no expand
