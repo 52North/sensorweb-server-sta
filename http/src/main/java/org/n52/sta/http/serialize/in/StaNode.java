@@ -119,7 +119,7 @@ abstract class StaNode implements Identifiable {
     protected <T> T getOrNull(String property, Function<JsonNode, T> asResult) {
         Optional<JsonNode> propertyNode = get(property);
         return propertyNode.map(asResult::apply)
-                           .orElse(null);
+                .orElse(null);
     }
 
     protected Optional<JsonNode> get(String property) {
@@ -132,11 +132,12 @@ abstract class StaNode implements Identifiable {
     protected Map<String, Object> toMap(String property) {
         Optional<JsonNode> objectNode = get(property);
         return objectNode.map(this::toMap)
-                         .orElse(Collections.emptyMap());
+                .orElse(Collections.emptyMap());
     }
 
     private Map<String, Object> toMap(JsonNode node) {
-        return mapper.convertValue(node, new TypeReference<Map<String, Object>>() {});
+        return mapper.convertValue(node, new TypeReference<Map<String, Object>>() {
+        });
     }
 
     protected <T> Set<T> toSet(String property, Function<JsonNode, T> nodeMapper) {
@@ -148,14 +149,15 @@ abstract class StaNode implements Identifiable {
 
     protected <T> Set<T> toSet(JsonNode arrayNode, Function<JsonNode, T> nodeMapper) {
         return toStream(arrayNode).map(nodeMapper)
-                                  .collect(Collectors.toSet());
+                .collect(Collectors.toSet());
     }
 
     private Stream<JsonNode> toStream(JsonNode arrayNode) {
-        return arrayNode.isArray()
-                ? Streams.stream(arrayNode)
-                // FIXME throw exception as json is invalid
-                : Stream.empty();
+        if (arrayNode.isArray()) {
+            return Streams.stream(arrayNode);
+        } else {
+            throw new RuntimeException("Invalid JSON!");
+        }
     }
 
 }
