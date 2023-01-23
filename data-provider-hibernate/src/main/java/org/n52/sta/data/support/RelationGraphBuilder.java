@@ -64,7 +64,7 @@ public final class RelationGraphBuilder extends GraphBuilder<RelationEntity> {
                     addGraphText(GraphText.GRAPH_SUBJECT);
                     break;
                 case StaConstants.GROUPS:
-                    addGraphText(GraphText.GRAPH_RELATION_GROUPS);
+                    addGraphText(GraphText.GRAPH_GROUPS);
                     break;
                 default:
                     // no expand

@@ -63,7 +63,7 @@ public final class PartyGraphBuilder extends GraphBuilder<PartyEntity> {
                     addGraphText(GraphText.GRAPH_DATASTREAMS);
                     break;
                 case StaConstants.GROUPS:
-                    addGraphText(GraphText.GRAPH_PARTY_GROUPS);
+                    addGraphText(GraphText.GRAPH_GROUPS);
                     break;
                 default:
                     // no expand
