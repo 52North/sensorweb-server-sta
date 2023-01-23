@@ -28,13 +28,13 @@
 
 package org.n52.sta.api.domain.service;
 
-import org.n52.sta.api.EntityProvider;
 import org.n52.sta.api.domain.DomainService.DomainServiceAdapter;
 import org.n52.sta.api.entity.License;
+import org.n52.sta.api.service.EntityService;
 
 public class LicenseDomainService extends DomainServiceAdapter<License> {
 
-    public LicenseDomainService(EntityProvider<License> entityProvider) {
+    public LicenseDomainService(EntityService<License> entityProvider) {
         super(entityProvider);
     }
 

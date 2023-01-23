@@ -28,13 +28,13 @@
 
 package org.n52.sta.api.domain.service;
 
-import org.n52.sta.api.EntityProvider;
 import org.n52.sta.api.domain.DomainService.DomainServiceAdapter;
 import org.n52.sta.api.entity.Group;
+import org.n52.sta.api.service.EntityService;
 
 public class GroupDomainService extends DomainServiceAdapter<Group> {
 
-    public GroupDomainService(EntityProvider<Group> entityProvider) {
+    public GroupDomainService(EntityService<Group> entityProvider) {
         super(entityProvider);
     }
 

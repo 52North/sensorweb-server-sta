@@ -28,14 +28,13 @@
 
 package org.n52.sta.api.domain.service;
 
-import org.n52.sta.api.EntityProvider;
 import org.n52.sta.api.domain.DomainService.DomainServiceAdapter;
 import org.n52.sta.api.entity.Thing;
+import org.n52.sta.api.service.EntityService;
 
 public class ThingDomainService extends DomainServiceAdapter<Thing> {
 
-    public ThingDomainService(EntityProvider<Thing> entityProvider) {
-        super(entityProvider);
+    public ThingDomainService(EntityService<Thing> entityService) {
+        super(entityService);
     }
-
 }

@@ -28,13 +28,13 @@
 
 package org.n52.sta.api.domain.service;
 
-import org.n52.sta.api.EntityProvider;
 import org.n52.sta.api.domain.DomainService.DomainServiceAdapter;
 import org.n52.sta.api.entity.FeatureOfInterest;
+import org.n52.sta.api.service.EntityService;
 
 public class FeatureOfInterestDomainService extends DomainServiceAdapter<FeatureOfInterest> {
 
-    public FeatureOfInterestDomainService(EntityProvider<FeatureOfInterest> entityProvider) {
+    public FeatureOfInterestDomainService(EntityService<FeatureOfInterest> entityProvider) {
         super(entityProvider);
     }
 

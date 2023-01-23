@@ -34,6 +34,19 @@ import org.n52.shetland.ogc.sta.StaConstants;
 import org.n52.sta.api.EntityEditor;
 import org.n52.sta.api.EntityProvider;
 import org.n52.sta.api.EntityServiceLookup;
+import org.n52.sta.api.domain.service.DatastreamDomainService;
+import org.n52.sta.api.domain.service.FeatureOfInterestDomainService;
+import org.n52.sta.api.domain.service.GroupDomainService;
+import org.n52.sta.api.domain.service.HistoricalLocationDomainService;
+import org.n52.sta.api.domain.service.LicenseDomainService;
+import org.n52.sta.api.domain.service.LocationDomainService;
+import org.n52.sta.api.domain.service.ObservationDomainService;
+import org.n52.sta.api.domain.service.ObservedPropertyDomainService;
+import org.n52.sta.api.domain.service.PartyDomainService;
+import org.n52.sta.api.domain.service.ProjectDomainService;
+import org.n52.sta.api.domain.service.RelationDomainService;
+import org.n52.sta.api.domain.service.SensorDomainService;
+import org.n52.sta.api.domain.service.ThingDomainService;
 import org.n52.sta.api.entity.Datastream;
 import org.n52.sta.api.entity.FeatureOfInterest;
 import org.n52.sta.api.entity.Group;
@@ -82,7 +95,7 @@ public class EntityServiceConfiguration {
             Optional<EntityEditor<Thing>> entityEditor) {
         ThingService service = new ThingService(entityProvider);
         entityEditor.ifPresent(service::setEditor);
-        serviceLookup.addEntityService(Thing.class, service);
+        serviceLookup.addEntityService(Thing.class, new ThingDomainService(service));
         return service;
     }
 
@@ -91,7 +104,7 @@ public class EntityServiceConfiguration {
             Optional<EntityEditor<Datastream>> entityEditor) {
         DatastreamService service = new DatastreamService(entityProvider);
         entityEditor.ifPresent(service::setEditor);
-        serviceLookup.addEntityService(Datastream.class, service);
+        serviceLookup.addEntityService(Datastream.class, new DatastreamDomainService(service));
         return service;
     }
 
@@ -100,7 +113,7 @@ public class EntityServiceConfiguration {
             Optional<EntityEditor<Sensor>> entityEditor) {
         SensorService service = new SensorService(entityProvider);
         entityEditor.ifPresent(service::setEditor);
-        serviceLookup.addEntityService(Sensor.class, service);
+        serviceLookup.addEntityService(Sensor.class, new SensorDomainService(service));
         return service;
     }
 
@@ -109,7 +122,7 @@ public class EntityServiceConfiguration {
             Optional<EntityEditor<Location>> entityEditor) {
         LocationService service = new LocationService(entityProvider);
         entityEditor.ifPresent(service::setEditor);
-        serviceLookup.addEntityService(Location.class, service);
+        serviceLookup.addEntityService(Location.class, new LocationDomainService(service));
         return service;
     }
 
@@ -120,7 +133,7 @@ public class EntityServiceConfiguration {
             EntityServiceLookup serviceLookup) {
         ObservedPropertyService service = new ObservedPropertyService(entityProvider);
         entityEditor.ifPresent(service::setEditor);
-        serviceLookup.addEntityService(ObservedProperty.class, service);
+        serviceLookup.addEntityService(ObservedProperty.class, new ObservedPropertyDomainService(service));
         return service;
     }
 
@@ -130,7 +143,7 @@ public class EntityServiceConfiguration {
             EntityServiceLookup serviceLookup) {
         ObservationService service = new ObservationService(entityProvider);
         entityEditor.ifPresent(service::setEditor);
-        serviceLookup.addEntityService(Observation.class, service);
+        serviceLookup.addEntityService(Observation.class, new ObservationDomainService(service));
         return service;
     }
 
@@ -141,7 +154,7 @@ public class EntityServiceConfiguration {
             EntityServiceLookup serviceLookup) {
         FeatureOfInterestService service = new FeatureOfInterestService(entityProvider);
         entityEditor.ifPresent(service::setEditor);
-        serviceLookup.addEntityService(FeatureOfInterest.class, service);
+        serviceLookup.addEntityService(FeatureOfInterest.class, new FeatureOfInterestDomainService(service));
         return service;
     }
 
@@ -152,7 +165,7 @@ public class EntityServiceConfiguration {
             EntityServiceLookup serviceLookup) {
         HistoricalLocationService service = new HistoricalLocationService(entityProvider);
         entityEditor.ifPresent(service::setEditor);
-        serviceLookup.addEntityService(HistoricalLocation.class, service);
+        serviceLookup.addEntityService(HistoricalLocation.class, new HistoricalLocationDomainService(service));
         return service;
     }
 
@@ -162,7 +175,7 @@ public class EntityServiceConfiguration {
             Optional<EntityEditor<Group>> entityEditor) {
         GroupService service = new GroupService(entityProvider);
         entityEditor.ifPresent(service::setEditor);
-        serviceLookup.addEntityService(Group.class, service);
+        serviceLookup.addEntityService(Group.class, new GroupDomainService(service));
         return service;
     }
 
@@ -172,7 +185,7 @@ public class EntityServiceConfiguration {
             Optional<EntityEditor<License>> entityEditor) {
         LicenseService service = new LicenseService(entityProvider);
         entityEditor.ifPresent(service::setEditor);
-        serviceLookup.addEntityService(License.class, service);
+        serviceLookup.addEntityService(License.class, new LicenseDomainService(service));
         return service;
     }
 
@@ -182,7 +195,7 @@ public class EntityServiceConfiguration {
             Optional<EntityEditor<Party>> entityEditor) {
         PartyService service = new PartyService(entityProvider);
         entityEditor.ifPresent(service::setEditor);
-        serviceLookup.addEntityService(Party.class, service);
+        serviceLookup.addEntityService(Party.class, new PartyDomainService(service));
         return service;
     }
 
@@ -192,7 +205,7 @@ public class EntityServiceConfiguration {
             Optional<EntityEditor<Project>> entityEditor) {
         ProjectService service = new ProjectService(entityProvider);
         entityEditor.ifPresent(service::setEditor);
-        serviceLookup.addEntityService(Project.class, service);
+        serviceLookup.addEntityService(Project.class, new ProjectDomainService(service));
         return service;
     }
 
@@ -202,7 +215,7 @@ public class EntityServiceConfiguration {
             Optional<EntityEditor<Relation>> entityEditor) {
         RelationService service = new RelationService(entityProvider);
         entityEditor.ifPresent(service::setEditor);
-        serviceLookup.addEntityService(Relation.class, service);
+        serviceLookup.addEntityService(Relation.class, new RelationDomainService(service));
         return service;
     }
 }

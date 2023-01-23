@@ -28,13 +28,13 @@
 
 package org.n52.sta.api.domain.service;
 
-import org.n52.sta.api.EntityProvider;
 import org.n52.sta.api.domain.DomainService.DomainServiceAdapter;
 import org.n52.sta.api.entity.ObservedProperty;
+import org.n52.sta.api.service.EntityService;
 
 public class ObservedPropertyDomainService extends DomainServiceAdapter<ObservedProperty> {
 
-    public ObservedPropertyDomainService(EntityProvider<ObservedProperty> entityProvider) {
+    public ObservedPropertyDomainService(EntityService<ObservedProperty> entityProvider) {
         super(entityProvider);
     }
 

@@ -28,13 +28,13 @@
 
 package org.n52.sta.api.domain.service;
 
-import org.n52.sta.api.EntityProvider;
-import org.n52.sta.api.domain.DomainService.DomainServiceAdapter;
-import org.n52.sta.api.entity.Group;
+import org.n52.sta.api.domain.DomainService;
+import org.n52.sta.api.entity.Party;
+import org.n52.sta.api.service.EntityService;
 
-public class PartyDomainService extends DomainServiceAdapter<Group> {
+public class PartyDomainService extends DomainService.DomainServiceAdapter<Party> {
 
-    public PartyDomainService(EntityProvider<Group> entityProvider) {
+    public PartyDomainService(EntityService<Party> entityProvider) {
         super(entityProvider);
     }
 

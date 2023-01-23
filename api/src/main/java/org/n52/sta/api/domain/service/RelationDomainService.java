@@ -28,13 +28,13 @@
 
 package org.n52.sta.api.domain.service;
 
-import org.n52.sta.api.EntityProvider;
 import org.n52.sta.api.domain.DomainService.DomainServiceAdapter;
 import org.n52.sta.api.entity.Relation;
+import org.n52.sta.api.service.EntityService;
 
 public class RelationDomainService extends DomainServiceAdapter<Relation> {
 
-    public RelationDomainService(EntityProvider<Relation> entityProvider) {
+    public RelationDomainService(EntityService<Relation> entityProvider) {
         super(entityProvider);
     }
 

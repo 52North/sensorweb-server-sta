@@ -28,13 +28,13 @@
 
 package org.n52.sta.api.domain.service;
 
-import org.n52.sta.api.EntityProvider;
 import org.n52.sta.api.domain.DomainService.DomainServiceAdapter;
 import org.n52.sta.api.entity.Sensor;
+import org.n52.sta.api.service.EntityService;
 
 public class SensorDomainService extends DomainServiceAdapter<Sensor> {
 
-    public SensorDomainService(EntityProvider<Sensor> entityProvider) {
+    public SensorDomainService(EntityService<Sensor> entityProvider) {
         super(entityProvider);
     }
 

@@ -28,13 +28,13 @@
 
 package org.n52.sta.api.domain.service;
 
-import org.n52.sta.api.EntityProvider;
 import org.n52.sta.api.domain.DomainService.DomainServiceAdapter;
 import org.n52.sta.api.entity.HistoricalLocation;
+import org.n52.sta.api.service.EntityService;
 
 public class HistoricalLocationDomainService extends DomainServiceAdapter<HistoricalLocation> {
 
-    public HistoricalLocationDomainService(EntityProvider<HistoricalLocation> entityProvider) {
+    public HistoricalLocationDomainService(EntityService<HistoricalLocation> entityProvider) {
         super(entityProvider);
     }
 

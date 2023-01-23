@@ -31,26 +31,29 @@ package org.n52.sta.api.domain;
 import java.util.Optional;
 
 import org.n52.shetland.oasis.odata.query.option.QueryOptions;
+import org.n52.sta.api.EntityEditor;
 import org.n52.sta.api.EntityPage;
 import org.n52.sta.api.EntityProvider;
 import org.n52.sta.api.exception.ProviderException;
 import org.n52.sta.api.domain.event.DomainEvent;
 import org.n52.sta.api.domain.event.DomainEventService;
 import org.n52.sta.api.entity.Identifiable;
+import org.n52.sta.api.exception.editor.EditorException;
 import org.n52.sta.api.path.Request;
+import org.n52.sta.api.service.EntityService;
 
-public interface DomainService<T extends Identifiable> extends EntityProvider<T> {
+public interface DomainService<T extends Identifiable> extends EntityService<T> {
 
     void sendDomainEvent(DomainEvent<Identifiable> event);
 
     abstract class DomainServiceAdapter<T extends Identifiable> implements DomainService<T> {
 
-        protected final EntityProvider<T> entityProvider;
+        protected final EntityService<T> entityService;
 
         private Optional<DomainEventService> domainEventService;
 
-        protected DomainServiceAdapter(EntityProvider<T> entityProvider) {
-            this.entityProvider = entityProvider;
+        protected DomainServiceAdapter(EntityService<T> entityService) {
+            this.entityService = entityService;
             this.domainEventService = Optional.empty();
         }
 
@@ -61,26 +64,43 @@ public interface DomainService<T extends Identifiable> extends EntityProvider<T>
 
         @Override
         public boolean exists(String id) throws ProviderException {
-            return entityProvider.exists(id);
-        }
-
-        @Override
-        public Optional<T> getEntity(String id, QueryOptions queryOptions) throws ProviderException {
-            return entityProvider.getEntity(id, queryOptions);
+            return entityService.exists(id);
         }
 
         @Override
         public Optional<T> getEntity(Request req) throws ProviderException {
-            return entityProvider.getEntity(req);
+            return entityService.getEntity(req);
         }
 
         @Override
         public EntityPage<T> getEntities(Request req) throws ProviderException {
-            return entityProvider.getEntities(req);
+            return entityService.getEntities(req);
+        }
+
+        public T save(T entity) throws EditorException {
+            return entityService.save(entity);
+        }
+
+        public T update(String id, T entity) throws EditorException {
+            return entityService.update(id, entity);
+        }
+
+        public void delete(String id) throws EditorException {
+            entityService.delete(id);
         }
 
         public void setDomainEventService(DomainEventService domainEventService) {
             this.domainEventService = Optional.ofNullable(domainEventService);
+        }
+
+        @Override
+        public EntityProvider<?> unwrapProvider() {
+            return entityService.unwrapProvider();
+        }
+
+        @Override
+        public EntityEditor<?> unwrapEditor() {
+            return entityService.unwrapEditor();
         }
 
     }
