@@ -7,11 +7,6 @@ server:
       # Key that holds information about Observation->samplingGeometry
       samplingGeometry: geometry
 
-
-spring:
-  profiles:
-    active: hereon
-
 # MQTT is disabled
 mqtt:
   broker:
