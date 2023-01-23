@@ -28,14 +28,60 @@
 
 package org.n52.sta.api.domain.service;
 
+import org.n52.shetland.ogc.gml.time.Time;
+import org.n52.shetland.ogc.gml.time.TimePeriod;
+import org.n52.sta.api.EntityServiceLookup;
 import org.n52.sta.api.domain.DomainService.DomainServiceAdapter;
+import org.n52.sta.api.entity.Group;
 import org.n52.sta.api.entity.Observation;
+import org.n52.sta.api.exception.editor.EditorException;
+import org.n52.sta.api.path.Request;
 import org.n52.sta.api.service.EntityService;
+
+import java.util.Optional;
 
 public class ObservationDomainService extends DomainServiceAdapter<Observation> {
 
-    public ObservationDomainService(EntityService<Observation> entityProvider) {
+    private final EntityServiceLookup serviceLookup;
+
+    public ObservationDomainService(EntityService<Observation> entityProvider, EntityServiceLookup serviceLookup) {
         super(entityProvider);
+        this.serviceLookup = serviceLookup;
     }
 
+    @Override
+    public Observation save(Observation entity) throws EditorException {
+        checkGroupClosed(entity);
+        return super.save(entity);
+    }
+
+    @Override
+    public Observation update(String id, Observation entity) throws EditorException {
+        checkGroupClosed(entity);
+        return super.update(id, entity);
+    }
+
+    @Override
+    public void delete(String id) throws EditorException {
+        Optional<Observation> observation = getEntity(Request.createIdRequest(id));
+        observation.ifPresent(this::checkGroupClosed);
+        super.delete(id);
+    }
+
+    // those that do not own the group) can no longer add observations or update or
+    private void checkGroupClosed(Observation entity) throws EditorException {
+        //TODO: This does not apply if you are the Group Owner
+        EntityService<Group> groupService = serviceLookup.getService(Group.class).get();
+        for (Group group : entity.getGroups()) {
+            Optional<Group> groupEntity = groupService.getEntity(Request.createIdRequest(group.getId()));
+            Time runTime = groupEntity
+                    .orElseThrow(() -> new EditorException("Cannot find group with id: " + group.getId()))
+                    .getRunTime();
+            // check if Group is already closed
+            if (runTime instanceof TimePeriod && ((TimePeriod) runTime).getEnd().isBeforeNow()) {
+                throw new EditorException("Cannot add to group - group is closed");
+            }
+        }
+
+    }
 }

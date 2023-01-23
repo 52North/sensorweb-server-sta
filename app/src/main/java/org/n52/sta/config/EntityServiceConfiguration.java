@@ -143,7 +143,7 @@ public class EntityServiceConfiguration {
             EntityServiceLookup serviceLookup) {
         ObservationService service = new ObservationService(entityProvider);
         entityEditor.ifPresent(service::setEditor);
-        serviceLookup.addEntityService(Observation.class, new ObservationDomainService(service));
+        serviceLookup.addEntityService(Observation.class, new ObservationDomainService(service, serviceLookup));
         return service;
     }
 
