@@ -32,13 +32,13 @@ import java.util.Objects;
 import java.util.Optional;
 
 import org.n52.shetland.oasis.odata.query.option.QueryOptions;
+import org.n52.sta.api.EntityEditor;
 import org.n52.sta.api.EntityPage;
+import org.n52.sta.api.EntityProvider;
 import org.n52.sta.api.domain.aggregate.AggregateException;
 import org.n52.sta.api.domain.aggregate.EntityAggregate;
-import org.n52.sta.api.EntityEditor;
-import org.n52.sta.api.EntityProvider;
-import org.n52.sta.api.exception.ProviderException;
 import org.n52.sta.api.entity.Identifiable;
+import org.n52.sta.api.exception.ProviderException;
 import org.n52.sta.api.exception.ServiceException;
 import org.n52.sta.api.exception.editor.EditorException;
 import org.n52.sta.api.path.Request;
@@ -74,9 +74,7 @@ public abstract class AbstractEntityService<T extends Identifiable> implements E
 
     @Override
     public boolean exists(String id) throws ProviderException {
-        return (id == null)
-                ? false
-                : provider.exists(id);
+        return id != null && provider.exists(id);
     }
 
     @Override
@@ -87,7 +85,8 @@ public abstract class AbstractEntityService<T extends Identifiable> implements E
     @Override
     public T save(T entity) throws EditorException {
         try {
-            return createAggregate(entity).save();
+            EntityAggregate<T> aggregate = createAggregate(entity);
+            return aggregate.save(unwrapEditor());
         } catch (AggregateException e) {
             LOGGER.error("Could not create entity: {}", entity, e);
             throw new EditorException("Could not create Entity!", e);
@@ -99,7 +98,8 @@ public abstract class AbstractEntityService<T extends Identifiable> implements E
         Objects.requireNonNull(entity, "entity must not be null!");
         try {
             T stored = getOrThrow(id);
-            return createAggregate(stored).saveOrUpdate(entity);
+            EntityAggregate<T> aggregate = createAggregate(stored);
+            return aggregate.update(entity, unwrapEditor());
         } catch (AggregateException e) {
             LOGGER.error("Could not update entity: {}", entity, e);
             throw new EditorException("Could not update Entity!", e);
@@ -108,20 +108,15 @@ public abstract class AbstractEntityService<T extends Identifiable> implements E
 
     @Override
     public void delete(String id) throws EditorException {
-        if (editor.isEmpty()) {
-            throw new IllegalStateException("Aggregate is read only!");
-        }
-        T entity = getOrThrow(id);
+        T stored = getOrThrow(id);
         try {
-            editor.get()
-                  .delete(id);
-        } catch (EditorException e) {
-            LOGGER.error("Could not delete entity: {}", entity, e);
+            EntityAggregate<T> aggregate = createAggregate(stored);
+            aggregate.delete(unwrapEditor());
+        } catch (AggregateException e) {
+            LOGGER.error("Could not delete entity: {}", stored, e);
             throw new EditorException("Could not delete Entity!", e);
         }
     }
-
-    protected abstract EntityAggregate<T> createAggregate(T entity);
 
     protected T getOrThrow(String id) throws ProviderException {
         return provider.getEntity(id, QueryOptionsFactory.createEmpty())
@@ -141,4 +136,5 @@ public abstract class AbstractEntityService<T extends Identifiable> implements E
     public EntityProvider<T> unwrapProvider() {
         return provider;
     }
+
 }

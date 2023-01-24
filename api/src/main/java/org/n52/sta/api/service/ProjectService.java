@@ -29,7 +29,6 @@
 package org.n52.sta.api.service;
 
 import org.n52.sta.api.EntityProvider;
-import org.n52.sta.api.domain.aggregate.EntityAggregate;
 import org.n52.sta.api.domain.aggregate.ProjectAggregate;
 import org.n52.sta.api.entity.Project;
 import org.slf4j.Logger;
@@ -43,8 +42,8 @@ public class ProjectService extends AbstractEntityService<Project> {
         super(provider);
     }
 
-    protected EntityAggregate<Project> createAggregate(Project entity) {
-        return new ProjectAggregate(entity, editor.orElse(null));
+    public ProjectAggregate createAggregate(Project entity) {
+        return new ProjectAggregate(entity);
     }
 
 }

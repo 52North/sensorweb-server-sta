@@ -28,15 +28,19 @@
 
 package org.n52.sta.api.domain;
 
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Optional;
 
 import org.n52.sta.api.EntityEditor;
 import org.n52.sta.api.EntityPage;
 import org.n52.sta.api.EntityProvider;
-import org.n52.sta.api.exception.ProviderException;
+import org.n52.sta.api.domain.aggregate.EntityAggregate;
 import org.n52.sta.api.domain.event.DomainEvent;
 import org.n52.sta.api.domain.event.DomainEventService;
 import org.n52.sta.api.entity.Identifiable;
+import org.n52.sta.api.exception.ProviderException;
 import org.n52.sta.api.exception.editor.EditorException;
 import org.n52.sta.api.path.Request;
 import org.n52.sta.api.service.EntityService;
@@ -49,11 +53,20 @@ public interface DomainService<T extends Identifiable> extends EntityService<T> 
 
         protected final EntityService<T> entityService;
 
+        private final List<DomainRule> domainRules;
+
         private Optional<DomainEventService> domainEventService;
+
+        public class DomainRule {}
 
         protected DomainServiceAdapter(EntityService<T> entityService) {
             this.entityService = entityService;
+            this.domainRules = new ArrayList<>();
             this.domainEventService = Optional.empty();
+        }
+
+        protected Iterator<DomainRule> getDomainRules() {
+            return domainRules.iterator();
         }
 
         @Override
@@ -76,14 +89,17 @@ public interface DomainService<T extends Identifiable> extends EntityService<T> 
             return entityService.getEntities(req);
         }
 
+        @Override
         public T save(T entity) throws EditorException {
             return entityService.save(entity);
         }
 
+        @Override
         public T update(String id, T entity) throws EditorException {
             return entityService.update(id, entity);
         }
 
+        @Override
         public void delete(String id) throws EditorException {
             entityService.delete(id);
         }
@@ -100,6 +116,11 @@ public interface DomainService<T extends Identifiable> extends EntityService<T> 
         @Override
         public EntityEditor<?> unwrapEditor() {
             return entityService.unwrapEditor();
+        }
+
+        @Override
+        public EntityAggregate<T> createAggregate(T entity) {
+            return entityService.createAggregate(entity);
         }
 
     }

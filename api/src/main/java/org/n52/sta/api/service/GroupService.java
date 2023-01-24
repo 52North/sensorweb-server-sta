@@ -29,7 +29,6 @@
 package org.n52.sta.api.service;
 
 import org.n52.sta.api.EntityProvider;
-import org.n52.sta.api.domain.aggregate.EntityAggregate;
 import org.n52.sta.api.domain.aggregate.GroupAggregate;
 import org.n52.sta.api.entity.Group;
 import org.slf4j.Logger;
@@ -43,8 +42,8 @@ public class GroupService extends AbstractEntityService<Group> {
         super(provider);
     }
 
-    protected EntityAggregate<Group> createAggregate(Group entity) {
-        return new GroupAggregate(entity, editor.orElse(null));
+    public GroupAggregate createAggregate(Group entity) {
+        return new GroupAggregate(entity);
     }
 
 }

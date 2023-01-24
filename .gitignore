@@ -41,3 +41,4 @@ sensor-things-api-app/console.log
 
 # Visual Studio Code files
 /.vscode/
+app/nbactions.xml

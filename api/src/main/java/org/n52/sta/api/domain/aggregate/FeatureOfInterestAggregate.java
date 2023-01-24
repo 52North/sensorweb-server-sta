@@ -32,50 +32,37 @@ import java.util.Map;
 import java.util.Set;
 
 import org.locationtech.jts.geom.Geometry;
-import org.n52.sta.api.EntityEditor;
 import org.n52.sta.api.entity.FeatureOfInterest;
 import org.n52.sta.api.entity.Observation;
 
 public class FeatureOfInterestAggregate extends EntityAggregate<FeatureOfInterest> implements FeatureOfInterest {
 
-    private final FeatureOfInterest featureOfInterest;
-
-    public FeatureOfInterestAggregate(FeatureOfInterest featureOfInterest) {
-        this(featureOfInterest, null);
-    }
-
-    public FeatureOfInterestAggregate(FeatureOfInterest featureOfInterest, EntityEditor<FeatureOfInterest> editor) {
-        super(featureOfInterest, editor);
-        this.featureOfInterest = featureOfInterest;
-    }
-
-    @Override
-    public String getId() {
-        return featureOfInterest.getId();
+    public FeatureOfInterestAggregate(FeatureOfInterest entity) {
+        super(entity);
     }
 
     @Override
     public String getName() {
-        return featureOfInterest.getName();
+        return entity.getName();
     }
 
     @Override
     public String getDescription() {
-        return featureOfInterest.getDescription();
+        return entity.getDescription();
     }
 
     @Override
     public Map<String, Object> getProperties() {
-        return featureOfInterest.getProperties();
+        return entity.getProperties();
     }
 
     @Override
     public Geometry getFeature() {
-        return featureOfInterest.getFeature();
+        return entity.getFeature();
     }
 
     @Override
     public Set<Observation> getObservations() {
-        return featureOfInterest.getObservations();
+        return entity.getObservations();
     }
 }

@@ -31,58 +31,46 @@ package org.n52.sta.api.domain.aggregate;
 import java.util.Map;
 import java.util.Set;
 
-import org.n52.sta.api.EntityEditor;
 import org.n52.sta.api.entity.Datastream;
 import org.n52.sta.api.entity.Group;
 import org.n52.sta.api.entity.License;
 
 public class LicenseAggregate extends EntityAggregate<License> implements License {
 
-    private final License license;
-
-    public LicenseAggregate(License license) {
-        this(license, null);
-    }
-
-    public LicenseAggregate(License license, EntityEditor<License> editor) {
-        super(license, editor);
-        this.license = license;
-    }
-
-    public String getId() {
-        return license.getId();
+    public LicenseAggregate(License entity) {
+        super(entity);
     }
 
     public String getName() {
-        return license.getName();
+        return entity.getName();
     }
 
     public String getDescription() {
-        return license.getDescription();
+        return entity.getDescription();
     }
 
     public Map<String, Object> getProperties() {
-        return license.getProperties();
+        return entity.getProperties();
     }
 
     @Override
     public String getDefinition() {
-        return license.getDefinition();
+        return entity.getDefinition();
     }
 
     @Override
     public String getLogo() {
-        return license.getLogo();
+        return entity.getLogo();
     }
 
     @Override
     public Set<Group> getGroups() {
-        return license.getGroups();
+        return entity.getGroups();
     }
 
     @Override
     public Set<Datastream> getDatastreams() {
-        return license.getDatastreams();
+        return entity.getDatastreams();
     }
 
 

@@ -31,55 +31,47 @@ package org.n52.sta.api.domain.aggregate;
 import java.util.Map;
 import java.util.Set;
 
-import org.n52.sta.api.EntityEditor;
 import org.n52.sta.api.entity.Datastream;
 import org.n52.sta.api.entity.Sensor;
 
 public class SensorAggregate extends EntityAggregate<Sensor> implements Sensor {
 
-    private final Sensor sensor;
-
-    public SensorAggregate(Sensor sensor) {
-        this(sensor, null);
-    }
-
-    public SensorAggregate(Sensor sensor, EntityEditor<Sensor> editor) {
-        super(sensor, editor);
-        this.sensor = sensor;
+    public SensorAggregate(Sensor entity) {
+        super(entity);
     }
 
     @Override
     public String getId() {
-        return sensor.getId();
+        return entity.getId();
     }
 
     @Override
     public String getName() {
-        return sensor.getName();
+        return entity.getName();
     }
 
     @Override
     public String getDescription() {
-        return sensor.getDescription();
+        return entity.getDescription();
     }
 
     @Override
     public String getEncodingType() {
-        return sensor.getEncodingType();
+        return entity.getEncodingType();
     }
 
     @Override
     public String getMetadata() {
-        return sensor.getMetadata();
+        return entity.getMetadata();
     }
 
     @Override
     public Map<String, Object> getProperties() {
-        return sensor.getProperties();
+        return entity.getProperties();
     }
 
     @Override
     public Set<Datastream> getDatastreams() {
-        return sensor.getDatastreams();
+        return entity.getDatastreams();
     }
 }

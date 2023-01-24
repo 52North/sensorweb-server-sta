@@ -33,11 +33,13 @@ import java.util.Optional;
 import org.n52.sta.api.EntityEditor;
 import org.n52.sta.api.EntityPage;
 import org.n52.sta.api.EntityProvider;
+import org.n52.sta.api.domain.aggregate.EntityAggregate;
+import org.n52.sta.api.entity.Identifiable;
 import org.n52.sta.api.exception.ProviderException;
 import org.n52.sta.api.exception.editor.EditorException;
 import org.n52.sta.api.path.Request;
 
-public interface EntityService<T> {
+public interface EntityService<T extends Identifiable> {
 
     boolean exists(String id) throws ProviderException;
 
@@ -50,6 +52,8 @@ public interface EntityService<T> {
     T update(String id, T entity) throws EditorException;
 
     void delete(String id) throws EditorException;
+
+    EntityAggregate<T> createAggregate(T entity);
 
     EntityProvider< ? > unwrapProvider();
 

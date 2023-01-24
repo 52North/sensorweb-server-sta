@@ -29,7 +29,6 @@
 package org.n52.sta.api.service;
 
 import org.n52.sta.api.EntityProvider;
-import org.n52.sta.api.domain.aggregate.EntityAggregate;
 import org.n52.sta.api.domain.aggregate.ObservedPropertyAggregate;
 import org.n52.sta.api.entity.ObservedProperty;
 import org.slf4j.Logger;
@@ -43,8 +42,8 @@ public class ObservedPropertyService extends AbstractEntityService<ObservedPrope
         super(provider);
     }
 
-    protected EntityAggregate<ObservedProperty> createAggregate(ObservedProperty entity) {
-        return new ObservedPropertyAggregate(entity, editor.orElse(null));
+    public ObservedPropertyAggregate createAggregate(ObservedProperty entity) {
+        return new ObservedPropertyAggregate(entity);
     }
 
 }

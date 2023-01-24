@@ -28,66 +28,58 @@
 
 package org.n52.sta.api.domain.aggregate;
 
-import org.n52.sta.api.EntityEditor;
+import java.util.Map;
+import java.util.Set;
+
 import org.n52.sta.api.entity.Datastream;
 import org.n52.sta.api.entity.HistoricalLocation;
 import org.n52.sta.api.entity.Location;
 import org.n52.sta.api.entity.Party;
 import org.n52.sta.api.entity.Thing;
 
-import java.util.Map;
-import java.util.Set;
-
 public class ThingAggregate extends EntityAggregate<Thing> implements Thing {
 
     private static final String PROPERTY_IS_MOBILE = "isMobile";
 
-    private final Thing thing;
-
-    public ThingAggregate(Thing thing) {
-        this(thing, null);
-    }
-
-    public ThingAggregate(Thing thing, EntityEditor<Thing> editor) {
-        super(thing, editor);
-        this.thing = thing;
+    public ThingAggregate(Thing entity) {
+        super(entity);
     }
 
     public String getId() {
-        return thing.getId();
+        return entity.getId();
     }
 
     public String getName() {
-        return thing.getName();
+        return entity.getName();
     }
 
     public String getDescription() {
-        return thing.getDescription();
+        return entity.getDescription();
     }
 
     public Map<String, Object> getProperties() {
-        return thing.getProperties();
+        return entity.getProperties();
     }
 
     public Set<HistoricalLocation> getHistoricalLocations() {
-        return thing.getHistoricalLocations();
+        return entity.getHistoricalLocations();
     }
 
     public Set<Location> getLocations() {
-        return thing.getLocations();
+        return entity.getLocations();
     }
 
     public Set<Datastream> getDatastreams() {
-        return thing.getDatastreams();
+        return entity.getDatastreams();
     }
 
     @Override
     public Party getParty() {
-        return thing.getParty();
+        return entity.getParty();
     }
 
     public boolean isMobile() {
-        Map<String, Object> properties = thing.getProperties();
+        Map<String, Object> properties = entity.getProperties();
         if (properties.containsKey(PROPERTY_IS_MOBILE)) {
             Object value = properties.get(PROPERTY_IS_MOBILE);
             return value instanceof Boolean

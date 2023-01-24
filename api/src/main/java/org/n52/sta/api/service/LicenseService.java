@@ -29,7 +29,6 @@
 package org.n52.sta.api.service;
 
 import org.n52.sta.api.EntityProvider;
-import org.n52.sta.api.domain.aggregate.EntityAggregate;
 import org.n52.sta.api.domain.aggregate.LicenseAggregate;
 import org.n52.sta.api.entity.License;
 import org.slf4j.Logger;
@@ -43,8 +42,8 @@ public class LicenseService extends AbstractEntityService<License> {
         super(provider);
     }
 
-    protected EntityAggregate<License> createAggregate(License entity) {
-        return new LicenseAggregate(entity, editor.orElse(null));
+    public LicenseAggregate createAggregate(License entity) {
+        return new LicenseAggregate(entity);
     }
 
 }

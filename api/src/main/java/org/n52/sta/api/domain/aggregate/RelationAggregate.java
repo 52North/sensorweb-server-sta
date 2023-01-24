@@ -31,7 +31,6 @@ package org.n52.sta.api.domain.aggregate;
 import java.util.Map;
 import java.util.Set;
 
-import org.n52.sta.api.EntityEditor;
 import org.n52.sta.api.domain.TargetReference;
 import org.n52.sta.api.entity.Group;
 import org.n52.sta.api.entity.Observation;
@@ -39,48 +38,36 @@ import org.n52.sta.api.entity.Relation;
 
 public class RelationAggregate extends EntityAggregate<Relation> implements Relation {
 
-    private final Relation relation;
-
-    public RelationAggregate(Relation relation) {
-        this(relation, null);
+    public RelationAggregate(Relation entity) {
+        super(entity);
     }
-
-    public RelationAggregate(Relation relation, EntityEditor<Relation> editor) {
-        super(relation, editor);
-        this.relation = relation;
-    }
-
-    public String getId() {
-        return relation.getId();
-    }
-
 
     public String getDescription() {
-        return relation.getDescription();
+        return entity.getDescription();
     }
 
     public Map<String, Object> getProperties() {
-        return relation.getProperties();
+        return entity.getProperties();
     }
 
     @Override
     public String getRole() {
-        return relation.getRole();
+        return entity.getRole();
     }
 
     @Override
     public Observation getSubject() {
-       return relation.getSubject();
+       return entity.getSubject();
     }
 
     @Override
     public TargetReference getObject() {
-        return relation.getObject();
+        return entity.getObject();
     }
 
     @Override
     public Set<Group> getGroups() {
-        return relation.getGroups();
+        return entity.getGroups();
     }
 
 

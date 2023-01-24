@@ -29,7 +29,6 @@
 package org.n52.sta.api.service;
 
 import org.n52.sta.api.EntityProvider;
-import org.n52.sta.api.domain.aggregate.EntityAggregate;
 import org.n52.sta.api.domain.aggregate.PartyAggregate;
 import org.n52.sta.api.entity.Party;
 import org.slf4j.Logger;
@@ -43,8 +42,8 @@ public class PartyService extends AbstractEntityService<Party> {
         super(provider);
     }
 
-    protected EntityAggregate<Party> createAggregate(Party entity) {
-        return new PartyAggregate(entity, editor.orElse(null));
+    public PartyAggregate createAggregate(Party entity) {
+        return new PartyAggregate(entity);
     }
 
 }

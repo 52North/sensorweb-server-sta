@@ -29,7 +29,6 @@
 package org.n52.sta.api.domain.aggregate;
 
 import java.util.Objects;
-import java.util.Optional;
 
 import org.n52.sta.api.EntityEditor;
 import org.n52.sta.api.entity.Identifiable;
@@ -37,40 +36,38 @@ import org.n52.sta.api.exception.editor.EditorException;
 
 public abstract class EntityAggregate<T extends Identifiable> {
 
-    private final T entity;
-
-    private final Optional<EntityEditor<T>> optionalEditor;
+    protected final T entity;
 
     protected EntityAggregate(T entity) {
-        this(entity, null);
-    }
-
-    protected EntityAggregate(T entity, EntityEditor<T> editor) {
         Objects.requireNonNull(entity, "entity must not be null!");
         this.entity = entity;
-        this.optionalEditor = Optional.ofNullable(editor);
     }
 
-    public T save() throws AggregateException {
-        return saveOrUpdate(null);
+    public String getId() {
+        return entity.getId();
     }
 
-    public T saveOrUpdate(T updateEntity) throws AggregateException {
-        assertEditor();
-        EntityEditor<T> editor = optionalEditor.get();
+    public T getEntity() {
+        return entity;
+    }
+
+    public T save(EntityEditor<T> editor) throws AggregateException {
         try {
-            T newEntity = updateEntity == null
-                    ? editor.save(entity)
-                    : editor.update(entity, updateEntity);
-            return newEntity;
+            return editor.save(entity);
         } catch (EditorException e) {
             throw new AggregateException("Could not save entity!", e);
         }
     }
 
-    public T delete() throws AggregateException {
-        assertEditor();
-        EntityEditor<T> editor = optionalEditor.get();
+    public T update(T updateEntity, EntityEditor<T> editor) throws AggregateException {
+        try {
+            return editor.update(entity, updateEntity);
+        } catch (EditorException e) {
+            throw new AggregateException("Could not save entity!", e);
+        }
+    }
+
+    public T delete(EntityEditor<T> editor) throws AggregateException {
         try {
             editor.delete(entity.getId());
             return entity;
@@ -82,12 +79,6 @@ public abstract class EntityAggregate<T extends Identifiable> {
     protected void assertRequired(Object reference, String message) throws InvalidAggregateException {
         if (reference == null) {
             throw new InvalidAggregateException(message);
-        }
-    }
-
-    private void assertEditor() {
-        if (!optionalEditor.isPresent()) {
-            throw new IllegalStateException("Aggregate is read only!");
         }
     }
 

@@ -29,7 +29,6 @@
 package org.n52.sta.api.service;
 
 import org.n52.sta.api.EntityProvider;
-import org.n52.sta.api.domain.aggregate.EntityAggregate;
 import org.n52.sta.api.domain.aggregate.SensorAggregate;
 import org.n52.sta.api.entity.Sensor;
 import org.slf4j.Logger;
@@ -43,8 +42,8 @@ public class SensorService extends AbstractEntityService<Sensor> {
         super(provider);
     }
 
-    protected EntityAggregate<Sensor> createAggregate(Sensor entity) {
-        return new SensorAggregate(entity, editor.orElse(null));
+    public SensorAggregate createAggregate(Sensor entity) {
+        return new SensorAggregate(entity);
     }
 
 }

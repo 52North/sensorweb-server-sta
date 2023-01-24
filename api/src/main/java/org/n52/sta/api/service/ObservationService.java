@@ -43,8 +43,8 @@ public class ObservationService extends AbstractEntityService<Observation> {
         super(provider);
     }
 
-    protected EntityAggregate<Observation> createAggregate(Observation entity) {
-        return new ObservationAggregate(entity, editor.orElse(null));
+    public ObservationAggregate createAggregate(Observation entity) {
+        return new ObservationAggregate(entity);
     }
 
 }

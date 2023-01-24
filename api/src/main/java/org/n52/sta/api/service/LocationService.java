@@ -29,7 +29,6 @@
 package org.n52.sta.api.service;
 
 import org.n52.sta.api.EntityProvider;
-import org.n52.sta.api.domain.aggregate.EntityAggregate;
 import org.n52.sta.api.domain.aggregate.LocationAggregate;
 import org.n52.sta.api.entity.Location;
 import org.slf4j.Logger;
@@ -43,8 +42,8 @@ public class LocationService extends AbstractEntityService<Location> {
         super(provider);
     }
 
-    protected EntityAggregate<Location> createAggregate(Location entity) {
-        return new LocationAggregate(entity, editor.orElse(null));
+    public LocationAggregate createAggregate(Location entity) {
+        return new LocationAggregate(entity);
     }
 
 }

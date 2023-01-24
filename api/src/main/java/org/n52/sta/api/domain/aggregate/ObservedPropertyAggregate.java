@@ -31,50 +31,37 @@ package org.n52.sta.api.domain.aggregate;
 import java.util.Map;
 import java.util.Set;
 
-import org.n52.sta.api.EntityEditor;
 import org.n52.sta.api.entity.Datastream;
 import org.n52.sta.api.entity.ObservedProperty;
 
 public class ObservedPropertyAggregate extends EntityAggregate<ObservedProperty> implements ObservedProperty {
 
-    private final ObservedProperty observedProperty;
-
-    public ObservedPropertyAggregate(ObservedProperty observedProperty) {
-        this(observedProperty, null);
-    }
-
-    public ObservedPropertyAggregate(ObservedProperty observedProperty, EntityEditor<ObservedProperty> editor) {
-        super(observedProperty, editor);
-        this.observedProperty = observedProperty;
-    }
-
-    @Override
-    public String getId() {
-        return observedProperty.getId();
+    public ObservedPropertyAggregate(ObservedProperty entity) {
+        super(entity);
     }
 
     @Override
     public String getName() {
-        return observedProperty.getName();
+        return entity.getName();
     }
 
     @Override
     public String getDescription() {
-        return observedProperty.getDescription();
+        return entity.getDescription();
     }
 
     @Override
     public String getDefinition() {
-        return observedProperty.getDefinition();
+        return entity.getDefinition();
     }
 
     @Override
     public Map<String, Object> getProperties() {
-        return observedProperty.getProperties();
+        return entity.getProperties();
     }
 
     @Override
     public Set<Datastream> getDatastreams() {
-        return observedProperty.getDatastreams();
+        return entity.getDatastreams();
     }
 }

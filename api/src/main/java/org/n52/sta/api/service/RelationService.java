@@ -29,7 +29,6 @@
 package org.n52.sta.api.service;
 
 import org.n52.sta.api.EntityProvider;
-import org.n52.sta.api.domain.aggregate.EntityAggregate;
 import org.n52.sta.api.domain.aggregate.RelationAggregate;
 import org.n52.sta.api.entity.Relation;
 import org.slf4j.Logger;
@@ -43,8 +42,8 @@ public class RelationService extends AbstractEntityService<Relation> {
         super(provider);
     }
 
-    protected EntityAggregate<Relation> createAggregate(Relation entity) {
-        return new RelationAggregate(entity, editor.orElse(null));
+    public RelationAggregate createAggregate(Relation entity) {
+        return new RelationAggregate(entity);
     }
 
 }

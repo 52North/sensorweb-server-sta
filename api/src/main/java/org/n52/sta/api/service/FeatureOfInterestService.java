@@ -29,7 +29,6 @@
 package org.n52.sta.api.service;
 
 import org.n52.sta.api.EntityProvider;
-import org.n52.sta.api.domain.aggregate.EntityAggregate;
 import org.n52.sta.api.domain.aggregate.FeatureOfInterestAggregate;
 import org.n52.sta.api.entity.FeatureOfInterest;
 import org.slf4j.Logger;
@@ -43,8 +42,8 @@ public class FeatureOfInterestService extends AbstractEntityService<FeatureOfInt
         super(provider);
     }
 
-    protected EntityAggregate<FeatureOfInterest> createAggregate(FeatureOfInterest entity) {
-        return new FeatureOfInterestAggregate(entity, editor.orElse(null));
+    public FeatureOfInterestAggregate createAggregate(FeatureOfInterest entity) {
+        return new FeatureOfInterestAggregate(entity);
     }
 
 }

@@ -32,72 +32,64 @@ import java.util.Map;
 import java.util.Set;
 
 import org.n52.shetland.ogc.gml.time.Time;
-import org.n52.sta.api.EntityEditor;
 import org.n52.sta.api.entity.Datastream;
 import org.n52.sta.api.entity.Project;
 
 public class ProjectAggregate extends EntityAggregate<Project> implements Project {
 
-    private final Project project;
-
-    public ProjectAggregate(Project project) {
-        this(project, null);
-    }
-
-    public ProjectAggregate(Project project, EntityEditor<Project> editor) {
-        super(project, editor);
-        this.project = project;
+    public ProjectAggregate(Project entity) {
+        super(entity);
     }
 
     public String getId() {
-        return project.getId();
+        return entity.getId();
     }
 
     public String getName() {
-        return project.getName();
+        return entity.getName();
     }
 
     public String getDescription() {
-        return project.getDescription();
+        return entity.getDescription();
     }
 
     public Map<String, Object> getProperties() {
-        return project.getProperties();
+        return entity.getProperties();
     }
 
     @Override
     public Time getRunTime() {
-        return project.getRunTime();
+        return entity.getRunTime();
     }
 
     @Override
     public Time getCreationTime() {
-        return project.getCreationTime();
+        return entity.getCreationTime();
     }
 
     @Override
     public String getClassification() {
-        return project.getClassification();
+        return entity.getClassification();
     }
 
     @Override
     public String getTermsOfUse() {
-        return project.getTermsOfUse();
+        return entity.getTermsOfUse();
     }
 
     @Override
     public String getPrivacyPolicy() {
-        return project.getPrivacyPolicy();
+        return entity.getPrivacyPolicy();
     }
 
     @Override
     public String getUrl() {
-        return project.getUrl();
+        return entity.getUrl();
     }
 
     @Override
     public Set<Datastream> getDatastreams() {
-        return project.getDatastreams();
+        return entity.getDatastreams();
     }
 
 

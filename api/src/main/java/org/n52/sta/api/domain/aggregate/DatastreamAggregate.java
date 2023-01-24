@@ -28,9 +28,11 @@
 
 package org.n52.sta.api.domain.aggregate;
 
+import java.util.Map;
+import java.util.Set;
+
 import org.locationtech.jts.geom.Geometry;
 import org.n52.shetland.ogc.gml.time.Time;
-import org.n52.sta.api.EntityEditor;
 import org.n52.sta.api.entity.Datastream;
 import org.n52.sta.api.entity.License;
 import org.n52.sta.api.entity.Observation;
@@ -40,90 +42,76 @@ import org.n52.sta.api.entity.Project;
 import org.n52.sta.api.entity.Sensor;
 import org.n52.sta.api.entity.Thing;
 
-import java.util.Map;
-import java.util.Set;
-
 public class DatastreamAggregate extends EntityAggregate<Datastream> implements Datastream {
 
-    private final Datastream datastream;
-
-    public DatastreamAggregate(Datastream datastream) {
-        this(datastream, null);
-    }
-
-    public DatastreamAggregate(Datastream datastream, EntityEditor<Datastream> editor) {
-        super(datastream, editor);
-        this.datastream = datastream;
-        assertRequired(datastream.getThing(), "Thing is mandatory!");
-        assertRequired(datastream.getSensor(), "Sensor is mandatory!");
-        assertRequired(datastream.getObservedProperty(), "ObservedProperty is mandatory!");
-    }
-
-    public String getId() {
-        return datastream.getId();
+    public DatastreamAggregate(Datastream entity) {
+        super(entity);
+        assertRequired(entity.getThing(), "Thing is mandatory!");
+        assertRequired(entity.getSensor(), "Sensor is mandatory!");
+        assertRequired(entity.getObservedProperty(), "ObservedProperty is mandatory!");
     }
 
     public String getName() {
-        return datastream.getName();
+        return entity.getName();
     }
 
     public String getDescription() {
-        return datastream.getDescription();
+        return entity.getDescription();
     }
 
     public Map<String, Object> getProperties() {
-        return datastream.getProperties();
+        return entity.getProperties();
     }
 
     public String getObservationType() {
-        return datastream.getObservationType();
+        return entity.getObservationType();
     }
 
     public UnitOfMeasurement getUnitOfMeasurement() {
-        return datastream.getUnitOfMeasurement();
+        return entity.getUnitOfMeasurement();
     }
 
     public Geometry getObservedArea() {
-        return datastream.getObservedArea();
+        return entity.getObservedArea();
     }
 
     public Time getPhenomenonTime() {
-        return datastream.getPhenomenonTime();
+        return entity.getPhenomenonTime();
     }
 
     public Time getResultTime() {
-        return datastream.getResultTime();
+        return entity.getResultTime();
     }
 
     public Thing getThing() {
-        return datastream.getThing();
+        return entity.getThing();
     }
 
     public Sensor getSensor() {
-        return datastream.getSensor();
+        return entity.getSensor();
     }
 
     public ObservedProperty getObservedProperty() {
-        return datastream.getObservedProperty();
+        return entity.getObservedProperty();
     }
 
     public Set<Observation> getObservations() {
-        return datastream.getObservations();
+        return entity.getObservations();
     }
 
     @Override
     public Project getProject() {
-        return datastream.getProject();
+        return entity.getProject();
     }
 
     @Override
     public Party getParty() {
-        return datastream.getParty();
+        return entity.getParty();
     }
 
     @Override
     public License getLicense() {
-        return datastream.getLicense();
+        return entity.getLicense();
     }
 
     private boolean isTrajectory(Datastream entity) {

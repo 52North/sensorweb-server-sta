@@ -30,7 +30,6 @@ package org.n52.sta.api.service;
 
 import org.n52.sta.api.EntityProvider;
 import org.n52.sta.api.domain.aggregate.DatastreamAggregate;
-import org.n52.sta.api.domain.aggregate.EntityAggregate;
 import org.n52.sta.api.entity.Datastream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -43,8 +42,8 @@ public class DatastreamService extends AbstractEntityService<Datastream> {
         super(provider);
     }
 
-    protected EntityAggregate<Datastream> createAggregate(Datastream entity) {
-        return new DatastreamAggregate(entity, editor.orElse(null));
+    public DatastreamAggregate createAggregate(Datastream entity) {
+        return new DatastreamAggregate(entity);
     }
 
 }

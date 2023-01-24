@@ -32,61 +32,48 @@ import java.util.Map;
 import java.util.Set;
 
 import org.locationtech.jts.geom.Geometry;
-import org.n52.sta.api.EntityEditor;
 import org.n52.sta.api.entity.HistoricalLocation;
 import org.n52.sta.api.entity.Location;
 import org.n52.sta.api.entity.Thing;
 
 public class LocationAggregate extends EntityAggregate<Location> implements Location {
 
-    private final Location location;
-
-    public LocationAggregate(Location location) {
-        this(location, null);
-    }
-
-    public LocationAggregate(Location location, EntityEditor<Location> editor) {
-        super(location, editor);
-        this.location = location;
-    }
-
-    @Override
-    public String getId() {
-        return location.getId();
+    public LocationAggregate(Location entity) {
+        super(entity);
     }
 
     @Override
     public String getName() {
-        return location.getName();
+        return entity.getName();
     }
 
     @Override
     public String getDescription() {
-        return location.getDescription();
+        return entity.getDescription();
     }
 
     @Override
     public Map<String, Object> getProperties() {
-        return location.getProperties();
+        return entity.getProperties();
     }
 
     @Override
     public String getEncodingType() {
-        return location.getEncodingType();
+        return entity.getEncodingType();
     }
 
     @Override
     public Geometry getGeometry() {
-        return location.getGeometry();
+        return entity.getGeometry();
     }
 
     @Override
     public Set<HistoricalLocation> getHistoricalLocations() {
-        return location.getHistoricalLocations();
+        return entity.getHistoricalLocations();
     }
 
     @Override
     public Set<Thing> getThings() {
-        return location.getThings();
+        return entity.getThings();
     }
 }

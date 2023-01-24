@@ -29,7 +29,6 @@
 package org.n52.sta.api.domain.aggregate;
 
 import org.n52.shetland.ogc.gml.time.Time;
-import org.n52.sta.api.EntityEditor;
 import org.n52.sta.api.entity.Datastream;
 import org.n52.sta.api.entity.FeatureOfInterest;
 import org.n52.sta.api.entity.Group;
@@ -41,85 +40,75 @@ import java.util.Set;
 
 public class ObservationAggregate extends EntityAggregate<Observation> implements Observation {
 
-    private final Observation observation;
+    public ObservationAggregate(Observation entity) {
+        super(entity);
+        assertRequired(entity.getDatastream(), "Datastream is mandatory!");
 
-    public ObservationAggregate(Observation observation) {
-        this(observation, null);
-    }
-
-    public ObservationAggregate(Observation observation, EntityEditor<Observation> editor) {
-        super(observation, editor);
-        this.observation = observation;
-        assertRequired(observation.getDatastream(), "Datastream is mandatory!");
-
+        // XXX: do logic in domain services
         // TODO: implement auto-generation of FOI based on Thing-Location
         // TODO: see 18-088 Section 10.2 Special Case #1
 
-        assertRequired(observation.getFeatureOfInterest(), "FeatureOfInterest is mandatory!");
-    }
-
-    public String getId() {
-        return observation.getId();
+        assertRequired(entity.getFeatureOfInterest(), "FeatureOfInterest is mandatory!");
     }
 
     @Override
     public Time getPhenomenonTime() {
-        return observation.getPhenomenonTime();
+        return entity.getPhenomenonTime();
     }
 
     @Override
     public Time getResultTime() {
-        return observation.getResultTime();
+        return entity.getResultTime();
     }
 
     @Override
     public Object getResult() {
-        return observation.getResult();
+        return entity.getResult();
     }
 
     @Override
     public Object getResultQuality() {
-        return observation.getResultQuality();
+        return entity.getResultQuality();
     }
 
     @Override
     public Time getValidTime() {
-        return observation.getValidTime();
+        return entity.getValidTime();
     }
 
     @Override
     public Map<String, Object> getParameters() {
-        return observation.getParameters();
+        return entity.getParameters();
     }
 
     @Override
     public FeatureOfInterest getFeatureOfInterest() {
-        return observation.getFeatureOfInterest();
+        return entity.getFeatureOfInterest();
     }
 
     @Override
     public Datastream getDatastream() {
-        return observation.getDatastream();
+        return entity.getDatastream();
     }
 
     @Override
     public Set<Group> getGroups() {
-        return observation.getGroups();
+        return entity.getGroups();
     }
 
     @Override
     public Set<Relation> getSubjects() {
-        return observation.getSubjects();
+        return entity.getSubjects();
     }
 
     @Override
     public Set<Relation> getObjects() {
-        return observation.getObjects();
+        return entity.getObjects();
     }
 
     @Override
     public String getValueType() {
-        return observation.getValueType();
+        return entity.getValueType();
     }
 
 }

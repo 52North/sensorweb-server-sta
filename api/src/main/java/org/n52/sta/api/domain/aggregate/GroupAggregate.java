@@ -32,7 +32,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.n52.shetland.ogc.gml.time.Time;
-import org.n52.sta.api.EntityEditor;
+import org.n52.shetland.ogc.gml.time.TimePeriod;
 import org.n52.sta.api.entity.Group;
 import org.n52.sta.api.entity.License;
 import org.n52.sta.api.entity.Observation;
@@ -41,66 +41,67 @@ import org.n52.sta.api.entity.Relation;
 
 public class GroupAggregate extends EntityAggregate<Group> implements Group {
 
-    private final Group group;
-
-    public GroupAggregate(Group group) {
-        this(group, null);
+    public GroupAggregate(Group entity) {
+        super(entity);
     }
 
-    public GroupAggregate(Group group, EntityEditor<Group> editor) {
-        super(group, editor);
-        this.group = group;
+    public boolean isClosedGroup() {
+        Time runTime = getRunTime();
+
+        // FIXME creationTime -> [TimeInstant]
+        // FIXME runTime -> endTime [TimeInstant]
+        // see https://docs.ogc.org/DRAFTS/22-022.html#toc23
+        return runTime instanceof TimePeriod && ((TimePeriod) runTime).getEnd().isBeforeNow();
     }
 
-    public String getId() {
-        return group.getId();
-    }
-
+    @Override
     public String getName() {
-        return group.getName();
+        return entity.getName();
     }
 
+    @Override
     public String getDescription() {
-        return group.getDescription();
+        return entity.getDescription();
     }
 
+    @Override
     public Map<String, Object> getProperties() {
-        return group.getProperties();
+        return entity.getProperties();
     }
 
     @Override
     public String getPurpose() {
-        return group.getPurpose();
+        return entity.getPurpose();
     }
 
     @Override
     public Time getRunTime() {
-        return group.getRunTime();
+        return entity.getRunTime();
     }
 
     @Override
     public Time getCreationTime() {
-        return group.getCreationTime();
+        return entity.getCreationTime();
     }
 
     @Override
     public Set<Relation> getRelations() {
-        return group.getRelations();
+        return entity.getRelations();
     }
 
     @Override
     public License getLicense() {
-        return group.getLicense();
+        return entity.getLicense();
     }
 
     @Override
     public Party getParty() {
-        return group.getParty();
+        return entity.getParty();
     }
 
     @Override
     public Set<Observation> getObservations() {
-        return group.getObservations();
+        return entity.getObservations();
     }
 
 }

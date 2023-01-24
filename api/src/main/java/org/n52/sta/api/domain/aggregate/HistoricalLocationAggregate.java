@@ -31,46 +31,33 @@ package org.n52.sta.api.domain.aggregate;
 import java.util.Set;
 
 import org.n52.shetland.ogc.gml.time.Time;
-import org.n52.sta.api.EntityEditor;
 import org.n52.sta.api.entity.HistoricalLocation;
 import org.n52.sta.api.entity.Location;
 import org.n52.sta.api.entity.Thing;
 
 public class HistoricalLocationAggregate extends EntityAggregate<HistoricalLocation> implements HistoricalLocation {
 
-    private final HistoricalLocation historicalLocation;
-
-    public HistoricalLocationAggregate(HistoricalLocation historicalLocation) {
-        this(historicalLocation, null);
-    }
-
-    public HistoricalLocationAggregate(HistoricalLocation historicalLocation, EntityEditor<HistoricalLocation> editor) {
-        super(historicalLocation, editor);
-        this.historicalLocation = historicalLocation;
-        assertRequired(historicalLocation.getThing(), "Thing is mandatory!");
-        assertRequired(historicalLocation.getLocations(), "Locations is mandatory!");
+    public HistoricalLocationAggregate(HistoricalLocation entity) {
+        super(entity);
+        assertRequired(entity.getThing(), "Thing is mandatory!");
+        assertRequired(entity.getLocations(), "Locations is mandatory!");
         if (getLocations().size() == 0) {
             throw new InvalidAggregateException("At least one Location must be present!");
         }
     }
 
     @Override
-    public String getId() {
-        return historicalLocation.getId();
-    }
-
-    @Override
     public Time getTime() {
-        return historicalLocation.getTime();
+        return entity.getTime();
     }
 
     @Override
     public Set<Location> getLocations() {
-        return historicalLocation.getLocations();
+        return entity.getLocations();
     }
 
     @Override
     public Thing getThing() {
-        return historicalLocation.getThing();
+        return entity.getThing();
     }
 }

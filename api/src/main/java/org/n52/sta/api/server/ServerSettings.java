@@ -65,11 +65,11 @@ public interface ServerSettings {
         public String getName() {
             return name;
         }
-        
+
         public String getUrl() {
             return url;
         }
-        
+
         @Override
         public int hashCode() {
             return Objects.hash(9, getName());

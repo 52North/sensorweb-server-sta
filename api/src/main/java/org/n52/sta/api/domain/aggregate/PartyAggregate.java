@@ -30,7 +30,6 @@ package org.n52.sta.api.domain.aggregate;
 
 import java.util.Set;
 
-import org.n52.sta.api.EntityEditor;
 import org.n52.sta.api.domain.PartyRole;
 import org.n52.sta.api.entity.Datastream;
 import org.n52.sta.api.entity.Group;
@@ -39,57 +38,46 @@ import org.n52.sta.api.entity.Thing;
 
 public class PartyAggregate extends EntityAggregate<Party> implements Party {
 
-    private final Party party;
-
-    public PartyAggregate(Party party) {
-        this(party, null);
-    }
-
-    public PartyAggregate(Party party, EntityEditor<Party> editor) {
-        super(party, editor);
-        this.party = party;
-    }
-
-    public String getId() {
-        return party.getId();
+    public PartyAggregate(Party entity) {
+        super(entity);
     }
 
     public String getName() {
-        return party.getName();
+        return entity.getName();
     }
 
     public String getDescription() {
-        return party.getDescription();
+        return entity.getDescription();
     }
 
     @Override
     public String getAuthId() {
-        return party.getAuthId();
+        return entity.getAuthId();
     }
 
     @Override
     public PartyRole getRole() {
-        return party.getRole();
+        return entity.getRole();
     }
 
     @Override
     public String getDisplayName() {
-        return party.getDisplayName();
+        return entity.getDisplayName();
     }
 
     @Override
     public Set<Datastream> getDatastreams() {
-        return party.getDatastreams();
+        return entity.getDatastreams();
     }
 
     @Override
     public Set<Thing> getThings() {
-        return party.getThings();
+        return entity.getThings();
     }
 
     @Override
     public Set<Group> getGroups() {
-        return party.getGroups();
+        return entity.getGroups();
     }
 
 }
