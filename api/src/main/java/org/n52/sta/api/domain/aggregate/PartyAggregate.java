@@ -42,10 +42,12 @@ public class PartyAggregate extends EntityAggregate<Party> implements Party {
         super(entity);
     }
 
+    @Override
     public String getName() {
         return entity.getName();
     }
 
+    @Override
     public String getDescription() {
         return entity.getDescription();
     }

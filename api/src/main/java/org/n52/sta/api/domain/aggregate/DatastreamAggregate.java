@@ -28,75 +28,101 @@
 
 package org.n52.sta.api.domain.aggregate;
 
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.locationtech.jts.geom.Geometry;
 import org.n52.shetland.ogc.gml.time.Time;
 import org.n52.sta.api.entity.Datastream;
 import org.n52.sta.api.entity.License;
 import org.n52.sta.api.entity.Observation;
-import org.n52.sta.api.entity.ObservedProperty;
 import org.n52.sta.api.entity.Party;
 import org.n52.sta.api.entity.Project;
-import org.n52.sta.api.entity.Sensor;
-import org.n52.sta.api.entity.Thing;
 
 public class DatastreamAggregate extends EntityAggregate<Datastream> implements Datastream {
+
+    private final ThingAggregate thingAggregate;
+    private final SensorAggregate sensorAggregate;
+    private final ObservedPropertyAggregate observedPropertyAggregate;
+    private Set<ObservationAggregate> observationAggregates;
 
     public DatastreamAggregate(Datastream entity) {
         super(entity);
         assertRequired(entity.getThing(), "Thing is mandatory!");
         assertRequired(entity.getSensor(), "Sensor is mandatory!");
         assertRequired(entity.getObservedProperty(), "ObservedProperty is mandatory!");
+
+        this.thingAggregate = new ThingAggregate(entity.getThing());
+        this.sensorAggregate = new SensorAggregate(entity.getSensor());
+        this.observedPropertyAggregate = new ObservedPropertyAggregate(entity.getObservedProperty());
+        Set<? extends Observation> observations = entity.getObservations();
+        observationAggregates = observations.isEmpty()
+            ? new HashSet<>()
+            : observations.stream()
+                          .map(ObservationAggregate::new)
+                          .collect(Collectors.toSet());
     }
 
+    @Override
     public String getName() {
         return entity.getName();
     }
 
+    @Override
     public String getDescription() {
         return entity.getDescription();
     }
 
+    @Override
     public Map<String, Object> getProperties() {
         return entity.getProperties();
     }
 
+    @Override
     public String getObservationType() {
         return entity.getObservationType();
     }
 
+    @Override
     public UnitOfMeasurement getUnitOfMeasurement() {
         return entity.getUnitOfMeasurement();
     }
 
+    @Override
     public Geometry getObservedArea() {
         return entity.getObservedArea();
     }
 
+    @Override
     public Time getPhenomenonTime() {
         return entity.getPhenomenonTime();
     }
 
+    @Override
     public Time getResultTime() {
         return entity.getResultTime();
     }
 
-    public Thing getThing() {
-        return entity.getThing();
+    @Override
+    public ThingAggregate getThing() {
+        return thingAggregate;
     }
 
-    public Sensor getSensor() {
-        return entity.getSensor();
+    @Override
+    public SensorAggregate getSensor() {
+        return sensorAggregate;
     }
 
-    public ObservedProperty getObservedProperty() {
-        return entity.getObservedProperty();
+    @Override
+    public ObservedPropertyAggregate getObservedProperty() {
+        return observedPropertyAggregate;
     }
 
-    public Set<Observation> getObservations() {
-        return entity.getObservations();
+    @Override
+    public Set<ObservationAggregate> getObservations() {
+        return observationAggregates;
     }
 
     @Override

@@ -58,7 +58,7 @@ public interface Datastream extends Identifiable {
 
     ObservedProperty getObservedProperty();
 
-    Set<Observation> getObservations();
+    Set<? extends Observation> getObservations();
 
     Project getProject();
 

@@ -215,7 +215,7 @@ public class DatastreamEntityEditor extends DatabaseEntityAdapter<AbstractDatase
         ObservedPropertyData observedProperty = observedPropertyEditor.getOrSave(entity.getObservedProperty());
         dataset.setObservableProperty(observedProperty.getData());
 
-        Set<Observation> observations = entity.getObservations();
+        Set<? extends Observation> observations = entity.getObservations();
         Streams.stream(observations)
                .findFirst()
                .ifPresentOrElse(o -> dataset.setObservationType(getObservationType(o)),

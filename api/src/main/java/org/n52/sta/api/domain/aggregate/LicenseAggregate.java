@@ -41,14 +41,17 @@ public class LicenseAggregate extends EntityAggregate<License> implements Licens
         super(entity);
     }
 
+    @Override
     public String getName() {
         return entity.getName();
     }
 
+    @Override
     public String getDescription() {
         return entity.getDescription();
     }
 
+    @Override
     public Map<String, Object> getProperties() {
         return entity.getProperties();
     }

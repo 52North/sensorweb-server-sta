@@ -28,6 +28,7 @@
 
 package org.n52.sta.http.util;
 
+import org.n52.janmayen.http.HTTPStatus;
 import org.n52.shetland.ogc.sta.exception.STACRUDException;
 import org.n52.shetland.ogc.sta.exception.STAInvalidFilterExpressionException;
 import org.n52.shetland.ogc.sta.exception.STAInvalidQueryException;
@@ -74,59 +75,55 @@ public class ErrorHandler {
         String msg = createErrorMessage(exception);
         LOGGER.debug(msg, exception);
         return new ResponseEntity<>(msg,
-                                    headers,
-                                    HttpStatus.NOT_FOUND);
+                headers,
+                HttpStatus.NOT_FOUND);
     }
 
     @ExceptionHandler(value = {
-        HttpRequestMethodNotSupportedException.class,
-        MismatchedInputException.class,
-        STAInvalidFilterExpressionException.class,
-        STAInvalidQueryException.class,
-        InvalidValueException.class,
-        STAInvalidUrlException.class
+            HttpRequestMethodNotSupportedException.class,
+            MismatchedInputException.class,
+            STAInvalidFilterExpressionException.class,
+            STAInvalidQueryException.class,
+            InvalidValueException.class,
+            STAInvalidUrlException.class
     })
 
     public ResponseEntity<Object> staInvalidUrlException(STAInvalidUrlException exception) {
         String msg = createErrorMessage(exception);
         LOGGER.debug(msg, exception);
-        return new ResponseEntity<>(msg,
-                                    headers,
-                                    HttpStatus.BAD_REQUEST);
+        return new ResponseEntity<>(msg, headers, HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler(value = STACRUDException.class)
     public ResponseEntity<Object> staCrudException(STACRUDException exception) {
         String msg = createErrorMessage(exception);
         LOGGER.debug(msg, exception);
-        return new ResponseEntity<>(msg,
-                                    headers,
-                                    HttpStatus.valueOf(exception.getResponseStatus()
-                                                                .getCode()));
+        return new ResponseEntity<>(msg, headers, getStatusCode(exception));
+    }
+
+    private HttpStatus getStatusCode(STACRUDException exception) {
+        HTTPStatus responseStatus = exception.getResponseStatus();
+        return HttpStatus.valueOf(responseStatus.getCode());
     }
 
     @ExceptionHandler(value = InvalidAggregateException.class)
     public ResponseEntity<Object> staInvalidAggregateException(InvalidAggregateException exception) {
         String msg = createErrorMessage(exception);
         LOGGER.debug(msg, exception);
-        return new ResponseEntity<>(msg,
-                                    headers,
-                                    HttpStatus.BAD_REQUEST);
+        return new ResponseEntity<>(msg, headers, HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler(value = {
-        IllegalArgumentException.class,
-        IllegalStateException.class,
-        Exception.class,
-        RuntimeException.class,
-        ProviderException.class
+            IllegalArgumentException.class,
+            IllegalStateException.class,
+            Exception.class,
+            RuntimeException.class,
+            ProviderException.class
     })
     public ResponseEntity<Object> fallbackException(Exception exception) {
         String msg = createErrorMessage(exception);
         LOGGER.error(msg, exception);
-        return new ResponseEntity<>(msg,
-                                    headers,
-                                    HttpStatus.INTERNAL_SERVER_ERROR);
+        return new ResponseEntity<>(msg, headers, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
     private String createErrorMessage(Exception e) {
@@ -134,15 +131,16 @@ public class ErrorHandler {
         return err.toPrettyString();
     }
 
-    private ObjectNode formatError(Exception e) {
+    private ObjectNode formatError(Throwable e) {
         ObjectNode root = mapper.createObjectNode();
-        root.put("timestamp", System.currentTimeMillis());
+        root.put("timestamp",System.currentTimeMillis());
         root.put("error",
-                 e.getClass()
-                  .getSimpleName());
+                e.getClass()
+                        .getSimpleName());
         root.put("message", e.getMessage());
         if (e.getCause() != null) {
-            root.put("cause", formatError((Exception) e.getCause()));
+            ObjectNode formatError = formatError(e.getCause());
+            root.set("cause", formatError);
         }
         return root;
     }

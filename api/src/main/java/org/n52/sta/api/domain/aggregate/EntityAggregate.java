@@ -51,7 +51,7 @@ public abstract class EntityAggregate<T extends Identifiable> {
         return entity;
     }
 
-    public T save(EntityEditor<T> editor) throws AggregateException {
+    public static <T extends Identifiable> T save(T entity, EntityEditor<T> editor) throws AggregateException {
         try {
             return editor.save(entity);
         } catch (EditorException e) {
@@ -78,7 +78,9 @@ public abstract class EntityAggregate<T extends Identifiable> {
 
     protected void assertRequired(Object reference, String message) throws InvalidAggregateException {
         if (reference == null) {
-            throw new InvalidAggregateException(message);
+            String className = getClass().getSimpleName();
+            className = className.replace("Aggregate", "");
+            throw new InvalidAggregateException(className + ": " + message);
         }
     }
 

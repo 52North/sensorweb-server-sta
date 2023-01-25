@@ -38,11 +38,10 @@ public class SensorAggregate extends EntityAggregate<Sensor> implements Sensor {
 
     public SensorAggregate(Sensor entity) {
         super(entity);
-    }
 
-    @Override
-    public String getId() {
-        return entity.getId();
+        // TODO further assertions (see DatastreamAggregate)
+
+        assertRequired(entity.getEncodingType(), "EncodingType is mandatory!");
     }
 
     @Override

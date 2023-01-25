@@ -42,10 +42,12 @@ public class RelationAggregate extends EntityAggregate<Relation> implements Rela
         super(entity);
     }
 
+    @Override
     public String getDescription() {
         return entity.getDescription();
     }
 
+    @Override
     public Map<String, Object> getProperties() {
         return entity.getProperties();
     }

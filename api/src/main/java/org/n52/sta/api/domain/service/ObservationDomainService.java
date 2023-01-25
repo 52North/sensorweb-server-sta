@@ -75,10 +75,10 @@ public class ObservationDomainService extends DomainServiceAdapter<Observation> 
         //     checkGroupClosed(aggregate);
         // }
 
-        ClosedGroupDomainRule rule = new ClosedGroupDomainRule();
-        Streams.stream(getGroups(entity)).forEach(rule::assertEditableGroup);
+        ClosedGroupDomainRule rule = new ClosedGroupDomainRule(serviceLookup);
+        rule.assertAddObservation(entity);
 
-        return save(aggregate);
+        return super.save(aggregate);
     }
 
     @Override
@@ -96,10 +96,10 @@ public class ObservationDomainService extends DomainServiceAdapter<Observation> 
 
         // }
 
-        ClosedGroupDomainRule rule = new ClosedGroupDomainRule();
-        Streams.stream(entity.getGroups()).forEach(rule::assertEditableGroup);
+        ClosedGroupDomainRule rule = new ClosedGroupDomainRule(serviceLookup);
+        rule.assertAddObservation(entity);
 
-        return update(id, aggregate);
+        return super.update(id, aggregate);
     }
 
     @Override
@@ -118,37 +118,11 @@ public class ObservationDomainService extends DomainServiceAdapter<Observation> 
 
                 // }
 
-                ClosedGroupDomainRule rule = new ClosedGroupDomainRule();
-                Streams.stream(entity.getGroups()).forEach(rule::assertEditableGroup);
+                ClosedGroupDomainRule rule = new ClosedGroupDomainRule(serviceLookup);
+                rule.assertAddObservation(entity);
 
-                delete(id);
+                super.delete(id);
             });
     }
 
-    private List<Group> getGroups(Observation entity) {
-        EntityService<Group> groupService = serviceLookup.getService(Group.class).get();
-        return Streams.stream(entity.getGroups())
-                        .map(group -> Request.createIdRequest(group.getId()))
-                        .map(request -> groupService.getEntity(request))
-                        .flatMap(Optional::stream)
-                        .collect(Collectors.toList());
-    }
-
-
-    // those that do not own the group) can no longer add observations or update or
-    private void checkGroupClosed(ObservationAggregate entity) throws EditorException {
-        //TODO: This does not apply if you are the Group Owner
-        EntityService<Group> groupService = serviceLookup.getService(Group.class).get();
-        for (Group group : entity.getGroups()) {
-            Optional<Group> groupEntity = groupService.getEntity(Request.createIdRequest(group.getId()));
-            Time runTime = groupEntity
-                    .orElseThrow(() -> new EditorException("Cannot find group with id: " + group.getId()))
-                    .getRunTime();
-            // check if Group is already closed
-            if (runTime instanceof TimePeriod && ((TimePeriod) runTime).getEnd().isBeforeNow()) {
-                throw new EditorException("Cannot add to group - group is closed");
-            }
-        }
-
-    }
 }

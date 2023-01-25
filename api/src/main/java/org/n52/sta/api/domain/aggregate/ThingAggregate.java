@@ -45,30 +45,33 @@ public class ThingAggregate extends EntityAggregate<Thing> implements Thing {
         super(entity);
     }
 
-    public String getId() {
-        return entity.getId();
-    }
-
+    @Override
     public String getName() {
         return entity.getName();
     }
 
+    @Override
     public String getDescription() {
         return entity.getDescription();
     }
 
+
+    @Override
     public Map<String, Object> getProperties() {
         return entity.getProperties();
     }
 
+    @Override
     public Set<HistoricalLocation> getHistoricalLocations() {
         return entity.getHistoricalLocations();
     }
 
+    @Override
     public Set<Location> getLocations() {
         return entity.getLocations();
     }
 
+    @Override
     public Set<Datastream> getDatastreams() {
         return entity.getDatastreams();
     }

@@ -41,18 +41,17 @@ public class ProjectAggregate extends EntityAggregate<Project> implements Projec
         super(entity);
     }
 
-    public String getId() {
-        return entity.getId();
-    }
-
+    @Override
     public String getName() {
         return entity.getName();
     }
 
+    @Override
     public String getDescription() {
         return entity.getDescription();
     }
 
+    @Override
     public Map<String, Object> getProperties() {
         return entity.getProperties();
     }

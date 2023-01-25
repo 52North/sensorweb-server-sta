@@ -143,7 +143,8 @@ public class EntityServiceConfiguration {
             EntityServiceLookup serviceLookup) {
         ObservationService service = new ObservationService(entityProvider);
         entityEditor.ifPresent(service::setEditor);
-        serviceLookup.addEntityService(Observation.class, new ObservationDomainService(service, serviceLookup));
+        ObservationDomainService domainService = new ObservationDomainService(service, serviceLookup);
+        serviceLookup.addEntityService(Observation.class, domainService);
         return service;
     }
 
@@ -154,7 +155,8 @@ public class EntityServiceConfiguration {
             EntityServiceLookup serviceLookup) {
         FeatureOfInterestService service = new FeatureOfInterestService(entityProvider);
         entityEditor.ifPresent(service::setEditor);
-        serviceLookup.addEntityService(FeatureOfInterest.class, new FeatureOfInterestDomainService(service));
+        FeatureOfInterestDomainService domainService = new FeatureOfInterestDomainService(service);
+        serviceLookup.addEntityService(FeatureOfInterest.class, domainService);
         return service;
     }
 
@@ -165,7 +167,8 @@ public class EntityServiceConfiguration {
             EntityServiceLookup serviceLookup) {
         HistoricalLocationService service = new HistoricalLocationService(entityProvider);
         entityEditor.ifPresent(service::setEditor);
-        serviceLookup.addEntityService(HistoricalLocation.class, new HistoricalLocationDomainService(service));
+        HistoricalLocationDomainService domainService = new HistoricalLocationDomainService(service);
+        serviceLookup.addEntityService(HistoricalLocation.class, domainService);
         return service;
     }
 
@@ -175,7 +178,8 @@ public class EntityServiceConfiguration {
             Optional<EntityEditor<Group>> entityEditor) {
         GroupService service = new GroupService(entityProvider);
         entityEditor.ifPresent(service::setEditor);
-        serviceLookup.addEntityService(Group.class, new GroupDomainService(service));
+        GroupDomainService domainService = new GroupDomainService(service, serviceLookup);
+        serviceLookup.addEntityService(Group.class, domainService);
         return service;
     }
 

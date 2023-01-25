@@ -1,0 +1,802 @@
+{
+	"info": {
+		"_postman_id": "fbe21f64-2d0e-4f22-9571-8354e238500b",
+		"name": "sta-plus",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Post",
+			"item": [
+				{
+					"name": "http://localhost:8081/v1.1/Parties_NoRole",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"@iot.id\": \"e851ed9a-d72c-47fc-b52b-f8824e0dc1fd\",\r\n    \"name\": \"Karl\",\r\n    \"description\": \"Karls party\",\r\n    \"authId\": \"123-456-789\",\r\n    \"displayName\": \"Karl der Grosse\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8081/v1.1/Parties",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8081",
+							"path": [
+								"v1.1",
+								"Parties"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "http://localhost:8081/v1.1/Parties",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"@iot.id\": \"facd2754-3c73-49bb-843b-b829ccc69290\",\r\n    \"name\": \"Karl2\",\r\n    \"description\": \"Karl2s party\",\r\n    \"authId\": \"123-456-789-0\",\r\n    \"role\": \"individual\",\r\n    \"displayName\": \"Karl2 der Grosse\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8081/v1.1/Parties",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8081",
+							"path": [
+								"v1.1",
+								"Parties"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "http://localhost:8081/v1.1/Things",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"@iot.id\": \"28424e81-08cf-43ff-b5bf-14a1b17ff29d\",\r\n  \"description\": \"This an oven with a temperature datastream.\",\r\n  \"name\": \"oven\",\r\n  \"Party\": {\r\n        \"@iot.id\": \"facd2754-3c73-49bb-843b-b829ccc69290\"\r\n   }\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8081/v1.1/Things",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8081",
+							"path": [
+								"v1.1",
+								"Things"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "http://localhost:8081/v1.1/Sensors",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"@iot.id\": \"53843b78-0ef8-467d-9fb5-d30dbde21526\",\r\n    \"name\": \"DS18B20\",\r\n    \"description\": \"DS18B20 is an air temperature sensor…\",\r\n    \"encodingType\": \"application/pdf\",\r\n    \"metadata\": \"http://datasheets.maxim-ic.com/en/ds/DS18B20.pdf\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8081/v1.1/Sensors",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8081",
+							"path": [
+								"v1.1",
+								"Sensors"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "http://localhost:8081/v1.1/ObservedProperties",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"@iot.id\": \"87927cbc-7f41-4ed2-bd32-da39917f7d47\",\r\n    \"name\": \"DewPoint Temperature\",\r\n    \"definition\": \"http://sweet.jpl.nasa.gov/ontology/property.owl#DewPointTemperature\",\r\n    \"description\": \"The dewpoint temperature is the temperature to which the air  must be cooled, at constant pressure, for dew to form. As the grass and other objects near the ground cool to the dewpoint, some of the water vapor in the atmosphere condenses into liquid water on the objects.\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8081/v1.1/ObservedProperties",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8081",
+							"path": [
+								"v1.1",
+								"ObservedProperties"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "http://localhost:8081/v1.1/Projects",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"@iot.id\": \"5a6b8cdf-e09c-4cc4-9c53-d9522725cf88\",\r\n    \"name\": \"Project\",\r\n    \"description\": \"Test projects\",\r\n    \"creationTime\": \"2021-04-22T18:10:00Z\",\r\n    \"runTime\": \"2021-04-21T12:00:00Z/2021-04-22T15:43:00Z\",\r\n    \"classification\": \"Classification\",\r\n    \"termsOfUse\": \"Terms of Use\",\r\n    \"privacyPolicy\": \"privacy policy\",\r\n    \"url\": \"https://url.org/\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8081/v1.1/Projects",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8081",
+							"path": [
+								"v1.1",
+								"Projects"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "http://localhost:8081/v1.1/License",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"@iot.id\": \"028dcf79-0bd4-40ff-9e80-7ec175bee326\",\r\n    \"name\": \"CC-BY\",\r\n    \"description\": \"CreativeCommon-BY\",\r\n    \"definition\": \"https://creativecommons.org/licenses/by/2.0/de/\",\r\n    \"logo\": \"logologo\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8081/v1.1/Licenses",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8081",
+							"path": [
+								"v1.1",
+								"Licenses"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "http://localhost:8081/v1.1/Datastreams",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"@iot.id\": \"c4c322a3-ff3c-46be-b432-8a5fe768ba56\",\r\n    \"name\": \"oven temperature\",\r\n    \"description\": \"This is a datastream for an oven’s internal temperature.\",\r\n    \"unitOfMeasurement\": {\r\n    \"name\": \"degree Celsius\",\r\n    \"symbol\": \"°C\",\r\n    \"definition\": \"http://unitsofmeasure.org/ucum.html#para-30\"\r\n    },\r\n    \"observationType\": \"http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_Measurement\",\r\n    \"observedArea\": {\r\n    \"type\": \"Polygon\",\r\n    \"coordinates\": [[[100,0], [101,0], [101,1], [100,1], [100,0]]]\r\n    },\r\n    \"phenomenonTime\": \"2009-01-11T16:22:25.00Z/2011-08-21T08:32:10.00Z\",\r\n    \"Thing\": {\r\n    \"@iot.id\": \"28424e81-08cf-43ff-b5bf-14a1b17ff29d\"\r\n    },\r\n    \"ObservedProperty\": {\r\n    \"@iot.id\": \"87927cbc-7f41-4ed2-bd32-da39917f7d47\"\r\n    },\r\n    \"Sensor\": {\r\n        \"@iot.id\": \"53843b78-0ef8-467d-9fb5-d30dbde21526\"\r\n    },\r\n    \"Project\": {\r\n        \"@iot.id\": \"5a6b8cdf-e09c-4cc4-9c53-d9522725cf88\"\r\n    },\r\n    \"Party\": {\r\n        \"@iot.id\": \"facd2754-3c73-49bb-843b-b829ccc69290\"\r\n    },\r\n    \"License\": {\r\n        \"@iot.id\": \"028dcf79-0bd4-40ff-9e80-7ec175bee326\"\r\n    }\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8081/v1.1/Datastreams",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8081",
+							"path": [
+								"v1.1",
+								"Datastreams"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "http://localhost:8081/v1.1/FeaturesOfInterest",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"@iot.id\": \"fe3cc211-af98-400a-9f17-d134e365e0f8\",\r\n    \"name\": \"CCIT #361\",\r\n    \"description\": \"This is CCIT #361, Noah’s dad’s office\",\r\n    \"encodingType\": \"application/geo+json\",\r\n    \"feature\": {\r\n        \"type\": \"Feature\",\r\n        \"geometry\": {\r\n        \"type\": \"Polygon\",\r\n        \"coordinates\": [\r\n            [[100,50], [10,9], [23,4], [100,50]], [[30,20], [10,4], [4,22], [30,20]]\r\n        ]\r\n        }\r\n    }\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8081/v1.1/FeaturesOfInterest",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8081",
+							"path": [
+								"v1.1",
+								"FeaturesOfInterest"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "http://localhost:8081/v1.1/Groups",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"@iot.id\": \"01144f32-1fdb-4ff2-b73d-9d16ae425441\",\r\n    \"name\": \"Camera Trap Event\",\r\n    \"description\": \"Camera Trap Event #1\",\r\n    \"creationTime\": \"2021-04-22T18:10:00Z\",\r\n    \"runTime\": \"2021-04-21T12:00:00Z/2021-04-22T15:43:00Z\",\r\n    \"purpose\": \"test\",\r\n    \"Party\": {\r\n        \"@iot.id\": \"facd2754-3c73-49bb-843b-b829ccc69290\"\r\n    },\r\n    \"License\": {\r\n        \"@iot.id\": \"028dcf79-0bd4-40ff-9e80-7ec175bee326\"\r\n    }\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8081/v1.1/Groups",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8081",
+							"path": [
+								"v1.1",
+								"Groups"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "http://localhost:8081/v1.1/Observations",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n          \"@iot.id\": \"7013cd6b-2110-4427-b0fb-bf9498e8562c\",\r\n          \"phenomenonTime\": \"2012-06-27T03:42:02-0600\",\r\n          \"result\": 74.0,\r\n          \"FeatureOfInterest\": {\r\n            \"@iot.id\": \"fe3cc211-af98-400a-9f17-d134e365e0f8\"\r\n          },\r\n          \"Datastream\": {\r\n             \"@iot.id\": \"c4c322a3-ff3c-46be-b432-8a5fe768ba56\"\r\n          },\r\n          \"Groups\": {\r\n              \"@iot.id\": \"01144f32-1fdb-4ff2-b73d-9d16ae425441\"\r\n          }\r\n        }",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8081/v1.1/Observations",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8081",
+							"path": [
+								"v1.1",
+								"Observations"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "http://localhost:8081/v1.1/Groups",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"@iot.id\": \"da8f6ace-276b-4797-aa0f-1357c59360ce\",\r\n    \"name\": \"Camera Trap Event\",\r\n    \"description\": \"Camera Trap Event #1\",\r\n    \"creationTime\": \"2021-04-22T18:10:00Z\",\r\n    \"runTime\": \"2021-04-21T12:00:00Z/2021-04-22T15:43:00Z\",\r\n    \"Observations\": [\r\n         { \"@iot.id\": \"7013cd6b-2110-4427-b0fb-bf9498e8562c\"}\r\n    ],\r\n    \"Party\": {\r\n        \"@iot.id\": \"facd2754-3c73-49bb-843b-b829ccc69290\"\r\n    },\r\n    \"License\": {\r\n        \"@iot.id\": \"028dcf79-0bd4-40ff-9e80-7ec175bee326\"\r\n    }\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8081/v1.1/Groups",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8081",
+							"path": [
+								"v1.1",
+								"Groups"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "http://localhost:8081/v1.1/Relation",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"@iot.id\": \"7c82c27e-b7b1-4e43-9734-62c5aebc2783\",\r\n    \"role\": \"relation role\",\r\n    \"description\": \"Test relation\",\r\n    \"externalObject\": \"https://erternal.object.org/\",\r\n    \"Subject\": {\r\n        \"@iot.id\": \"7013cd6b-2110-4427-b0fb-bf9498e8562c\"\r\n    },\r\n    \"Groups\": [\r\n        { \"@iot.id\": \"01144f32-1fdb-4ff2-b73d-9d16ae425441\" }\r\n    ]\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8081/v1.1/Relations",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8081",
+							"path": [
+								"v1.1",
+								"Relations"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "http://localhost:8081/v1.1/RelationObject",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"@iot.id\": \"402afa71-c4db-496f-9eb3-800a9c88c830\",\r\n    \"role\": \"relation role\",\r\n    \"description\": \"Test relation\",\r\n    \"Subject\": {\r\n        \"@iot.id\": \"7013cd6b-2110-4427-b0fb-bf9498e8562c\"\r\n    },\r\n    \"Object\": {\r\n        \"@iot.id\": \"7013cd6b-2110-4427-b0fb-bf9498e8562c\"\r\n    },\r\n    \"Groups\": [\r\n        { \"@iot.id\": \"01144f32-1fdb-4ff2-b73d-9d16ae425441\" },\r\n        { \"@iot.id\": \"da8f6ace-276b-4797-aa0f-1357c59360ce\" }\r\n    ]\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8081/v1.1/Relations",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8081",
+							"path": [
+								"v1.1",
+								"Relations"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Patch",
+			"item": [
+				{
+					"name": "http://localhost:8081/v1.1/RelationObject",
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"role\": \"relation role UPDATE\",\r\n    \"description\": \"Test relation UPDATE\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8081/v1.1/Relations(402afa71-c4db-496f-9eb3-800a9c88c830)",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8081",
+							"path": [
+								"v1.1",
+								"Relations(402afa71-c4db-496f-9eb3-800a9c88c830)"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "http://localhost:8081/v1.1/Things",
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"description\": \"This an oven with a temperature datastream. UPDATE\",\r\n  \"name\": \"oven UPDATE\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8081/v1.1/Things(28424e81-08cf-43ff-b5bf-14a1b17ff29d)",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8081",
+							"path": [
+								"v1.1",
+								"Things(28424e81-08cf-43ff-b5bf-14a1b17ff29d)"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "http://localhost:8081/v1.1/Parties",
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"name\": \"Karl2 UPDATE\",\r\n    \"description\": \"Karl2s party UPDATE\",\r\n    \"authId\": \"123-456-789-0-321\",\r\n    \"role\": \"individual\",\r\n    \"displayName\": \"Karl2 der Grosse UPDATE\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8081/v1.1/Parties(facd2754-3c73-49bb-843b-b829ccc69290)",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8081",
+							"path": [
+								"v1.1",
+								"Parties(facd2754-3c73-49bb-843b-b829ccc69290)"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "http://localhost:8081/v1.1/Parties_AddRole",
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"role\": \"institutional\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8081/v1.1/Parties(e851ed9a-d72c-47fc-b52b-f8824e0dc1fd)",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8081",
+							"path": [
+								"v1.1",
+								"Parties(e851ed9a-d72c-47fc-b52b-f8824e0dc1fd)"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "http://localhost:8081/v1.1/Sensors",
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"name\": \"DS18B20 UPDATE\",\r\n    \"description\": \"DS18B20 is an air temperature sensor… UPDATE\",\r\n    \"metadata\": \"http://datasheets.maxim-ic.com/en/ds/DS18B20.pdf UPDATE\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8081/v1.1/Sensors(53843b78-0ef8-467d-9fb5-d30dbde21526)",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8081",
+							"path": [
+								"v1.1",
+								"Sensors(53843b78-0ef8-467d-9fb5-d30dbde21526)"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "http://localhost:8081/v1.1/ObservedProperties",
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"name\": \"DewPoint Temperature UPDATE\",\r\n    \"definition\": \"http://sweet.jpl.nasa.gov/ontology/property.owl#DewPointTemperature_UPDATE\",\r\n    \"description\": \"The dewpoint temperature is the temperature to which the air  must be cooled, at constant pressure, for dew to form. As the grass and other objects near the ground cool to the dewpoint, some of the water vapor in the atmosphere condenses into liquid water on the objects. UPDATE\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8081/v1.1/ObservedProperties(87927cbc-7f41-4ed2-bd32-da39917f7d47)",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8081",
+							"path": [
+								"v1.1",
+								"ObservedProperties(87927cbc-7f41-4ed2-bd32-da39917f7d47)"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "http://localhost:8081/v1.1/Projects",
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"name\": \"Project UPDATE\",\r\n    \"description\": \"Test projects UPDATE\",\r\n    \"creationTime\": \"2025-04-22T18:10:00Z\",\r\n    \"runTime\": \"2025-04-21T12:00:00Z/2025-04-22T15:43:00Z\",\r\n    \"classification\": \"Classification UPDATE\",\r\n    \"termsOfUse\": \"Terms of Use UPDATE\",\r\n    \"privacyPolicy\": \"privacy policy UPDATE\",\r\n    \"url\": \"https://url.org/UPDATE\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8081/v1.1/Projects(5a6b8cdf-e09c-4cc4-9c53-d9522725cf88)",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8081",
+							"path": [
+								"v1.1",
+								"Projects(5a6b8cdf-e09c-4cc4-9c53-d9522725cf88)"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "http://localhost:8081/v1.1/License",
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"@iot.id\": \"028dcf79-0bd4-40ff-9e80-7ec175bee326\",\r\n    \"name\": \"CC-BY UPDATE\",\r\n    \"description\": \"CreativeCommon-BY UPDATE\",\r\n    \"definition\": \"https://creativecommons.org/licenses/by/2.0/de/ UPDATE\",\r\n    \"logo\": \"logologo UPDATE\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8081/v1.1/Licenses(028dcf79-0bd4-40ff-9e80-7ec175bee326)",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8081",
+							"path": [
+								"v1.1",
+								"Licenses(028dcf79-0bd4-40ff-9e80-7ec175bee326)"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "http://localhost:8081/v1.1/Datastreams",
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"name\": \"oven temperature UPDATE\",\r\n    \"description\": \"This is a datastream for an oven’s internal temperature. UPDATE\",\r\n    \"unitOfMeasurement\": {\r\n        \"name\": \"degree Celsius UPDATE\",\r\n        \"symbol\": \"°C\",\r\n        \"definition\": \"http://unitsofmeasure.org/ucum.html#para-30_UPDATE\"\r\n    },\r\n    \"observationType\": \"http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_Measurement\",\r\n    \"observedArea\": {\r\n        \"type\": \"Polygon\",\r\n        \"coordinates\": [[[100,0], [102,0], [102,1], [100,1], [100,0]]]\r\n    },\r\n    \"phenomenonTime\": \"2025-01-11T16:22:25.00Z/20127-08-21T08:32:10.00Z\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8081/v1.1/Datastreams(c4c322a3-ff3c-46be-b432-8a5fe768ba56)",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8081",
+							"path": [
+								"v1.1",
+								"Datastreams(c4c322a3-ff3c-46be-b432-8a5fe768ba56)"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "http://localhost:8081/v1.1/FeaturesOfInterest",
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"name\": \"CCIT #361 UPDATE\",\r\n    \"description\": \"This is CCIT #361, Noah’s dad’s office UPDATE\",\r\n    \"encodingType\": \"application/geo+json\",\r\n    \"feature\": {\r\n        \"type\": \"Feature\",\r\n        \"geometry\": {\r\n        \"type\": \"Point\",\r\n        \"coordinates\": [100,50]\r\n        }\r\n    }\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8081/v1.1/FeaturesOfInterest(fe3cc211-af98-400a-9f17-d134e365e0f8)",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8081",
+							"path": [
+								"v1.1",
+								"FeaturesOfInterest(fe3cc211-af98-400a-9f17-d134e365e0f8)"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "http://localhost:8081/v1.1/Groups",
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"name\": \"Camera Trap Event UPDATE\",\r\n    \"description\": \"Camera Trap Event #1 UPDATE\",\r\n    \"creationTime\": \"2025-04-22T18:10:00Z\",\r\n    \"runTime\": \"2025-04-21T12:00:00Z/2025-04-22T15:43:00Z\",\r\n    \"purpose\": \"UPDATE\",\r\n    \"Party\": {\r\n        \"@iot.id\": \"facd2754-3c73-49bb-843b-b829ccc69290\"\r\n    },\r\n    \"License\": {\r\n        \"@iot.id\": \"028dcf79-0bd4-40ff-9e80-7ec175bee326\"\r\n    }\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8081/v1.1/Groups(01144f32-1fdb-4ff2-b73d-9d16ae425441)",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8081",
+							"path": [
+								"v1.1",
+								"Groups(01144f32-1fdb-4ff2-b73d-9d16ae425441)"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "http://localhost:8081/v1.1/Observations",
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"phenomenonTime\": \"2025-06-27T03:42:02-0600\",\r\n    \"resultTime\": \"2022-12-22T12:00:00Z\",\r\n    \"result\": 52.0\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8081/v1.1/Observations(7013cd6b-2110-4427-b0fb-bf9498e8562c)",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8081",
+							"path": [
+								"v1.1",
+								"Observations(7013cd6b-2110-4427-b0fb-bf9498e8562c)"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "http://localhost:8081/v1.1/Relation",
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"role\": \"relation role UPDATE\",\r\n    \"description\": \"Test relation UPDATE\",\r\n    \"externalObject\": \"https://erternal.object.org/UPDATE\",\r\n    \"Subject\": {\r\n        \"@iot.id\": \"7013cd6b-2110-4427-b0fb-bf9498e8562c\"\r\n    },\r\n    \"Groups\": [\r\n        { \"@iot.id\": \"01144f32-1fdb-4ff2-b73d-9d16ae425441\" }\r\n    ]\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8081/v1.1/Relations(7c82c27e-b7b1-4e43-9734-62c5aebc2783)",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8081",
+							"path": [
+								"v1.1",
+								"Relations(7c82c27e-b7b1-4e43-9734-62c5aebc2783)"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	]
+}

@@ -85,8 +85,7 @@ public abstract class AbstractEntityService<T extends Identifiable> implements E
     @Override
     public T save(T entity) throws EditorException {
         try {
-            EntityAggregate<T> aggregate = createAggregate(entity);
-            return aggregate.save(unwrapEditor());
+            return EntityAggregate.save(entity, unwrapEditor());
         } catch (AggregateException e) {
             LOGGER.error("Could not create entity: {}", entity, e);
             throw new EditorException("Could not create Entity!", e);
