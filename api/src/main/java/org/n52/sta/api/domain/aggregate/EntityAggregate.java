@@ -63,7 +63,7 @@ public abstract class EntityAggregate<T extends Identifiable> {
         try {
             return editor.update(entity, updateEntity);
         } catch (EditorException e) {
-            throw new AggregateException("Could not save entity!", e);
+            throw new AggregateException("Could not update entity!", e);
         }
     }
 

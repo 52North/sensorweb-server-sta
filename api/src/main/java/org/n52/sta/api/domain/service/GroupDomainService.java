@@ -28,24 +28,21 @@
 
 package org.n52.sta.api.domain.service;
 
-import java.util.Optional;
-import java.util.OptionalInt;
-import java.util.Set;
-import java.util.stream.Collectors;
-
-import org.n52.janmayen.stream.Streams;
+import org.apache.commons.lang.NotImplementedException;
 import org.n52.shetland.ogc.gml.time.Time;
 import org.n52.sta.api.EntityServiceLookup;
 import org.n52.sta.api.domain.DomainService.DomainServiceAdapter;
 import org.n52.sta.api.domain.aggregate.GroupAggregate;
 import org.n52.sta.api.domain.rules.ClosedGroupDomainRule;
 import org.n52.sta.api.entity.Group;
-import org.n52.sta.api.entity.Observation;
 import org.n52.sta.api.exception.editor.EditorException;
-import org.n52.sta.api.service.EntityService;
 import org.n52.sta.api.service.GroupService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class GroupDomainService extends DomainServiceAdapter<Group> {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(GroupDomainService.class);
 
     private final GroupService groupService;
 
@@ -60,8 +57,6 @@ public class GroupDomainService extends DomainServiceAdapter<Group> {
     @Override
     public Group save(Group entity) throws EditorException {
 
-        ClosedGroupDomainRule rule = new ClosedGroupDomainRule(serviceLookup);
-
         // get timestamp of referenced observations
         // either: validate observations against the runtime of the group
         // or: auto-update runtime (preferred)
@@ -73,29 +68,31 @@ public class GroupDomainService extends DomainServiceAdapter<Group> {
     @Override
     public Group update(String id, Group entity) throws EditorException {
         return groupService.getEntity(id)
-                           .map(stored -> {
-                                GroupAggregate aggregate = groupService.createAggregate(entity);
-                                Time runtime = entity.getRunTime();
-                                if (runtime == null) {
+                .map(stored -> {
+                    GroupAggregate aggregate = groupService.createAggregate(entity);
+                    Time runtime = entity.getRunTime();
+                    if (runtime == null) {
 
-                                    // no edits allowed
-                                    ClosedGroupDomainRule rule = new ClosedGroupDomainRule(serviceLookup);
-                                    rule.assertUpdateGroup(stored);
+                        // no edits allowed
+                        ClosedGroupDomainRule rule = new ClosedGroupDomainRule(serviceLookup);
+                        rule.assertUpdateGroup(stored);
 
-                                    // auto-updating runtime only makes sense with an owner,
-                                    // i.e. when there actually are users who are not allowed
-                                    // to add further observations when the group is closed
+                        // auto-updating runtime only makes sense with an owner,
+                        // i.e. when there actually are users who are not allowed
+                        // to add further observations when the group is closed
 
-                                } else {
+                    } else {
 
-                                    // case 0: closing group -> ok
-                                    // case 1: opening group -> ok
-                                    // case 2: updating runtime -> [ min(min(rt), min(ob)), max(max(rt), max(ob)) ]
-                                    //         -> make aggregate writable
+                        // case 0: closing group -> ok
+                        // case 1: opening group -> ok
+                        // case 2: updating runtime -> [ min(min(rt), min(ob)), max(max(rt), max(ob)) ]
+                        // -> make aggregate writable
 
-                                }
+                        throw new NotImplementedException("Group update via domain service not supported yet.");
 
-                                return super.save(aggregate);
-                           }).orElseThrow(()-> new EditorException("Group with id '" + id + "' is unknown"));
+                    }
+
+                    return super.save(aggregate);
+                }).orElseThrow(() -> new EditorException("Group with id '" + id + "' is unknown"));
     }
 }

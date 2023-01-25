@@ -29,7 +29,6 @@ package org.n52.sta.api.domain.rules;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.n52.janmayen.stream.Streams;

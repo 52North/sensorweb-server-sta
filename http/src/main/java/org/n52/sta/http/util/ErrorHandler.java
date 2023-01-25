@@ -133,7 +133,7 @@ public class ErrorHandler {
 
     private ObjectNode formatError(Throwable e) {
         ObjectNode root = mapper.createObjectNode();
-        root.put("timestamp",System.currentTimeMillis());
+        root.put("timestamp", System.currentTimeMillis());
         root.put("error",
                 e.getClass()
                         .getSimpleName());

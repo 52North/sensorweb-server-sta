@@ -28,9 +28,6 @@
 
 package org.n52.sta.api.domain;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
 import java.util.Optional;
 
 import org.n52.sta.api.EntityEditor;
@@ -53,20 +50,11 @@ public interface DomainService<T extends Identifiable> extends EntityService<T> 
 
         protected final EntityService<T> entityService;
 
-        private final List<DomainRule> domainRules;
-
         private Optional<DomainEventService> domainEventService;
-
-        public class DomainRule {}
 
         protected DomainServiceAdapter(EntityService<T> entityService) {
             this.entityService = entityService;
-            this.domainRules = new ArrayList<>();
             this.domainEventService = Optional.empty();
-        }
-
-        protected Iterator<DomainRule> getDomainRules() {
-            return domainRules.iterator();
         }
 
         @Override

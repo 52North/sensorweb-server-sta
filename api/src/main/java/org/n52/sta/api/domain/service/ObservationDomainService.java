@@ -28,25 +28,13 @@
 
 package org.n52.sta.api.domain.service;
 
-import java.util.Iterator;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
-import java.util.stream.Collectors;
-
-import org.n52.janmayen.stream.Streams;
-import org.n52.shetland.ogc.gml.time.Time;
-import org.n52.shetland.ogc.gml.time.TimePeriod;
 import org.n52.sta.api.EntityServiceLookup;
 import org.n52.sta.api.domain.DomainService.DomainServiceAdapter;
-import org.n52.sta.api.domain.aggregate.EntityAggregate;
 import org.n52.sta.api.domain.aggregate.ObservationAggregate;
 import org.n52.sta.api.domain.rules.ClosedGroupDomainRule;
-import org.n52.sta.api.entity.Group;
 import org.n52.sta.api.entity.Observation;
 import org.n52.sta.api.exception.editor.EditorException;
 import org.n52.sta.api.path.Request;
-import org.n52.sta.api.service.EntityService;
 import org.n52.sta.api.service.ObservationService;
 
 public class ObservationDomainService extends DomainServiceAdapter<Observation> {
@@ -65,14 +53,15 @@ public class ObservationDomainService extends DomainServiceAdapter<Observation> 
     public Observation save(Observation entity) throws EditorException {
         ObservationAggregate aggregate = entityProvider.createAggregate(entity);
 
-        // Iterator<DomainServiceAdapter<Observation>.DomainRule> domainRules = getDomainRules();
+        // Iterator<DomainServiceAdapter<Observation>.DomainRule> domainRules =
+        // getDomainRules();
         // while (domainRules.hasNext()) {
 
-        //     DomainRule rule = domainRules.next();
-        //     // TODO rule.assertSave(ObservationAggregate aggregate)
+        // DomainRule rule = domainRules.next();
+        // // TODO rule.assertSave(ObservationAggregate aggregate)
 
-        //     // TODO make checkGroupClosed a ClosedGroupDomainRule object
-        //     checkGroupClosed(aggregate);
+        // // TODO make checkGroupClosed a ClosedGroupDomainRule object
+        // checkGroupClosed(aggregate);
         // }
 
         ClosedGroupDomainRule rule = new ClosedGroupDomainRule(serviceLookup);
@@ -85,14 +74,15 @@ public class ObservationDomainService extends DomainServiceAdapter<Observation> 
     public Observation update(String id, Observation entity) throws EditorException {
         ObservationAggregate aggregate = entityProvider.createAggregate(entity);
 
-        // Iterator<DomainServiceAdapter<Observation>.DomainRule> domainRules = getDomainRules();
+        // Iterator<DomainServiceAdapter<Observation>.DomainRule> domainRules =
+        // getDomainRules();
         // while (domainRules.hasNext()) {
 
-        //     DomainRule rule = domainRules.next();
-        //     // TODO rule.assertUpdate(ObservationAggregate aggregate)
+        // DomainRule rule = domainRules.next();
+        // // TODO rule.assertUpdate(ObservationAggregate aggregate)
 
-        //     // TODO make checkGroupClosed a ClosedGroupDomainRule object
-        //     checkGroupClosed(aggregate);
+        // // TODO make checkGroupClosed a ClosedGroupDomainRule object
+        // checkGroupClosed(aggregate);
 
         // }
 
@@ -105,24 +95,25 @@ public class ObservationDomainService extends DomainServiceAdapter<Observation> 
     @Override
     public void delete(String id) throws EditorException {
         getEntity(Request.createIdRequest(id))
-            .ifPresent(entity -> {
-                ObservationAggregate aggregate = entityProvider.createAggregate(entity);
-                // Iterator<DomainServiceAdapter<Observation>.DomainRule> domainRules = getDomainRules();
-                // while (domainRules.hasNext()) {
+                .ifPresent(entity -> {
+                    ObservationAggregate aggregate = entityProvider.createAggregate(entity);
+                    // Iterator<DomainServiceAdapter<Observation>.DomainRule> domainRules =
+                    // getDomainRules();
+                    // while (domainRules.hasNext()) {
 
-                //     DomainRule rule = domainRules.next();
-                //     // TODO rule.assertDelete(ObservationAggregate aggregate)
+                    // DomainRule rule = domainRules.next();
+                    // // TODO rule.assertDelete(ObservationAggregate aggregate)
 
-                //     // TODO make checkGroupClosed a ClosedGroupDomainRule object
-                //     checkGroupClosed(aggregate);
+                    // // TODO make checkGroupClosed a ClosedGroupDomainRule object
+                    // checkGroupClosed(aggregate);
 
-                // }
+                    // }
 
-                ClosedGroupDomainRule rule = new ClosedGroupDomainRule(serviceLookup);
-                rule.assertAddObservation(entity);
+                    ClosedGroupDomainRule rule = new ClosedGroupDomainRule(serviceLookup);
+                    rule.assertAddObservation(entity);
 
-                super.delete(id);
-            });
+                    super.delete(id);
+                });
     }
 
 }
