@@ -28,6 +28,7 @@
 
 package org.n52.sta.api.service;
 
+import org.n52.sta.api.EntityEditor;
 import org.n52.sta.api.EntityProvider;
 import org.n52.sta.api.domain.aggregate.GroupAggregate;
 import org.n52.sta.api.entity.Group;
@@ -40,6 +41,10 @@ public class GroupService extends AbstractEntityService<Group> {
 
     public GroupService(EntityProvider<Group> provider) {
         super(provider);
+    }
+
+    public GroupService(EntityProvider<Group> provider, EntityEditor<Group> editor) {
+        super(provider, editor);
     }
 
     public GroupAggregate createAggregate(Group entity) {

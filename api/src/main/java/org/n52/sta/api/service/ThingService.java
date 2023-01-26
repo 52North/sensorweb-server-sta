@@ -28,6 +28,7 @@
 
 package org.n52.sta.api.service;
 
+import org.n52.sta.api.EntityEditor;
 import org.n52.sta.api.EntityProvider;
 import org.n52.sta.api.domain.aggregate.ThingAggregate;
 import org.n52.sta.api.entity.Thing;
@@ -40,6 +41,10 @@ public class ThingService extends AbstractEntityService<Thing> {
 
     public ThingService(EntityProvider<Thing> provider) {
         super(provider);
+    }
+
+    public ThingService(EntityProvider<Thing> provider, EntityEditor<Thing> editor) {
+        super(provider, editor);
     }
 
     public ThingAggregate createAggregate(Thing entity) {

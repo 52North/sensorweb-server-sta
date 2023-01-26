@@ -28,6 +28,7 @@
 
 package org.n52.sta.api.service;
 
+import org.n52.sta.api.EntityEditor;
 import org.n52.sta.api.EntityProvider;
 import org.n52.sta.api.domain.aggregate.ObservedPropertyAggregate;
 import org.n52.sta.api.entity.ObservedProperty;
@@ -40,6 +41,10 @@ public class ObservedPropertyService extends AbstractEntityService<ObservedPrope
 
     public ObservedPropertyService(EntityProvider<ObservedProperty> provider) {
         super(provider);
+    }
+
+    public ObservedPropertyService(EntityProvider<ObservedProperty> provider, EntityEditor<ObservedProperty> editor) {
+        super(provider, editor);
     }
 
     public ObservedPropertyAggregate createAggregate(ObservedProperty entity) {

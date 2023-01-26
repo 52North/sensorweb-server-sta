@@ -28,6 +28,7 @@
 
 package org.n52.sta.api.service;
 
+import org.n52.sta.api.EntityEditor;
 import org.n52.sta.api.EntityProvider;
 import org.n52.sta.api.domain.aggregate.FeatureOfInterestAggregate;
 import org.n52.sta.api.entity.FeatureOfInterest;
@@ -40,6 +41,11 @@ public class FeatureOfInterestService extends AbstractEntityService<FeatureOfInt
 
     public FeatureOfInterestService(EntityProvider<FeatureOfInterest> provider) {
         super(provider);
+    }
+
+    public FeatureOfInterestService(EntityProvider<FeatureOfInterest> provider,
+            EntityEditor<FeatureOfInterest> editor) {
+        super(provider, editor);
     }
 
     public FeatureOfInterestAggregate createAggregate(FeatureOfInterest entity) {

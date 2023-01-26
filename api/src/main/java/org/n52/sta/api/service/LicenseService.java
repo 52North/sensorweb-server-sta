@@ -28,6 +28,7 @@
 
 package org.n52.sta.api.service;
 
+import org.n52.sta.api.EntityEditor;
 import org.n52.sta.api.EntityProvider;
 import org.n52.sta.api.domain.aggregate.LicenseAggregate;
 import org.n52.sta.api.entity.License;
@@ -40,6 +41,10 @@ public class LicenseService extends AbstractEntityService<License> {
 
     public LicenseService(EntityProvider<License> provider) {
         super(provider);
+    }
+
+    public LicenseService(EntityProvider<License> provider, EntityEditor<License> editor) {
+        super(provider, editor);
     }
 
     public LicenseAggregate createAggregate(License entity) {

@@ -55,8 +55,13 @@ public abstract class AbstractEntityService<T extends Identifiable> implements E
     protected Optional<EntityEditor<T>> editor;
 
     public AbstractEntityService(EntityProvider<T> provider) {
+        this(provider, null);
+    }
+
+    public AbstractEntityService(EntityProvider<T> provider, EntityEditor<T> editor) {
         Objects.requireNonNull(provider, "provider must not be null");
         this.provider = provider;
+        this.editor = Optional.of(editor);
     }
 
     public Optional<T> getEntity(String id) throws ProviderException {
@@ -120,10 +125,6 @@ public abstract class AbstractEntityService<T extends Identifiable> implements E
     protected T getOrThrow(String id) throws ProviderException {
         return provider.getEntity(id, QueryOptionsFactory.createEmpty())
                        .orElseThrow(() -> new ProviderException("Id '" + id + "' does not exist."));
-    }
-
-    public void setEditor(EntityEditor<T> editor) {
-        this.editor = Optional.ofNullable(editor);
     }
 
     @Override

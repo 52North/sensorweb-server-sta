@@ -33,6 +33,7 @@ import java.util.Optional;
 import org.n52.sta.api.EntityEditor;
 import org.n52.sta.api.EntityPage;
 import org.n52.sta.api.EntityProvider;
+import org.n52.sta.api.ServiceLookup;
 import org.n52.sta.api.domain.aggregate.EntityAggregate;
 import org.n52.sta.api.domain.event.DomainEvent;
 import org.n52.sta.api.domain.event.DomainEventService;
@@ -42,6 +43,8 @@ import org.n52.sta.api.exception.editor.EditorException;
 import org.n52.sta.api.path.Request;
 import org.n52.sta.api.service.EntityService;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+
 public interface DomainService<T extends Identifiable> extends EntityService<T> {
 
     void sendDomainEvent(DomainEvent<Identifiable> event);
@@ -50,10 +53,18 @@ public interface DomainService<T extends Identifiable> extends EntityService<T> 
 
         protected final EntityService<T> entityService;
 
+        protected final ServiceLookup serviceLookup;
+
         private Optional<DomainEventService> domainEventService;
 
         protected DomainServiceAdapter(EntityService<T> entityService) {
+            this(entityService, null);
+        }
+
+        @SuppressFBWarnings("EI_EXPOSE_REP2")
+        protected DomainServiceAdapter(EntityService<T> entityService, ServiceLookup serviceLookup) {
             this.entityService = entityService;
+            this.serviceLookup = serviceLookup;
             this.domainEventService = Optional.empty();
         }
 

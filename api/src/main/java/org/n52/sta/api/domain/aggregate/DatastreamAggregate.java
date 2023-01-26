@@ -38,15 +38,17 @@ import org.n52.shetland.ogc.gml.time.Time;
 import org.n52.sta.api.entity.Datastream;
 import org.n52.sta.api.entity.License;
 import org.n52.sta.api.entity.Observation;
+import org.n52.sta.api.entity.ObservedProperty;
 import org.n52.sta.api.entity.Party;
 import org.n52.sta.api.entity.Project;
+import org.n52.sta.api.entity.Thing;
 
 public class DatastreamAggregate extends EntityAggregate<Datastream> implements Datastream {
 
     private final ThingAggregate thingAggregate;
     private final SensorAggregate sensorAggregate;
     private final ObservedPropertyAggregate observedPropertyAggregate;
-    private Set<ObservationAggregate> observationAggregates;
+    private final Set<ObservationAggregate> observationAggregates;
 
     public DatastreamAggregate(Datastream entity) {
         super(entity);
@@ -116,13 +118,13 @@ public class DatastreamAggregate extends EntityAggregate<Datastream> implements 
     }
 
     @Override
-    public ObservedPropertyAggregate getObservedProperty() {
+    public ObservedProperty getObservedProperty() {
         return observedPropertyAggregate;
     }
 
     @Override
     public Set<ObservationAggregate> getObservations() {
-        return observationAggregates;
+        return new HashSet<>(observationAggregates);
     }
 
     @Override

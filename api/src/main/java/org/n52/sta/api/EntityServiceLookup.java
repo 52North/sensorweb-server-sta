@@ -38,7 +38,7 @@ import java.util.Set;
 import org.n52.sta.api.entity.Identifiable;
 import org.n52.sta.api.service.EntityService;
 
-public final class EntityServiceLookup {
+public final class EntityServiceLookup implements ServiceLookup {
 
     private final Map<Class< ? extends Identifiable>, EntityService< ? extends Identifiable>> entityServicesByType;
 

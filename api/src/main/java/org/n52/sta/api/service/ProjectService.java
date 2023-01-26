@@ -28,6 +28,7 @@
 
 package org.n52.sta.api.service;
 
+import org.n52.sta.api.EntityEditor;
 import org.n52.sta.api.EntityProvider;
 import org.n52.sta.api.domain.aggregate.ProjectAggregate;
 import org.n52.sta.api.entity.Project;
@@ -40,6 +41,10 @@ public class ProjectService extends AbstractEntityService<Project> {
 
     public ProjectService(EntityProvider<Project> provider) {
         super(provider);
+    }
+
+    public ProjectService(EntityProvider<Project> provider, EntityEditor<Project> editor) {
+        super(provider, editor);
     }
 
     public ProjectAggregate createAggregate(Project entity) {

@@ -28,6 +28,7 @@
 
 package org.n52.sta.api.service;
 
+import org.n52.sta.api.EntityEditor;
 import org.n52.sta.api.EntityProvider;
 import org.n52.sta.api.domain.aggregate.HistoricalLocationAggregate;
 import org.n52.sta.api.entity.HistoricalLocation;
@@ -40,6 +41,11 @@ public class HistoricalLocationService extends AbstractEntityService<HistoricalL
 
     public HistoricalLocationService(EntityProvider<HistoricalLocation> provider) {
         super(provider);
+    }
+
+    public HistoricalLocationService(EntityProvider<HistoricalLocation> provider,
+            EntityEditor<HistoricalLocation> editor) {
+        super(provider, editor);
     }
 
     public HistoricalLocationAggregate createAggregate(HistoricalLocation entity) {

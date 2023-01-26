@@ -32,7 +32,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.n52.janmayen.stream.Streams;
-import org.n52.sta.api.EntityServiceLookup;
+import org.n52.sta.api.ServiceLookup;
 import org.n52.sta.api.domain.aggregate.GroupAggregate;
 import org.n52.sta.api.entity.Group;
 import org.n52.sta.api.entity.Observation;
@@ -41,9 +41,9 @@ import org.n52.sta.api.service.EntityService;
 
 public class ClosedGroupDomainRule implements DomainRule {
 
-    private EntityServiceLookup serviceLookup;
+    private ServiceLookup serviceLookup;
 
-    public ClosedGroupDomainRule(EntityServiceLookup serviceLookup) {
+    public ClosedGroupDomainRule(ServiceLookup serviceLookup) {
         this.serviceLookup = serviceLookup;
     }
 

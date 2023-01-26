@@ -28,6 +28,7 @@
 
 package org.n52.sta.api.service;
 
+import org.n52.sta.api.EntityEditor;
 import org.n52.sta.api.EntityProvider;
 import org.n52.sta.api.domain.aggregate.PartyAggregate;
 import org.n52.sta.api.entity.Party;
@@ -40,6 +41,10 @@ public class PartyService extends AbstractEntityService<Party> {
 
     public PartyService(EntityProvider<Party> provider) {
         super(provider);
+    }
+
+    public PartyService(EntityProvider<Party> provider, EntityEditor<Party> editor) {
+        super(provider, editor);
     }
 
     public PartyAggregate createAggregate(Party entity) {

@@ -28,6 +28,7 @@
 
 package org.n52.sta.api.service;
 
+import org.n52.sta.api.EntityEditor;
 import org.n52.sta.api.EntityProvider;
 import org.n52.sta.api.domain.aggregate.SensorAggregate;
 import org.n52.sta.api.entity.Sensor;
@@ -40,6 +41,10 @@ public class SensorService extends AbstractEntityService<Sensor> {
 
     public SensorService(EntityProvider<Sensor> provider) {
         super(provider);
+    }
+
+    public SensorService(EntityProvider<Sensor> provider, EntityEditor<Sensor> editor) {
+        super(provider, editor);
     }
 
     public SensorAggregate createAggregate(Sensor entity) {

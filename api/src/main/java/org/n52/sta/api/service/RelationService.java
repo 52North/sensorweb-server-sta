@@ -28,6 +28,7 @@
 
 package org.n52.sta.api.service;
 
+import org.n52.sta.api.EntityEditor;
 import org.n52.sta.api.EntityProvider;
 import org.n52.sta.api.domain.aggregate.RelationAggregate;
 import org.n52.sta.api.entity.Relation;
@@ -40,6 +41,10 @@ public class RelationService extends AbstractEntityService<Relation> {
 
     public RelationService(EntityProvider<Relation> provider) {
         super(provider);
+    }
+
+    public RelationService(EntityProvider<Relation> provider, EntityEditor<Relation> editor) {
+        super(provider, editor);
     }
 
     public RelationAggregate createAggregate(Relation entity) {

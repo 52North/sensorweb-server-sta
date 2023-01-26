@@ -30,7 +30,7 @@ package org.n52.sta.api.domain.service;
 
 import org.apache.commons.lang.NotImplementedException;
 import org.n52.shetland.ogc.gml.time.Time;
-import org.n52.sta.api.EntityServiceLookup;
+import org.n52.sta.api.ServiceLookup;
 import org.n52.sta.api.domain.DomainService.DomainServiceAdapter;
 import org.n52.sta.api.domain.aggregate.GroupAggregate;
 import org.n52.sta.api.domain.rules.ClosedGroupDomainRule;
@@ -40,18 +40,18 @@ import org.n52.sta.api.service.GroupService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+
 public class GroupDomainService extends DomainServiceAdapter<Group> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(GroupDomainService.class);
 
     private final GroupService groupService;
 
-    private EntityServiceLookup serviceLookup;
-
-    public GroupDomainService(GroupService entityProvider, EntityServiceLookup serviceLookup) {
-        super(entityProvider);
-        this.groupService = entityProvider;
-        this.serviceLookup = serviceLookup;
+    @SuppressFBWarnings("EI_EXPOSE_REP2")
+    public GroupDomainService(GroupService groupService, ServiceLookup serviceLookup) {
+        super(groupService, serviceLookup);
+        this.groupService = groupService;
     }
 
     @Override

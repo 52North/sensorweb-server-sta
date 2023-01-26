@@ -28,6 +28,7 @@
 
 package org.n52.sta.api.service;
 
+import org.n52.sta.api.EntityEditor;
 import org.n52.sta.api.EntityProvider;
 import org.n52.sta.api.domain.aggregate.ObservationAggregate;
 import org.n52.sta.api.entity.Observation;
@@ -40,6 +41,10 @@ public class ObservationService extends AbstractEntityService<Observation> {
 
     public ObservationService(EntityProvider<Observation> provider) {
         super(provider);
+    }
+
+    public ObservationService(EntityProvider<Observation> provider, EntityEditor<Observation> editor) {
+        super(provider, editor);
     }
 
     public ObservationAggregate createAggregate(Observation entity) {

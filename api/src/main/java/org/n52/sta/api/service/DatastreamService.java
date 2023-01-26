@@ -28,6 +28,7 @@
 
 package org.n52.sta.api.service;
 
+import org.n52.sta.api.EntityEditor;
 import org.n52.sta.api.EntityProvider;
 import org.n52.sta.api.domain.aggregate.DatastreamAggregate;
 import org.n52.sta.api.entity.Datastream;
@@ -40,6 +41,10 @@ public class DatastreamService extends AbstractEntityService<Datastream> {
 
     public DatastreamService(EntityProvider<Datastream> provider) {
         super(provider);
+    }
+
+    public DatastreamService(EntityProvider<Datastream> provider, EntityEditor<Datastream> editor) {
+        super(provider, editor);
     }
 
     public DatastreamAggregate createAggregate(Datastream entity) {

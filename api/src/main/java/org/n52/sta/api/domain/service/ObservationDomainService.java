@@ -28,7 +28,7 @@
 
 package org.n52.sta.api.domain.service;
 
-import org.n52.sta.api.EntityServiceLookup;
+import org.n52.sta.api.ServiceLookup;
 import org.n52.sta.api.domain.DomainService.DomainServiceAdapter;
 import org.n52.sta.api.domain.aggregate.ObservationAggregate;
 import org.n52.sta.api.domain.rules.ClosedGroupDomainRule;
@@ -37,21 +37,21 @@ import org.n52.sta.api.exception.editor.EditorException;
 import org.n52.sta.api.path.Request;
 import org.n52.sta.api.service.ObservationService;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+
 public class ObservationDomainService extends DomainServiceAdapter<Observation> {
 
-    private final EntityServiceLookup serviceLookup;
+    private final ObservationService observationService;
 
-    private final ObservationService entityProvider;
-
-    public ObservationDomainService(ObservationService entityProvider, EntityServiceLookup serviceLookup) {
-        super(entityProvider);
-        this.entityProvider = entityProvider;
-        this.serviceLookup = serviceLookup;
+    @SuppressFBWarnings("EI_EXPOSE_REP2")
+    public ObservationDomainService(ObservationService observationService, ServiceLookup serviceLookup) {
+        super(observationService, serviceLookup);
+        this.observationService = observationService;
     }
 
     @Override
     public Observation save(Observation entity) throws EditorException {
-        ObservationAggregate aggregate = entityProvider.createAggregate(entity);
+        ObservationAggregate aggregate = observationService.createAggregate(entity);
 
         // Iterator<DomainServiceAdapter<Observation>.DomainRule> domainRules =
         // getDomainRules();
@@ -72,7 +72,7 @@ public class ObservationDomainService extends DomainServiceAdapter<Observation> 
 
     @Override
     public Observation update(String id, Observation entity) throws EditorException {
-        ObservationAggregate aggregate = entityProvider.createAggregate(entity);
+        ObservationAggregate aggregate = observationService.createAggregate(entity);
 
         // Iterator<DomainServiceAdapter<Observation>.DomainRule> domainRules =
         // getDomainRules();
@@ -96,7 +96,7 @@ public class ObservationDomainService extends DomainServiceAdapter<Observation> 
     public void delete(String id) throws EditorException {
         getEntity(Request.createIdRequest(id))
                 .ifPresent(entity -> {
-                    ObservationAggregate aggregate = entityProvider.createAggregate(entity);
+                    ObservationAggregate aggregate = observationService.createAggregate(entity);
                     // Iterator<DomainServiceAdapter<Observation>.DomainRule> domainRules =
                     // getDomainRules();
                     // while (domainRules.hasNext()) {
