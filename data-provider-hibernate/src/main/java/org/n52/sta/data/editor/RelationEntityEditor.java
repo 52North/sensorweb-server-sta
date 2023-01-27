@@ -84,12 +84,11 @@ public class RelationEntityEditor extends DatabaseEntityAdapter<RelationEntity>
     }
 
     @Override
-    public RelationData getOrSave(Relation entity) throws EditorException {
-        if (entity != null) {
-            Optional<RelationEntity> stored = getEntity(entity.getId());
-            return stored.map(e -> new RelationData(e, Optional.of(propertyMapping))).orElseGet(() -> save(entity));
-        }
-        throw new EditorException("The Relation to get or save is NULL!");
+    public RelationData get(Relation entity) throws EditorException {
+        Objects.requireNonNull(entity, "entity must be present!");
+        Optional<RelationEntity> stored = getEntity(entity.getId());
+        return stored.map(e -> new RelationData(e, Optional.of(propertyMapping)))
+                .orElseThrow(() -> new EditorException(String.format("entity with id %s not found", entity.getId())));
     }
 
     @Override
@@ -111,10 +110,10 @@ public class RelationEntityEditor extends DatabaseEntityAdapter<RelationEntity>
                .map(entry -> convertParameter(relation, entry))
                .forEach(relation::addParameter);
 
-        relation.setSubject(observationEditor.getOrSave(entity.getSubject()).getData());
+        relation.setSubject(observationEditor.get(entity.getSubject()).getData());
 
         if (entity.getObject().isObjectPresent()) {
-            relation.setObject(observationEditor.getOrSave(entity.getObject().getObject()).getData());
+            relation.setObject(observationEditor.get(entity.getObject().getObject()).getData());
         } else {
             relation.setExternalObject(entity.getObject().getExternalObject());
         }
@@ -123,7 +122,7 @@ public class RelationEntityEditor extends DatabaseEntityAdapter<RelationEntity>
         RelationEntity saved = relationRepository.save(relation);
 
         saved.setGroups(Streams.stream(entity.getGroups())
-                .map(groupEditor::getOrSave)
+                .map(groupEditor::get)
                 .map(StaData::getData)
                 .collect(Collectors.toSet()));
 
@@ -144,7 +143,7 @@ public class RelationEntityEditor extends DatabaseEntityAdapter<RelationEntity>
         setIfNotNull(updateEntity::getDescription, data::setDescription);
 
         if (updateEntity.getObject().isObjectPresent()) {
-            data.setObject(observationEditor.getOrSave(updateEntity.getObject().getObject()).getData());
+            data.setObject(observationEditor.get(updateEntity.getObject().getObject()).getData());
         } else {
             data.setExternalObject(updateEntity.getObject().getExternalObject());
         }

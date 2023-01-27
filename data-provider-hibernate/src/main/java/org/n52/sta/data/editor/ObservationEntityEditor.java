@@ -106,9 +106,11 @@ public class ObservationEntityEditor extends DatabaseEntityAdapter<DataEntity>
     }
 
     @Override
-    public ObservationData getOrSave(Observation entity) throws EditorException {
+    public ObservationData get(Observation entity) throws EditorException {
+        Objects.requireNonNull(entity, "entity must be present!");
         Optional<DataEntity> stored = getEntity(entity.getId());
-        return stored.map(e -> new ObservationData(e, Optional.of(propertyMapping))).orElseGet(() -> save(entity));
+        return stored.map(e -> new ObservationData(e, Optional.of(propertyMapping)))
+                .orElseThrow(() -> new EditorException(String.format("entity with id %s not found", entity.getId())));
     }
 
     @Override
@@ -204,14 +206,14 @@ public class ObservationEntityEditor extends DatabaseEntityAdapter<DataEntity>
     }
 
     private AbstractDatasetEntity getDatastreamOf(Observation entity) throws EditorException {
-        return datastreamEditor.getOrSave(entity.getDatastream()).getData();
+        return datastreamEditor.get(entity.getDatastream()).getData();
         // return datastreamEditor.getEntity(datastream.getId())
         // .orElseThrow(() -> new IllegalStateException("Datastream not found
         // for Observation!"));
     }
 
     private AbstractFeatureEntity<?> getFeatureOfInterestOf(Observation entity) {
-        return featureofInterestEditor.getOrSave(entity.getFeatureOfInterest()).getData();
+        return featureofInterestEditor.get(entity.getFeatureOfInterest()).getData();
     }
 
     private DataEntity<?> createEntity(Observation observation, DatasetEntity datasetEntity) throws EditorException {
@@ -240,14 +242,14 @@ public class ObservationEntityEditor extends DatabaseEntityAdapter<DataEntity>
     }
 
     private DataEntity<?> addAddtitionals(DataEntity<?> entity, Observation observation) {
-        entity.setGroups(Streams.stream(observation.getGroups()).map(groupEditor::getOrSave).map(StaData::getData)
+        entity.setGroups(Streams.stream(observation.getGroups()).map(groupEditor::get).map(StaData::getData)
                 .collect(Collectors.toSet()));
 
         // TODO set this DataEntity in relation as subject!
-        entity.setSubjects(Streams.stream(observation.getSubjects()).map(relationEditor::getOrSave)
+        entity.setSubjects(Streams.stream(observation.getSubjects()).map(relationEditor::get)
                 .map(StaData::getData).collect(Collectors.toSet()));
 
-        entity.setObjects(Streams.stream(observation.getObjects()).map(relationEditor::getOrSave).map(StaData::getData)
+        entity.setObjects(Streams.stream(observation.getObjects()).map(relationEditor::get).map(StaData::getData)
                 .collect(Collectors.toSet()));
 
         return entity;

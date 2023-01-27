@@ -85,12 +85,11 @@ public class PartyEntityEditor extends DatabaseEntityAdapter<PartyEntity>
     }
 
     @Override
-    public PartyData getOrSave(Party entity) throws EditorException {
-        if (entity != null) {
-            Optional<PartyEntity> stored = getEntity(entity.getId());
-            return stored.map(e -> new PartyData(e, Optional.empty())).orElseGet(() -> save(entity));
-        }
-        throw new EditorException("The Party to get or save is NULL!");
+    public PartyData get(Party entity) throws EditorException {
+        Objects.requireNonNull(entity, "entity must be present!");
+        Optional<PartyEntity> stored = getEntity(entity.getId());
+        return stored.map(e -> new PartyData(e, Optional.empty()))
+                .orElseThrow(() -> new EditorException(String.format("entity with id %s not found", entity.getId())));
     }
 
     @Override
@@ -114,17 +113,17 @@ public class PartyEntityEditor extends DatabaseEntityAdapter<PartyEntity>
         PartyEntity saved = partyRepository.save(party);
 
         saved.setDatasets(Streams.stream(entity.getDatastreams())
-                .map(datastreamEditor::getOrSave)
+                .map(datastreamEditor::get)
                 .map(StaData::getData)
                 .collect(Collectors.toSet()));
 
         saved.setGroups(Streams.stream(entity.getGroups())
-                .map(groupEditor::getOrSave)
+                .map(groupEditor::get)
                 .map(StaData::getData)
                 .collect(Collectors.toSet()));
 
         saved.setPlatforms(Streams.stream(entity.getThings())
-                .map(thingEditor::getOrSave)
+                .map(thingEditor::get)
                 .map(StaData::getData)
                 .collect(Collectors.toSet()));
 

@@ -76,10 +76,11 @@ public class SensorEntityEditor extends DatabaseEntityAdapter<ProcedureEntity>
     }
 
     @Override
-    public SensorData getOrSave(Sensor entity) throws EditorException {
+    public SensorData get(Sensor entity) throws EditorException {
+        Objects.requireNonNull(entity, "entity must be present!");
         Optional<ProcedureEntity> stored = getEntity(entity.getId());
         return stored.map(e -> new SensorData(e, Optional.empty()))
-                     .orElseGet(() -> save(entity));
+                .orElseThrow(() -> new EditorException(String.format("entity with id %s not found", entity.getId())));
     }
 
     @Override
@@ -115,7 +116,7 @@ public class SensorEntityEditor extends DatabaseEntityAdapter<ProcedureEntity>
 
         // save related entities
         procedureEntity.setDatasets(Streams.stream(entity.getDatastreams())
-                                           .map(datastreamEditor::getOrSave)
+                                           .map(datastreamEditor::get)
                                            .map(StaData::getData)
                                            .collect(Collectors.toSet()));
 

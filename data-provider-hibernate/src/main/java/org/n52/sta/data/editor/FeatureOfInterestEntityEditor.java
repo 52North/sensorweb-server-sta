@@ -81,11 +81,11 @@ public class FeatureOfInterestEntityEditor extends DatabaseEntityAdapter<Abstrac
     }
 
     @Override
-    public FeatureOfInterestData getOrSave(FeatureOfInterest entity) throws EditorException {
+    public FeatureOfInterestData get(FeatureOfInterest entity) throws EditorException {
         Objects.requireNonNull(entity, "entity must be present!");
         Optional<AbstractFeatureEntity> stored = getEntity(entity.getId());
         return stored.map(e -> new FeatureOfInterestData(e, Optional.empty()))
-                     .orElseGet(() -> save(entity));
+                .orElseThrow(() -> new EditorException(String.format("entity with id %s not found", entity.getId())));
     }
 
     @Override

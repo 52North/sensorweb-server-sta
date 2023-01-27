@@ -155,12 +155,13 @@ public class DatastreamEntityEditor extends DatabaseEntityAdapter<AbstractDatase
                                             });
     }
 
+
     @Override
-    public DatastreamData getOrSave(Datastream entity) throws EditorException {
+    public DatastreamData get(Datastream entity) throws EditorException {
         Objects.requireNonNull(entity, "entity must be present");
         Optional<AbstractDatasetEntity> stored = getEntity(entity.getId());
         return stored.map(e -> new DatastreamData(e, Optional.of(propertyMapping)))
-                     .orElseGet(() -> save(entity));
+                .orElseThrow(() -> new EditorException(String.format("entity with id %s not found", entity.getId())));
     }
 
     @Override
@@ -192,7 +193,7 @@ public class DatastreamEntityEditor extends DatabaseEntityAdapter<AbstractDatase
         valueHelper.setUnit(dataset::setUnit, entity.getUnitOfMeasurement());
 
         // references
-        ThingData thing = thingEditor.getOrSave(entity.getThing());
+        ThingData thing = thingEditor.get(entity.getThing());
         ThingAggregate thingAggregate = new ThingAggregate(thing);
         if (thingAggregate.isMobile()) {
             dataset.setDatasetType(DatasetType.trajectory);
@@ -203,52 +204,52 @@ public class DatastreamEntityEditor extends DatabaseEntityAdapter<AbstractDatase
         }
         dataset.setPlatform(thing.getData());
 
-        SensorData sensor = sensorEditor.getOrSave(entity.getSensor());
+        SensorData sensor = sensorEditor.get(entity.getSensor());
         ProcedureEntity sensorEntity = sensor.getData();
         dataset.setProcedure(sensorEntity);
 
         // 52N-DB-model specific entries
-        OfferingEntity offering = getOrSaveOfferingValue(sensor);
+        OfferingEntity offering = getOfferingValue(sensor);
         dataset.setOffering(offering);
         dataset.setCategory(defaultCategory);
 
-        ObservedPropertyData observedProperty = observedPropertyEditor.getOrSave(entity.getObservedProperty());
+        ObservedPropertyData observedProperty = observedPropertyEditor.get(entity.getObservedProperty());
         dataset.setObservableProperty(observedProperty.getData());
 
         Set<? extends Observation> observations = entity.getObservations();
         Streams.stream(observations)
-               .findFirst()
-               .ifPresentOrElse(o -> dataset.setObservationType(getObservationType(o)),
-                                () -> dataset.setObservationType(ObservationType.not_initialized));
+                .findFirst()
+                .ifPresentOrElse(o -> dataset.setObservationType(getObservationType(o)),
+                        () -> dataset.setObservationType(ObservationType.not_initialized));
 
         // TODO create aggregate on multiple FOIs <- observation
 
         // parameters are saved as cascade
         Map<String, Object> properties = entity.getProperties();
         Streams.stream(properties.entrySet())
-               .map(e -> convertParameter(dataset, e))
-               .forEach(dataset::addParameter);
+                .map(e -> convertParameter(dataset, e))
+                .forEach(dataset::addParameter);
 
         DatasetEntity savedEntity = datastreamRepository.save(dataset);
 
         // Set Observations
         dataset.setObservations(Streams.stream(observations)
-                                       .map(o -> observationEditor.getOrSave(o))
-                                       .map(StaData::getData)
-                                       .collect(Collectors.toSet()));
+                .map(o -> observationEditor.get(o))
+                .map(StaData::getData)
+                .collect(Collectors.toSet()));
 
         if (entity.getLicense() != null) {
-            LicenseData licence = licenseEditor.getOrSave(entity.getLicense());
+            LicenseData licence = licenseEditor.get(entity.getLicense());
             savedEntity.setLicense(licence.getData());
         }
 
         if (entity.getParty() != null) {
-            PartyData party = partyEditor.getOrSave(entity.getParty());
+            PartyData party = partyEditor.get(entity.getParty());
             savedEntity.setParty(party.getData());
         }
 
         if (entity.getProject() != null) {
-            ProjectData project = projectEditor.getOrSave(entity.getProject());
+            ProjectData project = projectEditor.get(entity.getProject());
             savedEntity.setProject(project.getData());
         }
         // TODO explicitly save all references, too? if so, what about CASCADE.PERSIST?
@@ -302,8 +303,8 @@ public class DatastreamEntityEditor extends DatabaseEntityAdapter<AbstractDatase
             Set<AbstractDatasetEntity> allByAggregationId =
                     datastreamRepository.findAllByAggregationId(dataset.getId());
             Set<Long> datasetIds = allByAggregationId.stream()
-                                                     .map(IdEntity::getId)
-                                                     .collect(Collectors.toSet());
+                    .map(IdEntity::getId)
+                    .collect(Collectors.toSet());
             allByAggregationId.forEach(ds -> {
                 ds.setFirstObservation(null);
                 ds.setLastObservation(null);
@@ -330,7 +331,7 @@ public class DatastreamEntityEditor extends DatabaseEntityAdapter<AbstractDatase
     }
 
     @Transactional(value = TxType.REQUIRES_NEW)
-    private OfferingEntity getOrSaveOfferingValue(Sensor sensor) {
+    OfferingEntity getOfferingValue(Sensor sensor) {
         Optional<OfferingEntity> optionalOffering = offeringRepository.findByIdentifier(sensor.getId());
         if (optionalOffering.isPresent()) {
             return optionalOffering.get();
@@ -350,12 +351,12 @@ public class DatastreamEntityEditor extends DatabaseEntityAdapter<AbstractDatase
         }
     }
 
-    public boolean removeAsFirstObservation(DataEntity< ? > observation) {
+    public boolean removeAsFirstObservation(DataEntity<?> observation) {
         DatasetEntity dataset = observation.getDataset();
         if (dataset.getFirstObservation() != null
                 && dataset.getFirstObservation()
-                          .getStaIdentifier()
-                          .equals(observation.getStaIdentifier())) {
+                .getStaIdentifier()
+                .equals(observation.getStaIdentifier())) {
             deleteFirstObservation(dataset);
             observation.setDataset(datastreamRepository.saveAndFlush(dataset));
             return true;
@@ -364,12 +365,12 @@ public class DatastreamEntityEditor extends DatabaseEntityAdapter<AbstractDatase
     }
 
     @Override
-    public boolean removeAsLastObservation(DataEntity< ? > observation) {
+    public boolean removeAsLastObservation(DataEntity<?> observation) {
         DatasetEntity dataset = observation.getDataset();
         if (dataset.getLastObservation() != null
                 && dataset.getLastObservation()
-                          .getStaIdentifier()
-                          .equals(observation.getStaIdentifier())) {
+                .getStaIdentifier()
+                .equals(observation.getStaIdentifier())) {
             deleteLastObservation(dataset);
             observation.setDataset(datastreamRepository.saveAndFlush(dataset));
             return true;
@@ -386,12 +387,12 @@ public class DatastreamEntityEditor extends DatabaseEntityAdapter<AbstractDatase
     }
 
     public void updateFirstLastObservation(AbstractDatasetEntity datastreamEntity,
-            DataEntity< ? > first,
-            DataEntity< ? > last) {
+                                           DataEntity<?> first,
+                                           DataEntity<?> last) {
         if (first != null
                 && (!datastreamEntity.isSetFirstValueAt()
-                        || first.getSamplingTimeStart()
-                                .before(datastreamEntity.getSamplingTimeStart()))) {
+                || first.getSamplingTimeStart()
+                .before(datastreamEntity.getSamplingTimeStart()))) {
             datastreamEntity.setFirstObservation(first);
             datastreamEntity.setFirstValueAt(first.getSamplingTimeStart());
             DataEntity unwrapped = (DataEntity) Hibernate.unproxy(first);
@@ -402,8 +403,8 @@ public class DatastreamEntityEditor extends DatabaseEntityAdapter<AbstractDatase
 
         if (last != null
                 && (!datastreamEntity.isSetLastValueAt()
-                        || last.getSamplingTimeEnd()
-                               .after(datastreamEntity.getSamplingTimeEnd()))) {
+                || last.getSamplingTimeEnd()
+                .after(datastreamEntity.getSamplingTimeEnd()))) {
             datastreamEntity.setLastObservation(last);
             datastreamEntity.setFirstValueAt(last.getSamplingTimeEnd());
 
@@ -418,11 +419,11 @@ public class DatastreamEntityEditor extends DatabaseEntityAdapter<AbstractDatase
         // update parent if datastream is part of aggregation
         if (datastreamEntity.isSetAggregation()) {
             updateFirstLastObservation(
-                                       datastreamRepository.findById(datastreamEntity.getAggregation()
-                                                                                     .getId())
-                                                           .get(),
-                                       first,
-                                       last);
+                    datastreamRepository.findById(datastreamEntity.getAggregation()
+                                    .getId())
+                            .get(),
+                    first,
+                    last);
         }
     }
 

@@ -87,12 +87,11 @@ public class ThingEntityEditor extends DatabaseEntityAdapter<PlatformEntity>
     }
 
     @Override
-    public ThingData getOrSave(Thing entity) throws EditorException {
-        if (entity != null) {
-            Optional<PlatformEntity> stored = getEntity(entity.getId());
-            return stored.map(e -> new ThingData(e, Optional.empty())).orElseGet(() -> save(entity));
-        }
-        throw new EditorException("The Thing to get or save is NULL!");
+    public ThingData get(Thing entity) throws EditorException {
+        Objects.requireNonNull(entity, "entity must be present!");
+        Optional<PlatformEntity> stored = getEntity(entity.getId());
+        return stored.map(e -> new ThingData(e, Optional.empty()))
+                .orElseThrow(() -> new EditorException(String.format("entity with id %s not found", entity.getId())));
     }
 
     @Override
@@ -122,22 +121,22 @@ public class ThingEntityEditor extends DatabaseEntityAdapter<PlatformEntity>
 
         // save related entities
         platformEntity.setLocations(Streams.stream(entity.getLocations())
-                                           .map(locationEditor::getOrSave)
+                                           .map(locationEditor::get)
                                            .map(StaData::getData)
                                            .collect(Collectors.toSet()));
 
         platformEntity.setDatasets(Streams.stream(entity.getDatastreams())
-                                          .map(datastreamEditor::getOrSave)
+                                          .map(datastreamEditor::get)
                                           .map(StaData::getData)
                                           .collect(Collectors.toSet()));
 
         platformEntity.setHistoricalLocations(Streams.stream(entity.getHistoricalLocations())
-                                                     .map(historicalLocationEditor::getOrSave)
+                                                     .map(historicalLocationEditor::get)
                                                      .map(StaData::getData)
                                                      .collect(Collectors.toSet()));
 
         if (entity.getParty() != null) {
-            PartyData party = partyEditor.getOrSave(entity.getParty());
+            PartyData party = partyEditor.get(entity.getParty());
             saved.setParty(party.getData());
         }
 

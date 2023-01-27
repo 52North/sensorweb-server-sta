@@ -41,7 +41,7 @@ import org.n52.sta.api.exception.editor.EditorException;
 interface EntityEditorDelegate<T extends Identifiable, V extends T> extends EntityEditor<T> {
 
     /**
-     * Gets the Database Entity if it exists, saves it otherwise.
+     * Gets the Database Entity if it exists.
      *
      * @param entity
      *        Entity to be handled
@@ -49,5 +49,5 @@ interface EntityEditorDelegate<T extends Identifiable, V extends T> extends Enti
      * @throws EditorException
      *         if an error occurred
      */
-    V getOrSave(T entity) throws EditorException;
+    V get(T entity) throws EditorException;
 }

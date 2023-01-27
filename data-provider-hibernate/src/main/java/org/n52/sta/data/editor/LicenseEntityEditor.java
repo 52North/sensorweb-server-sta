@@ -79,12 +79,11 @@ public class LicenseEntityEditor extends DatabaseEntityAdapter<LicenseEntity>
     }
 
     @Override
-    public LicenseData getOrSave(License entity) throws EditorException {
-        if (entity != null) {
-            Optional<LicenseEntity> stored = getEntity(entity.getId());
-            return stored.map(e -> new LicenseData(e, Optional.empty())).orElseGet(() -> save(entity));
-        }
-        throw new EditorException("The License to get or save is NULL!");
+    public LicenseData get(License entity) throws EditorException {
+        Objects.requireNonNull(entity, "entity must be present!");
+        Optional<LicenseEntity> stored = getEntity(entity.getId());
+        return stored.map(e -> new LicenseData(e, Optional.empty()))
+                .orElseThrow(() -> new EditorException(String.format("entity with id %s not found", entity.getId())));
     }
 
     @Override
@@ -111,12 +110,12 @@ public class LicenseEntityEditor extends DatabaseEntityAdapter<LicenseEntity>
         LicenseEntity saved = licenseRepository.save(license);
 
         saved.setDatasets(Streams.stream(entity.getDatastreams())
-                .map(datastreamEditor::getOrSave)
+                .map(datastreamEditor::get)
                 .map(StaData::getData)
                 .collect(Collectors.toSet()));
 
         saved.setGroups(Streams.stream(entity.getGroups())
-                .map(groupEditor::getOrSave)
+                .map(groupEditor::get)
                 .map(StaData::getData)
                 .collect(Collectors.toSet()));
 

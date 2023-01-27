@@ -83,10 +83,11 @@ public class LocationEntityEditor extends DatabaseEntityAdapter<LocationEntity>
     }
 
     @Override
-    public LocationData getOrSave(Location entity) throws EditorException {
+    public LocationData get(Location entity) throws EditorException {
+        Objects.requireNonNull(entity, "entity must be present!");
         Optional<LocationEntity> stored = getEntity(entity.getId());
         return stored.map(e -> new LocationData(e, Optional.empty()))
-                     .orElseGet(() -> save(entity));
+                .orElseThrow(() -> new EditorException(String.format("entity with id %s not found", entity.getId())));
     }
 
     @Override
@@ -123,12 +124,12 @@ public class LocationEntityEditor extends DatabaseEntityAdapter<LocationEntity>
                .forEach(locationEntity::addParameter);
 
         locationEntity.setPlatforms(Streams.stream(entity.getThings())
-                                           .map(thingEditor::getOrSave)
+                                           .map(thingEditor::get)
                                            .map(StaData::getData)
                                            .collect(Collectors.toSet()));
 
         locationEntity.setHistoricalLocations(Streams.stream(entity.getHistoricalLocations())
-                                                     .map(historicalLocationEditor::getOrSave)
+                                                     .map(historicalLocationEditor::get)
                                                      .map(StaData::getData)
                                                      .collect(Collectors.toSet()));
 

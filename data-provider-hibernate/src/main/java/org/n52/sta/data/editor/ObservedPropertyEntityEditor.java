@@ -72,10 +72,11 @@ public class ObservedPropertyEntityEditor extends DatabaseEntityAdapter<Phenomen
     }
 
     @Override
-    public ObservedPropertyData getOrSave(ObservedProperty entity) throws EditorException {
+    public ObservedPropertyData get(ObservedProperty entity) throws EditorException {
+        Objects.requireNonNull(entity, "entity must be present!");
         Optional<PhenomenonEntity> stored = getEntity(entity.getId());
         return stored.map(e -> new ObservedPropertyData(e, Optional.empty()))
-                     .orElseGet(() -> save(entity));
+                .orElseThrow(() -> new EditorException(String.format("entity with id %s not found", entity.getId())));
     }
 
     @Override
@@ -103,7 +104,7 @@ public class ObservedPropertyEntityEditor extends DatabaseEntityAdapter<Phenomen
 
         // save related entities
         phenomenonEntity.setDatasets(Streams.stream(entity.getDatastreams())
-                                            .map(datastreamEditor::getOrSave)
+                                            .map(datastreamEditor::get)
                                             .map(StaData::getData)
                                             .collect(Collectors.toSet()));
 

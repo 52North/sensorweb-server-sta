@@ -83,10 +83,10 @@ public class HistoricalLocationEntityEditor extends DatabaseEntityAdapter<Histor
     }
 
     @Override
-    public HistoricalLocationData getOrSave(HistoricalLocation entity) throws EditorException {
+    public HistoricalLocationData get(HistoricalLocation entity) throws EditorException {
         Optional<HistoricalLocationEntity> stored = getEntity(entity.getId());
         return stored.map(e -> new HistoricalLocationData(e, Optional.empty()))
-                     .orElseGet(() -> save(entity));
+                .orElseThrow(() -> new EditorException(String.format("entity with id %s not found", entity.getId())));
     }
 
     @Override
@@ -108,12 +108,12 @@ public class HistoricalLocationEntityEditor extends DatabaseEntityAdapter<Histor
         historicalLocationEntity.setStaIdentifier(id);
         valueHelper.setStartTime(historicalLocationEntity::setTime, entity.getTime());
 
-        PlatformEntity thing = thingEditor.getOrSave(entity.getThing())
+        PlatformEntity thing = thingEditor.get(entity.getThing())
                                           .getData();
         historicalLocationEntity.setThing(thing);
 
         historicalLocationEntity.setLocations(Streams.stream(entity.getLocations())
-                                                     .map(locationEditor::getOrSave)
+                                                     .map(locationEditor::get)
                                                      .map(StaData::getData)
                                                      .collect(Collectors.toSet()));
 

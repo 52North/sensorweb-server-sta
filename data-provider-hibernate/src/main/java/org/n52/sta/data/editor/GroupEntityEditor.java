@@ -92,12 +92,11 @@ public class GroupEntityEditor extends DatabaseEntityAdapter<GroupEntity>
     }
 
     @Override
-    public GroupData getOrSave(Group entity) throws EditorException {
-        if (entity != null) {
-            Optional<GroupEntity> stored = getEntity(entity.getId());
-            return stored.map(e -> new GroupData(e, Optional.empty())).orElseGet(() -> save(entity));
-        }
-        throw new EditorException("The Group to get or save is NULL!");
+    public GroupData get(Group entity) throws EditorException {
+        Objects.requireNonNull(entity, "entity must be present!");
+        Optional<GroupEntity> stored = getEntity(entity.getId());
+        return stored.map(e -> new GroupData(e, Optional.empty()))
+            .orElseThrow(() -> new EditorException(String.format("entity with id %s not found", entity.getId())));
     }
 
     @Override
@@ -131,22 +130,22 @@ public class GroupEntityEditor extends DatabaseEntityAdapter<GroupEntity>
         GroupEntity saved = groupRepository.save(group);
 
         saved.setObservations(Streams.stream(entity.getObservations())
-                .map(observationEditor::getOrSave)
+                .map(observationEditor::get)
                 .map(StaData::getData)
                 .collect(Collectors.toSet()));
 
         if (entity.getLicense() != null) {
-            LicenseData licence = licenseEditor.getOrSave(entity.getLicense());
+            LicenseData licence = licenseEditor.get(entity.getLicense());
             saved.setLicense(licence.getData());
         }
 
         if (entity.getParty() != null) {
-            PartyData party = partyEditor.getOrSave(entity.getParty());
+            PartyData party = partyEditor.get(entity.getParty());
             saved.setParty(party.getData());
         }
 
         saved.setRelations(Streams.stream(entity.getRelations())
-                .map(relationEditor::getOrSave)
+                .map(relationEditor::get)
                 .map(StaData::getData)
                 .collect(Collectors.toSet()));
 
