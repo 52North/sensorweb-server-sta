@@ -61,7 +61,7 @@ public abstract class AbstractEntityService<T extends Identifiable> implements E
     public AbstractEntityService(EntityProvider<T> provider, EntityEditor<T> editor) {
         Objects.requireNonNull(provider, "provider must not be null");
         this.provider = provider;
-        this.editor = Optional.of(editor);
+        this.editor = Optional.ofNullable(editor);
     }
 
     public Optional<T> getEntity(String id) throws ProviderException {

@@ -94,7 +94,7 @@ public class EntityServiceConfiguration {
     public AbstractEntityService<Thing> thingService(EntityProvider<Thing> entityProvider,
             Optional<EntityEditor<Thing>> entityEditor) {
         ThingService service = entityEditor.map(editor -> new ThingService(entityProvider, editor))
-                .orElse(new ThingService(entityProvider));
+                .orElseGet(() -> new ThingService(entityProvider));
         serviceLookup.addEntityService(Thing.class, new ThingDomainService(service));
         return service;
     }
@@ -103,7 +103,7 @@ public class EntityServiceConfiguration {
     public AbstractEntityService<Datastream> datastreamService(EntityProvider<Datastream> entityProvider,
             Optional<EntityEditor<Datastream>> entityEditor) {
         DatastreamService service = entityEditor.map(editor -> new DatastreamService(entityProvider, editor))
-                .orElse(new DatastreamService(entityProvider));
+                .orElseGet(() -> new DatastreamService(entityProvider));
         serviceLookup.addEntityService(Datastream.class, new DatastreamDomainService(service));
         return service;
     }
@@ -112,7 +112,7 @@ public class EntityServiceConfiguration {
     public AbstractEntityService<Sensor> sensorService(EntityProvider<Sensor> entityProvider,
             Optional<EntityEditor<Sensor>> entityEditor) {
         SensorService service = entityEditor.map(editor -> new SensorService(entityProvider, editor))
-                .orElse(new SensorService(entityProvider));
+                .orElseGet(() -> new SensorService(entityProvider));
         serviceLookup.addEntityService(Sensor.class, new SensorDomainService(service));
         return service;
     }
@@ -121,7 +121,7 @@ public class EntityServiceConfiguration {
     public AbstractEntityService<Location> locationService(EntityProvider<Location> entityProvider,
             Optional<EntityEditor<Location>> entityEditor) {
         LocationService service = entityEditor.map(editor -> new LocationService(entityProvider, editor))
-                .orElse(new LocationService(entityProvider));
+                .orElseGet(() -> new LocationService(entityProvider));
         serviceLookup.addEntityService(Location.class, new LocationDomainService(service));
         return service;
     }
@@ -133,7 +133,7 @@ public class EntityServiceConfiguration {
             EntityServiceLookup serviceLookup) {
         ObservedPropertyService service = entityEditor
                 .map(editor -> new ObservedPropertyService(entityProvider, editor))
-                .orElse(new ObservedPropertyService(entityProvider));
+                .orElseGet(() -> new ObservedPropertyService(entityProvider));
         serviceLookup.addEntityService(ObservedProperty.class, new ObservedPropertyDomainService(service));
         return service;
     }
@@ -143,7 +143,7 @@ public class EntityServiceConfiguration {
             Optional<EntityEditor<Observation>> entityEditor,
             EntityServiceLookup serviceLookup) {
         ObservationService service = entityEditor.map(editor -> new ObservationService(entityProvider, editor))
-                .orElse(new ObservationService(entityProvider));
+                .orElseGet(() -> new ObservationService(entityProvider));
         ObservationDomainService domainService = new ObservationDomainService(service, serviceLookup);
         serviceLookup.addEntityService(Observation.class, domainService);
         return service;
@@ -156,7 +156,7 @@ public class EntityServiceConfiguration {
             EntityServiceLookup serviceLookup) {
         FeatureOfInterestService service = entityEditor
                 .map(editor -> new FeatureOfInterestService(entityProvider, editor))
-                .orElse(new FeatureOfInterestService(entityProvider));
+                .orElseGet(() -> new FeatureOfInterestService(entityProvider));
         FeatureOfInterestDomainService domainService = new FeatureOfInterestDomainService(service);
         serviceLookup.addEntityService(FeatureOfInterest.class, domainService);
         return service;
@@ -169,7 +169,7 @@ public class EntityServiceConfiguration {
             EntityServiceLookup serviceLookup) {
         HistoricalLocationService service = entityEditor
                 .map(editor -> new HistoricalLocationService(entityProvider, editor))
-                .orElse(new HistoricalLocationService(entityProvider));
+                .orElseGet(() -> new HistoricalLocationService(entityProvider));
         HistoricalLocationDomainService domainService = new HistoricalLocationDomainService(service);
         serviceLookup.addEntityService(HistoricalLocation.class, domainService);
         return service;
@@ -180,7 +180,7 @@ public class EntityServiceConfiguration {
     public AbstractEntityService<Group> groupService(EntityProvider<Group> entityProvider,
             Optional<EntityEditor<Group>> entityEditor) {
         GroupService service = entityEditor.map(editor -> new GroupService(entityProvider, editor))
-                .orElse(new GroupService(entityProvider));
+                .orElseGet(() -> new GroupService(entityProvider));
         GroupDomainService domainService = new GroupDomainService(service, serviceLookup);
         serviceLookup.addEntityService(Group.class, domainService);
         return service;
@@ -191,7 +191,7 @@ public class EntityServiceConfiguration {
     public AbstractEntityService<License> licenseService(EntityProvider<License> entityProvider,
             Optional<EntityEditor<License>> entityEditor) {
         LicenseService service = entityEditor.map(editor -> new LicenseService(entityProvider, editor))
-                .orElse(new LicenseService(entityProvider));
+                .orElseGet(() -> new LicenseService(entityProvider));
         serviceLookup.addEntityService(License.class, new LicenseDomainService(service));
         return service;
     }
@@ -201,7 +201,7 @@ public class EntityServiceConfiguration {
     public AbstractEntityService<Party> partyService(EntityProvider<Party> entityProvider,
             Optional<EntityEditor<Party>> entityEditor) {
         PartyService service = entityEditor.map(editor -> new PartyService(entityProvider, editor))
-                .orElse(new PartyService(entityProvider));
+                .orElseGet(() -> new PartyService(entityProvider));
         serviceLookup.addEntityService(Party.class, new PartyDomainService(service));
         return service;
     }
@@ -211,7 +211,7 @@ public class EntityServiceConfiguration {
     public AbstractEntityService<Project> projectService(EntityProvider<Project> entityProvider,
             Optional<EntityEditor<Project>> entityEditor) {
         ProjectService service = entityEditor.map(editor -> new ProjectService(entityProvider, editor))
-                .orElse(new ProjectService(entityProvider));
+                .orElseGet(() -> new ProjectService(entityProvider));
         serviceLookup.addEntityService(Project.class, new ProjectDomainService(service));
         return service;
     }
@@ -221,7 +221,7 @@ public class EntityServiceConfiguration {
     public AbstractEntityService<Relation> relationService(EntityProvider<Relation> entityProvider,
             Optional<EntityEditor<Relation>> entityEditor) {
         RelationService service = entityEditor.map(editor -> new RelationService(entityProvider, editor))
-                .orElse(new RelationService(entityProvider));
+                .orElseGet(() -> new RelationService(entityProvider));
         serviceLookup.addEntityService(Relation.class, new RelationDomainService(service));
         return service;
     }
