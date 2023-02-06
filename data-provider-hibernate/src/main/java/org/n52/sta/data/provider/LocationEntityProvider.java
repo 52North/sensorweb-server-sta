@@ -28,18 +28,24 @@
 
 package org.n52.sta.data.provider;
 
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 
+import org.n52.series.db.beans.sta.LicenseEntity;
 import org.n52.series.db.beans.sta.LocationEntity;
 import org.n52.shetland.oasis.odata.query.option.QueryOptions;
 import org.n52.sta.api.EntityPage;
+import org.n52.sta.api.entity.License;
 import org.n52.sta.api.exception.ProviderException;
 import org.n52.sta.api.entity.Location;
 import org.n52.sta.api.path.Request;
 import org.n52.sta.config.EntityPropertyMapping;
 import org.n52.sta.data.StaEntityPage;
 import org.n52.sta.data.StaPageRequest;
+import org.n52.sta.data.entity.LicenseData;
 import org.n52.sta.data.entity.LocationData;
 import org.n52.sta.data.query.specifications.LocationQuerySpecification;
 import org.n52.sta.data.repositories.entity.LocationRepository;
@@ -87,6 +93,13 @@ public class LocationEntityProvider extends BaseEntityProvider<Location> {
         return platform.map(entity -> new LocationData(entity, Optional.of(propertyMapping)));
     }
 
+    @Override
+    public List<Location> getEntities(Set<String> ids) throws ProviderException {
+        List<LocationEntity> allByStaIdentifier = locationRepository.findAllByStaIdentifier(ids);
+        return allByStaIdentifier.stream()
+            .map(entity -> new LocationData(entity, Optional.of(propertyMapping)))
+            .collect(Collectors.toList());
+    }
     @Override
     public EntityPage<Location> getEntities(Request request) throws ProviderException {
         QueryOptions options = request.getQueryOptions();

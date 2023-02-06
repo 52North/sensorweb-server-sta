@@ -28,11 +28,23 @@
 
 package org.n52.sta.data.provider;
 
+import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
+import java.util.Set;
+import java.util.function.Function;
 
+import org.n52.sta.api.EntityPage;
 import org.n52.sta.api.EntityProvider;
 import org.n52.sta.api.entity.Identifiable;
+import org.n52.sta.api.entity.Thing;
+import org.n52.sta.api.exception.ProviderException;
 import org.n52.sta.config.EntityPropertyMapping;
+import org.n52.sta.data.entity.FeatureOfInterestData;
+import org.n52.sta.data.entity.ThingData;
+import org.n52.sta.data.repositories.BaseRepository;
+import org.n52.sta.data.support.ThingGraphBuilder;
+import org.n52.svalbard.odata.core.QueryOptionsFactory;
 
 public abstract class BaseEntityProvider<T extends Identifiable> implements EntityProvider<T> {
 
@@ -56,5 +68,10 @@ public abstract class BaseEntityProvider<T extends Identifiable> implements Enti
             throw new IllegalArgumentException("Invalid 'id': " + id);
         }
     }
+
+    public Optional<T> getEntity(String id) throws ProviderException {
+        return getEntity(id, QueryOptionsFactory.createEmpty());
+    }
+
 
 }

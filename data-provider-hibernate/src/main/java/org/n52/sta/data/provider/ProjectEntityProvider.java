@@ -28,18 +28,24 @@
 
 package org.n52.sta.data.provider;
 
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 
+import org.n52.series.db.beans.sta.PartyEntity;
 import org.n52.series.db.beans.sta.ProjectEntity;
 import org.n52.shetland.oasis.odata.query.option.QueryOptions;
 import org.n52.sta.api.EntityPage;
+import org.n52.sta.api.entity.Party;
 import org.n52.sta.api.exception.ProviderException;
 import org.n52.sta.api.entity.Project;
 import org.n52.sta.api.path.Request;
 import org.n52.sta.config.EntityPropertyMapping;
 import org.n52.sta.data.StaEntityPage;
 import org.n52.sta.data.StaPageRequest;
+import org.n52.sta.data.entity.PartyData;
 import org.n52.sta.data.entity.ProjectData;
 import org.n52.sta.data.query.specifications.ProjectQuerySpecification;
 import org.n52.sta.data.repositories.entity.ProjectRepository;
@@ -84,6 +90,14 @@ public class ProjectEntityProvider extends BaseEntityProvider<Project> {
     private Optional<Project> getEntity(Specification<ProjectEntity> spec, ProjectGraphBuilder graphBuilder) {
         Optional<ProjectEntity> platform = projectRepository.findOne(spec, graphBuilder);
         return platform.map(entity -> new ProjectData(entity, Optional.of(propertyMapping)));
+    }
+
+    @Override
+    public List<Project> getEntities(Set<String> ids) throws ProviderException {
+        List<ProjectEntity> allByStaIdentifier = projectRepository.findAllByStaIdentifier(ids);
+        return allByStaIdentifier.stream()
+            .map(entity -> new ProjectData(entity, Optional.of(propertyMapping)))
+            .collect(Collectors.toList());
     }
 
     @Override

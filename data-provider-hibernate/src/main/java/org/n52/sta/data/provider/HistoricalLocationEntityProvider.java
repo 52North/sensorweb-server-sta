@@ -28,18 +28,24 @@
 
 package org.n52.sta.data.provider;
 
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 
+import org.n52.series.db.beans.sta.GroupEntity;
 import org.n52.series.db.beans.sta.HistoricalLocationEntity;
 import org.n52.shetland.oasis.odata.query.option.QueryOptions;
 import org.n52.sta.api.EntityPage;
+import org.n52.sta.api.entity.Group;
 import org.n52.sta.api.exception.ProviderException;
 import org.n52.sta.api.entity.HistoricalLocation;
 import org.n52.sta.api.path.Request;
 import org.n52.sta.config.EntityPropertyMapping;
 import org.n52.sta.data.StaEntityPage;
 import org.n52.sta.data.StaPageRequest;
+import org.n52.sta.data.entity.GroupData;
 import org.n52.sta.data.entity.HistoricalLocationData;
 import org.n52.sta.data.query.specifications.HistoricalLocationQuerySpecification;
 import org.n52.sta.data.repositories.entity.HistoricalLocationRepository;
@@ -87,6 +93,14 @@ public class HistoricalLocationEntityProvider extends BaseEntityProvider<Histori
             HistoricalLocationGraphBuilder graphBuilder) {
         Optional<HistoricalLocationEntity> datastream = historicalLocationRepository.findOne(spec, graphBuilder);
         return datastream.map(entity -> new HistoricalLocationData(entity, Optional.of(propertyMapping)));
+    }
+
+    @Override
+    public List<HistoricalLocation> getEntities(Set<String> ids) throws ProviderException {
+        List<HistoricalLocationEntity> allByStaIdentifier = historicalLocationRepository.findAllByStaIdentifier(ids);
+        return allByStaIdentifier.stream()
+            .map(entity -> new HistoricalLocationData(entity, Optional.of(propertyMapping)))
+            .collect(Collectors.toList());
     }
 
     @Override

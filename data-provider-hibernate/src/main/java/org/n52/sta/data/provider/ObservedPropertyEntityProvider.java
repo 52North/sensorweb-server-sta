@@ -28,18 +28,24 @@
 
 package org.n52.sta.data.provider;
 
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 
+import org.n52.series.db.beans.DataEntity;
 import org.n52.series.db.beans.PhenomenonEntity;
 import org.n52.shetland.oasis.odata.query.option.QueryOptions;
 import org.n52.sta.api.EntityPage;
+import org.n52.sta.api.entity.Observation;
 import org.n52.sta.api.exception.ProviderException;
 import org.n52.sta.api.entity.ObservedProperty;
 import org.n52.sta.api.path.Request;
 import org.n52.sta.config.EntityPropertyMapping;
 import org.n52.sta.data.StaEntityPage;
 import org.n52.sta.data.StaPageRequest;
+import org.n52.sta.data.entity.ObservationData;
 import org.n52.sta.data.entity.ObservedPropertyData;
 import org.n52.sta.data.query.specifications.ObservedPropertyQuerySpecification;
 import org.n52.sta.data.repositories.entity.PhenomenonRepository;
@@ -87,6 +93,14 @@ public class ObservedPropertyEntityProvider extends BaseEntityProvider<ObservedP
             ObservedPropertyGraphBuilder graphBuilder) {
         Optional<PhenomenonEntity> platform = observedPropertyRepository.findOne(spec, graphBuilder);
         return platform.map(entity -> new ObservedPropertyData(entity, Optional.of(propertyMapping)));
+    }
+
+    @Override
+    public List<ObservedProperty> getEntities(Set<String> ids) throws ProviderException {
+        List<PhenomenonEntity> allByStaIdentifier = observedPropertyRepository.findAllByStaIdentifier(ids);
+        return allByStaIdentifier.stream()
+            .map(entity -> new ObservedPropertyData(entity, Optional.of(propertyMapping)))
+            .collect(Collectors.toList());
     }
 
     @Override

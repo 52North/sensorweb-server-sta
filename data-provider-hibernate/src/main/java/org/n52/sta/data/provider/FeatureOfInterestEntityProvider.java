@@ -28,12 +28,17 @@
 
 package org.n52.sta.data.provider;
 
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.n52.series.db.beans.AbstractFeatureEntity;
+import org.n52.series.db.beans.PlatformEntity;
 import org.n52.shetland.oasis.odata.query.option.QueryOptions;
 import org.n52.sta.api.EntityPage;
+import org.n52.sta.api.entity.Thing;
 import org.n52.sta.api.exception.ProviderException;
 import org.n52.sta.api.entity.FeatureOfInterest;
 import org.n52.sta.api.path.Request;
@@ -41,6 +46,7 @@ import org.n52.sta.config.EntityPropertyMapping;
 import org.n52.sta.data.StaEntityPage;
 import org.n52.sta.data.StaPageRequest;
 import org.n52.sta.data.entity.FeatureOfInterestData;
+import org.n52.sta.data.entity.ThingData;
 import org.n52.sta.data.query.specifications.FeatureOfInterestQuerySpecification;
 import org.n52.sta.data.repositories.entity.FeatureOfInterestRepository;
 import org.n52.sta.data.support.FeatureOfInterestGraphBuilder;
@@ -87,6 +93,14 @@ public class FeatureOfInterestEntityProvider extends BaseEntityProvider<FeatureO
             FeatureOfInterestGraphBuilder graphBuilder) {
         Optional<AbstractFeatureEntity> datastream = featureOfInterestRepository.findOne(specification, graphBuilder);
         return datastream.map(entity -> new FeatureOfInterestData(entity, Optional.of(propertyMapping)));
+    }
+
+    @Override
+    public List<FeatureOfInterest> getEntities(Set<String> ids) throws ProviderException {
+        List<AbstractFeatureEntity> allByStaIdentifier = featureOfInterestRepository.findAllByStaIdentifier(ids);
+        return allByStaIdentifier.stream()
+            .map(entity -> new FeatureOfInterestData(entity, Optional.of(propertyMapping)))
+            .collect(Collectors.toList());
     }
 
     @Override

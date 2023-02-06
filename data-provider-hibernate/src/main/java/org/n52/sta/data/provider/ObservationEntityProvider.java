@@ -29,14 +29,17 @@
 package org.n52.sta.data.provider;
 
 import org.n52.series.db.beans.DataEntity;
+import org.n52.series.db.beans.sta.LocationEntity;
 import org.n52.shetland.oasis.odata.query.option.QueryOptions;
 import org.n52.sta.api.EntityPage;
+import org.n52.sta.api.entity.Location;
 import org.n52.sta.api.entity.Observation;
 import org.n52.sta.api.exception.ProviderException;
 import org.n52.sta.api.path.Request;
 import org.n52.sta.config.EntityPropertyMapping;
 import org.n52.sta.data.StaEntityPage;
 import org.n52.sta.data.StaPageRequest;
+import org.n52.sta.data.entity.LocationData;
 import org.n52.sta.data.entity.ObservationData;
 import org.n52.sta.data.query.specifications.ObservationQuerySpecification;
 import org.n52.sta.data.repositories.entity.ObservationRepository;
@@ -45,8 +48,11 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 public class ObservationEntityProvider extends BaseEntityProvider<Observation> {
 
@@ -87,6 +93,14 @@ public class ObservationEntityProvider extends BaseEntityProvider<Observation> {
             ObservationGraphBuilder graphBuilder) {
         Optional<DataEntity> platform = observationRepository.findOne(spec, graphBuilder);
         return platform.map(entity -> new ObservationData(entity, Optional.of(propertyMapping)));
+    }
+
+    @Override
+    public List<Observation> getEntities(Set<String> ids) throws ProviderException {
+        List<DataEntity> allByStaIdentifier = observationRepository.findAllByStaIdentifier(ids);
+        return allByStaIdentifier.stream()
+            .map(entity -> new ObservationData(entity, Optional.of(propertyMapping)))
+            .collect(Collectors.toList());
     }
 
     @Override

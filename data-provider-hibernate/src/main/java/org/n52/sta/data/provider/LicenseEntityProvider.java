@@ -28,18 +28,24 @@
 
 package org.n52.sta.data.provider;
 
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 
+import org.n52.series.db.beans.sta.HistoricalLocationEntity;
 import org.n52.series.db.beans.sta.LicenseEntity;
 import org.n52.shetland.oasis.odata.query.option.QueryOptions;
 import org.n52.sta.api.EntityPage;
+import org.n52.sta.api.entity.HistoricalLocation;
 import org.n52.sta.api.exception.ProviderException;
 import org.n52.sta.api.entity.License;
 import org.n52.sta.api.path.Request;
 import org.n52.sta.config.EntityPropertyMapping;
 import org.n52.sta.data.StaEntityPage;
 import org.n52.sta.data.StaPageRequest;
+import org.n52.sta.data.entity.HistoricalLocationData;
 import org.n52.sta.data.entity.LicenseData;
 import org.n52.sta.data.query.specifications.LicenseQuerySpecification;
 import org.n52.sta.data.repositories.entity.LicenseRepository;
@@ -85,6 +91,14 @@ public class LicenseEntityProvider extends BaseEntityProvider<License> {
     private Optional<License> getEntity(Specification<LicenseEntity> spec, LicenseGraphBuilder graphBuilder) {
         Optional<LicenseEntity> platform = licenseRepository.findOne(spec, graphBuilder);
         return platform.map(entity -> new LicenseData(entity, Optional.of(propertyMapping)));
+    }
+
+    @Override
+    public List<License> getEntities(Set<String> ids) throws ProviderException {
+        List<LicenseEntity> allByStaIdentifier = licenseRepository.findAllByStaIdentifier(ids);
+        return allByStaIdentifier.stream()
+            .map(entity -> new LicenseData(entity, Optional.of(propertyMapping)))
+            .collect(Collectors.toList());
     }
 
     @Override

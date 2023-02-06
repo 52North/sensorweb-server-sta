@@ -30,6 +30,7 @@ package org.n52.sta.data.repositories;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 import javax.persistence.EntityGraph;
 
@@ -92,6 +93,8 @@ public interface BaseRepository<T> extends JpaSpecificationExecutor<T>, JpaRepos
     List<T> findAll(Specification<T> spec, Sort sort, GraphBuilder<T> entityGraphBuilder);
 
     Page<T> findAll(Specification<T> spec, Pageable pageable, GraphBuilder<T> entityGraphBuilder);
+
+    List<T> findAllByStaIdentifier(Set<String> identifier);
 
     void deleteByStaIdentifier(String identifier);
 

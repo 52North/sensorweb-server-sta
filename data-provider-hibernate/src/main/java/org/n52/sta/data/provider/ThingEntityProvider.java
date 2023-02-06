@@ -28,8 +28,11 @@
 
 package org.n52.sta.data.provider;
 
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.n52.series.db.beans.PlatformEntity;
 import org.n52.shetland.oasis.odata.query.option.QueryOptions;
@@ -44,6 +47,7 @@ import org.n52.sta.data.entity.ThingData;
 import org.n52.sta.data.query.specifications.ThingQuerySpecification;
 import org.n52.sta.data.repositories.entity.PlatformRepository;
 import org.n52.sta.data.support.ThingGraphBuilder;
+import org.n52.svalbard.odata.core.QueryOptionsFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
@@ -69,16 +73,22 @@ public class ThingEntityProvider extends BaseEntityProvider<Thing> {
     @Override
     public Optional<Thing> getEntity(Request request) throws ProviderException {
         ThingGraphBuilder graphBuilder = request.isRefRequest()
-                ? ThingGraphBuilder.createEmpty()
-                : ThingGraphBuilder.createWith(request.getQueryOptions());
+            ? ThingGraphBuilder.createEmpty()
+            : ThingGraphBuilder.createWith(request.getQueryOptions());
         return getEntity(rootSpecification.buildSpecification(request), graphBuilder);
+    }
+
+    @Override
+    public Optional<Thing> getEntity(String id) throws ProviderException {
+        ThingGraphBuilder graphBuilder = ThingGraphBuilder.createEmpty();
+        return getEntity(rootSpecification.equalsStaIdentifier(id), graphBuilder);
     }
 
     @Override
     public Optional<Thing> getEntity(String id, QueryOptions queryOptions) throws ProviderException {
         ThingGraphBuilder graphBuilder = ThingGraphBuilder.createEmpty();
         return getEntity(rootSpecification.buildSpecification(queryOptions)
-                                          .and(rootSpecification.equalsStaIdentifier(id)),
+                             .and(rootSpecification.equalsStaIdentifier(id)),
                          graphBuilder);
     }
 
@@ -88,13 +98,21 @@ public class ThingEntityProvider extends BaseEntityProvider<Thing> {
     }
 
     @Override
+    public List<Thing> getEntities(Set<String> ids) throws ProviderException {
+        List<PlatformEntity> allByStaIdentifier = thingRepository.findAllByStaIdentifier(ids);
+        return allByStaIdentifier.stream()
+            .map(entity -> new ThingData(entity, Optional.of(propertyMapping)))
+            .collect(Collectors.toList());
+    }
+
+    @Override
     public EntityPage<Thing> getEntities(Request request) throws ProviderException {
         QueryOptions options = request.getQueryOptions();
         Pageable pageable = StaPageRequest.create(options);
 
         ThingGraphBuilder graphBuilder = request.isRefRequest()
-                ? ThingGraphBuilder.createEmpty()
-                : ThingGraphBuilder.createWith(options);
+            ? ThingGraphBuilder.createEmpty()
+            : ThingGraphBuilder.createWith(options);
         Specification<PlatformEntity> spec = rootSpecification.buildSpecification(request);
         Page<PlatformEntity> results = thingRepository.findAll(spec, pageable, graphBuilder);
         return new StaEntityPage<>(Thing.class, results, entity -> new ThingData(entity, Optional.of(propertyMapping)));

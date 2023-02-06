@@ -101,12 +101,12 @@ abstract class DatabaseEntityAdapter<T extends DescribableEntity> {
     }
 
     /*
-     * protected <E extends Identifiable> E getOrSaveMandatory(E input, Class<E> type) throws EditorException
+     * protected <E extends Identifiable> E getMandatory(E input, Class<E> type) throws EditorException
      * { if (input == null) { String typeName = type.getSimpleName(); throw new
-     * EditorException("The input for '" + typeName + "' is null!"); } return getOrSave(input, type); }
-     * protected <E extends Identifiable> Optional<E> getOrSaveOptional(E input, Class<E> type) throws
-     * EditorException { return input == null ? Optional.empty() : Optional.of(getOrSave(input, type)); }
-     * private <E extends Identifiable> E getOrSave(E input, Class<E> type) throws EditorException {
+     * EditorException("The input for '" + typeName + "' is null!"); } return get(input, type); }
+     * protected <E extends Identifiable> Optional<E> getOptional(E input, Class<E> type) throws
+     * EditorException { return input == null ? Optional.empty() : Optional.of(get(input, type)); }
+     * private <E extends Identifiable> E get(E input, Class<E> type) throws EditorException {
      * AbstractEntityService<E> service = getService(type); Optional<E> optionalEntity =
      * service.getEntity(input.getId()); return optionalEntity.isPresent() ? optionalEntity.get() :
      * service.save(input); }

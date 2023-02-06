@@ -31,6 +31,7 @@ package org.n52.sta.data.repositories;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 
 import javax.persistence.EntityGraph;
 import javax.persistence.EntityManager;
@@ -130,6 +131,16 @@ public class BaseRepositoryImpl<T>
     public Page<T> findAll(Specification<T> spec, Pageable pageable, GraphBuilder<T> graphBuilder) {
         TypedQuery<T> query = getQuery(spec, graphBuilder, pageable.getSort());
         return readPage(query, getDomainClass(), pageable, spec);
+    }
+
+    @Override
+    public List<T> findAllByStaIdentifier(Set<String> id) {
+        CriteriaQuery<T> query = createQuery(root -> {
+            Path<Object> path = root.get(DescribableEntity.PROPERTY_STA_IDENTIFIER);
+            return criteriaBuilder.equal(path, id);
+        });
+        TypedQuery<T> typedQuery = em.createQuery(query);
+        return typedQuery.getResultList();
     }
 
     private Optional<T> findByUniqueProperty(Object id, String uniqueProperty, GraphBuilder<T> graphBuilder) {

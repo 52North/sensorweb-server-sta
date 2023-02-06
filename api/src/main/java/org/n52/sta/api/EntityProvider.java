@@ -28,7 +28,9 @@
 
 package org.n52.sta.api;
 
+import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 import org.n52.shetland.oasis.odata.query.option.QueryOptions;
 import org.n52.sta.api.entity.Identifiable;
@@ -41,8 +43,12 @@ public interface EntityProvider<T extends Identifiable> {
 
     Optional<T> getEntity(Request request) throws ProviderException;
 
+    Optional<T> getEntity(String id) throws ProviderException;
+
     Optional<T> getEntity(String id, QueryOptions queryOptions) throws ProviderException;
 
     EntityPage<T> getEntities(Request request) throws ProviderException;
+
+    List<T> getEntities(Set<String> ids) throws ProviderException;
 
 }

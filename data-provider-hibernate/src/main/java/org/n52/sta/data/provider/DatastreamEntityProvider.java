@@ -28,12 +28,18 @@
 
 package org.n52.sta.data.provider;
 
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.n52.series.db.beans.AbstractDatasetEntity;
+import org.n52.series.db.beans.PlatformEntity;
 import org.n52.shetland.oasis.odata.query.option.QueryOptions;
 import org.n52.sta.api.EntityPage;
+import org.n52.sta.api.entity.FeatureOfInterest;
+import org.n52.sta.api.entity.Thing;
 import org.n52.sta.api.exception.ProviderException;
 import org.n52.sta.api.entity.Datastream;
 import org.n52.sta.api.path.Request;
@@ -41,6 +47,7 @@ import org.n52.sta.config.EntityPropertyMapping;
 import org.n52.sta.data.StaEntityPage;
 import org.n52.sta.data.StaPageRequest;
 import org.n52.sta.data.entity.DatastreamData;
+import org.n52.sta.data.entity.ThingData;
 import org.n52.sta.data.query.specifications.DatastreamQuerySpecification;
 import org.n52.sta.data.repositories.entity.DatastreamRepository;
 import org.n52.sta.data.support.DatastreamGraphBuilder;
@@ -86,6 +93,14 @@ public class DatastreamEntityProvider extends BaseEntityProvider<Datastream> {
             DatastreamGraphBuilder graphBuilder) {
         Optional<AbstractDatasetEntity> datastream = datastreamRepository.findOne(specification, graphBuilder);
         return datastream.map(entity -> new DatastreamData(entity, Optional.of(propertyMapping)));
+    }
+
+    @Override
+    public List<Datastream> getEntities(Set<String> ids) throws ProviderException {
+        List<AbstractDatasetEntity> allByStaIdentifier = datastreamRepository.findAllByStaIdentifier(ids);
+        return allByStaIdentifier.stream()
+            .map(entity -> new DatastreamData(entity, Optional.of(propertyMapping)))
+            .collect(Collectors.toList());
     }
 
     @Override
