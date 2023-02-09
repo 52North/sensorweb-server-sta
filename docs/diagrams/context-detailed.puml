@@ -1,7 +1,12 @@
 @startuml Detailed Context
 
+title STA package/module graph (commit 547fdd)
+
+
 file "War File" as war
 file "Executable Jar" as jar
+
+database database #dd7766
 
 frame "SensorThings API" as sta {
     together {
@@ -10,19 +15,23 @@ frame "SensorThings API" as sta {
     }
     
     together {
-        [dao]
-        [dao-postgres] as daopg
-        [dao-ufz] as daoufz
+        [api]
+        [data-provider-hibernate] as dph
     }
 
     together {
         [app]
         [webapp]
     }
+
     webapp .up.> war : //creates//
     app .up.> jar : //creates//
-    http --> dao
-    mqtt --> dao
+    http --> api
+    mqtt --> api
+
+
+    api --> dph
+    dph --> database
 }
 
 frame "arctic-sea" as arcticsea {
@@ -44,23 +53,6 @@ http -up- sta_api
 client ..> sta_api
 sensor ..> sta_api
 
-[helgoland-server-db-model] as 52n_db_model
-note right of 52n_db_model: Entities and mapping files
-database database #dd7766
-
 data_provider .d.> mqtt
-
-52n_db_model --> database
-
-dao --> daopg
-dao --> daoufz
-daopg ..> 52n_db_model
-daoufz --> daopg
-
-[UFZ] as ufz #dd7766
-() "Aggregata\n REST API" as api #dd7766
-ufz -- api
-
-daoufz ..> api
 
 @enduml

@@ -1,42 +1,67 @@
 @startuml SensorThings API, API
 
-' TODO review diagram
+title STA Architecture (commit 547fdd)
 
-node "sta" as sta {
+node "User" as sta {
 }
 
-package "api" {
-    package "provider" as pkg_provider {
-        interface "DataStreamProvider" as ds_provider
+package "http" {
+
+    class ReadController {
     }
-    package "domain" as pkg_domain {
-        class "DataStreamAggregate" as ds_aggregate
-        rectangle "DomainEvent" as ds_event #CCCCCC {
+
+    class WriteController {
+    }
+
+    package "serializer" as pkg_serializer {
+        interface "Serializer" as serializer
+        interface "Deserializer" as deserializer
+    }
+
+}
+package "api" {
+
+    interface "EntityService"
+    interface "DomainService"
+
+    package "aggregate" as pkg_aggregate {
+        interface EntityAggregate
+        note right of EntityAggregate {
+            validates integrity of
+            entity against STA
+            integrity constraints
         }
     }
-    note as note_domain
-        Maybe we find a way how to
-        make this configurable, so
-        that the STA can plug-in true
-        business rules.
-    end note
-    pkg_domain .u. note_domain 
+
+    package "rules" as pkg_rules {
+        interface DomainRule
+        note right of DomainRule {
+            applies business logic
+            to request. May forbid
+            or modify request before
+            further processing
+        }
+    }
 
     package "event" as pkg_event {
-        interface "EventHandler" as event_handler
+        interface DomainEvent
+        note right of DomainEvent {
+            encapsulates event for
+            later processing
+        }
+        interface DomainEventHandler
     }
-    package "service" as pkg_service {
-        class "DataStreamService" as ds_service
-    }
-    note top of ds_service {
-        We may think of making
-        these composable, to hook
-        optional business services.
-    }
-    package "serializer" as pkg_serializer {
-        interface "Serializer" as ds_serializer
-        interface "Deserializer" as ds_deserializer
-    }
+
+    interface "EntityEditor" as entity_editor
+    ' note left of entity_editor {
+    '     Orchestrates read access
+    ' }
+
+    interface "EntityProvider" as entity_provider
+    ' note right of entity_provider {
+    '     Orchestrates write access
+    ' }
+
 }
 
 node "spring" {
@@ -44,39 +69,55 @@ node "spring" {
     interface "JpaSpecificationExecutor" as jpa_spec_executor
 }
 
-node "dao" {
-    class "DataStreamHibernateProvider" as ds_dao_provider
-    note left of ds_dao_provider {
-        Orchestrates access to
-        db entities. Operates on
-        aggregates and creates them
-        via factories.
+
+node "data-provider-hibernate" {
+
+    interface "BaseRepository" as base_repository
+
+    class "BaseRepositoryImpl" as base_repository_impl
+    note right of base_repository_impl {
+        Provides custom
+        implementations
+        of JPA interface
+        methods
     }
-    package "repository" {
-        interface "StaJpaRepository" as sta_repo
-        interface "PlatformRepository"  as platform_repo
-        interface "ProcedureRepository" as procedure_repo
-        interface "xyzRepository" as xyz_repo
+    ' package "repository" {
+        ' interface "<<Entity>>Repository"  as entity_repo
+        ' interface "ProcedureRepository" as procedure_repo
+        ' interface "ThingRepository" as thing_repo
+        ' interface "SensorRepository" as sensor_repo
+    ' }
+
+    package repositories as pkg_repositories {
+        class EntityRepository  extends base_repository_impl implements base_repository, jpa_repo, jpa_spec_executor
+        note right of EntityRepository {
+            entity-specific
+        }
     }
 }
 
-sta ..> pkg_serializer : //creates//
-sta --> ds_service : //delegates//
-ds_service --> ds_provider
+database Database as db {
+}
 
-event_handler .r.> ds_event : //receives//
+sta ..> WriteController : //creates/updates/deletes//
+sta ..> ReadController : //reads//
 
-ds_aggregate ..> ds_event : //sends//
-ds_aggregate <.. ds_dao_provider : //creates//\n//updates//\n//deletes//
-ds_provider <|.. ds_dao_provider : //implements//
-ds_dao_provider --> platform_repo
-ds_dao_provider --> procedure_repo
-ds_dao_provider --> xyz_repo
 
-sta_repo --|> jpa_repo
-sta_repo --|> jpa_spec_executor
+WriteController --> "DomainService"
+ReadController --> "DomainService"
 
-platform_repo ..|> sta_repo
-procedure_repo ..|> sta_repo
+DomainService ..> DomainRule : // 1. validate rule //
+DomainService ..> DomainEvent : // 2. generate event //
+DomainService ..> EntityService : // 3. forward request //
+
+EntityService --> entity_editor : //delegates//
+EntityService --> entity_provider : //delegates//
+
+entity_provider --|> base_repository
+entity_editor --|> base_repository
+
+EntityRepository --> db
+
+EntityService --> EntityAggregate
 
 @enduml

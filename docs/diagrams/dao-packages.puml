@@ -1,4 +1,12 @@
-@startuml 52n SensorThings API, DAO Packages
+@startuml 52n SensorThings API
+
+skinparam titleBorderRoundCorner 15
+skinparam titleBorderThickness 2
+skinparam titleBorderColor red
+skinparam titleBackgroundColor red
+
+title WARNING: OUTDATED! data-provider-hibernate structure (commit ???)
+
 
 ' TODO review diagram
 
@@ -42,9 +50,7 @@ package query as pkg_query{
 package repositories as pkg_repos_base {
     interface "BaseRepository" as base_repo
     class "BaseRepositoryImpl" as base_repo_impl
-    
-    package "value" as pkg_repos_values {}
-    package "parameter" as pkg_repos_params {}
+
     package "entity" as pkg_repos_entity {
         interface "DataStreamRepository" as datastream_repo 
     }

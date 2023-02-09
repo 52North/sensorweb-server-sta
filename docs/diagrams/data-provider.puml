@@ -1,5 +1,13 @@
 @startuml 52n SensorThings API, Data Provider (Datastream)
 
+skinparam titleBorderRoundCorner 15
+skinparam titleBorderThickness 2
+skinparam titleBorderColor red
+skinparam titleBackgroundColor red
+
+title WARNING: OUTDATED!
+
+
 package service {
     interface "EntityService<T>" as api_entity_service
     class "DatastreamService<AbstractDatasetEntity>" as api_ds_service
