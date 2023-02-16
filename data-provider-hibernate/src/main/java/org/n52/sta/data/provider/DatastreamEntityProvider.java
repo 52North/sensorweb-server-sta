@@ -28,32 +28,28 @@
 
 package org.n52.sta.data.provider;
 
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Set;
-import java.util.stream.Collectors;
-
 import org.n52.series.db.beans.AbstractDatasetEntity;
-import org.n52.series.db.beans.PlatformEntity;
 import org.n52.shetland.oasis.odata.query.option.QueryOptions;
 import org.n52.sta.api.EntityPage;
-import org.n52.sta.api.entity.FeatureOfInterest;
-import org.n52.sta.api.entity.Thing;
-import org.n52.sta.api.exception.ProviderException;
 import org.n52.sta.api.entity.Datastream;
+import org.n52.sta.api.exception.ProviderException;
 import org.n52.sta.api.path.Request;
 import org.n52.sta.config.EntityPropertyMapping;
 import org.n52.sta.data.StaEntityPage;
 import org.n52.sta.data.StaPageRequest;
 import org.n52.sta.data.entity.DatastreamData;
-import org.n52.sta.data.entity.ThingData;
 import org.n52.sta.data.query.specifications.DatastreamQuerySpecification;
 import org.n52.sta.data.repositories.entity.DatastreamRepository;
 import org.n52.sta.data.support.DatastreamGraphBuilder;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
+
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 public class DatastreamEntityProvider extends BaseEntityProvider<Datastream> {
 
@@ -76,8 +72,8 @@ public class DatastreamEntityProvider extends BaseEntityProvider<Datastream> {
     @Override
     public Optional<Datastream> getEntity(Request request) throws ProviderException {
         DatastreamGraphBuilder graphBuilder = request.isRefRequest()
-                ? DatastreamGraphBuilder.createEmpty()
-                : DatastreamGraphBuilder.createWith(request.getQueryOptions());
+            ? DatastreamGraphBuilder.createEmpty()
+            : DatastreamGraphBuilder.createWith(request.getQueryOptions());
         return getEntity(rootSpecification.buildSpecification(request), graphBuilder);
     }
 
@@ -85,12 +81,12 @@ public class DatastreamEntityProvider extends BaseEntityProvider<Datastream> {
     public Optional<Datastream> getEntity(String id, QueryOptions queryOptions) throws ProviderException {
         DatastreamGraphBuilder graphBuilder = DatastreamGraphBuilder.createEmpty();
         return getEntity(rootSpecification.buildSpecification(queryOptions)
-                                          .and(rootSpecification.equalsStaIdentifier(id)),
+                             .and(rootSpecification.equalsStaIdentifier(id)),
                          graphBuilder);
     }
 
     private Optional<Datastream> getEntity(Specification<AbstractDatasetEntity> specification,
-            DatastreamGraphBuilder graphBuilder) {
+                                           DatastreamGraphBuilder graphBuilder) {
         Optional<AbstractDatasetEntity> datastream = datastreamRepository.findOne(specification, graphBuilder);
         return datastream.map(entity -> new DatastreamData(entity, Optional.of(propertyMapping)));
     }
@@ -109,8 +105,8 @@ public class DatastreamEntityProvider extends BaseEntityProvider<Datastream> {
         Pageable pageable = StaPageRequest.create(options);
 
         DatastreamGraphBuilder graphBuilder = request.isRefRequest()
-                ? DatastreamGraphBuilder.createEmpty()
-                : DatastreamGraphBuilder.createWith(options);
+            ? DatastreamGraphBuilder.createEmpty()
+            : DatastreamGraphBuilder.createWith(options);
         Specification<AbstractDatasetEntity> spec = rootSpecification.buildSpecification(request);
         Page<AbstractDatasetEntity> results = datastreamRepository.findAll(spec, pageable, graphBuilder);
         return new StaEntityPage<>(Datastream.class,

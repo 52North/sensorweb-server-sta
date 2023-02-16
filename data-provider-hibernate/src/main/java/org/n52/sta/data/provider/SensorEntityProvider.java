@@ -28,24 +28,15 @@
 
 package org.n52.sta.data.provider;
 
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Set;
-import java.util.stream.Collectors;
-
 import org.n52.series.db.beans.ProcedureEntity;
-import org.n52.series.db.beans.sta.RelationEntity;
 import org.n52.shetland.oasis.odata.query.option.QueryOptions;
 import org.n52.sta.api.EntityPage;
-import org.n52.sta.api.entity.Relation;
-import org.n52.sta.api.exception.ProviderException;
 import org.n52.sta.api.entity.Sensor;
+import org.n52.sta.api.exception.ProviderException;
 import org.n52.sta.api.path.Request;
 import org.n52.sta.config.EntityPropertyMapping;
 import org.n52.sta.data.StaEntityPage;
 import org.n52.sta.data.StaPageRequest;
-import org.n52.sta.data.entity.RelationData;
 import org.n52.sta.data.entity.SensorData;
 import org.n52.sta.data.query.specifications.SensorQuerySpecification;
 import org.n52.sta.data.repositories.entity.ProcedureRepository;
@@ -53,6 +44,12 @@ import org.n52.sta.data.support.SensorGraphBuilder;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
+
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 public class SensorEntityProvider extends BaseEntityProvider<Sensor> {
 
@@ -75,8 +72,8 @@ public class SensorEntityProvider extends BaseEntityProvider<Sensor> {
     @Override
     public Optional<Sensor> getEntity(Request request) throws ProviderException {
         SensorGraphBuilder graphBuilder = request.isRefRequest()
-                ? SensorGraphBuilder.createEmpty()
-                : SensorGraphBuilder.createWith(request.getQueryOptions());
+            ? SensorGraphBuilder.createEmpty()
+            : SensorGraphBuilder.createWith(request.getQueryOptions());
         return getEntity(rootSpecification.buildSpecification(request), graphBuilder);
     }
 
@@ -84,7 +81,7 @@ public class SensorEntityProvider extends BaseEntityProvider<Sensor> {
     public Optional<Sensor> getEntity(String id, QueryOptions queryOptions) throws ProviderException {
         SensorGraphBuilder graphBuilder = SensorGraphBuilder.createEmpty();
         return getEntity(rootSpecification.buildSpecification(queryOptions)
-                                          .and(rootSpecification.equalsStaIdentifier(id)),
+                             .and(rootSpecification.equalsStaIdentifier(id)),
                          graphBuilder);
     }
 
@@ -107,8 +104,8 @@ public class SensorEntityProvider extends BaseEntityProvider<Sensor> {
         Pageable pageable = StaPageRequest.create(options);
 
         SensorGraphBuilder graphBuilder = request.isRefRequest()
-                ? SensorGraphBuilder.createEmpty()
-                : SensorGraphBuilder.createWith(options);
+            ? SensorGraphBuilder.createEmpty()
+            : SensorGraphBuilder.createWith(options);
         Specification<ProcedureEntity> spec = rootSpecification.buildSpecification(request);
         Page<ProcedureEntity> results = sensorRepository.findAll(spec, pageable, graphBuilder);
         return new StaEntityPage<>(Sensor.class,

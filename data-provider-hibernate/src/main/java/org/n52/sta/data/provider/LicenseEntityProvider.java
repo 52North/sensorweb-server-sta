@@ -28,24 +28,15 @@
 
 package org.n52.sta.data.provider;
 
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Set;
-import java.util.stream.Collectors;
-
-import org.n52.series.db.beans.sta.HistoricalLocationEntity;
 import org.n52.series.db.beans.sta.LicenseEntity;
 import org.n52.shetland.oasis.odata.query.option.QueryOptions;
 import org.n52.sta.api.EntityPage;
-import org.n52.sta.api.entity.HistoricalLocation;
-import org.n52.sta.api.exception.ProviderException;
 import org.n52.sta.api.entity.License;
+import org.n52.sta.api.exception.ProviderException;
 import org.n52.sta.api.path.Request;
 import org.n52.sta.config.EntityPropertyMapping;
 import org.n52.sta.data.StaEntityPage;
 import org.n52.sta.data.StaPageRequest;
-import org.n52.sta.data.entity.HistoricalLocationData;
 import org.n52.sta.data.entity.LicenseData;
 import org.n52.sta.data.query.specifications.LicenseQuerySpecification;
 import org.n52.sta.data.repositories.entity.LicenseRepository;
@@ -53,6 +44,12 @@ import org.n52.sta.data.support.LicenseGraphBuilder;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
+
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 public class LicenseEntityProvider extends BaseEntityProvider<License> {
 
@@ -75,8 +72,8 @@ public class LicenseEntityProvider extends BaseEntityProvider<License> {
     @Override
     public Optional<License> getEntity(Request request) throws ProviderException {
         LicenseGraphBuilder graphBuilder = request.isRefRequest()
-                ? LicenseGraphBuilder.createEmpty()
-                : LicenseGraphBuilder.createWith(request.getQueryOptions());
+            ? LicenseGraphBuilder.createEmpty()
+            : LicenseGraphBuilder.createWith(request.getQueryOptions());
         return getEntity(rootSpecification.buildSpecification(request), graphBuilder);
     }
 
@@ -84,7 +81,7 @@ public class LicenseEntityProvider extends BaseEntityProvider<License> {
     public Optional<License> getEntity(String id, QueryOptions queryOptions) throws ProviderException {
         LicenseGraphBuilder graphBuilder = LicenseGraphBuilder.createEmpty();
         return getEntity(rootSpecification.buildSpecification(queryOptions)
-                                          .and(rootSpecification.equalsStaIdentifier(id)),
+                             .and(rootSpecification.equalsStaIdentifier(id)),
                          graphBuilder);
     }
 
@@ -107,12 +104,12 @@ public class LicenseEntityProvider extends BaseEntityProvider<License> {
         Pageable pageable = StaPageRequest.create(options);
 
         LicenseGraphBuilder graphBuilder = request.isRefRequest()
-                ? LicenseGraphBuilder.createEmpty()
-                : LicenseGraphBuilder.createWith(options);
+            ? LicenseGraphBuilder.createEmpty()
+            : LicenseGraphBuilder.createWith(options);
         Specification<LicenseEntity> spec = rootSpecification.buildSpecification(request);
         Page<LicenseEntity> results = licenseRepository.findAll(spec, pageable, graphBuilder);
         return new StaEntityPage<>(License.class, results,
-                entity -> new LicenseData(entity, Optional.of(propertyMapping)));
+                                   entity -> new LicenseData(entity, Optional.of(propertyMapping)));
     }
 
 }

@@ -28,24 +28,15 @@
 
 package org.n52.sta.data.provider;
 
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Set;
-import java.util.stream.Collectors;
-
-import org.n52.series.db.beans.DataEntity;
 import org.n52.series.db.beans.PhenomenonEntity;
 import org.n52.shetland.oasis.odata.query.option.QueryOptions;
 import org.n52.sta.api.EntityPage;
-import org.n52.sta.api.entity.Observation;
-import org.n52.sta.api.exception.ProviderException;
 import org.n52.sta.api.entity.ObservedProperty;
+import org.n52.sta.api.exception.ProviderException;
 import org.n52.sta.api.path.Request;
 import org.n52.sta.config.EntityPropertyMapping;
 import org.n52.sta.data.StaEntityPage;
 import org.n52.sta.data.StaPageRequest;
-import org.n52.sta.data.entity.ObservationData;
 import org.n52.sta.data.entity.ObservedPropertyData;
 import org.n52.sta.data.query.specifications.ObservedPropertyQuerySpecification;
 import org.n52.sta.data.repositories.entity.PhenomenonRepository;
@@ -53,6 +44,12 @@ import org.n52.sta.data.support.ObservedPropertyGraphBuilder;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
+
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 public class ObservedPropertyEntityProvider extends BaseEntityProvider<ObservedProperty> {
 
@@ -76,8 +73,8 @@ public class ObservedPropertyEntityProvider extends BaseEntityProvider<ObservedP
     @Override
     public Optional<ObservedProperty> getEntity(Request request) throws ProviderException {
         ObservedPropertyGraphBuilder graphBuilder = request.isRefRequest()
-                ? ObservedPropertyGraphBuilder.createEmpty()
-                : ObservedPropertyGraphBuilder.createWith(request.getQueryOptions());
+            ? ObservedPropertyGraphBuilder.createEmpty()
+            : ObservedPropertyGraphBuilder.createWith(request.getQueryOptions());
         return getEntity(rootSpecification.buildSpecification(request), graphBuilder);
     }
 
@@ -85,12 +82,12 @@ public class ObservedPropertyEntityProvider extends BaseEntityProvider<ObservedP
     public Optional<ObservedProperty> getEntity(String id, QueryOptions queryOptions) throws ProviderException {
         ObservedPropertyGraphBuilder graphBuilder = ObservedPropertyGraphBuilder.createEmpty();
         return getEntity(rootSpecification.buildSpecification(queryOptions)
-                                          .and(rootSpecification.equalsStaIdentifier(id)),
+                             .and(rootSpecification.equalsStaIdentifier(id)),
                          graphBuilder);
     }
 
     private Optional<ObservedProperty> getEntity(Specification<PhenomenonEntity> spec,
-            ObservedPropertyGraphBuilder graphBuilder) {
+                                                 ObservedPropertyGraphBuilder graphBuilder) {
         Optional<PhenomenonEntity> platform = observedPropertyRepository.findOne(spec, graphBuilder);
         return platform.map(entity -> new ObservedPropertyData(entity, Optional.of(propertyMapping)));
     }
@@ -109,8 +106,8 @@ public class ObservedPropertyEntityProvider extends BaseEntityProvider<ObservedP
         Pageable pageable = StaPageRequest.create(options);
 
         ObservedPropertyGraphBuilder graphBuilder = request.isRefRequest()
-                ? ObservedPropertyGraphBuilder.createEmpty()
-                : ObservedPropertyGraphBuilder.createWith(options);
+            ? ObservedPropertyGraphBuilder.createEmpty()
+            : ObservedPropertyGraphBuilder.createWith(options);
         Specification<PhenomenonEntity> spec = rootSpecification.buildSpecification(request);
         Page<PhenomenonEntity> results = observedPropertyRepository.findAll(spec, pageable, graphBuilder);
         return new StaEntityPage<>(ObservedProperty.class,

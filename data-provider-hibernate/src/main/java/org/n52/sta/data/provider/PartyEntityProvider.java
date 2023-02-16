@@ -25,26 +25,18 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
+
 package org.n52.sta.data.provider;
 
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Set;
-import java.util.stream.Collectors;
-
-import org.n52.series.db.beans.PhenomenonEntity;
 import org.n52.series.db.beans.sta.PartyEntity;
 import org.n52.shetland.oasis.odata.query.option.QueryOptions;
 import org.n52.sta.api.EntityPage;
-import org.n52.sta.api.entity.ObservedProperty;
-import org.n52.sta.api.exception.ProviderException;
 import org.n52.sta.api.entity.Party;
+import org.n52.sta.api.exception.ProviderException;
 import org.n52.sta.api.path.Request;
 import org.n52.sta.config.EntityPropertyMapping;
 import org.n52.sta.data.StaEntityPage;
 import org.n52.sta.data.StaPageRequest;
-import org.n52.sta.data.entity.ObservedPropertyData;
 import org.n52.sta.data.entity.PartyData;
 import org.n52.sta.data.query.specifications.PartyQuerySpecification;
 import org.n52.sta.data.repositories.entity.PartyRepository;
@@ -52,6 +44,12 @@ import org.n52.sta.data.support.PartyGraphBuilder;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
+
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 public class PartyEntityProvider extends BaseEntityProvider<Party> {
 
@@ -74,8 +72,8 @@ public class PartyEntityProvider extends BaseEntityProvider<Party> {
     @Override
     public Optional<Party> getEntity(Request request) throws ProviderException {
         PartyGraphBuilder graphBuilder = request.isRefRequest()
-                ? PartyGraphBuilder.createEmpty()
-                : PartyGraphBuilder.createWith(request.getQueryOptions());
+            ? PartyGraphBuilder.createEmpty()
+            : PartyGraphBuilder.createWith(request.getQueryOptions());
         return getEntity(rootSpecification.buildSpecification(request), graphBuilder);
     }
 
@@ -83,7 +81,7 @@ public class PartyEntityProvider extends BaseEntityProvider<Party> {
     public Optional<Party> getEntity(String id, QueryOptions queryOptions) throws ProviderException {
         PartyGraphBuilder graphBuilder = PartyGraphBuilder.createEmpty();
         return getEntity(rootSpecification.buildSpecification(queryOptions)
-                                          .and(rootSpecification.equalsStaIdentifier(id)),
+                             .and(rootSpecification.equalsStaIdentifier(id)),
                          graphBuilder);
     }
 
@@ -99,18 +97,19 @@ public class PartyEntityProvider extends BaseEntityProvider<Party> {
             .map(entity -> new PartyData(entity, Optional.of(propertyMapping)))
             .collect(Collectors.toList());
     }
+
     @Override
     public EntityPage<Party> getEntities(Request request) throws ProviderException {
         QueryOptions options = request.getQueryOptions();
         Pageable pageable = StaPageRequest.create(options);
 
         PartyGraphBuilder graphBuilder = request.isRefRequest()
-                ? PartyGraphBuilder.createEmpty()
-                : PartyGraphBuilder.createWith(options);
+            ? PartyGraphBuilder.createEmpty()
+            : PartyGraphBuilder.createWith(options);
         Specification<PartyEntity> spec = rootSpecification.buildSpecification(request);
         Page<PartyEntity> results = partyRepository.findAll(spec, pageable, graphBuilder);
         return new StaEntityPage<>(Party.class, results,
-                entity -> new PartyData(entity, Optional.of(propertyMapping)));
+                                   entity -> new PartyData(entity, Optional.of(propertyMapping)));
     }
 
 }

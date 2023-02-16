@@ -28,24 +28,15 @@
 
 package org.n52.sta.data.provider;
 
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Set;
-import java.util.stream.Collectors;
-
-import org.n52.series.db.beans.AbstractDatasetEntity;
 import org.n52.series.db.beans.sta.GroupEntity;
 import org.n52.shetland.oasis.odata.query.option.QueryOptions;
 import org.n52.sta.api.EntityPage;
-import org.n52.sta.api.entity.Datastream;
-import org.n52.sta.api.exception.ProviderException;
 import org.n52.sta.api.entity.Group;
+import org.n52.sta.api.exception.ProviderException;
 import org.n52.sta.api.path.Request;
 import org.n52.sta.config.EntityPropertyMapping;
 import org.n52.sta.data.StaEntityPage;
 import org.n52.sta.data.StaPageRequest;
-import org.n52.sta.data.entity.DatastreamData;
 import org.n52.sta.data.entity.GroupData;
 import org.n52.sta.data.query.specifications.GroupQuerySpecification;
 import org.n52.sta.data.repositories.entity.GroupRepository;
@@ -53,6 +44,12 @@ import org.n52.sta.data.support.GroupGraphBuilder;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
+
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 public class GroupEntityProvider extends BaseEntityProvider<Group> {
 
@@ -75,8 +72,8 @@ public class GroupEntityProvider extends BaseEntityProvider<Group> {
     @Override
     public Optional<Group> getEntity(Request request) throws ProviderException {
         GroupGraphBuilder graphBuilder = request.isRefRequest()
-                ? GroupGraphBuilder.createEmpty()
-                : GroupGraphBuilder.createWith(request.getQueryOptions());
+            ? GroupGraphBuilder.createEmpty()
+            : GroupGraphBuilder.createWith(request.getQueryOptions());
         return getEntity(rootSpecification.buildSpecification(request), graphBuilder);
     }
 
@@ -84,7 +81,7 @@ public class GroupEntityProvider extends BaseEntityProvider<Group> {
     public Optional<Group> getEntity(String id, QueryOptions queryOptions) throws ProviderException {
         GroupGraphBuilder graphBuilder = GroupGraphBuilder.createEmpty();
         return getEntity(rootSpecification.buildSpecification(queryOptions)
-                                          .and(rootSpecification.equalsStaIdentifier(id)),
+                             .and(rootSpecification.equalsStaIdentifier(id)),
                          graphBuilder);
     }
 
@@ -107,8 +104,8 @@ public class GroupEntityProvider extends BaseEntityProvider<Group> {
         Pageable pageable = StaPageRequest.create(options);
 
         GroupGraphBuilder graphBuilder = request.isRefRequest()
-                ? GroupGraphBuilder.createEmpty()
-                : GroupGraphBuilder.createWith(options);
+            ? GroupGraphBuilder.createEmpty()
+            : GroupGraphBuilder.createWith(options);
         Specification<GroupEntity> spec = rootSpecification.buildSpecification(request);
         Page<GroupEntity> results = groupRepository.findAll(spec, pageable, graphBuilder);
         return new StaEntityPage<>(Group.class, results, entity -> new GroupData(entity, Optional.of(propertyMapping)));

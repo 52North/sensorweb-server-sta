@@ -41,7 +41,6 @@ import org.n52.sta.api.entity.Observation;
 import org.n52.sta.api.entity.ObservedProperty;
 import org.n52.sta.api.entity.Party;
 import org.n52.sta.api.entity.Project;
-import org.n52.sta.api.entity.Thing;
 
 public class DatastreamAggregate extends EntityAggregate<Datastream> implements Datastream {
 

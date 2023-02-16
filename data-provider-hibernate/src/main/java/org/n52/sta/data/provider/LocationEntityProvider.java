@@ -28,24 +28,15 @@
 
 package org.n52.sta.data.provider;
 
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Set;
-import java.util.stream.Collectors;
-
-import org.n52.series.db.beans.sta.LicenseEntity;
 import org.n52.series.db.beans.sta.LocationEntity;
 import org.n52.shetland.oasis.odata.query.option.QueryOptions;
 import org.n52.sta.api.EntityPage;
-import org.n52.sta.api.entity.License;
-import org.n52.sta.api.exception.ProviderException;
 import org.n52.sta.api.entity.Location;
+import org.n52.sta.api.exception.ProviderException;
 import org.n52.sta.api.path.Request;
 import org.n52.sta.config.EntityPropertyMapping;
 import org.n52.sta.data.StaEntityPage;
 import org.n52.sta.data.StaPageRequest;
-import org.n52.sta.data.entity.LicenseData;
 import org.n52.sta.data.entity.LocationData;
 import org.n52.sta.data.query.specifications.LocationQuerySpecification;
 import org.n52.sta.data.repositories.entity.LocationRepository;
@@ -53,6 +44,12 @@ import org.n52.sta.data.support.LocationGraphBuilder;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
+
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 public class LocationEntityProvider extends BaseEntityProvider<Location> {
 
@@ -75,8 +72,8 @@ public class LocationEntityProvider extends BaseEntityProvider<Location> {
     @Override
     public Optional<Location> getEntity(Request request) throws ProviderException {
         LocationGraphBuilder graphBuilder = request.isRefRequest()
-                ? LocationGraphBuilder.createEmpty()
-                : LocationGraphBuilder.createWith(request.getQueryOptions());
+            ? LocationGraphBuilder.createEmpty()
+            : LocationGraphBuilder.createWith(request.getQueryOptions());
         return getEntity(rootSpecification.buildSpecification(request), graphBuilder);
     }
 
@@ -84,7 +81,7 @@ public class LocationEntityProvider extends BaseEntityProvider<Location> {
     public Optional<Location> getEntity(String id, QueryOptions queryOptions) throws ProviderException {
         LocationGraphBuilder graphBuilder = LocationGraphBuilder.createEmpty();
         return getEntity(rootSpecification.buildSpecification(queryOptions)
-                                          .and(rootSpecification.equalsStaIdentifier(id)),
+                             .and(rootSpecification.equalsStaIdentifier(id)),
                          graphBuilder);
     }
 
@@ -100,14 +97,15 @@ public class LocationEntityProvider extends BaseEntityProvider<Location> {
             .map(entity -> new LocationData(entity, Optional.of(propertyMapping)))
             .collect(Collectors.toList());
     }
+
     @Override
     public EntityPage<Location> getEntities(Request request) throws ProviderException {
         QueryOptions options = request.getQueryOptions();
         Pageable pageable = StaPageRequest.create(options);
 
         LocationGraphBuilder graphBuilder = request.isRefRequest()
-                ? LocationGraphBuilder.createEmpty()
-                : LocationGraphBuilder.createWith(request.getQueryOptions());
+            ? LocationGraphBuilder.createEmpty()
+            : LocationGraphBuilder.createWith(request.getQueryOptions());
         Specification<LocationEntity> spec = rootSpecification.buildSpecification(request);
         Page<LocationEntity> results = locationRepository.findAll(spec, pageable, graphBuilder);
         return new StaEntityPage<>(Location.class,

@@ -28,24 +28,15 @@
 
 package org.n52.sta.data.provider;
 
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Set;
-import java.util.stream.Collectors;
-
-import org.n52.series.db.beans.sta.PartyEntity;
 import org.n52.series.db.beans.sta.ProjectEntity;
 import org.n52.shetland.oasis.odata.query.option.QueryOptions;
 import org.n52.sta.api.EntityPage;
-import org.n52.sta.api.entity.Party;
-import org.n52.sta.api.exception.ProviderException;
 import org.n52.sta.api.entity.Project;
+import org.n52.sta.api.exception.ProviderException;
 import org.n52.sta.api.path.Request;
 import org.n52.sta.config.EntityPropertyMapping;
 import org.n52.sta.data.StaEntityPage;
 import org.n52.sta.data.StaPageRequest;
-import org.n52.sta.data.entity.PartyData;
 import org.n52.sta.data.entity.ProjectData;
 import org.n52.sta.data.query.specifications.ProjectQuerySpecification;
 import org.n52.sta.data.repositories.entity.ProjectRepository;
@@ -53,6 +44,12 @@ import org.n52.sta.data.support.ProjectGraphBuilder;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
+
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 public class ProjectEntityProvider extends BaseEntityProvider<Project> {
 
@@ -75,7 +72,7 @@ public class ProjectEntityProvider extends BaseEntityProvider<Project> {
     @Override
     public Optional<Project> getEntity(Request request) throws ProviderException {
         ProjectGraphBuilder graphBuilder = request.isRefRequest() ? ProjectGraphBuilder.createEmpty()
-                : ProjectGraphBuilder.createWith(request.getQueryOptions());
+            : ProjectGraphBuilder.createWith(request.getQueryOptions());
         return getEntity(rootSpecification.buildSpecification(request), graphBuilder);
     }
 
@@ -83,8 +80,8 @@ public class ProjectEntityProvider extends BaseEntityProvider<Project> {
     public Optional<Project> getEntity(String id, QueryOptions queryOptions) throws ProviderException {
         ProjectGraphBuilder graphBuilder = ProjectGraphBuilder.createEmpty();
         return getEntity(
-                rootSpecification.buildSpecification(queryOptions).and(rootSpecification.equalsStaIdentifier(id)),
-                graphBuilder);
+            rootSpecification.buildSpecification(queryOptions).and(rootSpecification.equalsStaIdentifier(id)),
+            graphBuilder);
     }
 
     private Optional<Project> getEntity(Specification<ProjectEntity> spec, ProjectGraphBuilder graphBuilder) {
@@ -106,11 +103,11 @@ public class ProjectEntityProvider extends BaseEntityProvider<Project> {
         Pageable pageable = StaPageRequest.create(options);
 
         ProjectGraphBuilder graphBuilder =
-                request.isRefRequest() ? ProjectGraphBuilder.createEmpty() : ProjectGraphBuilder.createWith(options);
+            request.isRefRequest() ? ProjectGraphBuilder.createEmpty() : ProjectGraphBuilder.createWith(options);
         Specification<ProjectEntity> spec = rootSpecification.buildSpecification(request);
         Page<ProjectEntity> results = projectRepository.findAll(spec, pageable, graphBuilder);
         return new StaEntityPage<>(Project.class, results,
-                entity -> new ProjectData(entity, Optional.of(propertyMapping)));
+                                   entity -> new ProjectData(entity, Optional.of(propertyMapping)));
     }
 
 }
