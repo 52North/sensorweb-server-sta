@@ -332,8 +332,7 @@ public class ObservationEntityEditor extends DatabaseEntityAdapter<DataEntity>
 
     private BigDecimal valueToDouble(String parameter, Map<String, Object> parameters) {
         Object value = parameters.get(parameter);
-        Double doubleValue = value instanceof String ? Double.parseDouble((String) value) : (Double) value;
-        return BigDecimal.valueOf(doubleValue);
+        return BigDecimal.valueOf(value instanceof String ? Double.parseDouble((String) value) : (Double) value);
     }
 
     private GeometryEntity valueToGeometry(String parameter, Map<String, Object> parameters) {

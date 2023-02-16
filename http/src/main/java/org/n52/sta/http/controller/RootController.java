@@ -64,7 +64,7 @@ public class RootController {
         "https://github.com/52North/sensorweb-server-sta/extension/extended-sensor-encodingtype.md";
 
     private static final String BUSINESS_LOGIC_EXTENSION =
-        "https://github.com/52North/sensorweb-server-sta/extension/business-logic.md";
+        "https://github.com/52North/sensorweb-server-sta/blob/sta-slicing/docs/extensions/business-logic.md";
 
     private static final String STAPLUS_CREATE_ENTITY =
         "http://www.opengis.net/spec/iot_sensing/1.1/extension/staplus/req/create/create-entity";

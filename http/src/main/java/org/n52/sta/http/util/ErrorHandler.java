@@ -28,6 +28,7 @@
 
 package org.n52.sta.http.util;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.n52.janmayen.http.HTTPStatus;
 import org.n52.shetland.ogc.sta.exception.STACRUDException;
 import org.n52.shetland.ogc.sta.exception.STAInvalidFilterExpressionException;
@@ -64,6 +65,7 @@ public class ErrorHandler {
     private final ObjectMapper mapper;
     private final HttpHeaders headers;
 
+    @SuppressFBWarnings("EI_EXPOSE_REP2")
     public ErrorHandler(ObjectMapper mapper) {
         this.mapper = mapper;
         headers = new HttpHeaders();

@@ -39,6 +39,8 @@ import org.locationtech.jts.io.geojson.GeoJsonWriter;
 
 public class GeometrySerializer extends StdSerializer<Geometry> {
 
+    private static final long serialVersionUID = -6673262072637960397L;
+
     private final transient GeoJsonWriter geometryWriter;
 
     public GeometrySerializer() {

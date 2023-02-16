@@ -152,8 +152,18 @@
                     </execution>
                 </executions> -->
             </plugin>
-
-            <!-- <plugin>
+            <plugin>
+                <groupId>com.github.spotbugs</groupId>
+                <artifactId>spotbugs-maven-plugin</artifactId>
+                <configuration>
+                    <skip>true</skip>
+                    <!--
+                    <failOnError>true</failOnError>
+                    <excludeFilterFile>${project.basedir}/findbugs_exclude.xml</excludeFilterFile>
+                    -->
+                </configuration>
+            </plugin>
+            <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
                 <executions>
