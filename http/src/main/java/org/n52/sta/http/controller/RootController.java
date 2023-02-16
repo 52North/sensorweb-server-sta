@@ -47,14 +47,47 @@ import org.springframework.web.bind.annotation.RestController;
 @SuppressWarnings("checkstyle:LineLength")
 public class RootController {
 
-    protected static final String HTTPS_GITHUB_COM_52_NORTH_SENSORWEB_SERVER_STA_EXTENSION_SERVER_PROPERTIES_MD = "https://github.com/52North/sensorweb-server-sta/extension/server-properties.md";
-    private static final String HTTP_WWW_OPENGIS_NET_SPEC_IOT_SENSING_1_1_REQ_CREATE_UPDATE_DELETE = "http://www.opengis.net/spec/iot_sensing/1.1/req/create-update-delete";
-    private static final String HTTP_WWW_OPENGIS_NET_SPEC_IOT_SENSING_1_1_REQ_REQUEST_DATA = "http://www.opengis.net/spec/iot_sensing/1.1/req/request-data";
-    private static final String HTTP_WWW_OPENGIS_NET_SPEC_IOT_SENSING_1_1_REQ_RESOURCE_PATH_RESOURCE_PATH_TO_ENTITIES = "http://www.opengis.net/spec/iot_sensing/1.1/req/resource-path/resource-path-to-entities";
-    private static final String HTTP_WWW_OPENGIS_NET_SPEC_IOT_SENSING_1_1_REQ_DATAMODEL = "http://www.opengis.net/spec/iot_sensing/1.1/req/datamodel";
+    protected static final String HTTPS_GITHUB_COM_52_NORTH_SENSORWEB_SERVER_STA_EXTENSION_SERVER_PROPERTIES_MD =
+        "https://github.com/52North/sensorweb-server-sta/extension/server-properties.md";
+    private static final String HTTP_WWW_OPENGIS_NET_SPEC_IOT_SENSING_1_1_REQ_CREATE_UPDATE_DELETE =
+        "http://www.opengis.net/spec/iot_sensing/1.1/req/create-update-delete";
+    private static final String HTTP_WWW_OPENGIS_NET_SPEC_IOT_SENSING_1_1_REQ_REQUEST_DATA =
+        "http://www.opengis.net/spec/iot_sensing/1.1/req/request-data";
+    private static final String HTTP_WWW_OPENGIS_NET_SPEC_IOT_SENSING_1_1_REQ_RESOURCE_PATH_RESOURCE_PATH_TO_ENTITIES =
+        "http://www.opengis.net/spec/iot_sensing/1.1/req/resource-path/resource-path-to-entities";
+    private static final String HTTP_WWW_OPENGIS_NET_SPEC_IOT_SENSING_1_1_REQ_DATAMODEL =
+        "http://www.opengis.net/spec/iot_sensing/1.1/req/datamodel";
 
-    private static final String HTTPS_GITHUB_COM_52_NORTH_SENSORWEB_SERVER_STA_EXTENSION_SERVER_VERSION_MD = "https://github.com/52North/sensorweb-server-sta/extension/server-version.md";
-    private static final String HTTPS_GITHUB_COM_52_NORTH_SENSORWEB_SERVER_STA_EXTENSION_EXTENDED_SENSOR_ENCODINGTYPE = "https://github.com/52North/sensorweb-server-sta/extension/extended-sensor-encodingtype.md";
+    private static final String HTTPS_GITHUB_COM_52_NORTH_SENSORWEB_SERVER_STA_EXTENSION_SERVER_VERSION_MD =
+        "https://github.com/52North/sensorweb-server-sta/extension/server-version.md";
+    private static final String HTTPS_GITHUB_COM_52_NORTH_SENSORWEB_SERVER_STA_EXTENSION_EXTENDED_SENSOR_ENCODINGTYPE =
+        "https://github.com/52North/sensorweb-server-sta/extension/extended-sensor-encodingtype.md";
+
+    private static final String BUSINESS_LOGIC_EXTENSION =
+        "https://github.com/52North/sensorweb-server-sta/extension/business-logic.md";
+
+    private static final String STAPLUS_CREATE_ENTITY =
+        "http://www.opengis.net/spec/iot_sensing/1.1/extension/staplus/req/create/create-entity";
+    private static final String STAPLUS_LINK_EXISTING =
+        "http://www.opengis.net/spec/iot_sensing/1.1/extension/staplus/req/create/link-to-existing-entities";
+    private static final String STAPLUS_UPDATE_ENTITY =
+        "http://www.opengis.net/spec/iot_sensing/1.1/extension/staplus/req/update/update-entity";
+    private static final String STAPLUS_DELETE_ENTITY =
+        "http://www.opengis.net/spec/iot_sensing/1.1/extension/staplus/req/delete/delete-entity";
+    private static final String STAPLUS_PARTY =
+        "http://www.opengis.net/spec/iot_sensing/1.1/extension/staplus/req-class/party";
+    private static final String STAPLUS_LICENSE =
+        "http://www.opengis.net/spec/iot_sensing/1.1/extension/staplus/req-class/license";
+    private static final String STAPLUS_RELATION =
+        "http://www.opengis.net/spec/iot_sensing/1.1/extension/staplus/req-class/relation";
+    private static final String STAPLUS_GROUP =
+        "http://www.opengis.net/spec/iot_sensing/1.1/extension/staplus/req-class/group";
+    private static final String STAPLUS_PROJECT =
+        "http://www.opengis.net/spec/iot_sensing/1.1/extension/staplus/req-class/project";
+    private static final String STAPLUS_BUSINESS_LOGIC =
+        "http://www.opengis.net/spec/iot_sensing/1.1/extension/staplus/req-class/business-logic";
+    private static final String STAPLUS_BUSINESS_LOGIC_CONF =
+        "http://www.opengis.net/doc/is/sensorthings/1.1/staplus/1.0/conf/business-logic";
 
     @Value("${server.feature.http.writable}")
     private final Boolean writable = false;
@@ -95,32 +128,48 @@ public class RootController {
         ArrayNode conformanceClasses = mapper.createArrayNode();
         serverSettings.set("conformance", conformanceClasses);
         conformanceClasses.add(
-                               HTTP_WWW_OPENGIS_NET_SPEC_IOT_SENSING_1_1_REQ_DATAMODEL);
+            HTTP_WWW_OPENGIS_NET_SPEC_IOT_SENSING_1_1_REQ_DATAMODEL);
         conformanceClasses.add(
-                               HTTP_WWW_OPENGIS_NET_SPEC_IOT_SENSING_1_1_REQ_RESOURCE_PATH_RESOURCE_PATH_TO_ENTITIES);
+            HTTP_WWW_OPENGIS_NET_SPEC_IOT_SENSING_1_1_REQ_RESOURCE_PATH_RESOURCE_PATH_TO_ENTITIES);
         conformanceClasses.add(
-                               HTTP_WWW_OPENGIS_NET_SPEC_IOT_SENSING_1_1_REQ_REQUEST_DATA);
+            HTTP_WWW_OPENGIS_NET_SPEC_IOT_SENSING_1_1_REQ_REQUEST_DATA);
         // Do not list CUD if we are in readOnly-Mode
         if (writable) {
             conformanceClasses.add(
-                                   HTTP_WWW_OPENGIS_NET_SPEC_IOT_SENSING_1_1_REQ_CREATE_UPDATE_DELETE);
+                HTTP_WWW_OPENGIS_NET_SPEC_IOT_SENSING_1_1_REQ_CREATE_UPDATE_DELETE);
         }
 
         // 52N Extensions
         conformanceClasses.add(
-                               HTTPS_GITHUB_COM_52_NORTH_SENSORWEB_SERVER_STA_EXTENSION_SERVER_PROPERTIES_MD);
+            HTTPS_GITHUB_COM_52_NORTH_SENSORWEB_SERVER_STA_EXTENSION_SERVER_PROPERTIES_MD);
         serverSettings.set(HTTPS_GITHUB_COM_52_NORTH_SENSORWEB_SERVER_STA_EXTENSION_SERVER_PROPERTIES_MD,
                            serverProperties.getFeatureInformation(mapper));
 
         conformanceClasses.add(
-                               HTTPS_GITHUB_COM_52_NORTH_SENSORWEB_SERVER_STA_EXTENSION_SERVER_VERSION_MD);
+            HTTPS_GITHUB_COM_52_NORTH_SENSORWEB_SERVER_STA_EXTENSION_SERVER_VERSION_MD);
         serverSettings.set(HTTPS_GITHUB_COM_52_NORTH_SENSORWEB_SERVER_STA_EXTENSION_SERVER_VERSION_MD,
                            versionProperties.getVersionInformation(mapper));
 
         if (environment.getRequiredProperty("server.feature.variableEncodingType", Boolean.class)) {
             conformanceClasses.add(
-                                   HTTPS_GITHUB_COM_52_NORTH_SENSORWEB_SERVER_STA_EXTENSION_EXTENDED_SENSOR_ENCODINGTYPE);
+                HTTPS_GITHUB_COM_52_NORTH_SENSORWEB_SERVER_STA_EXTENSION_EXTENDED_SENSOR_ENCODINGTYPE);
         }
+
+        // STAPlus
+        conformanceClasses.add(STAPLUS_CREATE_ENTITY);
+        conformanceClasses.add(STAPLUS_LINK_EXISTING);
+        conformanceClasses.add(STAPLUS_UPDATE_ENTITY);
+        conformanceClasses.add(STAPLUS_DELETE_ENTITY);
+        conformanceClasses.add(STAPLUS_PARTY);
+        conformanceClasses.add(STAPLUS_LICENSE);
+        conformanceClasses.add(STAPLUS_PROJECT);
+        conformanceClasses.add(STAPLUS_RELATION);
+        conformanceClasses.add(STAPLUS_GROUP);
+
+        conformanceClasses.add(STAPLUS_BUSINESS_LOGIC);
+        ObjectNode businessLogicConfigs = mapper.createObjectNode();
+        businessLogicConfigs.put("href", BUSINESS_LOGIC_EXTENSION);
+        serverSettings.set(STAPLUS_BUSINESS_LOGIC_CONF, businessLogicConfigs);
 
         node.set("serverSettings", serverSettings);
         return node.toString();
