@@ -1,12 +1,9 @@
 ```
-  _____ ___  _   _    _____                           _______ _     _                            _____ _____ 
- | ____|__ \| \ | |  / ____|                         |__   __| |   (_)                     /\   |  __ \_   _|
- | |__    ) |  \| | | (___   ___ _ __  ___  ___  _ __   | |  | |__  _ _ __   __ _ ___     /  \  | |__) || |  
- |___ \  / /| . ` |  \___ \ / _ \ '_ \/ __|/ _ \| '__|  | |  | '_ \| | '_ \ / _` / __|   / /\ \ |  ___/ | |  
-  ___) |/ /_| |\  |  ____) |  __/ | | \__ \ (_) | |     | |  | | | | | | | | (_| \__ \  / ____ \| |    _| |_ 
- |____/|____|_| \_| |_____/ \___|_| |_|___/\___/|_|     |_|  |_| |_|_|_| |_|\__, |___/ /_/    \_\_|   |_____|
-                                                                            __/ |                           
-                                                                           |___/                            
+  ____ ____  _   _     ____ _____  _    ____  _           
+ | ___|___ \| \ | |   / ___|_   _|/ \  |  _ \| |_   _ ___ 
+ |___ \ __) |  \| |   \___ \ | | / _ \ | |_) | | | | / __|
+  ___) / __/| |\  |    ___) || |/ ___ \|  __/| | |_| \__ \
+ |____/_____|_| \_|   |____/ |_/_/   \_\_|   |_|\__,_|___/               
 ```
 
 ## Table of Contents
@@ -22,57 +19,32 @@
 
 ## About The Project
 
-This is an implementation of the `OGC SensorThings API Part I: Sensing`.
-
-Primary features:
-* Interoperability with the [52°North SOS](https://github.com/52North/SOS/) and [52°North Helgoland API](https://github.com/52North/sensorweb-server-helgoland) based on a shared data model (Contact us for further information about this feature)
-* Several convenience extensions
-  * User-defined @iot.id
-  * Extended MQTT Capabilities
-  * Automatic synchronization of Datastream->phenomenonTime with linked Observation->phenomenonTime
-  * etc.
+This is an implementation of the `SensorThingsAPI Plus (OGC 22-022)`.
 
 Further documentation:
-* Standard: [OGC SensorThings API Part I: Sensing](https://github.com/opengeospatial/sensorthings)
-* Additional Features: [Github Wiki](https://github.com/52North/sensorweb-server-sta/wiki)
-* [Example Requests](https://github.com/52North/sensorweb-server-sta/wiki/Example-Requests)
-
-## Roadmap
-All development is tracked via GitHub Projects [here](https://github.com/52North/sensorweb-server-sta/projects/4).
-
-Next Key Milestones:
- - Integration of HiveMQ MQTT Broker (Q4 2020)
- - Implementation of STA Extensions Multidatastream,DataArray,Batch-Request (Q1 2021)
+* STAPlus Specification: [OGC 22-022 Repository](https://github.com/opengeospatial/sensorthings/tree/22-022)
+* [OGC Best Practice for using SensorThings API with Citizen Science](https://docs.ogc.org/bp/21-068.pdf)
+* STA v1.1 Specification: [OGC SensorThings API Part I: Sensing](https://github.com/opengeospatial/sensorthings)
 
 ## Setup
 ### Docker
-The latest Docker Images are available on [DockerHub](https://hub.docker.com/r/52north/sensorweb-server-sta)
-A complete demo setup is provided via a [docker-compose file](docker-compose.yml)
+The latest Docker Images are available on [DockerHub](https://hub.docker.com/r/52north/sensorweb-server-sta/tags?page=1&name=STAPLUS) (Suffix `-STAPLUS`).
 
-### JAR/WAR Packaging
-The latest jar/war packages are available via the GitHub [Releases](https://github.com/52North/sensorweb-server-sta/releases)
+A complete demo setup is provided via a [docker-compose file](docker-compose.yml)
 
 ## Conformance Status:
 
-| Conformance Class                     | Reference | Implemented | Test Status |
-|:--------------------------------------|:---------:|:-----------:|------------:|
-| Sensing Core                          | A.1       |     Yes     |       6 / 6 |
-| Filtering Extension                   | A.2       |     No      |       0 / 8 |
-| Create-Update-Delete                  | A.3       |     No      |       8 / 8 |
-| Batch Requests                        | A.4       |     No      |       0 / ? |
-| MultiDatastream Extension             | A.5       |     No      |       0 / ? |
-| DataArray Extension                   | A.6       |     No      |       0 / ? |
-| Observation Creation via MQTT         | A.7       |     No      |       0 / 1 |
-| Receiving Updates via MQTT            | A.8       |     No      |       0 / 5 |
+> Note: This is only an abstract overview. For the specific Specification classes that are covered refer to the `conformanceClasses` Section on the STA Landing Page of the individual deployment (accessible via `/v1.1/`)
 
+- Create/Read/Update/Delete
+  - Deep-Insert not supported
+- Filtering Extension
+- Business-Logic
+  - ClosedGroupRule --> Observations cannot be added to a group that is closed (runtimeEnd is after current timestamp)
 
 ## Support
 
-You can get support via the community mailing list:
-
-https://list.52north.org/mailman/listinfo/sensorweb/
-
-or [Contact us directly](#contact)
+[Contact us directly](#contact)
 
 ## Contributing
 

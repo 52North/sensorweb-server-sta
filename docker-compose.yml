@@ -1,7 +1,7 @@
 version: '3'
 services:
   sta:
-    image: 52north/sensorweb-server-sta:latest
+    image: 52north/sensorweb-server-sta:v4.0.2-STAPLUS
     # build: https://github.com/52North/sensorweb-server-sta.git#develop
     ports:
       - 8080:8081
