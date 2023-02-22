@@ -37,6 +37,7 @@ import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.joda.time.DateTime;
 import org.n52.janmayen.stream.Streams;
 import org.n52.series.db.beans.DescribableEntity;
@@ -59,6 +60,7 @@ public class StaData<T extends DescribableEntity> implements Identifiable {
         this.propertyMapping = propertyMapping;
     }
 
+    @SuppressFBWarnings("EI_EXPOSE_REP")
     public T getData() {
         return data;
     }

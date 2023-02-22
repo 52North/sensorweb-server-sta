@@ -37,7 +37,8 @@ import java.io.IOException;
 
 public class CollectionNodeSerializer extends StdSerializer<CollectionNode> {
 
-    private SerializationContext context;
+    private static final long serialVersionUID = -6466291255888394719L;
+    private final SerializationContext context;
 
     public CollectionNodeSerializer(SerializationContext context) {
         super(CollectionNode.class);

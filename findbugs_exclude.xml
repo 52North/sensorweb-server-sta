@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<FindBugsFilter>
+    <Match>
+        <Or>
+            <Class name="org.n52.grammar.StaPlusPathGrammar" />
+            <Class name="org.n52.grammar.StaPathGrammar" />
+            <Class name="org.n52.grammar.StaPlusPathLexer" />
+            <Class name="org.n52.grammar.StaPathLexer" />
+        </Or>
+    </Match>
+
+    <Match>
+        <Bug pattern="EI_EXPOSE_REP"/>
+    </Match>
+
+    <Match>
+        <Bug pattern="EI_EXPOSE_REP2"/>
+    </Match>
+</FindBugsFilter>

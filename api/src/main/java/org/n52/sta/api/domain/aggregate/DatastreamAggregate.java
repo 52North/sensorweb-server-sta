@@ -33,6 +33,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.locationtech.jts.geom.Geometry;
 import org.n52.shetland.ogc.gml.time.Time;
 import org.n52.sta.api.entity.Datastream;
@@ -107,16 +108,19 @@ public class DatastreamAggregate extends EntityAggregate<Datastream> implements 
     }
 
     @Override
+    @SuppressFBWarnings("EI_EXPOSE_REP")
     public ThingAggregate getThing() {
         return thingAggregate;
     }
 
     @Override
+    @SuppressFBWarnings("EI_EXPOSE_REP")
     public SensorAggregate getSensor() {
         return sensorAggregate;
     }
 
     @Override
+    @SuppressFBWarnings("EI_EXPOSE_REP")
     public ObservedProperty getObservedProperty() {
         return observedPropertyAggregate;
     }

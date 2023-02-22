@@ -28,6 +28,7 @@
 
 package org.n52.sta.data.provider;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.n52.series.db.beans.DataEntity;
 import org.n52.shetland.oasis.odata.query.option.QueryOptions;
 import org.n52.sta.api.EntityPage;
@@ -56,6 +57,7 @@ public class ObservationEntityProvider extends BaseEntityProvider<Observation> {
     private final ObservationRepository observationRepository;
     private final ObservationQuerySpecification rootSpecification;
 
+    @SuppressFBWarnings("EI_EXPOSE_REP2")
     public ObservationEntityProvider(ObservationRepository observationRepository,
                                      EntityPropertyMapping propertyMapping) {
         super(propertyMapping);
