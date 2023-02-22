@@ -4,7 +4,7 @@
 	<parent>
 		<groupId>org.n52.sensorweb-server.sta</groupId>
 		<artifactId>sta-parent</artifactId>
-		<version>4.0.1-STAPLUS-SNAPSHOT</version>
+		<version>4.0.3-STAPLUS-SNAPSHOT</version>
 	</parent>
 	<artifactId>sta-data-provider-hibernate</artifactId>
 	<dependencies>
@@ -145,7 +145,6 @@
 		<dependency>
 			<groupId>com.github.spotbugs</groupId>
 			<artifactId>spotbugs-annotations</artifactId>
-			<optional>true</optional>
 		</dependency>
 
 		<dependency>

@@ -4,7 +4,7 @@
     <parent>
         <groupId>org.n52.sensorweb-server.sta</groupId>
         <artifactId>sta-parent</artifactId>
-        <version>4.0.1-STAPLUS-SNAPSHOT</version>
+        <version>4.0.3-STAPLUS-SNAPSHOT</version>
     </parent>
     <artifactId>sta-app</artifactId>
     <packaging>jar</packaging>
@@ -152,8 +152,18 @@
                     </execution>
                 </executions> -->
             </plugin>
-
-            <!-- <plugin>
+            <plugin>
+                <groupId>com.github.spotbugs</groupId>
+                <artifactId>spotbugs-maven-plugin</artifactId>
+                <configuration>
+                    <skip>true</skip>
+                    <!--
+                    <failOnError>true</failOnError>
+                    <excludeFilterFile>${project.basedir}/findbugs_exclude.xml</excludeFilterFile>
+                    -->
+                </configuration>
+            </plugin>
+            <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
                 <executions>
@@ -170,14 +180,6 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-dependency-plugin</artifactId>
-                <configuration>
-                    <usedDependencies>
-                        <dependency>org.springframework.boot:spring-boot-starter-web</dependency>
-                        <dependency>org.springframework.boot:spring-boot-starter-data-jpa</dependency>
-                        <dependency>org.n52.sensorweb-server.sta:sta-http</dependency>
-                        <dependency>org.n52.sensorweb-server.sta:sta-mqtt</dependency>
-                    </usedDependencies>
-                </configuration>
                 <executions>
                     <execution>
                         <id>unpack</id>
@@ -197,7 +199,7 @@
                         </configuration>
                     </execution>
                 </executions>
-            </plugin> -->
+            </plugin>
         </plugins>
     </build>
 </project>

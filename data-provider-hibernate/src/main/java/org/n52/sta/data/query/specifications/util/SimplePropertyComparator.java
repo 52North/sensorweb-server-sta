@@ -126,11 +126,13 @@ public class SimplePropertyComparator<R, T extends Comparable< ? super T>> imple
      * @see #compare(Expression, ComparisonOperator, Expression, CriteriaBuilder) for a list of supported
      *      operators
      */
+    /*
     private Specification<T> compare(Expression< ? > left,
             FilterConstants.ComparisonOperator operator,
             Expression< ? > right) {
         return (root, query, builder) -> compare(left, operator, right, builder);
     }
+    */
 
     /**
      * Creates a predicate that compares two expressions with the specified operator.
