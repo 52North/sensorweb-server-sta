@@ -41,10 +41,10 @@
         <currentYear>${maven.build.timestamp}</currentYear>
         <db-model.version>4.0.0-PR.15</db-model.version>
         <arctic-sea.version>10.1.1</arctic-sea.version>
-        <spring-boot.version>2.7.6</spring-boot.version>
+        <spring-boot.version>2.7.8</spring-boot.version>
         <geolatte-geom.version>1.9.0</geolatte-geom.version>
-        <hibernate.version>5.6.14.Final</hibernate.version>
-        <jackson.version>2.14.1</jackson.version>
+        <hibernate.version>5.6.15.Final</hibernate.version>
+        <jackson.version>2.14.2</jackson.version>
         <hamcrest.version>2.2</hamcrest.version>
         <locationtech-jts.version>1.19.0</locationtech-jts.version>
         <h2database.version>2.1.214</h2database.version>
@@ -187,7 +187,7 @@
 	        <dependency>
                 <groupId>org.checkerframework</groupId>
                 <artifactId>checker-qual</artifactId>
-                <version>3.28.0</version>
+                <version>3.31.0</version>
             </dependency>
 
             <dependency>
