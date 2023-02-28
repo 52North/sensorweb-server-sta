@@ -33,7 +33,6 @@ import org.hibernate.proxy.HibernateProxy;
 import org.n52.series.db.beans.AbstractDatasetEntity;
 import org.n52.series.db.beans.AbstractFeatureEntity;
 import org.n52.series.db.beans.DataEntity;
-import org.n52.series.db.beans.FeatureEntity;
 import org.n52.series.db.beans.HibernateRelations;
 import org.n52.series.db.beans.PhenomenonEntity;
 import org.n52.series.db.beans.PlatformEntity;
