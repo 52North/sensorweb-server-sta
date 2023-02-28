@@ -337,13 +337,12 @@ public class DatastreamService
      * Constructs FilterPredicate based on given queryOptions. Additionally
      * filters out Datasets that are aggregated into DatasetAggregations.
      *
-     * @param entityClass
-     *            Class of the requested Entity
      * @param queryOptions
      *            QueryOptions Object
      * @return Predicate based on FilterOption from queryOptions
      */
-    public Specification<AbstractDatasetEntity> getFilterPredicate(Class entityClass, QueryOptions queryOptions) {
+    @Override
+    public Specification<AbstractDatasetEntity> getFilterPredicate(QueryOptions queryOptions) {
         return (root, query, builder) -> {
             Predicate isNotAggregated = builder.isNull(root.get(AbstractDatasetEntity.PROPERTY_AGGREGATION));
             if (!queryOptions.hasFilterFilter()) {
