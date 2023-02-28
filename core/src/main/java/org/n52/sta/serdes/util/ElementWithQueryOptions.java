@@ -31,6 +31,7 @@ package org.n52.sta.serdes.util;
 import org.hibernate.Hibernate;
 import org.hibernate.proxy.HibernateProxy;
 import org.n52.series.db.beans.AbstractDatasetEntity;
+import org.n52.series.db.beans.AbstractFeatureEntity;
 import org.n52.series.db.beans.DataEntity;
 import org.n52.series.db.beans.FeatureEntity;
 import org.n52.series.db.beans.HibernateRelations;
@@ -39,7 +40,6 @@ import org.n52.series.db.beans.PlatformEntity;
 import org.n52.series.db.beans.ProcedureEntity;
 import org.n52.series.db.beans.sta.HistoricalLocationEntity;
 import org.n52.series.db.beans.sta.LocationEntity;
-import org.n52.series.db.beans.sta.StaFeatureEntity;
 import org.n52.shetland.filter.ExpandItem;
 import org.n52.shetland.oasis.odata.query.option.QueryOptions;
 
@@ -78,11 +78,8 @@ public abstract class ElementWithQueryOptions<P extends HibernateRelations.HasId
                 return new LocationWithQueryOptions((LocationEntity) unwrapped, queryOptions);
             case "HistoricalLocationEntity":
                 return new HistoricalLocationWithQueryOptions((HistoricalLocationEntity) unwrapped, queryOptions);
-            case "StaFeatureEntity":
-                return new FeatureOfInterestWithQueryOptions((StaFeatureEntity<?>) unwrapped, queryOptions);
             case "FeatureEntity":
-                return new FeatureOfInterestWithQueryOptions(
-                    new StaFeatureEntity<>((FeatureEntity) unwrapped), queryOptions);
+                return new FeatureOfInterestWithQueryOptions((AbstractFeatureEntity<?>) unwrapped, queryOptions);
             case "DatasetEntity":
             case "AbstractDatasetEntity":
             case "DatasetAggregationEntity":
@@ -192,9 +189,9 @@ public abstract class ElementWithQueryOptions<P extends HibernateRelations.HasId
     }
 
 
-    public static class FeatureOfInterestWithQueryOptions extends ElementWithQueryOptions<StaFeatureEntity<?>> {
+    public static class FeatureOfInterestWithQueryOptions extends ElementWithQueryOptions<AbstractFeatureEntity<?>> {
 
-        FeatureOfInterestWithQueryOptions(StaFeatureEntity<?> entity, QueryOptions queryOptions) {
+        FeatureOfInterestWithQueryOptions(AbstractFeatureEntity<?> entity, QueryOptions queryOptions) {
             super(entity, queryOptions);
         }
     }

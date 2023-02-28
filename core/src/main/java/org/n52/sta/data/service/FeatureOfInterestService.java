@@ -51,8 +51,8 @@ import org.n52.janmayen.http.HTTPStatus;
 import org.n52.series.db.beans.AbstractDatasetEntity;
 import org.n52.series.db.beans.AbstractFeatureEntity;
 import org.n52.series.db.beans.DataEntity;
+import org.n52.series.db.beans.FeatureEntity;
 import org.n52.series.db.beans.FormatEntity;
-import org.n52.series.db.beans.sta.StaFeatureEntity;
 import org.n52.shetland.filter.ExpandFilter;
 import org.n52.shetland.filter.ExpandItem;
 import org.n52.shetland.oasis.odata.query.option.QueryOptions;
@@ -127,7 +127,6 @@ public class FeatureOfInterestService
     protected AbstractFeatureEntity<?> fetchExpandEntitiesWithFilter(AbstractFeatureEntity<?> entity,
                                                                      ExpandFilter expandOption)
         throws STACRUDException, STAInvalidQueryException {
-        StaFeatureEntity<?> foi = new StaFeatureEntity<>(entity);
         Set<DataEntity<?>> observations = new HashSet<>();
         for (ExpandItem expandItem : expandOption.getItems()) {
             String expandProperty = expandItem.getPath();
@@ -143,8 +142,8 @@ public class FeatureOfInterestService
                                                                  StaConstants.FEATURE_OF_INTEREST));
             }
         }
-        foi.setObservations(observations);
-        return foi;
+        entity.setObservations(observations);
+        return entity;
     }
 
     @Override

@@ -38,7 +38,6 @@ import org.locationtech.jts.io.geojson.GeoJsonWriter;
 import org.n52.series.db.beans.AbstractFeatureEntity;
 import org.n52.series.db.beans.FeatureEntity;
 import org.n52.series.db.beans.parameter.ParameterEntity;
-import org.n52.series.db.beans.sta.StaFeatureEntity;
 import org.n52.shetland.ogc.sta.model.FeatureOfInterestEntityDefinition;
 import org.n52.shetland.ogc.sta.model.STAEntityDefinition;
 import org.n52.sta.serdes.json.JSONBase;
@@ -76,7 +75,7 @@ public class FeatureOfInterestSerDes {
 
 
     public static class FeatureOfInterestSerializer
-        extends AbstractSTASerializer<FeatureOfInterestWithQueryOptions, StaFeatureEntity<?>> {
+        extends AbstractSTASerializer<FeatureOfInterestWithQueryOptions, AbstractFeatureEntity<?>> {
 
         private static final String ENCODINGTYPE_GEOJSON = "application/vnd.geo+json";
 
@@ -95,7 +94,7 @@ public class FeatureOfInterestSerDes {
                               SerializerProvider serializers) throws IOException {
             gen.writeStartObject();
             value.unwrap(implicitSelect);
-            StaFeatureEntity<?> feature = value.getEntity();
+            FeatureEntity feature = (FeatureEntity) value.getEntity();
 
             // olingo @iot links
             if (!value.hasSelectOption() || value.getFieldsToSerialize().contains(STAEntityDefinition.PROP_ID)) {
