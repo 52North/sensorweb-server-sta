@@ -130,7 +130,15 @@ public class DatastreamQuerySpecifications extends EntityQuerySpecifications<Abs
                             .where(((Specification<DataEntity>) propertyValue).toPredicate(data,
                                                                                            query,
                                                                                            builder));
-                        return builder.in(root.get(DatasetEntity.PROPERTY_ID)).value(sq);
+
+                        Subquery<AbstractDatasetEntity> subquery = query.subquery(AbstractDatasetEntity.class);
+                        Root<AbstractDatasetEntity> realDataset = subquery.from(AbstractDatasetEntity.class);
+                        subquery.select(realDataset.get(AbstractDatasetEntity.PROPERTY_AGGREGATION))
+                            .where(builder.equal(realDataset.get(AbstractDatasetEntity.PROPERTY_ID), sq));
+
+                        // Either id matches or aggregation id matches
+                        return builder.or(builder.equal(root.get(AbstractDatasetEntity.PROPERTY_ID), sq),
+                                          builder.equal(root.get(AbstractDatasetEntity.PROPERTY_ID), subquery));
                     }
                     default:
                         throw new STAInvalidFilterExpressionException(COULD_NOT_FIND_RELATED_PROPERTY + propertyName);
