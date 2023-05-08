@@ -377,13 +377,20 @@ public class MessageBusRepository<T, I extends Serializable>
                                 Collections.singleton(entity.getDataset().getFeature().getStaIdentifier()));
             }
 
-            Optional<AbstractDatasetEntity> datastreamEntity =
-                datastreamRepository.findOne(dQs.withObservationStaIdentifier(entity.getStaIdentifier()));
-            if (datastreamEntity.isPresent()) {
-                collections.put(STAEntityDefinition.DATASTREAMS,
-                                Collections.singleton(datastreamEntity.get().getStaIdentifier()));
-            } else {
-                LOGGER.debug("No Datastream associated with this Entity {}", entity.getStaIdentifier());
+            if (entity.getDataset() != null) {
+                if (entity.getDataset().isSetAggregation()) {
+                    Optional<AbstractDatasetEntity> datastreamEntity =
+                        datastreamRepository.findOne(dQs.withSubDataset(entity.getDataset().getId()));
+                    if (datastreamEntity.isPresent()) {
+                        collections.put(STAEntityDefinition.DATASTREAMS,
+                                        Collections.singleton(datastreamEntity.get().getStaIdentifier()));
+                    } else {
+                        LOGGER.debug("No Datastream associated with this Entity {}", entity.getStaIdentifier());
+                    }
+                } else {
+                    collections.put(STAEntityDefinition.DATASTREAMS,
+                                    Collections.singleton(entity.getDataset().getStaIdentifier()));
+                }
             }
         } else if (rawObject instanceof AbstractFeatureEntity) {
             return collections;
