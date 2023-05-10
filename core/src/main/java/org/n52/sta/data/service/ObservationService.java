@@ -33,6 +33,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.Optional;
 import java.util.Set;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 import javax.persistence.EntityManager;
@@ -54,6 +55,9 @@ import org.n52.series.db.beans.DatasetEntity;
 import org.n52.series.db.beans.QuantityDataEntity;
 import org.n52.series.db.beans.SensorML20DataEntity;
 import org.n52.series.db.beans.TextDataEntity;
+import org.n52.series.db.beans.TrajectoryDataEntity;
+import org.n52.series.db.beans.dataset.DatasetType;
+import org.n52.series.db.beans.dataset.ValueType;
 import org.n52.series.db.beans.sta.LocationEntity;
 import org.n52.shetland.filter.ExpandFilter;
 import org.n52.shetland.filter.ExpandItem;
@@ -301,6 +305,21 @@ public class ObservationService
                     // We have not found a matching dataset so we need to create a new one
                     LOGGER.debug("Creating new dataset as none with matching FOI exists");
                     observation.setDataset(getDatastreamService().createOrExpandAggregation(datastream, feature));
+                }
+
+                // handle trajectory
+                if (observation.getDataset().getDatasetType().equals(DatasetType.trajectory)) {
+                    Optional<DataEntity<DataEntity<?>>> trajectoryObservation =
+                        getRepository().findFirstByDataset_idAndValue_type(observation.getDatasetId(), "trajectory");
+                    Long parentId = null;
+                    if (trajectoryObservation.isEmpty()) {
+                        // create a new trajectoryObservation to attach to
+                        parentId = createTrajectoryParent(observation).getId();
+                    } else {
+                        parentId = trajectoryObservation.get().getId();
+                    }
+
+                    observation.setParent(parentId);
                 }
 
                 // Save Observation
@@ -572,6 +591,15 @@ public class ObservationService
             dataset.setLastValueAt(null);
         }
         observation.setDataset(datastreamRepository.saveAndFlush(dataset));
+    }
+
+    private DataEntity<?> createTrajectoryParent(DataEntity<?> observation) {
+        TrajectoryDataEntity trajectoryDataEntity = new TrajectoryDataEntity();
+        trajectoryDataEntity.setDataset(observation.getDataset());
+        String id = UUID.randomUUID().toString();
+        trajectoryDataEntity.setStaIdentifier(id);
+        trajectoryDataEntity.setIdentifier(id);
+        return getRepository().intermediateSave(trajectoryDataEntity);
     }
 
     private AbstractFeatureEntity<?> createOrfetchFeature(DataEntity observation,

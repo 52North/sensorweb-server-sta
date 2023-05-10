@@ -404,27 +404,6 @@ public class DatastreamService
         return existing;
     }
 
-    /*
-     * private Specification<AbstractDatasetEntity>
-     * createQuery(AbstractDatasetEntity datastream) {
-     * Specification<AbstractDatasetEntity> expression; if
-     * (datastream.getThing().getStaIdentifier() != null &&
-     * !datastream.getThing().isSetName()) { expression =
-     * dQS.withThingStaIdentifier(datastream.getThing().getStaIdentifier()); }
-     * else { expression = dQS.withThingName(datastream.getThing().getName()); }
-     * if (datastream.getProcedure().getStaIdentifier() != null &&
-     * !datastream.getProcedure().isSetName()) { expression =
-     * expression.and(dQS.withSensorStaIdentifier(datastream.getProcedure().
-     * getStaIdentifier())); } else { expression =
-     * expression.and(dQS.withSensorName(datastream.getProcedure().getName()));
-     * } if (datastream.getObservableProperty().getStaIdentifier() != null &&
-     * !datastream.getObservableProperty() .isSetName()) { expression =
-     * expression.and(dQS.withObservedPropertyStaIdentifier(datastream.
-     * getObservableProperty() .getStaIdentifier())); } else { expression =
-     * expression.and(dQS.withObservedPropertyName(datastream.
-     * getObservableProperty().getName())); } return expression; }
-     */
-
     /**
      * Creates a DatasetAggregation or expands the existing Aggregation with a
      * new dataset.
@@ -464,9 +443,6 @@ public class DatastreamService
             return createandSaveDataset(datastream, feature, null);
         }
 
-        // We need to create a new dataset
-        // datastream.setIdentifier(UUID.randomUUID().toString());
-        // datastream.setStaIdentifier(null);
     }
 
     private DatasetEntity createandSaveDataset(AbstractDatasetEntity datastream, AbstractFeatureEntity<?> feature,
@@ -475,8 +451,8 @@ public class DatastreamService
                 .orElseThrow(() -> new STACRUDException("Could not find default SOS Category!"));
         OfferingEntity offering = offeringService.createOrFetchOffering(datastream.getProcedure());
         DatasetEntity dataset = createDatasetSkeleton(datastream.getOMObservationType().getFormat(),
-                isMobileFeatureEnabled && datastream.getPlatform().hasParameters()
-                        && datastream.getPlatform().getParameters().stream()
+                isMobileFeatureEnabled && datastream.hasParameters()
+                        && datastream.getParameters().stream()
                                 .filter(p -> p instanceof BooleanParameterEntity)
                                 .filter(p -> p.getName().equals("isMobile"))
                                 .anyMatch(p -> ((ParameterEntity<Boolean>) p).getValue()));
@@ -493,7 +469,7 @@ public class DatastreamService
         dataset.setPlatform(datastream.getPlatform());
         dataset.setUnit(datastream.getUnit());
         dataset.setOMObservationType(datastream.getOMObservationType());
-        // dataset.setParameters(datastream.getParameters());
+        dataset.setParameters(datastream.getParameters());
         if (datastream.getId() != null) {
             dataset.setAggregation(datastream);
         }

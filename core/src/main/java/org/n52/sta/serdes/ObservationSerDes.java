@@ -26,18 +26,8 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
-package org.n52.sta.serdes;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-import java.util.TreeSet;
+package org.n52.sta.serdes;
 
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonParser;
@@ -74,6 +64,17 @@ import org.n52.sta.serdes.util.EntityPatch;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+import java.util.TreeSet;
+
 @SuppressFBWarnings({"EI_EXPOSE_REP", "EI_EXPOSE_REP2"})
 public class ObservationSerDes {
 
@@ -95,7 +96,8 @@ public class ObservationSerDes {
             return entity;
         }
 
-        @Override public boolean isNoDataValue(Collection<String> noDataValues) {
+        @Override
+        public boolean isNoDataValue(Collection<String> noDataValues) {
             return false;
         }
     }
@@ -107,6 +109,22 @@ public class ObservationSerDes {
         protected static final String VERTICAL = "vertical";
         private static final long serialVersionUID = -4575044340713191285L;
         private static final GeoJsonWriter GEO_JSON_WRITER = new GeoJsonWriter();
+
+        private static final QueryOptions trajectoryResultSchema =
+            new QueryOptions("",
+                             Collections.singleton(new SelectFilter(new HashSet<>(
+                                 Arrays.asList(StaConstants.PROP_RESULT,
+                                               StaConstants.PROP_PARAMETERS,
+                                               StaConstants.PROP_PHENOMENON_TIME,
+                                               StaConstants.PROP_RESULT_TIME,
+                                               StaConstants.PROP_VALID_TIME)))));
+
+        private static final QueryOptions profileResultSchema =
+            new QueryOptions("",
+                             Collections.singleton(new SelectFilter(new HashSet<>(
+                                 Arrays.asList(StaConstants.PROP_RESULT,
+                                               StaConstants.PROP_PARAMETERS,
+                                               VERTICAL)))));
 
         public ObservationSerializer(String rootUrl, boolean implicitExpand, String... activeExtensions) {
             super(ObservationWithQueryOptions.class, implicitExpand, activeExtensions);
@@ -133,26 +151,13 @@ public class ObservationSerDes {
             if (!value.hasSelectOption() || value.getFieldsToSerialize().contains(STAEntityDefinition.PROP_RESULT)) {
                 gen.writeFieldName(STAEntityDefinition.PROP_RESULT);
                 if (observation instanceof ProfileDataEntity) {
-                    QueryOptions profileResultSchema =
-                        new QueryOptions("",
-                                         Collections.singleton(new SelectFilter(new HashSet<>(
-                                             Arrays.asList(StaConstants.PROP_RESULT,
-                                                           StaConstants.PROP_PARAMETERS,
-                                                           VERTICAL)))));
-                    writeNestedCollection(sortValuesByPhenomenonTime((Set<DataEntity<?>>) observation.getValue()),
+                    writeNestedCollection(sortValuesByVerticalFrom((Set<DataEntity<?>>) observation.getValue()),
                                           profileResultSchema,
                                           gen,
                                           serializers);
                 } else if (observation instanceof TrajectoryDataEntity) {
-                    QueryOptions trajectoryResultSchema =
-                        new QueryOptions("",
-                                         Collections.singleton(new SelectFilter(new HashSet<>(
-                                             Arrays.asList(StaConstants.PROP_RESULT,
-                                                           StaConstants.PROP_PARAMETERS,
-                                                           StaConstants.PROP_PHENOMENON_TIME,
-                                                           StaConstants.PROP_RESULT_TIME,
-                                                           StaConstants.PROP_VALID_TIME)))));
-                    writeNestedCollection(sortValuesByVerticalFrom((Set<DataEntity<?>>) observation.getValue()),
+
+                    writeNestedCollection(sortValuesByPhenomenonTime((Set<DataEntity<?>>) observation.getValue()),
                                           trajectoryResultSchema,
                                           gen,
                                           serializers);

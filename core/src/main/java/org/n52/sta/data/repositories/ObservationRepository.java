@@ -33,6 +33,7 @@ import org.springframework.context.annotation.DependsOn;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Optional;
 import java.util.Set;
 
 @Transactional
@@ -44,6 +45,8 @@ public interface ObservationRepository<T extends DataEntity<?>>
     DataEntity<T> findFirstByDataset_idOrderBySamplingTimeStartAsc(Long datasetIdentifier);
 
     DataEntity<T> findFirstByDataset_idOrderBySamplingTimeEndDesc(Long datasetIdentifier);
+
+    Optional<DataEntity<T>> findFirstByDataset_idAndValue_type(Long datasetId, String valueType);
 
     void deleteAllByDatasetIdIn(Set<Long> datasetId);
 }
