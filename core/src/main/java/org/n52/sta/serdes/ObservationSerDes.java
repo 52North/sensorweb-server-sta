@@ -110,7 +110,7 @@ public class ObservationSerDes {
         private static final long serialVersionUID = -4575044340713191285L;
         private static final GeoJsonWriter GEO_JSON_WRITER = new GeoJsonWriter();
 
-        private static final QueryOptions trajectoryResultSchema =
+        private static final QueryOptions RESULT_SCHEMA_TRAJECTORY =
             new QueryOptions("",
                              Collections.singleton(new SelectFilter(new HashSet<>(
                                  Arrays.asList(StaConstants.PROP_RESULT,
@@ -119,7 +119,7 @@ public class ObservationSerDes {
                                                StaConstants.PROP_RESULT_TIME,
                                                StaConstants.PROP_VALID_TIME)))));
 
-        private static final QueryOptions profileResultSchema =
+        private static final QueryOptions RESULT_SCHEMA_PROFILE =
             new QueryOptions("",
                              Collections.singleton(new SelectFilter(new HashSet<>(
                                  Arrays.asList(StaConstants.PROP_RESULT,
@@ -152,13 +152,13 @@ public class ObservationSerDes {
                 gen.writeFieldName(STAEntityDefinition.PROP_RESULT);
                 if (observation instanceof ProfileDataEntity) {
                     writeNestedCollection(sortValuesByVerticalFrom((Set<DataEntity<?>>) observation.getValue()),
-                                          profileResultSchema,
+                                          RESULT_SCHEMA_PROFILE,
                                           gen,
                                           serializers);
                 } else if (observation instanceof TrajectoryDataEntity) {
 
                     writeNestedCollection(sortValuesByPhenomenonTime((Set<DataEntity<?>>) observation.getValue()),
-                                          trajectoryResultSchema,
+                                          RESULT_SCHEMA_TRAJECTORY,
                                           gen,
                                           serializers);
                 } else if (observation instanceof QuantityDataEntity) {
