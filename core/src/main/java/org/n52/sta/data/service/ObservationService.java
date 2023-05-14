@@ -57,7 +57,6 @@ import org.n52.series.db.beans.SensorML20DataEntity;
 import org.n52.series.db.beans.TextDataEntity;
 import org.n52.series.db.beans.TrajectoryDataEntity;
 import org.n52.series.db.beans.dataset.DatasetType;
-import org.n52.series.db.beans.dataset.ValueType;
 import org.n52.series.db.beans.sta.LocationEntity;
 import org.n52.shetland.filter.ExpandFilter;
 import org.n52.shetland.filter.ExpandItem;
