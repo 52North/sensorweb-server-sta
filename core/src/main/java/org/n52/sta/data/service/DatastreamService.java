@@ -451,8 +451,8 @@ public class DatastreamService
                 .orElseThrow(() -> new STACRUDException("Could not find default SOS Category!"));
         OfferingEntity offering = offeringService.createOrFetchOffering(datastream.getProcedure());
         DatasetEntity dataset = createDatasetSkeleton(datastream.getOMObservationType().getFormat(),
-                isMobileFeatureEnabled && datastream.hasParameters()
-                        && datastream.getParameters().stream()
+                isMobileFeatureEnabled && datastream.getPlatform().hasParameters()
+                        && datastream.getPlatform().getParameters().stream()
                                 .filter(p -> p instanceof BooleanParameterEntity)
                                 .filter(p -> p.getName().equals("isMobile"))
                                 .anyMatch(p -> ((ParameterEntity<Boolean>) p).getValue()));
@@ -469,7 +469,7 @@ public class DatastreamService
         dataset.setPlatform(datastream.getPlatform());
         dataset.setUnit(datastream.getUnit());
         dataset.setOMObservationType(datastream.getOMObservationType());
-        dataset.setParameters(datastream.getParameters());
+        // dataset.setParameters(datastream.getParameters());
         if (datastream.getId() != null) {
             dataset.setAggregation(datastream);
         }

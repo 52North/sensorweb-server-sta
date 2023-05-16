@@ -46,7 +46,7 @@ public interface ObservationRepository<T extends DataEntity<?>>
 
     DataEntity<T> findFirstByDataset_idOrderBySamplingTimeEndDesc(Long datasetIdentifier);
 
-    Optional<DataEntity<T>> findFirstByDataset_idAndValue_type(Long datasetId, String valueType);
+    Optional<DataEntity<T>> findFirstByDataset_idAndValueType(Long datasetId, String valueType);
 
     void deleteAllByDatasetIdIn(Set<Long> datasetId);
 }

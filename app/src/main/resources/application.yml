@@ -54,7 +54,7 @@ server:
       verticalFromTo: vertical
 
     ## Toggle support for isMobile Feature
-    ## When true DatasetType is set to trajectory if Datastream->properties contains KVP '"isMobile": "true"'
+    ## When true DatasetType is set to trajectory if Thing->properties contains KVP '"isMobile": "true"'
     isMobile: false
 
     # Toggle whether this Instance should be read-only. Can be toggled separately for MQTT and HTTP
@@ -71,6 +71,11 @@ server:
         credentials: >
           test:9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08,
           test2:9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08
+
+    # Enables automatic nesting of CompositeObservations (e.g. Trajectories or Profiles)
+    # If true Sub-Observations of CompositeObservations are not rendered standalone
+    # If false CompositeObservations themselves are not returned, only Sub-Observations
+    embedCompositeObservations: false
 
 # Database Configuration
 database:
@@ -90,7 +95,7 @@ spring:
     platform: postgres
     username: postgres
     password: postgres
-    url: jdbc:postgresql://192.168.178.94:5432/sos2
+    url: jdbc:postgresql://localhost:5432/sos2
     initialization-mode: always
     hikari:
       maximum-pool-size: 10
