@@ -272,14 +272,8 @@ public class LocationService
         if (toMerge.isSetGeometry()) {
             existing.setGeometryEntity(toMerge.getGeometryEntity());
         }
-        if (toMerge.hasParameters()) {
-            existing.getParameters().clear();
-            toMerge.getParameters().forEach(p -> {
-                                                p.setDescribeableEntity(existing);
-                                                existing.addParameter(p);
-                                            }
-            );
-        }
+
+        mergeProperties(existing, toMerge, parameterRepository);
         return existing;
     }
 

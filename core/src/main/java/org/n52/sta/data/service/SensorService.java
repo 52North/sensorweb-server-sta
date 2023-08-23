@@ -267,13 +267,8 @@ public class SensorService extends AbstractSensorThingsEntityServiceImpl<Procedu
          * if (toMerge.isSetFormat()) { existing.setFormat(toMerge.getFormat());
          * }
          */
-        if (toMerge.hasParameters()) {
-            existing.getParameters().clear();
-            toMerge.getParameters().forEach(p -> {
-                p.setDescribeableEntity(existing);
-                existing.addParameter(p);
-            });
-        }
+
+        mergeProperties(existing, toMerge, parameterRepository);
 
         return existing;
     }

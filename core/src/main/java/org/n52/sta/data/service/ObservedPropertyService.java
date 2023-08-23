@@ -253,15 +253,8 @@ public class ObservedPropertyService
 
     @Override
     public PhenomenonEntity merge(PhenomenonEntity existing, PhenomenonEntity toMerge) {
-        mergeIdentifierNameDescription(existing, toMerge);
-        if (toMerge.hasParameters()) {
-            existing.getParameters().clear();
-            toMerge.getParameters().forEach(p -> {
-                                                p.setDescribeableEntity(existing);
-                                                existing.addParameter(p);
-                                            }
-            );
-        }
+        mergeNameDescription(existing, toMerge);
+        mergeProperties(existing, toMerge, parameterRepository);
         return existing;
     }
 

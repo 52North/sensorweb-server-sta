@@ -432,14 +432,9 @@ public class ObservationService
             existing.setValidTimeEnd(toMerge.getValidTimeEnd());
         }
         // parameter
-        if (toMerge.hasParameters()) {
-            existing.getParameters().clear();
-            toMerge.getParameters().forEach(p -> {
-                        p.setDescribeableEntity(existing);
-                        existing.addParameter(p);
-                    }
-            );
-        }
+
+        mergeProperties(existing, toMerge, parameterRepository);
+
         // value
         if (toMerge.getValueText() != null) {
             checkValue(existing, toMerge);

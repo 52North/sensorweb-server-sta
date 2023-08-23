@@ -394,13 +394,8 @@ public class DatastreamService
                 && !toMerge.getOMObservationType().getFormat().equalsIgnoreCase(UNKNOWN)) {
             existing.setOMObservationType(toMerge.getOMObservationType());
         }
-        if (toMerge.hasParameters()) {
-            existing.getParameters().clear();
-            toMerge.getParameters().forEach(p -> {
-                p.setDescribeableEntity(existing);
-                existing.addParameter(p);
-            });
-        }
+
+        mergeProperties(existing, toMerge, parameterRepository);
         return existing;
     }
 

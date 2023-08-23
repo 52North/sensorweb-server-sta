@@ -31,9 +31,11 @@ package org.n52.sta.data.service;
 import org.hibernate.query.criteria.internal.CriteriaBuilderImpl;
 import org.n52.series.db.beans.AbstractDatasetEntity;
 import org.n52.series.db.beans.DataEntity;
+import org.n52.series.db.beans.DescribableEntity;
 import org.n52.series.db.beans.HibernateRelations;
 import org.n52.series.db.beans.HibernateRelations.HasDescription;
 import org.n52.series.db.beans.HibernateRelations.HasName;
+import org.n52.series.db.beans.parameter.ParameterEntity;
 import org.n52.series.db.beans.sta.LocationEntity;
 import org.n52.shetland.filter.ExpandFilter;
 import org.n52.shetland.filter.FilterFilter;
@@ -59,6 +61,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.data.repository.CrudRepository;
 import org.springframework.http.HttpMethod;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -68,6 +71,7 @@ import javax.persistence.EntityManager;
 import javax.persistence.criteria.Predicate;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * Interface for requesting Sensor Things entities
@@ -546,6 +550,22 @@ public abstract class AbstractSensorThingsEntityServiceImpl<T extends StaIdentif
         if (toMerge.hasSamplingTimeStart() && toMerge.hasSamplingTimeEnd()) {
             existing.setSamplingTimeStart(toMerge.getSamplingTimeStart());
             existing.setSamplingTimeEnd(toMerge.getSamplingTimeEnd());
+        }
+    }
+
+    protected void mergeProperties(DescribableEntity existing,
+                                   HibernateRelations.HasParameters toMerge,
+                                   CrudRepository<?, Long> parameterRepository) {
+        if (toMerge.getParameters() != null) {
+            parameterRepository.deleteAllById(
+                    existing.getParameters()
+                            .stream()
+                            .map(ParameterEntity::getId).collect(Collectors.toList()));
+            existing.getParameters().clear();
+            for (ParameterEntity<?> parameter : toMerge.getParameters()) {
+                parameter.setDescribeableEntity(existing);
+                existing.addParameter(parameter);
+            }
         }
     }
 
