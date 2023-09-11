@@ -1,9 +1,23 @@
-# Alpine Linux
-FROM maven:3-eclipse-temurin-11-alpine as buildstage
+FROM alpine/git as gitstage
 
+WORKDIR /app 
+
+RUN git clone https://github.com/52north/sensorweb-server-db-model \
+      && cd sensorweb-server-db-model \
+      && git checkout v4.0.2
+
+
+FROM maven:3-eclipse-temurin-11-alpine as buildstage
 WORKDIR /app
-COPY . /app
-RUN mvn clean package
+
+COPY --from=gitstage /app /app
+COPY . /app/sensorweb-server-sta/
+
+RUN cd sensorweb-server-db-model \
+      && mvn clean install
+
+RUN cd sensorweb-server-sta \
+      && mvn clean package
 
 #######################################################################################################
 
@@ -20,7 +34,7 @@ LABEL maintainer="Jan Speckamp <j.speckamp@52north.org>" \
       org.opencontainers.image.authors="Jan Speckamp <j.speckamp@52north.org>"
 
 WORKDIR /app
-ARG DEPENDENCY=/app/app/target/unpacked
+ARG DEPENDENCY=/app/sensorweb-server-sta/app/target/unpacked
 COPY --from=buildstage ${DEPENDENCY}/BOOT-INF/lib /app/lib
 COPY --from=buildstage ${DEPENDENCY}/META-INF /app/META-INF
 COPY --from=buildstage ${DEPENDENCY}/BOOT-INF/classes /app
