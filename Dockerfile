@@ -4,7 +4,7 @@ WORKDIR /app
 
 RUN git clone https://github.com/52north/sensorweb-server-db-model \
       && cd sensorweb-server-db-model \
-      && git checkout v4.0.2
+      && git checkout v4.0.3
 
 
 FROM maven:3-eclipse-temurin-11-alpine as buildstage
