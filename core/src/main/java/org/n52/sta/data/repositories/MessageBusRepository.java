@@ -379,14 +379,8 @@ public class MessageBusRepository<T, I extends Serializable>
 
             if (entity.getDataset() != null) {
                 if (entity.getDataset().isSetAggregation()) {
-                    Optional<AbstractDatasetEntity> datastreamEntity =
-                        datastreamRepository.findOne(dQs.withSubDataset(entity.getDataset().getId()));
-                    if (datastreamEntity.isPresent()) {
-                        collections.put(STAEntityDefinition.DATASTREAMS,
-                                        Collections.singleton(datastreamEntity.get().getStaIdentifier()));
-                    } else {
-                        LOGGER.debug("No Datastream associated with this Entity {}", entity.getStaIdentifier());
-                    }
+                    collections.put(STAEntityDefinition.DATASTREAMS,
+                                    Collections.singleton(entity.getDataset().getAggregation().getStaIdentifier()));
                 } else {
                     collections.put(STAEntityDefinition.DATASTREAMS,
                                     Collections.singleton(entity.getDataset().getStaIdentifier()));

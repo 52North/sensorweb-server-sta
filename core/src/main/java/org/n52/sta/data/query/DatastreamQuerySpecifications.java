@@ -343,10 +343,6 @@ public class DatastreamQuerySpecifications extends EntityQuerySpecifications<Abs
         };
     }
 
-    public Specification<AbstractDatasetEntity> withSubDataset(final Long subDatasetId) {
-        return (root, query, builder) -> builder.equal(root.get(DatasetEntity.PROPERTY_AGGREGATION), subDatasetId);
-    }
-
     public Specification<AbstractDatasetEntity> withObservationStaIdentifier(String observationIdentifier) {
         return (root, query, builder) -> {
             Subquery<AbstractDatasetEntity> sq = query.subquery(AbstractDatasetEntity.class);
