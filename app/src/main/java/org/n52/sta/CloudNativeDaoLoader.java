@@ -29,34 +29,23 @@
 
 package org.n52.sta;
 
-import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.ComponentScan;
-import org.springframework.context.annotation.FilterType;
-import org.springframework.scheduling.annotation.EnableAsync;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Profile;
+import org.springframework.context.annotation.aspectj.EnableSpringConfigured;
 
-@SpringBootApplication
-@EnableConfigurationProperties
-@EnableAsync
-@SuppressWarnings("uncommentedmain")
-@ComponentScan(excludeFilters = {
-    @ComponentScan.Filter(type = FilterType.REGEX, pattern = ".*vanilla.*"),
-    @ComponentScan.Filter(type = FilterType.REGEX, pattern = ".*citsci.*"),
-    @ComponentScan.Filter(type = FilterType.REGEX, pattern = ".*ufzaggregata.*"),
-    @ComponentScan.Filter(type = FilterType.REGEX, pattern = ".*cndao.*")
-}
-)
-public class Application {
+/**
+ * @author <a href="mailto:humaid.kidwai@ucalgary.ca">Humaid Kidwai</a>
+ */
 
-    static {
-        String TRUE = "true";
-        System.setProperty("tomcat.util.http.parser.HttpParser.requestTargetAllow", "%");
-        System.setProperty("org.apache.tomcat.util.buf.UDecoder.ALLOW_ENCODED_SLASH", TRUE);
-        System.setProperty("org.apache.catalina.connector.CoyoteAdapter.ALLOW_BACKSLASH", TRUE);
-    }
+@Profile("cloudnativedao")
+@Configuration
+@ComponentScan(basePackages = {
+        "org.n52.sta.http.vanilla",
+        "org.n52.sta.mqtt.vanilla",
+        "org.n52.sta.cloudnative",
+})
+@EnableSpringConfigured
+public class CloudNativeDaoLoader {
 
-    public static void main(String[] args) {
-        SpringApplication.run(Application.class, args);
-    }
 }

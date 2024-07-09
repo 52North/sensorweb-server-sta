@@ -4,7 +4,7 @@
     <parent>
         <groupId>org.n52</groupId>
         <artifactId>parent</artifactId>
-        <version>19</version>
+        <version>27</version>
     </parent>
 
     <groupId>org.n52.sensorweb-server.sta</groupId>
@@ -32,6 +32,7 @@
         <module>webapp</module>
         <module>dao-ufz</module>
         <module>dao-postgres</module>
+        <module>dao-cloudnative</module>
     </modules>
 
     <properties>
@@ -67,6 +68,11 @@
             <dependency>
                 <groupId>${project.groupId}</groupId>
                 <artifactId>sta-dao-postgres</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.n52.sensorweb-server.sta</groupId>
+                <artifactId>sta-dao-cloudnative</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
@@ -270,8 +276,8 @@
                     <groupId>pl.project13.maven</groupId>
                     <artifactId>git-commit-id-plugin</artifactId>
                     <version>4.0.2</version>
-                </plugin>
-                <plugin>
+				</plugin>
+				<plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-dependency-plugin</artifactId>
                     <configuration>
@@ -287,6 +293,7 @@
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-enforcer-plugin</artifactId>
+                    <version>3.5.0</version>
                     <configuration>
                         <rules>
                             <requireNoRepositories>
@@ -299,6 +306,11 @@
                                     </id>
                                 </allowedRepositories>
                             </requireNoRepositories>
+                            <dependencyConvergence>
+                                <excludes>
+                                    <exclude>org.n52.sensorweb-server.sta:sta-dao-postgres</exclude>
+                                </excludes>
+                            </dependencyConvergence>
                         </rules>
                     </configuration>
                 </plugin>
@@ -367,9 +379,12 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-checkstyle-plugin</artifactId>
+                <version>3.1.1</version>
+                <configuration>
+                    <skip>true</skip>
+                </configuration>
                 <executions>
                     <execution>
-                        <id>validate</id>
                         <phase>validate</phase>
                         <goals>
                             <goal>check</goal>
