@@ -36,12 +36,13 @@ import org.jooq.impl.DSL;
 import org.n52.shetland.ogc.filter.FilterConstants;
 import org.n52.shetland.ogc.sta.StaConstants;
 import org.n52.shetland.ogc.sta.exception.STAInvalidFilterExpressionException;
-
 import java.util.Date;
-
 import static org.jooq.impl.DSL.*;
 
-public class HistoricalLocationConditions extends EntityQueryConditions{
+/**
+ * @author <a href="mailto:humaid.kidwai@ucalgary.ca">Humaid Kidwai</a>
+ */
+public class HistoricalLocationQueryConditions extends EntityQueryConditions{
 
     public Condition withLocationStaIdentifier(final String locationIdentifier) {
         // Join and condition

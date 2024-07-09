@@ -31,16 +31,20 @@ package org.n52.sta;
 
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Profile; /**
+import org.springframework.context.annotation.Profile;
+
+/**
  * @author <a href="mailto:humaid.kidwai@ucalgary.ca">Humaid Kidwai</a>
  */
-@Profile("cndao")
+
+@Profile("cloudnativedao")
 @Configuration
 @ComponentScan(basePackages = {
         "org.n52.sta.http.vanilla",
         "org.n52.sta.mqtt.vanilla",
         "org.n52.sta.cndao",
 })
-public class CnDaoLoader {
+
+public class CloudNativeDaoLoader {
 
 }

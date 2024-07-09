@@ -33,7 +33,6 @@ import org.jooq.Field;
 import org.jooq.Record1;
 import org.jooq.SelectConditionStep;
 import org.jooq.impl.DSL;
-import org.n52.series.db.beans.AbstractFeatureEntity;
 import org.n52.series.db.beans.DescribableEntity;
 import org.n52.series.db.beans.parameter.ParameterFactory;
 import org.n52.shetland.oasis.odata.ODataConstants;
@@ -42,11 +41,12 @@ import org.n52.shetland.ogc.sta.StaConstants;
 import org.n52.shetland.ogc.sta.exception.STAInvalidFilterExpressionException;
 import org.n52.sta.cndao.condition.utils.GeospatialFunctions;
 import org.n52.svalbard.odata.core.expr.GeoValueExpr;
-
-
 import static org.jooq.impl.DSL.*;
 
-public class FeatureOfInterestConditions extends EntityQueryConditions implements SpatialQueryConditions{
+/**
+ * @author <a href="mailto:humaid.kidwai@ucalgary.ca">Humaid Kidwai</a>
+ */
+public class FeatureOfInterestQueryConditions extends EntityQueryConditions implements SpatialQueryConditions{
 
     public Condition withObservationStaIdentifier(final String observationIdentifier) {
 

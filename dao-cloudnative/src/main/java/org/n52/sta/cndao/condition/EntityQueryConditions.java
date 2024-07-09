@@ -26,29 +26,26 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
-package org.n52.sta.data.cndao.condition;
-import org.jooq.impl.SQLDataType;
-import org.n52.series.db.beans.DescribableEntity;
-import org.n52.series.db.beans.HibernateRelations;
-import org.n52.series.db.beans.parameter.ParameterEntity;
+package org.n52.sta.cndao.condition;
 import org.n52.series.db.beans.parameter.ParameterFactory;
-import org.n52.series.db.beans.parameter.dataset.DatasetParameterEntity;
-import org.n52.series.db.beans.parameter.feature.FeatureParameterEntity;
-import org.n52.series.db.beans.parameter.location.LocationParameterEntity;
-import org.n52.series.db.beans.parameter.observation.ObservationParameterEntity;
-import org.n52.series.db.beans.parameter.phenomenon.PhenomenonParameterEntity;
-import org.n52.series.db.beans.parameter.platform.PlatformParameterEntity;
-import org.n52.series.db.beans.parameter.procedure.ProcedureParameterEntity;
 import org.n52.shetland.ogc.filter.FilterConstants;
 import org.n52.shetland.ogc.sta.exception.STAInvalidFilterExpressionException;
 import org.jooq.*;
 import org.jooq.impl.DSL;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 import java.util.Date;
 import java.util.List;
 
+/**
+ * @author <a href="mailto:humaid.kidwai@ucalgary.ca">Humaid Kidwai</a>
+ */
+
 public abstract class EntityQueryConditions implements EntityQueryConstants {
 
+
     protected DSLContext dsl;
+
     /**
      * Gets Entity-specific Filter for relation with given name.
      *
@@ -75,22 +72,21 @@ public abstract class EntityQueryConditions implements EntityQueryConstants {
      * @return Condition evaluating to true if Entity is not to be filtered out
      * @throws STAInvalidFilterExpressionException if an error occurs
      */
-    public <K extends Comparable<? super K>> Condition getFilterForProperty(String propertyName,
-                                         K propertyValue,
+    public <T extends Comparable<? super T>> Condition getFilterForProperty(String propertyName,
+                                         Field<T> propertyValue,
                                          FilterConstants.ComparisonOperator operator,
                                          boolean switched)
             throws STAInvalidFilterExpressionException {
         return handleDirectPropertyFilter(propertyName, propertyValue, operator, switched);
     }
 
-    protected abstract <K extends Comparable<? super K>> Condition handleDirectPropertyFilter(String propertyName,
-                                                            K propertyValue,
+    protected abstract <T extends Comparable<? super T>> Condition handleDirectPropertyFilter(String propertyName,
+                                                            Field<T> propertyValue,
                                                             FilterConstants.ComparisonOperator operator,
                                                             boolean switched);
 
     protected abstract Condition handleRelatedPropertyFilter(String propertyName,
-                                                                    Condition propertyValue)
-            throws STAInvalidFilterExpressionException;
+                                                                    Condition propertyValue);
 
     public Condition withName(final String name) {
         return DSL.field(STA_NAME_FIELD).equal(name);
@@ -105,53 +101,55 @@ public abstract class EntityQueryConditions implements EntityQueryConstants {
     }
 
     @SuppressWarnings("unchecked")
-    protected <K extends Comparable<? super K>> Condition handleDirectStringPropertyFilter(Field<String> tableField,
-                                                         K propertyValue,
-                                                         FilterConstants.ComparisonOperator operator,
-                                                         boolean switched)
+    protected <T extends Comparable<? super T>> Condition handleDirectStringPropertyFilter(
+            Field<String> stringField,
+            Field <T> propertyValue,
+            FilterConstants.ComparisonOperator operator,
+            boolean switched)
             throws STAInvalidFilterExpressionException {
-        if (propertyValue.getClass().equals(String.class)) {
-            return this.handleStringFilter(tableField, (String) propertyValue, operator, switched);
+        if (propertyValue.getDataType().getType().equals(String.class)) {
+            return this.handleStringFilter(stringField, (Field<String>) propertyValue, operator, switched);
         } else {
             throw new STAInvalidFilterExpressionException(
-                    INVALID_DATATYPE_CANNOT_CAST + propertyValue.getClass() + " to String.class");
+                    INVALID_DATATYPE_CANNOT_CAST + propertyValue.getDataType().getType() + " to String.class");
         }
     }
 
 
     @SuppressWarnings("unchecked")
-    protected <K extends Comparable<? super K>> Condition handleDirectNumberPropertyFilter(
-            Field<K> numberField,
-            K propertyValue,
+    protected <T extends Comparable<? super T>> Condition handleDirectNumberPropertyFilter(
+            Field<Double> numberField,
+            Field <T> propertyValue,
             FilterConstants.ComparisonOperator operator)
             throws STAInvalidFilterExpressionException {
 
-        if (Number.class.isAssignableFrom(propertyValue.getClass()) &&
-                Number.class.isAssignableFrom(numberField.getDataType().getType())) {
-            return this.handleComparableFilter(numberField, propertyValue, operator);
+        if (Number.class.isAssignableFrom(numberField.getDataType().getType()) &&
+                Number.class.isAssignableFrom(propertyValue.getDataType().getType())){
+            return this.handleComparableFilter(numberField, (Field<Double>) propertyValue, operator);
         } else {
             throw new STAInvalidFilterExpressionException(
-                    INVALID_DATATYPE_CANNOT_CAST + propertyValue.getClass() + " to Number.class");
+                    INVALID_DATATYPE_CANNOT_CAST + propertyValue.getDataType().getType() + " to Number.class");
         }
     }
 
 
     @SuppressWarnings("unchecked")
-    protected <K extends Comparable<? super K>> Condition handleDirectDateTimePropertyFilter(Field<Date> time,
-                                                           K propertyValue,
-                                                           FilterConstants.ComparisonOperator operator)
+    protected <T extends Comparable<? super T>> Condition handleDirectDateTimePropertyFilter(
+            Field<Date> timeField,
+            Field <T> propertyValue,
+            FilterConstants.ComparisonOperator operator)
             throws STAInvalidFilterExpressionException {
 
-        if (propertyValue.getClass().equals(Date.class)) {
-            return this.handleComparableFilter(time, (Date) propertyValue, operator);
+        if (propertyValue.getDataType().getType().equals(Date.class)) {
+            return this.handleComparableFilter(timeField, (Field<Date>)propertyValue, operator);
         } else {
             throw new STAInvalidFilterExpressionException(
-                    INVALID_DATATYPE_CANNOT_CAST + propertyValue.getClass() + " to Date.class");
+                    INVALID_DATATYPE_CANNOT_CAST + propertyValue.getDataType().getType() + " to Date.class");
         }
     }
 
     private Condition handleStringFilter(Field<String> left,
-                                         String right,
+                                         Field<String> right,
                                          FilterConstants.ComparisonOperator operatorKind,
                                          boolean switched)
             throws STAInvalidFilterExpressionException {
@@ -159,9 +157,9 @@ public abstract class EntityQueryConditions implements EntityQueryConstants {
         return handleComparableFilter(left, right, operator);
     }
 
-    private <K extends Comparable<? super K>> Condition handleComparableFilter(
-            Field<K> left,
-            K right,
+    private <T extends Comparable<? super T>> Condition handleComparableFilter(
+            Field <T> left,
+            Field <T> right,
             FilterConstants.ComparisonOperator operator)
             throws STAInvalidFilterExpressionException {
 
@@ -205,78 +203,47 @@ public abstract class EntityQueryConditions implements EntityQueryConstants {
     }
 
 
-    protected <K extends Comparable<? super K>> Condition handleProperties(String propertyName,
-                                         K propertyValue,
-                                         FilterConstants.ComparisonOperator operator,
-                                         boolean switched,
-                                         String referenceName,
-                                         ParameterFactory.EntityType entityType)
+    protected <T extends Comparable<? super T>> Condition handleProperties(
+            String propertyName,
+            Field<T> propertyValue,
+            FilterConstants.ComparisonOperator operator,
+            boolean switched,
+            String referenceField,
+            ParameterFactory.EntityType entityType)
             throws STAInvalidFilterExpressionException {
-        String key = propertyName.substring(11);
-        if (propertyValue.getClass().equals(String.class)) {
-            Class<? extends ParameterEntity> paramsEntityClass =
-                    ParameterFactory.from(entityType, ParameterFactory.ValueType.TEXT).getClass();
 
-            String tableName = getTableName(paramsEntityClass);
-            if (tableName == null) {
+        String key = propertyName.substring(11);
+        if (propertyValue.getDataType().getType().equals(String.class)) {
+
+            String tableName = getTableName(entityType);
+            String entityId = getEntityId(entityType);
+
+            if (tableName == null || entityId == null) {
                 // handle exception
                 throw new STAInvalidFilterExpressionException(
                         String.format(ERROR_INVALID_PARAMETER_ENTITY_TYPE, entityType));
             }
-            // Define the table and fields
-            Table<?> table = DSL.table(DSL.name(tableName)); // unqualified table name; fix it
-            // type depends on referenceField type
-            Field<Long> referenceField = DSL.field(DSL.name(referenceName), SQLDataType.BIGINT);
-            // type depends on nameField type
-            Field<String> nameField = DSL.field(DSL.name(ParameterEntity.NAME), SQLDataType.VARCHAR);
-            // value is ambiguous here: value_json,xml,category,etc.
-            Field<String> valueField = DSL.field(DSL.name(HibernateRelations.HasValue.VALUE), SQLDataType.VARCHAR);
-            // cross check if PROPERTY_ID is the correct field name
-            Field<Long> idField = DSL.field(DSL.name(DescribableEntity.PROPERTY_ID), SQLDataType.BIGINT);
+
+            // value could also be: value_json,value_xml,value_category,value_text, value_count, value_quantity,etc
+            Field<String> valueField = DSL.field(PARAMETER_VALUE_TEXT, String.class);
 
             // Build the subquery condition
-            Condition subqueryCondition = nameField.eq(key)
-                    .and(handleDirectStringPropertyFilter(valueField, (String) propertyValue, operator, switched));
+            Condition subqueryCondition = DSL.field(STA_NAME_FIELD).eq(key)
+                    .and(handleDirectStringPropertyFilter(valueField, propertyValue, operator, switched));
 
             // Build the subquery
-            Select<?> subquery = DSL.select(referenceField)
-                    .from(table)
+            SelectConditionStep<Record1<Object>> subquery = DSL.select(DSL.field(referenceField))
+                    .from(DSL.table(tableName))
                     .where(subqueryCondition);
 
             // Main query condition
-            return idField.in((Select<? extends Record1<Long>>) subquery);
+            return DSL.field(entityId).in(subquery);
 
         } else {
             throw new STAInvalidFilterExpressionException(
                     String.format(ERROR_GETTING_FILTER_NO_PROP_OR_WRONG_TYPE, key, "String"));
         }
     }
-
-    private String getTableName(Class<? extends ParameterEntity> paramsEntityClass) {
-        if ((PlatformParameterEntity.class).isAssignableFrom(paramsEntityClass)) {
-            return "platform_parameter";
-        }
-        else if ((ProcedureParameterEntity.class).isAssignableFrom(paramsEntityClass)) {
-            return "procedure_parameter";
-        }
-        else if ((ObservationParameterEntity.class).isAssignableFrom(paramsEntityClass)) {
-            return "observation_parameter";
-        }
-        else if ((LocationParameterEntity.class).isAssignableFrom(paramsEntityClass)) {
-            return "location_parameter";
-        }
-        else if ((PhenomenonParameterEntity.class).isAssignableFrom(paramsEntityClass)) {
-            return "phenomenon_parameter";
-        }
-        else if ((FeatureParameterEntity.class).isAssignableFrom(paramsEntityClass)) {
-            return "feature_parameter";
-        }
-        else if ((DatasetParameterEntity.class).isAssignableFrom(paramsEntityClass)) {
-            return "dataset_parameter";
-        }
-        return null;
-    }
-
     /**
      * Translate STA property name to Database property name
      *

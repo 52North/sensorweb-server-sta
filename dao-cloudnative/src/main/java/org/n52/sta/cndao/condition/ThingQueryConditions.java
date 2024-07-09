@@ -1,4 +1,32 @@
-package org.n52.sta.data.cndao.condition;
+/*
+ * Copyright (C) 2018-2021 52°North Initiative for Geospatial Open Source
+ * Software GmbH
+ *
+ * This program is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License version 2 as published
+ * by the Free Software Foundation.
+ *
+ * If the program is linked with libraries which are licensed under one of
+ * the following licenses, the combination of the program with the linked
+ * library is not considered a "derivative work" of the program:
+ *
+ *     - Apache License, version 2.0
+ *     - Apache Software License, version 1.0
+ *     - GNU Lesser General Public License, version 3
+ *     - Mozilla Public License, versions 1.0, 1.1 and 2.0
+ *     - Common Development and Distribution License (CDDL), version 1.0
+ *
+ * Therefore the distribution of the program linked with libraries licensed
+ * under the aforementioned licenses, is permitted by the copyright holders
+ * if the distribution is compliant with both the GNU General Public
+ * License version 2 and the aforementioned licenses.
+ *
+ * This program is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
+ * Public License for more details.
+ */
+package org.n52.sta.cndao.condition;
 
 import org.jooq.*;
 import org.jooq.impl.DSL;
@@ -7,9 +35,11 @@ import org.n52.shetland.ogc.filter.FilterConstants;
 import org.n52.shetland.ogc.sta.StaConstants;
 import org.n52.shetland.ogc.sta.exception.STAInvalidFilterExpressionException;
 
-import static org.jooq.impl.DSL.field;
-import static org.jooq.impl.DSL.table;
+import static org.jooq.impl.DSL.*;
 
+/**
+ * @author <a href="mailto:humaid.kidwai@ucalgary.ca">Humaid Kidwai</a>
+ */
 public class ThingQueryConditions extends EntityQueryConditions {
 
     public Condition withLocationStaIdentifier(final String locationIdentifier) {
@@ -17,13 +47,12 @@ public class ThingQueryConditions extends EntityQueryConditions {
         return DSL.exists(
                 dsl.selectOne()
                         .from(table(THING_LOCATION_TABLE))
-                        .join(table(THING_TABLE))
-                        .on(field(THING_LOCATION_TABLE + "." + FK_THING_ID_FIELD)
-                                .eq(field(THING_TABLE + "." + THING_ID_FIELD)))
-                        .join(table(LOCATION_TABLE))
-                        .on(field(THING_LOCATION_TABLE + "." + FK_LOCATION_ID_FIELD)
-                                .eq(field(LOCATION_TABLE + "." + LOCATION_ID_FIELD)))
-                        .where(field(LOCATION_TABLE + "." + STA_IDENTIFIER_FIELD).eq(locationIdentifier))
+                        .innerJoin(table(THING_TABLE))
+                        .onKey()
+                        .innerJoin(table(LOCATION_TABLE))
+                        .onKey()
+                        .where(field(name(LOCATION_TABLE, STA_IDENTIFIER_FIELD))
+                                .eq(locationIdentifier))
         );
     }
 
@@ -50,84 +79,87 @@ public class ThingQueryConditions extends EntityQueryConditions {
     }
 
     @Override
-    protected Condition handleDirectPropertyFilter(String propertyName,
-                                                   Field<? extends Comparable> propertyValue,
+    protected  <T extends Comparable<? super T>> Condition handleDirectPropertyFilter(String propertyName,
+                                                   Field<T> propertyValue,
                                                    FilterConstants.ComparisonOperator operator,
                                                    boolean switched) {
-            try {
-                switch (propertyName) {
-                    case StaConstants.PROP_ID:
-                        // check if propertyValue is of type String
-                        return handleDirectStringPropertyFilter(field(STA_IDENTIFIER_FIELD, String.class),
-                                propertyValue.cast(String.class),
+        try {
+            switch (propertyName) {
+                case StaConstants.PROP_ID:
+                    // check if propertyValue is of type String
+                    return handleDirectStringPropertyFilter(field(STA_IDENTIFIER_FIELD, String.class),
+                            propertyValue,
+                            operator,
+                            false);
+                case StaConstants.PROP_NAME:
+                    return handleDirectStringPropertyFilter(field(STA_NAME_FIELD, String.class),
+                            propertyValue,
+                            operator,
+                            switched);
+                case StaConstants.PROP_DESCRIPTION:
+                    return handleDirectStringPropertyFilter(field(STA_DESCRIPTION_FIELD, String.class),
+                            propertyValue,
+                            operator,
+                            switched);
+                default:
+                    // We are filtering on variable keys on properties
+                    if (propertyName.startsWith(STA_PROPERTIES_FIELD)) {
+                        return handleProperties(
+                                propertyName,
+                                propertyValue,
                                 operator,
-                                false);
-                    case StaConstants.PROP_NAME:
-                        return handleDirectStringPropertyFilter(field(STA_NAME_FIELD, String.class),
-                                propertyValue.cast(String.class),
-                                operator,
-                                switched);
-                    case StaConstants.PROP_DESCRIPTION:
-                        return handleDirectStringPropertyFilter(field(STA_DESCRIPTION_FIELD, String.class),
-                                propertyValue.cast(String.class),
-                                operator,
-                                switched);
-                    default:
-                        // We are filtering on variable keys on properties
-                        if (propertyName.startsWith(STA_PROPERTIES_FIELD)) {
-                            return handleProperties(
-                                    propertyName,
-                                    propertyValue,
-                                    operator,
-                                    switched,
-                                    FK_THING_ID_FIELD,
-                                    ParameterFactory.EntityType.PLATFORM);
-                        } else {
-                            throw new RuntimeException(String.format(ERROR_GETTING_FILTER_NO_PROP, propertyName));
-                        }
-                }
-            } catch (STAInvalidFilterExpressionException e) {
-                throw new RuntimeException(e);
+                                switched,
+                                FK_THING_ID_FIELD,
+                                ParameterFactory.EntityType.PLATFORM);
+                    } else {
+                        throw new RuntimeException(String.format(ERROR_GETTING_FILTER_NO_PROP, propertyName));
+                    }
             }
+        } catch (STAInvalidFilterExpressionException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Override
-    protected Condition handleRelatedPropertyFilter(String propertyName, Condition propertyValue)
-            throws STAInvalidFilterExpressionException {
+    protected Condition handleRelatedPropertyFilter(String propertyName, Condition propertyValue) {
+        try {
+            SelectConditionStep<Record1<Object>> subquery;
+            switch (propertyName) {
+                case DATASTREAMS: {
 
-        SelectConditionStep<Record1<Object>> subquery;
+                    subquery = dsl.select(field(DATASTREAM_TABLE + "." + FK_THING_ID_FIELD))
+                            .from(table(DATASTREAM_TABLE))
+                            .where(propertyValue);
 
-        switch (propertyName) {
-            case StaConstants.DATASTREAMS: {
+                    return field(THING_ID_FIELD).in(subquery);
+                }
+                case LOCATIONS: {
+                    subquery = dsl.select(field(THING_LOCATION_TABLE + '.' + FK_THING_ID_FIELD))
+                            .from(table(THING_LOCATION_TABLE))
+                            .join(table(LOCATION_TABLE))
+                            .on(field(THING_LOCATION_TABLE + "." + FK_LOCATION_ID_FIELD)
+                                    .eq(field(LOCATION_TABLE + "." + LOCATION_ID_FIELD)))
+                            .where(propertyValue);
 
-                subquery = dsl.select(field(DATASTREAM_TABLE + "." + FK_THING_ID_FIELD))
-                        .from(table(DATASTREAM_TABLE))
-                        .where(propertyValue);
+                    return field(THING_ID_FIELD).in(subquery);
+                }
+                case HISTORICAL_LOCATIONS:
+                    subquery = dsl.select(field(HISTORICAL_LOCATION_TABLE + '.' + FK_THING_ID_FIELD))
+                            .from(table(HISTORICAL_LOCATION_TABLE))
+                            .join(table(THING_TABLE))
+                            .on(field(THING_TABLE + "." + THING_ID_FIELD)
+                                    .eq(field(HISTORICAL_LOCATION_TABLE + "." + FK_THING_ID_FIELD)))
+                            .where(propertyValue);
 
-                return field(THING_ID_FIELD).in(subquery);
+                    return field(THING_ID_FIELD).in(subquery);
+                default:
+                    throw new STAInvalidFilterExpressionException(
+                            "Could not find related property: " + propertyName);
             }
-            case StaConstants.LOCATIONS: {
-                subquery = dsl.select(field(THING_LOCATION_TABLE + '.' + FK_THING_ID_FIELD))
-                        .from(table(THING_LOCATION_TABLE))
-                        .join(table(LOCATION_TABLE))
-                        .on(field(THING_LOCATION_TABLE + "." + FK_LOCATION_ID_FIELD)
-                                .eq(field(LOCATION_TABLE + "." + LOCATION_ID_FIELD)))
-                        .where(propertyValue);
-
-                return  field(THING_ID_FIELD).in(subquery);
-            }
-            case StaConstants.HISTORICAL_LOCATIONS:
-                subquery = dsl.select(field(HISTORICAL_LOCATION_TABLE + '.' + FK_THING_ID_FIELD))
-                        .from(table(HISTORICAL_LOCATION_TABLE))
-                        .join(table(THING_TABLE))
-                        .on(field(THING_TABLE + "." + THING_ID_FIELD)
-                                .eq(field(HISTORICAL_LOCATION_TABLE + "." + FK_THING_ID_FIELD)))
-                        .where(propertyValue);
-
-                return field(THING_ID_FIELD).in(subquery);
-            default:
-                throw new STAInvalidFilterExpressionException(
-                        "Could not find related property: " + propertyName);
+        } catch (STAInvalidFilterExpressionException e) {
+            throw new RuntimeException(e);
         }
     }
+
+
 }

@@ -1,11 +1,11 @@
-package org.n52.sta.data.cndao;
+package org.n52.sta.cndao;
 
-import com.zaxxer.hikari.HikariConfig;
-import com.zaxxer.hikari.HikariDataSource;
 import org.jooq.ExecuteContext;
 import org.jooq.SQLDialect;
 import org.jooq.impl.*;
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.boot.jdbc.DataSourceBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
@@ -19,29 +19,14 @@ import javax.sql.DataSource;
 
 @Configuration
 @EnableTransactionManagement
+@EnableConfigurationProperties
 @PropertySource("classpath:application.yml")
 public class PersistenceContext {
 
-    @Value("${spring.jooq.datasource.driver-class-name}")
-    private String driverClassName;
-
-    @Value("${spring.jooq.datasource.url}")
-    private String jdbcUrl;
-
-    @Value("${spring.jooq.datasource.username}")
-    private String username;
-
-    @Value("${spring.jooq.datasource.password}")
-    private String password;
-
     @Bean
+    @ConfigurationProperties(prefix="spring.cloudnative.datasource")
     public DataSource dataSource() {
-        HikariConfig hikariConfig = new HikariConfig();
-        hikariConfig.setDriverClassName(driverClassName);
-        hikariConfig.setJdbcUrl(jdbcUrl);
-        hikariConfig.setUsername(username);
-        hikariConfig.setPassword(password);
-        return new HikariDataSource(hikariConfig);
+        return DataSourceBuilder.create().build();
     }
 
     @Bean
@@ -60,24 +45,18 @@ public class PersistenceContext {
     }
 
     @Bean
-    public ExceptionTranslator exceptionTransformer() {
-        return new ExceptionTranslator();
-    }
-
-    @Bean
     public DefaultDSLContext dsl() {
-        return new DefaultDSLContext(configuration());
-    }
-
-    @Bean
-    public DefaultConfiguration configuration() {
         DefaultConfiguration jooqConfiguration = new DefaultConfiguration();
-
         jooqConfiguration.set(connectionProvider());
         jooqConfiguration.set(new DefaultExecuteListenerProvider(exceptionTransformer()));
         jooqConfiguration.set(SQLDialect.DUCKDB);
 
-        return jooqConfiguration;
+        return new DefaultDSLContext(jooqConfiguration);
+    }
+
+    @Bean
+    public ExceptionTranslator exceptionTransformer() {
+        return new ExceptionTranslator();
     }
 
     public static class ExceptionTranslator extends DefaultExecuteListener {

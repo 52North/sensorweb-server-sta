@@ -33,7 +33,7 @@ import org.jooq.Field;
 import org.jooq.Record1;
 import org.jooq.SelectConditionStep;
 import org.jooq.impl.DSL;
-import org.n52.series.db.beans.PhenomenonEntity;
+import org.n52.series.db.beans.DescribableEntity;
 import org.n52.series.db.beans.parameter.ParameterFactory;
 import org.n52.shetland.ogc.filter.FilterConstants;
 import org.n52.shetland.ogc.sta.StaConstants;
@@ -41,7 +41,10 @@ import org.n52.shetland.ogc.sta.exception.STAInvalidFilterExpressionException;
 
 import static org.jooq.impl.DSL.*;
 
-public class ObservedPropertyConditions extends EntityQueryConditions {
+/**
+ * @author <a href="mailto:humaid.kidwai@ucalgary.ca">Humaid Kidwai</a>
+ */
+public class ObservedPropertyQueryConditions extends EntityQueryConditions {
 
     private static final String IDENTIFIER = "identifier";
 
@@ -129,7 +132,7 @@ public class ObservedPropertyConditions extends EntityQueryConditions {
     public String checkPropertyName(String property) {
         switch (property) {
             case StaConstants.PROP_DEFINITION:
-                return PhenomenonEntity.PROPERTY_IDENTIFIER;
+                return DescribableEntity.PROPERTY_IDENTIFIER;
             case StaConstants.PROP_ID: // IDENTIFIER
                 return STA_IDENTIFIER_FIELD;
             default:

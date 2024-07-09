@@ -83,9 +83,10 @@ spring:
   # Options:
   # - Vanilla STA: vanilla
   # - UFZ Aggregata backend: ufzaggregata
+  # - Cloud Native Dao: cloudnativedao
   # - [not implemented yet] STA with MultiDatastream Extension: multiDatastreamExtension
   profiles:
-    active: vanilla
+    active: cloudnativedao
   datasource:
     platform: postgres
     username: postgres
@@ -94,6 +95,14 @@ spring:
     initialization-mode: always
     hikari:
       maximum-pool-size: 10
+  cloudnative:
+    datasource:
+      url: jdbc:duckdb://localhost:3000/sta
+      username: duckdb
+      password: duckdb
+      driver-class-name: org.duckdb.DuckDBDriver
+      hikari:
+        maximum-pool-size: 10
   jpa:
     openInView: false
     properties:
@@ -120,6 +129,7 @@ spring:
   mvc:
     servlet:
       path: /
+
 
 # HTTP Configuration
 http:
