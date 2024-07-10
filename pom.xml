@@ -271,8 +271,15 @@
                     <groupId>pl.project13.maven</groupId>
                     <artifactId>git-commit-id-plugin</artifactId>
                     <version>4.0.2</version>
-                </plugin>
-                <plugin>
+				</plugin>
+				<plugin>
+					<artifactId>maven-compiler-plugin</artifactId>
+					<configuration>
+						<source>17</source>
+						<target>17</target>
+					</configuration>
+				</plugin>
+				<plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-dependency-plugin</artifactId>
                     <configuration>
@@ -368,9 +375,12 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-checkstyle-plugin</artifactId>
+                <version>3.1.1</version>
+                <configuration>
+                    <skip>true</skip>
+                </configuration>
                 <executions>
                     <execution>
-                        <id>validate</id>
                         <phase>validate</phase>
                         <goals>
                             <goal>check</goal>

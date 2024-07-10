@@ -177,8 +177,8 @@
                 <artifactId>maven-dependency-plugin</artifactId>
                 <configuration>
                     <usedDependencies>
-                        <dependency>org.n52.sensorweb-server.db-model:db-model-mappings</dependency>
-                        <dependency>org.n52.sensorweb-server.db-model:db-model-entities</dependency>
+<!--                        <dependency>org.n52.sensorweb-server.db-model:db-model-mappings</dependency>-->
+<!--                        <dependency>org.n52.sensorweb-server.db-model:db-model-entities</dependency>-->
                     </usedDependencies>
                 </configuration>
             </plugin>
