@@ -295,6 +295,7 @@
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-enforcer-plugin</artifactId>
+                    <version>3.5.0</version>
                     <configuration>
                         <rules>
                             <requireNoRepositories>
@@ -307,6 +308,11 @@
                                     </id>
                                 </allowedRepositories>
                             </requireNoRepositories>
+                            <dependencyConvergence>
+                                <excludes>
+                                    <exclude>org.n52.sensorweb-server.sta:sta-dao-postgres</exclude>
+                                </excludes>
+                            </dependencyConvergence>
                         </rules>
                     </configuration>
                 </plugin>
