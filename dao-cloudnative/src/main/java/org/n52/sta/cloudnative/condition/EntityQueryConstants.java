@@ -26,7 +26,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
-package org.n52.sta.cndao.condition;
+package org.n52.sta.cloudnative.condition;
 
 import org.n52.series.db.beans.parameter.ParameterFactory;
 
@@ -75,19 +75,24 @@ public interface EntityQueryConstants {
     String STA_DEFINITION_FIELD = "definition";
     String STA_GEOM_FIELD = "geom";
 
+
+    String PARAMETER_VALUE_COUNT = "value_count";
+    String PARAMETER_VALUE_QUANTITY = "value_quantity";
+    String PARAMETER_VALUE_CATEGORY = "value_category";
+    String PARAMETER_VALUE_TEXT = "value_text";
+    String PARAMETER_VALUE_BOOLEAN = "value_boolean";
     String SENSOR_METADATA_FIELD = "description_file";
     String HISTORICAL_LOCATION_TIME_FIELD = "time";
-    String OBSERVATION_VALUE_COUNT_FIELD = "value_count";
-    String OBSERVATION_VALUE_QUANTITY_FIELD = "value_quantity";
-    String OBSERVATION_VALUE_CATEGORY_FIELD = "value_category";
-    String OBSERVATION_VALUE_TEXT_FIELD = "value_text";
-    String OBSERVATION_VALUE_BOOLEAN_FIELD = "value_boolean";
+    String OBSERVATION_VALUE_COUNT_FIELD = PARAMETER_VALUE_COUNT;
+    String OBSERVATION_VALUE_QUANTITY_FIELD = PARAMETER_VALUE_QUANTITY;
+    String OBSERVATION_VALUE_CATEGORY_FIELD = PARAMETER_VALUE_CATEGORY;
+    String OBSERVATION_VALUE_TEXT_FIELD = PARAMETER_VALUE_TEXT;
+    String OBSERVATION_VALUE_BOOLEAN_FIELD = PARAMETER_VALUE_BOOLEAN;
     String OBSERVATION_RESULT_TIME_FIELD = "result_time";
     String OBSERVATION_SAMPLING_TIME_START_FIELD = "sampling_time_start";
     String OBSERVATION_SAMPLING_TIME_END_FIELD = "sampling_time_end";
     String LOCATION_GEOM_FIELD = STA_GEOM_FIELD;
     String FEATURE_GEOM_FIELD = STA_GEOM_FIELD;
-    String PARAMETER_VALUE_TEXT = "value_text";
     String DATASTREAM_PHENOMENONTIME_START_FIELD = "first_time";
     String DATASTREAM_PHENOMENONTIME_END_FIELD = "last_time";
     String DATASTREAM_RESULTTIME_START_FIELD = "result_time_start";
@@ -145,6 +150,7 @@ public interface EntityQueryConstants {
                 return null;
         }
     }
+
     default String getEntityId(ParameterFactory.EntityType entityType) {
         switch (entityType) {
             case PHENOMENON:

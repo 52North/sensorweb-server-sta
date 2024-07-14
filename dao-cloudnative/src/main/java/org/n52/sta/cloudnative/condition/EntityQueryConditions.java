@@ -26,14 +26,14 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
-package org.n52.sta.cndao.condition;
+package org.n52.sta.cloudnative.condition;
 import org.n52.series.db.beans.parameter.ParameterFactory;
 import org.n52.shetland.ogc.filter.FilterConstants;
 import org.n52.shetland.ogc.sta.exception.STAInvalidFilterExpressionException;
 import org.jooq.*;
 import org.jooq.impl.DSL;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
+import org.springframework.beans.factory.annotation.Configurable;
 import java.util.Date;
 import java.util.List;
 
@@ -41,10 +41,11 @@ import java.util.List;
  * @author <a href="mailto:humaid.kidwai@ucalgary.ca">Humaid Kidwai</a>
  */
 
+@Configurable
 public abstract class EntityQueryConditions implements EntityQueryConstants {
 
-
-    protected DSLContext dsl;
+    @Autowired
+    protected DSLContext ctx;
 
     /**
      * Gets Entity-specific Filter for relation with given name.
@@ -108,7 +109,7 @@ public abstract class EntityQueryConditions implements EntityQueryConstants {
             boolean switched)
             throws STAInvalidFilterExpressionException {
         if (propertyValue.getDataType().getType().equals(String.class)) {
-            return this.handleStringFilter(stringField, (Field<String>) propertyValue, operator, switched);
+            return this.handleStringFilter(stringField, propertyValue.cast(String.class), operator, switched);
         } else {
             throw new STAInvalidFilterExpressionException(
                     INVALID_DATATYPE_CANNOT_CAST + propertyValue.getDataType().getType() + " to String.class");
@@ -124,8 +125,8 @@ public abstract class EntityQueryConditions implements EntityQueryConstants {
             throws STAInvalidFilterExpressionException {
 
         if (Number.class.isAssignableFrom(numberField.getDataType().getType()) &&
-                Number.class.isAssignableFrom(propertyValue.getDataType().getType())){
-            return this.handleComparableFilter(numberField, (Field<Double>) propertyValue, operator);
+                Number.class.isAssignableFrom(propertyValue.getDataType().getType())) {
+            return this.handleComparableFilter(numberField, propertyValue.cast(Double.class), operator);
         } else {
             throw new STAInvalidFilterExpressionException(
                     INVALID_DATATYPE_CANNOT_CAST + propertyValue.getDataType().getType() + " to Number.class");
@@ -141,7 +142,7 @@ public abstract class EntityQueryConditions implements EntityQueryConstants {
             throws STAInvalidFilterExpressionException {
 
         if (propertyValue.getDataType().getType().equals(Date.class)) {
-            return this.handleComparableFilter(timeField, (Field<Date>)propertyValue, operator);
+            return this.handleComparableFilter(timeField, propertyValue.cast(Date.class), operator);
         } else {
             throw new STAInvalidFilterExpressionException(
                     INVALID_DATATYPE_CANNOT_CAST + propertyValue.getDataType().getType() + " to Date.class");
@@ -187,6 +188,7 @@ public abstract class EntityQueryConditions implements EntityQueryConstants {
      * @param operator to be reversed
      * @return String representation of reversed Operator
      */
+
     private FilterConstants.ComparisonOperator reverseOperator(FilterConstants.ComparisonOperator operator) {
         switch (operator) {
             case PropertyIsLessThan:
@@ -250,6 +252,7 @@ public abstract class EntityQueryConditions implements EntityQueryConstants {
      * @param property name of the property in STA
      * @return name of the property in database
      */
+
     public String checkPropertyName(String property) {
         return property;
     }
