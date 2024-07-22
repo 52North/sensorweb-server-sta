@@ -95,14 +95,6 @@ spring:
     initialization-mode: always
     hikari:
       maximum-pool-size: 10
-  cloudnative:
-    datasource:
-      url: jdbc:duckdb://localhost:3000/sta
-      username: duckdb
-      password: duckdb
-      driver-class-name: org.duckdb.DuckDBDriver
-      hikari:
-        maximum-pool-size: 10
   jpa:
     openInView: false
     properties:

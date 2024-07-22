@@ -44,7 +44,7 @@ import org.springframework.scheduling.annotation.EnableAsync;
     @ComponentScan.Filter(type = FilterType.REGEX, pattern = ".*vanilla.*"),
     @ComponentScan.Filter(type = FilterType.REGEX, pattern = ".*citsci.*"),
     @ComponentScan.Filter(type = FilterType.REGEX, pattern = ".*ufzaggregata.*"),
-    @ComponentScan.Filter(type = FilterType.REGEX, pattern = ".*cndao.*")
+    @ComponentScan.Filter(type = FilterType.REGEX, pattern = ".*cloudnative.*")
 }
 )
 public class Application {

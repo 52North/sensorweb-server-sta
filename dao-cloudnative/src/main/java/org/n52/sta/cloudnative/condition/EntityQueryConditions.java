@@ -34,6 +34,7 @@ import org.jooq.*;
 import org.jooq.impl.DSL;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Configurable;
+
 import java.util.Date;
 import java.util.List;
 
@@ -46,6 +47,15 @@ public abstract class EntityQueryConditions implements EntityQueryConstants {
 
     @Autowired
     protected DSLContext ctx;
+
+    /**
+     * Used for testing
+     *
+     * @param ctx jOOQ DSLContext object
+     */
+    public void setDslContext(DSLContext ctx) {
+        this.ctx = ctx;
+    }
 
     /**
      * Gets Entity-specific Filter for relation with given name.
@@ -109,7 +119,10 @@ public abstract class EntityQueryConditions implements EntityQueryConstants {
             boolean switched)
             throws STAInvalidFilterExpressionException {
         if (propertyValue.getDataType().getType().equals(String.class)) {
-            return this.handleStringFilter(stringField, propertyValue.cast(String.class), operator, switched);
+            return this.handleStringFilter(stringField,
+                    propertyValue.cast(String.class),
+                    operator,
+                    switched);
         } else {
             throw new STAInvalidFilterExpressionException(
                     INVALID_DATATYPE_CANNOT_CAST + propertyValue.getDataType().getType() + " to String.class");
@@ -126,7 +139,9 @@ public abstract class EntityQueryConditions implements EntityQueryConstants {
 
         if (Number.class.isAssignableFrom(numberField.getDataType().getType()) &&
                 Number.class.isAssignableFrom(propertyValue.getDataType().getType())) {
-            return this.handleComparableFilter(numberField, propertyValue.cast(Double.class), operator);
+            return this.handleComparableFilter(numberField,
+                    propertyValue.cast(Double.class),
+                    operator);
         } else {
             throw new STAInvalidFilterExpressionException(
                     INVALID_DATATYPE_CANNOT_CAST + propertyValue.getDataType().getType() + " to Number.class");
@@ -141,8 +156,10 @@ public abstract class EntityQueryConditions implements EntityQueryConstants {
             FilterConstants.ComparisonOperator operator)
             throws STAInvalidFilterExpressionException {
 
-        if (propertyValue.getDataType().getType().equals(Date.class)) {
-            return this.handleComparableFilter(timeField, propertyValue.cast(Date.class), operator);
+        if (Date.class.isAssignableFrom(propertyValue.getDataType().getType())) {
+            return this.handleComparableFilter(timeField,
+                    propertyValue.cast(Date.class),
+                    operator);
         } else {
             throw new STAInvalidFilterExpressionException(
                     INVALID_DATATYPE_CANNOT_CAST + propertyValue.getDataType().getType() + " to Date.class");
@@ -217,7 +234,7 @@ public abstract class EntityQueryConditions implements EntityQueryConstants {
         String key = propertyName.substring(11);
         if (propertyValue.getDataType().getType().equals(String.class)) {
 
-            String tableName = getTableName(entityType);
+            String tableName = getParameterTableName(entityType);
             String entityId = getEntityId(entityType);
 
             if (tableName == null || entityId == null) {
@@ -230,7 +247,7 @@ public abstract class EntityQueryConditions implements EntityQueryConstants {
             Field<String> valueField = DSL.field(PARAMETER_VALUE_TEXT, String.class);
 
             // Build the subquery condition
-            Condition subqueryCondition = DSL.field(STA_NAME_FIELD).eq(key)
+            Condition subqueryCondition = DSL.field(STA_NAME_FIELD).eq(DSL.val(key))
                     .and(handleDirectStringPropertyFilter(valueField, propertyValue, operator, switched));
 
             // Build the subquery

@@ -1,16 +1,43 @@
+/*
+ * Copyright (C) 2018-2021 52°North Initiative for Geospatial Open Source
+ * Software GmbH
+ *
+ * This program is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License version 2 as published
+ * by the Free Software Foundation.
+ *
+ * If the program is linked with libraries which are licensed under one of
+ * the following licenses, the combination of the program with the linked
+ * library is not considered a "derivative work" of the program:
+ *
+ *     - Apache License, version 2.0
+ *     - Apache Software License, version 1.0
+ *     - GNU Lesser General Public License, version 3
+ *     - Mozilla Public License, versions 1.0, 1.1 and 2.0
+ *     - Common Development and Distribution License (CDDL), version 1.0
+ *
+ * Therefore the distribution of the program linked with libraries licensed
+ * under the aforementioned licenses, is permitted by the copyright holders
+ * if the distribution is compliant with both the GNU General Public
+ * License version 2 and the aforementioned licenses.
+ *
+ * This program is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
+ * Public License for more details.
+ */
 package org.n52.sta.cloudnative;
 
 import org.jooq.DSLContext;
 import org.jooq.ExecuteContext;
 import org.jooq.SQLDialect;
 import org.jooq.impl.*;
-import org.springframework.boot.context.properties.ConfigurationProperties;
+
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.jdbc.DataSourceBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
-import org.springframework.jdbc.datasource.DataSourceUtils;
 import org.springframework.jdbc.datasource.TransactionAwareDataSourceProxy;
 import org.springframework.jdbc.support.SQLErrorCodeSQLExceptionTranslator;
 import org.springframework.jdbc.support.SQLExceptionTranslator;
@@ -18,18 +45,15 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 
 import javax.sql.DataSource;
-import java.sql.Connection;
 import java.sql.SQLException;
-import java.sql.Statement;
 
 @Configuration
 @EnableTransactionManagement
 @EnableConfigurationProperties
-@PropertySource("classpath:application.yml")
+@PropertySource("classpath:cloudnative-datasource.yml")
 public class PersistenceContext {
 
     @Bean
-    @ConfigurationProperties(prefix = "spring.cloudnative.datasource")
     public DataSource dataSource() {
         return DataSourceBuilder.create().build();
     }
@@ -56,28 +80,40 @@ public class PersistenceContext {
         DefaultConfiguration jooqConfiguration = new DefaultConfiguration();
         jooqConfiguration.set(connectionProvider());
         jooqConfiguration.set(new DefaultExecuteListenerProvider(exceptionTransformer()));
-        jooqConfiguration.set(SQLDialect.DUCKDB);
 
-        // Obtain a connection from the DataSource
-        try (Connection conn = DataSourceUtils.getConnection(dataSource())) {
-            // Load the spatial extension
-            installAndLoadSpatialExtension(conn);
-        }
+        // Create context
+        DSLContext ctx = DSL.using(jooqConfiguration);
 
-        return DSL.using(jooqConfiguration);
+        // Load Extensions
+        installAndLoadSpatialExtension(ctx);
+        installLoadAndConfigureHTTPFSExtension(ctx);
+
+        return ctx;
     }
+
 
     @Bean
     public ExceptionTranslator exceptionTransformer() {
         return new ExceptionTranslator();
     }
 
-    private void installAndLoadSpatialExtension(Connection conn) throws SQLException {
-        try (Statement stmt = conn.createStatement()) {
-            stmt.execute("INSTALL spatial");
-            stmt.execute("LOAD spatial;");
-            System.out.println("Spatial extension loaded successfully.");
-        }
+    private void installAndLoadSpatialExtension(DSLContext ctx) {
+        ctx.execute("INSTALL spatial;");
+        ctx.execute("LOAD spatial;");
+        System.out.println("Spatial extension loaded successfully.");
+    }
+
+    private void installLoadAndConfigureHTTPFSExtension(DSLContext ctx) {
+        ctx.execute("INSTALL httpfs;");
+        ctx.execute("LOAD httpfs;");
+
+        // TODO: Configuration
+        ctx.execute("CREATE SECRET secret1 (" +
+                "    TYPE S3," +
+                "    KEY_ID 'AKIAIOSFODNN7EXAMPLE'," +
+                "    SECRET 'wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY'," +
+                "    REGION 'us-east-1'" + ");"
+        );
     }
 
     public static class ExceptionTranslator extends DefaultExecuteListener {

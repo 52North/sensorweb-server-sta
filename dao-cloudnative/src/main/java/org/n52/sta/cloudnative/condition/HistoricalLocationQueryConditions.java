@@ -26,6 +26,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
+
 package org.n52.sta.cloudnative.condition;
 
 import org.jooq.Condition;
@@ -33,9 +34,11 @@ import org.jooq.Field;
 import org.jooq.Record1;
 import org.jooq.SelectConditionStep;
 import org.jooq.impl.DSL;
+
 import org.n52.shetland.ogc.filter.FilterConstants;
 import org.n52.shetland.ogc.sta.StaConstants;
 import org.n52.shetland.ogc.sta.exception.STAInvalidFilterExpressionException;
+
 import java.util.Date;
 
 /**
@@ -48,10 +51,12 @@ public class HistoricalLocationQueryConditions extends EntityQueryConditions {
         return DSL.exists(
                 ctx.selectOne()
                         .from(DSL.table(LOCATION_HISTORICAL_LOCATION_TABLE))
-                        .innerJoin(DSL.table(HISTORICAL_LOCATION_TABLE))
-                        .onKey()
-                        .innerJoin(DSL.table(LOCATION_TABLE))
-                        .onKey()
+                        .join(DSL.table(HISTORICAL_LOCATION_TABLE))
+                        .on(DSL.field(DSL.name(LOCATION_HISTORICAL_LOCATION_TABLE, FK_HISTORICAL_LOCATION_ID_FIELD))
+                                .eq(DSL.field(DSL.name(HISTORICAL_LOCATION_TABLE, HISTORICAL_LOCATION_ID_FIELD))))
+                        .join(DSL.table(LOCATION_TABLE))
+                        .on(DSL.field(DSL.name(LOCATION_HISTORICAL_LOCATION_TABLE, FK_LOCATION_ID_FIELD))
+                                .eq(DSL.field(DSL.name(LOCATION_TABLE, LOCATION_ID_FIELD))))
                         .where(DSL.field(DSL.name(LOCATION_TABLE, STA_IDENTIFIER_FIELD)).eq(locationIdentifier))
         );
     }
@@ -60,9 +65,10 @@ public class HistoricalLocationQueryConditions extends EntityQueryConditions {
         return DSL.exists(
                 ctx.selectOne()
                         .from(DSL.table(HISTORICAL_LOCATION_TABLE))
-                        .innerJoin(DSL.table(THING_TABLE))
-                        .onKey()
-                        .where(DSL.field(DSL.name(THING_TABLE, THING_ID_FIELD))
+                        .join(DSL.table(THING_TABLE))
+                        .on(DSL.field(DSL.name(HISTORICAL_LOCATION_TABLE, FK_THING_ID_FIELD))
+                                .eq(DSL.field(DSL.name(THING_TABLE, THING_ID_FIELD))))
+                        .where(DSL.field(DSL.name(THING_TABLE, STA_IDENTIFIER_FIELD))
                                 .eq(thingIdentifier))
         );
     }
@@ -103,17 +109,22 @@ public class HistoricalLocationQueryConditions extends EntityQueryConditions {
             subquery = ctx
                     .select(DSL.field(DSL.name(HISTORICAL_LOCATION_TABLE, HISTORICAL_LOCATION_ID_FIELD)))
                     .from(DSL.table(HISTORICAL_LOCATION_TABLE))
-                    .innerJoin(DSL.table(THING_TABLE))
-                    .onKey()
+                    .join(DSL.table(THING_TABLE))
+                    .on(DSL.field(DSL.name(HISTORICAL_LOCATION_TABLE, FK_THING_ID_FIELD))
+                            .eq(DSL.field(DSL.name(THING_TABLE, THING_ID_FIELD))))
                     .where(propertyValue);
 
             return DSL.field(HISTORICAL_LOCATION_ID_FIELD).in(subquery);
         } else if (LOCATIONS.equals(propertyName)) {
             subquery = ctx
-                    .select(DSL.field(DSL.name(LOCATION_HISTORICAL_LOCATION_TABLE, FK_HISTORICAL_LOCATION_ID_FIELD)))
+                    .select(DSL.field(DSL.name(HISTORICAL_LOCATION_TABLE, HISTORICAL_LOCATION_ID_FIELD)))
                     .from(DSL.table(LOCATION_HISTORICAL_LOCATION_TABLE))
-                    .innerJoin(DSL.table(LOCATION_TABLE))
-                    .onKey()
+                    .join(DSL.table(HISTORICAL_LOCATION_TABLE))
+                    .on(DSL.field(DSL.name(LOCATION_HISTORICAL_LOCATION_TABLE, FK_HISTORICAL_LOCATION_ID_FIELD))
+                            .eq(DSL.field(DSL.name(HISTORICAL_LOCATION_TABLE, HISTORICAL_LOCATION_ID_FIELD))))
+                    .join(DSL.table(LOCATION_TABLE))
+                    .on(DSL.field(DSL.name(LOCATION_HISTORICAL_LOCATION_TABLE, FK_LOCATION_ID_FIELD))
+                            .eq(DSL.field(DSL.name(LOCATION_TABLE, LOCATION_ID_FIELD))))
                     .where(propertyValue);
 
             return DSL.field(HISTORICAL_LOCATION_ID_FIELD).in(subquery);

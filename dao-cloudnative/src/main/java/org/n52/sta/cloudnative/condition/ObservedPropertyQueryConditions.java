@@ -50,8 +50,9 @@ public class ObservedPropertyQueryConditions extends EntityQueryConditions {
         return DSL.exists(
                 ctx.selectOne()
                         .from(DSL.table(DATASTREAM_TABLE))
-                        .innerJoin(DSL.table(OBSERVED_PROPERTY_TABLE))
-                        .onKey()
+                        .join(DSL.table(OBSERVED_PROPERTY_TABLE))
+                        .on(DSL.field(DSL.name(OBSERVED_PROPERTY_TABLE, OBSERVED_PROPERTY_ID_FIELD))
+                                .eq(DSL.field(DSL.name(DATASTREAM_TABLE, FK_OBSERVED_PROPERTY_ID_FIELD))))
                         .where(DSL.field(DSL.name(DATASTREAM_TABLE, STA_IDENTIFIER_FIELD)).
                                 eq(datastreamStaIdentifier))
         );

@@ -30,10 +30,12 @@ package org.n52.sta.cloudnative.condition;
 
 import org.jooq.*;
 import org.jooq.impl.DSL;
+
 import org.n52.series.db.beans.parameter.ParameterFactory;
 import org.n52.shetland.ogc.filter.FilterConstants;
 import org.n52.shetland.ogc.sta.StaConstants;
 import org.n52.shetland.ogc.sta.exception.STAInvalidFilterExpressionException;
+
 import java.util.List;
 
 /**
@@ -47,8 +49,8 @@ public class DatastreamQueryConditions extends EntityQueryConditions {
     }
 
     @Override
-    public Condition withStaIdentifier(final String name) {
-        return DSL.field(FK_AGGREGATE_ID_FIELD).isNull().and(DSL.field(STA_IDENTIFIER_FIELD).eq(name));
+    public Condition withStaIdentifier(final String staIdentifier) {
+        return DSL.field(FK_AGGREGATE_ID_FIELD).isNull().and(DSL.field(STA_IDENTIFIER_FIELD).eq(staIdentifier));
     }
 
     @Override
@@ -153,6 +155,7 @@ public class DatastreamQueryConditions extends EntityQueryConditions {
         }
     }
 
+/*
     @Override
     protected <T extends Comparable<? super T>> Condition handleProperties(
                                          String propertyName,
@@ -228,13 +231,14 @@ public class DatastreamQueryConditions extends EntityQueryConditions {
                 entityType);
 
     }
-
+*/
     public Condition withFeatureStaIdentifier(final String featureIdentifier) {
         return DSL.exists(
                 ctx.selectOne()
                         .from(DSL.table(DATASTREAM_TABLE))
-                        .innerJoin(DSL.table(FEATURE_TABLE))
-                        .onKey()
+                        .join(DSL.table(FEATURE_TABLE))
+                        .on(DSL.field(DSL.name(DATASTREAM_TABLE, FK_FEATURE_ID_FIELD))
+                                .eq(DSL.field(DSL.name(FEATURE_TABLE, FEATURE_ID_FIELD))))
                         .where(DSL.field(DSL.name(FEATURE_TABLE, STA_IDENTIFIER_FIELD))
                                 .eq(featureIdentifier))
         );
@@ -244,8 +248,9 @@ public class DatastreamQueryConditions extends EntityQueryConditions {
         return DSL.exists(
                 ctx.selectOne()
                         .from(DSL.table(DATASTREAM_TABLE))
-                        .innerJoin(DSL.table(OBSERVED_PROPERTY_TABLE))
-                        .onKey()
+                        .join(DSL.table(OBSERVED_PROPERTY_TABLE))
+                        .on(DSL.field(DSL.name(DATASTREAM_TABLE, FK_OBSERVED_PROPERTY_ID_FIELD))
+                                .eq(DSL.field(DSL.name(OBSERVED_PROPERTY_TABLE, OBSERVED_PROPERTY_ID_FIELD))))
                         .where(DSL.field(DSL.name(OBSERVED_PROPERTY_TABLE, STA_IDENTIFIER_FIELD))
                                 .eq(observablePropertyIdentifier))
         );
@@ -255,8 +260,9 @@ public class DatastreamQueryConditions extends EntityQueryConditions {
         return DSL.exists(
                 ctx.selectOne()
                         .from(DSL.table(DATASTREAM_TABLE))
-                        .innerJoin(DSL.table(OBSERVED_PROPERTY_TABLE))
-                        .onKey()
+                        .join(DSL.table(OBSERVED_PROPERTY_TABLE))
+                        .on(DSL.field(DSL.name(DATASTREAM_TABLE, FK_OBSERVED_PROPERTY_ID_FIELD))
+                                .eq(DSL.field(DSL.name(OBSERVED_PROPERTY_TABLE, OBSERVED_PROPERTY_ID_FIELD))))
                         .where(DSL.field(DSL.name(OBSERVED_PROPERTY_TABLE, STA_NAME_FIELD))
                                 .eq(name))
         );
@@ -266,8 +272,9 @@ public class DatastreamQueryConditions extends EntityQueryConditions {
         return DSL.exists(
                 ctx.selectOne()
                         .from(DSL.table(DATASTREAM_TABLE))
-                        .innerJoin(DSL.table(THING_TABLE))
-                        .onKey()
+                        .join(DSL.table(THING_TABLE))
+                        .on(DSL.field(DSL.name(DATASTREAM_TABLE, FK_THING_ID_FIELD))
+                                .eq(DSL.field(DSL.name(THING_TABLE, THING_ID_FIELD))))
                         .where(DSL.field(DSL.name(THING_TABLE, STA_IDENTIFIER_FIELD))
                                 .eq(thingIdentifier))
         );
@@ -277,8 +284,9 @@ public class DatastreamQueryConditions extends EntityQueryConditions {
         return DSL.exists(
                 ctx.selectOne()
                         .from(DSL.table(DATASTREAM_TABLE))
-                        .innerJoin(DSL.table(THING_TABLE))
-                        .onKey()
+                        .join(DSL.table(THING_TABLE))
+                        .on(DSL.field(DSL.name(DATASTREAM_TABLE, FK_THING_ID_FIELD))
+                                .eq(DSL.field(DSL.name(THING_TABLE, THING_ID_FIELD))))
                         .where(DSL.field(DSL.name(THING_TABLE, STA_NAME_FIELD))
                                 .eq(name))
         );
@@ -288,8 +296,9 @@ public class DatastreamQueryConditions extends EntityQueryConditions {
         return DSL.exists(
                 ctx.selectOne()
                         .from(DSL.table(DATASTREAM_TABLE))
-                        .innerJoin(DSL.table(SENSOR_TABLE))
-                        .onKey()
+                        .join(DSL.table(SENSOR_TABLE))
+                        .on(DSL.field(DSL.name(DATASTREAM_TABLE, FK_SENSOR_ID_FIELD))
+                                .eq(DSL.field(DSL.name(SENSOR_TABLE, SENSOR_ID_FIELD))))
                         .where(DSL.field(DSL.name(SENSOR_TABLE, STA_IDENTIFIER_FIELD))
                                 .eq(sensorIdentifier))
         );
@@ -299,8 +308,9 @@ public class DatastreamQueryConditions extends EntityQueryConditions {
         return DSL.exists(
                 ctx.selectOne()
                         .from(DSL.table(DATASTREAM_TABLE))
-                        .innerJoin(DSL.table(SENSOR_TABLE))
-                        .onKey()
+                        .join(DSL.table(SENSOR_TABLE))
+                        .on(DSL.field(DSL.name(DATASTREAM_TABLE, FK_SENSOR_ID_FIELD))
+                                .eq(DSL.field(DSL.name(SENSOR_TABLE, SENSOR_ID_FIELD))))
                         .where(DSL.field(DSL.name(SENSOR_TABLE, STA_NAME_FIELD))
                                 .eq(name))
         );
@@ -309,7 +319,7 @@ public class DatastreamQueryConditions extends EntityQueryConditions {
     public Condition withObservationStaIdentifier(String observationIdentifier) {
 
         // Subquery to get dataset_id from Observation where sta_identifier matches
-        SelectConditionStep<Record1<Object>> sq = ctx.select(DSL.field(DATASTREAM_ID_FIELD))
+        SelectConditionStep<Record1<Object>> sq = ctx.select(DSL.field(FK_DATASTREAM_ID_FIELD))
                 .from(OBSERVATION_TABLE)
                 .where(DSL.field(STA_IDENTIFIER_FIELD).eq(observationIdentifier));
 

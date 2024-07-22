@@ -29,6 +29,7 @@
 package org.n52.sta.cloudnative.condition;
 
 import org.n52.series.db.beans.parameter.ParameterFactory;
+import org.n52.shetland.ogc.sta.StaConstants;
 
 /**
  * @author <a href="mailto:humaid.kidwai@ucalgary.ca">Humaid Kidwai</a>
@@ -58,15 +59,14 @@ public interface EntityQueryConstants {
     String FORMAT_TABLE = "format";
     String OBSERVED_PROPERTY_TABLE = "phenomenon";
     String LOCATION_HISTORICAL_LOCATION_TABLE = "location_historical_location";
-    String CATEGORY_TABLE = "category";
 
     String OBSERVATION_PARAMETER_TABLE = "observation_parameter";
     String PHENOMENON_PARAMETER_TABLE = "phenomenon_parameter";
     String LOCATION_PARAMETER_TABLE = "location_parameter";
-    String DATASTREAM_PARAMETER_TABLE = "datastream_parameter";
+    String DATASTREAM_PARAMETER_TABLE = "dataset_parameter";
     String FEATURE_PARAMETER_TABLE = "feature_parameter";
     String SENSOR_PARAMETER_TABLE = "procedure_parameter";
-    String THING_PARAMETER_TABLE = "thing_parameter";
+    String THING_PARAMETER_TABLE = "platform_parameter";
 
     String STA_IDENTIFIER_FIELD = "sta_identifier";
     String STA_NAME_FIELD = "name";
@@ -106,10 +106,8 @@ public interface EntityQueryConstants {
     String HISTORICAL_LOCATION_ID_FIELD = "historical_location_id";
     String DATASTREAM_ID_FIELD = "dataset_id";
     String OBSERVATION_ID_FIELD = "observation_id";
-    String CATEGORY_ID_FIELD = "category_id";
 
-    String FK_CATEGORY_ID_FIELD = "fk_category_id";
-    String FK_DATASTREAM_ID_FIELD = "fk_datastream_id";
+    String FK_DATASTREAM_ID_FIELD = "fk_dataset_id";
     String FK_OBSERVATION_ID_FIELD = "fk_observation_id";
     String FK_FEATURE_ID_FIELD = "fk_feature_id";
     String FK_HISTORICAL_LOCATION_ID_FIELD = "fk_historical_location_id";
@@ -130,7 +128,7 @@ public interface EntityQueryConstants {
     String ERROR_INVALID_PARAMETER_ENTITY_TYPE = "Error getting entity from '%s'. No such parameter entity found";
 
 
-    default String getTableName(ParameterFactory.EntityType entityType) {
+    default String getParameterTableName(ParameterFactory.EntityType entityType) {
         switch (entityType) {
             case PHENOMENON:
                 return PHENOMENON_PARAMETER_TABLE;
@@ -171,4 +169,63 @@ public interface EntityQueryConstants {
                 return null;
         }
     }
+
+//    default String innerJoinKey(String entity1, String entity2) {
+//        switch (entity1) {
+//            case StaConstants.SENSOR:
+//                switch (entity2) {
+//                    case StaConstants.DATASTREAM:
+//                        break;
+//                }
+//                break;
+//            case StaConstants.DATASTREAM:
+//                switch (entity2) {
+//
+//                }
+//                break;
+//            case StaConstants.THING:
+//                switch (entity2) {
+//                    case StaConstants.LOCATION:
+//                        break;
+//                    case StaConstants.HISTORICAL_LOCATION:
+//                        break;
+//                    case StaConstants.DATASTREAM:
+//                        break;
+//                }
+//                break;
+//            case StaConstants.OBSERVATION:
+//                switch (entity2) {
+//                    case StaConstants.DATASTREAM:
+//                        break;
+//                }
+//                break;
+//            case StaConstants.FEATURE_OF_INTEREST:
+//                switch (entity2) {
+//                    case StaConstants.DATASTREAM:
+//                        break;
+//                }
+//                break;
+//            case StaConstants.LOCATION:
+//                switch (entity2) {
+//                    case StaConstants.HISTORICAL_LOCATION:
+//                        break;
+//                    case StaConstants.THING:
+//                        break;
+//                }
+//                break;
+//            case StaConstants.HISTORICAL_LOCATION:
+//                switch (entity2) {
+//                    case StaConstants.LOCATION:
+//                        break;
+//                    case StaConstants.THING:
+//                        break;
+//                }
+//                break;
+//            case StaConstants.OBSERVED_PROPERTY:
+//                switch (entity2) {
+//                    case StaConstants.DATASTREAM:
+//                }
+//                break;
+//        }
+//    }
 }

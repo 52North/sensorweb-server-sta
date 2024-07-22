@@ -45,10 +45,12 @@ public class ThingQueryConditions extends EntityQueryConditions {
         return DSL.exists(
                 ctx.selectOne()
                         .from(DSL.table(THING_LOCATION_TABLE))
-                        .innerJoin(DSL.table(THING_TABLE))
-                        .onKey()
-                        .innerJoin(DSL.table(LOCATION_TABLE))
-                        .onKey()
+                        .join(DSL.table(THING_TABLE))
+                        .on(DSL.field(DSL.name(THING_TABLE, THING_ID_FIELD))
+                                .eq(DSL.field(DSL.name(THING_LOCATION_TABLE, FK_THING_ID_FIELD))))
+                        .join(DSL.table(LOCATION_TABLE))
+                        .on(DSL.field(DSL.name(LOCATION_TABLE, LOCATION_ID_FIELD))
+                                .eq(DSL.field(DSL.name(THING_LOCATION_TABLE, FK_LOCATION_ID_FIELD))))
                         .where(DSL.field(DSL.name(LOCATION_TABLE, STA_IDENTIFIER_FIELD))
                                 .eq(locationIdentifier))
         );
@@ -59,9 +61,9 @@ public class ThingQueryConditions extends EntityQueryConditions {
                 ctx.selectOne()
                         .from(DSL.table(THING_TABLE))
                         .join(DSL.table(HISTORICAL_LOCATION_TABLE))
-                        .on(DSL.field(THING_TABLE + "." + THING_ID_FIELD)
-                                .eq(DSL.field(HISTORICAL_LOCATION_TABLE + "." + FK_THING_ID_FIELD)))
-                        .where(DSL.field(HISTORICAL_LOCATION_TABLE + "." + STA_IDENTIFIER_FIELD)
+                        .on(DSL.field(DSL.name(THING_TABLE, THING_ID_FIELD))
+                                .eq(DSL.field(DSL.name(HISTORICAL_LOCATION_TABLE, FK_THING_ID_FIELD))))
+                        .where(DSL.field(DSL.name(HISTORICAL_LOCATION_TABLE, STA_IDENTIFIER_FIELD))
                                 .eq(historicalIdentifier))
         );
     }
@@ -71,9 +73,9 @@ public class ThingQueryConditions extends EntityQueryConditions {
                 ctx.selectOne()
                         .from(DSL.table(THING_TABLE))
                         .join(DSL.table(DATASTREAM_TABLE))
-                        .on(DSL.field(THING_TABLE + "." + THING_ID_FIELD)
-                                .eq(DSL.field(DATASTREAM_TABLE + "." + FK_THING_ID_FIELD)))
-                        .where(DSL.field(DATASTREAM_TABLE + "." + STA_IDENTIFIER_FIELD).eq(datastreamIdentifier))
+                        .on(DSL.field(DSL.name(THING_TABLE, THING_ID_FIELD))
+                                .eq(DSL.field(DSL.name(DATASTREAM_TABLE, FK_THING_ID_FIELD))))
+                        .where(DSL.field(DSL.name(DATASTREAM_TABLE, STA_IDENTIFIER_FIELD)).eq(datastreamIdentifier))
         );
     }
 
@@ -126,28 +128,28 @@ public class ThingQueryConditions extends EntityQueryConditions {
             switch (propertyName) {
                 case DATASTREAMS: {
 
-                    subquery = ctx.select(DSL.field(DATASTREAM_TABLE + "." + FK_THING_ID_FIELD))
+                    subquery = ctx.select(DSL.field(DSL.name(DATASTREAM_TABLE, FK_THING_ID_FIELD)))
                             .from(DSL.table(DATASTREAM_TABLE))
                             .where(propertyValue);
 
                     return DSL.field(THING_ID_FIELD).in(subquery);
                 }
                 case LOCATIONS: {
-                    subquery = ctx.select(DSL.field(THING_LOCATION_TABLE + '.' + FK_THING_ID_FIELD))
+                    subquery = ctx.select(DSL.field(DSL.name(THING_LOCATION_TABLE, FK_THING_ID_FIELD)))
                             .from(DSL.table(THING_LOCATION_TABLE))
                             .join(DSL.table(LOCATION_TABLE))
-                            .on(DSL.field(THING_LOCATION_TABLE + "." + FK_LOCATION_ID_FIELD)
-                                    .eq(DSL.field(LOCATION_TABLE + "." + LOCATION_ID_FIELD)))
+                            .on(DSL.field(DSL.name(THING_LOCATION_TABLE, FK_LOCATION_ID_FIELD))
+                                    .eq(DSL.field(DSL.name(LOCATION_TABLE, LOCATION_ID_FIELD))))
                             .where(propertyValue);
 
                     return DSL.field(THING_ID_FIELD).in(subquery);
                 }
                 case HISTORICAL_LOCATIONS:
-                    subquery = ctx.select(DSL.field(HISTORICAL_LOCATION_TABLE + '.' + FK_THING_ID_FIELD))
+                    subquery = ctx.select(DSL.field(DSL.name(HISTORICAL_LOCATION_TABLE, FK_THING_ID_FIELD)))
                             .from(DSL.table(HISTORICAL_LOCATION_TABLE))
                             .join(DSL.table(THING_TABLE))
-                            .on(DSL.field(THING_TABLE + "." + THING_ID_FIELD)
-                                    .eq(DSL.field(HISTORICAL_LOCATION_TABLE + "." + FK_THING_ID_FIELD)))
+                            .on(DSL.field(DSL.name(THING_TABLE, THING_ID_FIELD))
+                                    .eq(DSL.field(DSL.name(HISTORICAL_LOCATION_TABLE, FK_THING_ID_FIELD))))
                             .where(propertyValue);
 
                     return DSL.field(THING_ID_FIELD).in(subquery);

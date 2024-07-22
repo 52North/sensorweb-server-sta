@@ -49,10 +49,12 @@ public class LocationQueryConditions extends EntityQueryConditions implements Sp
         return DSL.exists(
                 ctx.selectOne()
                         .from(DSL.table(LOCATION_HISTORICAL_LOCATION_TABLE))
-                        .innerJoin(DSL.table(HISTORICAL_LOCATION_TABLE))
-                        .onKey()
-                        .innerJoin(DSL.table(LOCATION_TABLE))
-                        .onKey()
+                        .join(DSL.table(HISTORICAL_LOCATION_TABLE))
+                        .on(DSL.field(DSL.name(LOCATION_HISTORICAL_LOCATION_TABLE, FK_HISTORICAL_LOCATION_ID_FIELD))
+                                .eq(DSL.field(DSL.name(HISTORICAL_LOCATION_TABLE, HISTORICAL_LOCATION_ID_FIELD))))
+                        .join(DSL.table(LOCATION_TABLE))
+                        .on(DSL.field(DSL.name(LOCATION_HISTORICAL_LOCATION_TABLE, FK_LOCATION_ID_FIELD))
+                                .eq(DSL.field(DSL.name(LOCATION_TABLE, LOCATION_ID_FIELD))))
                         .where(DSL.field(DSL.name(HISTORICAL_LOCATION_TABLE, STA_IDENTIFIER_FIELD))
                                 .eq(historicalLocationIdentifier))
         );
@@ -62,10 +64,12 @@ public class LocationQueryConditions extends EntityQueryConditions implements Sp
         return DSL.exists(
                 ctx.selectOne()
                         .from(DSL.table(LOCATION_TABLE))
-                        .innerJoin(DSL.table(THING_LOCATION_TABLE))
-                        .onKey()
-                        .innerJoin(DSL.table(THING_TABLE))
-                        .onKey()
+                        .join(DSL.table(THING_LOCATION_TABLE))
+                        .on(DSL.field(DSL.name(LOCATION_TABLE, LOCATION_ID_FIELD))
+                                .eq(DSL.field(DSL.name(THING_LOCATION_TABLE, FK_LOCATION_ID_FIELD))))
+                        .join(DSL.table(THING_TABLE))
+                        .on(DSL.field(DSL.name(THING_LOCATION_TABLE, FK_THING_ID_FIELD))
+                                .eq(DSL.field(DSL.name(THING_TABLE, THING_ID_FIELD))))
                         .where(DSL.field(DSL.name(THING_TABLE, STA_IDENTIFIER_FIELD))
                                 .eq(thingIdentifier))
         );
@@ -125,11 +129,6 @@ public class LocationQueryConditions extends EntityQueryConditions implements Sp
                 return GeospatialFunctions.st_contains(
                         DSL.field(LOCATION_GEOM_FIELD, Geometry.class),
                         arguments[0]);
-            case ODataConstants.SpatialFunctions.ST_RELATE:
-                return GeospatialFunctions.st_relate(
-                        DSL.field(LOCATION_GEOM_FIELD, Geometry.class),
-                        arguments[0],
-                        arguments[1]);
             default:
                 throw new RuntimeException("Could not find function: " + spatialFunctionName);
         }
@@ -201,8 +200,9 @@ public class LocationQueryConditions extends EntityQueryConditions implements Sp
                     SelectConditionStep<Record1<Object>> subquery = ctx
                             .select(DSL.field(DSL.name(LOCATION_TABLE, LOCATION_ID_FIELD)))
                             .from(DSL.table(LOCATION_TABLE))
-                            .innerJoin(DSL.table(FORMAT_TABLE))
-                            .onKey()
+                            .join(DSL.table(FORMAT_TABLE))
+                            .on(DSL.field(DSL.name(LOCATION_TABLE, FK_FORMAT_ID_FIELD))
+                                    .eq(DSL.field(DSL.name(FORMAT_TABLE, FORMAT_ID_FIELD))))
                             .where(subCondition);
                     return DSL.field(LOCATION_ID_FIELD).in(subquery);
                 default:

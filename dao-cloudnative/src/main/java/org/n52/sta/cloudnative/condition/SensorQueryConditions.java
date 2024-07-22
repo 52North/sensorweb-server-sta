@@ -44,8 +44,9 @@ public class SensorQueryConditions extends EntityQueryConditions {
         return DSL.exists(
                 ctx.selectOne()
                         .from(DSL.table(DATASTREAM_TABLE))
-                        .innerJoin(DSL.table(SENSOR_TABLE))
-                        .onKey()
+                        .join(DSL.table(SENSOR_TABLE))
+                        .on(DSL.field(DSL.name(DATASTREAM_TABLE, FK_SENSOR_ID_FIELD))
+                                .eq(DSL.field(DSL.name(SENSOR_TABLE, SENSOR_ID_FIELD))))
                         .where(DSL.field(DSL.name(DATASTREAM_TABLE, STA_IDENTIFIER_FIELD))
                                 .eq(datastreamIdentifier))
         );
@@ -88,8 +89,9 @@ public class SensorQueryConditions extends EntityQueryConditions {
                     SelectConditionStep<Record1<Object>> subquery = ctx
                             .select(DSL.field(DSL.name(SENSOR_TABLE, SENSOR_ID_FIELD)))
                             .from(DSL.table(SENSOR_TABLE))
-                            .innerJoin(DSL.table(FORMAT_TABLE))
-                            .onKey()
+                            .join(DSL.table(FORMAT_TABLE))
+                            .on(DSL.field(DSL.name(SENSOR_TABLE, FK_FORMAT_ID_FIELD))
+                                    .eq(DSL.field(DSL.name(FORMAT_TABLE, FORMAT_ID_FIELD))))
                             .where(subCondition);
 
                     return DSL.field(SENSOR_ID_FIELD).in(subquery);

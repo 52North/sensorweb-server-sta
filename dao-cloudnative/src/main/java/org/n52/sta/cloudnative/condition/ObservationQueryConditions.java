@@ -28,10 +28,7 @@
  */
 package org.n52.sta.cloudnative.condition;
 
-import org.jooq.Condition;
-import org.jooq.Field;
-import org.jooq.Record1;
-import org.jooq.SelectConditionStep;
+import org.jooq.*;
 import org.n52.series.db.beans.parameter.ParameterFactory;
 import org.n52.shetland.ogc.filter.FilterConstants;
 import org.n52.shetland.ogc.sta.StaConstants;
@@ -49,8 +46,9 @@ public class ObservationQueryConditions extends EntityQueryConditions {
         SelectConditionStep<Record1<Object>> subquery = ctx
                 .select(DSL.field(DSL.name(DATASTREAM_TABLE, DATASTREAM_ID_FIELD)))
                 .from(DSL.table(DATASTREAM_TABLE))
-                .innerJoin(DSL.table(FEATURE_TABLE))
-                .onKey()
+                .join(DSL.table(FEATURE_TABLE))
+                .on(DSL.field(DSL.name(DATASTREAM_TABLE, FK_FEATURE_ID_FIELD))
+                        .eq(DSL.field(DSL.name(FEATURE_TABLE, FEATURE_ID_FIELD))))
                 .where(DSL.field(DSL.name(FEATURE_TABLE, STA_IDENTIFIER_FIELD))
                         .eq(featureIdentifier));
 
@@ -61,16 +59,17 @@ public class ObservationQueryConditions extends EntityQueryConditions {
         SelectConditionStep<Record1<Object>> subquery = ctx
                 .select(DSL.field(DSL.name(DATASTREAM_TABLE, DATASTREAM_ID_FIELD)))
                 .from(DSL.table(DATASTREAM_TABLE))
-                .innerJoin(DSL.table(OBSERVATION_TABLE))
-                .onKey()
+                .join(DSL.table(OBSERVATION_TABLE))
+                .on(DSL.field(DSL.name(DATASTREAM_TABLE, DATASTREAM_ID_FIELD))
+                        .eq(DSL.field(DSL.name(OBSERVATION_TABLE, FK_DATASTREAM_ID_FIELD))))
                 .where(DSL.field(DSL.name(DATASTREAM_TABLE, STA_IDENTIFIER_FIELD))
                         .eq(datastreamStaIdentifier));
 
         return DSL.field(DSL.name(OBSERVATION_TABLE, FK_DATASTREAM_ID_FIELD)).in(subquery);
     }
 
-    public Condition withDatasetId(final long datasetId) {
-        return DSL.field(DATASTREAM_ID_FIELD).eq(datasetId);
+    public Condition withDatastreamId(final long datastreamId) {
+        return DSL.field(FK_DATASTREAM_ID_FIELD).eq(datastreamId);
     }
 
     /*
@@ -215,11 +214,11 @@ public class ObservationQueryConditions extends EntityQueryConditions {
         SelectConditionStep<Record1<Object>> subquery;
         try {
             if (DATASTREAM.equals(propertyName)) {
-                subquery = ctx.select(DSL.field(DATASTREAM_TABLE + "." + DATASTREAM_ID_FIELD))
+                subquery = ctx.select(DSL.field(DATASTREAM_ID_FIELD))
                         .from(DSL.table(DATASTREAM_TABLE))
                         .where(propertyValue);
 
-                return DSL.field(DATASTREAM_ID_FIELD).in(subquery);
+                return DSL.field(FK_DATASTREAM_ID_FIELD).in(subquery);
 
             } else if (FEATUREOFINTEREST.equals(propertyName)) {
                 SelectConditionStep<Record1<Object>> subSubquery;
@@ -230,14 +229,17 @@ public class ObservationQueryConditions extends EntityQueryConditions {
 
                 subquery = ctx.select(DSL.field(DATASTREAM_ID_FIELD))
                         .from(DSL.table(DATASTREAM_TABLE))
-                        .where(DSL.field(FEATURE_ID_FIELD).in(subSubquery));
+                        .where(DSL.field(FK_FEATURE_ID_FIELD).in(subSubquery));
 
-                return DSL.field(DATASTREAM_ID_FIELD).in(subquery);
+                return DSL.field(FK_DATASTREAM_ID_FIELD).in(subquery);
+
             } else if (StaConstants.PROP_PARAMETERS.equals(propertyName)) {
                 subquery = ctx.select(DSL.field(FK_OBSERVATION_ID_FIELD))
                         .from(DSL.table(OBSERVATION_PARAMETER_TABLE))
                         .where(propertyValue);
+
                 return DSL.field(OBSERVATION_ID_FIELD).in(subquery);
+
             } else {
                 throw new STAInvalidFilterExpressionException("Could not find related property: " + propertyName);
             }
