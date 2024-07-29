@@ -40,7 +40,7 @@ import org.n52.series.db.beans.sta.LocationEntity;
 import org.n52.shetland.oasis.odata.query.option.QueryOptions;
 import org.n52.shetland.ogc.sta.exception.STACRUDException;
 import org.n52.sta.data.vanilla.DTOTransformer;
-import org.n52.sta.data.vanilla.DaoSemaphore;
+import org.n52.sta.data.DaoSemaphore;
 import org.n52.sta.data.vanilla.SerDesConfig;
 import org.n52.sta.api.AbstractSensorThingsEntityService;
 import org.n52.sta.api.CollectionWrapper;

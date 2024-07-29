@@ -104,11 +104,11 @@ public class ThingSerDes {
                     } else {
                         switch (navigationProperty) {
                             case ThingEntityDefinition.DATASTREAMS:
-                                if (value.getDatastream() == null) {
+                                if (value.getDatastreams() == null) {
                                     writeNavigationProp(gen, navigationProperty, value.getId());
                                 } else {
                                     gen.writeFieldName(navigationProperty);
-                                    writeNestedCollection(Collections.unmodifiableSet(value.getDatastream()),
+                                    writeNestedCollection(Collections.unmodifiableSet(value.getDatastreams()),
                                                           gen,
                                                           serializers);
                                 }

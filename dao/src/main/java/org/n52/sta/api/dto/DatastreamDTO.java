@@ -37,15 +37,7 @@ import java.util.Set;
 /**
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
  */
-public interface DatastreamDTO extends StaDTO {
-
-    String getName();
-
-    void setName(String name);
-
-    String getDescription();
-
-    void setDescription(String description);
+public interface DatastreamDTO extends StaDTO, HasNameAndDescription, HasPhenomenonTime {
 
     String getObservationType();
 
@@ -58,10 +50,6 @@ public interface DatastreamDTO extends StaDTO {
     Geometry getObservedArea();
 
     void setObservedArea(Geometry ObservedArea);
-
-    Time getPhenomenonTime();
-
-    void setPhenomenonTime(Time phenomenonTime);
 
     Time getResultTime();
 

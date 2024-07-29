@@ -83,10 +83,10 @@ spring:
   # Options:
   # - Vanilla STA: vanilla
   # - UFZ Aggregata backend: ufzaggregata
-  # - Cloud Native Dao: cloudnativedao
+  # - Cloud Native Dao: cloudnative
   # - [not implemented yet] STA with MultiDatastream Extension: multiDatastreamExtension
   profiles:
-    active: cloudnativedao
+    active: cloudnative
   datasource:
     platform: postgres
     username: postgres

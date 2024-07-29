@@ -38,15 +38,7 @@ import java.util.Set;
  *
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
  */
-public interface FeatureOfInterestDTO extends StaDTO {
-
-    String getName();
-
-    void setName(String name);
-
-    String getDescription();
-
-    void setDescription(String description);
+public interface FeatureOfInterestDTO extends StaDTO, HasNameAndDescription {
 
     String getEncodingType();
 

@@ -37,15 +37,7 @@ import java.util.Set;
  *
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
  */
-public interface SensorDTO extends StaDTO {
-
-    String getName();
-
-    void setName(String name);
-
-    String getDescription();
-
-    void setDescription(String description);
+public interface SensorDTO extends StaDTO, HasNameAndDescription, HasDatastreams {
 
     String getEncodingType();
 
@@ -58,10 +50,6 @@ public interface SensorDTO extends StaDTO {
     ObjectNode getProperties();
 
     void setProperties(ObjectNode properties);
-
-    Set<DatastreamDTO> getDatastreams();
-
-    void setDatastreams(Set<DatastreamDTO> datastreams);
 
     void addDatastream(DatastreamDTO datastream);
 }

@@ -38,12 +38,12 @@ import org.springframework.context.annotation.aspectj.EnableSpringConfigured;
  * @author <a href="mailto:humaid.kidwai@ucalgary.ca">Humaid Kidwai</a>
  */
 
-@Profile("cloudnativedao")
+@Profile("cloudnative")
 @Configuration
 @ComponentScan(basePackages = {
         "org.n52.sta.http.vanilla",
         "org.n52.sta.mqtt.vanilla",
-        "org.n52.sta.cloudnative",
+        "org.n52.sta.data.cloudnative",
 })
 @EnableSpringConfigured
 public class CloudNativeDaoLoader {

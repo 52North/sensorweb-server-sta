@@ -31,7 +31,7 @@ package org.n52.sta.data.vanilla.service;
 import org.n52.series.db.beans.OfferingEntity;
 import org.n52.series.db.beans.ProcedureEntity;
 import org.n52.shetland.ogc.sta.exception.STACRUDException;
-import org.n52.sta.data.vanilla.MutexFactory;
+import org.n52.sta.data.MutexFactory;
 import org.n52.sta.data.vanilla.repositories.OfferingRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

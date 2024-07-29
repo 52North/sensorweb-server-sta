@@ -37,15 +37,7 @@ import java.util.Set;
  *
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
  */
-public interface ThingDTO extends StaDTO {
-
-    String getName();
-
-    void setName(String name);
-
-    String getDescription();
-
-    void setDescription(String description);
+public interface ThingDTO extends StaDTO, HasNameAndDescription, HasDatastreams {
 
     ObjectNode getProperties();
 
@@ -63,7 +55,4 @@ public interface ThingDTO extends StaDTO {
 
     void addLocations(LocationDTO location);
 
-    Set<DatastreamDTO> getDatastream();
-
-    void setDatastreams(Set<DatastreamDTO> datastream);
 }

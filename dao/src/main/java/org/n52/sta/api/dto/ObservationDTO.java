@@ -36,11 +36,7 @@ import org.n52.shetland.ogc.gml.time.Time;
  *
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
  */
-public interface ObservationDTO extends StaDTO {
-
-    Time getPhenomenonTime();
-
-    void setPhenomenonTime(Time phenomenonTimeEnd);
+public interface ObservationDTO extends StaDTO, HasPhenomenonTime {
 
     Time getResultTime();
 

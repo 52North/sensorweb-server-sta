@@ -117,8 +117,8 @@ public class JSONThing extends JSONBase.JSONwithIdNameDescription<ThingDTO> impl
                     if (backReference instanceof JSONLocation) {
                         self.addLocations(((JSONLocation) backReference).getEntity());
                     } else if (backReference instanceof JSONDatastream) {
-                        if (self.getDatastream() != null) {
-                            self.getDatastream().add(((JSONDatastream) backReference).getEntity());
+                        if (self.getDatastreams() != null) {
+                            self.getDatastreams().add(((JSONDatastream) backReference).getEntity());
                         } else {
                             self.setDatastreams(Collections.singleton(((JSONDatastream) backReference).getEntity()));
                         }

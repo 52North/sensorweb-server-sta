@@ -439,8 +439,8 @@ public class DTOTransformer<R extends StaDTO, S extends HibernateRelations.HasId
 
             platform.setParameters(convertParameters(raw.getProperties(), ParameterFactory.EntityType.PLATFORM));
 
-            if (raw.getDatastream() != null) {
-                platform.setDatasets(raw.getDatastream()
+            if (raw.getDatastreams() != null) {
+                platform.setDatasets(raw.getDatastreams()
                                          .stream()
                                          .map(this::toDatasetEntity)
                                          .collect(Collectors.toSet()));

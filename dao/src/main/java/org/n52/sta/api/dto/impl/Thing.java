@@ -110,7 +110,7 @@ public class Thing extends Entity implements ThingDTO {
         this.locations.add(location);
     }
 
-    @Override public Set<DatastreamDTO> getDatastream() {
+    @Override public Set<DatastreamDTO> getDatastreams() {
         return this.datastreams;
     }
 
