@@ -27,26 +27,47 @@
  * Public License for more details.
  */
 package org.n52.sta.data.cloudnative.condition;
+
 import org.n52.series.db.beans.parameter.ParameterFactory;
 import org.n52.shetland.ogc.filter.FilterConstants;
+import org.n52.shetland.ogc.sta.StaConstants;
 import org.n52.shetland.ogc.sta.exception.STAInvalidFilterExpressionException;
+
 import org.jooq.*;
 import org.jooq.impl.DSL;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Configurable;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
+import java.time.LocalDateTime;
 import java.util.Date;
-import java.util.List;
 
 /**
  * @author <a href="mailto:humaid.kidwai@ucalgary.ca">Humaid Kidwai</a>
  */
 
-@Configurable
-public abstract class EntityQueryConditions implements EntityQueryConstants {
+@Component
+public abstract class EntityQueryConditions implements StaEntity {
+
+    String COULD_NOT_FIND_RELATED_PROPERTY = "Could not find related property: ";
+    String ERROR_GETTING_FILTER_NO_PROP = "Error getting filter for Property: '%s'. No such " +
+            "property in Entity.";
+    String ERROR_GETTING_FILTER_NO_PROP_OR_WRONG_TYPE =
+            "Error getting filter for Property: '%s'. No such property with type %s in Entity.";
+    String ERROR_TEMPLATE = "Operator \"%s\" is not supported for given arguments.";
+    String INVALID_DATATYPE_CANNOT_CAST = "Invalid Datatypes found. Cannot cast ";
+    String ERROR_INVALID_PARAMETER_ENTITY_TYPE = "Error getting entity from '%s'. No such parameter entity found";
+
+    protected DSLContext ctx;
+
+    public DSLContext getCtx() {
+        return ctx;
+    }
 
     @Autowired
-    protected DSLContext ctx;
+    public void setCtx(DSLContext ctx) {
+        this.ctx = ctx;
+    }
 
     /**
      * Used for testing
@@ -96,31 +117,30 @@ public abstract class EntityQueryConditions implements EntityQueryConstants {
                                                             FilterConstants.ComparisonOperator operator,
                                                             boolean switched);
 
-    protected abstract Condition handleRelatedPropertyFilter(String propertyName,
-                                                                    Condition propertyValue);
+    protected abstract Condition handleRelatedPropertyFilter(String propertyName, Condition propertyValue);
 
-    public Condition withName(final String name) {
-        return DSL.field(STA_NAME_FIELD).equal(name);
-    }
+//    public Condition withName(final String name) {
+//        return DSL.field(STA_NAME_FIELD).equal(name);
+//    }
+//
+//    public Condition withStaIdentifier(final String name) {
+//        return DSL.field(STA_IDENTIFIER_FIELD).equal(name);
+//    }
+//
+//    public Condition withStaIdentifier(final List<String> identifiers) {
+//        return DSL.field(STA_IDENTIFIER_FIELD).in(identifiers);
+//    }
 
-    public Condition withStaIdentifier(final String name) {
-        return DSL.field(STA_IDENTIFIER_FIELD).equal(name);
-    }
-
-    public Condition withStaIdentifier(final List<String> identifiers) {
-        return DSL.field(STA_IDENTIFIER_FIELD).in(identifiers);
-    }
-
-    @SuppressWarnings("unchecked")
     protected <T extends Comparable<? super T>> Condition handleDirectStringPropertyFilter(
             Field<String> stringField,
-            Field <T> propertyValue,
+            Field <?> propertyValue,
             FilterConstants.ComparisonOperator operator,
             boolean switched)
             throws STAInvalidFilterExpressionException {
         if (propertyValue.getDataType().getType().equals(String.class)) {
-            return this.handleStringFilter(stringField,
-                    propertyValue.cast(String.class),
+            return this.handleStringFilter(
+                    stringField,
+                    (Field<String>) propertyValue,
                     operator,
                     switched);
         } else {
@@ -130,17 +150,17 @@ public abstract class EntityQueryConditions implements EntityQueryConstants {
     }
 
 
-    @SuppressWarnings("unchecked")
     protected <T extends Comparable<? super T>> Condition handleDirectNumberPropertyFilter(
-            Field<Double> numberField,
-            Field <T> propertyValue,
+            Field<T> numericField,
+            Field <?> propertyValue,
             FilterConstants.ComparisonOperator operator)
             throws STAInvalidFilterExpressionException {
 
-        if (Number.class.isAssignableFrom(numberField.getDataType().getType()) &&
+        if (Number.class.isAssignableFrom(numericField.getDataType().getType()) &&
                 Number.class.isAssignableFrom(propertyValue.getDataType().getType())) {
-            return this.handleComparableFilter(numberField,
-                    propertyValue.cast(Double.class),
+            return this.handleComparableFilter(
+                    numericField,
+                    (Field<T>) propertyValue,
                     operator);
         } else {
             throw new STAInvalidFilterExpressionException(
@@ -149,17 +169,18 @@ public abstract class EntityQueryConditions implements EntityQueryConstants {
     }
 
 
-    @SuppressWarnings("unchecked")
     protected <T extends Comparable<? super T>> Condition handleDirectDateTimePropertyFilter(
-            Field<Date> timeField,
+            Field<LocalDateTime> timeField,
             Field <T> propertyValue,
             FilterConstants.ComparisonOperator operator)
             throws STAInvalidFilterExpressionException {
 
         if (Date.class.isAssignableFrom(propertyValue.getDataType().getType())) {
-            return this.handleComparableFilter(timeField,
-                    propertyValue.cast(Date.class),
-                    operator);
+            return this.handleComparableFilter(
+                    (Field<T>) timeField,
+                    propertyValue,
+                    operator
+            );
         } else {
             throw new STAInvalidFilterExpressionException(
                     INVALID_DATATYPE_CANNOT_CAST + propertyValue.getDataType().getType() + " to Date.class");
@@ -196,7 +217,7 @@ public abstract class EntityQueryConditions implements EntityQueryConstants {
                 return left.ge(right);
             default:
                 throw new STAInvalidFilterExpressionException(
-                        String.format(ERROR_TEMPLATE, operator.toString()));
+                        String.format(ERROR_TEMPLATE, operator));
         }
     }
     /**
@@ -227,36 +248,37 @@ public abstract class EntityQueryConditions implements EntityQueryConstants {
             Field<T> propertyValue,
             FilterConstants.ComparisonOperator operator,
             boolean switched,
-            String referenceField,
+            Field<Long> referenceField,
             ParameterFactory.EntityType entityType)
             throws STAInvalidFilterExpressionException {
 
-        String key = propertyName.substring(11);
+        String key = propertyName.substring(StaConstants.PROP_PROPERTIES.length() + 1);
         if (propertyValue.getDataType().getType().equals(String.class)) {
 
-            String tableName = getParameterTableName(entityType);
-            String entityId = getEntityId(entityType);
+            Table<?> table = getParameterTable(entityType);
+            Field<Long> entityId = getEntityId(entityType);
 
-            if (tableName == null || entityId == null) {
+            if (table == null || entityId == null) {
                 // handle exception
                 throw new STAInvalidFilterExpressionException(
                         String.format(ERROR_INVALID_PARAMETER_ENTITY_TYPE, entityType));
             }
 
             // value could also be: value_json,value_xml,value_category,value_text, value_count, value_quantity,etc
-            Field<String> valueField = DSL.field(PARAMETER_VALUE_TEXT, String.class);
+            Field<String> valueField = DSL.field(DSL.name(table.getName(), "VALUE_TEXT"), String.class);
 
             // Build the subquery condition
-            Condition subqueryCondition = DSL.field(STA_NAME_FIELD).eq(DSL.val(key))
+            Condition subqueryCondition = DSL.field(DSL.name(table.getName(), "NAME")).eq(DSL.val(key))
                     .and(handleDirectStringPropertyFilter(valueField, propertyValue, operator, switched));
 
             // Build the subquery
-            SelectConditionStep<Record1<Object>> subquery = DSL.select(DSL.field(referenceField))
-                    .from(DSL.table(tableName))
+            SelectConditionStep<? extends Record1<Long>> subquery = ctx
+                    .select(referenceField)
+                    .from(table)
                     .where(subqueryCondition);
 
             // Main query condition
-            return DSL.field(entityId).in(subquery);
+            return entityId.in(subquery);
 
         } else {
             throw new STAInvalidFilterExpressionException(
@@ -270,7 +292,46 @@ public abstract class EntityQueryConditions implements EntityQueryConstants {
      * @return name of the property in database
      */
 
-    public String checkPropertyName(String property) {
-        return property;
+    public abstract Field<?> checkPropertyName(String property);
+
+    private Field<Long> getEntityId(ParameterFactory.EntityType entityType) {
+        switch (entityType) {
+            case PHENOMENON:
+                return OBSERVED_PROPERTY.PHENOMENON_ID;
+            case PROCEDURE:
+                return SENSOR.PROCEDURE_ID;
+            case PLATFORM:
+                return THING.PLATFORM_ID;
+            case DATASET:
+                return DATASTREAM.DATASET_ID;
+            case FEATURE:
+                return FEATURE_OF_INTEREST.FEATURE_ID;
+            case OBSERVATION:
+                return OBSERVATION.OBSERVATION_ID;
+            case LOCATION:
+                return LOCATION.LOCATION_ID;
+            default:
+                return null;
+        }
+    }
+    Table<?> getParameterTable(ParameterFactory.EntityType entityType) {
+        switch (entityType) {
+            case PHENOMENON:
+                return OBSERVED_PROPERTY_PROPERTIES;
+            case PROCEDURE:
+                return SENSOR_PROPERTIES;
+            case PLATFORM:
+                return THING_PROPERTIES;
+            case DATASET:
+                return DATASTREAM_PROPERTIES;
+            case FEATURE:
+                return FEATURE_PROPERTIES;
+            case OBSERVATION:
+                return OBSERVATION_PARAMETERS;
+            case LOCATION:
+                return LOCATION_PROPERTIES;
+            default:
+                return null;
+        }
     }
 }

@@ -26,8 +26,6 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
-
-
 package org.n52.sta.data.cloudnative;
 
 import org.jooq.Condition;
@@ -44,7 +42,9 @@ import org.n52.shetland.ogc.filter.FilterConstants;
 import org.n52.shetland.ogc.sta.StaConstants;
 import org.n52.shetland.ogc.sta.exception.STAInvalidFilterExpressionException;
 
-import org.n52.sta.data.cloudnative.condition.EntityQueryConstants;
+import org.n52.shetland.ogc.sta.model.STAEntityDefinition;
+import org.n52.sta.data.cloudnative.condition.EntityQueryConditions;
+import org.n52.sta.data.cloudnative.condition.StaEntity;
 import org.n52.sta.data.cloudnative.condition.SensorQueryConditions;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -66,6 +66,10 @@ public class SensorQueryConditionsTest {
         sensorQueryConditions.setDslContext(ctx);
     }
 
+    private String read_parquet(String table) {
+        return String.format("read_parquet('s3://52n-sta/%s') %s ", table, table);
+    }
+
     @Test
     public void testWithDatastreamStaIdentifier_TP() {
 
@@ -75,11 +79,13 @@ public class SensorQueryConditionsTest {
 
         String sql = ctx.renderInlined(result);
         String expectedSQL = "exists " +
-                "(select 1 one " +
+                "(select DATASET.DATASET_ID " +
                 "from " +
-                "dataset join procedure " +
-                "on dataset.fk_procedure_id = procedure.procedure_id " +
-                "where dataset.sta_identifier = 'datastream123')";
+                read_parquet("DATASET") +
+                "join " +
+                read_parquet("PROCEDURE") +
+                "on DATASET.FK_PROCEDURE_ID = PROCEDURE.PROCEDURE_ID " +
+                "where DATASET.STA_IDENTIFIER = 'datastream123')";
 
         Assertions.assertEquals(expectedSQL, sql);
 
@@ -88,7 +94,7 @@ public class SensorQueryConditionsTest {
     @Test
     public void testWithRelatedPropertyFilter_TP() {
 
-        String propertyName = EntityQueryConstants.DATASTREAMS;
+        String propertyName = STAEntityDefinition.DATASTREAMS;
         Condition propertyValue = DSL.condition("");
         Condition result = null;
 
@@ -99,11 +105,11 @@ public class SensorQueryConditionsTest {
         }
 
         String sql = ctx.renderNamedOrInlinedParams(result);
-        String expectedSQL = "procedure_id in " +
+        String expectedSQL = "PROCEDURE.PROCEDURE_ID in " +
                 "(select " +
-                "dataset.fk_procedure_id " +
+                "DATASET.FK_PROCEDURE_ID " +
                 "from " +
-                "dataset " +
+                read_parquet("DATASET") +
                 "where ())";
 
         Assertions.assertEquals(expectedSQL, sql);
@@ -127,7 +133,7 @@ public class SensorQueryConditionsTest {
             e.printStackTrace();
         }
         String sql = ctx.renderInlined(result);
-        String expectedSQL = "sta_identifier = cast('sensor123' as varchar)";
+        String expectedSQL = "PROCEDURE.STA_IDENTIFIER = 'sensor123'";
 
         Assertions.assertEquals(expectedSQL, sql);
     }
@@ -149,7 +155,7 @@ public class SensorQueryConditionsTest {
             e.printStackTrace();
         }
         String sql = ctx.renderInlined(result);
-        String expectedSQL = "sta_identifier = 'sensor123'";
+        String expectedSQL = "PROCEDURE.STA_IDENTIFIER = 'sensor12'";
 
         Assertions.assertNotEquals(expectedSQL, sql);
     }
@@ -167,7 +173,7 @@ public class SensorQueryConditionsTest {
                 }
         );
         Assertions.assertEquals("org.n52.shetland.ogc.sta.exception.STAInvalidFilterExpressionException: "
-                        + EntityQueryConstants.INVALID_DATATYPE_CANNOT_CAST
+                        + "Invalid Datatypes found. Cannot cast "
                         + propertyValue.getDataType().getType()
                         + " to String.class",
                 e.getMessage());
@@ -190,7 +196,7 @@ public class SensorQueryConditionsTest {
             e.printStackTrace();
         }
         String sql = ctx.renderInlined(result);
-        String expectedSQL = "name = cast('airSensor' as varchar)";
+        String expectedSQL = "PROCEDURE.NAME = 'airSensor'";
 
         Assertions.assertEquals(expectedSQL, sql);
     }
@@ -212,7 +218,7 @@ public class SensorQueryConditionsTest {
             e.printStackTrace();
         }
         String sql = ctx.renderInlined(result);
-        String expectedSQL = "description = cast('Sensor to measure C02 levels in the atmosphere' as varchar)";
+        String expectedSQL = "PROCEDURE.DESCRIPTION = 'Sensor to measure C02 levels in the atmosphere'";
 
         Assertions.assertEquals(expectedSQL, sql);
     }
@@ -234,12 +240,14 @@ public class SensorQueryConditionsTest {
             e.printStackTrace();
         }
         String sql = ctx.renderInlined(result);
-        String expectedSQL = "procedure_id in " +
-                "(select procedure.procedure_id " +
-                "from procedure " +
-                "join format " +
-                "on procedure.fk_format_id = format.format_id " +
-                "where format.definition = cast('pdf' as varchar))";
+        String expectedSQL = "PROCEDURE.PROCEDURE_ID in " +
+                "(select PROCEDURE.PROCEDURE_ID " +
+                "from " +
+                read_parquet("PROCEDURE") +
+                "join " +
+                read_parquet("FORMAT") +
+                "on PROCEDURE.FK_FORMAT_ID = FORMAT.FORMAT_ID " +
+                "where FORMAT.DEFINITION = 'pdf')";
 
         Assertions.assertEquals(expectedSQL, sql);
     }
@@ -261,7 +269,7 @@ public class SensorQueryConditionsTest {
             e.printStackTrace();
         }
         String sql = ctx.renderInlined(result);
-        String expectedSQL = "description_file = cast('metadata_info' as varchar)";
+        String expectedSQL = "PROCEDURE.DESCRIPTION_FILE = 'metadata_info'";
 
         Assertions.assertEquals(expectedSQL, sql);
     }
@@ -283,11 +291,13 @@ public class SensorQueryConditionsTest {
             e.printStackTrace();
         }
         String sql = ctx.renderInlined(result);
-        String expectedSQL = "procedure_id in " +
-                "(select fk_procedure_id " +
-                "from procedure_parameter " +
+        String expectedSQL = "PROCEDURE.PROCEDURE_ID in " +
+                "(select " +
+                "PROCEDURE_PARAMETER.FK_PROCEDURE_ID " +
+                "from " +
+                read_parquet("PROCEDURE_PARAMETER") +
                 "where " +
-                "(name = 'valid' and value_text = cast('true' as varchar)))";
+                "(PROCEDURE_PARAMETER.NAME = 'valid' and PROCEDURE_PARAMETER.VALUE_TEXT = 'true'))";
 
         Assertions.assertEquals(expectedSQL, sql);
     }

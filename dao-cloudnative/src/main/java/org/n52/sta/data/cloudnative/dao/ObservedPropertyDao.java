@@ -1,4 +1,6 @@
 package org.n52.sta.data.cloudnative.dao;
 
-public interface ObservedPropertyDao extends StaIdentifierDao {
+import org.n52.sta.api.dto.ObservedPropertyDTO;
+
+public interface ObservedPropertyDao extends StaNamedEntityDao<ObservedPropertyDTO> {
 }

@@ -28,7 +28,6 @@
  */
 package org.n52.sta.api.dto;
 
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.locationtech.jts.geom.Geometry;
 import org.n52.shetland.ogc.gml.time.Time;
 
@@ -37,7 +36,7 @@ import java.util.Set;
 /**
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
  */
-public interface DatastreamDTO extends StaDTO, HasNameAndDescription, HasPhenomenonTime {
+public interface DatastreamDTO extends StaDTO, HasNameAndDescription, HasPhenomenonTime, HasProperties {
 
     String getObservationType();
 
@@ -54,10 +53,6 @@ public interface DatastreamDTO extends StaDTO, HasNameAndDescription, HasPhenome
     Time getResultTime();
 
     void setResultTime(Time resultTimeStart);
-
-    ObjectNode getProperties();
-
-    void setProperties(ObjectNode properties);
 
     ThingDTO getThing();
 

@@ -44,7 +44,7 @@ import org.n52.shetland.oasis.odata.ODataConstants;
 import org.n52.shetland.ogc.filter.FilterConstants;
 import org.n52.shetland.ogc.sta.StaConstants;
 import org.n52.shetland.ogc.sta.exception.STAInvalidFilterExpressionException;
-import org.n52.sta.data.cloudnative.condition.EntityQueryConstants;
+import org.n52.shetland.ogc.sta.model.STAEntityDefinition;
 import org.n52.svalbard.odata.core.expr.GeoValueExpr;
 
 import org.n52.sta.data.cloudnative.condition.FeatureOfInterestQueryConditions;
@@ -70,6 +70,10 @@ public class FeatureOfInterestQueryConditionsTest {
         featureQueryConditions.setDslContext(ctx);
     }
 
+    private String read_parquet(String table) {
+        return String.format("read_parquet('s3://52n-sta/%s') %s ", table, table);
+    }
+
     @Test
     public void testWithObservationStaIdentifier() {
         final String staIdentifier = "observation123";
@@ -78,20 +82,25 @@ public class FeatureOfInterestQueryConditionsTest {
 
         String sql = ctx.renderInlined(result);
         String expectedSQL = "exists " +
-                "(select 1 one " +
-                "from feature " +
-                "join dataset " +
-                "on dataset.fk_feature_id = feature.feature_id " +
-                "join observation " +
-                "on observation.fk_dataset_id = dataset.dataset_id " +
-                "where observation.sta_identifier = 'observation123')";
+                "(select OBSERVATION.OBSERVATION_ID " +
+                "from " +
+                read_parquet("FEATURE") +
+                "join " +
+                read_parquet("DATASET") +
+                "on " +
+                "dataset.fk_feature_id = feature.feature_id ".toUpperCase() +
+                "join " +
+                read_parquet("OBSERVATION") +
+                "on " +
+                "observation.fk_dataset_id = dataset.dataset_id ".toUpperCase() +
+                "where OBSERVATION.STA_IDENTIFIER = 'observation123')";
 
         Assertions.assertEquals(expectedSQL, sql);
     }
 
     @Test
     public void testWithRelatedPropertyFilter_Observation() {
-        String propertyName = EntityQueryConstants.OBSERVATIONS;
+        String propertyName = STAEntityDefinition.OBSERVATIONS;
         Condition propertyValue = DSL.condition("");
         Condition result = null;
 
@@ -102,12 +111,14 @@ public class FeatureOfInterestQueryConditionsTest {
         }
 
         String sql = ctx.renderInlined(result);
-        String expectedSQL = "feature_id in " +
-                "(select fk_feature_id " +
-                "from dataset " +
-                "where dataset_id in " +
-                "(select fk_dataset_id " +
-                "from observation " +
+        String expectedSQL = "FEATURE.FEATURE_ID in " +
+                "(select DATASET.FK_FEATURE_ID " +
+                "from " +
+                read_parquet("DATASET") +
+                "where DATASET.DATASET_ID in " +
+                "(select OBSERVATION.FK_DATASET_ID " +
+                "from " +
+                read_parquet("OBSERVATION") +
                 "where " + propertyValue + "))";
 
         Assertions.assertEquals(expectedSQL, sql);
@@ -122,7 +133,7 @@ public class FeatureOfInterestQueryConditionsTest {
         Condition result = featureQueryConditions.handleGeoSpatialPropertyFilter(propertyName, functionName, argument);
 
         String sql = ctx.renderInlined(result);
-        String expectedSQL = "ST_Equals(ST_GeomFromWKB(geom), ST_GeomFromText('LINESTRING(0 0, 5 5, 10 10)'))";
+        String expectedSQL = "ST_Equals(ST_GeomFromWKB(FEATURE.GEOM), ST_GeomFromText('LINESTRING(0 0, 5 5, 10 10)'))";
 
         Assertions.assertEquals(expectedSQL, sql);
 
@@ -137,7 +148,7 @@ public class FeatureOfInterestQueryConditionsTest {
         Condition result = featureQueryConditions.handleGeoSpatialPropertyFilter(propertyName, functionName, argument);
 
         String sql = ctx.renderInlined(result);
-        String expectedSQL = "ST_Disjoint(ST_GeomFromWKB(geom), ST_GeomFromText('LINESTRING(0 0, 5 5, 10 10)'))";
+        String expectedSQL = "ST_Disjoint(ST_GeomFromWKB(FEATURE.GEOM), ST_GeomFromText('LINESTRING(0 0, 5 5, 10 10)'))";
 
         Assertions.assertEquals(expectedSQL, sql);
 
@@ -152,7 +163,7 @@ public class FeatureOfInterestQueryConditionsTest {
         Condition result = featureQueryConditions.handleGeoSpatialPropertyFilter(propertyName, functionName, argument);
 
         String sql = ctx.renderInlined(result);
-        String expectedSQL = "ST_Within(ST_GeomFromWKB(geom), ST_GeomFromText('LINESTRING(0 0, 5 5, 10 10)'))";
+        String expectedSQL = "ST_Within(ST_GeomFromWKB(FEATURE.GEOM), ST_GeomFromText('LINESTRING(0 0, 5 5, 10 10)'))";
 
         Assertions.assertEquals(expectedSQL, sql);
     }
@@ -166,7 +177,7 @@ public class FeatureOfInterestQueryConditionsTest {
         Condition result = featureQueryConditions.handleGeoSpatialPropertyFilter(propertyName, functionName, argument);
 
         String sql = ctx.renderInlined(result);
-        String expectedSQL = "ST_Touches(ST_GeomFromWKB(geom), ST_GeomFromText('LINESTRING(0 0, 5 5, 10 10)'))";
+        String expectedSQL = "ST_Touches(ST_GeomFromWKB(FEATURE.GEOM), ST_GeomFromText('LINESTRING(0 0, 5 5, 10 10)'))";
 
         Assertions.assertEquals(expectedSQL, sql);
     }
@@ -180,7 +191,7 @@ public class FeatureOfInterestQueryConditionsTest {
         Condition result = featureQueryConditions.handleGeoSpatialPropertyFilter(propertyName, functionName, argument);
 
         String sql = ctx.renderInlined(result);
-        String expectedSQL = "ST_Overlaps(ST_GeomFromWKB(geom), ST_GeomFromText('LINESTRING(0 0, 5 5, 10 10)'))";
+        String expectedSQL = "ST_Overlaps(ST_GeomFromWKB(FEATURE.GEOM), ST_GeomFromText('LINESTRING(0 0, 5 5, 10 10)'))";
 
         Assertions.assertEquals(expectedSQL, sql);
     }
@@ -194,7 +205,7 @@ public class FeatureOfInterestQueryConditionsTest {
         Condition result = featureQueryConditions.handleGeoSpatialPropertyFilter(propertyName, functionName, argument);
 
         String sql = ctx.renderInlined(result);
-        String expectedSQL = "ST_Crosses(ST_GeomFromWKB(geom), ST_GeomFromText('LINESTRING(0 0, 5 5, 10 10)'))";
+        String expectedSQL = "ST_Crosses(ST_GeomFromWKB(FEATURE.GEOM), ST_GeomFromText('LINESTRING(0 0, 5 5, 10 10)'))";
 
         Assertions.assertEquals(expectedSQL, sql);
     }
@@ -208,7 +219,7 @@ public class FeatureOfInterestQueryConditionsTest {
         Condition result = featureQueryConditions.handleGeoSpatialPropertyFilter(propertyName, functionName, argument);
 
         String sql = ctx.renderInlined(result);
-        String expectedSQL = "ST_Intersects(ST_GeomFromWKB(geom), ST_GeomFromText('LINESTRING(0 0, 5 5, 10 10)'))";
+        String expectedSQL = "ST_Intersects(ST_GeomFromWKB(FEATURE.GEOM), ST_GeomFromText('LINESTRING(0 0, 5 5, 10 10)'))";
 
         Assertions.assertEquals(expectedSQL, sql);
     }
@@ -222,7 +233,7 @@ public class FeatureOfInterestQueryConditionsTest {
         Condition result = featureQueryConditions.handleGeoSpatialPropertyFilter(propertyName, functionName, argument);
 
         String sql = ctx.renderInlined(result);
-        String expectedSQL = "ST_Contains(ST_GeomFromWKB(geom), ST_GeomFromText('LINESTRING(0 0, 5 5, 10 10)'))";
+        String expectedSQL = "ST_Contains(ST_GeomFromWKB(FEATURE.GEOM), ST_GeomFromText('LINESTRING(0 0, 5 5, 10 10)'))";
 
         Assertions.assertEquals(expectedSQL, sql);
     }
@@ -254,7 +265,7 @@ public class FeatureOfInterestQueryConditionsTest {
 
         String sql = ctx.renderInlined(result);
         String expectedSQL = "ST_Distance(" +
-                "ST_GeomFromWKB(geom), " +
+                "ST_GeomFromWKB(FEATURE.GEOM), " +
                 "ST_GeomFromText('LINESTRING(0 0, 5 5, 10 10)')" +
                 ")";
 
@@ -282,7 +293,7 @@ public class FeatureOfInterestQueryConditionsTest {
         Field<Double> result = featureQueryConditions.handleGeospatial(expr, functionName, null);
 
         String sql = ctx.renderInlined(result);
-        String expectedSQL = "ST_Length(ST_GeomFromWKB(geom))";
+        String expectedSQL = "ST_Length(ST_GeomFromWKB(FEATURE.GEOM))";
 
         Assertions.assertEquals(expectedSQL, sql);
     }
@@ -304,7 +315,7 @@ public class FeatureOfInterestQueryConditionsTest {
             System.out.println(e);
         }
         String sql = ctx.renderInlined(result);
-        String expectedSQL = "sta_identifier = cast('feature123' as varchar)";
+        String expectedSQL = "FEATURE.STA_IDENTIFIER = 'feature123'";
 
         assertEquals(expectedSQL, sql);
     }
@@ -326,7 +337,7 @@ public class FeatureOfInterestQueryConditionsTest {
             e.printStackTrace();
         }
         String sql = ctx.renderInlined(result);
-        String expectedSQL = "name = cast('feature_of_interest' as varchar)";
+        String expectedSQL = "FEATURE.NAME = 'feature_of_interest'";
 
         Assertions.assertEquals(expectedSQL, sql);
     }
@@ -348,7 +359,7 @@ public class FeatureOfInterestQueryConditionsTest {
             e.printStackTrace();
         }
         String sql = ctx.renderInlined(result);
-        String expectedSQL = "description = cast('description of the feature' as varchar)";
+        String expectedSQL = "FEATURE.DESCRIPTION = 'description of the feature'";
 
         Assertions.assertEquals(expectedSQL, sql);
     }
@@ -371,42 +382,23 @@ public class FeatureOfInterestQueryConditionsTest {
         }
 
         String sql = ctx.renderInlined(result);
-        String expectedSQL = "fk_format_id in " +
-                "(select feature.fk_format_id " +
-                "from feature " +
-                "join format " +
-                "on feature.fk_format_id = format.format_id " +
+        String expectedSQL = "FEATURE.FK_FORMAT_ID in " +
+                "(select FEATURE.FK_FORMAT_ID " +
+                "from " +
+                read_parquet("FEATURE") +
+                "join " +
+                read_parquet("FORMAT") +
+                "on " +
+                "feature.fk_format_id = format.format_id ".toUpperCase() +
                 "where " +
-                "(format.definition = 'application/vnd.geo+json' " +
+                "(FORMAT.DEFINITION = 'application/vnd.geo+json' " +
                 "or " +
-                "format.definition = 'application/vnd.geo json')" +
+                "FORMAT.DEFINITION = 'application/vnd.geo json')" +
                 ")";
 
         Assertions.assertEquals(expectedSQL, sql);
     }
 
-    @Test
-    public void testWithDirectPropertyFilterEncodingType() {
-        String propertyName = StaConstants.PROP_ENCODINGTYPE;
-        Field<String> propertyValue = DSL.val("");
-        FilterConstants.ComparisonOperator operator = FilterConstants.ComparisonOperator.PropertyIsNotEqualTo;
-        Condition result = null;
-        try {
-            result = featureQueryConditions.getFilterForProperty(
-                    propertyName,
-                    propertyValue,
-                    operator,
-                    false
-            );
-        } catch (STAInvalidFilterExpressionException e) {
-            e.printStackTrace();
-        }
-
-        String sql = ctx.renderInlined(result);
-        String expectedSQL = "identifier is not null";
-
-        Assertions.assertEquals(expectedSQL, sql);
-    }
 
     @Test
     public void testWithDirectPropertyFilterDefault() {
@@ -425,11 +417,12 @@ public class FeatureOfInterestQueryConditionsTest {
             e.printStackTrace();
         }
         String sql = ctx.renderInlined(result);
-        String expectedSQL = "feature_id in " +
-                "(select fk_feature_id " +
-                "from feature_parameter " +
+        String expectedSQL = "FEATURE.FEATURE_ID in " +
+                "(select FEATURE_PARAMETER.FK_FEATURE_ID " +
+                "from " +
+                read_parquet("FEATURE_PARAMETER") +
                 "where " +
-                "(name = 'fNo' and value_text = cast('23.11.09' as varchar)))";
+                "(FEATURE_PARAMETER.NAME = 'fNo' and FEATURE_PARAMETER.VALUE_TEXT = '23.11.09'))";
 
         Assertions.assertEquals(expectedSQL, sql);
     }

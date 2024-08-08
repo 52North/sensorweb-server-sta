@@ -47,7 +47,7 @@ public interface GeospatialFunctions {
     * - List of spatial functions supported: https://duckdb.org/docs/extensions/spatial.html
     * */
 
-    static Field<Double> st_length(Field<Geometry> geom) {
+    static Field<Double> st_length(Field<byte[]> geom) {
         return DSL.function(
             ST_LENGTH,
             Double.class,
@@ -63,7 +63,7 @@ public interface GeospatialFunctions {
         );
     }
 
-    static Field<Double> st_distance(Field<Geometry> geom, String wkt) {
+    static Field<Double> st_distance(Field<byte[]> geom, String wkt) {
         return DSL.function(
                 ST_DISTANCE,
                 Double.class,
@@ -81,39 +81,39 @@ public interface GeospatialFunctions {
         );
     }
 
-    static Condition st_intersects(Field<Geometry> geom, String wkt) {
+    static Condition st_intersects(Field<byte[]> geom, String wkt) {
         return defaultSTMethodCallGeometry("ST_Intersects", geom, wkt);
     }
 
-    static Condition st_equals(Field<Geometry> geom, String wkt) {
+    static Condition st_equals(Field<byte[]> geom, String wkt) {
         return defaultSTMethodCallGeometry("ST_Equals", geom, wkt);
     }
 
-    static Condition st_disjoint(Field<Geometry> geom, String wkt) {
+    static Condition st_disjoint(Field<byte[]> geom, String wkt) {
         return defaultSTMethodCallGeometry("ST_Disjoint", geom, wkt);
     }
 
-    static Condition st_touches(Field<Geometry> geom, String wkt) {
+    static Condition st_touches(Field<byte[]> geom, String wkt) {
         return defaultSTMethodCallGeometry("ST_Touches", geom, wkt);
     }
 
-    static Condition st_within(Field<Geometry> geom, String wkt) {
+    static Condition st_within(Field<byte[]> geom, String wkt) {
         return defaultSTMethodCallGeometry("ST_Within", geom, wkt);
     }
 
-    static Condition st_overlaps(Field<Geometry> geom, String wkt) {
+    static Condition st_overlaps(Field<byte[]> geom, String wkt) {
         return defaultSTMethodCallGeometry("ST_Overlaps", geom, wkt);
     }
 
-    static Condition st_crosses(Field<Geometry> geom, String wkt) {
+    static Condition st_crosses(Field<byte[]> geom, String wkt) {
         return defaultSTMethodCallGeometry("ST_Crosses", geom, wkt);
     }
 
-    static Condition st_contains(Field<Geometry> geom, String wkt) {
+    static Condition st_contains(Field<byte[]> geom, String wkt) {
         return defaultSTMethodCallGeometry("ST_Contains", geom, wkt);
     }
 
-    static Condition defaultSTMethodCallGeometry(String methodName, Field<Geometry> geom, String wkt) {
+    static Condition defaultSTMethodCallGeometry(String methodName, Field<byte[]> geom, String wkt) {
         return DSL.condition(DSL.function(
                 methodName,
                 Boolean.class,
@@ -123,18 +123,18 @@ public interface GeospatialFunctions {
         );
     }
 
-    private static Field<Geometry> geometryfromWKT(String wkt) {
+    private static Field<byte[]> geometryfromWKT(String wkt) {
         return DSL.function(
                 "ST_GeomFromText",
-                Geometry.class,
+                byte[].class,
                 DSL.inline(wkt)
         );
     }
 
-    private static Field<Geometry> geometryFromWKB(Field<Geometry> geom) {
+    private static Field<byte[]> geometryFromWKB(Field<byte[]> geom) {
         return DSL.function(
                 "ST_GeomFromWKB",
-                Geometry.class,
+                byte[].class,
                 geom
         );
     }

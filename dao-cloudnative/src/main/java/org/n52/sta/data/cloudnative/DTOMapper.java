@@ -28,26 +28,25 @@
  */
 package org.n52.sta.data.cloudnative;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import org.joda.time.DateTime;
 import org.jooq.*;
 import org.jooq.Record;
-import org.jooq.impl.DSL;
 
 import org.locationtech.jts.io.ParseException;
 import org.locationtech.jts.io.WKBReader;
 
-import org.n52.shetland.ogc.gml.time.TimeInstant;
 import org.n52.sta.api.dto.*;
 import org.n52.sta.api.dto.impl.*;
 
-import org.n52.sta.data.cloudnative.condition.EntityQueryConstants;
+import org.n52.sta.data.cloudnative.condition.StaEntity;
+import org.n52.sta.data.cloudnative.schema.tables.records.*;
 import org.n52.sta.utils.TimeUtil;
 
 import org.springframework.util.Assert;
 
-import java.sql.Time;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.Set;
+import java.sql.Timestamp;
 
 /**
  * jOOQ Record Mapper for mapping Result Sets to DTO Entities
@@ -57,50 +56,94 @@ import java.util.Set;
 public class DTOMapper implements RecordMapperProvider {
 
     private static final WKBReader WKBreader = new WKBReader();
+    private static final ObjectMapper MAPPER = new ObjectMapper();
 
-    private static <T extends HasNameAndDescription> void setStaDescription (T entity, Record record, String alias){
-        String fieldName = alias.concat(EntityQueryConstants.STA_DESCRIPTION_FIELD);
-
-        if (record.field(DSL.field(fieldName, String.class)) != null) {
-            entity.setDescription(record.get(DSL.field(fieldName, String.class)));
+    private static <T extends HasNameAndDescription> void setStaDescription (T entity, String description){
+        if (description != null) {
+            entity.setDescription(description);
         }
     }
 
-    private static <T extends HasNameAndDescription> void setStaName (T entity, Record record, String alias) {
-        String fieldName = alias.concat(EntityQueryConstants.STA_NAME_FIELD);
-
-        if (record.field(DSL.field(fieldName, String.class)) != null) {
-            entity.setName(record.get(DSL.field(fieldName, String.class)));
+    private static <T extends HasNameAndDescription> void setStaName (T entity, String name) {
+        if (name != null) {
+            entity.setName(name);
         }
     }
 
-    private static <T extends StaDTO> void setStaIdentifier (T entity, Record record, String alias){
-        String fieldName = alias.concat(EntityQueryConstants.STA_IDENTIFIER_FIELD);
-
-        if (record.field(DSL.field(fieldName, String.class)) != null) {
-            entity.setId(record.get(DSL.field(fieldName, String.class)));
+    private static <T extends StaDTO> void setStaIdentifier (T entity, String Identifier){
+        if (Identifier != null) {
+            entity.setId(Identifier);
         }
     }
 
-    private static <T extends HasPhenomenonTime> void setPhenomenonTime(T entity, Record record, String alias) {
-        String fieldStart = alias.concat(EntityQueryConstants.DATASTREAM_PHENOMENONTIME_START_FIELD);
-        String fieldEnd = alias.concat(EntityQueryConstants.DATASTREAM_PHENOMENONTIME_END_FIELD);
+    private static <T extends HasProperties> void setStaProperties(T entity, Record rec) {
+        ObjectNode properties = MAPPER.createObjectNode();
 
-        if (record.field(DSL.field(fieldStart)) != null && record.field(DSL.field(fieldEnd, String.class)) != null) {
-            entity.setPhenomenonTime(TimeUtil.createTime(
-                    TimeUtil.createDateTime(record.get(DSL.field(fieldStart, Date.class))),
-                    TimeUtil.createDateTime(record.get(DSL.field(fieldEnd, Date.class))))
-            );
+        // Use one ParameterRecord type for all STA entities since all have common attributes
+        DatasetParameterRecord record = rec.into(DatasetParameterRecord.class);
+
+        if (record.getName() != null) {
+            properties.put(StaEntity.OBSERVATION_PARAMETERS.NAME.getName(),
+                    record.getName());
         }
-    }
+        if (record.getDescription() != null) {
+            properties.put(StaEntity.OBSERVATION_PARAMETERS.DESCRIPTION.getName(),
+                    record.getDescription());
+        }
+        if (record.getLastUpdate() != null) {
+            properties.put(StaEntity.OBSERVATION_PARAMETERS.LAST_UPDATE.getName(),
+                    record.getLastUpdate().toString());
+        }
+        if (record.getDomain() != null) {
+            properties.put(StaEntity.OBSERVATION_PARAMETERS.DOMAIN.getName(),
+                    record.getDomain());
+        }
+        if (record.getValueCount() != null) {
+            properties.put(StaEntity.OBSERVATION_PARAMETERS.VALUE_COUNT.getName(),
+                    record.getValueCount());
+        }
+        if (record.getValueText() != null) {
+            properties.put(StaEntity.OBSERVATION_PARAMETERS.VALUE_TEXT.getName(),
+                    record.getValueText());
+        }
+        if (record.getValueQuantity() != null) {
+            properties.put(StaEntity.OBSERVATION_PARAMETERS.VALUE_QUANTITY.getName(),
+                    record.getValueQuantity());
+        }
+        if (record.getValueBoolean() != null) {
+            properties.put(StaEntity.OBSERVATION_PARAMETERS.VALUE_BOOLEAN.getName(),
+                    record.getValueBoolean());
+        }
+        if (record.getValueCategory() != null) {
+            properties.put(StaEntity.OBSERVATION_PARAMETERS.VALUE_CATEGORY.getName(),
+                    record.getValueCategory());
+        }
+        if (record.getValueXml() != null) {
+            properties.put(StaEntity.OBSERVATION_PARAMETERS.VALUE_XML.getName(),
+                    record.getValueXml());
+        }
+        if (record.getValueJson() != null) {
+            properties.put(StaEntity.OBSERVATION_PARAMETERS.VALUE_JSON.getName(),
+                    record.getValueJson());
+        }
+        if (record.getValueTemporalFrom() != null) {
+            properties.put(StaEntity.OBSERVATION_PARAMETERS.VALUE_TEMPORAL_FROM.getName(),
+                    record.getValueTemporalFrom().toString());
+        }
+        if (record.getValueTemporalTo() != null) {
+            properties.put(StaEntity.OBSERVATION_PARAMETERS.VALUE_TEMPORAL_TO.getName(),
+                    record.getValueTemporalTo().toString());
+        }
+        if (record.getFkUnitId() != null) {
+            properties.put(StaEntity.OBSERVATION_PARAMETERS.FK_UNIT_ID.getName(),
+                    record.getFkUnitId());
+        }
 
-    private static <T extends StaDTO> void setProperties (T entity, Record record, String alias) {
-
+        entity.setProperties(properties);
     }
 
     @Override
-    public <R extends Record, E> RecordMapper<R, E> provide(RecordType<R> recordType,
-                                                                           Class<? extends E> type) {
+    public <R extends Record, E> RecordMapper<R, E> provide(RecordType<R> recordType, Class<? extends E> type) {
         if (type == DatastreamDTO.class) {
             return (RecordMapper<R, E>) new DatastreamRecordMapper();
         } else if (type == LocationDTO.class) {
@@ -124,45 +167,58 @@ public class DTOMapper implements RecordMapperProvider {
 
     public static class DatastreamRecordMapper implements RecordMapper<Record, Datastream> {
         @Override
-        public Datastream map(Record record) {
-
+        public Datastream map(Record rec) {
+            DatasetRecord record = rec.into(DatasetRecord.class);
             Datastream datastream = new Datastream();
-            final String alias = EntityQueryConstants.DATASTREAM_TABLE.concat(EntityQueryConstants.UNDERSCORE);
 
-            setStaIdentifier(datastream, record, alias);
-            setStaName(datastream, record, alias);
-            setStaDescription(datastream, record, alias);
-            setProperties(datastream, record, alias);
-            setPhenomenonTime(datastream, record, alias);
-            setObservedArea(datastream, record, alias);
-            setResultTime(datastream, record, alias);
+            setStaIdentifier(datastream, record.getIdentifier());
+            setStaName(datastream, record.getName());
+            setStaDescription(datastream, record.getDescription());
+            setProperties(datastream, record);
+            setPhenomenonTime(datastream, record);
+            setObservedArea(datastream, record);
+            setResultTime(datastream, record);
             setObservationType(datastream, record);
-            setUnitOfMeasurement(datastream, record);
-            setThing(datastream, record);
-            setSensor(datastream, record);
-            setObservedProperty(datastream, record);
+            setUnitOfMeasurement(datastream, rec);
 
             return datastream;
         }
 
-        private void setResultTime(Datastream datastream, Record record, String alias) {
-            String fieldStart = alias.concat(EntityQueryConstants.DATASTREAM_RESULTTIME_START_FIELD);
-            String fieldEnd = alias.concat(EntityQueryConstants.DATASTREAM_RESULTTIME_END_FIELD);
-
-            if (record.field(DSL.field(fieldStart)) != null && record.field(DSL.field(fieldEnd)) != null) {
-                datastream.setResultTime(TimeUtil.createTime(
-                        TimeUtil.createDateTime(record.get(DSL.field(fieldStart, Date.class))),
-                        TimeUtil.createDateTime(record.get(DSL.field(fieldEnd, Date.class))))
+        private void setProperties(Datastream datastream, Record rec) {
+            DatasetParameterRecord record = rec.into(DatasetParameterRecord.class);
+            setStaProperties(datastream, record);
+            if(record.getFkDatasetId() != null) {
+                datastream.getProperties().put(
+                        StaEntity.DATASTREAM_PROPERTIES.FK_DATASET_ID.getName(),
+                        record.getFkDatasetId()
                 );
             }
         }
 
-        private void setObservedArea (Datastream datastream, Record record, String alias){
-            String fieldName = alias.concat(EntityQueryConstants.DATASTREAM_OBS_AREA_FIELD);
+        private void setPhenomenonTime(Datastream datastream, DatasetRecord record) {
+            if (record.getFirstTime() != null && record.getLastTime() != null) {
+                datastream.setPhenomenonTime(TimeUtil.createTime(
+                        TimeUtil.createDateTime(Timestamp.valueOf(record.getFirstTime())),
+                        TimeUtil.createDateTime(Timestamp.valueOf(record.getLastTime())))
+                );
+            }
+        }
 
-            if (record.field(DSL.field(fieldName, Geometry.class)) != null) {
+        private void setResultTime(Datastream datastream, DatasetRecord record) {
+
+            if (record.getResultTimeStart() != null && record.getResultTimeEnd() != null) {
+                datastream.setResultTime(TimeUtil.createTime(
+                        TimeUtil.createDateTime(Timestamp.valueOf(record.getResultTimeStart())),
+                        TimeUtil.createDateTime(Timestamp.valueOf(record.getResultTimeEnd())))
+                );
+            }
+        }
+
+        private void setObservedArea (Datastream datastream, DatasetRecord record){
+
+            if (record.getObservedArea() != null) {
                 try {
-                    datastream.setObservedArea(WKBreader.read(record.get(DSL.field(fieldName), byte[].class)));
+                    datastream.setObservedArea(WKBreader.read(record.getObservedArea()));
                 } catch (ParseException e) {
                     Assert.notNull(null, "Could not parse to WKB" + e.getMessage());
                 }
@@ -170,86 +226,59 @@ public class DTOMapper implements RecordMapperProvider {
             }
         }
 
-            private void setObservationType (Datastream datastream, Record record){
-                String fieldName = EntityQueryConstants.FORMAT_TABLE
-                        .concat(EntityQueryConstants.UNDERSCORE
-                                .concat(EntityQueryConstants.STA_DEFINITION_FIELD));
-
-                if (record.field(DSL.field(fieldName, String.class)) != null) {
-                    datastream.setObservationType(record.get(DSL.field(fieldName, String.class)));
-                }
+        private void setObservationType (Datastream datastream, DatasetRecord record){
+            if (record.getObservationType() != null) {
+                datastream.setObservationType(record.getObservationType());
             }
+        }
 
-        private void setUnitOfMeasurement (Datastream datastream, Record record){
-            String alias = EntityQueryConstants.UNIT_TABLE.concat(EntityQueryConstants.UNDERSCORE);
-            String fieldName = alias.concat(EntityQueryConstants.UNIT_NAME_FIELD);
-            String fieldSymbol = alias.concat(EntityQueryConstants.UNIT_SYMBOL_FIELD);
-            String fieldLink = alias.concat(EntityQueryConstants.UNIT_LINK_FIELD);
-
+        private void setUnitOfMeasurement (Datastream datastream, Record rec){
+            UnitRecord record = rec.into(UnitRecord.class);
             DatastreamDTO.UnitOfMeasurement uom = new DatastreamDTO.UnitOfMeasurement();
-            if (record.field(DSL.field(fieldName)) != null) {
-                uom.setName(record.get(DSL.field(fieldName, String.class)));
+
+            if (record.getName() != null) {
+                uom.setName(record.getName());
             }
-            if (record.field(DSL.field(fieldSymbol)) != null) {
-                uom.setSymbol(record.get(DSL.field(fieldSymbol, String.class)));
+            if (record.getSymbol() != null) {
+                uom.setSymbol(record.getSymbol());
             }
-            if (record.field(DSL.field(fieldLink)) != null) {
-                uom.setDefinition(record.get(DSL.field(fieldLink, String.class)));
+            if (record.getLink() != null) {
+                uom.setDefinition(record.getLink());
             }
             datastream.setUnitOfMeasurement(uom);
-        }
-
-        private void setObservedProperty (Datastream datastream, Record record) {
-            ObservedPropertyDTO observedProperty = (new ObservedPropertyRecordMapper().map(record));
-            datastream.setObservedProperty(observedProperty);
-        }
-
-        private void setSensor (Datastream datastream, Record record) {
-            SensorDTO sensor = (new SensorRecordMapper().map(record));
-            datastream.setSensor(sensor);
-        }
-
-        private void setThing (Datastream datastream, Record record) {
-            ThingDTO thing = (new ThingRecordMapper().map(record));
-            datastream.setThing(thing);
         }
     }
 
     public static class LocationRecordMapper implements RecordMapper<Record, Location> {
         @Override
-        public Location map(Record record) {
+        public Location map(Record rec) {
             Location location = new Location();
-            String alias = EntityQueryConstants.LOCATION_TABLE.concat(EntityQueryConstants.UNDERSCORE);
+            LocationRecord record = rec.into(LocationRecord.class);
 
-            setStaIdentifier(location, record, alias);
-            setStaName(location, record, alias);
-            setStaDescription(location, record, alias);
-            setProperties(location, record, alias);
-            setGeometry(location, record, alias);
-            setThings(location, record);
-            setHistoricalLocations(location, record);
+            setStaIdentifier(location, record.getIdentifier());
+            setStaName(location, record.getName());
+            setStaDescription(location, record.getDescription());
+            setProperties(location, record);
+            setGeometry(location, record);
 
             return location;
         }
 
-        private void setHistoricalLocations(Location location, Record record) {
-            Set<HistoricalLocationDTO> historicalLocations = new HashSet<>();
-            historicalLocations.add(new HistoricalLocationRecordMapper().map(record));
-            location.setHistoricalLocations(historicalLocations);
+        private void setProperties(Location location, Record rec) {
+            LocationParameterRecord record = rec.into(LocationParameterRecord.class);
+            setStaProperties(location, record);
+            if (record.getFkLocationId() != null) {
+                location.getProperties().put(
+                        StaEntity.LOCATION_PROPERTIES.FK_LOCATION_ID.getName(),
+                        record.getFkLocationId()
+                );
+            }
         }
 
-        private void setThings(Location location, Record record) {
-            Set<ThingDTO> things = new HashSet<>();
-            things.add(new ThingRecordMapper().map(record));
-            location.setThings(things);
-        }
-
-        private void setGeometry(Location location, Record record, String alias) {
-            String fieldName = alias.concat(EntityQueryConstants.LOCATION_GEOM_FIELD);
-
-            if (record.field(fieldName) != null) {
+        private void setGeometry(Location location, LocationRecord record) {
+            if (record.getGeom() != null) {
                 try {
-                    location.setGeometry(WKBreader.read((record.get(DSL.field(fieldName), byte[].class))));
+                    location.setGeometry(WKBreader.read((record.getGeom())));
                 } catch (ParseException e) {
                     Assert.notNull(null, "Could not parse to WKB" + e.getMessage());
                 }
@@ -259,210 +288,259 @@ public class DTOMapper implements RecordMapperProvider {
 
     public static class ThingRecordMapper implements RecordMapper<Record, Thing> {
         @Override
-        public Thing map(Record record) {
+        public Thing map(Record rec) {
             Thing thing = new Thing();
-            String alias = EntityQueryConstants.THING_TABLE.concat(EntityQueryConstants.UNDERSCORE);
-
-            setStaIdentifier(thing, record, alias);
-            setStaName(thing, record, alias);
-            setStaDescription(thing, record, alias);
-            setProperties(thing, record, alias);
-            setDatastreams(thing, record);
-            setLocations(thing, record);
-            setHistoricalLocations(thing, record);
-
+            PlatformRecord record = rec.into(PlatformRecord.class);
+            setStaIdentifier(thing, record.getIdentifier());
+            setStaName(thing, record.getName());
+            setStaDescription(thing, record.getDescription());
+            setProperties(thing, rec);
             return thing;
         }
 
-        private void setDatastreams(Thing thing, Record record) {
-            Set<DatastreamDTO> datastreams = new HashSet<>();
-            datastreams.add(new DatastreamRecordMapper().map(record));
-            thing.setDatastreams(datastreams);
-        }
-
-        private void setLocations(Thing thing, Record record) {
-            Set<LocationDTO> locations = new HashSet<>();
-            locations.add(new LocationRecordMapper().map(record));
-            thing.setLocations(locations);
-        }
-
-        private void setHistoricalLocations(Thing thing, Record record) {
-            Set<HistoricalLocationDTO> historicalLocations = new HashSet<>();
-            historicalLocations.add(new HistoricalLocationRecordMapper().map(record));
-            thing.setHistoricalLocations(historicalLocations);
+        private void setProperties(Thing thing, Record rec) {
+            PlatformParameterRecord record = rec.into(PlatformParameterRecord.class);
+            setStaProperties(thing, rec);
+            if (record.getFkPlatformId() != null) {
+                thing.getProperties().put(
+                        StaEntity.LOCATION_PROPERTIES.FK_LOCATION_ID.getName(),
+                        record.getFkPlatformId()
+                );
+            }
         }
     }
 
     public static class HistoricalLocationRecordMapper implements RecordMapper<Record, HistoricalLocation> {
         @Override
-        public HistoricalLocation map(Record record) {
+        public HistoricalLocation map(Record rec) {
             HistoricalLocation historicalLocation = new HistoricalLocation();
-            String alias = EntityQueryConstants.HISTORICAL_LOCATION_TABLE.concat(EntityQueryConstants.UNDERSCORE);
+            HistoricalLocationRecord record = rec.into(HistoricalLocationRecord.class);
 
-            setStaIdentifier(historicalLocation, record, alias);
-            setTime(historicalLocation, record, alias);
-            setLocations(historicalLocation, record);
-            setThing(historicalLocation, record);
+            setStaIdentifier(historicalLocation, record.getIdentifier());
+            setTime(historicalLocation, record);
 
             return historicalLocation;
         }
 
-        private void setTime(HistoricalLocation historicalLocation, Record record, String alias) {
-            String fieldName = alias.concat(EntityQueryConstants.HISTORICAL_LOCATION_TIME_FIELD);
-
-            if(record.field(DSL.field(fieldName)) != null) {
-                historicalLocation.setTime(new TimeInstant(record.get(DSL.field(fieldName, Time.class))));
+        private void setTime(HistoricalLocation historicalLocation, HistoricalLocationRecord record) {
+            if(record.getTime() != null) {
+                historicalLocation.setTime(TimeUtil.createTime(new DateTime(Timestamp.valueOf(record.getTime()))));
             }
         }
 
-        private void setLocations(HistoricalLocation historicalLocation, Record record) {
-            Set<LocationDTO> locations = new HashSet<>();
-            locations.add(new LocationRecordMapper().map(record));
-            historicalLocation.setLocations(locations);
-        }
-
-        private void setThing(HistoricalLocation historicalLocation, Record record) {
-            ThingDTO things = new ThingRecordMapper().map(record);
-            historicalLocation.setThing(things);
-        }
     }
 
     public static class SensorRecordMapper implements RecordMapper<Record, Sensor> {
-        @Override
-        public Sensor map(Record record) {
-            Sensor sensor = new Sensor();
-            String alias = EntityQueryConstants.SENSOR_TABLE.concat(EntityQueryConstants.UNDERSCORE);
 
-            setStaIdentifier(sensor, record, alias);
-            setStaName(sensor, record, alias);
-            setStaDescription(sensor, record, alias);
-            setProperties(sensor, record, alias);
-            setMetadata(sensor, record, alias);
-            setEncodingType(sensor, record);
-            setDatastreams(sensor, record);
+        @Override
+        public Sensor map(Record rec) {
+            Sensor sensor = new Sensor();
+            ProcedureRecord record = rec.into(ProcedureRecord.class);
+
+            setStaIdentifier(sensor, record.getIdentifier());
+            setStaName(sensor, record.getName());
+            setStaDescription(sensor, record.getDescription());
+            setMetadata(sensor, record);
+            setProperties(sensor, rec);
+            setEncodingType(sensor, rec);
 
             return sensor;
         }
 
-        private void setMetadata(Sensor sensor, Record record, String alias) {
-            String fieldName = alias.concat(EntityQueryConstants.SENSOR_METADATA_FIELD);
-
-            if (record.field(DSL.field(fieldName)) != null) {
-                sensor.setMetadata(record.get(DSL.field(EntityQueryConstants.SENSOR_METADATA_FIELD, String.class)));
+        private void setProperties(Sensor sensor, Record rec) {
+            ProcedureParameterRecord record = rec.into(ProcedureParameterRecord.class);
+            setStaProperties(sensor, rec);
+            if (record.getFkProcedureId() != null) {
+                sensor.getProperties().put(
+                        StaEntity.LOCATION_PROPERTIES.FK_LOCATION_ID.getName(),
+                        record.getFkProcedureId()
+                );
             }
         }
 
-        private void setEncodingType(Sensor sensor, Record record) {
-            String alias = EntityQueryConstants.FORMAT_TABLE.concat(EntityQueryConstants.UNDERSCORE);
-            String fieldName = alias.concat(EntityQueryConstants.STA_DEFINITION_FIELD);
-
-            if (record.field(DSL.field(fieldName)) != null) {
-                sensor.setEncodingType(record.get(DSL.field(fieldName, String.class)));
+        private void setMetadata(Sensor sensor, ProcedureRecord record) {
+            if (record.getDescriptionFile() != null) {
+                sensor.setMetadata(record.getDescriptionFile());
             }
         }
 
-        private void setDatastreams(Sensor sensor, Record record) {
-            Set<DatastreamDTO> datastreams = new HashSet<>();
-            datastreams.add(new DatastreamRecordMapper().map(record));
-            sensor.setDatastreams(datastreams);
+        private void setEncodingType(Sensor sensor, Record rec) {
+            FormatRecord record = rec.into(FormatRecord.class);
+
+            if (record.getDefinition() != null) {
+                sensor.setEncodingType(record.getDefinition());
+            }
         }
     }
 
     public static class ObservedPropertyRecordMapper implements RecordMapper<Record, ObservedProperty> {
         @Override
-        public ObservedProperty map(Record record) {
+        public ObservedProperty map(Record rec) {
             ObservedProperty observedProperty = new ObservedProperty();
-            String alias = EntityQueryConstants.OBSERVED_PROPERTY_TABLE.concat(EntityQueryConstants.UNDERSCORE);
+            PhenomenonRecord record = rec.into(PhenomenonRecord.class);
 
-            setStaIdentifier(observedProperty, record, alias);
-            setStaName(observedProperty, record, alias);
-            setStaDescription(observedProperty, record, alias);
-            setProperties(observedProperty, record, alias);
-            setDefinition(observedProperty, record, alias);
-            setDatastreams(observedProperty, record);
+            setStaIdentifier(observedProperty, record.getIdentifier());
+            setStaName(observedProperty, record.getName());
+            setStaDescription(observedProperty, record.getDescription());
+            setDefinition(observedProperty, record);
+            setProperties(observedProperty, rec);
 
             return observedProperty;
         }
 
-        private void setDefinition(ObservedProperty observedProperty, Record record, String alias) {
-            String fieldName = alias.concat(EntityQueryConstants.STA_DEFINITION_FIELD);
-
-            if (record.field(DSL.field(fieldName)) != null) {
-                observedProperty.setDefinition(record.get(DSL.field(fieldName, String.class)));
+        private void setProperties(ObservedProperty observedProperty, Record rec) {
+            PhenomenonParameterRecord record = rec.into(PhenomenonParameterRecord.class);
+            setStaProperties(observedProperty, rec);
+            if (record.getFkPhenomenonId() != null) {
+                observedProperty.getProperties().put(
+                        StaEntity.LOCATION_PROPERTIES.FK_LOCATION_ID.getName(),
+                        record.getFkPhenomenonId()
+                );
             }
         }
 
-        private void setDatastreams(ObservedProperty observedProperty, Record record) {
-            Set<DatastreamDTO> datastreams = new HashSet<>();
-            datastreams.add(new DatastreamRecordMapper().map(record));
-            observedProperty.setDatastreams(datastreams);
+        private void setDefinition(ObservedProperty observedProperty, PhenomenonRecord record) {
+            if (record.getIdentifier() != null) {
+                observedProperty.setDefinition(record.getIdentifier());
+            }
         }
     }
 
     public static class ObservationRecordMapper implements RecordMapper<Record, Observation> {
         @Override
-        public Observation map(Record record) {
+        public Observation map(Record rec) {
             Observation observation = new Observation();
-            String alias = EntityQueryConstants.OBSERVATION_TABLE.concat(EntityQueryConstants.UNDERSCORE);
+            ObservationRecord record = rec.into(ObservationRecord.class);
 
-            setStaIdentifier(observation, record, alias);
-            setProperties(observation, record, alias);
-            setProperties(observation, record, alias);
-            setPhenomenonTime(observation, record, alias);
-            setResultTime(observation, record, alias);
-            setResult(observation, record, alias);
-            setValidTime(observation, record, alias);
-            setDatastreams(observation, record);
-            setFeatureOfInterest(observation, record);
+            setStaIdentifier(observation, record.getIdentifier());
+            setPhenomenonTime(observation, record);
+            setParameters(observation, record);
+            setResultTime(observation, record);
+            setResult(observation, record);
+            setValidTime(observation, record);
 
             return observation;
         }
 
-        private void setFeatureOfInterest(Observation observation, Record record) {
-            observation.setFeatureOfInterest(new FeatureOfInterestRecordMapper().map(record));
-        }
-
-        private void setDatastreams(Observation observation, Record record) {
-            observation.setDatastream(new DatastreamRecordMapper().map(record));
-        }
-
-        private void setResult(Observation observation, Record record, String alias) {
-            String fieldCount = alias.concat(EntityQueryConstants.OBSERVATION_VALUE_COUNT_FIELD);
-            String fieldText = alias.concat(EntityQueryConstants.OBSERVATION_VALUE_TEXT_FIELD);
-            String fieldQuantity = alias.concat(EntityQueryConstants.OBSERVATION_VALUE_QUANTITY_FIELD);
-            String fieldBoolean = alias.concat(EntityQueryConstants.OBSERVATION_VALUE_BOOLEAN_FIELD);
-            String fieldCategory = alias.concat(EntityQueryConstants.OBSERVATION_VALUE_CATEGORY_FIELD);
-
-            if (record.field(DSL.field(fieldCount)) != null) {
-                observation.setResult(record.get(DSL.field(fieldCount)));
-            } else if (record.field(DSL.field(fieldText)) != null) {
-                observation.setResult(record.get(DSL.field(fieldText)));
-            } else if (record.field(DSL.field(fieldQuantity)) != null) {
-                observation.setResult(record.get(DSL.field(fieldQuantity)));
-            } else if (record.field(DSL.field(fieldBoolean)) != null) {
-                observation.setResult(record.get(DSL.field(fieldBoolean)));
-            } else if (record.field(DSL.field(fieldCategory)) != null) {
-                observation.setResult(record.get(DSL.field(fieldCategory)));
-            }
-        }
-
-        private void setValidTime(Observation observation, Record record, String alias) {
-            String fieldStart = alias.concat(EntityQueryConstants.OBSERVATION_VALIDTIME_START_FIELD);
-            String fieldEnd = alias.concat(EntityQueryConstants.OBSERVATION_VALIDTIME_END_FIELD);
-
-            if (record.field(DSL.field(fieldStart)) != null) {
+        private void setPhenomenonTime(Observation observation, ObservationRecord record) {
+            if (record.getSamplingTimeStart() != null && record.getSamplingTimeEnd() != null) {
                 observation.setPhenomenonTime(TimeUtil.createTime(
-                        TimeUtil.createDateTime(record.get(DSL.field(fieldStart, Date.class))),
-                        TimeUtil.createDateTime(record.get(DSL.field(fieldEnd, Date.class))))
+                        TimeUtil.createDateTime(Timestamp.valueOf(record.getSamplingTimeStart())),
+                        TimeUtil.createDateTime(Timestamp.valueOf(record.getSamplingTimeEnd())))
                 );
             }
         }
 
-        private void setResultTime(Observation observation, Record record, String alias) {
-            String fieldName = alias.concat(EntityQueryConstants.OBSERVATION_RESULT_TIME_FIELD);
+        private void setParameters(Observation observation, Record rec) {
+            ObservationParameterRecord record = rec.into(ObservationParameterRecord.class);
+            ObjectNode properties = MAPPER.createObjectNode();
 
-            if (record.field(DSL.field(fieldName)) != null) {
-               observation.setResultTime(new TimeInstant(record.get(DSL.field(fieldName, Time.class))));
+            if (record.getName() != null) {
+                properties.put(
+                        StaEntity.OBSERVATION_PARAMETERS.NAME.getName(),
+                        record.getName());
+            }
+            if (record.getDescription() != null) {
+                properties.put(
+                        StaEntity.OBSERVATION_PARAMETERS.DESCRIPTION.getName(),
+                        record.getDescription());
+            }
+            if (record.getLastUpdate() != null) {
+                properties.put(
+                        StaEntity.OBSERVATION_PARAMETERS.LAST_UPDATE.getName(),
+                        record.getLastUpdate().toString());
+            }
+            if (record.getDomain() != null) {
+                properties.put(
+                        StaEntity.OBSERVATION_PARAMETERS.DOMAIN.getName(),
+                        record.getDomain());
+            }
+            if (record.getValueCount() != null) {
+                properties.put(
+                        StaEntity.OBSERVATION_PARAMETERS.VALUE_COUNT.getName(),
+                        record.getValueCount());
+            }
+            if (record.getValueText() != null) {
+                properties.put(
+                        StaEntity.OBSERVATION_PARAMETERS.VALUE_TEXT.getName(),
+                        record.getValueText());
+            }
+            if (record.getValueQuantity() != null) {
+                properties.put(
+                        StaEntity.OBSERVATION_PARAMETERS.VALUE_QUANTITY.getName(),
+                        record.getValueQuantity());
+            }
+            if (record.getValueBoolean() != null) {
+                properties.put(
+                        StaEntity.OBSERVATION_PARAMETERS.VALUE_BOOLEAN.getName(),
+                        record.getValueBoolean());
+            }
+            if (record.getValueCategory() != null) {
+                properties.put(
+                        StaEntity.OBSERVATION_PARAMETERS.VALUE_CATEGORY.getName(),
+                        record.getValueCategory());
+            }
+            if (record.getValueXml() != null) {
+                properties.put(
+                        StaEntity.OBSERVATION_PARAMETERS.VALUE_XML.getName(),
+                        record.getValueXml());
+            }
+            if (record.getValueJson() != null) {
+                properties.put(
+                        StaEntity.OBSERVATION_PARAMETERS.VALUE_JSON.getName(),
+                        record.getValueJson());
+            }
+            if (record.getValueTemporalFrom() != null) {
+                properties.put(
+                        StaEntity.OBSERVATION_PARAMETERS.VALUE_TEMPORAL_FROM.getName(),
+                        record.getValueTemporalFrom().toString());
+            }
+            if (record.getValueTemporalTo() != null) {
+                properties.put(
+                        StaEntity.OBSERVATION_PARAMETERS.VALUE_TEMPORAL_TO.getName(),
+                        record.getValueTemporalTo().toString());
+            }
+            if (record.getFkUnitId() != null) {
+                properties.put(
+                        StaEntity.OBSERVATION_PARAMETERS.FK_UNIT_ID.getName(),
+                        record.getFkUnitId());
+            }
+            if (record.getFkObservationId() != null) {
+                observation.getParameters().put(
+                        StaEntity.OBSERVATION_PARAMETERS.FK_OBSERVATION_ID.getName(),
+                        record.getFkObservationId()
+                );
+            }
+
+            observation.setParameters(properties);
+        }
+
+        private void setResult(Observation observation, ObservationRecord record) {
+            if (record.getValueCount() != null) {
+                observation.setResult(record.getValueCount());
+            } else if (record.getValueText() != null) {
+                observation.setResult(record.getValueText());
+            } else if (record.getValueQuantity() != null) {
+                observation.setResult(record.getValueQuantity());
+            } else if (record.getValueBoolean() != null) {
+                observation.setResult(record.getValueBoolean());
+            } else if (record.getValueCategory() != null) {
+                observation.setResult(record.getValueCategory());
+            }
+        }
+
+        private void setValidTime(Observation observation, ObservationRecord record) {
+            if (record.getValidTimeStart() != null && record.getValidTimeEnd() != null) {
+                observation.setPhenomenonTime(TimeUtil.createTime(
+                        TimeUtil.createDateTime(Timestamp.valueOf(record.getValidTimeStart())),
+                        TimeUtil.createDateTime(Timestamp.valueOf(record.getValidTimeEnd())))
+                );
+            }
+        }
+
+        private void setResultTime(Observation observation, ObservationRecord record) {
+            if (record.getResultTime() != null) {
+               observation.setResultTime(TimeUtil.createTime(new DateTime(record.getResultTime())));
             }
         }
 
@@ -470,43 +548,42 @@ public class DTOMapper implements RecordMapperProvider {
 
     public static class FeatureOfInterestRecordMapper implements RecordMapper<Record, FeatureOfInterest> {
         @Override
-        public FeatureOfInterest map(Record record) {
+        public FeatureOfInterest map(Record rec) {
             FeatureOfInterest featureOfInterest = new FeatureOfInterest();
-            String alias = EntityQueryConstants.FEATURE_TABLE.concat(EntityQueryConstants.UNDERSCORE);
+            FeatureRecord record = rec.into(FeatureRecord.class);
 
-            setStaIdentifier(featureOfInterest, record, alias);
-            setStaName(featureOfInterest, record, alias);
-            setStaDescription(featureOfInterest, record, alias);
-            setProperties(featureOfInterest, record, alias);
+            setStaIdentifier(featureOfInterest, record.getStaIdentifier());
+            setStaName(featureOfInterest, record.getName());
+            setStaDescription(featureOfInterest, record.getDescription());
+            setFeature(featureOfInterest, record);
+            setProperties(featureOfInterest, rec);
+            setEncodingType(featureOfInterest, rec);
 
-            setFeature(featureOfInterest, record, alias);
-            setEncodingType(featureOfInterest, record);
-
-            setObservations(featureOfInterest, record);
             return featureOfInterest;
         }
 
-        private void setObservations(FeatureOfInterest featureOfInterest, Record record) {
-            Set<ObservationDTO> observations = new HashSet<>();
-            observations.add(new ObservationRecordMapper().map(record));
-            featureOfInterest.setObservations(observations);
-        }
-
-        private void setEncodingType(FeatureOfInterest featureOfInterest, Record record) {
-            String alias = EntityQueryConstants.FORMAT_TABLE.concat(EntityQueryConstants.UNDERSCORE);
-            String fieldName = alias.concat(EntityQueryConstants.STA_DEFINITION_FIELD);
-
-            if (record.field(DSL.field(fieldName)) != null) {
-                featureOfInterest.setEncodingType(record.get(DSL.field(fieldName, String.class)));
+        private void setProperties(FeatureOfInterest featureOfInterest, Record rec) {
+            FeatureParameterRecord record = rec.into(FeatureParameterRecord.class);
+            setStaProperties(featureOfInterest, rec);
+            if (record.getFkFeatureId() != null) {
+                featureOfInterest.getProperties().put(
+                        StaEntity.OBSERVATION_PARAMETERS.FK_OBSERVATION_ID.getName(),
+                        record.getFkFeatureId()
+                );
             }
         }
 
-        private void setFeature(FeatureOfInterest featureOfInterest, Record record, String alias) {
-            String fieldName = alias.concat(EntityQueryConstants.FEATURE_GEOM_FIELD);
+        private void setEncodingType(FeatureOfInterest featureOfInterest, Record rec) {
+            FormatRecord record = rec.into(FormatRecord.class);
+            if (record.getDefinition() != null) {
+                featureOfInterest.setEncodingType(record.getDefinition());
+            }
+        }
 
-            if (record.field(DSL.field(fieldName)) != null) {
+        private void setFeature(FeatureOfInterest featureOfInterest, FeatureRecord record) {
+            if (record.getGeom() != null) {
                 try {
-                    featureOfInterest.setFeature(WKBreader.read(record.get(DSL.field(fieldName, byte[].class))));
+                    featureOfInterest.setFeature(WKBreader.read(record.getGeom()));
                 } catch (ParseException e) {
                     Assert.notNull(null, "Could not parse to WKB" + e.getMessage());
                 }
@@ -514,5 +591,3 @@ public class DTOMapper implements RecordMapperProvider {
         }
     }
 }
-
-

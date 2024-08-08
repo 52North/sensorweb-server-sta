@@ -27,11 +27,13 @@
  * Public License for more details.
  */
 package org.n52.sta.data.cloudnative;
-import org.jooq.DSLContext;
-import org.jooq.SQLDialect;
+import org.jooq.*;
 import org.jooq.conf.RenderQuotedNames;
 import org.jooq.impl.DSL;
 import org.jooq.conf.Settings;
+import org.jooq.impl.DefaultConfiguration;
+import org.jooq.impl.QOM;
+import org.n52.sta.data.cloudnative.schema.DefaultSchema;
 import org.springframework.boot.jdbc.DataSourceBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -40,6 +42,8 @@ import javax.sql.DataSource;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Configuration
 public class TestDatabaseConfig {
@@ -54,14 +58,38 @@ public class TestDatabaseConfig {
 
     @Bean
     public DSLContext dslContext(DataSource dataSource) {
+        // Configure jOOQ
+        DefaultConfiguration jooqConfiguration = new DefaultConfiguration();
+
         Settings settings = new Settings().withRenderQuotedNames(RenderQuotedNames.EXPLICIT_DEFAULT_UNQUOTED);
-        DSLContext ctx =  DSL.using(dataSource, SQLDialect.DUCKDB, settings);
+        jooqConfiguration.set(settings);
+        jooqConfiguration.set(dataSource);
+        jooqConfiguration.set(SQLDialect.DUCKDB);
+        jooqConfiguration.set(new VisitListener() {
+
+            private final Set<Class<?>> StaTableClasses = DefaultSchema.DEFAULT_SCHEMA.getTables()
+                    .stream()
+                    .map(Table::getClass)
+                    .collect(Collectors.toSet());
+
+            @Override
+            public void visitStart(VisitContext context) {
+                QueryPart part = context.queryPart();
+                if (part instanceof Table &&
+                        !(part instanceof Field) &&
+                        StaTableClasses.contains((part.getClass()))) {
+                    handleTable(context, (Table<?>) part);
+                }
+            }
+
+            private void handleTable(VisitContext context, Table<?> table) {
+                String parquetReadFunction = String.format("read_parquet('s3://52n-sta/%s')", table.getName());
+                Table<?> aliasedTable = DSL.table(parquetReadFunction).as(table.getName());
+                context.queryPart(aliasedTable);
+            }
+        });
+        DSLContext ctx =  DSL.using(jooqConfiguration);
         installAndLoadSpatialExtension(ctx);
-        /*
-                String filePath = "src/test/resources/schema.sql";
-                String schemaSQL = readSchema(filePath);
-                if(schemaSQL != null) { ctx.execute(schemaSQL); }
-         */
         return ctx;
     }
     private void installAndLoadSpatialExtension(DSLContext ctx) {

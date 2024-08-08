@@ -65,6 +65,10 @@ public class ObservationQueryConditionsTest {
         observationQueryConditions.setDslContext(ctx);
     }
 
+    private String read_parquet(String table) {
+        return String.format("read_parquet('s3://52n-sta/%s') %s ", table, table);
+    }
+
     @Test
     public void testWithFeatureOfInterestStaIdentifier_TP() {
 
@@ -73,11 +77,13 @@ public class ObservationQueryConditionsTest {
         Condition result = observationQueryConditions.withFeatureOfInterestStaIdentifier(featureIdentifier);
 
         String sql = ctx.renderInlined(result);
-        String expectedSQL = "observation.fk_dataset_id in " +
-                "(select dataset.dataset_id from " +
-                "dataset join feature " +
-                "on dataset.fk_feature_id = feature.feature_id " +
-                "where feature.sta_identifier = 'feature123')";
+        String expectedSQL = "OBSERVATION.FK_DATASET_ID in " +
+                "(select DATASET.DATASET_ID from " +
+                read_parquet("DATASET") +
+                "join " +
+                read_parquet("FEATURE") +
+                "on DATASET.FK_FEATURE_ID = FEATURE.FEATURE_ID " +
+                "where FEATURE.STA_IDENTIFIER = 'feature123')";
 
 
         Assertions.assertEquals(expectedSQL, sql);
@@ -91,11 +97,14 @@ public class ObservationQueryConditionsTest {
         Condition result = observationQueryConditions.withDatastreamStaIdentifier(datastreamStaIdentifier);
 
         String sql = ctx.renderInlined(result);
-        String expectedSQL = "observation.fk_dataset_id in " +
-                "(select dataset.dataset_id " +
-                "from dataset join observation " +
-                "on dataset.dataset_id = observation.fk_dataset_id " +
-                "where dataset.sta_identifier = 'datastream123')";
+        String expectedSQL = "OBSERVATION.FK_DATASET_ID in " +
+                "(select DATASET.DATASET_ID from " +
+                read_parquet("DATASET") +
+                "join " +
+                read_parquet("OBSERVATION") +
+                "on " +
+                "observation.fk_dataset_id = dataset.dataset_id ".toUpperCase() +
+                "where DATASET.STA_IDENTIFIER = 'datastream123')";
 
 
         Assertions.assertEquals(expectedSQL, sql);
@@ -109,7 +118,7 @@ public class ObservationQueryConditionsTest {
         Condition result = observationQueryConditions.withDatastreamId(datastreamId);
 
         String sql = ctx.renderInlined(result);
-        String expectedSQL = "fk_dataset_id = 1";
+        String expectedSQL = "OBSERVATION.FK_DATASET_ID = 1";
 
 
         Assertions.assertEquals(expectedSQL, sql);
@@ -130,9 +139,10 @@ public class ObservationQueryConditionsTest {
         }
 
         String sql = ctx.renderInlined(result);
-        String expectedSQL = "fk_dataset_id in " +
-                "(select dataset_id " +
-                "from dataset " +
+        String expectedSQL = "OBSERVATION.FK_DATASET_ID in " +
+                "(select DATASET.DATASET_ID " +
+                "from " +
+                read_parquet("DATASET") +
                 "where " +
                 conditionSQL +
                 ")";
@@ -157,12 +167,14 @@ public class ObservationQueryConditionsTest {
         }
 
         String sql = ctx.renderInlined(result);
-        String expectedSQL = "fk_dataset_id in " +
-                "(select dataset_id " +
-                "from dataset " +
-                "where fk_feature_id in " +
-                "(select feature_id " +
-                "from feature " +
+        String expectedSQL = "OBSERVATION.FK_DATASET_ID in " +
+                "(select DATASET.DATASET_ID " +
+                "from " +
+                read_parquet("DATASET") +
+                "where DATASET.FK_FEATURE_ID in " +
+                "(select FEATURE.FEATURE_ID " +
+                "from " +
+                read_parquet("FEATURE") +
                 "where " +
                 conditionSQL +
                 "))";
@@ -187,9 +199,10 @@ public class ObservationQueryConditionsTest {
         }
 
         String sql = ctx.renderInlined(result);
-        String expectedSQL = "observation_id in " +
-                "(select fk_observation_id " +
-                "from observation_parameter " +
+        String expectedSQL = "OBSERVATION.OBSERVATION_ID in " +
+                "(select OBSERVATION_PARAMETER.FK_OBSERVATION_ID " +
+                "from " +
+                read_parquet("OBSERVATION_PARAMETER") +
                 "where " +
                 conditionSQL +
                 ")";
@@ -215,7 +228,7 @@ public class ObservationQueryConditionsTest {
             System.out.println(e);
         }
         String sql = ctx.renderInlined(result);
-        String expectedSQL = "sta_identifier = cast('observation123' as varchar)";
+        String expectedSQL = "OBSERVATION.STA_IDENTIFIER = 'observation123'";
 
         Assertions.assertEquals(expectedSQL, sql);
     }
@@ -239,7 +252,7 @@ public class ObservationQueryConditionsTest {
         }
         String sql = ctx.renderInlined(result);
         String expectedSQL = String.format(
-                "result_time = cast(timestamp '%s' as timestamp)",
+                "OBSERVATION.RESULT_TIME = timestamp '%s'",
                 currentTime.toString());
 
         Assertions.assertEquals(expectedSQL, sql);
@@ -265,10 +278,10 @@ public class ObservationQueryConditionsTest {
         }
         String sql = ctx.renderInlined(result);
         String expectedSQL = String.format(
-                "(sampling_time_start = cast(timestamp '%s' as timestamp) " +
-                        "and sampling_time_end = cast(timestamp '%s' as timestamp))",
-                currentTime.toString(),
-                currentTime.toString()
+                "(OBSERVATION.SAMPLING_TIME_START = timestamp '%s' " +
+                        "and OBSERVATION.SAMPLING_TIME_END = timestamp '%s')",
+                currentTime,
+                currentTime
         );
 
         Assertions.assertEquals(expectedSQL, sql);
@@ -294,7 +307,7 @@ public class ObservationQueryConditionsTest {
         }
         String sql = ctx.renderInlined(result);
         String expectedSQL = String.format(
-                "sampling_time_end < cast(timestamp '%s' as timestamp)",
+                "OBSERVATION.SAMPLING_TIME_END < timestamp '%s'",
                 currentTime.toString()
         );
 
@@ -322,7 +335,7 @@ public class ObservationQueryConditionsTest {
 
         String sql = ctx.renderInlined(result);
         String expectedSQL = String.format(
-                "sampling_time_start > cast(timestamp '%s' as timestamp)",
+                "OBSERVATION.SAMPLING_TIME_START > timestamp '%s'",
                 currentTime.toString()
         );
 
@@ -350,10 +363,10 @@ public class ObservationQueryConditionsTest {
 
         String sql = ctx.renderInlined(result);
         String expectedSQL = String.format(
-                "(sampling_time_start <> cast(timestamp '%s' as timestamp)" +
-                " or sampling_time_end <> cast(timestamp '%s' as timestamp))",
-                currentTime.toString(),
-                currentTime.toString()
+                "(OBSERVATION.SAMPLING_TIME_START <> timestamp '%s'" +
+                " or OBSERVATION.SAMPLING_TIME_END <> timestamp '%s')",
+                currentTime,
+                currentTime
         );
 
         Assertions.assertEquals(expectedSQL, sql);
@@ -383,11 +396,12 @@ public class ObservationQueryConditionsTest {
         }
 
         String sql = ctx.renderInlined(result);
-        String expectedSQL = "observation_id in " +
-                "(select fk_observation_id " +
-                "from observation_parameter " +
+        String expectedSQL = "OBSERVATION.OBSERVATION_ID in " +
+                "(select OBSERVATION_PARAMETER.FK_OBSERVATION_ID " +
+                "from " +
+                read_parquet("OBSERVATION_PARAMETER") +
                 "where " +
-                "(name = 'valid' and value_text = cast('true' as varchar)))";
+                "(OBSERVATION_PARAMETER.NAME = 'valid' and OBSERVATION_PARAMETER.VALUE_TEXT = 'true'))";
 
         Assertions.assertEquals(expectedSQL, sql);
     }

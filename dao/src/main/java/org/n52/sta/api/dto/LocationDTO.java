@@ -28,7 +28,6 @@
  */
 package org.n52.sta.api.dto;
 
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.locationtech.jts.geom.Geometry;
 
 import java.util.Set;
@@ -38,17 +37,13 @@ import java.util.Set;
  *
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
  */
-public interface LocationDTO extends StaDTO, HasNameAndDescription {
+public interface LocationDTO extends StaDTO, HasNameAndDescription, HasProperties {
 
     String getEncodingType();
 
     Geometry getGeometry();
 
     void setGeometry(Geometry geometry);
-
-    ObjectNode getProperties();
-
-    void setProperties(ObjectNode properties);
 
     void addHistoricalLocation(HistoricalLocationDTO historicalLocations);
 

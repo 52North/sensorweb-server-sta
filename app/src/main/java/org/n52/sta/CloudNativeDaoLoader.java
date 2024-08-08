@@ -32,7 +32,7 @@ package org.n52.sta;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
-import org.springframework.context.annotation.aspectj.EnableSpringConfigured;
+//import org.springframework.context.annotation.aspectj.EnableSpringConfigured;
 
 /**
  * @author <a href="mailto:humaid.kidwai@ucalgary.ca">Humaid Kidwai</a>
@@ -45,7 +45,7 @@ import org.springframework.context.annotation.aspectj.EnableSpringConfigured;
         "org.n52.sta.mqtt.vanilla",
         "org.n52.sta.data.cloudnative",
 })
-@EnableSpringConfigured
+//@EnableSpringConfigured
 public class CloudNativeDaoLoader {
 
 }

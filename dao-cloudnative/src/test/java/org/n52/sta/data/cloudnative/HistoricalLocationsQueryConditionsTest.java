@@ -1,3 +1,31 @@
+/*
+ * Copyright (C) 2018-2021 52°North Initiative for Geospatial Open Source
+ * Software GmbH
+ *
+ * This program is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License version 2 as published
+ * by the Free Software Foundation.
+ *
+ * If the program is linked with libraries which are licensed under one of
+ * the following licenses, the combination of the program with the linked
+ * library is not considered a "derivative work" of the program:
+ *
+ *     - Apache License, version 2.0
+ *     - Apache Software License, version 1.0
+ *     - GNU Lesser General Public License, version 3
+ *     - Mozilla Public License, versions 1.0, 1.1 and 2.0
+ *     - Common Development and Distribution License (CDDL), version 1.0
+ *
+ * Therefore the distribution of the program linked with libraries licensed
+ * under the aforementioned licenses, is permitted by the copyright holders
+ * if the distribution is compliant with both the GNU General Public
+ * License version 2 and the aforementioned licenses.
+ *
+ * This program is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
+ * Public License for more details.
+ */
 package org.n52.sta.data.cloudnative;
 
 import org.jooq.DSLContext;
@@ -14,7 +42,8 @@ import org.n52.series.db.common.Utils;
 import org.n52.shetland.ogc.filter.FilterConstants;
 import org.n52.shetland.ogc.sta.StaConstants;
 import org.n52.shetland.ogc.sta.exception.STAInvalidFilterExpressionException;
-import org.n52.sta.data.cloudnative.condition.EntityQueryConstants;
+import org.n52.shetland.ogc.sta.model.STAEntityDefinition;
+import org.n52.sta.data.cloudnative.condition.StaEntity;
 import org.n52.sta.data.cloudnative.condition.HistoricalLocationQueryConditions;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,26 +68,34 @@ public class HistoricalLocationsQueryConditionsTest {
         historicalLocationQueryConditions.setDslContext(ctx);
     }
 
+    private String read_parquet(String table) {
+        return String.format("read_parquet('s3://52n-sta/%s') %s ", table, table);
+    }
+
     @Test
     public void testWithLocationStaIdentifier() {
-        final String locationStaIdentifier = "location123";
+        final String locationStaIdentifier = "LOCATION123";
 
         Condition result = historicalLocationQueryConditions.withLocationStaIdentifier(locationStaIdentifier);
 
         String sql = ctx.renderInlined(result);
         String expectedSQL = String.format(
                 "exists " +
-                        "(select 1 one " +
-                        "from location_historical_location " +
-                        "join historical_location " +
+                        "(select LOCATION.LOCATION_ID " +
+                        "from " +
+                        read_parquet("location_historical_location".toUpperCase()) +
+                        "join " +
+                        read_parquet("historical_location".toUpperCase()) +
                         "on " +
-                        "location_historical_location.fk_historical_location_id = " +
-                        "historical_location.historical_location_id " +
-                        "join location " +
+                        "location_historical_location.fk_historical_location_id = ".toUpperCase() +
+                        "historical_location.historical_location_id ".toUpperCase() +
+                        "join " +
+                        read_parquet("location".toUpperCase()) +
                         "on " +
-                        "location_historical_location.fk_location_id = " +
-                        "location.location_id " +
-                        "where location.sta_identifier = '%s')",
+                        "location_historical_location.fk_location_id = ".toUpperCase() +
+                        "location.location_id ".toUpperCase() +
+                        "where " +
+                        "location.sta_identifier = '%s')".toUpperCase(),
                 locationStaIdentifier
         );
 
@@ -67,19 +104,22 @@ public class HistoricalLocationsQueryConditionsTest {
 
     @Test
     public void testWithThingStaIdentifier() {
-        final String thingStaIdentifier = "thing123";
+        final String thingStaIdentifier = "THING123";
 
         Condition result = historicalLocationQueryConditions.withThingStaIdentifier(thingStaIdentifier);
 
         String sql = ctx.renderInlined(result);
         String expectedSQL = String.format(
                 "exists " +
-                        "(select 1 one " +
-                        "from historical_location " +
-                        "join platform " +
+                        "(select PLATFORM.PLATFORM_ID " +
+                        "from " +
+                        read_parquet("HISTORICAL_LOCATION") +
+                        "join " +
+                        read_parquet("PLATFORM") +
                         "on " +
-                        "historical_location.fk_platform_id = platform.platform_id " +
-                        "where platform.sta_identifier = '%s')",
+                        "historical_location.fk_platform_id = platform.platform_id ".toUpperCase() +
+                        "where " +
+                        "platform.sta_identifier = '%s')".toUpperCase(),
                 thingStaIdentifier
         );
 
@@ -103,7 +143,7 @@ public class HistoricalLocationsQueryConditionsTest {
             System.out.println(e);
         }
         String sql = ctx.renderInlined(result);
-        String expectedSQL = "sta_identifier = cast('historicalLocation123' as varchar)";
+        String expectedSQL = "HISTORICAL_LOCATION.STA_IDENTIFIER = 'historicalLocation123'";
 
         Assertions.assertEquals(expectedSQL, sql);
     }
@@ -126,14 +166,14 @@ public class HistoricalLocationsQueryConditionsTest {
             System.out.println(e);
         }
         String sql = ctx.renderInlined(result);
-        String expectedSQL = String.format("time = cast(timestamp '%s' as timestamp)", currentTime.toString());
+        String expectedSQL = String.format("HISTORICAL_LOCATION.time = timestamp '%s'", currentTime.toString());
 
         Assertions.assertEquals(expectedSQL, sql);
     }
 
     @Test
     public void testWithRelatedPropertyFilter_Location() {
-        String propertyName = EntityQueryConstants.LOCATIONS;
+        String propertyName = STAEntityDefinition.LOCATIONS;
         Condition propertyValue = DSL.condition("");
         Condition result = null;
 
@@ -144,18 +184,21 @@ public class HistoricalLocationsQueryConditionsTest {
         }
 
         String sql = ctx.renderInlined(result);
-        String expectedSQL = "historical_location_id in " +
+        String expectedSQL = "HISTORICAL_LOCATION.HISTORICAL_LOCATION_ID in " +
                 "(select " +
-                "historical_location.historical_location_id " +
-                "from location_historical_location " +
-                "join historical_location " +
+                "HISTORICAL_LOCATION.HISTORICAL_LOCATION_ID " +
+                "from " +
+                read_parquet("LOCATION_HISTORICAL_LOCATION") +
+                "join " +
+                read_parquet("HISTORICAL_LOCATION") +
                 "on " +
-                "location_historical_location.fk_historical_location_id = " +
-                "historical_location.historical_location_id " +
-                "join location " +
+                "location_historical_location.fk_historical_location_id = ".toUpperCase() +
+                "historical_location.historical_location_id ".toUpperCase() +
+                "join " +
+                read_parquet("LOCATION") +
                 "on " +
-                "location_historical_location.fk_location_id = " +
-                "location.location_id " +
+                "location_historical_location.fk_location_id = ".toUpperCase() +
+                "location.location_id ".toUpperCase() +
                 "where ())";
 
         Assertions.assertEquals(expectedSQL, sql);
@@ -164,7 +207,7 @@ public class HistoricalLocationsQueryConditionsTest {
 
     @Test
     public void testWithRelatedPropertyFilter_Thing() {
-        String propertyName = EntityQueryConstants.THING;
+        String propertyName = StaConstants.THING;
         Condition propertyValue = DSL.condition("");
         Condition result = null;
 
@@ -175,13 +218,15 @@ public class HistoricalLocationsQueryConditionsTest {
         }
 
         String sql = ctx.renderInlined(result);
-        String expectedSQL = "historical_location_id in " +
+        String expectedSQL = "HISTORICAL_LOCATION.HISTORICAL_LOCATION_ID in " +
                 "(select " +
-                "historical_location.historical_location_id " +
-                "from historical_location " +
-                "join platform " +
+                "HISTORICAL_LOCATION.HISTORICAL_LOCATION_ID " +
+                "from " +
+                read_parquet("HISTORICAL_LOCATION") +
+                "join " +
+                read_parquet("PLATFORM") +
                 "on " +
-                "historical_location.fk_platform_id = platform.platform_id " +
+                "historical_location.fk_platform_id = platform.platform_id ".toUpperCase() +
                 "where ())";
 
         Assertions.assertEquals(expectedSQL, sql);

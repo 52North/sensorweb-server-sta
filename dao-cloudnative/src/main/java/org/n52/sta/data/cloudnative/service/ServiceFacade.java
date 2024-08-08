@@ -30,6 +30,7 @@ package org.n52.sta.data.cloudnative.service;
 
 import org.n52.shetland.oasis.odata.query.option.QueryOptions;
 import org.n52.shetland.ogc.sta.exception.STACRUDException;
+import org.n52.shetland.ogc.sta.exception.STAInvalidQueryException;
 import org.n52.sta.data.DaoSemaphore;
 import org.n52.sta.api.AbstractSensorThingsEntityService;
 import org.n52.sta.api.CollectionWrapper;
@@ -68,7 +69,7 @@ public class ServiceFacade <R extends StaDTO> implements AbstractSensorThingsEnt
         try {
             semaphore.acquire();
             result = serviceImpl.existsEntity(id);
-        } catch (InterruptedException e) {
+        } catch (InterruptedException | STAInvalidQueryException e) {
             throw new STACRUDException(e.getMessage(), e);
         } finally {
             semaphore.release();
@@ -158,7 +159,7 @@ public class ServiceFacade <R extends StaDTO> implements AbstractSensorThingsEnt
         try {
             semaphore.acquire();
             result = serviceImpl.existsEntityByRelatedEntity(relatedId, relatedType, ownId);
-        } catch (InterruptedException e) {
+        } catch (InterruptedException | STAInvalidQueryException e) {
             throw new STACRUDException(e.getMessage(), e);
         } finally {
             semaphore.release();

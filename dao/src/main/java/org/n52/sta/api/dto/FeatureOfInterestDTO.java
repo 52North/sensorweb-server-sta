@@ -28,7 +28,6 @@
  */
 package org.n52.sta.api.dto;
 
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.locationtech.jts.geom.Geometry;
 
 import java.util.Set;
@@ -38,7 +37,7 @@ import java.util.Set;
  *
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
  */
-public interface FeatureOfInterestDTO extends StaDTO, HasNameAndDescription {
+public interface FeatureOfInterestDTO extends StaDTO, HasNameAndDescription, HasProperties {
 
     String getEncodingType();
 
@@ -47,10 +46,6 @@ public interface FeatureOfInterestDTO extends StaDTO, HasNameAndDescription {
     Geometry getFeature();
 
     void setFeature(Geometry feature);
-
-    ObjectNode getProperties();
-
-    void setProperties(ObjectNode properties);
 
     Set<ObservationDTO> getObservations();
 

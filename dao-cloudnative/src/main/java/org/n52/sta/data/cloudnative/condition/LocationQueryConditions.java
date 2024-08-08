@@ -36,42 +36,44 @@ import org.n52.shetland.oasis.odata.ODataConstants;
 import org.n52.shetland.ogc.filter.FilterConstants;
 import org.n52.shetland.ogc.sta.StaConstants;
 import org.n52.shetland.ogc.sta.exception.STAInvalidFilterExpressionException;
+import org.n52.shetland.ogc.sta.model.STAEntityDefinition;
 import org.n52.sta.data.cloudnative.condition.utils.GeospatialFunctions;
+import org.n52.sta.data.cloudnative.schema.tables.Dataset;
+import org.n52.sta.data.cloudnative.schema.tables.Location;
+import org.n52.sta.data.cloudnative.schema.tables.LocationParameter;
 import org.n52.svalbard.odata.core.expr.GeoValueExpr;
+import org.springframework.stereotype.Component;
 
 /**
  * @author <a href="mailto:humaid.kidwai@ucalgary.ca">Humaid Kidwai</a>
  */
+@Component
 public class LocationQueryConditions extends EntityQueryConditions implements SpatialQueryConditions {
+
+    public static Location StaEntity = LOCATION;
 
     public Condition withHistoricalLocationStaIdentifier(String historicalLocationIdentifier) {
         // Join and condition
         return DSL.exists(
                 ctx.selectOne()
-                        .from(DSL.table(LOCATION_HISTORICAL_LOCATION_TABLE))
-                        .join(DSL.table(HISTORICAL_LOCATION_TABLE))
-                        .on(DSL.field(DSL.name(LOCATION_HISTORICAL_LOCATION_TABLE, FK_HISTORICAL_LOCATION_ID_FIELD))
-                                .eq(DSL.field(DSL.name(HISTORICAL_LOCATION_TABLE, HISTORICAL_LOCATION_ID_FIELD))))
-                        .join(DSL.table(LOCATION_TABLE))
-                        .on(DSL.field(DSL.name(LOCATION_HISTORICAL_LOCATION_TABLE, FK_LOCATION_ID_FIELD))
-                                .eq(DSL.field(DSL.name(LOCATION_TABLE, LOCATION_ID_FIELD))))
-                        .where(DSL.field(DSL.name(HISTORICAL_LOCATION_TABLE, STA_IDENTIFIER_FIELD))
-                                .eq(historicalLocationIdentifier))
+                        .from(LOCATION_HISTORICAL_LOCATION)
+                        .join(HISTORICAL_LOCATION)
+                        .onKey()
+                        .join(LOCATION)
+                        .onKey()
+                        .where(HISTORICAL_LOCATION.STA_IDENTIFIER.eq(historicalLocationIdentifier))
         );
     }
 
     public Condition withThingStaIdentifier(final String thingIdentifier) {
         return DSL.exists(
                 ctx.selectOne()
-                        .from(DSL.table(LOCATION_TABLE))
-                        .join(DSL.table(THING_LOCATION_TABLE))
-                        .on(DSL.field(DSL.name(LOCATION_TABLE, LOCATION_ID_FIELD))
-                                .eq(DSL.field(DSL.name(THING_LOCATION_TABLE, FK_LOCATION_ID_FIELD))))
-                        .join(DSL.table(THING_TABLE))
-                        .on(DSL.field(DSL.name(THING_LOCATION_TABLE, FK_THING_ID_FIELD))
-                                .eq(DSL.field(DSL.name(THING_TABLE, THING_ID_FIELD))))
-                        .where(DSL.field(DSL.name(THING_TABLE, STA_IDENTIFIER_FIELD))
-                                .eq(thingIdentifier))
+                        .from(LOCATION)
+                        .join(THING_LOCATION)
+                        .onKey()
+                        .join(THING)
+                        .onKey()
+                        .where(THING.STA_IDENTIFIER.eq(thingIdentifier))
         );
     }
 
@@ -97,37 +99,37 @@ public class LocationQueryConditions extends EntityQueryConditions implements Sp
         switch (spatialFunctionName) {
             case ODataConstants.SpatialFunctions.ST_EQUALS:
                 return GeospatialFunctions.st_equals(
-                        DSL.field(LOCATION_GEOM_FIELD, Geometry.class),
+                        LOCATION.GEOM,
                         arguments[0]);
             case ODataConstants.SpatialFunctions.ST_DISJOINT:
                 return GeospatialFunctions.st_disjoint(
-                        DSL.field(LOCATION_GEOM_FIELD, Geometry.class),
+                        LOCATION.GEOM,
                         arguments[0]);
             case ODataConstants.SpatialFunctions.ST_TOUCHES:
                 return GeospatialFunctions.st_touches(
-                        DSL.field(LOCATION_GEOM_FIELD, Geometry.class),
+                        LOCATION.GEOM,
                         arguments[0]);
             case ODataConstants.SpatialFunctions.ST_WITHIN:
                 return GeospatialFunctions.st_within(
-                        DSL.field(LOCATION_GEOM_FIELD, Geometry.class),
+                        LOCATION.GEOM,
                         arguments[0]);
             case ODataConstants.SpatialFunctions.ST_OVERLAPS:
                 return GeospatialFunctions.st_overlaps(
-                        DSL.field(LOCATION_GEOM_FIELD, Geometry.class),
+                        LOCATION.GEOM,
                         arguments[0]);
             case ODataConstants.SpatialFunctions.ST_CROSSES:
                 return GeospatialFunctions.st_crosses(
-                        DSL.field(LOCATION_GEOM_FIELD, Geometry.class),
+                        LOCATION.GEOM,
                         arguments[0]);
             case ODataConstants.GeoFunctions.GEO_INTERSECTS:
                 //fallthru
             case ODataConstants.SpatialFunctions.ST_INTERSECTS:
                 return GeospatialFunctions.st_intersects(
-                        DSL.field(LOCATION_GEOM_FIELD, Geometry.class),
+                        LOCATION.GEOM,
                         arguments[0]);
             case ODataConstants.SpatialFunctions.ST_CONTAINS:
                 return GeospatialFunctions.st_contains(
-                        DSL.field(LOCATION_GEOM_FIELD, Geometry.class),
+                        LOCATION.GEOM,
                         arguments[0]);
             default:
                 throw new RuntimeException("Could not find function: " + spatialFunctionName);
@@ -141,12 +143,11 @@ public class LocationQueryConditions extends EntityQueryConditions implements Sp
                                           String argument) {
 
         if (StaConstants.PROP_LOCATION.equals(expr.getGeometry())) {
-            Field<Geometry> geomField = DSL.field(LOCATION_GEOM_FIELD, Geometry.class);
             switch (spatialFunctionName) {
                 case ODataConstants.GeoFunctions.GEO_DISTANCE:
-                    return GeospatialFunctions.st_distance(geomField, argument);
+                    return GeospatialFunctions.st_distance(LOCATION.GEOM, argument);
                 case ODataConstants.GeoFunctions.GEO_LENGTH:
-                    return GeospatialFunctions.st_length(geomField);
+                    return GeospatialFunctions.st_length(LOCATION.GEOM);
                 default:
                     break;
 
@@ -175,36 +176,35 @@ public class LocationQueryConditions extends EntityQueryConditions implements Sp
             switch (propertyName) {
                 case StaConstants.PROP_ID:
                     return handleDirectStringPropertyFilter(
-                            DSL.field(STA_IDENTIFIER_FIELD, String.class),
+                            LOCATION.STA_IDENTIFIER,
                             propertyValue,
                             operator,
                             false);
                 case StaConstants.PROP_NAME:
                     return handleDirectStringPropertyFilter(
-                            DSL.field(STA_NAME_FIELD, String.class),
+                            LOCATION.NAME,
                             propertyValue,
                             operator,
                             switched);
                 case StaConstants.PROP_DESCRIPTION:
                     return handleDirectStringPropertyFilter(
-                            DSL.field(STA_DESCRIPTION_FIELD, String.class),
+                            LOCATION.DESCRIPTION,
                             propertyValue,
                             operator,
                             switched);
                 case StaConstants.PROP_ENCODINGTYPE:
                     Condition subCondition = handleDirectStringPropertyFilter(
-                            DSL.field(DSL.name(FORMAT_TABLE, STA_DEFINITION_FIELD), String.class),
+                            FORMAT.DEFINITION,
                             propertyValue,
                             operator,
                             switched);
-                    SelectConditionStep<Record1<Object>> subquery = ctx
-                            .select(DSL.field(DSL.name(LOCATION_TABLE, LOCATION_ID_FIELD)))
-                            .from(DSL.table(LOCATION_TABLE))
-                            .join(DSL.table(FORMAT_TABLE))
-                            .on(DSL.field(DSL.name(LOCATION_TABLE, FK_FORMAT_ID_FIELD))
-                                    .eq(DSL.field(DSL.name(FORMAT_TABLE, FORMAT_ID_FIELD))))
+                    SelectConditionStep<Record1<Long>> subquery = ctx
+                            .select(LOCATION.LOCATION_ID)
+                            .from(LOCATION)
+                            .join(FORMAT)
+                            .onKey()
                             .where(subCondition);
-                    return DSL.field(LOCATION_ID_FIELD).in(subquery);
+                    return LOCATION.LOCATION_ID.in(subquery);
                 default:
                     // We are filtering on variable keys on properties
                     if (propertyName.startsWith(StaConstants.PROP_PROPERTIES)) {
@@ -213,10 +213,11 @@ public class LocationQueryConditions extends EntityQueryConditions implements Sp
                                 propertyValue,
                                 operator,
                                 switched,
-                                FK_LOCATION_ID_FIELD,
+                                LocationParameter.LOCATION_PARAMETER.FK_LOCATION_ID,
                                 ParameterFactory.EntityType.LOCATION);
                     } else {
-                        throw new RuntimeException(String.format(ERROR_GETTING_FILTER_NO_PROP, propertyName));
+                        throw new RuntimeException(String.format(ERROR_GETTING_FILTER_NO_PROP,
+                                propertyName));
                     }
             }
         } catch (STAInvalidFilterExpressionException e) {
@@ -226,40 +227,49 @@ public class LocationQueryConditions extends EntityQueryConditions implements Sp
 
     @Override
     protected Condition handleRelatedPropertyFilter(String propertyName, Condition propertyValue) {
-        if (THINGS.equals(propertyName)) {
-            SelectConditionStep<Record1<Object>> subSubquery = ctx.
-                    select(DSL.field(THING_ID_FIELD))
-                    .from(DSL.table(THING_TABLE))
+        if (STAEntityDefinition.THINGS.equals(propertyName)) {
+            SelectConditionStep<Record1<Long>> subSubquery = ctx.
+                    select(THING.PLATFORM_ID)
+                    .from(THING)
                     .where(propertyValue);
-            SelectConditionStep<Record1<Object>> subquery = ctx.
-                    select(DSL.field(FK_LOCATION_ID_FIELD))
-                    .from(DSL.table(THING_LOCATION_TABLE))
-                    .where(DSL.field(FK_THING_ID_FIELD).in(subSubquery));
-            return DSL.field(LOCATION_ID_FIELD).in(subquery);
-        } else if (HISTORICAL_LOCATIONS.equals(propertyName)) {
-            SelectConditionStep<Record1<Object>> subSubquery = ctx
-                    .select(DSL.field(HISTORICAL_LOCATION_ID_FIELD))
-                    .from(DSL.table(HISTORICAL_LOCATION_TABLE))
+            SelectConditionStep<Record1<Long>> subquery = ctx.
+                    select(THING_LOCATION.FK_LOCATION_ID)
+                    .from(THING_LOCATION)
+                    .where(THING_LOCATION.FK_PLATFORM_ID.in(subSubquery));
+            return LOCATION.LOCATION_ID.in(subquery);
+        } else if (STAEntityDefinition.HISTORICAL_LOCATIONS.equals(propertyName)) {
+            SelectConditionStep<Record1<Long>> subSubquery = ctx
+                    .select(HISTORICAL_LOCATION.HISTORICAL_LOCATION_ID)
+                    .from(HISTORICAL_LOCATION)
                     .where(propertyValue);
-            SelectConditionStep<Record1<Object>> subquery = ctx
-                    .select(DSL.field(FK_LOCATION_ID_FIELD))
-                    .from(DSL.table(LOCATION_HISTORICAL_LOCATION_TABLE))
-                    .where(DSL.field(FK_HISTORICAL_LOCATION_ID_FIELD).in(subSubquery));
-            return DSL.field(LOCATION_ID_FIELD).in(subquery);
+            SelectConditionStep<Record1<Long>> subquery = ctx
+                    .select(LOCATION_HISTORICAL_LOCATION.FK_LOCATION_ID)
+                    .from(LOCATION_HISTORICAL_LOCATION)
+                    .where(LOCATION_HISTORICAL_LOCATION.FK_HISTORICAL_LOCATION_ID.in(subSubquery));
+            return LOCATION.LOCATION_ID.in(subquery);
         } else {
             throw new RuntimeException("Could not find related property: " + propertyName);
         }
-
     }
 
     @Override
-    public String checkPropertyName(String property) {
-        if (property.equals(StaConstants.PROP_ENCODINGTYPE)) {
-            return FK_FORMAT_ID_FIELD;
-        } else if (property.equals(StaConstants.PROP_LOCATION)) {
-            return "name desc";
-        } else {
-            return property;
+    public Field checkPropertyName(String property) {
+        switch (property) {
+            case StaConstants.PROP_ID:
+                return LOCATION.STA_IDENTIFIER;
+            case StaConstants.PROP_NAME:
+                return LOCATION.NAME;
+            case StaConstants.PROP_DESCRIPTION:
+                return LOCATION.DESCRIPTION;
+            case StaConstants.PROP_LOCATION:
+                return LOCATION.GEOM;
+            case StaConstants.PROP_ENCODINGTYPE:
+                return FORMAT.DEFINITION;
+            case StaConstants.PROP_PROPERTIES:
+                // TODO
+                return null;
+            default:
+                return null;
         }
     }
 }

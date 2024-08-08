@@ -43,8 +43,8 @@ import org.n52.shetland.ogc.filter.FilterConstants;
 import org.n52.shetland.ogc.sta.StaConstants;
 import org.n52.shetland.ogc.sta.exception.STAInvalidFilterExpressionException;
 
+import org.n52.shetland.ogc.sta.model.STAEntityDefinition;
 import org.n52.sta.data.cloudnative.condition.DatastreamQueryConditions;
-import org.n52.sta.data.cloudnative.condition.EntityQueryConstants;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Import;
@@ -71,6 +71,10 @@ public class DatastreamQueryConditionsTest {
         datastreamQueryConditions.setDslContext(ctx);
     }
 
+    private String read_parquet(String table) {
+        return String.format("read_parquet('s3://52n-sta/%s') %s ", table, table);
+    }
+
     @Test
     public void testWithName() {
         final String name = "Nitric Datastream";
@@ -79,9 +83,9 @@ public class DatastreamQueryConditionsTest {
 
         String sql = ctx.renderInlined(result);
         String expectedSQL = String.format(
-                "(fk_aggregate_id is null " +
+                "(DATASET.FK_AGGREGATION_ID is null " +
                 "and " +
-                "name = '%s')",
+                "DATASET.NAME = '%s')",
                 name);
 
         Assertions.assertEquals(expectedSQL, sql);
@@ -96,9 +100,9 @@ public class DatastreamQueryConditionsTest {
 
         String sql = ctx.renderInlined(result);
         String expectedSQL = String.format(
-                "(fk_aggregate_id is null " +
+                "(DATASET.FK_AGGREGATION_ID is null " +
                 "and " +
-                "sta_identifier = '%s')",
+                "DATASET.STA_IDENTIFIER = '%s')",
                 staIdentifier);
 
         Assertions.assertEquals(expectedSQL, sql);
@@ -115,9 +119,9 @@ public class DatastreamQueryConditionsTest {
 
         String sql = ctx.renderInlined(result);
         String expectedSQL = String.format(
-                "(fk_aggregate_id is null " +
+                "(DATASET.FK_AGGREGATION_ID is null " +
                 "and " +
-                "sta_identifier in " +
+                "DATASET.STA_IDENTIFIER in " +
                 "(%s))",
                 staIdentifierList
                         .stream()
@@ -137,12 +141,14 @@ public class DatastreamQueryConditionsTest {
         String sql = ctx.renderInlined(result);
         String expectedSQL = String.format("exists " +
                 "(select 1 one " +
-                "from dataset " +
-                "join feature " +
+                "from " +
+                read_parquet("DATASET") +
+                "join " +
+                read_parquet("FEATURE") +
                 "on " +
-                "dataset.fk_feature_id = feature.feature_id " +
+                "dataset.fk_feature_id = feature.feature_id ".toUpperCase() +
                 "where " +
-                "feature.sta_identifier = '%s')",
+                "FEATURE.STA_IDENTIFIER = '%s')",
                 featureStaIdentifier);
 
         Assertions.assertEquals(expectedSQL, sql);
@@ -158,12 +164,14 @@ public class DatastreamQueryConditionsTest {
         String expectedSQL = String.format(
                 "exists " +
                         "(select 1 one " +
-                        "from dataset " +
-                        "join phenomenon " +
+                        "from " +
+                        read_parquet("DATASET") +
+                        "join " +
+                        read_parquet("PHENOMENON") +
                         "on " +
-                        "dataset.fk_phenomenon_id = phenomenon.phenomenon_id " +
+                        "dataset.fk_phenomenon_id = phenomenon.phenomenon_id ".toUpperCase() +
                         "where " +
-                        "phenomenon.sta_identifier = '%s')",
+                        "PHENOMENON.STA_IDENTIFIER = '%s')",
                 observedPropertyStaIdentifier
         );
 
@@ -180,12 +188,14 @@ public class DatastreamQueryConditionsTest {
         String expectedSQL = String.format(
                 "exists " +
                         "(select 1 one " +
-                        "from dataset " +
-                        "join phenomenon " +
+                        "from " +
+                        read_parquet("DATASET") +
+                        "join " +
+                        read_parquet("PHENOMENON") +
                         "on " +
-                        "dataset.fk_phenomenon_id = phenomenon.phenomenon_id " +
+                        "dataset.fk_phenomenon_id = phenomenon.phenomenon_id ".toUpperCase() +
                         "where " +
-                        "phenomenon.name = '%s')",
+                        "PHENOMENON.NAME = '%s')",
                 name
         );
 
@@ -202,12 +212,14 @@ public class DatastreamQueryConditionsTest {
         String expectedSQL = String.format(
                 "exists " +
                         "(select 1 one " +
-                        "from dataset " +
-                        "join platform " +
+                        "from " +
+                        read_parquet("DATASET") +
+                        "join " +
+                        read_parquet("PLATFORM") +
                         "on " +
-                        "dataset.fk_platform_id = platform.platform_id " +
+                        "dataset.fk_platform_id = platform.platform_id ".toUpperCase() +
                         "where " +
-                        "platform.sta_identifier = '%s')",
+                        "PLATFORM.STA_IDENTIFIER = '%s')",
                 thingStaIdentifier
         );
 
@@ -224,12 +236,14 @@ public class DatastreamQueryConditionsTest {
         String expectedSQL = String.format(
                 "exists " +
                         "(select 1 one " +
-                        "from dataset " +
-                        "join platform " +
+                        "from " +
+                        read_parquet("DATASET") +
+                        "join " +
+                        read_parquet("PLATFORM") +
                         "on " +
-                        "dataset.fk_platform_id = platform.platform_id " +
+                        "dataset.fk_platform_id = platform.platform_id ".toUpperCase() +
                         "where " +
-                        "platform.name = '%s')",
+                        "PLATFORM.NAME = '%s')",
                 thingName
         );
 
@@ -246,12 +260,14 @@ public class DatastreamQueryConditionsTest {
         String expectedSQL = String.format(
                 "exists " +
                         "(select 1 one " +
-                        "from dataset " +
-                        "join procedure " +
+                        "from " +
+                        read_parquet("DATASET") +
+                        "join " +
+                        read_parquet("PROCEDURE") +
                         "on " +
-                        "dataset.fk_procedure_id = procedure.procedure_id " +
+                        "dataset.fk_procedure_id = procedure.procedure_id ".toUpperCase() +
                         "where " +
-                        "procedure.sta_identifier = '%s')",
+                        "PROCEDURE.STA_IDENTIFIER = '%s')",
                 sensorStaIdentifier
         );
 
@@ -268,12 +284,14 @@ public class DatastreamQueryConditionsTest {
         String expectedSQL = String.format(
                 "exists " +
                         "(select 1 one " +
-                        "from dataset " +
-                        "join procedure " +
+                        "from " +
+                        read_parquet("DATASET") +
+                        "join " +
+                        read_parquet("PROCEDURE") +
                         "on " +
-                        "dataset.fk_procedure_id = procedure.procedure_id " +
+                        "dataset.fk_procedure_id = procedure.procedure_id ".toUpperCase() +
                         "where " +
-                        "procedure.name = '%s')",
+                        "PROCEDURE.NAME = '%s')",
                 sensorName
         );
 
@@ -287,17 +305,20 @@ public class DatastreamQueryConditionsTest {
         Condition result = datastreamQueryConditions.withObservationStaIdentifier(observationStaIdentifier);
 
         String sql = ctx.renderInlined(result);
-        String expectedSQL = String.format("(dataset_id in " +
-                "(select fk_dataset_id " +
-                "from observation " +
-                "where sta_identifier = '%s') " +
-                "or dataset_id in " +
-                "(select fk_aggregate_id " +
-                "from dataset " +
-                "where dataset_id in " +
-                    "(select fk_dataset_id " +
-                    "from observation " +
-                    "where sta_identifier = '%s'))" +
+        String expectedSQL = String.format("(DATASET.DATASET_ID in " +
+                "(select OBSERVATION.FK_DATASET_ID " +
+                "from " +
+                read_parquet("OBSERVATION") +
+                "where OBSERVATION.STA_IDENTIFIER = '%s') " +
+                "or DATASET.DATASET_ID in " +
+                "(select DATASET.FK_AGGREGATION_ID " +
+                "from " +
+                read_parquet("DATASET") +
+                "where DATASET.DATASET_ID in " +
+                    "(select OBSERVATION.FK_DATASET_ID " +
+                    "from " +
+                    read_parquet("OBSERVATION") +
+                    "where OBSERVATION.STA_IDENTIFIER = '%s'))" +
                 ")",
                 observationStaIdentifier, observationStaIdentifier);
 
@@ -306,7 +327,7 @@ public class DatastreamQueryConditionsTest {
 
     @Test
     public void testWithRelatedPropertyFilter_Observation() {
-        String propertyName = EntityQueryConstants.OBSERVATIONS;
+        String propertyName = STAEntityDefinition.OBSERVATIONS;
         Condition propertyValue = DSL.condition("");
         Condition result = null;
 
@@ -317,9 +338,10 @@ public class DatastreamQueryConditionsTest {
         }
 
         String sql = ctx.renderInlined(result);
-        String expectedSQL = "dataset_id in " +
-                "(select fk_dataset_id " +
-                "from observation " +
+        String expectedSQL = "DATASET.DATASET_ID in " +
+                "(select OBSERVATION.FK_DATASET_ID " +
+                "from " +
+                read_parquet("OBSERVATION") +
                 "where " + propertyValue + ")";
 
         Assertions.assertEquals(expectedSQL, sql);
@@ -327,7 +349,7 @@ public class DatastreamQueryConditionsTest {
 
     @Test
     public void testWithRelatedPropertyFilter_Thing() {
-        String propertyName = EntityQueryConstants.THING;
+        String propertyName = STAEntityDefinition.THING;
         Condition propertyValue = DSL.condition("");
         Condition result = null;
 
@@ -338,9 +360,10 @@ public class DatastreamQueryConditionsTest {
         }
 
         String sql = ctx.renderInlined(result);
-        String expectedSQL = "fk_platform_id in " +
-                "(select platform_id " +
-                "from platform " +
+        String expectedSQL = "DATASET.FK_PLATFORM_ID in " +
+                "(select PLATFORM.PLATFORM_ID " +
+                "from " +
+                read_parquet("PLATFORM") +
                 "where " + propertyValue + ")";
 
         Assertions.assertEquals(expectedSQL, sql);
@@ -348,7 +371,7 @@ public class DatastreamQueryConditionsTest {
 
     @Test
     public void testWithRelatedPropertyFilter_ObservedProperty() {
-        String propertyName = EntityQueryConstants.OBSERVED_PROPERTY;
+        String propertyName = STAEntityDefinition.OBSERVED_PROPERTY;
         Condition propertyValue = DSL.condition("");
         Condition result = null;
 
@@ -359,9 +382,10 @@ public class DatastreamQueryConditionsTest {
         }
 
         String sql = ctx.renderInlined(result);
-        String expectedSQL = "fk_phenomenon_id in " +
-                "(select phenomenon_id " +
-                "from phenomenon " +
+        String expectedSQL = "DATASET.FK_PHENOMENON_ID in " +
+                "(select PHENOMENON.PHENOMENON_ID " +
+                "from " +
+                read_parquet("PHENOMENON") +
                 "where " + propertyValue + ")";
 
         Assertions.assertEquals(expectedSQL, sql);
@@ -369,7 +393,7 @@ public class DatastreamQueryConditionsTest {
 
     @Test
     public void testWithRelatedPropertyFilter_Sensor() {
-        String propertyName = EntityQueryConstants.SENSOR;
+        String propertyName = STAEntityDefinition.SENSOR;
         Condition propertyValue = DSL.condition("");
         Condition result = null;
 
@@ -380,9 +404,10 @@ public class DatastreamQueryConditionsTest {
         }
 
         String sql = ctx.renderInlined(result);
-        String expectedSQL = "fk_procedure_id in " +
-                "(select procedure_id " +
-                "from procedure " +
+        String expectedSQL = "DATASET.FK_PROCEDURE_ID in " +
+                "(select PROCEDURE.PROCEDURE_ID " +
+                "from " +
+                read_parquet("PROCEDURE") +
                 "where " + propertyValue + ")";
 
         Assertions.assertEquals(expectedSQL, sql);
@@ -405,7 +430,7 @@ public class DatastreamQueryConditionsTest {
             System.out.println(e);
         }
         String sql = ctx.renderInlined(result);
-        String expectedSQL = "sta_identifier = cast('datastream123' as varchar)";
+        String expectedSQL = "DATASET.STA_IDENTIFIER = 'datastream123'";
 
         Assertions.assertEquals(expectedSQL, sql);
     }
@@ -427,7 +452,7 @@ public class DatastreamQueryConditionsTest {
             e.printStackTrace();
         }
         String sql = ctx.renderInlined(result);
-        String expectedSQL = "name = cast('datastream_collection' as varchar)";
+        String expectedSQL = "DATASET.NAME = 'datastream_collection'";
 
         Assertions.assertEquals(expectedSQL, sql);
     }
@@ -449,7 +474,7 @@ public class DatastreamQueryConditionsTest {
             e.printStackTrace();
         }
         String sql = ctx.renderInlined(result);
-        String expectedSQL = "description = cast('description of the datastream' as varchar)";
+        String expectedSQL = "DATASET.DESCRIPTION = 'description of the datastream'";
 
         Assertions.assertEquals(expectedSQL, sql);
     }
@@ -471,11 +496,7 @@ public class DatastreamQueryConditionsTest {
             e.printStackTrace();
         }
         String sql = ctx.renderInlined(result);
-        String expectedSQL = "fk_format_id in " +
-                "(select format_id " +
-                "from format " +
-                "where " +
-                "format.definition = cast('type of the datastream' as varchar))";
+        String expectedSQL = "DATASET.OBSERVATION_TYPE = 'type of the datastream'";
 
         Assertions.assertEquals(expectedSQL, sql);
     }
@@ -497,11 +518,12 @@ public class DatastreamQueryConditionsTest {
             e.printStackTrace();
         }
         String sql = ctx.renderInlined(result);
-        String expectedSQL = "dataset_id in " +
-                "(select fk_dataset_id " +
-                "from dataset_parameter " +
+        String expectedSQL = "DATASET.DATASET_ID in " +
+                "(select DATASET_PARAMETER.FK_DATASET_ID " +
+                "from " +
+                read_parquet("DATASET_PARAMETER") +
                 "where " +
-                "(name = 'dsNo' and value_text = cast('08.09.10' as varchar)))";
+                "(DATASET_PARAMETER.NAME = 'dsNo' and DATASET_PARAMETER.VALUE_TEXT = '08.09.10'))";
 
         Assertions.assertEquals(expectedSQL, sql);
     }

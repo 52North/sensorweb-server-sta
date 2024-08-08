@@ -34,21 +34,26 @@ import org.n52.series.db.beans.parameter.ParameterFactory;
 import org.n52.shetland.ogc.filter.FilterConstants;
 import org.n52.shetland.ogc.sta.StaConstants;
 import org.n52.shetland.ogc.sta.exception.STAInvalidFilterExpressionException;
+import org.n52.shetland.ogc.sta.model.STAEntityDefinition;
+import org.n52.sta.data.cloudnative.schema.tables.Procedure;
+import org.n52.sta.data.cloudnative.schema.tables.ProcedureParameter;
+import org.springframework.stereotype.Component;
 
 /**
  * @author <a href="mailto:humaid.kidwai@ucalgary.ca">Humaid Kidwai</a>
  */
+@Component
 public class SensorQueryConditions extends EntityQueryConditions {
+
+    public static Procedure StaEntity = SENSOR;
 
     public Condition withDatastreamStaIdentifier(final String datastreamIdentifier) {
         return DSL.exists(
-                ctx.selectOne()
-                        .from(DSL.table(DATASTREAM_TABLE))
-                        .join(DSL.table(SENSOR_TABLE))
-                        .on(DSL.field(DSL.name(DATASTREAM_TABLE, FK_SENSOR_ID_FIELD))
-                                .eq(DSL.field(DSL.name(SENSOR_TABLE, SENSOR_ID_FIELD))))
-                        .where(DSL.field(DSL.name(DATASTREAM_TABLE, STA_IDENTIFIER_FIELD))
-                                .eq(datastreamIdentifier))
+                ctx.select(DATASTREAM.DATASET_ID)
+                        .from(DATASTREAM)
+                        .join(SENSOR)
+                        .onKey()
+                        .where(DATASTREAM.STA_IDENTIFIER.eq(datastreamIdentifier))
         );
 
     }
@@ -62,54 +67,53 @@ public class SensorQueryConditions extends EntityQueryConditions {
             switch (propertyName) {
                 case StaConstants.PROP_ID:
                     return handleDirectStringPropertyFilter(
-                            DSL.field(STA_IDENTIFIER_FIELD, String.class),
+                            SENSOR.STA_IDENTIFIER,
                             propertyValue,
                             operator,
                             false);
                 case StaConstants.PROP_NAME:
                     return handleDirectStringPropertyFilter(
-                            DSL.field(STA_NAME_FIELD, String.class),
+                            SENSOR.NAME,
                             propertyValue,
                             operator,
                             switched);
                 case StaConstants.PROP_DESCRIPTION:
                     return handleDirectStringPropertyFilter(
-                            DSL.field(STA_DESCRIPTION_FIELD, String.class),
+                            SENSOR.DESCRIPTION,
                             propertyValue,
                             operator,
                             switched);
                 case "format":
                 case StaConstants.PROP_ENCODINGTYPE:
                     Condition subCondition = handleDirectStringPropertyFilter(
-                            DSL.field(DSL.name(FORMAT_TABLE, STA_DEFINITION_FIELD), String.class),
+                            FORMAT.DEFINITION,
                             propertyValue,
                             operator,
                             switched);
                     // join redundant?
-                    SelectConditionStep<Record1<Object>> subquery = ctx
-                            .select(DSL.field(DSL.name(SENSOR_TABLE, SENSOR_ID_FIELD)))
-                            .from(DSL.table(SENSOR_TABLE))
-                            .join(DSL.table(FORMAT_TABLE))
-                            .on(DSL.field(DSL.name(SENSOR_TABLE, FK_FORMAT_ID_FIELD))
-                                    .eq(DSL.field(DSL.name(FORMAT_TABLE, FORMAT_ID_FIELD))))
+                    SelectConditionStep<Record1<Long>> subquery = ctx
+                            .select(SENSOR.PROCEDURE_ID)
+                            .from(SENSOR)
+                            .join(FORMAT)
+                            .onKey()
                             .where(subCondition);
 
-                    return DSL.field(SENSOR_ID_FIELD).in(subquery);
+                    return SENSOR.PROCEDURE_ID.in(subquery);
                 case StaConstants.PROP_METADATA:
                     return handleDirectStringPropertyFilter(
-                            DSL.field(SENSOR_METADATA_FIELD, String.class),
+                            SENSOR.DESCRIPTION_FILE,
                             propertyValue,
                             operator,
                             switched);
                 default:
                     // We are filtering on variable keys on properties
-                    if (propertyName.startsWith(STA_PROPERTIES_FIELD)) {
+                    if (propertyName.startsWith(StaConstants.PROP_PROPERTIES)) {
                         return handleProperties(
                                 propertyName,
                                 propertyValue,
                                 operator,
                                 switched,
-                                FK_SENSOR_ID_FIELD,
+                                SENSOR_PROPERTIES.FK_PROCEDURE_ID,
                                 ParameterFactory.EntityType.PROCEDURE);
                     } else {
                         throw new RuntimeException(String.format(ERROR_GETTING_FILTER_NO_PROP, propertyName));
@@ -123,35 +127,39 @@ public class SensorQueryConditions extends EntityQueryConditions {
     @Override
     protected Condition handleRelatedPropertyFilter(String propertyName, Condition propertyValue) {
         try {
-            SelectConditionStep<Record1<Object>> subquery;
-            switch (propertyName) {
-                case DATASTREAMS: {
-                    subquery = ctx
-                            .select(DSL.field(DSL.name(DATASTREAM_TABLE, FK_SENSOR_ID_FIELD)))
-                            .from(DSL.table(DATASTREAM_TABLE))
-                            .where(propertyValue);
+            SelectConditionStep<Record1<Long>> subquery;
+            if (propertyName.equals(STAEntityDefinition.DATASTREAMS)) {
+                subquery = ctx
+                        .select(DATASTREAM.FK_PROCEDURE_ID)
+                        .from(DATASTREAM)
+                        .where(propertyValue);
 
-                    return DSL.field(SENSOR_ID_FIELD).in(subquery);
-                }
-                default:
-                    throw new STAInvalidFilterExpressionException("Could not find related property: " + propertyName);
+                return SENSOR.PROCEDURE_ID.in(subquery);
             }
+            throw new STAInvalidFilterExpressionException("Could not find related property: " + propertyName);
         } catch (STAInvalidFilterExpressionException e) {
             throw new RuntimeException(e);
         }
     }
 
     @Override
-    public String checkPropertyName(String property) {
+    public Field checkPropertyName(String property) {
         switch (property) {
-            // encodingType => Format::definition
+            case StaConstants.PROP_ID:
+                return StaEntity.STA_IDENTIFIER;
+            case StaConstants.PROP_NAME:
+                return StaEntity.NAME;
+            case StaConstants.PROP_DESCRIPTION:
+                return StaEntity.DESCRIPTION;
+            case StaConstants.PROP_PROPERTIES:
+                // TODO:
+                return null;
             case StaConstants.PROP_ENCODINGTYPE:
-                return FK_FORMAT_ID_FIELD;
+                return FORMAT.DEFINITION;
             case StaConstants.PROP_METADATA:
-                // TODO: Add sorting by HistoricalLocation that replaces Description if it is not present
-                return SENSOR_METADATA_FIELD;
+                return SENSOR.DESCRIPTION_FILE;
             default:
-                return super.checkPropertyName(property);
+                return null;
         }
     }
 }

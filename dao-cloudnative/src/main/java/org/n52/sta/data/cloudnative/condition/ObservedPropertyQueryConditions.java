@@ -38,38 +38,41 @@ import org.n52.series.db.beans.parameter.ParameterFactory;
 import org.n52.shetland.ogc.filter.FilterConstants;
 import org.n52.shetland.ogc.sta.StaConstants;
 import org.n52.shetland.ogc.sta.exception.STAInvalidFilterExpressionException;
+import org.n52.sta.data.cloudnative.schema.tables.Phenomenon;
+import org.n52.sta.data.cloudnative.schema.tables.PhenomenonParameter;
+import org.springframework.stereotype.Component;
 
 /**
  * @author <a href="mailto:humaid.kidwai@ucalgary.ca">Humaid Kidwai</a>
  */
+@Component
 public class ObservedPropertyQueryConditions extends EntityQueryConditions {
 
+    public static Phenomenon StaEntity = OBSERVED_PROPERTY;
     private static final String IDENTIFIER = "identifier";
 
     public Condition withDatastreamStaIdentifier(final String datastreamStaIdentifier) {
         return DSL.exists(
-                ctx.selectOne()
-                        .from(DSL.table(DATASTREAM_TABLE))
-                        .join(DSL.table(OBSERVED_PROPERTY_TABLE))
-                        .on(DSL.field(DSL.name(OBSERVED_PROPERTY_TABLE, OBSERVED_PROPERTY_ID_FIELD))
-                                .eq(DSL.field(DSL.name(DATASTREAM_TABLE, FK_OBSERVED_PROPERTY_ID_FIELD))))
-                        .where(DSL.field(DSL.name(DATASTREAM_TABLE, STA_IDENTIFIER_FIELD)).
-                                eq(datastreamStaIdentifier))
+                ctx.select(DATASTREAM.DATASET_ID)
+                        .from(DATASTREAM)
+                        .join(OBSERVED_PROPERTY)
+                        .onKey()
+                        .where(DATASTREAM.STA_IDENTIFIER.eq(datastreamStaIdentifier))
         );
     }
 
     @Override
     protected Condition handleRelatedPropertyFilter(String propertyName, Condition propertyValue) {
         try {
-            SelectConditionStep<Record1<Object>> subquery;
+            SelectConditionStep<Record1<Long>> subquery;
             switch (propertyName) {
                 case StaConstants.DATASTREAMS: {
                     subquery = ctx
-                            .select(DSL.field(DSL.name(DATASTREAM_TABLE, FK_OBSERVED_PROPERTY_ID_FIELD)))
-                            .from(DSL.table(DATASTREAM_TABLE))
+                            .select(DATASTREAM.FK_PHENOMENON_ID)
+                            .from(DATASTREAM)
                             .where(propertyValue);
 
-                    return DSL.field(OBSERVED_PROPERTY_ID_FIELD).in(subquery);
+                    return OBSERVED_PROPERTY.PHENOMENON_ID.in(subquery);
                 }
                 default:
                     throw new STAInvalidFilterExpressionException("Could not find related property: " + propertyName);
@@ -88,35 +91,39 @@ public class ObservedPropertyQueryConditions extends EntityQueryConditions {
         try {
             switch (propertyName) {
                 case StaConstants.PROP_ID:
-                    return handleDirectStringPropertyFilter(DSL.field(STA_IDENTIFIER_FIELD, String.class),
+                    return handleDirectStringPropertyFilter(
+                            OBSERVED_PROPERTY.STA_IDENTIFIER,
                             propertyValue,
                             operator,
                             false);
                 case StaConstants.PROP_NAME:
-                    return handleDirectStringPropertyFilter(DSL.field(STA_NAME_FIELD, String.class),
+                    return handleDirectStringPropertyFilter(
+                            OBSERVED_PROPERTY.NAME,
                             propertyValue,
                             operator,
                             switched);
                 case StaConstants.PROP_DESCRIPTION:
-                    return handleDirectStringPropertyFilter(DSL.field(STA_DESCRIPTION_FIELD, String.class),
+                    return handleDirectStringPropertyFilter(
+                            OBSERVED_PROPERTY.DESCRIPTION,
                             propertyValue,
                             operator,
                             switched);
                 case StaConstants.PROP_DEFINITION:
                 case IDENTIFIER:
-                    return handleDirectStringPropertyFilter(DSL.field(STA_DEFINITION_FIELD, String.class),
+                    return handleDirectStringPropertyFilter(
+                            OBSERVED_PROPERTY.IDENTIFIER,
                             propertyValue,
                             operator,
                             switched);
                 default:
                     // We are filtering on variable keys on properties
-                    if (propertyName.startsWith(STA_PROPERTIES_FIELD)) {
+                    if (propertyName.startsWith(StaConstants.PROP_PROPERTIES)) {
                         return handleProperties(
                                 propertyName,
                                 propertyValue,
                                 operator,
                                 switched,
-                                FK_OBSERVED_PROPERTY_ID_FIELD,
+                                OBSERVED_PROPERTY_PROPERTIES.FK_PHENOMENON_ID,
                                 ParameterFactory.EntityType.PHENOMENON);
                     } else {
                         throw new RuntimeException(String.format(ERROR_GETTING_FILTER_NO_PROP, propertyName));
@@ -129,15 +136,21 @@ public class ObservedPropertyQueryConditions extends EntityQueryConditions {
     }
 
     @Override
-    public String checkPropertyName(String property) {
+    public Field checkPropertyName(String property) {
         switch (property) {
-            case StaConstants.PROP_DEFINITION:
-                return DescribableEntity.PROPERTY_IDENTIFIER;
-            // IDENTIFIER
             case StaConstants.PROP_ID:
-                return STA_IDENTIFIER_FIELD;
+                return OBSERVED_PROPERTY.STA_IDENTIFIER;
+            case StaConstants.PROP_DEFINITION:
+                return OBSERVED_PROPERTY.IDENTIFIER;
+            case StaConstants.PROP_NAME:
+                return OBSERVED_PROPERTY.NAME;
+            case StaConstants.PROP_DESCRIPTION:
+                return OBSERVED_PROPERTY.DESCRIPTION;
+            case StaConstants.PROP_PROPERTIES:
+                // TODO:
+                return null;
             default:
-                return super.checkPropertyName(property);
+                return null;
         }
     }
 }

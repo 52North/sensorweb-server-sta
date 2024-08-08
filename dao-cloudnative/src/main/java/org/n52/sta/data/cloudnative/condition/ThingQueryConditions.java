@@ -34,83 +34,87 @@ import org.n52.series.db.beans.parameter.ParameterFactory;
 import org.n52.shetland.ogc.filter.FilterConstants;
 import org.n52.shetland.ogc.sta.StaConstants;
 import org.n52.shetland.ogc.sta.exception.STAInvalidFilterExpressionException;
+import org.n52.shetland.ogc.sta.model.STAEntityDefinition;
+import org.n52.sta.data.cloudnative.schema.tables.Platform;
+import org.springframework.stereotype.Component;
 
 /**
  * @author <a href="mailto:humaid.kidwai@ucalgary.ca">Humaid Kidwai</a>
  */
+@Component
 public class ThingQueryConditions extends EntityQueryConditions {
+
+    public static Platform StaEntity = THING;
 
     public Condition withLocationStaIdentifier(final String locationIdentifier) {
         // Join and condition
         return DSL.exists(
-                ctx.selectOne()
-                        .from(DSL.table(THING_LOCATION_TABLE))
-                        .join(DSL.table(THING_TABLE))
-                        .on(DSL.field(DSL.name(THING_TABLE, THING_ID_FIELD))
-                                .eq(DSL.field(DSL.name(THING_LOCATION_TABLE, FK_THING_ID_FIELD))))
-                        .join(DSL.table(LOCATION_TABLE))
-                        .on(DSL.field(DSL.name(LOCATION_TABLE, LOCATION_ID_FIELD))
-                                .eq(DSL.field(DSL.name(THING_LOCATION_TABLE, FK_LOCATION_ID_FIELD))))
-                        .where(DSL.field(DSL.name(LOCATION_TABLE, STA_IDENTIFIER_FIELD))
-                                .eq(locationIdentifier))
+                ctx.select(LOCATION.LOCATION_ID)
+                        .from(THING_LOCATION)
+                        .join(THING)
+                        .onKey()
+                        .join(LOCATION)
+                        .onKey()
+                        .where(LOCATION.STA_IDENTIFIER.eq(locationIdentifier))
         );
     }
 
     public Condition withHistoricalLocationStaIdentifier(final String historicalIdentifier) {
         return DSL.exists(
-                ctx.selectOne()
-                        .from(DSL.table(THING_TABLE))
-                        .join(DSL.table(HISTORICAL_LOCATION_TABLE))
-                        .on(DSL.field(DSL.name(THING_TABLE, THING_ID_FIELD))
-                                .eq(DSL.field(DSL.name(HISTORICAL_LOCATION_TABLE, FK_THING_ID_FIELD))))
-                        .where(DSL.field(DSL.name(HISTORICAL_LOCATION_TABLE, STA_IDENTIFIER_FIELD))
-                                .eq(historicalIdentifier))
+                ctx.select(HISTORICAL_LOCATION.HISTORICAL_LOCATION_ID)
+                        .from(THING)
+                        .join(HISTORICAL_LOCATION)
+                        .onKey()
+                        .where(HISTORICAL_LOCATION.STA_IDENTIFIER.eq(historicalIdentifier))
         );
     }
 
     public Condition withDatastreamStaIdentifier(final String datastreamIdentifier) {
         return DSL.exists(
-                ctx.selectOne()
-                        .from(DSL.table(THING_TABLE))
-                        .join(DSL.table(DATASTREAM_TABLE))
-                        .on(DSL.field(DSL.name(THING_TABLE, THING_ID_FIELD))
-                                .eq(DSL.field(DSL.name(DATASTREAM_TABLE, FK_THING_ID_FIELD))))
-                        .where(DSL.field(DSL.name(DATASTREAM_TABLE, STA_IDENTIFIER_FIELD)).eq(datastreamIdentifier))
+                ctx.select(DATASTREAM.DATASET_ID)
+                        .from(THING)
+                        .join(DATASTREAM)
+                        .onKey()
+                        .where(DATASTREAM.STA_IDENTIFIER.eq(datastreamIdentifier))
         );
     }
 
     @Override
-    protected  <T extends Comparable<? super T>> Condition handleDirectPropertyFilter(String propertyName,
-                                                   Field<T> propertyValue,
-                                                   FilterConstants.ComparisonOperator operator,
-                                                   boolean switched) {
+    protected  <T extends Comparable<? super T>> Condition handleDirectPropertyFilter(
+            String propertyName,
+            Field<T> propertyValue,
+            FilterConstants.ComparisonOperator operator,
+            boolean switched) {
         try {
             switch (propertyName) {
                 case StaConstants.PROP_ID:
                     // check if propertyValue is of type String
-                    return handleDirectStringPropertyFilter(DSL.field(STA_IDENTIFIER_FIELD, String.class),
+                    return handleDirectStringPropertyFilter(
+                            THING.STA_IDENTIFIER,
                             propertyValue,
                             operator,
                             false);
                 case StaConstants.PROP_NAME:
-                    return handleDirectStringPropertyFilter(DSL.field(STA_NAME_FIELD, String.class),
+                    return handleDirectStringPropertyFilter(
+                            THING.NAME,
                             propertyValue,
                             operator,
                             switched);
                 case StaConstants.PROP_DESCRIPTION:
-                    return handleDirectStringPropertyFilter(DSL.field(STA_DESCRIPTION_FIELD, String.class),
+                    return handleDirectStringPropertyFilter(
+                            THING.DESCRIPTION,
                             propertyValue,
                             operator,
                             switched);
                 default:
                     // We are filtering on variable keys on properties
-                    if (propertyName.startsWith(STA_PROPERTIES_FIELD)) {
+                    if (propertyName.startsWith(StaConstants.PROP_PROPERTIES)) {
                         return handleProperties(
                                 propertyName,
                                 propertyValue,
                                 operator,
                                 switched,
-                                FK_THING_ID_FIELD,
+                                THING_PROPERTIES.FK_PLATFORM_ID,
                                 ParameterFactory.EntityType.PLATFORM);
                     } else {
                         throw new RuntimeException(String.format(ERROR_GETTING_FILTER_NO_PROP, propertyName));
@@ -124,41 +128,58 @@ public class ThingQueryConditions extends EntityQueryConditions {
     @Override
     protected Condition handleRelatedPropertyFilter(String propertyName, Condition propertyValue) {
         try {
-            SelectConditionStep<Record1<Object>> subquery;
+            SelectConditionStep<Record1<Long>> subquery;
             switch (propertyName) {
-                case DATASTREAMS: {
-
-                    subquery = ctx.select(DSL.field(DSL.name(DATASTREAM_TABLE, FK_THING_ID_FIELD)))
-                            .from(DSL.table(DATASTREAM_TABLE))
+                case STAEntityDefinition.DATASTREAMS: {
+                    subquery = ctx
+                            .select(DATASTREAM.FK_PLATFORM_ID)
+                            .from(DATASTREAM)
                             .where(propertyValue);
 
-                    return DSL.field(THING_ID_FIELD).in(subquery);
+                    return THING.PLATFORM_ID.in(subquery);
                 }
-                case LOCATIONS: {
-                    subquery = ctx.select(DSL.field(DSL.name(THING_LOCATION_TABLE, FK_THING_ID_FIELD)))
-                            .from(DSL.table(THING_LOCATION_TABLE))
-                            .join(DSL.table(LOCATION_TABLE))
-                            .on(DSL.field(DSL.name(THING_LOCATION_TABLE, FK_LOCATION_ID_FIELD))
-                                    .eq(DSL.field(DSL.name(LOCATION_TABLE, LOCATION_ID_FIELD))))
+                case STAEntityDefinition.LOCATIONS: {
+                    subquery = ctx
+                            .select(THING_LOCATION.FK_PLATFORM_ID)
+                            .from(THING_LOCATION)
+                            .join(LOCATION)
+                            .onKey()
                             .where(propertyValue);
 
-                    return DSL.field(THING_ID_FIELD).in(subquery);
+                    return THING.PLATFORM_ID.in(subquery);
                 }
-                case HISTORICAL_LOCATIONS:
-                    subquery = ctx.select(DSL.field(DSL.name(HISTORICAL_LOCATION_TABLE, FK_THING_ID_FIELD)))
-                            .from(DSL.table(HISTORICAL_LOCATION_TABLE))
-                            .join(DSL.table(THING_TABLE))
-                            .on(DSL.field(DSL.name(THING_TABLE, THING_ID_FIELD))
-                                    .eq(DSL.field(DSL.name(HISTORICAL_LOCATION_TABLE, FK_THING_ID_FIELD))))
+                case STAEntityDefinition.HISTORICAL_LOCATIONS:
+                    subquery = ctx
+                            .select(HISTORICAL_LOCATION.FK_PLATFORM_ID)
+                            .from(HISTORICAL_LOCATION)
+                            .join(THING)
+                            .onKey()
                             .where(propertyValue);
 
-                    return DSL.field(THING_ID_FIELD).in(subquery);
+                    return THING.PLATFORM_ID.in(subquery);
                 default:
                     throw new STAInvalidFilterExpressionException(
                             "Could not find related property: " + propertyName);
             }
         } catch (STAInvalidFilterExpressionException e) {
             throw new RuntimeException(e);
+        }
+    }
+
+    @Override
+    public Field<?> checkPropertyName(String property) {
+        switch (property) {
+            case StaConstants.PROP_ID:
+                return THING.STA_IDENTIFIER;
+            case StaConstants.PROP_NAME:
+                return THING.NAME;
+            case StaConstants.PROP_DESCRIPTION:
+                return THING.DESCRIPTION;
+            case StaConstants.PROP_PROPERTIES:
+                // TODO:
+                return null;
+            default:
+                return null;
         }
     }
 

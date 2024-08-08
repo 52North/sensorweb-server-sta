@@ -28,24 +28,17 @@
  */
 package org.n52.sta.api.dto;
 
-import com.fasterxml.jackson.databind.node.ObjectNode;
-
-import java.util.Set;
 
 /**
  * Data Transfer Object for handling an ObservedProperty as specified in 18-088 OGC SensorThingsAPI Part I Section 8.2.6
  *
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
  */
-public interface ObservedPropertyDTO extends StaDTO, HasNameAndDescription, HasDatastreams {
+public interface ObservedPropertyDTO extends StaDTO, HasNameAndDescription, HasDatastreams, HasProperties {
 
     String getDefinition();
 
     void setDefinition(String definition);
-
-    ObjectNode getProperties();
-
-    void setProperties(ObjectNode properties);
 
     void addDatastreams(DatastreamDTO datastream);
 }

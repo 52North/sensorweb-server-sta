@@ -1,5 +1,6 @@
 package org.n52.sta.data.cloudnative.service;
 
+import org.jooq.Field;
 import org.n52.sta.api.dto.DatastreamDTO;
 import org.n52.sta.data.cloudnative.dao.DatastreamDao;
 import org.springframework.context.annotation.DependsOn;
@@ -17,5 +18,9 @@ public abstract class DatastreamService extends AbstractSensorThingsEntityServic
         DatastreamDTO> {
     public DatastreamService(DatastreamDao repository, Class entityClass) {
         super(repository, entityClass);
+    }
+    @Override
+    Field<String> getStaEntityId() {
+        return null;
     }
 }

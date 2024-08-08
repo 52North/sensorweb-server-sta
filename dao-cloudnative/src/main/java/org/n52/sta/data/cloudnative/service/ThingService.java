@@ -1,5 +1,6 @@
 package org.n52.sta.data.cloudnative.service;
 
+import org.jooq.Field;
 import org.n52.sta.api.dto.ThingDTO;
 import org.n52.sta.data.cloudnative.dao.ThingDao;
 import org.springframework.context.annotation.DependsOn;
@@ -18,5 +19,9 @@ public abstract class ThingService
         ThingDTO> {
     public ThingService(ThingDao dao, Class entityClass) {
         super(dao, entityClass);
+    }
+    @Override
+    Field<String> getStaEntityId() {
+        return null;
     }
 }

@@ -1,5 +1,6 @@
 package org.n52.sta.data.cloudnative.service;
 
+import org.jooq.Field;
 import org.n52.sta.api.dto.LocationDTO;
 import org.n52.sta.data.cloudnative.dao.LocationDao;
 import org.springframework.context.annotation.DependsOn;
@@ -18,5 +19,9 @@ public abstract class LocationService
         LocationDTO> {
     public LocationService(LocationDao dao, Class entityClass) {
         super(dao, entityClass);
+    }
+    @Override
+    Field<String> getStaEntityId() {
+        return null;
     }
 }

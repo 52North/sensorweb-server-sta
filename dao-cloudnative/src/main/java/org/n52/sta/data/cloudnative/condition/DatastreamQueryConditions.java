@@ -35,27 +35,31 @@ import org.n52.series.db.beans.parameter.ParameterFactory;
 import org.n52.shetland.ogc.filter.FilterConstants;
 import org.n52.shetland.ogc.sta.StaConstants;
 import org.n52.shetland.ogc.sta.exception.STAInvalidFilterExpressionException;
+import org.n52.shetland.ogc.sta.model.STAEntityDefinition;
+import org.n52.sta.data.cloudnative.schema.tables.*;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import java.util.List;
 
 /**
  * @author <a href="mailto:humaid.kidwai@ucalgary.ca">Humaid Kidwai</a>
  */
+@Component
 public class DatastreamQueryConditions extends EntityQueryConditions {
 
-    @Override
+    public static Dataset StaEntity = DATASTREAM;
+
     public Condition withName(final String name) {
-        return DSL.field(FK_AGGREGATE_ID_FIELD).isNull().and(DSL.field(STA_NAME_FIELD).eq(name));
+        return DATASTREAM.FK_AGGREGATION_ID.isNull().and(DATASTREAM.NAME.eq(name));
     }
 
-    @Override
     public Condition withStaIdentifier(final String staIdentifier) {
-        return DSL.field(FK_AGGREGATE_ID_FIELD).isNull().and(DSL.field(STA_IDENTIFIER_FIELD).eq(staIdentifier));
+        return DATASTREAM.FK_AGGREGATION_ID.isNull().and(DATASTREAM.STA_IDENTIFIER.eq(staIdentifier));
     }
 
-    @Override
     public Condition withStaIdentifier(final List<String> identifiers) {
-        return DSL.field(FK_AGGREGATE_ID_FIELD).isNull().and(DSL.field(STA_IDENTIFIER_FIELD).in(identifiers));
+        return DATASTREAM.FK_AGGREGATION_ID.isNull().and(DATASTREAM.STA_IDENTIFIER.in(identifiers));
     }
 
 
@@ -69,33 +73,28 @@ public class DatastreamQueryConditions extends EntityQueryConditions {
             switch (propertyName) {
                 case StaConstants.PROP_ID:
                     return handleDirectStringPropertyFilter(
-                            DSL.field(STA_IDENTIFIER_FIELD, String.class),
+                            DATASTREAM.STA_IDENTIFIER,
                             propertyValue,
                             operator,
                             false);
                 case StaConstants.PROP_NAME:
                     return handleDirectStringPropertyFilter(
-                            DSL.field(STA_NAME_FIELD, String.class),
+                            DATASTREAM.NAME,
                             propertyValue,
                             operator,
                             switched);
                 case StaConstants.PROP_DESCRIPTION:
                     return handleDirectStringPropertyFilter(
-                            DSL.field(STA_DESCRIPTION_FIELD, String.class),
+                            DATASTREAM.DESCRIPTION,
                             propertyValue,
                             operator,
                             switched);
                 case StaConstants.PROP_OBSERVATION_TYPE:
-                    Condition subCondition = handleDirectStringPropertyFilter(
-                            DSL.field(DSL.name(FORMAT_TABLE, STA_DEFINITION_FIELD), String.class),
+                    return handleDirectStringPropertyFilter(
+                            DATASTREAM.OBSERVATION_TYPE,
                             propertyValue,
                             operator,
                             switched);
-                    SelectConditionStep<Record1<Object>> subquery = ctx
-                            .select(DSL.field(FORMAT_ID_FIELD))
-                            .from(DSL.table(FORMAT_TABLE))
-                            .where(subCondition);
-                    return DSL.field(FK_FORMAT_ID_FIELD).in(subquery);
                 default:
                     // We are filtering on variable keys on properties
                     if (propertyName.startsWith(StaConstants.PROP_PROPERTIES)) {
@@ -104,7 +103,7 @@ public class DatastreamQueryConditions extends EntityQueryConditions {
                                 propertyValue,
                                 operator,
                                 switched,
-                                FK_DATASTREAM_ID_FIELD,
+                                DatasetParameter.DATASET_PARAMETER.FK_DATASET_ID,
                                 ParameterFactory.EntityType.DATASET);
                     } else {
                         throw new RuntimeException(String.format(ERROR_GETTING_FILTER_NO_PROP, propertyName));
@@ -119,33 +118,37 @@ public class DatastreamQueryConditions extends EntityQueryConditions {
     protected Condition handleRelatedPropertyFilter(String propertyName, Condition propertyValue) {
         try {
             switch (propertyName) {
-                case SENSOR: {
-                    SelectConditionStep<Record1<Object>> subquery = ctx
-                            .select(DSL.field(SENSOR_ID_FIELD))
-                            .from(DSL.table(SENSOR_TABLE))
-                            .where(propertyValue);
-                    return DSL.field(FK_SENSOR_ID_FIELD).in(subquery);
+                case STAEntityDefinition.SENSOR: {
+                    Procedure SENSOR = Procedure.PROCEDURE;
+                    return DATASTREAM.FK_PROCEDURE_ID.in(ctx
+                            .select(SENSOR.PROCEDURE_ID)
+                            .from(SENSOR)
+                            .where(propertyValue)
+                    );
                 }
-                case OBSERVED_PROPERTY: {
-                    SelectConditionStep<Record1<Object>> subquery = ctx
-                            .select(DSL.field(OBSERVED_PROPERTY_ID_FIELD))
-                            .from(DSL.table(OBSERVED_PROPERTY_TABLE))
-                            .where(propertyValue);
-                    return DSL.field(FK_OBSERVED_PROPERTY_ID_FIELD).in(subquery);
+                case STAEntityDefinition.OBSERVED_PROPERTY: {
+                    Phenomenon OBSERVED_PROPERTY = Phenomenon.PHENOMENON;
+                    return DATASTREAM.FK_PHENOMENON_ID.in(ctx
+                            .select(OBSERVED_PROPERTY.PHENOMENON_ID)
+                            .from(OBSERVED_PROPERTY)
+                            .where(propertyValue)
+                    );
                 }
-                case THING: {
-                    SelectConditionStep<Record1<Object>> subquery = ctx
-                            .select(DSL.field(THING_ID_FIELD))
-                            .from(DSL.table(THING_TABLE))
-                            .where(propertyValue);
-                    return DSL.field(FK_THING_ID_FIELD).in(subquery);
+                case STAEntityDefinition.THING: {
+                    Platform THING = Platform.PLATFORM;
+                    return DATASTREAM.FK_PLATFORM_ID.in(ctx
+                            .select(THING.PLATFORM_ID)
+                            .from(THING)
+                            .where(propertyValue)
+                    );
                 }
-                case OBSERVATIONS: {
-                    SelectConditionStep<Record1<Object>> subquery = ctx
-                            .select(DSL.field(FK_DATASTREAM_ID_FIELD))
-                            .from(DSL.table(OBSERVATION_TABLE))
-                            .where(propertyValue);
-                    return DSL.field(DATASTREAM_ID_FIELD).in(subquery);
+                case STAEntityDefinition.OBSERVATIONS: {
+                    Observation OBSERVATION = Observation.OBSERVATION;
+                    return DATASTREAM.DATASET_ID.in(ctx
+                            .select(OBSERVATION.FK_DATASET_ID)
+                            .from(OBSERVATION)
+                            .where(propertyValue)
+                    );
                 }
                 default:
                     throw new STAInvalidFilterExpressionException(COULD_NOT_FIND_RELATED_PROPERTY + propertyName);
@@ -233,114 +236,117 @@ public class DatastreamQueryConditions extends EntityQueryConditions {
     }
 */
     public Condition withFeatureStaIdentifier(final String featureIdentifier) {
+        var query = ctx.selectOne()
+                .from(DATASTREAM)
+                .join(FEATURE_OF_INTEREST)
+                .onKey();
+
         return DSL.exists(
-                ctx.selectOne()
-                        .from(DSL.table(DATASTREAM_TABLE))
-                        .join(DSL.table(FEATURE_TABLE))
-                        .on(DSL.field(DSL.name(DATASTREAM_TABLE, FK_FEATURE_ID_FIELD))
-                                .eq(DSL.field(DSL.name(FEATURE_TABLE, FEATURE_ID_FIELD))))
-                        .where(DSL.field(DSL.name(FEATURE_TABLE, STA_IDENTIFIER_FIELD))
-                                .eq(featureIdentifier))
+                query.where(FEATURE_OF_INTEREST.STA_IDENTIFIER.eq(featureIdentifier))
         );
     }
 
-    public Condition withObservedPropertyStaIdentifier(final String observablePropertyIdentifier) {
+    public Condition withObservedPropertyStaIdentifier(final String observedPropertyIdentifier) {
         return DSL.exists(
                 ctx.selectOne()
-                        .from(DSL.table(DATASTREAM_TABLE))
-                        .join(DSL.table(OBSERVED_PROPERTY_TABLE))
-                        .on(DSL.field(DSL.name(DATASTREAM_TABLE, FK_OBSERVED_PROPERTY_ID_FIELD))
-                                .eq(DSL.field(DSL.name(OBSERVED_PROPERTY_TABLE, OBSERVED_PROPERTY_ID_FIELD))))
-                        .where(DSL.field(DSL.name(OBSERVED_PROPERTY_TABLE, STA_IDENTIFIER_FIELD))
-                                .eq(observablePropertyIdentifier))
+                        .from(DATASTREAM)
+                        .join(OBSERVED_PROPERTY)
+                        .onKey()
+                        .where(OBSERVED_PROPERTY.STA_IDENTIFIER.eq(observedPropertyIdentifier))
         );
     }
 
     public Condition withObservedPropertyName(final String name) {
         return DSL.exists(
                 ctx.selectOne()
-                        .from(DSL.table(DATASTREAM_TABLE))
-                        .join(DSL.table(OBSERVED_PROPERTY_TABLE))
-                        .on(DSL.field(DSL.name(DATASTREAM_TABLE, FK_OBSERVED_PROPERTY_ID_FIELD))
-                                .eq(DSL.field(DSL.name(OBSERVED_PROPERTY_TABLE, OBSERVED_PROPERTY_ID_FIELD))))
-                        .where(DSL.field(DSL.name(OBSERVED_PROPERTY_TABLE, STA_NAME_FIELD))
-                                .eq(name))
+                        .from(DATASTREAM)
+                        .join(OBSERVED_PROPERTY)
+                        .onKey()
+                        .where(OBSERVED_PROPERTY.NAME.eq(name))
         );
     }
 
     public Condition withThingStaIdentifier(final String thingIdentifier) {
         return DSL.exists(
                 ctx.selectOne()
-                        .from(DSL.table(DATASTREAM_TABLE))
-                        .join(DSL.table(THING_TABLE))
-                        .on(DSL.field(DSL.name(DATASTREAM_TABLE, FK_THING_ID_FIELD))
-                                .eq(DSL.field(DSL.name(THING_TABLE, THING_ID_FIELD))))
-                        .where(DSL.field(DSL.name(THING_TABLE, STA_IDENTIFIER_FIELD))
-                                .eq(thingIdentifier))
+                        .from(DATASTREAM)
+                        .join(THING)
+                        .onKey()
+                        .where(THING.STA_IDENTIFIER.eq(thingIdentifier))
         );
     }
 
     public Condition withThingName(final String name) {
         return DSL.exists(
                 ctx.selectOne()
-                        .from(DSL.table(DATASTREAM_TABLE))
-                        .join(DSL.table(THING_TABLE))
-                        .on(DSL.field(DSL.name(DATASTREAM_TABLE, FK_THING_ID_FIELD))
-                                .eq(DSL.field(DSL.name(THING_TABLE, THING_ID_FIELD))))
-                        .where(DSL.field(DSL.name(THING_TABLE, STA_NAME_FIELD))
-                                .eq(name))
+                        .from(DATASTREAM)
+                        .join(THING)
+                        .onKey()
+                        .where(THING.NAME.eq(name))
         );
     }
 
     public Condition withSensorStaIdentifier(final String sensorIdentifier) {
         return DSL.exists(
                 ctx.selectOne()
-                        .from(DSL.table(DATASTREAM_TABLE))
-                        .join(DSL.table(SENSOR_TABLE))
-                        .on(DSL.field(DSL.name(DATASTREAM_TABLE, FK_SENSOR_ID_FIELD))
-                                .eq(DSL.field(DSL.name(SENSOR_TABLE, SENSOR_ID_FIELD))))
-                        .where(DSL.field(DSL.name(SENSOR_TABLE, STA_IDENTIFIER_FIELD))
-                                .eq(sensorIdentifier))
+                        .from(DATASTREAM)
+                        .join(SENSOR)
+                        .onKey()
+                        .where(SENSOR.STA_IDENTIFIER.eq(sensorIdentifier))
         );
     }
 
     public Condition withSensorName(final String name) {
         return DSL.exists(
                 ctx.selectOne()
-                        .from(DSL.table(DATASTREAM_TABLE))
-                        .join(DSL.table(SENSOR_TABLE))
-                        .on(DSL.field(DSL.name(DATASTREAM_TABLE, FK_SENSOR_ID_FIELD))
-                                .eq(DSL.field(DSL.name(SENSOR_TABLE, SENSOR_ID_FIELD))))
-                        .where(DSL.field(DSL.name(SENSOR_TABLE, STA_NAME_FIELD))
-                                .eq(name))
+                        .from(DATASTREAM)
+                        .join(SENSOR)
+                        .onKey()
+                        .where(SENSOR.NAME.eq(name))
         );
     }
 
     public Condition withObservationStaIdentifier(String observationIdentifier) {
-
         // Subquery to get dataset_id from Observation where sta_identifier matches
-        SelectConditionStep<Record1<Object>> sq = ctx.select(DSL.field(FK_DATASTREAM_ID_FIELD))
-                .from(OBSERVATION_TABLE)
-                .where(DSL.field(STA_IDENTIFIER_FIELD).eq(observationIdentifier));
+        SelectConditionStep<Record1<Long>> sq = ctx
+                .select(OBSERVATION.FK_DATASET_ID)
+                .from(OBSERVATION)
+                .where(OBSERVATION.STA_IDENTIFIER.eq(observationIdentifier));
 
         // Subquery to get fk_aggregate_id from Datastream where id matches the result from the first subquery
-        SelectConditionStep<Record1<Object>> subquery = ctx.select(DSL.field(FK_AGGREGATE_ID_FIELD))
-                .from(DATASTREAM_TABLE)
-                .where(DSL.field(DATASTREAM_ID_FIELD).in(sq));
+        SelectConditionStep<Record1<Long>> subquery = ctx
+                .select(DATASTREAM.FK_AGGREGATION_ID)
+                .from(DATASTREAM)
+                .where(DATASTREAM.DATASET_ID.in(sq));
 
         // Either id matches the result from the first subquery or id matches the result from the second subquery
-        return DSL.field(DATASTREAM_ID_FIELD).in(sq)
-                .or(DSL.field(DATASTREAM_ID_FIELD).in(subquery));
+        return DATASTREAM.DATASET_ID.in(sq).or(DATASTREAM.DATASET_ID.in(subquery));
     }
 
-        public String checkPropertyName(String property) {
+        public Field checkPropertyName(String property) {
         switch (property) {
+            case StaConstants.PROP_ID:
+                return DATASTREAM.STA_IDENTIFIER;
+            case StaConstants.PROP_NAME:
+                return DATASTREAM.NAME;
+            case StaConstants.PROP_DESCRIPTION:
+                return DATASTREAM.DESCRIPTION;
+            case StaConstants.PROP_OBSERVED_AREA:
+                return DATASTREAM.OBSERVED_AREA;
+            case StaConstants.PROP_UOM:
+                // TODO
+                return UNIT.NAME;
+            case StaConstants.PROP_OBSERVATION_TYPE:
+                return DATASTREAM.OBSERVATION_TYPE;
             case StaConstants.PROP_PHENOMENON_TIME:
-                return DATASTREAM_PHENOMENONTIME_START_FIELD;
+                return DATASTREAM.FIRST_TIME;
             case StaConstants.PROP_RESULT_TIME:
-                return DATASTREAM_RESULTTIME_START_FIELD;
+                return DATASTREAM.RESULT_TIME_START;
+            case StaConstants.PROP_PROPERTIES:
+                // TODO:
+                return null;
             default:
-                return super.checkPropertyName(property);
+                return null;
         }
     }
 

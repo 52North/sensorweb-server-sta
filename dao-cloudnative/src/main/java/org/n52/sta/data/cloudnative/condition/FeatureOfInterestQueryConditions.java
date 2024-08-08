@@ -36,27 +36,32 @@ import org.n52.shetland.oasis.odata.ODataConstants;
 import org.n52.shetland.ogc.filter.FilterConstants;
 import org.n52.shetland.ogc.sta.StaConstants;
 import org.n52.shetland.ogc.sta.exception.STAInvalidFilterExpressionException;
+import org.n52.shetland.ogc.sta.model.STAEntityDefinition;
 import org.n52.sta.data.cloudnative.condition.utils.GeospatialFunctions;
+import org.n52.sta.data.cloudnative.schema.tables.Dataset;
+import org.n52.sta.data.cloudnative.schema.tables.Feature;
+import org.n52.sta.data.cloudnative.schema.tables.FeatureParameter;
 import org.n52.svalbard.odata.core.expr.GeoValueExpr;
+import org.springframework.stereotype.Component;
 
 /**
  * @author <a href="mailto:humaid.kidwai@ucalgary.ca">Humaid Kidwai</a>
  */
+@Component
 public class FeatureOfInterestQueryConditions extends EntityQueryConditions implements SpatialQueryConditions {
+
+    public static Feature StaEntity = FEATURE_OF_INTEREST;
 
     public Condition withObservationStaIdentifier(final String observationIdentifier) {
 
         return DSL.exists(
-                ctx.selectOne()
-                        .from(DSL.table(FEATURE_TABLE))
-                        .join(DSL.table(DATASTREAM_TABLE))
-                        .on(DSL.field(DSL.name(DATASTREAM_TABLE, FK_FEATURE_ID_FIELD))
-                                .eq(DSL.field(DSL.name(FEATURE_TABLE, FEATURE_ID_FIELD))))
-                        .join(DSL.table(OBSERVATION_TABLE))
-                        .on(DSL.field(DSL.name(OBSERVATION_TABLE, FK_DATASTREAM_ID_FIELD))
-                                .eq(DSL.field(DSL.name(DATASTREAM_TABLE, DATASTREAM_ID_FIELD))))
-                        .where(DSL.field(DSL.name(OBSERVATION_TABLE, STA_IDENTIFIER_FIELD))
-                                .eq(observationIdentifier))
+                ctx.select(OBSERVATION.OBSERVATION_ID)
+                        .from(FEATURE_OF_INTEREST)
+                        .join(DATASTREAM)
+                        .onKey()
+                        .join(OBSERVATION)
+                        .onKey()
+                        .where(OBSERVATION.STA_IDENTIFIER.eq(observationIdentifier))
         );
     }
 
@@ -70,42 +75,36 @@ public class FeatureOfInterestQueryConditions extends EntityQueryConditions impl
             switch (propertyName) {
                 case StaConstants.PROP_ID:
                     return handleDirectStringPropertyFilter(
-                            DSL.field(STA_IDENTIFIER_FIELD, String.class),
+                            FEATURE_OF_INTEREST.STA_IDENTIFIER,
                             propertyValue,
                             operator,
                             false);
                 case StaConstants.PROP_NAME:
                     return handleDirectStringPropertyFilter(
-                            DSL.field(STA_NAME_FIELD, String.class),
+                            FEATURE_OF_INTEREST.NAME,
                             propertyValue,
                             operator,
                             switched);
                 case StaConstants.PROP_DESCRIPTION:
                     return handleDirectStringPropertyFilter(
-                            DSL.field(STA_DESCRIPTION_FIELD, String.class),
+                            FEATURE_OF_INTEREST.DESCRIPTION,
                             propertyValue,
                             operator,
                             switched);
                 case StaConstants.PROP_ENCODINGTYPE:
                 case "featureType":
                     if (operator.equals(FilterConstants.ComparisonOperator.PropertyIsEqualTo)) {
-                        SelectConditionStep<Record1<Object>> subquery;
+                        SelectConditionStep<Record1<Long>> subquery;
                         subquery = ctx
-                                .select(DSL.field(DSL.name(FEATURE_TABLE, FK_FORMAT_ID_FIELD)))
-                                .from(DSL.table(FEATURE_TABLE))
-                                .join(DSL.table(FORMAT_TABLE))
-                                .on(DSL.field(DSL.name(FEATURE_TABLE, FK_FORMAT_ID_FIELD))
-                                        .eq(DSL.field(DSL.name(FORMAT_TABLE, FORMAT_ID_FIELD))))
-                                .where(
-                                        DSL.field(DSL.name(FORMAT_TABLE, STA_DEFINITION_FIELD))
-                                                .eq("application/vnd.geo+json")
-                                        .or(
-                                                DSL.field(DSL.name(FORMAT_TABLE, STA_DEFINITION_FIELD))
-                                                        .eq("application/vnd.geo json"))
-                                );
-                        return DSL.field(FK_FORMAT_ID_FIELD).in(subquery);
+                                .select(FEATURE_OF_INTEREST.FK_FORMAT_ID)
+                                .from(FEATURE_OF_INTEREST)
+                                .join(FORMAT)
+                                .onKey()
+                                .where(FORMAT.DEFINITION.eq("application/vnd.geo+json")
+                                        .or(FORMAT.DEFINITION.eq("application/vnd.geo json")));
+                        return FEATURE_OF_INTEREST.FK_FORMAT_ID.in(subquery);
                     }
-                    return DSL.field(DescribableEntity.PROPERTY_IDENTIFIER).isNotNull();
+                    return FEATURE_OF_INTEREST.IDENTIFIER.isNotNull();
                 default:
                     // We are filtering on variable keys on properties
                     if (propertyName.startsWith(StaConstants.PROP_PROPERTIES)) {
@@ -114,7 +113,7 @@ public class FeatureOfInterestQueryConditions extends EntityQueryConditions impl
                                 propertyValue,
                                 operator,
                                 switched,
-                                FK_FEATURE_ID_FIELD,
+                                FEATURE_PROPERTIES.FK_FEATURE_ID,
                                 ParameterFactory.EntityType.FEATURE);
                     } else {
                         throw new RuntimeException(String.format(ERROR_GETTING_FILTER_NO_PROP, propertyName));
@@ -127,17 +126,19 @@ public class FeatureOfInterestQueryConditions extends EntityQueryConditions impl
 
     @Override
     protected Condition handleRelatedPropertyFilter(String propertyName, Condition propertyValue) {
-        if (OBSERVATIONS.equals(propertyName)) {
+        if (STAEntityDefinition.OBSERVATIONS.equals(propertyName)) {
 
-            SelectConditionStep<Record1<Object>> subSubquery = ctx.select(DSL.field(FK_DATASTREAM_ID_FIELD))
-                    .from(DSL.table(OBSERVATION_TABLE))
+            SelectConditionStep<Record1<Long>> subSubquery = ctx
+                    .select(OBSERVATION.FK_DATASET_ID)
+                    .from(OBSERVATION)
                     .where(propertyValue);
 
-            SelectConditionStep<Record1<Object>> subquery = ctx.select(DSL.field(FK_FEATURE_ID_FIELD))
-                    .from(DSL.table(DATASTREAM_TABLE))
-                    .where(DSL.field(DATASTREAM_ID_FIELD).in(subSubquery));
+            SelectConditionStep<Record1<Long>> subquery = ctx
+                    .select(DATASTREAM.FK_FEATURE_ID)
+                    .from(DATASTREAM)
+                    .where(DATASTREAM.DATASET_ID.in(subSubquery));
 
-            return DSL.field(FEATURE_ID_FIELD).in(subquery);
+            return FEATURE_OF_INTEREST.FEATURE_ID.in(subquery);
         } else {
             throw new RuntimeException("Could not find related property: " + propertyName);
         }
@@ -147,12 +148,11 @@ public class FeatureOfInterestQueryConditions extends EntityQueryConditions impl
     public Field<Double> handleGeospatial(GeoValueExpr expr, String spatialFunctionName, String argument) {
 
         if (StaConstants.PROP_FEATURE.equals(expr.getGeometry())) {
-            Field<Geometry> geomField = DSL.field(FEATURE_GEOM_FIELD, Geometry.class);
             switch (spatialFunctionName) {
                 case ODataConstants.GeoFunctions.GEO_DISTANCE:
-                    return GeospatialFunctions.st_distance(geomField, argument);
+                    return GeospatialFunctions.st_distance(FEATURE_OF_INTEREST.GEOM, argument);
                 case ODataConstants.GeoFunctions.GEO_LENGTH:
-                    return GeospatialFunctions.st_length(geomField);
+                    return GeospatialFunctions.st_length(FEATURE_OF_INTEREST.GEOM);
                 default:
                     break;
 
@@ -183,37 +183,37 @@ public class FeatureOfInterestQueryConditions extends EntityQueryConditions impl
         switch (spatialFunctionName) {
             case ODataConstants.SpatialFunctions.ST_EQUALS:
                 return GeospatialFunctions.st_equals(
-                        DSL.field(FEATURE_GEOM_FIELD, Geometry.class),
+                        FEATURE_OF_INTEREST.GEOM,
                         arguments[0]);
             case ODataConstants.SpatialFunctions.ST_DISJOINT:
                 return GeospatialFunctions.st_disjoint(
-                        DSL.field(FEATURE_GEOM_FIELD, Geometry.class),
+                        FEATURE_OF_INTEREST.GEOM,
                         arguments[0]);
             case ODataConstants.SpatialFunctions.ST_TOUCHES:
                 return GeospatialFunctions.st_touches(
-                        DSL.field(FEATURE_GEOM_FIELD, Geometry.class),
+                        FEATURE_OF_INTEREST.GEOM,
                         arguments[0]);
             case ODataConstants.SpatialFunctions.ST_WITHIN:
                 return GeospatialFunctions.st_within(
-                        DSL.field(FEATURE_GEOM_FIELD, Geometry.class),
+                        FEATURE_OF_INTEREST.GEOM,
                         arguments[0]);
             case ODataConstants.SpatialFunctions.ST_OVERLAPS:
                 return GeospatialFunctions.st_overlaps(
-                        DSL.field(FEATURE_GEOM_FIELD, Geometry.class),
+                        FEATURE_OF_INTEREST.GEOM,
                         arguments[0]);
             case ODataConstants.SpatialFunctions.ST_CROSSES:
                 return GeospatialFunctions.st_crosses(
-                        DSL.field(FEATURE_GEOM_FIELD, Geometry.class),
+                        FEATURE_OF_INTEREST.GEOM,
                         arguments[0]);
             case ODataConstants.GeoFunctions.GEO_INTERSECTS:
                 //fallthru
             case ODataConstants.SpatialFunctions.ST_INTERSECTS:
                 return GeospatialFunctions.st_intersects(
-                        DSL.field(FEATURE_GEOM_FIELD, Geometry.class),
+                        FEATURE_OF_INTEREST.GEOM,
                         arguments[0]);
             case ODataConstants.SpatialFunctions.ST_CONTAINS:
                 return GeospatialFunctions.st_contains(
-                        DSL.field(FEATURE_GEOM_FIELD, Geometry.class),
+                        FEATURE_OF_INTEREST.GEOM,
                         arguments[0]);
             default:
                 throw new RuntimeException("Could not find function: " + spatialFunctionName);
@@ -221,13 +221,23 @@ public class FeatureOfInterestQueryConditions extends EntityQueryConditions impl
     }
 
     @Override
-    public String checkPropertyName(String property) {
+    public Field checkPropertyName(String property) {
         switch (property) {
-            // encodingType defined in definition field of format table
+            case StaConstants.PROP_ID:
+                return FEATURE_OF_INTEREST.STA_IDENTIFIER;
+            case StaConstants.PROP_NAME:
+                return FEATURE_OF_INTEREST.NAME;
+            case StaConstants.PROP_DESCRIPTION:
+                return FEATURE_OF_INTEREST.DESCRIPTION;
+            case StaConstants.PROP_FEATURE:
+                return FEATURE_OF_INTEREST.GEOM;
             case StaConstants.PROP_ENCODINGTYPE:
-                return FK_FORMAT_ID_FIELD;
+                return FORMAT.DEFINITION;
+            case StaConstants.PROP_PROPERTIES:
+                // TODO
+                return null;
             default:
-                return property;
+                return null;
         }
     }
 }

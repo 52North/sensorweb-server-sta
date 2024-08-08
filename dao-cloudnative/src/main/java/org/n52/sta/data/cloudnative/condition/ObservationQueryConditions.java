@@ -35,41 +35,45 @@ import org.n52.shetland.ogc.sta.StaConstants;
 import org.n52.shetland.ogc.sta.exception.STAInvalidFilterExpressionException;
 import java.util.Date;
 import org.jooq.impl.DSL;
+import org.n52.shetland.ogc.sta.model.STAEntityDefinition;
+import org.n52.sta.data.cloudnative.schema.tables.Observation;
+import org.n52.sta.data.cloudnative.schema.tables.ObservationParameter;
+import org.springframework.stereotype.Component;
 
 /**
  * @author <a href="mailto:humaid.kidwai@ucalgary.ca">Humaid Kidwai</a>
  */
+@Component
 public class ObservationQueryConditions extends EntityQueryConditions {
+
+    public static Observation StaEntity = OBSERVATION;
 
     public Condition withFeatureOfInterestStaIdentifier(final String featureIdentifier) {
 
-        SelectConditionStep<Record1<Object>> subquery = ctx
-                .select(DSL.field(DSL.name(DATASTREAM_TABLE, DATASTREAM_ID_FIELD)))
-                .from(DSL.table(DATASTREAM_TABLE))
-                .join(DSL.table(FEATURE_TABLE))
-                .on(DSL.field(DSL.name(DATASTREAM_TABLE, FK_FEATURE_ID_FIELD))
-                        .eq(DSL.field(DSL.name(FEATURE_TABLE, FEATURE_ID_FIELD))))
-                .where(DSL.field(DSL.name(FEATURE_TABLE, STA_IDENTIFIER_FIELD))
-                        .eq(featureIdentifier));
+        SelectConditionStep<Record1<Long>> subquery = ctx
+                .select(DATASTREAM.DATASET_ID)
+                .from(DATASTREAM)
+                .join(FEATURE_OF_INTEREST)
+                .onKey()
+                .where(FEATURE_OF_INTEREST.STA_IDENTIFIER.eq(featureIdentifier));
 
-           return DSL.field(DSL.name(OBSERVATION_TABLE, FK_DATASTREAM_ID_FIELD)).in(subquery);
+           return OBSERVATION.FK_DATASET_ID.in(subquery);
     }
 
     public Condition withDatastreamStaIdentifier(final String datastreamStaIdentifier) {
-        SelectConditionStep<Record1<Object>> subquery = ctx
-                .select(DSL.field(DSL.name(DATASTREAM_TABLE, DATASTREAM_ID_FIELD)))
-                .from(DSL.table(DATASTREAM_TABLE))
-                .join(DSL.table(OBSERVATION_TABLE))
-                .on(DSL.field(DSL.name(DATASTREAM_TABLE, DATASTREAM_ID_FIELD))
-                        .eq(DSL.field(DSL.name(OBSERVATION_TABLE, FK_DATASTREAM_ID_FIELD))))
-                .where(DSL.field(DSL.name(DATASTREAM_TABLE, STA_IDENTIFIER_FIELD))
-                        .eq(datastreamStaIdentifier));
 
-        return DSL.field(DSL.name(OBSERVATION_TABLE, FK_DATASTREAM_ID_FIELD)).in(subquery);
+        SelectConditionStep<Record1<Long>> subquery = ctx
+                .select(DATASTREAM.DATASET_ID)
+                .from(DATASTREAM)
+                .join(OBSERVATION)
+                .onKey()
+                .where(DATASTREAM.STA_IDENTIFIER.eq(datastreamStaIdentifier));
+
+        return OBSERVATION.FK_DATASET_ID.in(subquery);
     }
 
     public Condition withDatastreamId(final long datastreamId) {
-        return DSL.field(FK_DATASTREAM_ID_FIELD).eq(datastreamId);
+        return OBSERVATION.FK_DATASET_ID.eq(datastreamId);
     }
 
     /*
@@ -88,7 +92,7 @@ public class ObservationQueryConditions extends EntityQueryConditions {
             switch (propertyName) {
                 case StaConstants.PROP_ID:
                     return handleDirectStringPropertyFilter(
-                            DSL.field(STA_IDENTIFIER_FIELD, String.class),
+                            OBSERVATION.STA_IDENTIFIER,
                             propertyValue,
                             operator,
                             false);
@@ -97,41 +101,41 @@ public class ObservationQueryConditions extends EntityQueryConditions {
                             || Integer.class.isAssignableFrom(propertyValue.getDataType().getType())) {
                         Condition countCondition = handleDirectNumberPropertyFilter(
                                 // Integer Field
-                                DSL.field(OBSERVATION_VALUE_COUNT_FIELD, Double.class),
+                                OBSERVATION.VALUE_COUNT,
                                 propertyValue,
                                 operator);
 
                         Condition quantityCondition = handleDirectNumberPropertyFilter(
-                                // Numeric(20,10) field
-                                DSL.field(OBSERVATION_VALUE_QUANTITY_FIELD, Double.class),
+                                // Numeric(19,2) field
+                                OBSERVATION.VALUE_QUANTITY,
                                 propertyValue,
                                 operator);
 
                         // Check for quantity or count as those are numeric
                         // Do not return observations with non-numeric result type
                         return countCondition
-                                .or(DSL.field(OBSERVATION_VALUE_COUNT_FIELD).isNull())
-                                .and(quantityCondition.or(DSL.field(OBSERVATION_VALUE_QUANTITY_FIELD).isNull()))
-                                .and(DSL.field(OBSERVATION_VALUE_CATEGORY_FIELD).isNull())
-                                .and(DSL.field(OBSERVATION_VALUE_TEXT_FIELD).isNull())
-                                .and(DSL.field(OBSERVATION_VALUE_BOOLEAN_FIELD).isNull());
+                                .or(OBSERVATION.VALUE_COUNT.isNull())
+                                .and(quantityCondition.or(OBSERVATION.VALUE_QUANTITY.isNull()))
+                                .and(OBSERVATION.VALUE_CATEGORY.isNull())
+                                .and(OBSERVATION.VALUE_TEXT.isNull())
+                                .and(OBSERVATION.VALUE_BOOLEAN.isNull());
 
                     } else if (String.class.isAssignableFrom(propertyValue.getDataType().getType())) {
                         Condition categoryCondition = handleDirectStringPropertyFilter(
-                                DSL.field(OBSERVATION_VALUE_CATEGORY_FIELD, String.class),
+                                OBSERVATION.VALUE_CATEGORY,
                                 propertyValue,
                                 operator,
                                 false);
 
                         Condition textCondition = handleDirectStringPropertyFilter(
-                                DSL.field(OBSERVATION_VALUE_TEXT_FIELD, String.class),
+                                OBSERVATION.VALUE_TEXT,
                                 propertyValue,
                                 operator,
                                 false);
 
                         /*
                         Condition boolCondition = handleDirectStringPropertyFilter(
-                                DSL.field(OBSERVATION_VALUE_BOOLEAN_FIELD, Boolean.class),
+                                OBSERVATION.VALUE_BOOLEAN,
                                 propertyValue,
                                 operator,
                                 false);
@@ -139,17 +143,17 @@ public class ObservationQueryConditions extends EntityQueryConditions {
 
                         // Check for category, text, boolean as those represented by String in query
                         // Do not return observations with numeric result type as we are filtering on string
-                        return categoryCondition.or(DSL.field(OBSERVATION_VALUE_CATEGORY_FIELD).isNull())
-                                        .and(textCondition.or(DSL.field(OBSERVATION_VALUE_TEXT_FIELD).isNull()))
-                                        // .and(boolCondition.or(DSL.field(OBSERVATION_VALUE_BOOLEAN_FIELD).isNull())
-                                        .and(DSL.field(OBSERVATION_VALUE_COUNT_FIELD).isNull())
-                                        .and(DSL.field(OBSERVATION_VALUE_QUANTITY_FIELD).isNull());
+                        return categoryCondition.or(OBSERVATION.VALUE_CATEGORY.isNull())
+                                        .and(textCondition.or(OBSERVATION.VALUE_TEXT.isNull()))
+                                        // .and(boolCondition.or(OBSERVATION.VALUE_BOOLEAN.isNull())
+                                        .and(OBSERVATION.VALUE_COUNT.isNull())
+                                        .and(OBSERVATION.VALUE_QUANTITY.isNull());
                     } else {
                         throw new STAInvalidFilterExpressionException("Value type not supported!");
                     }
                 case StaConstants.PROP_RESULT_TIME:
                     return this.handleDirectDateTimePropertyFilter(
-                            DSL.field(OBSERVATION_RESULT_TIME_FIELD, Date.class),
+                            OBSERVATION.RESULT_TIME,
                             propertyValue,
                             operator);
                 case StaConstants.PROP_PHENOMENON_TIME:
@@ -157,32 +161,32 @@ public class ObservationQueryConditions extends EntityQueryConditions {
                         case PropertyIsLessThan:
                         case PropertyIsLessThanOrEqualTo:
                             return handleDirectDateTimePropertyFilter(
-                                    DSL.field(OBSERVATION_PHENOMENONTIME_END_FIELD, Date.class),
+                                    OBSERVATION.SAMPLING_TIME_END,
                                     propertyValue,
                                     operator);
                         case PropertyIsGreaterThan:
                         case PropertyIsGreaterThanOrEqualTo:
                             return handleDirectDateTimePropertyFilter(
-                                    DSL.field(OBSERVATION_PHENOMENONTIME_START_FIELD, Date.class),
+                                    OBSERVATION.SAMPLING_TIME_START,
                                     propertyValue,
                                     operator);
                         case PropertyIsEqualTo:
                             Condition eqStart = handleDirectDateTimePropertyFilter(
-                                    DSL.field(OBSERVATION_PHENOMENONTIME_START_FIELD, Date.class),
+                                    OBSERVATION.SAMPLING_TIME_START,
                                     propertyValue,
                                     operator);
                             Condition eqEnd = handleDirectDateTimePropertyFilter(
-                                    DSL.field(OBSERVATION_PHENOMENONTIME_END_FIELD, Date.class),
+                                    OBSERVATION.SAMPLING_TIME_END,
                                     propertyValue,
                                     operator);
                             return eqStart.and(eqEnd);
                         case PropertyIsNotEqualTo:
                             Condition neStart = handleDirectDateTimePropertyFilter(
-                                    DSL.field(OBSERVATION_PHENOMENONTIME_START_FIELD, Date.class),
+                                    OBSERVATION.SAMPLING_TIME_START,
                                     propertyValue,
                                     operator);
                             Condition neEnd = handleDirectDateTimePropertyFilter(
-                                    DSL.field(OBSERVATION_PHENOMENONTIME_END_FIELD, Date.class),
+                                    OBSERVATION.SAMPLING_TIME_END,
                                     propertyValue,
                                     operator);
                             return neStart.or(neEnd);
@@ -198,7 +202,7 @@ public class ObservationQueryConditions extends EntityQueryConditions {
                                 propertyValue,
                                 operator,
                                 switched,
-                                FK_OBSERVATION_ID_FIELD,
+                                OBSERVATION_PARAMETERS.FK_OBSERVATION_ID,
                                 ParameterFactory.EntityType.OBSERVATION);
                     } else {
                         throw new RuntimeException(String.format(ERROR_GETTING_FILTER_NO_PROP, propertyName));
@@ -211,34 +215,38 @@ public class ObservationQueryConditions extends EntityQueryConditions {
 
     @Override
     protected Condition handleRelatedPropertyFilter(String propertyName, Condition propertyValue) {
-        SelectConditionStep<Record1<Object>> subquery;
+        SelectConditionStep<Record1<Long>> subquery;
         try {
-            if (DATASTREAM.equals(propertyName)) {
-                subquery = ctx.select(DSL.field(DATASTREAM_ID_FIELD))
-                        .from(DSL.table(DATASTREAM_TABLE))
+            if (STAEntityDefinition.DATASTREAM.equals(propertyName)) {
+                subquery = ctx
+                        .select(DATASTREAM.DATASET_ID)
+                        .from(DATASTREAM)
                         .where(propertyValue);
 
-                return DSL.field(FK_DATASTREAM_ID_FIELD).in(subquery);
+                return OBSERVATION.FK_DATASET_ID.in(subquery);
 
-            } else if (FEATUREOFINTEREST.equals(propertyName)) {
-                SelectConditionStep<Record1<Object>> subSubquery;
+            } else if (STAEntityDefinition.FEATURE_OF_INTEREST.equals(propertyName)) {
+                SelectConditionStep<Record1<Long>> subSubquery;
 
-                subSubquery = ctx.select(DSL.field(FEATURE_ID_FIELD))
-                        .from(DSL.table(FEATURE_TABLE))
+                subSubquery = ctx
+                        .select(FEATURE_OF_INTEREST.FEATURE_ID)
+                        .from(FEATURE_OF_INTEREST)
                         .where(propertyValue);
 
-                subquery = ctx.select(DSL.field(DATASTREAM_ID_FIELD))
-                        .from(DSL.table(DATASTREAM_TABLE))
-                        .where(DSL.field(FK_FEATURE_ID_FIELD).in(subSubquery));
+                subquery = ctx
+                        .select(DATASTREAM.DATASET_ID)
+                        .from(DATASTREAM)
+                        .where(DATASTREAM.FK_FEATURE_ID.in(subSubquery));
 
-                return DSL.field(FK_DATASTREAM_ID_FIELD).in(subquery);
+                return OBSERVATION.FK_DATASET_ID.in(subquery);
 
             } else if (StaConstants.PROP_PARAMETERS.equals(propertyName)) {
-                subquery = ctx.select(DSL.field(FK_OBSERVATION_ID_FIELD))
-                        .from(DSL.table(OBSERVATION_PARAMETER_TABLE))
+                subquery = ctx
+                        .select(OBSERVATION_PARAMETERS.FK_OBSERVATION_ID)
+                        .from(OBSERVATION_PARAMETERS)
                         .where(propertyValue);
 
-                return DSL.field(OBSERVATION_ID_FIELD).in(subquery);
+                return OBSERVATION.OBSERVATION_ID.in(subquery);
 
             } else {
                 throw new STAInvalidFilterExpressionException("Could not find related property: " + propertyName);
@@ -249,19 +257,27 @@ public class ObservationQueryConditions extends EntityQueryConditions {
     }
 
     @Override
-    public String checkPropertyName(String property) {
+    public Field checkPropertyName(String property) {
         switch (property) {
+            case StaConstants.PROP_ID:
+                return OBSERVATION.STA_IDENTIFIER;
+
             case StaConstants.PROP_PHENOMENON_TIME:
                 // TODO: proper ISO8601 comparison
-                return OBSERVATION_PHENOMENONTIME_END_FIELD;
+                return OBSERVATION.SAMPLING_TIME_END;
 
-            /* This is handled separately as result is split up over multiple columns
-            case "result":
-                return "valueBoolean";
-
-             */
+            /* TODO: This is handled separately as result is split up over multiple columns */
+            case StaConstants.PROP_RESULT:
+                return null;
+            case StaConstants.PROP_RESULT_TIME:
+                return OBSERVATION.RESULT_TIME;
+            case StaConstants.PROP_VALID_TIME:
+                return OBSERVATION.VALID_TIME_START;
+            case StaConstants.PROP_PARAMETERS:
+                // TODO:
+                return null;
             default:
-                return super.checkPropertyName(property);
+                return null;
         }
     }
 }

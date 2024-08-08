@@ -28,16 +28,13 @@
  */
 package org.n52.sta.api.dto;
 
-import com.fasterxml.jackson.databind.node.ObjectNode;
-
-import java.util.Set;
 
 /**
  * Data Transfer Object for handling a Sensor as specified in 18-088 OGC SensorThingsAPI Part I Section 8.2.5
  *
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
  */
-public interface SensorDTO extends StaDTO, HasNameAndDescription, HasDatastreams {
+public interface SensorDTO extends StaDTO, HasNameAndDescription, HasDatastreams, HasProperties {
 
     String getEncodingType();
 
@@ -46,10 +43,6 @@ public interface SensorDTO extends StaDTO, HasNameAndDescription, HasDatastreams
     String getMetadata();
 
     void setMetadata(String metadata);
-
-    ObjectNode getProperties();
-
-    void setProperties(ObjectNode properties);
 
     void addDatastream(DatastreamDTO datastream);
 }

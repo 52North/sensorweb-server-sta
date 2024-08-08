@@ -40,7 +40,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.n52.shetland.ogc.filter.FilterConstants;
 import org.n52.shetland.ogc.sta.StaConstants;
 import org.n52.shetland.ogc.sta.exception.STAInvalidFilterExpressionException;
-import org.n52.sta.data.cloudnative.condition.EntityQueryConstants;
+import org.n52.shetland.ogc.sta.model.STAEntityDefinition;
+import org.n52.sta.data.cloudnative.condition.StaEntity;
 import org.n52.sta.data.cloudnative.condition.ObservedPropertyQueryConditions;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -63,6 +64,10 @@ public class ObservedPropertyQueryConditionsTest {
         observedPropertyQueryConditions.setDslContext(ctx);
     }
 
+    private String read_parquet(String table) {
+        return String.format("read_parquet('s3://52n-sta/%s') %s ", table, table);
+    }
+
     @Test
     public void testWithDatastreamStaIdentifier_TP() {
 
@@ -71,12 +76,16 @@ public class ObservedPropertyQueryConditionsTest {
         Condition result = observedPropertyQueryConditions.withDatastreamStaIdentifier(staIdentifier);
 
         String sql = ctx.renderInlined(result);
-        String expectedSQL = "exists " +
-                "(select 1 one " +
+        String expectedSQL = String.format("exists " +
+                "(select DATASET.DATASET_ID " +
                 "from " +
-                "dataset join phenomenon " +
-                "on phenomenon.phenomenon_id = dataset.fk_phenomenon_id " +
-                "where dataset.sta_identifier = 'datastream123')";
+                read_parquet("DATASET") +
+                "join " +
+                read_parquet("PHENOMENON") +
+                "on " +
+                "dataset.fk_phenomenon_id = phenomenon.phenomenon_id ".toUpperCase() +
+                "where " +
+                "DATASET.STA_IDENTIFIER = '%s')", staIdentifier);
 
         Assertions.assertEquals(expectedSQL, sql);
     }
@@ -84,7 +93,7 @@ public class ObservedPropertyQueryConditionsTest {
     @Test
     public void testWithRelatedPropertyFilter_TP() {
 
-        String propertyName = EntityQueryConstants.DATASTREAMS;
+        String propertyName = STAEntityDefinition.DATASTREAMS;
         Condition propertyValue = DSL.condition("");
         Condition result = null;
 
@@ -95,11 +104,11 @@ public class ObservedPropertyQueryConditionsTest {
         }
 
         String sql = ctx.renderNamedOrInlinedParams(result);
-        String expectedSQL = "phenomenon_id in " +
+        String expectedSQL = "PHENOMENON.PHENOMENON_ID in " +
                 "(select " +
-                "dataset.fk_phenomenon_id " +
+                "DATASET.FK_PHENOMENON_ID " +
                 "from " +
-                "dataset " +
+                read_parquet("DATASET") +
                 "where ())";
 
         Assertions.assertEquals(expectedSQL, sql);
@@ -109,7 +118,7 @@ public class ObservedPropertyQueryConditionsTest {
     @Test
     public void testWithRelatedPropertyFilter_TN() {
         // Unrelated entity
-        final String propertyName = EntityQueryConstants.FEATUREOFINTEREST;
+        final String propertyName = STAEntityDefinition.FEATURE_OF_INTEREST;
         Condition propertyValue = DSL.condition("");
 
         Exception e = Assertions.assertThrows(RuntimeException.class, () -> {
@@ -139,7 +148,7 @@ public class ObservedPropertyQueryConditionsTest {
             e.printStackTrace();
         }
         String sql = ctx.renderInlined(result);
-        String expectedSQL = "sta_identifier >= cast('observedProperty123' as varchar)";
+        String expectedSQL = "PHENOMENON.STA_IDENTIFIER >= 'observedProperty123'";
 
         Assertions.assertEquals(expectedSQL, sql);
     }
@@ -161,7 +170,7 @@ public class ObservedPropertyQueryConditionsTest {
             e.printStackTrace();
         }
         String sql = ctx.renderInlined(result);
-        String expectedSQL = "sta_identifier >= 'observedProperty123'";
+        String expectedSQL = "PHENOMENON.STA_IDENTIFIER >= 'observedProperty123'";
 
         Assertions.assertNotEquals(expectedSQL, sql);
     }
@@ -176,7 +185,7 @@ public class ObservedPropertyQueryConditionsTest {
             observedPropertyQueryConditions.getFilterForProperty(propertyName, propertyValue, operator, false);
         });
         Assertions.assertEquals("org.n52.shetland.ogc.sta.exception.STAInvalidFilterExpressionException: "
-                        + EntityQueryConstants.INVALID_DATATYPE_CANNOT_CAST
+                        + "Invalid Datatypes found. Cannot cast "
                         + propertyValue.getDataType().getType()
                         + " to String.class",
                 e.getMessage());
@@ -199,7 +208,7 @@ public class ObservedPropertyQueryConditionsTest {
             e.printStackTrace();
         }
         String sql = ctx.renderInlined(result);
-        String expectedSQL = "name = cast('O3 conc.' as varchar)";
+        String expectedSQL = "PHENOMENON.NAME = 'O3 conc.'";
 
         Assertions.assertEquals(expectedSQL, sql);
     }
@@ -236,7 +245,7 @@ public class ObservedPropertyQueryConditionsTest {
             e.printStackTrace();
         }
         String sql = ctx.renderInlined(result);
-        String expectedSQL = "description = cast('ozone concentration levels in mg' as varchar)";
+        String expectedSQL = "PHENOMENON.DESCRIPTION = 'ozone concentration levels in mg'";
 
         Assertions.assertEquals(expectedSQL, sql);
     }
@@ -273,7 +282,7 @@ public class ObservedPropertyQueryConditionsTest {
             e.printStackTrace();
         }
         String sql = ctx.renderInlined(result);
-        String expectedSQL = "definition = cast('pdf/o3' as varchar)";
+        String expectedSQL = "PHENOMENON.IDENTIFIER = 'pdf/o3'";
 
         Assertions.assertEquals(expectedSQL, sql);
     }
@@ -289,7 +298,7 @@ public class ObservedPropertyQueryConditionsTest {
                 }
         );
         Assertions.assertEquals("org.n52.shetland.ogc.sta.exception.STAInvalidFilterExpressionException: " +
-                        EntityQueryConstants.INVALID_DATATYPE_CANNOT_CAST +
+                        "Invalid Datatypes found. Cannot cast " +
                         propertyValue.getDataType().getType() + " to String.class",
                 e.getMessage());
     }
@@ -311,11 +320,13 @@ public class ObservedPropertyQueryConditionsTest {
             e.printStackTrace();
         }
         String sql = ctx.renderInlined(result);
-        String expectedSQL = "phenomenon_id in " +
-                "(select fk_phenomenon_id " +
-                "from phenomenon_parameter " +
+        String expectedSQL = "PHENOMENON.PHENOMENON_ID in " +
+                "(select " +
+                "phenomenon_parameter.fk_phenomenon_id ".toUpperCase() +
+                "from " +
+                read_parquet("phenomenon_parameter".toUpperCase()) +
                 "where " +
-                "(name = 'sensitive' and value_text = cast('true' as varchar)))";
+                "(PHENOMENON_PARAMETER.NAME = 'sensitive' and PHENOMENON_PARAMETER.VALUE_TEXT = 'true'))";
 
         Assertions.assertEquals(expectedSQL, sql);
     }
@@ -331,7 +342,7 @@ public class ObservedPropertyQueryConditionsTest {
                 }
         );
         Assertions.assertEquals("org.n52.shetland.ogc.sta.exception.STAInvalidFilterExpressionException: " +
-                        String.format(EntityQueryConstants.ERROR_GETTING_FILTER_NO_PROP_OR_WRONG_TYPE,
+                        String.format("Error getting filter for Property: '%s'. No such property with type %s in Entity.",
                                 "sensitive",
                                 "String"),
                 e.getMessage());

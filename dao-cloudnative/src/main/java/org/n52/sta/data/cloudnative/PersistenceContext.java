@@ -28,11 +28,10 @@
  */
 package org.n52.sta.data.cloudnative;
 
-import org.jooq.DSLContext;
-import org.jooq.ExecuteContext;
-import org.jooq.SQLDialect;
+import org.jooq.*;
 import org.jooq.impl.*;
 
+import org.n52.sta.data.cloudnative.schema.DefaultSchema;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.jdbc.DataSourceBuilder;
 import org.springframework.context.annotation.Bean;
@@ -45,7 +44,12 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 
 import javax.sql.DataSource;
+import java.io.FileInputStream;
+import java.io.IOException;
 import java.sql.SQLException;
+import java.util.Properties;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Configuration
 @EnableTransactionManagement
@@ -80,6 +84,31 @@ public class PersistenceContext {
         DefaultConfiguration jooqConfiguration = new DefaultConfiguration();
         jooqConfiguration.set(connectionProvider());
         jooqConfiguration.set(new DefaultExecuteListenerProvider(exceptionTransformer()));
+        jooqConfiguration.set(SQLDialect.DUCKDB);
+        // Register the inline VisitListener
+        jooqConfiguration.set(new VisitListener() {
+
+            private final Set<Class<?>> StaTableClasses = DefaultSchema.DEFAULT_SCHEMA.getTables()
+                    .stream()
+                    .map(Table::getClass)
+                    .collect(Collectors.toSet());
+
+            @Override
+            public void visitStart(VisitContext context) {
+                QueryPart part = context.queryPart();
+                if (part instanceof Table &&
+                        !(part instanceof Field) &&
+                        StaTableClasses.contains((part.getClass()))) {
+                    handleTable(context, (Table<?>) part);
+                }
+            }
+
+            private void handleTable(VisitContext context, Table<?> table) {
+                String parquetReadFunction = String.format("read_parquet('s3://52n-sta/%s')", table.getName());
+                Table<?> aliasedTable = DSL.table(parquetReadFunction).as(table.getName());
+                context.queryPart(aliasedTable);
+            }
+        });
 
         // Create context
         DSLContext ctx = DSL.using(jooqConfiguration);
@@ -107,13 +136,30 @@ public class PersistenceContext {
         ctx.execute("INSTALL httpfs;");
         ctx.execute("LOAD httpfs;");
 
-        // TODO: Configuration
-        ctx.execute("CREATE SECRET secret1 (" +
-                "    TYPE S3," +
-                "    KEY_ID 'AKIAIOSFODNN7EXAMPLE'," +
-                "    SECRET 'wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY'," +
-                "    REGION 'us-east-1'" + ");"
-        );
+        Properties properties = new Properties();
+        try (FileInputStream fis = new FileInputStream("blob.properties")) {
+            properties.load(fis);
+
+            // Retrieve properties
+            String type = properties.getProperty("type");
+            String keyId = properties.getProperty("keyId");
+            String secret = properties.getProperty("secret");
+            String region = properties.getProperty("region");
+
+            // Format the CREATE SECRET statement
+            String createSecretStatement = String.format(
+                    "CREATE SECRET secret1 (" +
+                            "    TYPE %s," +
+                            "    KEY_ID '%s'," +
+                            "    SECRET '%s'," +
+                            "    REGION '%s'" +
+                            ");",
+                    type, keyId, secret, region
+            );
+            ctx.execute(createSecretStatement);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public static class ExceptionTranslator extends DefaultExecuteListener {

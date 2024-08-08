@@ -1,4 +1,6 @@
 package org.n52.sta.data.cloudnative.dao;
 
-public interface FeatureOfInterestDao extends StaIdentifierDao {
+import org.n52.sta.api.dto.FeatureOfInterestDTO;
+
+public interface FeatureOfInterestDao extends StaNamedEntityDao<FeatureOfInterestDTO> {
 }

@@ -43,7 +43,7 @@ import org.n52.shetland.oasis.odata.ODataConstants;
 import org.n52.shetland.ogc.filter.FilterConstants;
 import org.n52.shetland.ogc.sta.StaConstants;
 import org.n52.shetland.ogc.sta.exception.STAInvalidFilterExpressionException;
-import org.n52.sta.data.cloudnative.condition.EntityQueryConstants;
+import org.n52.shetland.ogc.sta.model.STAEntityDefinition;
 import org.n52.sta.data.cloudnative.condition.LocationQueryConditions;
 import org.n52.svalbard.odata.core.expr.GeoValueExpr;
 
@@ -69,9 +69,13 @@ public class LocationQueryConditionsTest {
         locationQueryConditions.setDslContext(ctx);
     }
 
+    private String read_parquet(String table) {
+        return String.format("read_parquet('s3://52n-sta/%s') %s ", table, table);
+    }
+
     @Test
     public void testWithHistoricalLocationStaIdentifier() {
-        String staIdentifier = "historicalLocation123";
+        String staIdentifier = "HISTORICALLOCATION123";
 
         Condition result = locationQueryConditions.withHistoricalLocationStaIdentifier(staIdentifier);
 
@@ -79,32 +83,42 @@ public class LocationQueryConditionsTest {
         String expectedSQL = "exists " +
                 "(select 1 one " +
                 "from " +
-                "location_historical_location " +
-                "join historical_location " +
+                read_parquet("location_historical_location".toUpperCase()) +
+                "join " +
+                read_parquet("historical_location".toUpperCase()) +
                 "on " +
-                "location_historical_location.fk_historical_location_id = historical_location.historical_location_id " +
-                "join location " +
-                "on location_historical_location.fk_location_id = location.location_id " +
-                "where historical_location.sta_identifier = 'historicalLocation123')";
+                "location_historical_location.fk_historical_location_id = historical_location.historical_location_id ".toUpperCase() +
+                "join " +
+                read_parquet("location".toUpperCase()) +
+                "on " +
+                "location_historical_location.fk_location_id = location.location_id ".toUpperCase() +
+                "where " +
+                "historical_location.sta_identifier = 'historicalLocation123')".toUpperCase();
 
         Assertions.assertEquals(expectedSQL, sql);
     }
 
     @Test
     public void testWithThingStaIdentifier() {
-        String thingStaIdentifier = "thing123";
+        String thingStaIdentifier = "THING123";
 
         Condition result = locationQueryConditions.withThingStaIdentifier(thingStaIdentifier);
 
         String sql = ctx.renderInlined(result);
         String expectedSQL = "exists " +
                 "(select 1 one " +
-                "from location " +
-                "join platform_location " +
-                "on location.location_id = platform_location.fk_location_id " +
-                "join platform " +
-                "on platform_location.fk_platform_id = platform.platform_id " +
-                "where platform.sta_identifier = 'thing123')";
+                "from " +
+                read_parquet("location".toUpperCase()) +
+                "join " +
+                read_parquet("platform_location".toUpperCase()) +
+                "on " +
+                "platform_location.fk_location_id = location.location_id ".toUpperCase() +
+                "join " +
+                read_parquet("platform".toUpperCase()) +
+                "on " +
+                "platform_location.fk_platform_id = platform.platform_id ".toUpperCase() +
+                "where " +
+                "platform.sta_identifier = 'thing123')".toUpperCase();
 
         Assertions.assertEquals(expectedSQL, sql);
     }
@@ -118,7 +132,7 @@ public class LocationQueryConditionsTest {
         Condition result = locationQueryConditions.handleGeoSpatialPropertyFilter(propertyName, functionName, argument);
 
         String sql = ctx.renderInlined(result);
-        String expectedSQL = "ST_Equals(ST_GeomFromWKB(geom), ST_GeomFromText('LINESTRING(0 0, 5 5, 10 10)'))";
+        String expectedSQL = "ST_Equals(ST_GeomFromWKB(LOCATION.GEOM), ST_GeomFromText('LINESTRING(0 0, 5 5, 10 10)'))";
 
         Assertions.assertEquals(expectedSQL, sql);
 
@@ -133,7 +147,7 @@ public class LocationQueryConditionsTest {
         Condition result = locationQueryConditions.handleGeoSpatialPropertyFilter(propertyName, functionName, argument);
 
         String sql = ctx.renderInlined(result);
-        String expectedSQL = "ST_Disjoint(ST_GeomFromWKB(geom), ST_GeomFromText('LINESTRING(0 0, 5 5, 10 10)'))";
+        String expectedSQL = "ST_Disjoint(ST_GeomFromWKB(LOCATION.GEOM), ST_GeomFromText('LINESTRING(0 0, 5 5, 10 10)'))";
 
         Assertions.assertEquals(expectedSQL, sql);
 
@@ -148,7 +162,7 @@ public class LocationQueryConditionsTest {
         Condition result = locationQueryConditions.handleGeoSpatialPropertyFilter(propertyName, functionName, argument);
 
         String sql = ctx.renderInlined(result);
-        String expectedSQL = "ST_Within(ST_GeomFromWKB(geom), ST_GeomFromText('LINESTRING(0 0, 5 5, 10 10)'))";
+        String expectedSQL = "ST_Within(ST_GeomFromWKB(LOCATION.GEOM), ST_GeomFromText('LINESTRING(0 0, 5 5, 10 10)'))";
 
         Assertions.assertEquals(expectedSQL, sql);
     }
@@ -162,7 +176,7 @@ public class LocationQueryConditionsTest {
         Condition result = locationQueryConditions.handleGeoSpatialPropertyFilter(propertyName, functionName, argument);
 
         String sql = ctx.renderInlined(result);
-        String expectedSQL = "ST_Touches(ST_GeomFromWKB(geom), ST_GeomFromText('LINESTRING(0 0, 5 5, 10 10)'))";
+        String expectedSQL = "ST_Touches(ST_GeomFromWKB(LOCATION.GEOM), ST_GeomFromText('LINESTRING(0 0, 5 5, 10 10)'))";
 
         Assertions.assertEquals(expectedSQL, sql);
     }
@@ -176,7 +190,7 @@ public class LocationQueryConditionsTest {
         Condition result = locationQueryConditions.handleGeoSpatialPropertyFilter(propertyName, functionName, argument);
 
         String sql = ctx.renderInlined(result);
-        String expectedSQL = "ST_Overlaps(ST_GeomFromWKB(geom), ST_GeomFromText('LINESTRING(0 0, 5 5, 10 10)'))";
+        String expectedSQL = "ST_Overlaps(ST_GeomFromWKB(LOCATION.GEOM), ST_GeomFromText('LINESTRING(0 0, 5 5, 10 10)'))";
 
         Assertions.assertEquals(expectedSQL, sql);
     }
@@ -190,7 +204,7 @@ public class LocationQueryConditionsTest {
         Condition result = locationQueryConditions.handleGeoSpatialPropertyFilter(propertyName, functionName, argument);
 
         String sql = ctx.renderInlined(result);
-        String expectedSQL = "ST_Crosses(ST_GeomFromWKB(geom), ST_GeomFromText('LINESTRING(0 0, 5 5, 10 10)'))";
+        String expectedSQL = "ST_Crosses(ST_GeomFromWKB(LOCATION.GEOM), ST_GeomFromText('LINESTRING(0 0, 5 5, 10 10)'))";
 
         Assertions.assertEquals(expectedSQL, sql);
     }
@@ -204,7 +218,7 @@ public class LocationQueryConditionsTest {
         Condition result = locationQueryConditions.handleGeoSpatialPropertyFilter(propertyName, functionName, argument);
 
         String sql = ctx.renderInlined(result);
-        String expectedSQL = "ST_Intersects(ST_GeomFromWKB(geom), ST_GeomFromText('LINESTRING(0 0, 5 5, 10 10)'))";
+        String expectedSQL = "ST_Intersects(ST_GeomFromWKB(LOCATION.GEOM), ST_GeomFromText('LINESTRING(0 0, 5 5, 10 10)'))";
 
         Assertions.assertEquals(expectedSQL, sql);
     }
@@ -218,7 +232,7 @@ public class LocationQueryConditionsTest {
         Condition result = locationQueryConditions.handleGeoSpatialPropertyFilter(propertyName, functionName, argument);
 
         String sql = ctx.renderInlined(result);
-        String expectedSQL = "ST_Contains(ST_GeomFromWKB(geom), ST_GeomFromText('LINESTRING(0 0, 5 5, 10 10)'))";
+        String expectedSQL = "ST_Contains(ST_GeomFromWKB(LOCATION.GEOM), ST_GeomFromText('LINESTRING(0 0, 5 5, 10 10)'))";
 
         Assertions.assertEquals(expectedSQL, sql);
     }
@@ -250,7 +264,7 @@ public class LocationQueryConditionsTest {
 
         String sql = ctx.renderInlined(result);
         String expectedSQL = "ST_Distance(" +
-                "ST_GeomFromWKB(geom), " +
+                "ST_GeomFromWKB(LOCATION.GEOM), " +
                 "ST_GeomFromText('LINESTRING(0 0, 5 5, 10 10)')" +
                 ")";
 
@@ -278,14 +292,14 @@ public class LocationQueryConditionsTest {
         Field<Double> result = locationQueryConditions.handleGeospatial(expr, functionName, null);
 
         String sql = ctx.renderInlined(result);
-        String expectedSQL = "ST_Length(ST_GeomFromWKB(geom))";
+        String expectedSQL = "ST_Length(ST_GeomFromWKB(LOCATION.GEOM))";
 
         Assertions.assertEquals(expectedSQL, sql);
     }
 
     @Test
     public void testWithRelatedPropertyFilter_Things() {
-        String propertyName = EntityQueryConstants.THINGS;
+        String propertyName = STAEntityDefinition.THINGS;
         Condition propertyValue = DSL.condition("");
         Condition result = null;
 
@@ -296,13 +310,15 @@ public class LocationQueryConditionsTest {
         }
 
         String sql = ctx.renderInlined(result);
-        String expectedSQL = "location_id in " +
-                "(select fk_location_id " +
-                "from platform_location " +
+        String expectedSQL = "LOCATION.LOCATION_ID in " +
+                "(select PLATFORM_LOCATION.FK_LOCATION_ID " +
+                "from " +
+                read_parquet("PLATFORM_LOCATION") +
                 "where " +
-                "fk_platform_id in " +
-                "(select platform_id " +
-                "from platform " +
+                "PLATFORM_LOCATION.FK_PLATFORM_ID in " +
+                "(select PLATFORM.PLATFORM_ID " +
+                "from " +
+                read_parquet("PLATFORM") +
                 "where " + propertyValue + "))";
 
         Assertions.assertEquals(expectedSQL, sql);
@@ -310,7 +326,7 @@ public class LocationQueryConditionsTest {
 
     @Test
     public void testWithRelatedPropertyFilter_HistoricalLocations() {
-        String propertyName = EntityQueryConstants.HISTORICAL_LOCATIONS;
+        String propertyName = STAEntityDefinition.HISTORICAL_LOCATIONS;
         Condition propertyValue = DSL.condition("");
         Condition result = null;
 
@@ -321,13 +337,15 @@ public class LocationQueryConditionsTest {
         }
 
         String sql = ctx.renderInlined(result);
-        String expectedSQL = "location_id in " +
-                "(select fk_location_id " +
-                "from location_historical_location " +
+        String expectedSQL = "LOCATION.LOCATION_ID in " +
+                "(select LOCATION_HISTORICAL_LOCATION.FK_LOCATION_ID " +
+                "from " +
+                read_parquet("location_historical_location".toUpperCase()) +
                 "where " +
-                "fk_historical_location_id in " +
-                "(select historical_location_id " +
-                "from historical_location " +
+                "LOCATION_HISTORICAL_LOCATION.FK_HISTORICAL_LOCATION_ID in " +
+                "(select HISTORICAL_LOCATION.HISTORICAL_LOCATION_ID " +
+                "from " +
+                read_parquet("historical_location".toUpperCase()) +
                 "where " + propertyValue + "))";
 
         Assertions.assertEquals(expectedSQL, sql);
@@ -336,7 +354,7 @@ public class LocationQueryConditionsTest {
     @Test
     public void testWithDirectPropertyFilterId() {
         String propertyName = StaConstants.PROP_ID;
-        Field<String> propertyValue = DSL.val("location123");
+        Field<String> propertyValue = DSL.val("LOCATION123");
         FilterConstants.ComparisonOperator operator = FilterConstants.ComparisonOperator.PropertyIsEqualTo;
         Condition result = null;
         try {
@@ -350,7 +368,7 @@ public class LocationQueryConditionsTest {
             System.out.println(e);
         }
         String sql = ctx.renderInlined(result);
-        String expectedSQL = "sta_identifier = cast('location123' as varchar)";
+        String expectedSQL = String.format("LOCATION.STA_IDENTIFIER = '%s'", propertyValue.getName());
 
         Assertions.assertEquals(expectedSQL, sql);
     }
@@ -372,7 +390,7 @@ public class LocationQueryConditionsTest {
             e.printStackTrace();
         }
         String sql = ctx.renderInlined(result);
-        String expectedSQL = "name = cast('location_of_interest' as varchar)";
+        String expectedSQL = String.format("LOCATION.NAME = '%s'", propertyValue.getName());
 
         Assertions.assertEquals(expectedSQL, sql);
     }
@@ -394,7 +412,7 @@ public class LocationQueryConditionsTest {
             e.printStackTrace();
         }
         String sql = ctx.renderInlined(result);
-        String expectedSQL = "description = cast('Location of the platform' as varchar)";
+        String expectedSQL = "LOCATION.DESCRIPTION = 'Location of the platform'";
 
         Assertions.assertEquals(expectedSQL, sql);
     }
@@ -416,12 +434,15 @@ public class LocationQueryConditionsTest {
             e.printStackTrace();
         }
         String sql = ctx.renderInlined(result);
-        String expectedSQL = "location_id in " +
-                "(select location.location_id " +
-                "from location " +
-                "join format " +
-                "on location.fk_format_id = format.format_id " +
-                "where format.definition = cast('Geo+JSON' as varchar))";
+        String expectedSQL = "LOCATION.LOCATION_ID in " +
+                "(select LOCATION.LOCATION_ID " +
+                "from " +
+                read_parquet("LOCATION") +
+                "join " +
+                read_parquet("FORMAT") +
+                "on " +
+                "location.fk_format_id = format.format_id ".toUpperCase() +
+                "where FORMAT.DEFINITION = 'Geo+JSON')";
 
         Assertions.assertEquals(expectedSQL, sql);
     }
@@ -443,11 +464,12 @@ public class LocationQueryConditionsTest {
             e.printStackTrace();
         }
         String sql = ctx.renderInlined(result);
-        String expectedSQL = "location_id in " +
-                "(select fk_location_id " +
-                "from location_parameter " +
+        String expectedSQL = "LOCATION.LOCATION_ID in " +
+                "(select LOCATION_PARAMETER.FK_LOCATION_ID " +
+                "from " +
+                read_parquet("LOCATION_PARAMETER") +
                 "where " +
-                "(name = 'lcTag' and value_text = cast('xzw.1223' as varchar)))";
+                "(LOCATION_PARAMETER.NAME = 'lcTag' and LOCATION_PARAMETER.VALUE_TEXT = 'xzw.1223'))";
 
         Assertions.assertEquals(expectedSQL, sql);
     }

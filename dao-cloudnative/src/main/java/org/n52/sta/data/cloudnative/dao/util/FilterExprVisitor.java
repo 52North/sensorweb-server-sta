@@ -127,7 +127,7 @@ public class FilterExprVisitor implements ExprVisitor<Field<?>, STAInvalidQueryE
             return null;
         } else {
             // TODO
-            return DSL.field(rootQC.checkPropertyName(expr.getValue()));
+            return rootQC.checkPropertyName(expr.getValue());
         }
     }
 
@@ -184,9 +184,9 @@ public class FilterExprVisitor implements ExprVisitor<Field<?>, STAInvalidQueryE
     public Field<?> visitTime(TimeValueExpr expr) throws STAInvalidQueryException {
         // This is always literal as we handle member Expressions seperately
         if (expr.getTime() instanceof String) {
-            return DSL.field(rootQC.checkPropertyName((String) expr.getTime()));
+            return rootQC.checkPropertyName((String) expr.getTime());
         } else {
-            return DSL.val(((TimeInstant) expr.getTime()).getValue().toDate());
+            return DSL.val(((TimeInstant) expr.getTime()).getValue().toLocalDateTime());
         }
     }
 
@@ -461,14 +461,15 @@ public class FilterExprVisitor implements ExprVisitor<Field<?>, STAInvalidQueryE
             if (secondParam.getDataType().getClass().isAssignableFrom(String.class)) {
                 // We could not resolve firstParam to a value, so we are filtering on Observation->result
                 return (S) DSL.concat(
-                        fkt.apply((Field<P>) DSL.field(EntityQueryConstants.PARAMETER_VALUE_CATEGORY), secondParam),
-                        fkt.apply((Field<P>) DSL.field(EntityQueryConstants.PARAMETER_VALUE_TEXT), secondParam)
+                        fkt.apply((Field<P>) StaEntity.OBSERVATION.VALUE_CATEGORY, secondParam),
+                        fkt.apply((Field<P>) StaEntity.OBSERVATION.VALUE_TEXT, secondParam)
                 );
             } else if (secondParam.getDataType().getClass().isAssignableFrom(Double.class)) {
-                return (S) fkt.apply((Field<P>) DSL.field(EntityQueryConstants.PARAMETER_VALUE_QUANTITY), secondParam);
+                return fkt.apply((Field<P>) StaEntity.OBSERVATION.VALUE_QUANTITY, secondParam);
             } else {
-                throw new STAInvalidQueryException("Could not evaluate function call on Observation->result. Result "
-                + "type not recognized.");
+                throw new STAInvalidQueryException(
+                        "Could not evaluate function call on Observation->result. Result type not recognized."
+                );
             }
         }
     }

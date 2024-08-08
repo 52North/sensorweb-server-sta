@@ -1,4 +1,6 @@
 package org.n52.sta.data.cloudnative.dao;
 
-public interface SensorDao extends StaIdentifierDao {
+import org.n52.sta.api.dto.SensorDTO;
+
+public interface SensorDao extends StaNamedEntityDao<SensorDTO> {
 }

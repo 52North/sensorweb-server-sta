@@ -38,38 +38,41 @@ import org.jooq.impl.DSL;
 import org.n52.shetland.ogc.filter.FilterConstants;
 import org.n52.shetland.ogc.sta.StaConstants;
 import org.n52.shetland.ogc.sta.exception.STAInvalidFilterExpressionException;
+import org.n52.shetland.ogc.sta.model.STAEntityDefinition;
+import org.n52.sta.data.cloudnative.schema.tables.Dataset;
+import org.n52.sta.data.cloudnative.schema.tables.HistoricalLocation;
+import org.springframework.stereotype.Component;
 
 import java.util.Date;
 
 /**
  * @author <a href="mailto:humaid.kidwai@ucalgary.ca">Humaid Kidwai</a>
  */
+@Component
 public class HistoricalLocationQueryConditions extends EntityQueryConditions {
+
+    public static HistoricalLocation StaEntity = HISTORICAL_LOCATION;
 
     public Condition withLocationStaIdentifier(final String locationIdentifier) {
         // Join and condition
         return DSL.exists(
-                ctx.selectOne()
-                        .from(DSL.table(LOCATION_HISTORICAL_LOCATION_TABLE))
-                        .join(DSL.table(HISTORICAL_LOCATION_TABLE))
-                        .on(DSL.field(DSL.name(LOCATION_HISTORICAL_LOCATION_TABLE, FK_HISTORICAL_LOCATION_ID_FIELD))
-                                .eq(DSL.field(DSL.name(HISTORICAL_LOCATION_TABLE, HISTORICAL_LOCATION_ID_FIELD))))
-                        .join(DSL.table(LOCATION_TABLE))
-                        .on(DSL.field(DSL.name(LOCATION_HISTORICAL_LOCATION_TABLE, FK_LOCATION_ID_FIELD))
-                                .eq(DSL.field(DSL.name(LOCATION_TABLE, LOCATION_ID_FIELD))))
-                        .where(DSL.field(DSL.name(LOCATION_TABLE, STA_IDENTIFIER_FIELD)).eq(locationIdentifier))
+                ctx.select(LOCATION.LOCATION_ID)
+                        .from(LOCATION_HISTORICAL_LOCATION)
+                        .join(HISTORICAL_LOCATION)
+                        .onKey()
+                        .join(LOCATION)
+                        .onKey()
+                        .where(LOCATION.STA_IDENTIFIER.eq(locationIdentifier))
         );
     }
 
     public Condition withThingStaIdentifier(final String thingIdentifier) {
         return DSL.exists(
-                ctx.selectOne()
-                        .from(DSL.table(HISTORICAL_LOCATION_TABLE))
-                        .join(DSL.table(THING_TABLE))
-                        .on(DSL.field(DSL.name(HISTORICAL_LOCATION_TABLE, FK_THING_ID_FIELD))
-                                .eq(DSL.field(DSL.name(THING_TABLE, THING_ID_FIELD))))
-                        .where(DSL.field(DSL.name(THING_TABLE, STA_IDENTIFIER_FIELD))
-                                .eq(thingIdentifier))
+                ctx.select(THING.PLATFORM_ID)
+                        .from(HISTORICAL_LOCATION)
+                        .join(THING)
+                        .onKey()
+                        .where(THING.STA_IDENTIFIER.eq(thingIdentifier))
         );
     }
 
@@ -82,15 +85,16 @@ public class HistoricalLocationQueryConditions extends EntityQueryConditions {
             switch (propertyName) {
                 case StaConstants.PROP_ID:
                     return handleDirectStringPropertyFilter(
-                            DSL.field(STA_IDENTIFIER_FIELD, String.class),
+                            HISTORICAL_LOCATION.STA_IDENTIFIER,
                             propertyValue,
                             operator,
                             false);
                 case StaConstants.PROP_TIME:
                     return handleDirectDateTimePropertyFilter(
-                            DSL.field(HISTORICAL_LOCATION_TIME_FIELD, Date.class),
+                            HISTORICAL_LOCATION.TIME,
                             propertyValue,
-                            operator);
+                            operator
+                    );
                 default:
                     throw new RuntimeException("Error getting filter for Property: \"" + propertyName
                             + "\". No such property in Entity.");
@@ -104,32 +108,42 @@ public class HistoricalLocationQueryConditions extends EntityQueryConditions {
     protected Condition handleRelatedPropertyFilter(String propertyName,
                                                     Condition propertyValue) {
 
-        SelectConditionStep<Record1<Object>> subquery;
-        if (THING.equals(propertyName)) {
+        SelectConditionStep<Record1<Long>> subquery;
+        if (STAEntityDefinition.THING.equals(propertyName)) {
             subquery = ctx
-                    .select(DSL.field(DSL.name(HISTORICAL_LOCATION_TABLE, HISTORICAL_LOCATION_ID_FIELD)))
-                    .from(DSL.table(HISTORICAL_LOCATION_TABLE))
-                    .join(DSL.table(THING_TABLE))
-                    .on(DSL.field(DSL.name(HISTORICAL_LOCATION_TABLE, FK_THING_ID_FIELD))
-                            .eq(DSL.field(DSL.name(THING_TABLE, THING_ID_FIELD))))
+                    .select(HISTORICAL_LOCATION.HISTORICAL_LOCATION_ID)
+                    .from(HISTORICAL_LOCATION)
+                    .join(THING)
+                    .onKey()
                     .where(propertyValue);
 
-            return DSL.field(HISTORICAL_LOCATION_ID_FIELD).in(subquery);
-        } else if (LOCATIONS.equals(propertyName)) {
+            return HISTORICAL_LOCATION.HISTORICAL_LOCATION_ID.in(subquery);
+        } else if (STAEntityDefinition.LOCATIONS.equals(propertyName)) {
             subquery = ctx
-                    .select(DSL.field(DSL.name(HISTORICAL_LOCATION_TABLE, HISTORICAL_LOCATION_ID_FIELD)))
-                    .from(DSL.table(LOCATION_HISTORICAL_LOCATION_TABLE))
-                    .join(DSL.table(HISTORICAL_LOCATION_TABLE))
-                    .on(DSL.field(DSL.name(LOCATION_HISTORICAL_LOCATION_TABLE, FK_HISTORICAL_LOCATION_ID_FIELD))
-                            .eq(DSL.field(DSL.name(HISTORICAL_LOCATION_TABLE, HISTORICAL_LOCATION_ID_FIELD))))
-                    .join(DSL.table(LOCATION_TABLE))
-                    .on(DSL.field(DSL.name(LOCATION_HISTORICAL_LOCATION_TABLE, FK_LOCATION_ID_FIELD))
-                            .eq(DSL.field(DSL.name(LOCATION_TABLE, LOCATION_ID_FIELD))))
+                    .select(HISTORICAL_LOCATION.HISTORICAL_LOCATION_ID)
+                    .from(LOCATION_HISTORICAL_LOCATION)
+                    .join(HISTORICAL_LOCATION)
+                    .onKey()
+                    .join(LOCATION)
+                    .onKey()
                     .where(propertyValue);
 
-            return DSL.field(HISTORICAL_LOCATION_ID_FIELD).in(subquery);
+            return HISTORICAL_LOCATION.HISTORICAL_LOCATION_ID.in(subquery);
         } else {
             throw new RuntimeException("Could not find related property: " + propertyName);
+        }
+    }
+
+    @Override
+    public Field<?> checkPropertyName(String property) {
+        switch (property) {
+            case StaConstants.PROP_ID:
+                return HISTORICAL_LOCATION.STA_IDENTIFIER;
+            case StaConstants.PROP_TIME:
+                return HISTORICAL_LOCATION.TIME;
+            default:
+                // TODO:
+                return null;
         }
     }
 }

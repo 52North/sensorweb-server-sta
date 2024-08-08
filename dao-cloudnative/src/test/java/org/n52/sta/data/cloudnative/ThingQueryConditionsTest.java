@@ -43,7 +43,8 @@ import org.n52.shetland.ogc.filter.FilterConstants;
 import org.n52.shetland.ogc.sta.StaConstants;
 import org.n52.shetland.ogc.sta.exception.STAInvalidFilterExpressionException;
 
-import org.n52.sta.data.cloudnative.condition.EntityQueryConstants;
+import org.n52.shetland.ogc.sta.model.STAEntityDefinition;
+import org.n52.sta.data.cloudnative.condition.StaEntity;
 import org.n52.sta.data.cloudnative.condition.ThingQueryConditions;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -65,6 +66,10 @@ public class ThingQueryConditionsTest {
         thingQueryConditions.setDslContext(ctx);
     }
 
+    private String read_parquet(String table) {
+        return String.format("read_parquet('s3://52n-sta/%s') %s ", table, table);
+    }
+
     @Test
     public void testWithLocationStaIdentifier_TP() {
         final String staIdentifier = "location123";
@@ -73,12 +78,16 @@ public class ThingQueryConditionsTest {
 
         String sql = ctx.renderInlined(result);
         String expectedSQL = "exists " +
-                "(select 1 one " +
+                "(select LOCATION.LOCATION_ID " +
                 "from " +
-                "platform_location join platform " +
-                "on platform.platform_id = platform_location.fk_platform_id " +
-                "join location on location.location_id = platform_location.fk_location_id " +
-                "where location.sta_identifier = 'location123')";
+                read_parquet("PLATFORM_LOCATION") +
+                "join " +
+                read_parquet("PLATFORM") +
+                "on PLATFORM_LOCATION.FK_PLATFORM_ID = PLATFORM.PLATFORM_ID " +
+                "join " +
+                read_parquet("LOCATION") +
+                "on PLATFORM_LOCATION.FK_LOCATION_ID = LOCATION.LOCATION_ID " +
+                "where LOCATION.STA_IDENTIFIER = 'location123')";
 
         Assertions.assertEquals(expectedSQL, sql);
     }
@@ -91,11 +100,13 @@ public class ThingQueryConditionsTest {
 
         String sql = ctx.renderInlined(result);
         String expectedSQL = "exists " +
-                "(select 1 one " +
+                "(select HISTORICAL_LOCATION.HISTORICAL_LOCATION_ID " +
                 "from " +
-                "platform join historical_location " +
-                "on platform.platform_id = historical_location.fk_platform_id " +
-                "where historical_location.sta_identifier = 'historicalLocation123')";
+                read_parquet("PLATFORM") +
+                "join " +
+                read_parquet("HISTORICAL_LOCATION") +
+                "on HISTORICAL_LOCATION.FK_PLATFORM_ID = PLATFORM.PLATFORM_ID " +
+                "where HISTORICAL_LOCATION.STA_IDENTIFIER = 'historicalLocation123')";
 
         Assertions.assertEquals(expectedSQL, sql);
     }
@@ -108,18 +119,20 @@ public class ThingQueryConditionsTest {
 
         String sql = ctx.renderInlined(result);
         String expectedSQL = "exists " +
-                "(select 1 one " +
+                "(select DATASET.DATASET_ID " +
                 "from " +
-                "platform join dataset " +
-                "on platform.platform_id = dataset.fk_platform_id " +
-                "where dataset.sta_identifier = 'datastream123')";
+                read_parquet("PLATFORM") +
+                "join " +
+                read_parquet("DATASET") +
+                "on DATASET.FK_PLATFORM_ID = PLATFORM.PLATFORM_ID " +
+                "where DATASET.STA_IDENTIFIER = 'datastream123')";
 
         Assertions.assertEquals(expectedSQL, sql);
     }
 
     @Test
     public void testWithRelatedPropertyFilter_Datastream_TP() {
-        final String propertyName = EntityQueryConstants.DATASTREAMS;
+        final String propertyName = STAEntityDefinition.DATASTREAMS;
         Condition propertyValue = DSL.condition("");
         String conditionSQL = ctx.renderInlined(propertyValue);
 
@@ -131,10 +144,11 @@ public class ThingQueryConditionsTest {
         }
 
         String sql = ctx.renderInlined(result);
-        String expectedSQL = "platform_id in " +
+        String expectedSQL = "PLATFORM.PLATFORM_ID in " +
                 "(select " +
-                "dataset.fk_platform_id " +
-                "from dataset " +
+                "DATASET.FK_PLATFORM_ID " +
+                "from " +
+                read_parquet("DATASET") +
                 "where " + conditionSQL + ")";
 
         Assertions.assertEquals(expectedSQL, sql);
@@ -142,7 +156,7 @@ public class ThingQueryConditionsTest {
 
     @Test
     public void testWithRelatedPropertyFilter_Datastream_FP() {
-        final String propertyName = EntityQueryConstants.DATASTREAMS;
+        final String propertyName = STAEntityDefinition.DATASTREAMS;
         Condition propertyValue = DSL.condition("");
         String conditionSQL = ctx.renderInlined(propertyValue);
 
@@ -156,10 +170,11 @@ public class ThingQueryConditionsTest {
         String sql = ctx.renderInlined(result);
 
         // This expected SQL is intentionally incorrect to create a false positive test case
-        String expectedSQL = "platform_id in " +
+        String expectedSQL = "PLATFORM.PLATFORM_ID in " +
                 "(select " +
-                "dataset.fk_platform_id " +
-                "from dataset " +
+                "DATASET.FK_PLATFORM_ID " +
+                "from " +
+                read_parquet("DATASET") +
                 "where " + conditionSQL + " AND some_nonexistent_condition)";
 
         Assertions.assertNotEquals(expectedSQL, sql);
@@ -167,7 +182,7 @@ public class ThingQueryConditionsTest {
 
     @Test
     public void testWithRelatedPropertyFilter_Location_TP() {
-        final String propertyName = EntityQueryConstants.LOCATIONS;
+        final String propertyName = STAEntityDefinition.LOCATIONS;
         Condition propertyValue = DSL.condition("");
         String conditionSQL = ctx.renderInlined(propertyValue);
 
@@ -180,12 +195,14 @@ public class ThingQueryConditionsTest {
 
         String sql = ctx.renderInlined(result);
 
-        String expectedSQL = "platform_id in " +
+        String expectedSQL = "PLATFORM.PLATFORM_ID in " +
                 "(select " +
-                "platform_location.fk_platform_id " +
-                "from platform_location " +
-                "join location " +
-                "on platform_location.fk_location_id = location.location_id " +
+                "PLATFORM_LOCATION.FK_PLATFORM_ID " +
+                "from " +
+                read_parquet("PLATFORM_LOCATION") +
+                "join " +
+                read_parquet("LOCATION") +
+                "on PLATFORM_LOCATION.FK_LOCATION_ID = LOCATION.LOCATION_ID " +
                 "where " + conditionSQL + ")";
 
         Assertions.assertEquals(expectedSQL, sql);
@@ -193,7 +210,7 @@ public class ThingQueryConditionsTest {
 
     @Test
     public void testWithRelatedPropertyFilter_Location_FP() {
-        final String propertyName = EntityQueryConstants.LOCATIONS;
+        final String propertyName = STAEntityDefinition.LOCATIONS;
         Condition propertyValue = DSL.condition("");
         String conditionSQL = ctx.renderInlined(propertyValue);
 
@@ -207,12 +224,14 @@ public class ThingQueryConditionsTest {
         String sql = ctx.renderInlined(result);
 
         // This expected SQL is intentionally incorrect to create a false positive test case
-        String expectedSQL = "platform_id in " +
+        String expectedSQL = "PLATFORM.PLATFORM_ID in " +
                 "(select " +
-                "platform_location.fk_platform_id " +
-                "from platform_location " +
-                "join location " +
-                "on platform_location.fk_location_id = location.location_id " +
+                "PLATFORM_LOCATION.FK_PLATFORM_ID " +
+                "from " +
+                read_parquet("PLATFORM_LOCATION") +
+                "join " +
+                read_parquet("LOCATION") +
+                "on PLATFORM_LOCATION.FK_LOCATION_ID = LOCATION.LOCATION_ID " +
                 "where " + conditionSQL + " AND some_nonexistent_condition)";
 
         Assertions.assertNotEquals(expectedSQL, sql);
@@ -220,7 +239,7 @@ public class ThingQueryConditionsTest {
 
     @Test
     public void testWithRelatedPropertyFilter_HistoricalLocation_TP() {
-        final String propertyName = EntityQueryConstants.HISTORICAL_LOCATIONS;
+        final String propertyName = STAEntityDefinition.HISTORICAL_LOCATIONS;
         Condition propertyValue = DSL.condition("");
         String conditionSQL = ctx.renderInlined(propertyValue);
 
@@ -233,12 +252,14 @@ public class ThingQueryConditionsTest {
 
         String sql = ctx.renderInlined(result);
 
-        String expectedSQL = "platform_id in " +
+        String expectedSQL = "PLATFORM.PLATFORM_ID in " +
                 "(select " +
-                "historical_location.fk_platform_id " +
-                "from historical_location " +
-                "join platform " +
-                "on platform.platform_id = historical_location.fk_platform_id " +
+                "HISTORICAL_LOCATION.FK_PLATFORM_ID " +
+                "from " +
+                read_parquet("HISTORICAL_LOCATION") +
+                "join " +
+                read_parquet("PLATFORM") +
+                "on HISTORICAL_LOCATION.FK_PLATFORM_ID = PLATFORM.PLATFORM_ID " +
                 "where " + conditionSQL + ")";
 
         Assertions.assertEquals(expectedSQL, sql);
@@ -246,7 +267,7 @@ public class ThingQueryConditionsTest {
 
     @Test
     public void testWithRelatedPropertyFilter_HistoricalLocation_FP() {
-        final String propertyName = EntityQueryConstants.HISTORICAL_LOCATIONS;
+        final String propertyName = STAEntityDefinition.HISTORICAL_LOCATIONS;
         Condition propertyValue = DSL.condition("");
         String conditionSQL = ctx.renderInlined(propertyValue);
 
@@ -260,12 +281,14 @@ public class ThingQueryConditionsTest {
         String sql = ctx.renderInlined(result);
 
         // This expected SQL is intentionally incorrect to create a false positive test case
-        String expectedSQL = "platform_id in " +
+        String expectedSQL = "PLATFORM.PLATFORM_ID in " +
                 "(select " +
-                "historical_location.fk_platform_id " +
-                "from historical_location " +
-                "join platform " +
-                "on platform.platform_id = historical_location.fk_platform_id " +
+                "HISTORICAL_LOCATION.FK_PLATFORM_ID " +
+                "from " +
+                read_parquet("HISTORICAL_LOCATION") +
+                "join " +
+                read_parquet("PLATFORM") +
+                "on HISTORICAL_LOCATION.FK_PLATFORM_ID = PLATFORM.PLATFORM_ID " +
                 "where " + conditionSQL + " AND some_nonexistent_condition)";
 
         Assertions.assertNotEquals(expectedSQL, sql);
@@ -274,7 +297,7 @@ public class ThingQueryConditionsTest {
     @Test
     public void testWithRelatedPropertyFilter_TN() {
         // Unrelated entity
-        final String propertyName = EntityQueryConstants.FEATUREOFINTEREST;
+        final String propertyName = STAEntityDefinition.FEATURE_OF_INTEREST;
         Condition propertyValue = DSL.condition("");
 
         Exception e = Assertions.assertThrows(RuntimeException.class, () -> {
@@ -304,7 +327,7 @@ public class ThingQueryConditionsTest {
             e.printStackTrace();
         }
         String sql = ctx.renderInlined(result);
-        String expectedSQL = "sta_identifier <> cast('thing123' as varchar)";
+        String expectedSQL = "PLATFORM.STA_IDENTIFIER <> 'thing123'";
 
         Assertions.assertEquals(expectedSQL, sql);
     }
@@ -326,7 +349,7 @@ public class ThingQueryConditionsTest {
             e.printStackTrace();
         }
         String sql = ctx.renderInlined(result);
-        String expectedSQL = "sta_identifier >= 'thing123'";
+        String expectedSQL = "PLATFORM.STA_IDENTIFIER >= 'thing123'";
 
         Assertions.assertNotEquals(expectedSQL, sql);
     }
@@ -341,7 +364,7 @@ public class ThingQueryConditionsTest {
                     thingQueryConditions.getFilterForProperty(propertyName, propertyValue, operator, false);
         });
         Assertions.assertEquals("org.n52.shetland.ogc.sta.exception.STAInvalidFilterExpressionException: "
-                        + EntityQueryConstants.INVALID_DATATYPE_CANNOT_CAST
+                        + "Invalid Datatypes found. Cannot cast "
                         + propertyValue.getDataType().getType()
                         + " to String.class",
                 e.getMessage());
@@ -364,7 +387,7 @@ public class ThingQueryConditionsTest {
             e.printStackTrace();
         }
         String sql = ctx.renderInlined(result);
-        String expectedSQL = "name > cast('Site.203.182' as varchar)";
+        String expectedSQL = "PLATFORM.NAME > 'Site.203.182'";
 
         Assertions.assertEquals(expectedSQL, sql);
     }
@@ -401,7 +424,7 @@ public class ThingQueryConditionsTest {
             e.printStackTrace();
         }
         String sql = ctx.renderInlined(result);
-        String expectedSQL = "description = cast('site to measure composite environmental pollutants' as varchar)";
+        String expectedSQL = "PLATFORM.DESCRIPTION = 'site to measure composite environmental pollutants'";
 
         Assertions.assertEquals(expectedSQL, sql);
     }
@@ -438,11 +461,12 @@ public class ThingQueryConditionsTest {
             e.printStackTrace();
         }
         String sql = ctx.renderInlined(result);
-        String expectedSQL = "platform_id in " +
-                "(select fk_platform_id " +
-                "from platform_parameter " +
+        String expectedSQL = "PLATFORM.PLATFORM_ID in " +
+                "(select PLATFORM_PARAMETER.FK_PLATFORM_ID " +
+                "from " +
+                read_parquet("PLATFORM_PARAMETER") +
                 "where " +
-                "(name = 'site_depth' and value_text <= cast('-23m' as varchar)))";
+                "(PLATFORM_PARAMETER.NAME = 'site_depth' and PLATFORM_PARAMETER.VALUE_TEXT <= '-23m'))";
 
         Assertions.assertEquals(expectedSQL, sql);
     }
@@ -458,7 +482,7 @@ public class ThingQueryConditionsTest {
                 }
         );
         Assertions.assertEquals("org.n52.shetland.ogc.sta.exception.STAInvalidFilterExpressionException: " +
-                        String.format(EntityQueryConstants.ERROR_GETTING_FILTER_NO_PROP_OR_WRONG_TYPE,
+                        String.format("Error getting filter for Property: '%s'. No such property with type %s in Entity.",
                                 "site_depth",
                                 "String"),
                 e.getMessage());

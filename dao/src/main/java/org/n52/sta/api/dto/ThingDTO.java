@@ -28,7 +28,6 @@
  */
 package org.n52.sta.api.dto;
 
-import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import java.util.Set;
 
@@ -37,11 +36,7 @@ import java.util.Set;
  *
  * @author <a href="mailto:j.speckamp@52north.org">Jan Speckamp</a>
  */
-public interface ThingDTO extends StaDTO, HasNameAndDescription, HasDatastreams {
-
-    ObjectNode getProperties();
-
-    void setProperties(ObjectNode properties);
+public interface ThingDTO extends StaDTO, HasNameAndDescription, HasDatastreams, HasProperties {
 
     Set<HistoricalLocationDTO> getHistoricalLocations();
 
