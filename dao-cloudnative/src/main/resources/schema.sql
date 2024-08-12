@@ -370,11 +370,6 @@ create table if not exists dataset (
 --     constraint dataset_is_insitu_check check (is_insitu = array[1, 0]),
 --     constraint dataset_is_hidden_check check (is_hidden = array[1, 0])
     );
-alter table dataset
-    add constraint
-        foreign key (fk_aggregation_id)
-            references dataset (dataset_id);
-
 create table if not exists dataset_parameter (
     parameter_id bigint not null,
     type varchar(255) not null,
@@ -396,7 +391,7 @@ create table if not exists dataset_parameter (
     fk_parent_parameter_id bigint,
     foreign key (fk_dataset_id) references dataset (dataset_id),
     foreign key (fk_unit_id) references unit (unit_id),
-    foreign key (fk_parent_parameter_id) references dataset_parameter (parameter_id),
+--     foreign key (fk_parent_parameter_id) references dataset_parameter (parameter_id),
     constraint dataset_parameter_pkey primary key (parameter_id)
 --     constraint dataset_parameter_type_check check (cast(type as varchar) = cast(array[
 --                                                                                 cast('bool' as varchar),
@@ -410,6 +405,7 @@ create table if not exists dataset_parameter (
 --     cast('temporal' as varchar)
 --     ] as array))
     );
+
 create table if not exists observation (
     observation_id bigint not null,
     value_type varchar(255) not null,
@@ -442,7 +438,7 @@ create table if not exists observation (
     value_geometry blob,
     value_array varchar,
     foreign key (fk_dataset_id) references dataset (dataset_id),
-    foreign key (fk_parent_observation_id) references observation (observation_id),
+--     foreign key (fk_parent_observation_id) references observation (observation_id),
     constraint observation_pkey primary key (observation_id),
     constraint un_observation_identifier unique (identifier),
     constraint un_observation_identity unique (
@@ -456,9 +452,6 @@ create table if not exists observation (
                                               ),
     constraint un_observation_staidentifier unique (sta_identifier)
     );
-alter table dataset add constraint fk_dataset_first_obs foreign key (fk_first_observation_id) references observation (observation_id);
-alter table dataset add constraint fk_dataset_last_obs foreign key (fk_last_observation_id) references observation (observation_id);
-
 create table if not exists observation_parameter (
     parameter_id bigint not null,
     type varchar(255) not null,
@@ -478,11 +471,11 @@ create table if not exists observation_parameter (
     value_temporal_from timestamp,
     value_temporal_to timestamp,
     fk_parent_parameter_id bigint,
-    foreign key (fk_observation_id) references observation (observation_id),
     foreign key (fk_unit_id) references unit (unit_id),
-    foreign key (fk_parent_parameter_id) references observation_parameter (parameter_id),
+--     foreign key (fk_observation_id) references observation (observation_id),
+--     foreign key (fk_parent_parameter_id) references observation_parameter (parameter_id),
     constraint observation_parameter_pkey primary key (parameter_id)
---     constraint observation_parameter_type_check check (cast(type as varchar) = cast(array[
+    --     constraint observation_parameter_type_check check (cast(type as varchar) = cast(array[
 --                                                                                     cast('bool' as varchar),
 --     cast('category' as varchar),
 --     cast('count' as varchar),
@@ -494,3 +487,31 @@ create table if not exists observation_parameter (
 --     cast('temporal' as varchar)
 --     ] as array))
     );
+
+alter table observation
+    add constraint
+        foreign key (fk_parent_observation_id)
+            references observation (observation_id);
+alter table observation_parameter
+    add constraint
+        foreign key (fk_observation_id)
+            references observation (observation_id);
+alter table observation_parameter
+    add constraint
+        foreign key (fk_parent_parameter_id)
+            references observation_parameter (parameter_id);
+alter table dataset
+    add constraint
+        foreign key (fk_aggregation_id)
+            references dataset (dataset_id);
+alter table dataset
+    add constraint
+        foreign key (fk_first_observation_id)
+            references observation (observation_id);
+alter table dataset
+    add constraint
+        foreign key (fk_last_observation_id)
+            references observation (observation_id);
+alter table dataset_parameter
+    add constraint foreign key (fk_parent_parameter_id)
+        references dataset_parameter (parameter_id);
