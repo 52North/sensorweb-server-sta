@@ -28,25 +28,24 @@
  */
 package org.n52.sta.data.cloudnative.dao.impl;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.jooq.*;
 import org.jooq.Record;
 
-import org.n52.shetland.filter.ExpandFilter;
+import org.n52.shetland.oasis.odata.query.option.QueryOptions;
 import org.n52.shetland.ogc.sta.exception.STAInvalidQueryException;
 import org.n52.sta.api.dto.ObservationDTO;
 import org.n52.sta.data.cloudnative.DTOMapper;
 import org.n52.sta.data.cloudnative.condition.ObservationQueryConditions;
 import org.n52.sta.data.cloudnative.condition.StaEntity;
+import org.n52.sta.data.cloudnative.dao.AbstractStaEntityDao;
 import org.n52.sta.data.cloudnative.dao.ObservationDao;
 
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Order;
 import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 /**
  * @author <a href="mailto:humaid.kidwai@ucalgary.ca">Humaid Kidwai</a>
@@ -54,12 +53,14 @@ import java.util.Set;
 @Component
 public class ObservationDaoImpl extends AbstractStaEntityDao<ObservationDTO> implements ObservationDao {
 
+    private Set<Table<?>> joins;
+
     @Override
     public ObservationDTO findFirstByDatasetIdOrderBySamplingTimeStartAsc(Long datasetIdentifier,
                                                                           Class<ObservationDTO> entityClass) throws STAInvalidQueryException {
 
         Condition predicate = StaEntity.OBSERVATION.FK_DATASET_ID.eq(datasetIdentifier);
-        Sort sort = Sort.by(Order.asc(StaEntity.OBSERVATION.SAMPLING_TIME_START.getName()));
+        Sort sort = Sort.by(Order.asc((StaEntity.OBSERVATION.SAMPLING_TIME_START.getName())));
         SelectSeekStepN<Record> query = (SelectSeekStepN<Record>) selectQueryBuilder(predicate,
                 entityClass,
                 sort,
@@ -83,20 +84,30 @@ public class ObservationDaoImpl extends AbstractStaEntityDao<ObservationDTO> imp
     }
 
     @Override
-    public void deleteAllByDatasetIdIn(Set datasetId) {
-        // TODO
-    }
-
-    @Override
     protected List<ObservationDTO> mapResultToDTO(Result<Record> result) {
-        List<ObservationDTO> observations = new ArrayList<>();
+        Map<Long, ObservationDTO> observationMap = new HashMap();
         for (Record record : result) {
-            ObservationDTO observation = record.map(new DTOMapper.ObservationRecordMapper());
-            observation.setFeatureOfInterest(record.map(new DTOMapper.FeatureOfInterestRecordMapper()));
-            observation.setDatastream(record.map(new DTOMapper.DatastreamRecordMapper()));
-            observations.add(observation);
+            Long Id = record.get(StaEntity.OBSERVATION.OBSERVATION_ID);
+
+            ObservationDTO observation = observationMap.computeIfAbsent(Id,
+                    k -> record.map(new DTOMapper.ObservationRecordMapper()));
+
+            if (joins.contains(StaEntity.FEATURE_OF_INTEREST)) {
+                observation.setFeatureOfInterest(record.map(new DTOMapper.FeatureOfInterestRecordMapper()));
+            }
+            if (joins.contains(StaEntity.OBSERVATION)) {
+                observation.setDatastream(record.map(new DTOMapper.DatastreamRecordMapper()));
+            }
+            if (joins.contains(StaEntity.OBSERVATION_PARAMETERS)) {
+                observation.setParameters(Optional.ofNullable(observation.getParameters())
+                        .orElse(new ObjectMapper().createObjectNode()));
+
+                observation.getParameters().setAll(record.map(new DTOMapper.ObservationRecordMapper
+                        .ObservationParameterRecordMapper()));
+            }
+
         }
-        return observations;
+        return new ArrayList<>(observationMap.values());
     }
 
     @Override
@@ -120,15 +131,20 @@ public class ObservationDaoImpl extends AbstractStaEntityDao<ObservationDTO> imp
     }
 
     @Override
-    public List<Table<?>> createJoinList(ExpandFilter expandOption)
+    public Set<Table<?>> createJoinList(QueryOptions queryOptions)
             throws STAInvalidQueryException {
-        List<Table<?>> joinList = new ArrayList<>();
-        joinList.add(StaEntity.OBSERVATION_PARAMETERS);
-        return joinList;
+        joins = new HashSet<>();
+        joins.add(StaEntity.OBSERVATION_PARAMETERS);
+        return joins;
     }
 
     @Override
     public Table<?> getEntityTable() {
         return StaEntity.OBSERVATION;
+    }
+
+    @Override
+    public void deleteAllByDatasetIdIn(Set datasetId) {
+        // TODO
     }
 }

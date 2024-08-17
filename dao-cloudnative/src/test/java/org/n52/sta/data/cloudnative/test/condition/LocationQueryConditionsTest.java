@@ -27,7 +27,7 @@
  * Public License for more details.
  */
 
-package org.n52.sta.data.cloudnative;
+package org.n52.sta.data.cloudnative.test.condition;
 
 import org.jooq.DSLContext;
 import org.jooq.Condition;
@@ -38,16 +38,15 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import org.n52.shetland.oasis.odata.ODataConstants;
 import org.n52.shetland.ogc.filter.FilterConstants;
 import org.n52.shetland.ogc.sta.StaConstants;
 import org.n52.shetland.ogc.sta.exception.STAInvalidFilterExpressionException;
 import org.n52.shetland.ogc.sta.model.STAEntityDefinition;
+import org.n52.sta.data.cloudnative.test.TestDatabaseConfig;
+import org.n52.sta.data.cloudnative.condition.LocationQueryConditions;
 import org.n52.svalbard.odata.core.expr.GeoValueExpr;
-
-import org.n52.sta.data.cloudnative.condition.FeatureOfInterestQueryConditions;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Import;
@@ -58,16 +57,17 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 @ExtendWith(SpringExtension.class)
 @Import(TestDatabaseConfig.class)
 @ActiveProfiles("cloudnative")
-public class FeatureOfInterestQueryConditionsTest {
+public class LocationQueryConditionsTest {
+
     @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
     @Autowired
     private DSLContext ctx;
-    FeatureOfInterestQueryConditions featureQueryConditions;
+    LocationQueryConditions locationQueryConditions;
 
     @BeforeEach
     public void setUp() {
-        featureQueryConditions = new FeatureOfInterestQueryConditions();
-        featureQueryConditions.setDslContext(ctx);
+        locationQueryConditions = new LocationQueryConditions();
+        locationQueryConditions.setDslContext(ctx);
     }
 
     private String read_parquet(String table) {
@@ -75,65 +75,65 @@ public class FeatureOfInterestQueryConditionsTest {
     }
 
     @Test
-    public void testWithObservationStaIdentifier() {
-        final String staIdentifier = "observation123";
+    public void testWithHistoricalLocationStaIdentifier() {
+        String staIdentifier = "HISTORICALLOCATION123";
 
-        Condition result = featureQueryConditions.withObservationStaIdentifier(staIdentifier);
+        Condition result = locationQueryConditions.withHistoricalLocationStaIdentifier(staIdentifier);
 
         String sql = ctx.renderInlined(result);
         String expectedSQL = "exists " +
-                "(select OBSERVATION.OBSERVATION_ID " +
+                "(select 1 one " +
                 "from " +
-                read_parquet("FEATURE") +
+                read_parquet("location_historical_location".toUpperCase()) +
                 "join " +
-                read_parquet("DATASET") +
+                read_parquet("historical_location".toUpperCase()) +
                 "on " +
-                "dataset.fk_feature_id = feature.feature_id ".toUpperCase() +
+                "location_historical_location.fk_historical_location_id = historical_location.historical_location_id ".toUpperCase() +
                 "join " +
-                read_parquet("OBSERVATION") +
+                read_parquet("location".toUpperCase()) +
                 "on " +
-                "observation.fk_dataset_id = dataset.dataset_id ".toUpperCase() +
-                "where OBSERVATION.STA_IDENTIFIER = 'observation123')";
+                "location_historical_location.fk_location_id = location.location_id ".toUpperCase() +
+                "where " +
+                "historical_location.sta_identifier = 'historicalLocation123')".toUpperCase();
 
         Assertions.assertEquals(expectedSQL, sql);
     }
 
     @Test
-    public void testWithRelatedPropertyFilter_Observation() {
-        String propertyName = STAEntityDefinition.OBSERVATIONS;
-        Condition propertyValue = DSL.condition("");
-        Condition result = null;
+    public void testWithThingStaIdentifier() {
+        String thingStaIdentifier = "THING123";
 
-        try {
-            result = featureQueryConditions.getFilterForRelation(propertyName, propertyValue);
-        } catch (STAInvalidFilterExpressionException e) {
-            e.printStackTrace();
-        }
+        Condition result = locationQueryConditions.withThingStaIdentifier(thingStaIdentifier);
 
         String sql = ctx.renderInlined(result);
-        String expectedSQL = "FEATURE.FEATURE_ID in " +
-                "(select DATASET.FK_FEATURE_ID " +
+        String expectedSQL = "exists " +
+                "(select 1 one " +
                 "from " +
-                read_parquet("DATASET") +
-                "where DATASET.DATASET_ID in " +
-                "(select OBSERVATION.FK_DATASET_ID " +
-                "from " +
-                read_parquet("OBSERVATION") +
-                "where " + propertyValue + "))";
+                read_parquet("location".toUpperCase()) +
+                "join " +
+                read_parquet("platform_location".toUpperCase()) +
+                "on " +
+                "platform_location.fk_location_id = location.location_id ".toUpperCase() +
+                "join " +
+                read_parquet("platform".toUpperCase()) +
+                "on " +
+                "platform_location.fk_platform_id = platform.platform_id ".toUpperCase() +
+                "where " +
+                "platform.sta_identifier = 'thing123')".toUpperCase();
 
         Assertions.assertEquals(expectedSQL, sql);
     }
 
     @Test
     public void testWithGeoSpatialPropertyFilter_STEquals() {
-        String propertyName = StaConstants.PROP_FEATURE;
+        String propertyName = StaConstants.PROP_LOCATION;
         String functionName = ODataConstants.SpatialFunctions.ST_EQUALS;
         String argument = "geography'LINESTRING(0 0, 5 5, 10 10)'";
 
-        Condition result = featureQueryConditions.handleGeoSpatialPropertyFilter(propertyName, functionName, argument);
+        Condition result = locationQueryConditions.handleGeoSpatialPropertyFilter(propertyName, functionName, argument);
 
         String sql = ctx.renderInlined(result);
-        String expectedSQL = "ST_Equals(ST_GeomFromWKB(FEATURE.GEOM), ST_GeomFromText('LINESTRING(0 0, 5 5, 10 10)'))";
+        String expectedSQL = "ST_Equals(ST_GeomFromWKB(LOCATION.GEOM), ST_GeomFromText('LINESTRING(0 0, 5 5, 10 10)'))";
 
         Assertions.assertEquals(expectedSQL, sql);
 
@@ -141,14 +141,14 @@ public class FeatureOfInterestQueryConditionsTest {
 
     @Test
     public void testWithGeoSpatialPropertyFilter_STDisjoint() {
-        String propertyName = StaConstants.PROP_FEATURE;
+        String propertyName = StaConstants.PROP_LOCATION;
         String functionName = ODataConstants.SpatialFunctions.ST_DISJOINT;
         String argument = "geography'LINESTRING(0 0, 5 5, 10 10)'";
 
-        Condition result = featureQueryConditions.handleGeoSpatialPropertyFilter(propertyName, functionName, argument);
+        Condition result = locationQueryConditions.handleGeoSpatialPropertyFilter(propertyName, functionName, argument);
 
         String sql = ctx.renderInlined(result);
-        String expectedSQL = "ST_Disjoint(ST_GeomFromWKB(FEATURE.GEOM), ST_GeomFromText('LINESTRING(0 0, 5 5, 10 10)'))";
+        String expectedSQL = "ST_Disjoint(ST_GeomFromWKB(LOCATION.GEOM), ST_GeomFromText('LINESTRING(0 0, 5 5, 10 10)'))";
 
         Assertions.assertEquals(expectedSQL, sql);
 
@@ -156,84 +156,84 @@ public class FeatureOfInterestQueryConditionsTest {
 
     @Test
     public void testWithGeoSpatialPropertyFilter_STWithin() {
-        String propertyName = StaConstants.PROP_FEATURE;
+        String propertyName = StaConstants.PROP_LOCATION;
         String functionName = ODataConstants.SpatialFunctions.ST_WITHIN;
         String argument = "geography'LINESTRING(0 0, 5 5, 10 10)'";
 
-        Condition result = featureQueryConditions.handleGeoSpatialPropertyFilter(propertyName, functionName, argument);
+        Condition result = locationQueryConditions.handleGeoSpatialPropertyFilter(propertyName, functionName, argument);
 
         String sql = ctx.renderInlined(result);
-        String expectedSQL = "ST_Within(ST_GeomFromWKB(FEATURE.GEOM), ST_GeomFromText('LINESTRING(0 0, 5 5, 10 10)'))";
+        String expectedSQL = "ST_Within(ST_GeomFromWKB(LOCATION.GEOM), ST_GeomFromText('LINESTRING(0 0, 5 5, 10 10)'))";
 
         Assertions.assertEquals(expectedSQL, sql);
     }
 
     @Test
     public void testWithGeoSpatialPropertyFilter_STTouches() {
-        String propertyName = StaConstants.PROP_FEATURE;
+        String propertyName = StaConstants.PROP_LOCATION;
         String functionName = ODataConstants.SpatialFunctions.ST_TOUCHES;
         String argument = "geography'LINESTRING(0 0, 5 5, 10 10)'";
 
-        Condition result = featureQueryConditions.handleGeoSpatialPropertyFilter(propertyName, functionName, argument);
+        Condition result = locationQueryConditions.handleGeoSpatialPropertyFilter(propertyName, functionName, argument);
 
         String sql = ctx.renderInlined(result);
-        String expectedSQL = "ST_Touches(ST_GeomFromWKB(FEATURE.GEOM), ST_GeomFromText('LINESTRING(0 0, 5 5, 10 10)'))";
+        String expectedSQL = "ST_Touches(ST_GeomFromWKB(LOCATION.GEOM), ST_GeomFromText('LINESTRING(0 0, 5 5, 10 10)'))";
 
         Assertions.assertEquals(expectedSQL, sql);
     }
 
     @Test
     public void testWithGeoSpatialPropertyFilter_STOverlaps() {
-        String propertyName = StaConstants.PROP_FEATURE;
+        String propertyName = StaConstants.PROP_LOCATION;
         String functionName = ODataConstants.SpatialFunctions.ST_OVERLAPS;
         String argument = "geography'LINESTRING(0 0, 5 5, 10 10)'";
 
-        Condition result = featureQueryConditions.handleGeoSpatialPropertyFilter(propertyName, functionName, argument);
+        Condition result = locationQueryConditions.handleGeoSpatialPropertyFilter(propertyName, functionName, argument);
 
         String sql = ctx.renderInlined(result);
-        String expectedSQL = "ST_Overlaps(ST_GeomFromWKB(FEATURE.GEOM), ST_GeomFromText('LINESTRING(0 0, 5 5, 10 10)'))";
+        String expectedSQL = "ST_Overlaps(ST_GeomFromWKB(LOCATION.GEOM), ST_GeomFromText('LINESTRING(0 0, 5 5, 10 10)'))";
 
         Assertions.assertEquals(expectedSQL, sql);
     }
 
     @Test
     public void testWithGeoSpatialPropertyFilter_STCrosses() {
-        String propertyName = StaConstants.PROP_FEATURE;
+        String propertyName = StaConstants.PROP_LOCATION;
         String functionName = ODataConstants.SpatialFunctions.ST_CROSSES;
         String argument = "geography'LINESTRING(0 0, 5 5, 10 10)'";
 
-        Condition result = featureQueryConditions.handleGeoSpatialPropertyFilter(propertyName, functionName, argument);
+        Condition result = locationQueryConditions.handleGeoSpatialPropertyFilter(propertyName, functionName, argument);
 
         String sql = ctx.renderInlined(result);
-        String expectedSQL = "ST_Crosses(ST_GeomFromWKB(FEATURE.GEOM), ST_GeomFromText('LINESTRING(0 0, 5 5, 10 10)'))";
+        String expectedSQL = "ST_Crosses(ST_GeomFromWKB(LOCATION.GEOM), ST_GeomFromText('LINESTRING(0 0, 5 5, 10 10)'))";
 
         Assertions.assertEquals(expectedSQL, sql);
     }
 
     @Test
     public void testWithGeoSpatialPropertyFilter_STIntersects() {
-        String propertyName = StaConstants.PROP_FEATURE;
+        String propertyName = StaConstants.PROP_LOCATION;
         String functionName = ODataConstants.SpatialFunctions.ST_INTERSECTS;
         String argument = "geography'LINESTRING(0 0, 5 5, 10 10)'";
 
-        Condition result = featureQueryConditions.handleGeoSpatialPropertyFilter(propertyName, functionName, argument);
+        Condition result = locationQueryConditions.handleGeoSpatialPropertyFilter(propertyName, functionName, argument);
 
         String sql = ctx.renderInlined(result);
-        String expectedSQL = "ST_Intersects(ST_GeomFromWKB(FEATURE.GEOM), ST_GeomFromText('LINESTRING(0 0, 5 5, 10 10)'))";
+        String expectedSQL = "ST_Intersects(ST_GeomFromWKB(LOCATION.GEOM), ST_GeomFromText('LINESTRING(0 0, 5 5, 10 10)'))";
 
         Assertions.assertEquals(expectedSQL, sql);
     }
 
     @Test
     public void testWithGeoSpatialPropertyFilter_STContains() {
-        String propertyName = StaConstants.PROP_FEATURE;
+        String propertyName = StaConstants.PROP_LOCATION;
         String functionName = ODataConstants.SpatialFunctions.ST_CONTAINS;
         String argument = "geography'LINESTRING(0 0, 5 5, 10 10)'";
 
-        Condition result = featureQueryConditions.handleGeoSpatialPropertyFilter(propertyName, functionName, argument);
+        Condition result = locationQueryConditions.handleGeoSpatialPropertyFilter(propertyName, functionName, argument);
 
         String sql = ctx.renderInlined(result);
-        String expectedSQL = "ST_Contains(ST_GeomFromWKB(FEATURE.GEOM), ST_GeomFromText('LINESTRING(0 0, 5 5, 10 10)'))";
+        String expectedSQL = "ST_Contains(ST_GeomFromWKB(LOCATION.GEOM), ST_GeomFromText('LINESTRING(0 0, 5 5, 10 10)'))";
 
         Assertions.assertEquals(expectedSQL, sql);
     }
@@ -244,7 +244,7 @@ public class FeatureOfInterestQueryConditionsTest {
         String functionName = ODataConstants.GeoFunctions.GEO_DISTANCE;
         String argument = "geography'LINESTRING(0 0, 5 5, 10 10)'";
 
-        Field<Double> result = featureQueryConditions.handleGeospatial(expr, functionName, argument);
+        Field<Double> result = locationQueryConditions.handleGeospatial(expr, functionName, argument);
 
         String sql = ctx.renderInlined(result);
         String expectedSQL = "ST_Distance(" +
@@ -257,15 +257,15 @@ public class FeatureOfInterestQueryConditionsTest {
 
     @Test
     public void testWithHandleGeospatial_DistanceField() {
-        GeoValueExpr expr = new GeoValueExpr(StaConstants.PROP_FEATURE);
+        GeoValueExpr expr = new GeoValueExpr(StaConstants.PROP_LOCATION);
         String functionName = ODataConstants.GeoFunctions.GEO_DISTANCE;
         String argument = "geography'LINESTRING(0 0, 5 5, 10 10)'";
 
-        Field<Double> result = featureQueryConditions.handleGeospatial(expr, functionName, argument);
+        Field<Double> result = locationQueryConditions.handleGeospatial(expr, functionName, argument);
 
         String sql = ctx.renderInlined(result);
         String expectedSQL = "ST_Distance(" +
-                "ST_GeomFromWKB(FEATURE.GEOM), " +
+                "ST_GeomFromWKB(LOCATION.GEOM), " +
                 "ST_GeomFromText('LINESTRING(0 0, 5 5, 10 10)')" +
                 ")";
 
@@ -277,7 +277,7 @@ public class FeatureOfInterestQueryConditionsTest {
         GeoValueExpr expr = new GeoValueExpr("geography'LINESTRING(1 2, 3 4)'");
         String functionName = ODataConstants.GeoFunctions.GEO_LENGTH;
 
-        Field<Double> result = featureQueryConditions.handleGeospatial(expr, functionName, null);
+        Field<Double> result = locationQueryConditions.handleGeospatial(expr, functionName, null);
 
         String sql = ctx.renderInlined(result);
         String expectedSQL = "ST_Length(ST_GeomFromText('LINESTRING(1 2, 3 4)'))";
@@ -287,13 +287,67 @@ public class FeatureOfInterestQueryConditionsTest {
 
     @Test
     public void testWithHandleGeospatial_LengthField() {
-        GeoValueExpr expr = new GeoValueExpr(StaConstants.PROP_FEATURE);
+        GeoValueExpr expr = new GeoValueExpr(StaConstants.PROP_LOCATION);
         String functionName = ODataConstants.GeoFunctions.GEO_LENGTH;
 
-        Field<Double> result = featureQueryConditions.handleGeospatial(expr, functionName, null);
+        Field<Double> result = locationQueryConditions.handleGeospatial(expr, functionName, null);
 
         String sql = ctx.renderInlined(result);
-        String expectedSQL = "ST_Length(ST_GeomFromWKB(FEATURE.GEOM))";
+        String expectedSQL = "ST_Length(ST_GeomFromWKB(LOCATION.GEOM))";
+
+        Assertions.assertEquals(expectedSQL, sql);
+    }
+
+    @Test
+    public void testWithRelatedPropertyFilter_Things() {
+        String propertyName = STAEntityDefinition.THINGS;
+        Condition propertyValue = DSL.condition("");
+        Condition result = null;
+
+        try {
+            result = locationQueryConditions.getFilterForRelation(propertyName, propertyValue);
+        } catch (STAInvalidFilterExpressionException e) {
+            e.printStackTrace();
+        }
+
+        String sql = ctx.renderInlined(result);
+        String expectedSQL = "LOCATION.LOCATION_ID in " +
+                "(select PLATFORM_LOCATION.FK_LOCATION_ID " +
+                "from " +
+                read_parquet("PLATFORM_LOCATION") +
+                "where " +
+                "PLATFORM_LOCATION.FK_PLATFORM_ID in " +
+                "(select PLATFORM.PLATFORM_ID " +
+                "from " +
+                read_parquet("PLATFORM") +
+                "where " + propertyValue + "))";
+
+        Assertions.assertEquals(expectedSQL, sql);
+    }
+
+    @Test
+    public void testWithRelatedPropertyFilter_HistoricalLocations() {
+        String propertyName = STAEntityDefinition.HISTORICAL_LOCATIONS;
+        Condition propertyValue = DSL.condition("");
+        Condition result = null;
+
+        try {
+            result = locationQueryConditions.getFilterForRelation(propertyName, propertyValue);
+        } catch (STAInvalidFilterExpressionException e) {
+            e.printStackTrace();
+        }
+
+        String sql = ctx.renderInlined(result);
+        String expectedSQL = "LOCATION.LOCATION_ID in " +
+                "(select LOCATION_HISTORICAL_LOCATION.FK_LOCATION_ID " +
+                "from " +
+                read_parquet("location_historical_location".toUpperCase()) +
+                "where " +
+                "LOCATION_HISTORICAL_LOCATION.FK_HISTORICAL_LOCATION_ID in " +
+                "(select HISTORICAL_LOCATION.HISTORICAL_LOCATION_ID " +
+                "from " +
+                read_parquet("historical_location".toUpperCase()) +
+                "where " + propertyValue + "))";
 
         Assertions.assertEquals(expectedSQL, sql);
     }
@@ -301,11 +355,11 @@ public class FeatureOfInterestQueryConditionsTest {
     @Test
     public void testWithDirectPropertyFilterId() {
         String propertyName = StaConstants.PROP_ID;
-        Field<String> propertyValue = DSL.val("feature123");
+        Field<String> propertyValue = DSL.val("LOCATION123");
         FilterConstants.ComparisonOperator operator = FilterConstants.ComparisonOperator.PropertyIsEqualTo;
         Condition result = null;
         try {
-            result = featureQueryConditions.getFilterForProperty(
+            result = locationQueryConditions.getFilterForProperty(
                     propertyName,
                     propertyValue,
                     operator,
@@ -315,19 +369,19 @@ public class FeatureOfInterestQueryConditionsTest {
             System.out.println(e);
         }
         String sql = ctx.renderInlined(result);
-        String expectedSQL = "FEATURE.STA_IDENTIFIER = 'feature123'";
+        String expectedSQL = String.format("LOCATION.STA_IDENTIFIER = '%s'", propertyValue.getName());
 
-        assertEquals(expectedSQL, sql);
+        Assertions.assertEquals(expectedSQL, sql);
     }
 
     @Test
     public void testWithDirectPropertyFilterName() {
         String propertyName = StaConstants.PROP_NAME;
-        Field<String> propertyValue = DSL.val("feature_of_interest");
+        Field<String> propertyValue = DSL.val("location_of_interest");
         FilterConstants.ComparisonOperator operator = FilterConstants.ComparisonOperator.PropertyIsEqualTo;
         Condition result = null;
         try {
-            result = featureQueryConditions.getFilterForProperty(
+            result = locationQueryConditions.getFilterForProperty(
                     propertyName,
                     propertyValue,
                     operator,
@@ -337,7 +391,7 @@ public class FeatureOfInterestQueryConditionsTest {
             e.printStackTrace();
         }
         String sql = ctx.renderInlined(result);
-        String expectedSQL = "FEATURE.NAME = 'feature_of_interest'";
+        String expectedSQL = String.format("LOCATION.NAME = '%s'", propertyValue.getName());
 
         Assertions.assertEquals(expectedSQL, sql);
     }
@@ -345,11 +399,11 @@ public class FeatureOfInterestQueryConditionsTest {
     @Test
     public void testWithDirectPropertyFilterDescription() {
         String propertyName = StaConstants.PROP_DESCRIPTION;
-        Field<String> propertyValue = DSL.val("description of the feature");
+        Field<String> propertyValue = DSL.val("Location of the platform");
         FilterConstants.ComparisonOperator operator = FilterConstants.ComparisonOperator.PropertyIsEqualTo;
         Condition result = null;
         try {
-            result = featureQueryConditions.getFilterForProperty(
+            result = locationQueryConditions.getFilterForProperty(
                     propertyName,
                     propertyValue,
                     operator,
@@ -359,19 +413,19 @@ public class FeatureOfInterestQueryConditionsTest {
             e.printStackTrace();
         }
         String sql = ctx.renderInlined(result);
-        String expectedSQL = "FEATURE.DESCRIPTION = 'description of the feature'";
+        String expectedSQL = "LOCATION.DESCRIPTION = 'Location of the platform'";
 
         Assertions.assertEquals(expectedSQL, sql);
     }
 
     @Test
-    public void testWithDirectPropertyFilterEncodingType_PropertyEq() {
+    public void testWithDirectPropertyFilterEncodingType() {
         String propertyName = StaConstants.PROP_ENCODINGTYPE;
-        Field<String> propertyValue = DSL.val("");
+        Field<String> propertyValue = DSL.val("Geo+JSON");
         FilterConstants.ComparisonOperator operator = FilterConstants.ComparisonOperator.PropertyIsEqualTo;
         Condition result = null;
         try {
-            result = featureQueryConditions.getFilterForProperty(
+            result = locationQueryConditions.getFilterForProperty(
                     propertyName,
                     propertyValue,
                     operator,
@@ -380,34 +434,28 @@ public class FeatureOfInterestQueryConditionsTest {
         } catch (STAInvalidFilterExpressionException e) {
             e.printStackTrace();
         }
-
         String sql = ctx.renderInlined(result);
-        String expectedSQL = "FEATURE.FK_FORMAT_ID in " +
-                "(select FEATURE.FK_FORMAT_ID " +
+        String expectedSQL = "LOCATION.LOCATION_ID in " +
+                "(select LOCATION.LOCATION_ID " +
                 "from " +
-                read_parquet("FEATURE") +
+                read_parquet("LOCATION") +
                 "join " +
                 read_parquet("FORMAT") +
                 "on " +
-                "feature.fk_format_id = format.format_id ".toUpperCase() +
-                "where " +
-                "(FORMAT.DEFINITION = 'application/vnd.geo+json' " +
-                "or " +
-                "FORMAT.DEFINITION = 'application/vnd.geo json')" +
-                ")";
+                "location.fk_format_id = format.format_id ".toUpperCase() +
+                "where FORMAT.DEFINITION = 'Geo+JSON')";
 
         Assertions.assertEquals(expectedSQL, sql);
     }
 
-
     @Test
     public void testWithDirectPropertyFilterDefault() {
-        String propertyName = "properties/fNo";
-        Field<String> propertyValue = DSL.val("23.11.09");
+        String propertyName = "properties/lcTag";
+        Field<String> propertyValue = DSL.val("xzw.1223");
         FilterConstants.ComparisonOperator operator = FilterConstants.ComparisonOperator.PropertyIsEqualTo;
         Condition result = null;
         try {
-            result = featureQueryConditions.getFilterForProperty(
+            result = locationQueryConditions.getFilterForProperty(
                     propertyName,
                     propertyValue,
                     operator,
@@ -417,12 +465,12 @@ public class FeatureOfInterestQueryConditionsTest {
             e.printStackTrace();
         }
         String sql = ctx.renderInlined(result);
-        String expectedSQL = "FEATURE.FEATURE_ID in " +
-                "(select FEATURE_PARAMETER.FK_FEATURE_ID " +
+        String expectedSQL = "LOCATION.LOCATION_ID in " +
+                "(select LOCATION_PARAMETER.FK_LOCATION_ID " +
                 "from " +
-                read_parquet("FEATURE_PARAMETER") +
+                read_parquet("LOCATION_PARAMETER") +
                 "where " +
-                "(FEATURE_PARAMETER.NAME = 'fNo' and FEATURE_PARAMETER.VALUE_TEXT = '23.11.09'))";
+                "(LOCATION_PARAMETER.NAME = 'lcTag' and LOCATION_PARAMETER.VALUE_TEXT = 'xzw.1223'))";
 
         Assertions.assertEquals(expectedSQL, sql);
     }

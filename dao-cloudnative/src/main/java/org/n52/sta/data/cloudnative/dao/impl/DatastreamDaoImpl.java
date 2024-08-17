@@ -28,10 +28,10 @@
  */
 package org.n52.sta.data.cloudnative.dao.impl;
 
-import org.apache.olingo.server.api.uri.queryoption.ExpandOption;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.jooq.*;
 import org.jooq.Record;
-import org.n52.shetland.filter.ExpandFilter;
+import org.jooq.impl.DSL;
 import org.n52.shetland.filter.ExpandItem;
 import org.n52.shetland.oasis.odata.query.option.QueryOptions;
 import org.n52.shetland.ogc.sta.StaConstants;
@@ -41,64 +41,82 @@ import org.n52.sta.api.dto.DatastreamDTO;
 import org.n52.sta.data.cloudnative.DTOMapper;
 import org.n52.sta.data.cloudnative.condition.DatastreamQueryConditions;
 import org.n52.sta.data.cloudnative.condition.StaEntity;
+import org.n52.sta.data.cloudnative.dao.AbstractStaEntityDao;
 import org.n52.sta.data.cloudnative.dao.DatastreamDao;
 import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * @author <a href="mailto:humaid.kidwai@ucalgary.ca">Humaid Kidwai</a>
  */
 @Component
 public class DatastreamDaoImpl extends AbstractStaEntityDao<DatastreamDTO> implements DatastreamDao {
+
+    private Set<Table<?>> joins;
+
     @Override
     public List<DatastreamDTO> findAllByAggregationId(Long id, Class<DatastreamDTO> entityClass)
             throws STAInvalidQueryException {
 
-        Condition predicate = StaEntity.DATASTREAM.FK_AGGREGATION_ID
-                .eq(id);
-
+        Condition predicate = StaEntity.DATASTREAM.FK_AGGREGATION_ID.eq(id);
         return findAll(predicate, null, entityClass);
     }
 
     @Override
-    protected List<DatastreamDTO> mapResultToDTO(Result<Record> result) {
-        ArrayList<DatastreamDTO> datastreams = new ArrayList<>();
+    public List<DatastreamDTO> mapResultToDTO(Result<Record> result) {
+        Map<Long, DatastreamDTO> datastreamMap = new HashMap<>();
         for (Record record : result) {
-            DatastreamDTO datastream = record.map(new DTOMapper.DatastreamRecordMapper());
-            datastream.setObservedProperty(record.map(new DTOMapper.ObservedPropertyRecordMapper()));
-            datastream.setSensor(record.map(new DTOMapper.SensorRecordMapper()));
-            datastream.setThing(record.map(new DTOMapper.ThingRecordMapper()));
-            datastreams.add(datastream);
+            Long Id = record.get(StaEntity.DATASTREAM.DATASET_ID);
+
+            DatastreamDTO datastream = datastreamMap.computeIfAbsent(Id,
+                    k -> record.map(new DTOMapper.DatastreamRecordMapper()));
+
+            if (joins.contains(StaEntity.OBSERVED_PROPERTY)) {
+                datastream.setObservedProperty(record.map(new DTOMapper.ObservedPropertyRecordMapper()));
+            }
+            if (joins.contains(StaEntity.SENSOR)) {
+                datastream.setSensor(record.map(new DTOMapper.SensorRecordMapper()));
+            }
+            if (joins.contains(StaEntity.THING)) {
+                datastream.setThing(record.map(new DTOMapper.ThingRecordMapper()));
+            }
+            if (joins.contains(StaEntity.DATASTREAM_PROPERTIES)) {
+                datastream.setProperties(Optional.ofNullable(datastream.getProperties())
+                        .orElse(new ObjectMapper().createObjectNode()));
+                datastream.getProperties().setAll(record.map(new DTOMapper.DatastreamRecordMapper
+                        .DatastreamParameterRecordMapper()));
+            }
         }
-        return datastreams;
+        return new ArrayList<>(datastreamMap.values());
     }
 
     @Override
-    public boolean existsByName(String name, Class<DatastreamDTO> entityClass) throws STAInvalidQueryException {
+    public boolean existsByName(String name, Class<DatastreamDTO> entityClass)
+            throws STAInvalidQueryException {
+
         Condition predicate = StaEntity.DATASTREAM.NAME.eq(name);
         return count(predicate, entityClass) > 0;
     }
 
     @Override
-    public Optional<DatastreamDTO> findByName(String name, Class<DatastreamDTO> entityClass) throws STAInvalidQueryException {
+    public Optional<DatastreamDTO> findByName(String name, Class<DatastreamDTO> entityClass)
+            throws STAInvalidQueryException {
+
         Condition predicate = StaEntity.DATASTREAM.NAME.eq(name);
-        Result<Record> result = selectQueryBuilder(predicate, entityClass, null, null).fetch();
-        return Optional.of(mapResultToDTO(result).get(0));
+        return findOne(predicate, null, entityClass);
     }
 
     @Override
-    public List<Table<?>> createJoinList(ExpandFilter expandOption) throws STAInvalidQueryException {
-        List<Table<?>> joinList = new ArrayList<>();
+    public Set<Table<?>> createJoinList(QueryOptions queryOptions) throws STAInvalidQueryException {
 
-        joinList.add(StaEntity.UNIT);
-        joinList.add(StaEntity.DATASTREAM_PROPERTIES);
+        joins = new HashSet<>();
+        joins.add(StaEntity.UNIT);
+        joins.add(StaEntity.DATASTREAM_PROPERTIES);
 
-        if (expandOption != null) {
-            for (ExpandItem expandItem : expandOption.getItems()) {
+        if (queryOptions != null && queryOptions.getExpandFilter() != null) {
+            for (ExpandItem expandItem : queryOptions.getExpandFilter().getItems()) {
                 // We cannot handle nested $filter or $expand
                 if (expandItem.getQueryOptions().hasFilterFilter() || expandItem.getQueryOptions().hasExpandFilter()) {
                     continue;
@@ -106,13 +124,13 @@ public class DatastreamDaoImpl extends AbstractStaEntityDao<DatastreamDTO> imple
                 String expandProperty = expandItem.getPath();
                 switch (expandProperty) {
                     case STAEntityDefinition.SENSOR:
-                        joinList.add(StaEntity.SENSOR);
+                        joins.add(StaEntity.SENSOR);
                         break;
                     case STAEntityDefinition.THING:
-                        joinList.add(StaEntity.THING);
+                        joins.add(StaEntity.THING);
                         break;
                     case STAEntityDefinition.OBSERVED_PROPERTY:
-                        joinList.add(StaEntity.OBSERVED_PROPERTY);
+                        joins.add(StaEntity.OBSERVED_PROPERTY);
                         break;
                     case STAEntityDefinition.OBSERVATIONS:
                         break;
@@ -123,7 +141,7 @@ public class DatastreamDaoImpl extends AbstractStaEntityDao<DatastreamDTO> imple
                 }
             }
         }
-        return joinList;
+        return joins;
     }
 
     @Override
@@ -138,7 +156,15 @@ public class DatastreamDaoImpl extends AbstractStaEntityDao<DatastreamDTO> imple
 
     @Override
     public List<Field<?>> getEntityTableFields() {
-        return Arrays.asList(StaEntity.DATASTREAM.fields());
+        return Arrays.stream(StaEntity.DATASTREAM.fields()).map(field -> {
+            if (field.getName().equals("OBSERVED_AREA")) {
+                return DSL.function("ST_AsText",
+                                String.class,
+                                DSL.function("ST_GeomFromWKB", byte[].class, field))
+                        .as(field.getName());
+            }
+            return field;
+        }).collect(Collectors.toList());
     }
 
     @Override
@@ -149,5 +175,17 @@ public class DatastreamDaoImpl extends AbstractStaEntityDao<DatastreamDTO> imple
     @Override
     public Field<Long> getEntityId() {
         return StaEntity.DATASTREAM.DATASET_ID;
+    }
+
+    public void save(DatastreamDTO merged) {
+        // TODO
+    }
+
+    public void update(String id, DatastreamDTO merged) {
+        // TODO
+    }
+
+    public void deleteById(Long Id) {
+        // TODO
     }
 }

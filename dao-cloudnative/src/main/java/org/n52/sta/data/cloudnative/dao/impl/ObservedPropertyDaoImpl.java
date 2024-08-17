@@ -28,10 +28,11 @@
  */
 package org.n52.sta.data.cloudnative.dao.impl;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.jooq.*;
 import org.jooq.Record;
-import org.n52.shetland.filter.ExpandFilter;
 import org.n52.shetland.filter.ExpandItem;
+import org.n52.shetland.oasis.odata.query.option.QueryOptions;
 import org.n52.shetland.ogc.sta.StaConstants;
 import org.n52.shetland.ogc.sta.exception.STAInvalidQueryException;
 import org.n52.shetland.ogc.sta.model.ObservedPropertyEntityDefinition;
@@ -39,6 +40,7 @@ import org.n52.sta.api.dto.ObservedPropertyDTO;
 import org.n52.sta.data.cloudnative.DTOMapper;
 import org.n52.sta.data.cloudnative.condition.ObservedPropertyQueryConditions;
 import org.n52.sta.data.cloudnative.condition.StaEntity;
+import org.n52.sta.data.cloudnative.dao.AbstractStaEntityDao;
 import org.n52.sta.data.cloudnative.dao.ObservedPropertyDao;
 import org.springframework.stereotype.Component;
 
@@ -49,18 +51,30 @@ import java.util.*;
  */
 @Component
 public class ObservedPropertyDaoImpl extends AbstractStaEntityDao<ObservedPropertyDTO> implements ObservedPropertyDao {
+
+    private Set<Table<?>> joins;
+
     @Override
     protected List<ObservedPropertyDTO> mapResultToDTO(Result<Record> result) {
-        List<ObservedPropertyDTO> observedProperties = new ArrayList<ObservedPropertyDTO>();
         Map<Long, ObservedPropertyDTO> observedPropertyMap = new HashMap<Long, ObservedPropertyDTO>();
         for (Record record : result) {
             Long Id = record.get(StaEntity.OBSERVED_PROPERTY.PHENOMENON_ID);
             ObservedPropertyDTO observedProperty = observedPropertyMap.computeIfAbsent(Id,
                     k -> record.map(new DTOMapper.ObservedPropertyRecordMapper()));
-            observedProperty.getDatastreams().add(record.map(new DTOMapper.DatastreamRecordMapper()));
-            observedProperties.add(observedProperty);
+
+            if (joins.contains(StaEntity.DATASTREAM)) {
+                observedProperty.setDatastreams(Optional.ofNullable(observedProperty.getDatastreams())
+                        .orElse(new HashSet<>()));
+                observedProperty.getDatastreams().add(record.map(new DTOMapper.DatastreamRecordMapper()));
+            }
+            if (joins.contains(StaEntity.OBSERVED_PROPERTY_PROPERTIES)) {
+                observedProperty.setProperties(Optional.ofNullable(observedProperty.getProperties())
+                        .orElse(new ObjectMapper().createObjectNode()));
+                observedProperty.getProperties().setAll(record.map(new DTOMapper.ObservedPropertyRecordMapper.
+                        ObservedPropertyParameterRecordMapper()));
+            }
         }
-        return observedProperties;
+        return new ArrayList<>(observedPropertyMap.values());
     }
 
     @Override
@@ -79,25 +93,25 @@ public class ObservedPropertyDaoImpl extends AbstractStaEntityDao<ObservedProper
     }
 
     @Override
-    public List<Table<?>> createJoinList(ExpandFilter expandOption) throws STAInvalidQueryException {
-        List<Table<?>> joinList = new ArrayList<>();
-        joinList.add(StaEntity.OBSERVED_PROPERTY_PROPERTIES);
-        if (expandOption != null) {
-            for (ExpandItem expandItem : expandOption.getItems()) {
+    public Set<Table<?>> createJoinList(QueryOptions queryOptions) throws STAInvalidQueryException {
+        joins = new HashSet<>();
+        joins.add(StaEntity.OBSERVED_PROPERTY_PROPERTIES);
+        if (queryOptions != null && queryOptions.getExpandFilter() != null) {
+            for (ExpandItem expandItem : queryOptions.getExpandFilter().getItems()) {
                 // We cannot handle nested $filter or $expand
                 if (expandItem.getQueryOptions().hasFilterFilter() || expandItem.getQueryOptions().hasExpandFilter()) {
                     continue;
                 }
                 String expandProperty = expandItem.getPath();
                 if (ObservedPropertyEntityDefinition.DATASTREAMS.equals(expandProperty)) {
-                    joinList.add(StaEntity.DATASTREAM);
+                    joins.add(StaEntity.DATASTREAM);
                 }
                 throw new STAInvalidQueryException(String.format(INVALID_EXPAND_OPTION_SUPPLIED,
                         expandProperty,
                         StaConstants.OBSERVED_PROPERTY));
             }
         }
-        return joinList;
+        return joins;
     }
 
     @Override

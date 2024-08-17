@@ -26,7 +26,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
-package org.n52.sta.data.cloudnative;
+package org.n52.sta.data.cloudnative.test.condition;
 
 import org.jooq.Condition;
 import org.jooq.DSLContext;
@@ -41,7 +41,7 @@ import org.n52.shetland.ogc.filter.FilterConstants;
 import org.n52.shetland.ogc.sta.StaConstants;
 import org.n52.shetland.ogc.sta.exception.STAInvalidFilterExpressionException;
 import org.n52.shetland.ogc.sta.model.STAEntityDefinition;
-import org.n52.sta.data.cloudnative.condition.StaEntity;
+import org.n52.sta.data.cloudnative.test.TestDatabaseConfig;
 import org.n52.sta.data.cloudnative.condition.ObservedPropertyQueryConditions;
 
 import org.springframework.beans.factory.annotation.Autowired;

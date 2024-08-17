@@ -26,7 +26,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
-package org.n52.sta.data.cloudnative.dao.impl;
+package org.n52.sta.data.cloudnative.dao;
 
 import org.jooq.*;
 import org.jooq.Record;
@@ -35,9 +35,6 @@ import org.jooq.impl.DSL;
 import org.n52.shetland.oasis.odata.query.option.QueryOptions;
 import org.n52.shetland.ogc.sta.exception.STAInvalidQueryException;
 import org.n52.sta.api.dto.*;
-import org.n52.sta.data.cloudnative.condition.EntityQueryConditions;
-import org.n52.sta.data.cloudnative.condition.StaEntity;
-import org.n52.sta.data.cloudnative.dao.StaEntityDao;
 import org.n52.sta.data.cloudnative.service.AbstractSensorThingsEntityServiceImpl;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -53,8 +50,6 @@ import java.util.*;
 import java.util.stream.Collectors;
 import jakarta.persistence.NoResultException;
 import javax.validation.constraints.NotNull;
-
-
 
 /**
  * @author <a href="mailto:humaid.kidwai@ucalgary.ca">Humaid Kidwai</a>
@@ -154,7 +149,7 @@ public abstract class AbstractStaEntityDao<T extends StaDTO> implements StaEntit
 
         Condition predicate = getEntityId().eq(id);
         Result<Record> result = selectQueryBuilder(predicate, entityClass, null, queryOptions).fetch();
-        return Optional.of(mapResultToDTO(result).get(0));
+        return Optional.ofNullable(mapResultToDTO(result)).map(dto -> dto.get(0));
     }
 
     @Override
@@ -164,7 +159,7 @@ public abstract class AbstractStaEntityDao<T extends StaDTO> implements StaEntit
 
 
         Result<Record> result = selectQueryBuilder(predicate, entityClass, null, queryOptions).fetch();
-        return Optional.of(mapResultToDTO(result).get(0));
+        return Optional.ofNullable(mapResultToDTO(result)).map(dto -> dto.get(0));
     }
 
     @Override
@@ -175,7 +170,7 @@ public abstract class AbstractStaEntityDao<T extends StaDTO> implements StaEntit
         Condition predicate = getStaEntityId().eq(identifier);
 
         Result<Record> result = selectQueryBuilder(predicate, entityClass, null, queryOptions).fetch();
-        return Optional.of(mapResultToDTO(result).get(0));
+        return Optional.ofNullable(mapResultToDTO(result)).map(dto -> dto.get(0));
     }
 
     @Override
@@ -255,20 +250,10 @@ public abstract class AbstractStaEntityDao<T extends StaDTO> implements StaEntit
 
     }
 
-    public boolean existsByFormat(String format, Class<T> entityClass) throws STAInvalidQueryException {
-        Condition predicate = StaEntity.FORMAT.DEFINITION.eq(format);
-        return count(predicate, entityClass) > 0;
-    }
-
-    public Optional<T> findByFormat(String format, Class<T> entityClass) throws STAInvalidQueryException {
-        Condition predicate = StaEntity.FORMAT.DEFINITION.eq(format);
-        Result<Record> result = selectQueryBuilder(predicate, entityClass, null, null).fetch();
-        return Optional.of(mapResultToDTO(result).get(0));
-    }
-    protected Select<Record> selectQueryBuilder(@NotNull Condition predicate,
-                                      @NotNull Class<T> entityClass,
-                                      @Nullable Sort sort,
-                                      @Nullable QueryOptions queryOptions)
+    public Select<Record> selectQueryBuilder(@NotNull Condition where,
+                                             @NotNull Class<T> entityClass,
+                                             @Nullable Sort sort,
+                                             @Nullable QueryOptions queryOptions)
             throws STAInvalidQueryException {
 
 
@@ -279,50 +264,46 @@ public abstract class AbstractStaEntityDao<T extends StaDTO> implements StaEntit
                     entityClass.getSimpleName()
             ));
         }
-        SelectJoinStep<Record> selectFromQuery = getSelectFromQuery(table, queryOptions);
-        SelectJoinStep<Record> selectJoinStep = getSelectJoinQuery(selectFromQuery, queryOptions);
-        SelectConditionStep<Record> selectWhereStep = getSelectWhereQuery(selectJoinStep, predicate);
-        Select<Record> finalQuery = sort == null ? selectWhereStep : getSelectSeekStep(selectWhereStep, sort);
+        List<Field<?>> select = new ArrayList<>(getSelect(queryOptions));
+        Table<?> from = getJoin(select, table, queryOptions);
+        List<SortField<?>> orderBy = getOrderBy(sort);
 
-        return finalQuery;
+        if(orderBy != null) {
+            return ctx.select(select).from(from).where(where).orderBy(orderBy);
+        }
+        return ctx.select(select).from(from).where(where);
 
     }
 
-    private SelectSeekStepN<Record> getSelectSeekStep(SelectConditionStep<Record> selectWhereStep, Sort sort) {
-        List<SortField<?>> sortFields = sort.stream()
+    private List<SortField<?>> getOrderBy(Sort sort) {
+        return sort == null ? null : sort.stream()
                     .map(order -> {
-                        Field<?> field = checkPropertyName(order.getProperty());
+                        Field<?> field = DSL.field(order.getProperty());
                         return order.isAscending() ? field.asc() : field.desc();
                     })
                     .collect(Collectors.toList());
-
-        return selectWhereStep.orderBy(sortFields);
     }
 
-    private SelectConditionStep<Record> getSelectWhereQuery(SelectJoinStep<Record> selectJoinStep,
-                                                       Condition predicate) {
-        return selectJoinStep.where(predicate);
-    }
-
-    private SelectJoinStep<Record> getSelectJoinQuery(SelectJoinStep<Record> selectFromQuery,
-                                                 QueryOptions queryOptions)
+    private Table<?> getJoin(List<Field<?>> fromTables, Table<?> table, QueryOptions queryOptions)
             throws STAInvalidQueryException {
-        SelectJoinStep<Record> selectJoinStep = selectFromQuery;
-        if(queryOptions != null && queryOptions.getExpandFilter() != null) {
-            List<Table<?>> joinList = createJoinList(queryOptions.getExpandFilter());
-            for (Table<?> toJoin : joinList) {
-                selectJoinStep = selectJoinStep.join(toJoin).onKey();
+
+        Set<Table<?>> joins = createJoinList(queryOptions);
+
+        for (Table<?> toJoin : joins) {
+            table = table.leftJoin(toJoin).onKey();
+            if (queryOptions == null || queryOptions.getSelectFilter() == null) {
+                fromTables.addAll(Arrays.asList(toJoin.fields()));
             }
         }
-        return selectJoinStep;
+
+        return table;
     }
 
-    private SelectJoinStep<Record> getSelectFromQuery(Table<?> table,
-                                                      QueryOptions queryOptions) {
+    private List<Field<?>> getSelect(QueryOptions queryOptions) {
 
         List<Field<?>> fieldList = new ArrayList<>();
 
-        // IMP: always try to minimize the columns to be fetched from a columnar data store
+        // always try to minimize the columns to be fetched from a columnar data store ^_^
         if(queryOptions != null && queryOptions.getSelectFilter() != null) {
             fieldList.add(getEntityId());
             fieldList.addAll(queryOptions
@@ -333,15 +314,12 @@ public abstract class AbstractStaEntityDao<T extends StaDTO> implements StaEntit
                     .collect(Collectors.toList()));
 
         }
+        // gotta fetch all fields 'cause select clause is not specified :(
         else {
             fieldList = getEntityTableFields();
         }
 
-        SelectJoinStep<Record> selectFromQuery = ctx
-                .select(fieldList.toArray(new Field<?>[0]))
-                .from(table);
-
-        return selectFromQuery;
+        return fieldList;
     }
 
 }

@@ -3,7 +3,6 @@ package org.n52.sta.data.cloudnative.dao;
 import org.jooq.Condition;
 import org.jooq.Field;
 import org.jooq.Table;
-import org.n52.shetland.filter.ExpandFilter;
 import org.n52.shetland.oasis.odata.query.option.QueryOptions;
 import org.n52.shetland.ogc.sta.exception.STAInvalidQueryException;
 import org.n52.sta.api.dto.StaDTO;
@@ -15,6 +14,7 @@ import org.springframework.lang.Nullable;
 import javax.transaction.Transactional;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 /**
  * @author <a href="mailto:humaid.kidwai@ucalgary.ca">Humaid Kidwai</a>
@@ -63,6 +63,7 @@ public interface StaEntityDao <T extends StaDTO> {
     Optional<T> findById(Long id,
                          QueryOptions queryOptions,
                          Class<T> className) throws STAInvalidQueryException;
+
 
     /**
      * Returns a single entity matching the given {@link Condition} or {@link Optional#empty()} if none found.
@@ -183,6 +184,6 @@ public interface StaEntityDao <T extends StaDTO> {
 
     Field<?> checkPropertyName(String property);
 
-    List<Table<?>> createJoinList(ExpandFilter expandOption) throws STAInvalidQueryException;
+    Set<Table<?>> createJoinList(QueryOptions queryOptions) throws STAInvalidQueryException;
 
 }

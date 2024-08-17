@@ -189,6 +189,8 @@ public class ServiceFacade <R extends StaDTO> implements AbstractSensorThingsEnt
             result = serviceImpl.update(id, entity, method);
         } catch (InterruptedException e) {
             throw new STACRUDException(e.getMessage(), e);
+        } catch (STAInvalidQueryException e) {
+            throw new RuntimeException(e);
         } finally {
             semaphore.release();
         }

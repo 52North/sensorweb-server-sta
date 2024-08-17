@@ -1,20 +1,20 @@
 create table if not exists unit (
-    unit_id bigint not null,
-    symbol varchar(255) not null,
+                                    unit_id bigint not null,
+                                    symbol varchar(255) not null,
     name varchar(255),
     link varchar(255),
     constraint unit_pkey primary key (unit_id),
     constraint un_unit_symbol unique (symbol)
     );
 create table if not exists format (
-    format_id bigint not null,
-    definition varchar(255) not null,
+                                      format_id bigint not null,
+                                      definition varchar(255) not null,
     constraint format_pkey primary key (format_id),
     constraint un_format_definition unique (definition)
     );
 create table if not exists feature (
-    feature_id bigint not null,
-    discriminator varchar(255),
+                                       feature_id bigint not null,
+                                       discriminator varchar(255),
     fk_format_id bigint not null,
     identifier varchar(255) not null,
     sta_identifier varchar(255) not null,
@@ -30,8 +30,8 @@ create table if not exists feature (
     constraint un_feature_url unique (url)
     );
 create table if not exists feature_parameter (
-    parameter_id bigint not null,
-    type varchar(255) not null,
+                                                 parameter_id bigint not null,
+                                                 type varchar(255) not null,
     name varchar(255) not null,
     description varchar,
     last_update timestamp,
@@ -49,10 +49,10 @@ create table if not exists feature_parameter (
     value_temporal_to timestamp,
     fk_parent_parameter_id bigint,
     foreign key (fk_feature_id) references feature (feature_id),
-    foreign key (fk_unit_id) references unit (unit_id),
+--     foreign key (fk_unit_id) references unit (unit_id),
     foreign key (fk_parent_parameter_id) references feature_parameter (parameter_id),
     constraint feature_parameter_pkey primary key (parameter_id)
---     constraint feature_parameter_type_check check (cast(type as varchar) = cast(array[
+    --     constraint feature_parameter_type_check check (cast(type as varchar) = cast(array[
 --                                                                                 cast('bool' as varchar),
 --     cast('category' as varchar),
 --     cast('count' as varchar),
@@ -65,8 +65,8 @@ create table if not exists feature_parameter (
 --     ] as array))
     );
 create table if not exists platform (
-    platform_id bigint not null,
-    identifier varchar(255) not null,
+                                        platform_id bigint not null,
+                                        identifier varchar(255) not null,
     sta_identifier varchar(255) not null,
     name varchar(255),
     description varchar,
@@ -75,8 +75,8 @@ create table if not exists platform (
     constraint un_platform_staidentifier unique (sta_identifier)
     );
 create table if not exists platform_parameter (
-    parameter_id bigint not null,
-    type varchar(255) not null,
+                                                  parameter_id bigint not null,
+                                                  type varchar(255) not null,
     name varchar(255) not null,
     description varchar,
     last_update timestamp,
@@ -94,10 +94,10 @@ create table if not exists platform_parameter (
     value_temporal_to timestamp,
     fk_parent_parameter_id bigint,
     foreign key (fk_platform_id) references platform (platform_id),
-    foreign key (fk_unit_id) references unit (unit_id),
+--     foreign key (fk_unit_id) references unit (unit_id),
     foreign key (fk_parent_parameter_id) references platform_parameter (parameter_id),
     constraint platform_parameter_pkey primary key (parameter_id)
---     constraint platform_parameter_type_check check (cast(type as varchar) = cast(array[
+    --     constraint platform_parameter_type_check check (cast(type as varchar) = cast(array[
 --                                                                                  cast('bool' as varchar),
 --     cast('category' as varchar),
 --     cast('count' as varchar),
@@ -110,8 +110,8 @@ create table if not exists platform_parameter (
 --     ] as array))
     );
 create table if not exists historical_location (
-    historical_location_id bigint not null,
-    identifier varchar(255) not null,
+                                                   historical_location_id bigint not null,
+                                                   identifier varchar(255) not null,
     sta_identifier varchar(255) not null,
     fk_platform_id bigint not null,
     "time" timestamp not null,
@@ -121,8 +121,8 @@ create table if not exists historical_location (
     constraint un_historicallocation_staidentifier unique (sta_identifier)
     );
 create table if not exists location (
-    location_id bigint not null,
-    identifier varchar(255) not null,
+                                        location_id bigint not null,
+                                        identifier varchar(255) not null,
     sta_identifier varchar(255) not null,
     name varchar(255) not null,
     description varchar not null,
@@ -135,8 +135,8 @@ create table if not exists location (
     constraint un_location_staidentifier unique (sta_identifier)
     );
 create table if not exists location_parameter (
-    parameter_id bigint not null,
-    type varchar(255) not null,
+                                                  parameter_id bigint not null,
+                                                  type varchar(255) not null,
     name varchar(255) not null,
     description varchar,
     last_update timestamp,
@@ -154,10 +154,10 @@ create table if not exists location_parameter (
     value_temporal_to timestamp,
     fk_parent_parameter_id bigint,
     foreign key (fk_location_id) references location (location_id),
-    foreign key (fk_unit_id) references unit (unit_id),
+--     foreign key (fk_unit_id) references unit (unit_id),
     foreign key (fk_parent_parameter_id) references location_parameter (parameter_id),
     constraint location_parameter_pkey primary key (parameter_id)
---     constraint location_parameter_type_check check (cast(type as varchar) = cast(array[
+    --     constraint location_parameter_type_check check (cast(type as varchar) = cast(array[
 --                                                                                  cast('bool' as varchar),
 --     cast('category' as varchar),
 --     cast('count' as varchar),
@@ -170,22 +170,22 @@ create table if not exists location_parameter (
 --     ] as array))
     );
 create table if not exists platform_location (
-    fk_location_id bigint not null,
-    fk_platform_id bigint not null,
-    foreign key (fk_location_id) references location (location_id),
+                                                 fk_location_id bigint not null,
+                                                 fk_platform_id bigint not null,
+                                                 foreign key (fk_location_id) references location (location_id),
     foreign key (fk_platform_id) references platform (platform_id),
     constraint platform_location_pkey primary key (fk_platform_id, fk_location_id)
     );
 create table if not exists location_historical_location (
-    fk_location_id bigint not null,
-    fk_historical_location_id bigint not null,
-    foreign key (fk_location_id) references location (location_id),
+                                                            fk_location_id bigint not null,
+                                                            fk_historical_location_id bigint not null,
+                                                            foreign key (fk_location_id) references location (location_id),
     foreign key (fk_historical_location_id) references historical_location (historical_location_id),
     constraint location_historical_location_pkey primary key (fk_location_id, fk_historical_location_id)
     );
 create table if not exists phenomenon (
-    phenomenon_id bigint not null,
-    identifier varchar(255) not null,
+                                          phenomenon_id bigint not null,
+                                          identifier varchar(255) not null,
     sta_identifier varchar(255) not null,
     name varchar(255),
     description varchar,
@@ -194,8 +194,8 @@ create table if not exists phenomenon (
     constraint un_phenomenon_staidentifier unique (sta_identifier)
     );
 create table if not exists phenomenon_parameter (
-    parameter_id bigint not null,
-    type varchar(255) not null,
+                                                    parameter_id bigint not null,
+                                                    type varchar(255) not null,
     name varchar(255) not null,
     description varchar,
     last_update timestamp,
@@ -213,10 +213,10 @@ create table if not exists phenomenon_parameter (
     value_temporal_to timestamp,
     fk_parent_parameter_id bigint,
     foreign key (fk_phenomenon_id) references phenomenon (phenomenon_id),
-    foreign key (fk_unit_id) references unit (unit_id),
+--     foreign key (fk_unit_id) references unit (unit_id),
     foreign key (fk_parent_parameter_id) references phenomenon_parameter (parameter_id),
     constraint phenomenon_parameter_pkey primary key (parameter_id)
---     constraint phenomenon_parameter_type_check check (cast(type as varchar) = cast(array[
+    --     constraint phenomenon_parameter_type_check check (cast(type as varchar) = cast(array[
 --                                                                                    cast('bool' as varchar),
 --     cast('category' as varchar),
 --     cast('count' as varchar),
@@ -229,8 +229,8 @@ create table if not exists phenomenon_parameter (
 --     ] as array))
     );
 create table if not exists procedure (
-    procedure_id bigint not null,
-    identifier varchar(255) not null,
+                                         procedure_id bigint not null,
+                                         identifier varchar(255) not null,
     sta_identifier varchar(255) not null,
     fk_identifier_codespace_id bigint,
     name varchar(255),
@@ -246,12 +246,12 @@ create table if not exists procedure (
     constraint procedure_pkey primary key (procedure_id),
     constraint un_procedure_identifier unique (identifier),
     constraint un_procedure_staidentifier unique (sta_identifier)
---     constraint procedure_is_reference_check check (is_reference = array[1, 0]),
+    --     constraint procedure_is_reference_check check (is_reference = array[1, 0]),
 --     constraint procedure_is_aggregation_check check (is_aggregation = array[1, 0])
     );
 create table if not exists procedure_parameter (
-    parameter_id bigint not null,
-    type varchar(255),
+                                                   parameter_id bigint not null,
+                                                   type varchar(255),
     name varchar(255),
     description varchar,
     last_update timestamp,
@@ -269,10 +269,10 @@ create table if not exists procedure_parameter (
     value_temporal_to timestamp,
     fk_parent_parameter_id bigint,
     foreign key (fk_procedure_id) references procedure (procedure_id),
-    foreign key (fk_unit_id) references unit (unit_id),
+--     foreign key (fk_unit_id) references unit (unit_id),
     foreign key (fk_parent_parameter_id) references procedure_parameter (parameter_id),
     constraint procedure_parameter_pkey primary key (parameter_id)
---     constraint procedure_parameter_type_check check (cast(type as varchar) = cast(array[
+    --     constraint procedure_parameter_type_check check (cast(type as varchar) = cast(array[
 --                                                                                   cast('bool' as varchar),
 --     cast('category' as varchar),
 --     cast('count' as varchar),
@@ -285,8 +285,8 @@ create table if not exists procedure_parameter (
 --     ] as array))
     );
 create table if not exists dataset (
-    dataset_id bigint not null,
-    discriminator varchar(255),
+                                       dataset_id bigint not null,
+                                       discriminator varchar(255),
     identifier varchar(255),
     sta_identifier varchar(255),
     name varchar(255),
@@ -335,7 +335,7 @@ create table if not exists dataset (
                                               fk_unit_id
                                           ),
     constraint un_dataset_staidentifier unique (sta_identifier)
---     constraint dataset_dataset_type_check check (cast(dataset_type as varchar) = cast(array[
+    --     constraint dataset_dataset_type_check check (cast(dataset_type as varchar) = cast(array[
 --                                                                                       cast('individualObservation' as varchar),
 --     cast('sampling' as varchar),
 --     cast('timeseries' as varchar),
@@ -371,8 +371,8 @@ create table if not exists dataset (
 --     constraint dataset_is_hidden_check check (is_hidden = array[1, 0])
     );
 create table if not exists dataset_parameter (
-    parameter_id bigint not null,
-    type varchar(255) not null,
+                                                 parameter_id bigint not null,
+                                                 type varchar(255) not null,
     name varchar(255) not null,
     description varchar,
     last_update timestamp,
@@ -390,10 +390,10 @@ create table if not exists dataset_parameter (
     value_temporal_to timestamp,
     fk_parent_parameter_id bigint,
     foreign key (fk_dataset_id) references dataset (dataset_id),
-    foreign key (fk_unit_id) references unit (unit_id),
+--     foreign key (fk_unit_id) references unit (unit_id),
 --     foreign key (fk_parent_parameter_id) references dataset_parameter (parameter_id),
     constraint dataset_parameter_pkey primary key (parameter_id)
---     constraint dataset_parameter_type_check check (cast(type as varchar) = cast(array[
+    --     constraint dataset_parameter_type_check check (cast(type as varchar) = cast(array[
 --                                                                                 cast('bool' as varchar),
 --     cast('category' as varchar),
 --     cast('count' as varchar),
@@ -407,8 +407,8 @@ create table if not exists dataset_parameter (
     );
 
 create table if not exists observation (
-    observation_id bigint not null,
-    value_type varchar(255) not null,
+                                           observation_id bigint not null,
+                                           value_type varchar(255) not null,
     fk_dataset_id bigint not null,
     sampling_time_start timestamp not null,
     sampling_time_end timestamp not null,
@@ -453,8 +453,8 @@ create table if not exists observation (
     constraint un_observation_staidentifier unique (sta_identifier)
     );
 create table if not exists observation_parameter (
-    parameter_id bigint not null,
-    type varchar(255) not null,
+                                                     parameter_id bigint not null,
+                                                     type varchar(255) not null,
     name varchar(255) not null,
     description varchar,
     last_update timestamp,
@@ -471,8 +471,8 @@ create table if not exists observation_parameter (
     value_temporal_from timestamp,
     value_temporal_to timestamp,
     fk_parent_parameter_id bigint,
-    foreign key (fk_unit_id) references unit (unit_id),
---     foreign key (fk_observation_id) references observation (observation_id),
+--     foreign key (fk_unit_id) references unit (unit_id),
+    --     foreign key (fk_observation_id) references observation (observation_id),
 --     foreign key (fk_parent_parameter_id) references observation_parameter (parameter_id),
     constraint observation_parameter_pkey primary key (parameter_id)
     --     constraint observation_parameter_type_check check (cast(type as varchar) = cast(array[

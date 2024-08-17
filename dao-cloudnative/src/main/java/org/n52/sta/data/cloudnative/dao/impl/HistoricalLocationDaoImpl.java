@@ -32,8 +32,8 @@ import org.jooq.Field;
 import org.jooq.Record;
 import org.jooq.Result;
 import org.jooq.Table;
-import org.n52.shetland.filter.ExpandFilter;
 import org.n52.shetland.filter.ExpandItem;
+import org.n52.shetland.oasis.odata.query.option.QueryOptions;
 import org.n52.shetland.ogc.sta.StaConstants;
 import org.n52.shetland.ogc.sta.exception.STAInvalidQueryException;
 import org.n52.shetland.ogc.sta.model.STAEntityDefinition;
@@ -41,6 +41,7 @@ import org.n52.sta.api.dto.HistoricalLocationDTO;
 import org.n52.sta.data.cloudnative.DTOMapper;
 import org.n52.sta.data.cloudnative.condition.HistoricalLocationQueryConditions;
 import org.n52.sta.data.cloudnative.condition.StaEntity;
+import org.n52.sta.data.cloudnative.dao.AbstractStaEntityDao;
 import org.n52.sta.data.cloudnative.dao.HistoricalLocationDao;
 import org.springframework.stereotype.Component;
 
@@ -52,27 +53,38 @@ import java.util.*;
 @Component
 public class HistoricalLocationDaoImpl extends AbstractStaEntityDao<HistoricalLocationDTO>
         implements HistoricalLocationDao {
+
+    private Set<Table<?>> joins;
+
     @Override
     protected List<HistoricalLocationDTO> mapResultToDTO(Result<Record> result) {
         List<HistoricalLocationDTO> historicalLocations = new ArrayList<>();
         Map<Long, HistoricalLocationDTO> historicalLocationMap = new HashMap<>();
         for (Record record : result) {
             Long id = record.get(StaEntity.HISTORICAL_LOCATION.HISTORICAL_LOCATION_ID);
+
             HistoricalLocationDTO historicalLocation = historicalLocationMap.computeIfAbsent(id,
                     k -> record.map(new DTOMapper.HistoricalLocationRecordMapper()));
-            historicalLocation.getLocations().add(record.map(new DTOMapper.LocationRecordMapper()));
-            historicalLocation.setThing(record.map(new DTOMapper.ThingRecordMapper()));
+
+            if (joins.contains(StaEntity.LOCATION)) {
+                historicalLocation.setLocations(Optional.ofNullable(historicalLocation.getLocations()).orElse(new HashSet<>()));
+                historicalLocation.getLocations().add(record.map(new DTOMapper.LocationRecordMapper()));
+            }
+            if (joins.contains(StaEntity.THING)) {
+                historicalLocation.setThing(record.map(new DTOMapper.ThingRecordMapper()));
+            }
+
             historicalLocations.add(historicalLocation);
         }
         return historicalLocations;
     }
 
     @Override
-    public List<Table<?>> createJoinList(ExpandFilter expandOption)
+    public Set<Table<?>> createJoinList(QueryOptions queryOptions)
             throws STAInvalidQueryException {
-        List<Table<?>> joinList = new ArrayList<>();
-        if (expandOption != null) {
-            for (ExpandItem expandItem : expandOption.getItems()) {
+        joins = new HashSet<>();
+        if (queryOptions != null && queryOptions.getExpandFilter() != null) {
+            for (ExpandItem expandItem : queryOptions.getExpandFilter().getItems()) {
                 // We cannot handle nested $filter or $expand
                 if (expandItem.getQueryOptions().hasFilterFilter() || expandItem.getQueryOptions().hasExpandFilter()) {
                     continue;
@@ -80,8 +92,8 @@ public class HistoricalLocationDaoImpl extends AbstractStaEntityDao<HistoricalLo
                 String expandProperty = expandItem.getPath();
                 switch (expandProperty) {
                     case STAEntityDefinition.LOCATIONS:
-                        joinList.add(StaEntity.LOCATION_HISTORICAL_LOCATION);
-                        joinList.add(StaEntity.LOCATION);
+                        joins.add(StaEntity.LOCATION_HISTORICAL_LOCATION);
+                        joins.add(StaEntity.LOCATION);
                         break;
                     case STAEntityDefinition.THING:
                         // fallthru
@@ -89,7 +101,7 @@ public class HistoricalLocationDaoImpl extends AbstractStaEntityDao<HistoricalLo
                         // The Definition in Section 8.2.3 of the OGC STA v1.0 defines the relations as "Thing"
                         // We will allow both for now
                     case STAEntityDefinition.THINGS:
-                        joinList.add(StaEntity.THING);
+                        joins.add(StaEntity.THING);
                         break;
                     default:
                         throw new STAInvalidQueryException(String.format(INVALID_EXPAND_OPTION_SUPPLIED,
@@ -98,7 +110,7 @@ public class HistoricalLocationDaoImpl extends AbstractStaEntityDao<HistoricalLo
                 }
             }
         }
-        return joinList;
+        return joins;
     }
 
     @Override

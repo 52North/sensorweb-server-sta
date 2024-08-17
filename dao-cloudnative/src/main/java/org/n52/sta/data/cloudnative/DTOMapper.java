@@ -34,9 +34,10 @@ import org.joda.time.DateTime;
 import org.jooq.*;
 import org.jooq.Record;
 
+import org.jooq.impl.DSL;
 import org.locationtech.jts.io.ParseException;
-import org.locationtech.jts.io.WKBReader;
 
+import org.locationtech.jts.io.WKTReader;
 import org.n52.sta.api.dto.*;
 import org.n52.sta.api.dto.impl.*;
 
@@ -55,7 +56,7 @@ import java.sql.Timestamp;
  */
 public class DTOMapper implements RecordMapperProvider {
 
-    private static final WKBReader WKBreader = new WKBReader();
+    private static final WKTReader WKTReader = new WKTReader();
     private static final ObjectMapper MAPPER = new ObjectMapper();
 
     private static <T extends HasNameAndDescription> void setStaDescription (T entity, String description){
@@ -74,72 +75,6 @@ public class DTOMapper implements RecordMapperProvider {
         if (Identifier != null) {
             entity.setId(Identifier);
         }
-    }
-
-    private static <T extends HasProperties> void setStaProperties(T entity, Record rec) {
-        ObjectNode properties = MAPPER.createObjectNode();
-
-        // Use one ParameterRecord type for all STA entities since all have common attributes
-        DatasetParameterRecord record = rec.into(DatasetParameterRecord.class);
-
-        if (record.getName() != null) {
-            properties.put(StaEntity.OBSERVATION_PARAMETERS.NAME.getName(),
-                    record.getName());
-        }
-        if (record.getDescription() != null) {
-            properties.put(StaEntity.OBSERVATION_PARAMETERS.DESCRIPTION.getName(),
-                    record.getDescription());
-        }
-        if (record.getLastUpdate() != null) {
-            properties.put(StaEntity.OBSERVATION_PARAMETERS.LAST_UPDATE.getName(),
-                    record.getLastUpdate().toString());
-        }
-        if (record.getDomain() != null) {
-            properties.put(StaEntity.OBSERVATION_PARAMETERS.DOMAIN.getName(),
-                    record.getDomain());
-        }
-        if (record.getValueCount() != null) {
-            properties.put(StaEntity.OBSERVATION_PARAMETERS.VALUE_COUNT.getName(),
-                    record.getValueCount());
-        }
-        if (record.getValueText() != null) {
-            properties.put(StaEntity.OBSERVATION_PARAMETERS.VALUE_TEXT.getName(),
-                    record.getValueText());
-        }
-        if (record.getValueQuantity() != null) {
-            properties.put(StaEntity.OBSERVATION_PARAMETERS.VALUE_QUANTITY.getName(),
-                    record.getValueQuantity());
-        }
-        if (record.getValueBoolean() != null) {
-            properties.put(StaEntity.OBSERVATION_PARAMETERS.VALUE_BOOLEAN.getName(),
-                    record.getValueBoolean());
-        }
-        if (record.getValueCategory() != null) {
-            properties.put(StaEntity.OBSERVATION_PARAMETERS.VALUE_CATEGORY.getName(),
-                    record.getValueCategory());
-        }
-        if (record.getValueXml() != null) {
-            properties.put(StaEntity.OBSERVATION_PARAMETERS.VALUE_XML.getName(),
-                    record.getValueXml());
-        }
-        if (record.getValueJson() != null) {
-            properties.put(StaEntity.OBSERVATION_PARAMETERS.VALUE_JSON.getName(),
-                    record.getValueJson());
-        }
-        if (record.getValueTemporalFrom() != null) {
-            properties.put(StaEntity.OBSERVATION_PARAMETERS.VALUE_TEMPORAL_FROM.getName(),
-                    record.getValueTemporalFrom().toString());
-        }
-        if (record.getValueTemporalTo() != null) {
-            properties.put(StaEntity.OBSERVATION_PARAMETERS.VALUE_TEMPORAL_TO.getName(),
-                    record.getValueTemporalTo().toString());
-        }
-        if (record.getFkUnitId() != null) {
-            properties.put(StaEntity.OBSERVATION_PARAMETERS.FK_UNIT_ID.getName(),
-                    record.getFkUnitId());
-        }
-
-        entity.setProperties(properties);
     }
 
     @Override
@@ -171,27 +106,65 @@ public class DTOMapper implements RecordMapperProvider {
             DatasetRecord record = rec.into(DatasetRecord.class);
             Datastream datastream = new Datastream();
 
-            setStaIdentifier(datastream, record.getIdentifier());
+            setStaIdentifier(datastream, record.getStaIdentifier());
             setStaName(datastream, record.getName());
             setStaDescription(datastream, record.getDescription());
-            setProperties(datastream, record);
             setPhenomenonTime(datastream, record);
-            setObservedArea(datastream, record);
             setResultTime(datastream, record);
             setObservationType(datastream, record);
             setUnitOfMeasurement(datastream, rec);
+            setObservedArea(datastream, rec);
+
 
             return datastream;
         }
+        public static class DatastreamParameterRecordMapper implements RecordMapper<Record, ObjectNode> {
 
-        private void setProperties(Datastream datastream, Record rec) {
-            DatasetParameterRecord record = rec.into(DatasetParameterRecord.class);
-            setStaProperties(datastream, record);
-            if(record.getFkDatasetId() != null) {
-                datastream.getProperties().put(
-                        StaEntity.DATASTREAM_PROPERTIES.FK_DATASET_ID.getName(),
-                        record.getFkDatasetId()
-                );
+            private ObjectNode setProperties(Record rec) {
+                DatasetParameterRecord record = rec.into(DatasetParameterRecord.class);
+                ObjectNode properties = MAPPER.createObjectNode();
+
+                if (record.getName() != null) {
+                    String key = record.getName();
+
+                    if (record.getValueCount() != null) {
+                        properties.put(key, record.getValueCount());
+                    }
+                    if (record.getValueText() != null) {
+                        properties.put(key, record.getValueText());
+                    }
+                    if (record.getValueQuantity() != null) {
+                        properties.put(key, record.getValueQuantity());
+                    }
+                    if (record.getValueBoolean() != null) {
+                        properties.put(key, record.getValueBoolean());
+                    }
+                    if (record.getValueCategory() != null) {
+                        properties.put(key,
+                                record.getValueCategory());
+                    }
+                    if (record.getValueXml() != null) {
+                        properties.put(key,
+                                record.getValueXml());
+                    }
+                    if (record.getValueJson() != null) {
+                        properties.put(key,
+                                record.getValueJson());
+                    }
+                    if (record.getValueTemporalFrom() != null) {
+                        properties.put(key,
+                                record.getValueTemporalFrom().toString());
+                    }
+                    if (record.getValueTemporalTo() != null) {
+                        properties.put(key,
+                                record.getValueTemporalTo().toString());
+                    }
+                }
+                return properties;
+            }
+            @Override
+            public ObjectNode map(Record record) {
+                return setProperties(record);
             }
         }
 
@@ -214,11 +187,11 @@ public class DTOMapper implements RecordMapperProvider {
             }
         }
 
-        private void setObservedArea (Datastream datastream, DatasetRecord record){
+        private void setObservedArea (Datastream datastream, Record record){
 
-            if (record.getObservedArea() != null) {
+            if (record.field("observed_area") != null) {
                 try {
-                    datastream.setObservedArea(WKBreader.read(record.getObservedArea()));
+                    datastream.setObservedArea(WKTReader.read(record.get(DSL.field("observed_area", String.class))));
                 } catch (ParseException e) {
                     Assert.notNull(null, "Could not parse to WKB" + e.getMessage());
                 }
@@ -232,21 +205,28 @@ public class DTOMapper implements RecordMapperProvider {
             }
         }
 
-        private void setUnitOfMeasurement (Datastream datastream, Record rec){
-            UnitRecord record = rec.into(UnitRecord.class);
-            DatastreamDTO.UnitOfMeasurement uom = new DatastreamDTO.UnitOfMeasurement();
-
-            if (record.getName() != null) {
-                uom.setName(record.getName());
-            }
-            if (record.getSymbol() != null) {
-                uom.setSymbol(record.getSymbol());
-            }
-            if (record.getLink() != null) {
-                uom.setDefinition(record.getLink());
-            }
-            datastream.setUnitOfMeasurement(uom);
+        private void setUnitOfMeasurement(Datastream datastream, Record record) {
+            datastream.setUnitOfMeasurement(record.map(new DTOMapper.DatastreamRecordMapper.UnitRecordMapper()));
         }
+
+        public static class UnitRecordMapper implements RecordMapper<Record, DatastreamDTO.UnitOfMeasurement> {
+            @Override
+            public DatastreamDTO.UnitOfMeasurement map(Record record) {
+                DatastreamDTO.UnitOfMeasurement uom = new DatastreamDTO.UnitOfMeasurement();
+
+                if (record.field(StaEntity.UNIT.NAME) != null) {
+                    uom.setName(record.get(StaEntity.UNIT.NAME));
+                }
+                if (record.field(StaEntity.UNIT.SYMBOL) != null) {
+                    uom.setSymbol(record.get(StaEntity.UNIT.SYMBOL));
+                }
+                if (record.field(StaEntity.UNIT.LINK) != null) {
+                    uom.setDefinition(record.get(StaEntity.UNIT.LINK));
+                }
+                return uom;
+            }
+        }
+
     }
 
     public static class LocationRecordMapper implements RecordMapper<Record, Location> {
@@ -255,30 +235,68 @@ public class DTOMapper implements RecordMapperProvider {
             Location location = new Location();
             LocationRecord record = rec.into(LocationRecord.class);
 
-            setStaIdentifier(location, record.getIdentifier());
+            setStaIdentifier(location, record.getStaIdentifier());
             setStaName(location, record.getName());
             setStaDescription(location, record.getDescription());
-            setProperties(location, record);
-            setGeometry(location, record);
+            setGeometry(location, rec);
 
             return location;
         }
+        public static class LocationParameterRecordMapper implements RecordMapper<Record, ObjectNode> {
+            private ObjectNode setProperties(Record rec) {
+                LocationParameterRecord record = rec.into(LocationParameterRecord.class);
+                ObjectNode properties = MAPPER.createObjectNode();
 
-        private void setProperties(Location location, Record rec) {
-            LocationParameterRecord record = rec.into(LocationParameterRecord.class);
-            setStaProperties(location, record);
-            if (record.getFkLocationId() != null) {
-                location.getProperties().put(
-                        StaEntity.LOCATION_PROPERTIES.FK_LOCATION_ID.getName(),
-                        record.getFkLocationId()
-                );
+                if (record.getName() != null) {
+                    String key = record.getName();
+
+                    if (record.getValueCount() != null) {
+                        properties.put(key, record.getValueCount());
+                    }
+                    if (record.getValueText() != null) {
+                        properties.put(key, record.getValueText());
+                    }
+                    if (record.getValueQuantity() != null) {
+                        properties.put(key, record.getValueQuantity());
+                    }
+                    if (record.getValueBoolean() != null) {
+                        properties.put(key, record.getValueBoolean());
+                    }
+                    if (record.getValueCategory() != null) {
+                        properties.put(key,
+                                record.getValueCategory());
+                    }
+                    if (record.getValueXml() != null) {
+                        properties.put(key,
+                                record.getValueXml());
+                    }
+                    if (record.getValueJson() != null) {
+                        properties.put(key,
+                                record.getValueJson());
+                    }
+                    if (record.getValueTemporalFrom() != null) {
+                        properties.put(key,
+                                record.getValueTemporalFrom().toString());
+                    }
+                    if (record.getValueTemporalTo() != null) {
+                        properties.put(key,
+                                record.getValueTemporalTo().toString());
+                    }
+                }
+
+                return properties;
+            }
+            @Override
+            public ObjectNode map(Record record) {
+                return setProperties(record);
             }
         }
 
-        private void setGeometry(Location location, LocationRecord record) {
-            if (record.getGeom() != null) {
+
+        private void setGeometry(Location location, Record record) {
+            if (record.field(DSL.field("GEOM")) != null) {
                 try {
-                    location.setGeometry(WKBreader.read((record.getGeom())));
+                    location.setGeometry(WKTReader.read(record.get(DSL.field("GEOM", String.class))));
                 } catch (ParseException e) {
                     Assert.notNull(null, "Could not parse to WKB" + e.getMessage());
                 }
@@ -291,21 +309,75 @@ public class DTOMapper implements RecordMapperProvider {
         public Thing map(Record rec) {
             Thing thing = new Thing();
             PlatformRecord record = rec.into(PlatformRecord.class);
-            setStaIdentifier(thing, record.getIdentifier());
+            setStaIdentifier(thing, record.getStaIdentifier());
             setStaName(thing, record.getName());
             setStaDescription(thing, record.getDescription());
-            setProperties(thing, rec);
+            //setProperties(thing, rec);
             return thing;
         }
+        public static class ThingParameterRecordMapper implements RecordMapper<Record, ObjectNode> {
 
-        private void setProperties(Thing thing, Record rec) {
-            PlatformParameterRecord record = rec.into(PlatformParameterRecord.class);
-            setStaProperties(thing, rec);
-            if (record.getFkPlatformId() != null) {
-                thing.getProperties().put(
-                        StaEntity.LOCATION_PROPERTIES.FK_LOCATION_ID.getName(),
-                        record.getFkPlatformId()
-                );
+            private ObjectNode setProperties(Record rec) {
+                PlatformParameterRecord record = rec.into(PlatformParameterRecord.class);
+                ObjectNode properties = MAPPER.createObjectNode();
+    //            if (record.getDescription() != null) {
+    //                properties.put(StaEntity.THING_PROPERTIES.DESCRIPTION.getName(),
+    //                        record.getDescription());
+    //            }
+    //            if (record.getLastUpdate() != null) {
+    //                properties.put(StaEntity.THING_PROPERTIES.LAST_UPDATE.getName(),
+    //                        record.getLastUpdate().toString());
+    //            }
+    //            if (record.getDomain() != null) {
+    //                properties.put(StaEntity.THING_PROPERTIES.DOMAIN.getName(),
+    //                        record.getDomain());
+    //            }
+                if (record.getName() != null) {
+                    String key = record.getName();
+
+                    if (record.getValueCount() != null) {
+                        properties.put(key, record.getValueCount());
+                    }
+                    if (record.getValueText() != null) {
+                        properties.put(key, record.getValueText());
+                    }
+                    if (record.getValueQuantity() != null) {
+                        properties.put(key, record.getValueQuantity());
+                    }
+                    if (record.getValueBoolean() != null) {
+                        properties.put(key, record.getValueBoolean());
+                    }
+                    if (record.getValueCategory() != null) {
+                        properties.put(key, record.getValueCategory());
+                    }
+                    if (record.getValueXml() != null) {
+                        properties.put(key, record.getValueXml());
+                    }
+                    if (record.getValueJson() != null) {
+                        properties.put(key, record.getValueJson());
+                    }
+                    if (record.getValueTemporalFrom() != null) {
+                        properties.put(key, record.getValueTemporalFrom().toString());
+                    }
+                    if (record.getValueTemporalTo() != null) {
+                        properties.put(key, record.getValueTemporalTo().toString());
+                    }
+                }
+    //            if (record.getFkUnitId() != null) {
+    //                properties.put(StaEntity.THING_PROPERTIES.FK_UNIT_ID.getName(),
+    //                        record.getFkUnitId());
+    //            }
+    //            if (record.getFkPlatformId() != null) {
+    //                properties.put(
+    //                        StaEntity.THING_PROPERTIES.FK_PLATFORM_ID.getName(),
+    //                        record.getFkPlatformId()
+    //                );
+    //            }
+                return properties;
+            }
+            @Override
+            public ObjectNode map(Record record) {
+                return setProperties(record);
             }
         }
     }
@@ -316,7 +388,7 @@ public class DTOMapper implements RecordMapperProvider {
             HistoricalLocation historicalLocation = new HistoricalLocation();
             HistoricalLocationRecord record = rec.into(HistoricalLocationRecord.class);
 
-            setStaIdentifier(historicalLocation, record.getIdentifier());
+            setStaIdentifier(historicalLocation, record.getStaIdentifier());
             setTime(historicalLocation, record);
 
             return historicalLocation;
@@ -337,24 +409,62 @@ public class DTOMapper implements RecordMapperProvider {
             Sensor sensor = new Sensor();
             ProcedureRecord record = rec.into(ProcedureRecord.class);
 
-            setStaIdentifier(sensor, record.getIdentifier());
+            setStaIdentifier(sensor, record.getStaIdentifier());
             setStaName(sensor, record.getName());
             setStaDescription(sensor, record.getDescription());
-            setMetadata(sensor, record);
-            setProperties(sensor, rec);
             setEncodingType(sensor, rec);
+            setMetadata(sensor, record);
 
             return sensor;
         }
 
-        private void setProperties(Sensor sensor, Record rec) {
-            ProcedureParameterRecord record = rec.into(ProcedureParameterRecord.class);
-            setStaProperties(sensor, rec);
-            if (record.getFkProcedureId() != null) {
-                sensor.getProperties().put(
-                        StaEntity.LOCATION_PROPERTIES.FK_LOCATION_ID.getName(),
-                        record.getFkProcedureId()
-                );
+        public static class SensorParameterRecordMapper implements RecordMapper<Record, ObjectNode> {
+
+            private ObjectNode setProperties(Record rec) {
+                ProcedureParameterRecord record = rec.into(ProcedureParameterRecord.class);
+                ObjectNode properties = MAPPER.createObjectNode();
+
+                if (record.getName() != null) {
+                    String key = record.getName();
+
+                    if (record.getValueCount() != null) {
+                        properties.put(key, record.getValueCount());
+                    }
+                    if (record.getValueText() != null) {
+                        properties.put(key, record.getValueText());
+                    }
+                    if (record.getValueQuantity() != null) {
+                        properties.put(key, record.getValueQuantity());
+                    }
+                    if (record.getValueBoolean() != null) {
+                        properties.put(key, record.getValueBoolean());
+                    }
+                    if (record.getValueCategory() != null) {
+                        properties.put(key,
+                                record.getValueCategory());
+                    }
+                    if (record.getValueXml() != null) {
+                        properties.put(key,
+                                record.getValueXml());
+                    }
+                    if (record.getValueJson() != null) {
+                        properties.put(key,
+                                record.getValueJson());
+                    }
+                    if (record.getValueTemporalFrom() != null) {
+                        properties.put(key,
+                                record.getValueTemporalFrom().toString());
+                    }
+                    if (record.getValueTemporalTo() != null) {
+                        properties.put(key,
+                                record.getValueTemporalTo().toString());
+                    }
+                }
+                return properties;
+            }
+            @Override
+            public ObjectNode map(Record record) {
+                return setProperties(record);
             }
         }
 
@@ -379,23 +489,60 @@ public class DTOMapper implements RecordMapperProvider {
             ObservedProperty observedProperty = new ObservedProperty();
             PhenomenonRecord record = rec.into(PhenomenonRecord.class);
 
-            setStaIdentifier(observedProperty, record.getIdentifier());
+            setStaIdentifier(observedProperty, record.getStaIdentifier());
             setStaName(observedProperty, record.getName());
             setStaDescription(observedProperty, record.getDescription());
             setDefinition(observedProperty, record);
-            setProperties(observedProperty, rec);
 
             return observedProperty;
         }
+        public static class ObservedPropertyParameterRecordMapper implements RecordMapper<Record, ObjectNode> {
 
-        private void setProperties(ObservedProperty observedProperty, Record rec) {
-            PhenomenonParameterRecord record = rec.into(PhenomenonParameterRecord.class);
-            setStaProperties(observedProperty, rec);
-            if (record.getFkPhenomenonId() != null) {
-                observedProperty.getProperties().put(
-                        StaEntity.LOCATION_PROPERTIES.FK_LOCATION_ID.getName(),
-                        record.getFkPhenomenonId()
-                );
+            private ObjectNode setProperties(Record rec) {
+                PhenomenonParameterRecord record = rec.into(PhenomenonParameterRecord.class);
+                ObjectNode properties = MAPPER.createObjectNode();
+
+                if (record.getName() != null) {
+                    String key = record.getName();
+
+                    if (record.getValueCount() != null) {
+                        properties.put(key, record.getValueCount());
+                    }
+                    if (record.getValueText() != null) {
+                        properties.put(key, record.getValueText());
+                    }
+                    if (record.getValueQuantity() != null) {
+                        properties.put(key, record.getValueQuantity());
+                    }
+                    if (record.getValueBoolean() != null) {
+                        properties.put(key, record.getValueBoolean());
+                    }
+                    if (record.getValueCategory() != null) {
+                        properties.put(key,
+                                record.getValueCategory());
+                    }
+                    if (record.getValueXml() != null) {
+                        properties.put(key,
+                                record.getValueXml());
+                    }
+                    if (record.getValueJson() != null) {
+                        properties.put(key,
+                                record.getValueJson());
+                    }
+                    if (record.getValueTemporalFrom() != null) {
+                        properties.put(key,
+                                record.getValueTemporalFrom().toString());
+                    }
+                    if (record.getValueTemporalTo() != null) {
+                        properties.put(key,
+                                record.getValueTemporalTo().toString());
+                    }
+                }
+                return properties;
+            }
+            @Override
+            public ObjectNode map(Record record) {
+                return setProperties(record);
             }
         }
 
@@ -412,9 +559,8 @@ public class DTOMapper implements RecordMapperProvider {
             Observation observation = new Observation();
             ObservationRecord record = rec.into(ObservationRecord.class);
 
-            setStaIdentifier(observation, record.getIdentifier());
+            setStaIdentifier(observation, record.getStaIdentifier());
             setPhenomenonTime(observation, record);
-            setParameters(observation, record);
             setResultTime(observation, record);
             setResult(observation, record);
             setValidTime(observation, record);
@@ -430,89 +576,54 @@ public class DTOMapper implements RecordMapperProvider {
                 );
             }
         }
+        public static class ObservationParameterRecordMapper implements RecordMapper<Record, ObjectNode> {
 
-        private void setParameters(Observation observation, Record rec) {
-            ObservationParameterRecord record = rec.into(ObservationParameterRecord.class);
-            ObjectNode properties = MAPPER.createObjectNode();
+            private ObjectNode setParameters(Record rec) {
+                ObservationParameterRecord record = rec.into(ObservationParameterRecord.class);
+                ObjectNode properties = MAPPER.createObjectNode();
 
-            if (record.getName() != null) {
-                properties.put(
-                        StaEntity.OBSERVATION_PARAMETERS.NAME.getName(),
-                        record.getName());
-            }
-            if (record.getDescription() != null) {
-                properties.put(
-                        StaEntity.OBSERVATION_PARAMETERS.DESCRIPTION.getName(),
-                        record.getDescription());
-            }
-            if (record.getLastUpdate() != null) {
-                properties.put(
-                        StaEntity.OBSERVATION_PARAMETERS.LAST_UPDATE.getName(),
-                        record.getLastUpdate().toString());
-            }
-            if (record.getDomain() != null) {
-                properties.put(
-                        StaEntity.OBSERVATION_PARAMETERS.DOMAIN.getName(),
-                        record.getDomain());
-            }
-            if (record.getValueCount() != null) {
-                properties.put(
-                        StaEntity.OBSERVATION_PARAMETERS.VALUE_COUNT.getName(),
-                        record.getValueCount());
-            }
-            if (record.getValueText() != null) {
-                properties.put(
-                        StaEntity.OBSERVATION_PARAMETERS.VALUE_TEXT.getName(),
-                        record.getValueText());
-            }
-            if (record.getValueQuantity() != null) {
-                properties.put(
-                        StaEntity.OBSERVATION_PARAMETERS.VALUE_QUANTITY.getName(),
-                        record.getValueQuantity());
-            }
-            if (record.getValueBoolean() != null) {
-                properties.put(
-                        StaEntity.OBSERVATION_PARAMETERS.VALUE_BOOLEAN.getName(),
-                        record.getValueBoolean());
-            }
-            if (record.getValueCategory() != null) {
-                properties.put(
-                        StaEntity.OBSERVATION_PARAMETERS.VALUE_CATEGORY.getName(),
-                        record.getValueCategory());
-            }
-            if (record.getValueXml() != null) {
-                properties.put(
-                        StaEntity.OBSERVATION_PARAMETERS.VALUE_XML.getName(),
-                        record.getValueXml());
-            }
-            if (record.getValueJson() != null) {
-                properties.put(
-                        StaEntity.OBSERVATION_PARAMETERS.VALUE_JSON.getName(),
-                        record.getValueJson());
-            }
-            if (record.getValueTemporalFrom() != null) {
-                properties.put(
-                        StaEntity.OBSERVATION_PARAMETERS.VALUE_TEMPORAL_FROM.getName(),
-                        record.getValueTemporalFrom().toString());
-            }
-            if (record.getValueTemporalTo() != null) {
-                properties.put(
-                        StaEntity.OBSERVATION_PARAMETERS.VALUE_TEMPORAL_TO.getName(),
-                        record.getValueTemporalTo().toString());
-            }
-            if (record.getFkUnitId() != null) {
-                properties.put(
-                        StaEntity.OBSERVATION_PARAMETERS.FK_UNIT_ID.getName(),
-                        record.getFkUnitId());
-            }
-            if (record.getFkObservationId() != null) {
-                observation.getParameters().put(
-                        StaEntity.OBSERVATION_PARAMETERS.FK_OBSERVATION_ID.getName(),
-                        record.getFkObservationId()
-                );
-            }
+                if (record.getName() != null) {
+                    String key = record.getName();
 
-            observation.setParameters(properties);
+                    if (record.getValueCount() != null) {
+                        properties.put(key, record.getValueCount());
+                    }
+                    if (record.getValueText() != null) {
+                        properties.put(key, record.getValueText());
+                    }
+                    if (record.getValueQuantity() != null) {
+                        properties.put(key, record.getValueQuantity());
+                    }
+                    if (record.getValueBoolean() != null) {
+                        properties.put(key, record.getValueBoolean());
+                    }
+                    if (record.getValueCategory() != null) {
+                        properties.put(key,
+                                record.getValueCategory());
+                    }
+                    if (record.getValueXml() != null) {
+                        properties.put(key,
+                                record.getValueXml());
+                    }
+                    if (record.getValueJson() != null) {
+                        properties.put(key,
+                                record.getValueJson());
+                    }
+                    if (record.getValueTemporalFrom() != null) {
+                        properties.put(key,
+                                record.getValueTemporalFrom().toString());
+                    }
+                    if (record.getValueTemporalTo() != null) {
+                        properties.put(key,
+                                record.getValueTemporalTo().toString());
+                    }
+                }
+                return properties;
+            }
+            @Override
+            public ObjectNode map(Record record) {
+                return setParameters(record);
+            }
         }
 
         private void setResult(Observation observation, ObservationRecord record) {
@@ -555,21 +666,60 @@ public class DTOMapper implements RecordMapperProvider {
             setStaIdentifier(featureOfInterest, record.getStaIdentifier());
             setStaName(featureOfInterest, record.getName());
             setStaDescription(featureOfInterest, record.getDescription());
-            setFeature(featureOfInterest, record);
-            setProperties(featureOfInterest, rec);
+            setFeature(featureOfInterest, rec);
             setEncodingType(featureOfInterest, rec);
 
             return featureOfInterest;
         }
+        public static class FeatureParameterRecordMapper implements RecordMapper<Record, ObjectNode> {
 
-        private void setProperties(FeatureOfInterest featureOfInterest, Record rec) {
-            FeatureParameterRecord record = rec.into(FeatureParameterRecord.class);
-            setStaProperties(featureOfInterest, rec);
-            if (record.getFkFeatureId() != null) {
-                featureOfInterest.getProperties().put(
-                        StaEntity.OBSERVATION_PARAMETERS.FK_OBSERVATION_ID.getName(),
-                        record.getFkFeatureId()
-                );
+            private ObjectNode setProperties(Record rec) {
+                FeatureParameterRecord record = rec.into(FeatureParameterRecord.class);
+                ObjectNode properties = MAPPER.createObjectNode();
+
+                if (record.getName() != null) {
+                    String key = record.getName();
+
+                    if (record.getValueCount() != null) {
+                        properties.put(key, record.getValueCount());
+                    }
+                    if (record.getValueText() != null) {
+                        properties.put(key, record.getValueText());
+                    }
+                    if (record.getValueQuantity() != null) {
+                        properties.put(key, record.getValueQuantity());
+                    }
+                    if (record.getValueBoolean() != null) {
+                        properties.put(key, record.getValueBoolean());
+                    }
+                    if (record.getValueCategory() != null) {
+                        properties.put(key,
+                                record.getValueCategory());
+                    }
+                    if (record.getValueXml() != null) {
+                        properties.put(key,
+                                record.getValueXml());
+                    }
+                    if (record.getValueJson() != null) {
+                        properties.put(key,
+                                record.getValueJson());
+                    }
+                    if (record.getValueTemporalFrom() != null) {
+                        properties.put(key,
+                                record.getValueTemporalFrom().toString());
+                    }
+                    if (record.getValueTemporalTo() != null) {
+                        properties.put(key,
+                                record.getValueTemporalTo().toString());
+                    }
+                }
+
+                return properties;
+            }
+
+            @Override
+            public ObjectNode map(Record record) {
+                return setProperties(record);
             }
         }
 
@@ -580,10 +730,10 @@ public class DTOMapper implements RecordMapperProvider {
             }
         }
 
-        private void setFeature(FeatureOfInterest featureOfInterest, FeatureRecord record) {
-            if (record.getGeom() != null) {
+        private void setFeature(FeatureOfInterest featureOfInterest, Record record) {
+            if (record.field("GEOM") != null) {
                 try {
-                    featureOfInterest.setFeature(WKBreader.read(record.getGeom()));
+                    featureOfInterest.setFeature(WKTReader.read(record.get(DSL.field("GEOM", String.class))));
                 } catch (ParseException e) {
                     Assert.notNull(null, "Could not parse to WKB" + e.getMessage());
                 }

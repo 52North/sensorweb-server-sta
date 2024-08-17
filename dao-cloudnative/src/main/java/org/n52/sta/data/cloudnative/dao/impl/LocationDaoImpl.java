@@ -28,11 +28,12 @@
  */
 package org.n52.sta.data.cloudnative.dao.impl;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.jooq.*;
 import org.jooq.Record;
 import org.jooq.impl.DSL;
-import org.n52.shetland.filter.ExpandFilter;
 import org.n52.shetland.filter.ExpandItem;
+import org.n52.shetland.oasis.odata.query.option.QueryOptions;
 import org.n52.shetland.ogc.sta.StaConstants;
 import org.n52.shetland.ogc.sta.exception.STAInvalidQueryException;
 import org.n52.shetland.ogc.sta.model.STAEntityDefinition;
@@ -40,10 +41,12 @@ import org.n52.sta.api.dto.LocationDTO;
 import org.n52.sta.data.cloudnative.DTOMapper;
 import org.n52.sta.data.cloudnative.condition.LocationQueryConditions;
 import org.n52.sta.data.cloudnative.condition.StaEntity;
+import org.n52.sta.data.cloudnative.dao.AbstractStaEntityDao;
 import org.n52.sta.data.cloudnative.dao.LocationDao;
 import org.springframework.stereotype.Component;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * @author <a href="mailto:humaid.kidwai@ucalgary.ca">Humaid Kidwai</a>
@@ -51,8 +54,11 @@ import java.util.*;
 @Component
 public class LocationDaoImpl extends AbstractStaEntityDao<LocationDTO> implements LocationDao {
 
+    private Set<Table<?>> joins;
+
     @Override
-    public List<LocationDTO> findAllByThingId(Long id, Class<LocationDTO> entityClass) throws STAInvalidQueryException {
+    public List<LocationDTO> findAllByThingId(Long id, Class<LocationDTO> entityClass)
+            throws STAInvalidQueryException {
         Condition predicate = DSL.exists(
                 ctx.select()
                         .from(StaEntity.LOCATION)
@@ -67,17 +73,29 @@ public class LocationDaoImpl extends AbstractStaEntityDao<LocationDTO> implement
 
     @Override
     protected List<LocationDTO> mapResultToDTO(Result<Record> result) {
-        List<LocationDTO> locations = new ArrayList<>();
-        Map<Long, LocationDTO> map = new HashMap<>();
+        Map<Long, LocationDTO> locationMap = new HashMap<>();
         for (Record record : result) {
             Long Id = record.get(StaEntity.LOCATION.LOCATION_ID);
-            LocationDTO location = map.computeIfAbsent(Id, k -> record.map(new DTOMapper.LocationRecordMapper()));
-            location.getHistoricalLocations().add(record.map(new DTOMapper.HistoricalLocationRecordMapper()));
-            location.getThings().add(record.map(new DTOMapper.ThingRecordMapper()));
-            location.getHistoricalLocations().add(record.map(new DTOMapper.HistoricalLocationRecordMapper()));
-            locations.add(location);
+
+            LocationDTO location = locationMap.computeIfAbsent(Id, k -> record.map(new DTOMapper.LocationRecordMapper()));
+
+            if (joins.contains(StaEntity.HISTORICAL_LOCATION)) {
+                location.setHistoricalLocations(Optional.ofNullable(location.getHistoricalLocations()).orElse(new HashSet<>()));
+                location.getHistoricalLocations().add(record.map(new DTOMapper.HistoricalLocationRecordMapper()));
+            }
+            if (joins.contains(StaEntity.THING)) {
+                location.setThings(Optional.ofNullable(location.getThings()).orElse(new HashSet<>()));
+                location.getThings().add(record.map(new DTOMapper.ThingRecordMapper()));
+            }
+            if (joins.contains(StaEntity.LOCATION_PROPERTIES)) {
+                location.setProperties(Optional.ofNullable(location.getProperties())
+                        .orElse(new ObjectMapper().createObjectNode()));
+                location.getProperties().setAll(record.map(new DTOMapper.LocationRecordMapper.
+                        LocationParameterRecordMapper()));
+            }
+
         }
-        return locations;
+        return new ArrayList<>(locationMap.values());
     }
 
     @Override
@@ -94,11 +112,11 @@ public class LocationDaoImpl extends AbstractStaEntityDao<LocationDTO> implement
     }
 
     @Override
-    public List<Table<?>> createJoinList(ExpandFilter expandOption) throws STAInvalidQueryException {
-        List<Table<?>> joinList = new ArrayList<>();
-        joinList.add(StaEntity.LOCATION_PROPERTIES);
-        if (expandOption != null) {
-            for (ExpandItem expandItem : expandOption.getItems()) {
+    public Set<Table<?>> createJoinList(QueryOptions queryOptions) throws STAInvalidQueryException {
+        joins = new HashSet<>();
+        joins.add(StaEntity.LOCATION_PROPERTIES);
+        if (queryOptions != null && queryOptions.getExpandFilter() != null) {
+            for (ExpandItem expandItem : queryOptions.getExpandFilter().getItems()) {
                 // We cannot handle nested $filter or $expand
                 if (expandItem.getQueryOptions().hasFilterFilter() || expandItem.getQueryOptions().hasExpandFilter()) {
                     continue;
@@ -106,12 +124,12 @@ public class LocationDaoImpl extends AbstractStaEntityDao<LocationDTO> implement
                 String expandProperty = expandItem.getPath();
                 switch (expandProperty) {
                     case STAEntityDefinition.HISTORICAL_LOCATIONS:
-                        joinList.add(StaEntity.LOCATION_HISTORICAL_LOCATION);
-                        joinList.add(StaEntity.HISTORICAL_LOCATION);
+                        joins.add(StaEntity.LOCATION_HISTORICAL_LOCATION);
+                        joins.add(StaEntity.HISTORICAL_LOCATION);
                         break;
                     case STAEntityDefinition.THINGS:
-                        joinList.add(StaEntity.THING_LOCATION);
-                        joinList.add(StaEntity.THING);
+                        joins.add(StaEntity.THING_LOCATION);
+                        joins.add(StaEntity.THING);
                         break;
                     default:
                         throw new STAInvalidQueryException(String.format(INVALID_EXPAND_OPTION_SUPPLIED, expandProperty,
@@ -119,7 +137,7 @@ public class LocationDaoImpl extends AbstractStaEntityDao<LocationDTO> implement
                 }
             }
         }
-        return joinList;
+        return joins;
     }
 
     @Override
@@ -134,7 +152,15 @@ public class LocationDaoImpl extends AbstractStaEntityDao<LocationDTO> implement
 
     @Override
     public List<Field<?>> getEntityTableFields() {
-        return Arrays.asList(StaEntity.LOCATION.fields());
+        return Arrays.stream(StaEntity.LOCATION.fields()).map(field -> {
+            if (field.getName().equals("GEOM")) {
+                return DSL.function("ST_AsText",
+                                String.class,
+                                DSL.function("ST_GeomFromWKB", byte[].class, field))
+                        .as(field.getName());
+            }
+            return field;
+        }).collect(Collectors.toList());
     }
 
     @Override

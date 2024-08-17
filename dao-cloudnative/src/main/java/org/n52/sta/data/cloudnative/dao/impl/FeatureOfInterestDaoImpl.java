@@ -28,32 +28,44 @@
  */
 package org.n52.sta.data.cloudnative.dao.impl;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.jooq.*;
 import org.jooq.Record;
-import org.n52.shetland.filter.ExpandFilter;
+import org.jooq.impl.DSL;
+import org.n52.shetland.oasis.odata.query.option.QueryOptions;
 import org.n52.shetland.ogc.sta.exception.STAInvalidQueryException;
 import org.n52.sta.api.dto.FeatureOfInterestDTO;
 import org.n52.sta.data.cloudnative.DTOMapper;
 import org.n52.sta.data.cloudnative.condition.FeatureOfInterestQueryConditions;
 import org.n52.sta.data.cloudnative.condition.StaEntity;
+import org.n52.sta.data.cloudnative.dao.AbstractStaEntityDao;
 import org.n52.sta.data.cloudnative.dao.FeatureOfInterestDao;
 import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Component
 public class FeatureOfInterestDaoImpl extends AbstractStaEntityDao<FeatureOfInterestDTO> implements FeatureOfInterestDao {
+
+    private Set<Table<?>> joins;
+
     @Override
     protected List<FeatureOfInterestDTO> mapResultToDTO(Result<Record> result) {
-        List<FeatureOfInterestDTO> featuresOfInterest = new ArrayList<FeatureOfInterestDTO>();
+        Map<Long, FeatureOfInterestDTO> featureMap = new HashMap<>();
         for (Record record : result) {
-            FeatureOfInterestDTO feature = record.map(new DTOMapper.FeatureOfInterestRecordMapper());
-            featuresOfInterest.add(feature);
+            Long Id = record.get(StaEntity.FEATURE_OF_INTEREST.FEATURE_ID);
+            FeatureOfInterestDTO feature = featureMap.computeIfAbsent(Id,
+                    k -> record.map(new DTOMapper.FeatureOfInterestRecordMapper()));
+            if (joins.contains(StaEntity.FEATURE_PROPERTIES)) {
+                feature.setProperties(Optional.ofNullable(feature.getProperties())
+                        .orElse(new ObjectMapper().createObjectNode()));
+
+                feature.getProperties().setAll(record.map(new DTOMapper.FeatureOfInterestRecordMapper
+                        .FeatureParameterRecordMapper()));
+            }
         }
-        return featuresOfInterest;
+        return new ArrayList<>(featureMap.values());
     }
 
     @Override
@@ -70,11 +82,11 @@ public class FeatureOfInterestDaoImpl extends AbstractStaEntityDao<FeatureOfInte
     }
 
     @Override
-    public List<Table<?>> createJoinList(ExpandFilter expandOption) throws STAInvalidQueryException {
-        List<Table<?>> joinList = new ArrayList<>();
-        joinList.add(StaEntity.FORMAT);
-        joinList.add(StaEntity.FEATURE_PROPERTIES);
-        return joinList;
+    public Set<Table<?>> createJoinList(QueryOptions queryOptions) throws STAInvalidQueryException {
+        joins = new HashSet<>();
+        joins.add(StaEntity.FORMAT);
+        joins.add(StaEntity.FEATURE_PROPERTIES);
+        return joins;
     }
 
     @Override
@@ -84,7 +96,15 @@ public class FeatureOfInterestDaoImpl extends AbstractStaEntityDao<FeatureOfInte
 
     @Override
     public List<Field<?>> getEntityTableFields() {
-        return Arrays.asList(StaEntity.FEATURE_OF_INTEREST.fields());
+        return Arrays.stream(StaEntity.FEATURE_OF_INTEREST.fields()).map(field -> {
+            if (field.getName().equals("GEOM")) {
+                return DSL.function("ST_AsText",
+                                String.class,
+                                DSL.function("ST_GeomFromWKB", byte[].class, field))
+                        .as(field.getName());
+            }
+            return field;
+        }).collect(Collectors.toList());
     }
 
     @Override

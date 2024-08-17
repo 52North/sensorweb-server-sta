@@ -28,10 +28,11 @@
  */
 package org.n52.sta.data.cloudnative.dao.impl;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.jooq.*;
 import org.jooq.Record;
-import org.n52.shetland.filter.ExpandFilter;
 import org.n52.shetland.filter.ExpandItem;
+import org.n52.shetland.oasis.odata.query.option.QueryOptions;
 import org.n52.shetland.ogc.sta.StaConstants;
 import org.n52.shetland.ogc.sta.exception.STAInvalidQueryException;
 import org.n52.shetland.ogc.sta.model.STAEntityDefinition;
@@ -39,6 +40,7 @@ import org.n52.sta.api.dto.ThingDTO;
 import org.n52.sta.data.cloudnative.DTOMapper;
 import org.n52.sta.data.cloudnative.condition.StaEntity;
 import org.n52.sta.data.cloudnative.condition.ThingQueryConditions;
+import org.n52.sta.data.cloudnative.dao.AbstractStaEntityDao;
 import org.n52.sta.data.cloudnative.dao.ThingDao;
 import org.springframework.stereotype.Component;
 
@@ -49,20 +51,8 @@ import java.util.*;
  */
 @Component
 public class ThingDaoImpl extends AbstractStaEntityDao<ThingDTO> implements ThingDao {
-    @Override
-    protected List<ThingDTO> mapResultToDTO(Result<Record> result) {
-        List<ThingDTO> things = new ArrayList<>();
-        Map<Long, ThingDTO> thingMap = new HashMap<>();
-        for (Record record : result) {
-            Long Id = record.get(StaEntity.THING.PLATFORM_ID);
-            ThingDTO thing = thingMap.computeIfAbsent(Id, k -> record.map(new DTOMapper.ThingRecordMapper()));
-            thing.getDatastreams().add(record.map(new DTOMapper.DatastreamRecordMapper()));
-            thing.getLocations().add(record.map(new DTOMapper.LocationRecordMapper()));
-            thing.getHistoricalLocations().add(record.map(new DTOMapper.HistoricalLocationRecordMapper()));
-            things.add(thing);
-        }
-        return things;
-    }
+
+    private Set<Table<?>> joins;
 
     @Override
     public boolean existsByName(String name, Class<ThingDTO> entityClass) throws STAInvalidQueryException {
@@ -78,11 +68,11 @@ public class ThingDaoImpl extends AbstractStaEntityDao<ThingDTO> implements Thin
     }
 
     @Override
-    public List<Table<?>> createJoinList(ExpandFilter expandOption) throws STAInvalidQueryException {
-        List<Table<?>> joinList = new ArrayList<>();
-        joinList.add(StaEntity.THING_PROPERTIES);
-        if (expandOption != null) {
-            for (ExpandItem expandItem : expandOption.getItems()) {
+    public Set<Table<?>> createJoinList(QueryOptions queryOptions) throws STAInvalidQueryException {
+        joins = new HashSet<>();
+        joins.add(StaEntity.THING_PROPERTIES);
+        if (queryOptions != null && queryOptions.getExpandFilter() != null) {
+            for (ExpandItem expandItem : queryOptions.getExpandFilter().getItems()) {
                 // We cannot handle nested $filter or $expand
                 if (expandItem.getQueryOptions().hasFilterFilter() || expandItem.getQueryOptions().hasExpandFilter()) {
                     continue;
@@ -90,14 +80,14 @@ public class ThingDaoImpl extends AbstractStaEntityDao<ThingDTO> implements Thin
                 String expandProperty = expandItem.getPath();
                 switch (expandProperty) {
                     case STAEntityDefinition.HISTORICAL_LOCATIONS:
-                        joinList.add(StaEntity.HISTORICAL_LOCATION);
+                        joins.add(StaEntity.HISTORICAL_LOCATION);
                         break;
                     case STAEntityDefinition.DATASTREAMS:
-                        joinList.add(StaEntity.DATASTREAM);
+                        joins.add(StaEntity.DATASTREAM);
                         break;
                     case STAEntityDefinition.LOCATIONS:
-                        joinList.add(StaEntity.THING_LOCATION);
-                        joinList.add(StaEntity.LOCATION);
+                        joins.add(StaEntity.THING_LOCATION);
+                        joins.add(StaEntity.LOCATION);
                         break;
                     default:
                         throw new STAInvalidQueryException(String.format(INVALID_EXPAND_OPTION_SUPPLIED,
@@ -106,17 +96,50 @@ public class ThingDaoImpl extends AbstractStaEntityDao<ThingDTO> implements Thin
                 }
             }
         }
-        return joinList;
+        return joins;
     }
 
     @Override
-    public Field checkPropertyName(String property) {
-        return new ThingQueryConditions().checkPropertyName(property);
+    protected List<ThingDTO> mapResultToDTO(Result<Record> result) {
+        Map<Long, ThingDTO> thingMap = new HashMap<>();
+        for (Record record : result) {
+            Long Id = record.get(StaEntity.THING.PLATFORM_ID);
+            ThingDTO thing = thingMap.computeIfAbsent(Id, k -> record.map(new DTOMapper.ThingRecordMapper()));
+
+            if (joins.contains(StaEntity.DATASTREAM)) {
+                thing.setDatastreams(Optional.ofNullable(thing.getDatastreams()).orElseGet(HashSet::new));
+                thing.getDatastreams().add(record.map(new DTOMapper.DatastreamRecordMapper()));
+            }
+
+            if (joins.contains(StaEntity.LOCATION)) {
+                thing.setLocations(Optional.ofNullable(thing.getLocations()).orElseGet(HashSet::new));
+                thing.getLocations().add(record.map(new DTOMapper.LocationRecordMapper()));
+            }
+
+            if (joins.contains(StaEntity.HISTORICAL_LOCATION)) {
+                thing.setHistoricalLocations(Optional.ofNullable(thing.getHistoricalLocations())
+                        .orElseGet(HashSet::new));
+                thing.getHistoricalLocations().add(record.map(new DTOMapper.HistoricalLocationRecordMapper()));
+            }
+
+            if (joins.contains(StaEntity.THING_PROPERTIES)) {
+                thing.setProperties(Optional.ofNullable(thing.getProperties())
+                        .orElse(new ObjectMapper().createObjectNode()));
+                thing.getProperties().setAll(record.map(new DTOMapper.ThingRecordMapper.ThingParameterRecordMapper()));
+            }
+
+        }
+        return new ArrayList<>(thingMap.values());
     }
 
     @Override
     public List<Field<?>> getEntityTableFields() {
-        return Arrays.asList(StaEntity.THING.fields());
+        return new ArrayList<>(Arrays.asList(StaEntity.THING.fields()));
+    }
+
+    @Override
+    public Field<?> checkPropertyName(String property) {
+        return new ThingQueryConditions().checkPropertyName(property);
     }
 
     @Override

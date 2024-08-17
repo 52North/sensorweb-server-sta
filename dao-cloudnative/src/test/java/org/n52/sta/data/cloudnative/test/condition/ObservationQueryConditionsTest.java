@@ -27,7 +27,7 @@
  * Public License for more details.
  */
 
-package org.n52.sta.data.cloudnative;
+package org.n52.sta.data.cloudnative.test.condition;
 
 import org.jooq.*;
 import org.jooq.impl.DSL;
@@ -42,6 +42,7 @@ import org.n52.shetland.ogc.filter.FilterConstants;
 import org.n52.shetland.ogc.sta.StaConstants;
 import org.n52.shetland.ogc.sta.exception.STAInvalidFilterExpressionException;
 
+import org.n52.sta.data.cloudnative.test.TestDatabaseConfig;
 import org.n52.sta.data.cloudnative.condition.ObservationQueryConditions;
 
 import org.springframework.beans.factory.annotation.Autowired;
