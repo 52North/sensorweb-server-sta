@@ -26,18 +26,18 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
-package org.n52.sta.data.cloudnative.dao;
 
-import org.n52.shetland.ogc.sta.exception.STAInvalidQueryException;
-import org.n52.sta.api.dto.DatastreamDTO;
-import org.n52.sta.data.cloudnative.schema.tables.pojos.Dataset;
+package org.n52.sta.data.cloudnative.dao.impl;
 
-import java.util.List;
+import org.n52.sta.data.cloudnative.schema.tables.pojos.LocationHistoricalLocation;
+
 import java.util.Set;
 
 /**
  * @author <a href="mailto:humaid.kidwai@ucalgary.ca">Humaid Kidwai</a>
  */
-public interface DatastreamDao extends StaNamedEntityDao <DatastreamDTO> {
-    Set<Dataset> findAllPOJOByAggregationId(Long id) throws STAInvalidQueryException;
+public interface LocationHistoricalLocationDao {
+    void saveAll(Set<LocationHistoricalLocation> platformLocations);
+    void deleteByLocationId(long locationId);
+    void deleteByHistoricalLocationId(long historicalLocationId);
 }

@@ -63,6 +63,7 @@ import org.springframework.http.HttpMethod;
 
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * Interface for requesting Sensor Things entities
@@ -70,7 +71,7 @@ import java.util.Set;
  * @author <a href="mailto:humaid.kidwai@ucalgary.ca">Humaid Kidwai</a>
  */
 @Transactional(rollbackFor = Exception.class)
-public abstract class AbstractSensorThingsEntityServiceImpl<T extends StaEntityDao<R>, R extends StaDTO> {
+public abstract class AbstractSensorThingsEntityServiceImpl <T extends StaEntityDao<R>, R extends StaDTO> {
 
     protected static final String RESULT = "result";
 
@@ -90,7 +91,7 @@ public abstract class AbstractSensorThingsEntityServiceImpl<T extends StaEntityD
     @Autowired private MutexFactory lock;
     private EntityServiceRepository serviceRepository;
     private final T StaEntityDao;
-    private final Class<R> entityClass;
+    protected final Class<R> entityClass;
 
     public AbstractSensorThingsEntityServiceImpl(T StaEntityDao, Class<R> entityClass) {
         this.entityClass = entityClass;
@@ -126,8 +127,11 @@ public abstract class AbstractSensorThingsEntityServiceImpl<T extends StaEntityD
     public R getEntity(String id, QueryOptions queryOptions) throws STACRUDException {
         try {
             Optional<R> entity =  StaEntityDao.findByStaIdentifier(id, queryOptions, entityClass);
-            if (entity.isPresent() && queryOptions.hasExpandFilter()) {
-               return fetchExpandEntitiesWithFilter(entity.get(), queryOptions.getExpandFilter());
+            if (entity.isPresent()) {
+                if (queryOptions.hasExpandFilter()) {
+                    return fetchExpandEntitiesWithFilter(entity.get(), queryOptions.getExpandFilter());
+                }
+                return entity.get();
             }
             else {
                 throw new STACRUDException(UNABLE_TO_GET_ENTITY_NOT_FOUND);
@@ -141,7 +145,7 @@ public abstract class AbstractSensorThingsEntityServiceImpl<T extends StaEntityD
         try {
             Page<R> pages = StaEntityDao.findAll(
                     getFilterPredicate(entityClass, queryOptions),
-                    createPageableRequest(entityClass, queryOptions),
+                    createPageableRequest(queryOptions),
                     queryOptions,
                     entityClass);
             return createCollectionWrapperAndExpand(queryOptions, pages);
@@ -168,7 +172,8 @@ public abstract class AbstractSensorThingsEntityServiceImpl<T extends StaEntityD
                 getEntityCollectionByRelatedEntityRaw(relatedId, relatedType, queryOptions));
     }
 
-    public String getEntityIdByRelatedEntity(String relatedId, String relatedType) {
+    public String getEntityIdByRelatedEntity(String relatedId, String relatedType)
+            throws STAInvalidQueryException {
         Optional<String> entity = StaEntityDao.getColumn(
                 this.byRelatedEntityFilter(relatedId, relatedType, null),
                 getStaEntityId().getName(),
@@ -182,17 +187,17 @@ public abstract class AbstractSensorThingsEntityServiceImpl<T extends StaEntityD
     }
 
     @Transactional(rollbackFor = Exception.class)
-    public R create(StaDTO entity) throws STACRUDException {
-        return this.createOrfetch((R) entity);
+    public R create(StaDTO entity) throws STACRUDException, STAInvalidQueryException {
+        return createOrfetch((R) entity);
     }
 
     @Transactional(rollbackFor = Exception.class)
-    public R update(String id, StaDTO entity, HttpMethod method) throws STACRUDException {
-        return this.updateEntity(id, (R) entity, method);
+    public R update(String id, StaDTO entity, HttpMethod method) throws STACRUDException, STAInvalidQueryException {
+        return updateEntity(id, (R) entity, method);
     }
 
     @Transactional(rollbackFor = Exception.class)
-    public void delete(String id) throws STACRUDException {
+    public void delete(String id) throws STACRUDException, STAInvalidQueryException {
         this.deleteEntity(id);
     }
 
@@ -230,8 +235,10 @@ public abstract class AbstractSensorThingsEntityServiceImpl<T extends StaEntityD
         }
     }
 
-    private R getEntityByRelatedEntityRaw(String relatedId, String relatedType, String ownId, QueryOptions queryOptions)
-            throws STACRUDException {
+    public R getEntityByRelatedEntityRaw(String relatedId,
+                                          String relatedType,
+                                          String ownId,
+                                          QueryOptions queryOptions) throws STACRUDException {
         try {
             Optional<R> entity =
                     StaEntityDao.findOne(byRelatedEntityFilter(relatedId, relatedType, ownId).and(
@@ -258,14 +265,14 @@ public abstract class AbstractSensorThingsEntityServiceImpl<T extends StaEntityD
      * @return List of Entities that match
      * @throws STACRUDException if the queryOptions are invalid
      */
-    protected Page getEntityCollectionByRelatedEntityRaw(String relatedId,
+    protected Page<R> getEntityCollectionByRelatedEntityRaw(String relatedId,
                                                          String relatedType,
                                                          QueryOptions queryOptions)
             throws STACRUDException {
         try {
             Page<R> pages = StaEntityDao.findAll(byRelatedEntityFilter(relatedId, relatedType, null).and(
                     getFilterPredicate(entityClass, queryOptions)),
-                    createPageableRequest(entityClass, queryOptions),
+                    createPageableRequest(queryOptions),
                     queryOptions,
                     entityClass);
             if (queryOptions.hasExpandFilter()) {
@@ -285,7 +292,7 @@ public abstract class AbstractSensorThingsEntityServiceImpl<T extends StaEntityD
         }
     }
 
-    protected abstract Condition byRelatedEntityFilter(String relatedId, String relatedType, String ownId);
+    protected abstract Condition byRelatedEntityFilter(String relatedId, String relatedType, String ownId) throws STAInvalidQueryException;
 
     /**
      * Fetches $expanded Entities that are filtered via $filter. An individual request is needed for each expanded
@@ -311,30 +318,20 @@ public abstract class AbstractSensorThingsEntityServiceImpl<T extends StaEntityD
     }
 
     @Transactional(rollbackFor = Exception.class)
-    protected abstract R createOrfetch(R entity) throws STACRUDException;
+    protected abstract R createOrfetch(R entity)
+            throws STACRUDException, STAInvalidQueryException;
+
+    protected abstract R createOrUpdate(R entity)
+            throws STACRUDException, STAInvalidQueryException;
 
     @Transactional(rollbackFor = Exception.class)
-    protected abstract R updateEntity(String id, R entity, HttpMethod method) throws STACRUDException;
+    protected abstract R updateEntity(String id, R entity, HttpMethod method)
+            throws STACRUDException, STAInvalidQueryException;
 
     @Transactional(rollbackFor = Exception.class)
-    protected abstract void deleteEntity(String id) throws STACRUDException;
+    protected abstract void deleteEntity(String id)
+            throws STACRUDException, STAInvalidQueryException;
 
-    /**
-     * Must be implemented by each Service individually as R is not known to have identifier here.
-     * Example Code to be pasted into each Service below
-     *
-     * @param entity entity to be persisted or updated
-     * @return updated entity
-     * @throws STACRUDException if an error occurred
-     */
-    protected abstract R createOrUpdate(R entity) throws STACRUDException;
-    //protected S createOrUpdate(S entity) throws STACRUDException {
-    //    if (entity.getId() != null && StaEntityDao.existsByStaIdentifier(entity.getId())) {
-    //        return update(entity, HttpMethod.PATCH);
-    //    }
-    //    return this.create(entity);
-
-    //}
 
     protected void checkInlineDatastream(DatastreamDTO datastream) throws STACRUDException {
         if (datastream.getId() == null
@@ -358,7 +355,7 @@ public abstract class AbstractSensorThingsEntityServiceImpl<T extends StaEntityD
      * @param queryOptions {@link QueryOptions} to create {@link PageRequest}
      * @return {@link PageRequest} of type {@link OffsetLimitBasedPageRequest}
      */
-    OffsetLimitBasedPageRequest createPageableRequest(Class<R> entityClass, QueryOptions queryOptions) {
+    OffsetLimitBasedPageRequest createPageableRequest(QueryOptions queryOptions) {
         long offset = queryOptions.hasSkipFilter() ? queryOptions.getSkipFilter().getValue() : 0;
         Sort sort;
         if (queryOptions.hasOrderByFilter()) {
@@ -401,7 +398,7 @@ public abstract class AbstractSensorThingsEntityServiceImpl<T extends StaEntityD
      * @param queryOptions QueryOptions Object
      * @return jOOQ Condition based on FilterOption from queryOptions
      */
-    private Condition getFilterPredicate(Class<R> entityClass, QueryOptions queryOptions) {
+    public Condition getFilterPredicate(Class<R> entityClass, QueryOptions queryOptions) {
 
         if (!queryOptions.hasFilterFilter()) {
             // Filter out non-root observations
@@ -411,7 +408,7 @@ public abstract class AbstractSensorThingsEntityServiceImpl<T extends StaEntityD
             FilterFilter filterOption = queryOptions.getFilterFilter();
             Expr filter = (Expr) filterOption.getFilter();
             try {
-                return (Condition) filter.accept(new FilterExprVisitor(entityClass.getName())); // check FilterExpr
+                return (Condition) filter.accept(new FilterExprVisitor(entityClass.getName()));
             } catch (STAInvalidQueryException e) {
                 throw new RuntimeException(e);
             }
@@ -429,12 +426,12 @@ public abstract class AbstractSensorThingsEntityServiceImpl<T extends StaEntityD
 
     protected abstract R merge(R existing, R toMerge) throws STACRUDException;
 
-    protected <E extends StaDTO & HasNameAndDescription > void mergeIdentifierNameDescription(E existing, E toMerge) {
-        if (toMerge.getId() != null && !toMerge.getId().isEmpty()) {
-            existing.setId(toMerge.getId());
-        }
-        mergeNameDescription(existing, toMerge);
-    }
+//    protected <E extends StaDTO & HasNameAndDescription > void mergeIdentifierNameDescription(E existing, E toMerge) {
+//        if (toMerge.getId() != null && !toMerge.getId().isEmpty()) {
+//            existing.setId(toMerge.getId());
+//        }
+//        mergeNameDescription(existing, toMerge);
+//    }
 
     protected <E extends HasNameAndDescription> void mergeNameDescription(E existing, E toMerge) {
         mergeName(existing, toMerge);
@@ -511,6 +508,21 @@ public abstract class AbstractSensorThingsEntityServiceImpl<T extends StaEntityD
                 .getEntityServiceRaw(EntityServiceRepository.EntityTypes.Observation);
     }
 
+    // 1 million unique timestamps/second
+    public Long getUniqueTimestamp() {
+        AtomicLong TS = getStaEntityTS();
+        long micros = System.currentTimeMillis() * 1000;
+        for ( ; ; ) {
+            long value = TS.get();
+            if (micros <= value)
+                micros = value + 1;
+            if (TS.compareAndSet(value, micros))
+                return micros;
+        }
+    }
+
     abstract Field<String> getStaEntityId();
+
+    abstract AtomicLong getStaEntityTS();
 
 }

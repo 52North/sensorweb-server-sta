@@ -29,6 +29,7 @@
 package org.n52.sta.data.cloudnative.dao.impl;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.jooq.*;
 import org.jooq.Record;
 import org.n52.shetland.filter.ExpandItem;
@@ -42,6 +43,7 @@ import org.n52.sta.data.cloudnative.condition.StaEntity;
 import org.n52.sta.data.cloudnative.condition.ThingQueryConditions;
 import org.n52.sta.data.cloudnative.dao.AbstractStaEntityDao;
 import org.n52.sta.data.cloudnative.dao.ThingDao;
+import org.n52.sta.data.cloudnative.schema.tables.pojos.Platform;
 import org.springframework.stereotype.Component;
 
 import java.util.*;
@@ -155,5 +157,26 @@ public class ThingDaoImpl extends AbstractStaEntityDao<ThingDTO> implements Thin
     @Override
     public Table<?> getEntityTable() {
         return StaEntity.THING;
+    }
+
+    public void save(Platform platform) {
+        // TODO
+    }
+
+    public void update(Platform thingPOJO) {
+        // TODO
+    }
+
+    @Override
+    public void deleteByStaIdentifier(String identifier, Class<ThingDTO> entityClass) {
+        // TODO
+    }
+
+    public void saveThingParameters(String id, ObjectNode properties) {
+        // TODO
+    }
+
+    public void deleteThingParameters(String id, ObjectNode properties) {
+        // TODO
     }
 }

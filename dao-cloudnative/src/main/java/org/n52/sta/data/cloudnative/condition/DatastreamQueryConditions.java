@@ -236,13 +236,13 @@ public class DatastreamQueryConditions extends EntityQueryConditions {
     }
 */
     public Condition withFeatureStaIdentifier(final String featureIdentifier) {
-        var query = ctx.selectOne()
-                .from(DATASTREAM)
-                .join(FEATURE_OF_INTEREST)
-                .onKey();
-
         return DSL.exists(
-                query.where(FEATURE_OF_INTEREST.STA_IDENTIFIER.eq(featureIdentifier))
+                ctx.selectOne()
+                        .from(DATASTREAM)
+                        .join(FEATURE_OF_INTEREST)
+                        .onKey()
+                        .where(FEATURE_OF_INTEREST.STA_IDENTIFIER
+                                .eq(featureIdentifier))
         );
     }
 

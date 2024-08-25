@@ -29,6 +29,7 @@
 package org.n52.sta.data.cloudnative.dao.impl;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.jooq.*;
 import org.jooq.Record;
 import org.jooq.impl.DSL;
@@ -40,6 +41,7 @@ import org.n52.sta.data.cloudnative.condition.FeatureOfInterestQueryConditions;
 import org.n52.sta.data.cloudnative.condition.StaEntity;
 import org.n52.sta.data.cloudnative.dao.AbstractStaEntityDao;
 import org.n52.sta.data.cloudnative.dao.FeatureOfInterestDao;
+import org.n52.sta.data.cloudnative.schema.tables.pojos.Feature;
 import org.springframework.stereotype.Component;
 
 import java.util.*;
@@ -120,5 +122,26 @@ public class FeatureOfInterestDaoImpl extends AbstractStaEntityDao<FeatureOfInte
     @Override
     public Table<?> getEntityTable() {
         return StaEntity.FEATURE_OF_INTEREST;
+    }
+
+    public void save(Feature featureOfInterestPOJO) {
+        // TODO
+    }
+
+    public void update(Feature feature) {
+        // TODO
+    }
+
+    @Override
+    public void deleteByStaIdentifier(String identifier, Class<FeatureOfInterestDTO> entityClass) {
+        // TODO
+    }
+
+    public void saveFeatureParameters(String featureId, ObjectNode parameters) {
+        // TODO
+    }
+
+    public void deleteFeatureParameters(String featureId, ObjectNode parameters) {
+        // TODO
     }
 }

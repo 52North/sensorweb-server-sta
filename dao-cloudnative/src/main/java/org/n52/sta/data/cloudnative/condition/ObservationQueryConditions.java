@@ -34,6 +34,8 @@ import org.n52.shetland.ogc.filter.FilterConstants;
 import org.n52.shetland.ogc.sta.StaConstants;
 import org.n52.shetland.ogc.sta.exception.STAInvalidFilterExpressionException;
 import java.util.Date;
+import java.util.List;
+
 import org.jooq.impl.DSL;
 import org.n52.shetland.ogc.sta.model.STAEntityDefinition;
 import org.n52.sta.data.cloudnative.schema.tables.Observation;
@@ -81,6 +83,15 @@ public class ObservationQueryConditions extends EntityQueryConditions {
         return null;
     }
     */
+    @Override
+    public Condition withStaIdentifier(String staIdentifier) {
+        return DATASTREAM.STA_IDENTIFIER.eq(staIdentifier);
+    }
+
+    @Override
+    public Condition withStaIdentifier(List<String> identifiers) {
+        return DATASTREAM.STA_IDENTIFIER.in(identifiers);
+    }
 
     @Override
     protected <T extends Comparable<? super T>> Condition

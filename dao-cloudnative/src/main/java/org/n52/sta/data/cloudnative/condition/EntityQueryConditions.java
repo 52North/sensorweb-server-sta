@@ -41,6 +41,7 @@ import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
 import java.util.Date;
+import java.util.List;
 
 /**
  * @author <a href="mailto:humaid.kidwai@ucalgary.ca">Humaid Kidwai</a>
@@ -77,6 +78,11 @@ public abstract class EntityQueryConditions implements StaEntity {
     public void setDslContext(DSLContext ctx) {
         this.ctx = ctx;
     }
+
+    public abstract Condition withStaIdentifier(final String staIdentifier);
+
+    public abstract Condition withStaIdentifier(final List<String> identifiers);
+
 
     /**
      * Gets Entity-specific Filter for relation with given name.

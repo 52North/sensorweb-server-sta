@@ -63,24 +63,24 @@ public class UnitDaoImpl {
         return count != null;
     }
 
-    public DatastreamDTO.UnitOfMeasurement save(Unit unitPOJO) {
-        // TODO:
-        unitPOJO.setUnitId(0L);
-        return null;
+    public void save(Unit unitPOJO) {
+        // TODO
     }
 
-    public Optional<DatastreamDTO.UnitOfMeasurement> findBySymbol(String symbol) {
+    public Optional<Unit> findBySymbol(String symbol) {
         Condition predicate = StaEntity.UNIT.SYMBOL.eq(symbol);
-        Result<Record> result = ctx.select().from(StaEntity.UNIT).where(predicate).fetch();
-        return Optional.ofNullable(mapResultToUOM(result)).map(dto -> dto.get(0));
+        // symbol must be unique
+        Record result = ctx.select().from(StaEntity.UNIT).where(predicate).fetchOne();
+        return Optional.of(mapResultToPOJO(result));
     }
 
-    protected List<DatastreamDTO.UnitOfMeasurement> mapResultToUOM(Result<Record> result) {
-        Set<DatastreamDTO.UnitOfMeasurement> units = new HashSet<>();
-        for (Record record: result) {
-            units.add(record.map(new DTOMapper.DatastreamRecordMapper.UnitRecordMapper()));
-        }
-        return new ArrayList<>(units);
+    private Unit mapResultToPOJO(Record result) {
+        Unit unitPOJO = new Unit();
+        unitPOJO.setSymbol(result.getValue(StaEntity.UNIT.SYMBOL));
+        unitPOJO.setUnitId(result.getValue(StaEntity.UNIT.UNIT_ID));
+        unitPOJO.setName(result.getValue(StaEntity.UNIT.NAME));
+        unitPOJO.setLink(result.getValue(StaEntity.UNIT.LINK));
+        return unitPOJO;
     }
 
 }

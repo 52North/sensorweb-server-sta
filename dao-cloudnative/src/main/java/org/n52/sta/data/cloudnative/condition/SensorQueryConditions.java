@@ -39,6 +39,8 @@ import org.n52.sta.data.cloudnative.schema.tables.Procedure;
 import org.n52.sta.data.cloudnative.schema.tables.ProcedureParameter;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
+
 /**
  * @author <a href="mailto:humaid.kidwai@ucalgary.ca">Humaid Kidwai</a>
  */
@@ -56,6 +58,20 @@ public class SensorQueryConditions extends EntityQueryConditions {
                         .where(DATASTREAM.STA_IDENTIFIER.eq(datastreamIdentifier))
         );
 
+    }
+
+    @Override
+    public Condition withStaIdentifier(String staIdentifier) {
+        return StaEntity.STA_IDENTIFIER.eq(staIdentifier);
+    }
+
+    @Override
+    public Condition withStaIdentifier(List<String> identifiers) {
+        return StaEntity.STA_IDENTIFIER.in(identifiers);
+    }
+
+    public Condition withName(String name) {
+        return StaEntity.NAME.eq(name);
     }
 
     @Override

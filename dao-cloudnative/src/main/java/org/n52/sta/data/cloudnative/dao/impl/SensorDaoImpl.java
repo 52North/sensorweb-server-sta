@@ -29,6 +29,7 @@
 package org.n52.sta.data.cloudnative.dao.impl;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.jooq.*;
 import org.jooq.Record;
 import org.n52.shetland.filter.ExpandItem;
@@ -42,6 +43,7 @@ import org.n52.sta.data.cloudnative.condition.SensorQueryConditions;
 import org.n52.sta.data.cloudnative.condition.StaEntity;
 import org.n52.sta.data.cloudnative.dao.AbstractStaEntityDao;
 import org.n52.sta.data.cloudnative.dao.SensorDao;
+import org.n52.sta.data.cloudnative.schema.tables.pojos.Procedure;
 import org.springframework.stereotype.Component;
 
 import java.util.*;
@@ -134,5 +136,26 @@ public class SensorDaoImpl extends AbstractStaEntityDao<SensorDTO> implements Se
     @Override
     public Table<?> getEntityTable() {
         return StaEntity.SENSOR;
+    }
+
+    public void save(Procedure procedure) {
+        // TODO
+    }
+
+    public void update(Procedure procedure) {
+        // TODO
+    }
+
+    @Override
+    public void deleteByStaIdentifier(String identifier, Class<SensorDTO> entityClass) {
+
+    }
+
+    public void saveSensorParameters(String id, ObjectNode properties) {
+        // TODO
+    }
+
+    public void deleteSensorParameters(String id, ObjectNode properties) {
+        // TODO
     }
 }

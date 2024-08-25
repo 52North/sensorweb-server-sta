@@ -38,6 +38,8 @@ import org.n52.shetland.ogc.sta.model.STAEntityDefinition;
 import org.n52.sta.data.cloudnative.schema.tables.Platform;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
+
 /**
  * @author <a href="mailto:humaid.kidwai@ucalgary.ca">Humaid Kidwai</a>
  */
@@ -77,6 +79,16 @@ public class ThingQueryConditions extends EntityQueryConditions {
                         .onKey()
                         .where(DATASTREAM.STA_IDENTIFIER.eq(datastreamIdentifier))
         );
+    }
+
+    @Override
+    public Condition withStaIdentifier(String staIdentifier) {
+        return THING.STA_IDENTIFIER.eq(staIdentifier);
+    }
+
+    @Override
+    public Condition withStaIdentifier(List<String> identifiers) {
+        return THING.STA_IDENTIFIER.in(identifiers);
     }
 
     @Override

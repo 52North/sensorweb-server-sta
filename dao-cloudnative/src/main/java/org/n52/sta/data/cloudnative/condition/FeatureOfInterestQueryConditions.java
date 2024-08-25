@@ -44,6 +44,8 @@ import org.n52.sta.data.cloudnative.schema.tables.FeatureParameter;
 import org.n52.svalbard.odata.core.expr.GeoValueExpr;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
+
 /**
  * @author <a href="mailto:humaid.kidwai@ucalgary.ca">Humaid Kidwai</a>
  */
@@ -63,6 +65,20 @@ public class FeatureOfInterestQueryConditions extends EntityQueryConditions impl
                         .onKey()
                         .where(OBSERVATION.STA_IDENTIFIER.eq(observationIdentifier))
         );
+    }
+
+    @Override
+    public Condition withStaIdentifier(String staIdentifier) {
+        return StaEntity.STA_IDENTIFIER.eq(staIdentifier);
+    }
+
+    public Condition withName(String name) {
+        return StaEntity.NAME.eq(name);
+    }
+
+    @Override
+    public Condition withStaIdentifier(List<String> identifiers) {
+        return StaEntity.STA_IDENTIFIER.in(identifiers);
     }
 
     @Override

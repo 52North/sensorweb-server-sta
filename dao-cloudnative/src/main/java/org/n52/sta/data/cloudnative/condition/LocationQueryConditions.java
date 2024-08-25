@@ -44,6 +44,8 @@ import org.n52.sta.data.cloudnative.schema.tables.LocationParameter;
 import org.n52.svalbard.odata.core.expr.GeoValueExpr;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
+
 /**
  * @author <a href="mailto:humaid.kidwai@ucalgary.ca">Humaid Kidwai</a>
  */
@@ -164,6 +166,16 @@ public class LocationQueryConditions extends EntityQueryConditions implements Sp
 
         }
         throw new RuntimeException("Could not find spatial function: " + spatialFunctionName);
+    }
+
+    @Override
+    public Condition withStaIdentifier(String staIdentifier) {
+        return LOCATION.STA_IDENTIFIER.eq(staIdentifier);
+    }
+
+    @Override
+    public Condition withStaIdentifier(List<String> identifiers) {
+        return LOCATION.STA_IDENTIFIER.in(identifiers);
     }
 
     @Override

@@ -244,11 +244,8 @@ public abstract class AbstractStaEntityDao<T extends StaDTO> implements StaEntit
     }
 
     @Override
-    public void deleteByStaIdentifier(String identifier,
-                                      Class<T> entityClass) {
-        // TODO
-
-    }
+    public abstract void deleteByStaIdentifier(String identifier,
+                                      Class<T> entityClass);
 
     public Select<Record> selectQueryBuilder(@NotNull Condition where,
                                              @NotNull Class<T> entityClass,

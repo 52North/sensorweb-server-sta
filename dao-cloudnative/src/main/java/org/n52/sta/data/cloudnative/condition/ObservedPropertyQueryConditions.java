@@ -42,6 +42,8 @@ import org.n52.sta.data.cloudnative.schema.tables.Phenomenon;
 import org.n52.sta.data.cloudnative.schema.tables.PhenomenonParameter;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
+
 /**
  * @author <a href="mailto:humaid.kidwai@ucalgary.ca">Humaid Kidwai</a>
  */
@@ -82,6 +84,20 @@ public class ObservedPropertyQueryConditions extends EntityQueryConditions {
         }
     }
 
+
+    @Override
+    public Condition withStaIdentifier(String staIdentifier) {
+        return OBSERVATION.STA_IDENTIFIER.eq(staIdentifier);
+    }
+
+    @Override
+    public Condition withStaIdentifier(List<String> identifiers) {
+        return OBSERVATION.STA_IDENTIFIER.in(identifiers);
+    }
+
+    public Condition withName(String name) {
+        return StaEntity.NAME.eq(name);
+    }
 
     @Override
     protected  <T extends Comparable<? super T>> Condition handleDirectPropertyFilter(String propertyName,

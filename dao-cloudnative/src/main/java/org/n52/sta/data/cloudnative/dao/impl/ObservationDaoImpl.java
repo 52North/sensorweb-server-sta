@@ -29,6 +29,7 @@
 package org.n52.sta.data.cloudnative.dao.impl;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.jooq.*;
 import org.jooq.Record;
 
@@ -41,6 +42,7 @@ import org.n52.sta.data.cloudnative.condition.StaEntity;
 import org.n52.sta.data.cloudnative.dao.AbstractStaEntityDao;
 import org.n52.sta.data.cloudnative.dao.ObservationDao;
 
+import org.n52.sta.data.cloudnative.schema.tables.pojos.Observation;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Order;
 import org.springframework.stereotype.Component;
@@ -56,8 +58,9 @@ public class ObservationDaoImpl extends AbstractStaEntityDao<ObservationDTO> imp
     private Set<Table<?>> joins;
 
     @Override
-    public ObservationDTO findFirstByDatasetIdOrderBySamplingTimeStartAsc(Long datasetIdentifier,
-                                                                          Class<ObservationDTO> entityClass) throws STAInvalidQueryException {
+    public Observation findFirstByDatasetIdOrderBySamplingTimeStartAsc(Long datasetIdentifier,
+                                                                          Class<ObservationDTO> entityClass)
+            throws STAInvalidQueryException {
 
         Condition predicate = StaEntity.OBSERVATION.FK_DATASET_ID.eq(datasetIdentifier);
         Sort sort = Sort.by(Order.asc((StaEntity.OBSERVATION.SAMPLING_TIME_START.getName())));
@@ -65,13 +68,14 @@ public class ObservationDaoImpl extends AbstractStaEntityDao<ObservationDTO> imp
                 entityClass,
                 sort,
                 null);
-        Result<Record> result = query.limit(1).fetch();
-        return mapResultToDTO(result).get(0);
+        return query.limit(1).fetch().into(StaEntity.OBSERVATION).into(Observation.class).get(0);
+
     }
 
     @Override
-    public ObservationDTO findFirstByDatasetIdOrderBySamplingTimeEndDesc(Long datasetIdentifier,
-                                                                         Class<ObservationDTO> entityClass) throws STAInvalidQueryException {
+    public Observation findFirstByDatasetIdOrderBySamplingTimeEndDesc(Long datasetIdentifier,
+                                                                         Class<ObservationDTO> entityClass)
+            throws STAInvalidQueryException {
 
         Condition predicate = StaEntity.OBSERVATION.FK_DATASET_ID.eq(datasetIdentifier);
         Sort sort = Sort.by(Order.desc(StaEntity.OBSERVATION.SAMPLING_TIME_END.getName()));
@@ -79,8 +83,7 @@ public class ObservationDaoImpl extends AbstractStaEntityDao<ObservationDTO> imp
                 entityClass,
                 sort,
                 null);
-        Result<Record> result = query.limit(1).fetch();
-        return mapResultToDTO(result).get(0);
+        return query.limit(1).fetch().into(StaEntity.OBSERVATION).into(Observation.class).get(0);
     }
 
     @Override
@@ -143,8 +146,29 @@ public class ObservationDaoImpl extends AbstractStaEntityDao<ObservationDTO> imp
         return StaEntity.OBSERVATION;
     }
 
+    public void save(Observation observation) {
+        // TODO:
+    }
+
+    public void update(Observation updatedObservation) {
+        // TODO:
+    }
+
+    @Override
+    public void deleteByStaIdentifier(String identifier, Class<ObservationDTO> entityClass) {
+        // TODO
+    }
+
     @Override
     public void deleteAllByDatasetIdIn(Set datasetId) {
         // TODO
+    }
+
+    public void saveObservationParameters(String id, ObjectNode parameters) {
+        // TODO
+    }
+
+    public void deleteObservationParameters(Long Id, ObjectNode parameters) {
+        // TODO:
     }
 }

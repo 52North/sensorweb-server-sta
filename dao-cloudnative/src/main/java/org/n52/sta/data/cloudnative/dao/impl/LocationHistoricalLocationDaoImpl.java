@@ -28,55 +28,29 @@
  */
 package org.n52.sta.data.cloudnative.dao.impl;
 
-import org.jooq.*;
-import org.jooq.Record;
-import org.n52.sta.data.cloudnative.condition.StaEntity;
-import org.n52.sta.data.cloudnative.schema.tables.pojos.Format;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.n52.sta.data.cloudnative.schema.tables.pojos.LocationHistoricalLocation;
 import org.springframework.stereotype.Component;
 
-import java.util.Optional;
+import java.util.Set;
 
 /**
  * @author <a href="mailto:humaid.kidwai@ucalgary.ca">Humaid Kidwai</a>
  */
 @Component
-public class FormatDaoImpl {
-    private final DSLContext ctx;
-
-    @Autowired
-    public FormatDaoImpl(DSLContext ctx) {
-        this.ctx = ctx;
+public class LocationHistoricalLocationDaoImpl implements LocationHistoricalLocationDao {
+    @Override
+    public void saveAll(Set<LocationHistoricalLocation> locationHistoricalLocations) {
+        // TODO
     }
 
+    @Override
+    public void deleteByLocationId(long locationId) {
+        // TODO
 
-    public boolean existsByFormat(String definition) {
-        Condition predicate = StaEntity.FORMAT.DEFINITION.eq(definition);
-        Table<?> table = StaEntity.FORMAT;
-        Long count = ctx
-                .selectCount()
-                .from(table)
-                .where(predicate)
-                .fetchOne(0, long.class);
-
-        return count != null;
     }
 
-    public Optional<Format> findByFormat(String definition) {
-        Condition predicate = StaEntity.FORMAT.DEFINITION.eq(definition);
-        // definition must be unique
-        Record result = ctx.select().from(StaEntity.UNIT).where(predicate).fetchOne();
-        return Optional.of(mapResultToPOJO(result));
-    }
-
-    private Format mapResultToPOJO(Record result) {
-        Format formatPOJO = new Format();
-        formatPOJO.setFormatId(result.get(StaEntity.FORMAT.FORMAT_ID));
-        formatPOJO.setDefinition(result.get(StaEntity.FORMAT.DEFINITION));
-        return formatPOJO;
-    }
-
-    public void save(Format formatPOJO) {
-        // TODO:
+    @Override
+    public void deleteByHistoricalLocationId(long historicalLocationId) {
+        // TODO
     }
 }

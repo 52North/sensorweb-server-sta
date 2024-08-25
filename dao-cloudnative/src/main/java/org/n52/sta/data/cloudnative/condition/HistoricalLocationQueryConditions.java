@@ -44,6 +44,7 @@ import org.n52.sta.data.cloudnative.schema.tables.HistoricalLocation;
 import org.springframework.stereotype.Component;
 
 import java.util.Date;
+import java.util.List;
 
 /**
  * @author <a href="mailto:humaid.kidwai@ucalgary.ca">Humaid Kidwai</a>
@@ -74,6 +75,16 @@ public class HistoricalLocationQueryConditions extends EntityQueryConditions {
                         .onKey()
                         .where(THING.STA_IDENTIFIER.eq(thingIdentifier))
         );
+    }
+
+    @Override
+    public Condition withStaIdentifier(String staIdentifier) {
+        return HISTORICAL_LOCATION.STA_IDENTIFIER.eq(staIdentifier);
+    }
+
+    @Override
+    public Condition withStaIdentifier(List<String> identifiers) {
+        return HISTORICAL_LOCATION.STA_IDENTIFIER.in(identifiers);
     }
 
     @Override

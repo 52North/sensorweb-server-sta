@@ -143,21 +143,21 @@ public class LocationService
             switch (expandProperty) {
                 case STAEntityDefinition.HISTORICAL_LOCATIONS:
                     Page<HistoricalLocationEntity> hLocs = getHistoricalLocationService()
-                        .getEntityCollectionByRelatedEntityRaw(entity.getStaIdentifier(),
-                                                               STAEntityDefinition.LOCATIONS,
-                                                               expandItem.getQueryOptions());
+                            .getEntityCollectionByRelatedEntityRaw(entity.getStaIdentifier(),
+                                    STAEntityDefinition.LOCATIONS,
+                                    expandItem.getQueryOptions());
                     entity.setHistoricalLocations(hLocs.get().collect(Collectors.toSet()));
                     break;
                 case STAEntityDefinition.THINGS:
                     Page<PlatformEntity> things =
-                        getThingService().getEntityCollectionByRelatedEntityRaw(entity.getStaIdentifier(),
-                                                                                STAEntityDefinition.LOCATIONS,
-                                                                                expandItem.getQueryOptions());
+                            getThingService().getEntityCollectionByRelatedEntityRaw(entity.getStaIdentifier(),
+                                    STAEntityDefinition.LOCATIONS,
+                                    expandItem.getQueryOptions());
                     entity.setThings(things.get().collect(Collectors.toSet()));
                     break;
                 default:
                     throw new STAInvalidQueryException(String.format(INVALID_EXPAND_OPTION_SUPPLIED, expandProperty,
-                                                                     StaConstants.LOCATION));
+                            StaConstants.LOCATION));
             }
         }
         return entity;

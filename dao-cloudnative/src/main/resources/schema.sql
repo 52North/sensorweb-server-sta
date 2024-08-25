@@ -1,20 +1,20 @@
 create table if not exists unit (
-                                    unit_id bigint not null,
-                                    symbol varchar(255) not null,
+    unit_id bigint not null,
+    symbol varchar(255) not null,
     name varchar(255),
     link varchar(255),
     constraint unit_pkey primary key (unit_id),
     constraint un_unit_symbol unique (symbol)
     );
 create table if not exists format (
-                                      format_id bigint not null,
-                                      definition varchar(255) not null,
+    format_id bigint not null,
+    definition varchar(255) not null,
     constraint format_pkey primary key (format_id),
     constraint un_format_definition unique (definition)
     );
 create table if not exists feature (
-                                       feature_id bigint not null,
-                                       discriminator varchar(255),
+    feature_id bigint not null,
+    discriminator varchar(255),
     fk_format_id bigint not null,
     identifier varchar(255) not null,
     sta_identifier varchar(255) not null,
@@ -30,8 +30,8 @@ create table if not exists feature (
     constraint un_feature_url unique (url)
     );
 create table if not exists feature_parameter (
-                                                 parameter_id bigint not null,
-                                                 type varchar(255) not null,
+    parameter_id bigint not null,
+    type varchar(255) not null,
     name varchar(255) not null,
     description varchar,
     last_update timestamp,
@@ -65,8 +65,8 @@ create table if not exists feature_parameter (
 --     ] as array))
     );
 create table if not exists platform (
-                                        platform_id bigint not null,
-                                        identifier varchar(255) not null,
+    platform_id bigint not null,
+    identifier varchar(255) not null,
     sta_identifier varchar(255) not null,
     name varchar(255),
     description varchar,
@@ -75,8 +75,8 @@ create table if not exists platform (
     constraint un_platform_staidentifier unique (sta_identifier)
     );
 create table if not exists platform_parameter (
-                                                  parameter_id bigint not null,
-                                                  type varchar(255) not null,
+    parameter_id bigint not null,
+    type varchar(255) not null,
     name varchar(255) not null,
     description varchar,
     last_update timestamp,
@@ -110,8 +110,8 @@ create table if not exists platform_parameter (
 --     ] as array))
     );
 create table if not exists historical_location (
-                                                   historical_location_id bigint not null,
-                                                   identifier varchar(255) not null,
+    historical_location_id bigint not null,
+    identifier varchar(255) not null,
     sta_identifier varchar(255) not null,
     fk_platform_id bigint not null,
     "time" timestamp not null,
@@ -121,8 +121,8 @@ create table if not exists historical_location (
     constraint un_historicallocation_staidentifier unique (sta_identifier)
     );
 create table if not exists location (
-                                        location_id bigint not null,
-                                        identifier varchar(255) not null,
+    location_id bigint not null,
+    identifier varchar(255) not null,
     sta_identifier varchar(255) not null,
     name varchar(255) not null,
     description varchar not null,
@@ -135,8 +135,8 @@ create table if not exists location (
     constraint un_location_staidentifier unique (sta_identifier)
     );
 create table if not exists location_parameter (
-                                                  parameter_id bigint not null,
-                                                  type varchar(255) not null,
+    parameter_id bigint not null,
+    type varchar(255) not null,
     name varchar(255) not null,
     description varchar,
     last_update timestamp,
@@ -170,22 +170,22 @@ create table if not exists location_parameter (
 --     ] as array))
     );
 create table if not exists platform_location (
-                                                 fk_location_id bigint not null,
-                                                 fk_platform_id bigint not null,
-                                                 foreign key (fk_location_id) references location (location_id),
+    fk_location_id bigint not null,
+    fk_platform_id bigint not null,
+    foreign key (fk_location_id) references location (location_id),
     foreign key (fk_platform_id) references platform (platform_id),
     constraint platform_location_pkey primary key (fk_platform_id, fk_location_id)
     );
 create table if not exists location_historical_location (
-                                                            fk_location_id bigint not null,
-                                                            fk_historical_location_id bigint not null,
-                                                            foreign key (fk_location_id) references location (location_id),
+    fk_location_id bigint not null,
+    fk_historical_location_id bigint not null,
+    foreign key (fk_location_id) references location (location_id),
     foreign key (fk_historical_location_id) references historical_location (historical_location_id),
     constraint location_historical_location_pkey primary key (fk_location_id, fk_historical_location_id)
     );
 create table if not exists phenomenon (
-                                          phenomenon_id bigint not null,
-                                          identifier varchar(255) not null,
+    phenomenon_id bigint not null,
+    identifier varchar(255) not null,
     sta_identifier varchar(255) not null,
     name varchar(255),
     description varchar,
@@ -194,8 +194,8 @@ create table if not exists phenomenon (
     constraint un_phenomenon_staidentifier unique (sta_identifier)
     );
 create table if not exists phenomenon_parameter (
-                                                    parameter_id bigint not null,
-                                                    type varchar(255) not null,
+    parameter_id bigint not null,
+    type varchar(255) not null,
     name varchar(255) not null,
     description varchar,
     last_update timestamp,
@@ -229,8 +229,8 @@ create table if not exists phenomenon_parameter (
 --     ] as array))
     );
 create table if not exists procedure (
-                                         procedure_id bigint not null,
-                                         identifier varchar(255) not null,
+    procedure_id bigint not null,
+    identifier varchar(255) not null,
     sta_identifier varchar(255) not null,
     fk_identifier_codespace_id bigint,
     name varchar(255),
@@ -250,8 +250,8 @@ create table if not exists procedure (
 --     constraint procedure_is_aggregation_check check (is_aggregation = array[1, 0])
     );
 create table if not exists procedure_parameter (
-                                                   parameter_id bigint not null,
-                                                   type varchar(255),
+    parameter_id bigint not null,
+    type varchar(255),
     name varchar(255),
     description varchar,
     last_update timestamp,
@@ -407,8 +407,8 @@ create table if not exists dataset_parameter (
     );
 
 create table if not exists observation (
-                                           observation_id bigint not null,
-                                           value_type varchar(255) not null,
+    observation_id bigint not null,
+    value_type varchar(255) not null,
     fk_dataset_id bigint not null,
     sampling_time_start timestamp not null,
     sampling_time_end timestamp not null,

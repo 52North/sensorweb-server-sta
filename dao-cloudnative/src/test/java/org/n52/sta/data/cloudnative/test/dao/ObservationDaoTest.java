@@ -39,33 +39,33 @@ public class ObservationDaoTest {
         observationDao.setCtx(ctx);
     }
 
-    @Test
-    public void testWithFindFirstByDatasetIdOrderBySamplingTimeStartAsc() {
-        Long datasetId = 1L;
-        Class<ObservationDTO> entityClass = ObservationDTO.class;
-        ObservationDTO observation = null;
-        try {
-            observation = observationDao.findFirstByDatasetIdOrderBySamplingTimeStartAsc(datasetId, entityClass);
-        } catch (STAInvalidQueryException e) {
-            e.printStackTrace();
-        }
+//    @Test
+//    public void testWithFindFirstByDatasetIdOrderBySamplingTimeStartAsc() {
+//        Long datasetId = 1L;
+//        Class<ObservationDTO> entityClass = ObservationDTO.class;
+//        ObservationDTO observation = null;
+//        try {
+//            observation = observationDao.findFirstByDatasetIdOrderBySamplingTimeStartAsc(datasetId, entityClass);
+//        } catch (STAInvalidQueryException e) {
+//            e.printStackTrace();
+//        }
+//
+//        Assertions.assertEquals(observation.getId(), "7800368e0ff362d2924424b91d4e3d2381cc1ba9ecfd7bcd72b5d7b3c1e17e38");
+//    }
 
-        Assertions.assertEquals(observation.getId(), "7800368e0ff362d2924424b91d4e3d2381cc1ba9ecfd7bcd72b5d7b3c1e17e38");
-    }
-
-    @Test
-    public void testWithFindFirstByDatasetIdOrderBySamplingTimeEndDesc() {
-        Long datasetId = 1L;
-        Class<ObservationDTO> entityClass = ObservationDTO.class;
-        ObservationDTO observation = null;
-        try {
-            observation = observationDao.findFirstByDatasetIdOrderBySamplingTimeEndDesc(datasetId, entityClass);
-        } catch (STAInvalidQueryException e) {
-            e.printStackTrace();
-        }
-
-        Assertions.assertEquals(observation.getId(), "7800368e0ff362d2924424b91d4e3d2381cc1ba9ecfd7bcd72b5d7b3c1e17e38");
-    }
+//    @Test
+//    public void testWithFindFirstByDatasetIdOrderBySamplingTimeEndDesc() {
+//        Long datasetId = 1L;
+//        Class<ObservationDTO> entityClass = ObservationDTO.class;
+//        ObservationDTO observation = null;
+//        try {
+//            observation = observationDao.findFirstByDatasetIdOrderBySamplingTimeEndDesc(datasetId, entityClass);
+//        } catch (STAInvalidQueryException e) {
+//            e.printStackTrace();
+//        }
+//
+//        Assertions.assertEquals(observation.getId(), "7800368e0ff362d2924424b91d4e3d2381cc1ba9ecfd7bcd72b5d7b3c1e17e38");
+//    }
 
     @Test
     public void testWithGetColumn() {

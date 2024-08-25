@@ -26,6 +26,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
+
 package org.n52.sta.data.cloudnative.service;
 
 import org.n52.shetland.oasis.odata.query.option.QueryOptions;
@@ -145,7 +146,7 @@ public class ServiceFacade <R extends StaDTO> implements AbstractSensorThingsEnt
         try {
             semaphore.acquire();
             result = serviceImpl.getEntityIdByRelatedEntity(relatedId, relatedType);
-        } catch (InterruptedException e) {
+        } catch (InterruptedException | STAInvalidQueryException e) {
             throw new STACRUDException(e.getMessage(), e);
         } finally {
             semaphore.release();
@@ -173,7 +174,7 @@ public class ServiceFacade <R extends StaDTO> implements AbstractSensorThingsEnt
         try {
             semaphore.acquire();
             result = serviceImpl.create(entity);
-        } catch (InterruptedException e) {
+        } catch (InterruptedException | STAInvalidQueryException e) {
             throw new STACRUDException(e.getMessage(), e);
         } finally {
             semaphore.release();
@@ -187,10 +188,8 @@ public class ServiceFacade <R extends StaDTO> implements AbstractSensorThingsEnt
         try {
             semaphore.acquire();
             result = serviceImpl.update(id, entity, method);
-        } catch (InterruptedException e) {
+        } catch (InterruptedException | STAInvalidQueryException e) {
             throw new STACRUDException(e.getMessage(), e);
-        } catch (STAInvalidQueryException e) {
-            throw new RuntimeException(e);
         } finally {
             semaphore.release();
         }
@@ -202,7 +201,7 @@ public class ServiceFacade <R extends StaDTO> implements AbstractSensorThingsEnt
         try {
             semaphore.acquire();
             serviceImpl.delete(id);
-        } catch (InterruptedException e) {
+        } catch (InterruptedException | STAInvalidQueryException e) {
             throw new STACRUDException(e.getMessage(), e);
         } finally {
             semaphore.release();

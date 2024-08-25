@@ -43,6 +43,7 @@ import org.n52.sta.data.cloudnative.condition.HistoricalLocationQueryConditions;
 import org.n52.sta.data.cloudnative.condition.StaEntity;
 import org.n52.sta.data.cloudnative.dao.AbstractStaEntityDao;
 import org.n52.sta.data.cloudnative.dao.HistoricalLocationDao;
+import org.n52.sta.data.cloudnative.schema.tables.pojos.HistoricalLocation;
 import org.springframework.stereotype.Component;
 
 import java.util.*;
@@ -136,5 +137,18 @@ public class HistoricalLocationDaoImpl extends AbstractStaEntityDao<HistoricalLo
     @Override
     public Field<Long> getEntityId() {
         return StaEntity.HISTORICAL_LOCATION.HISTORICAL_LOCATION_ID;
+    }
+
+    public void save(HistoricalLocation historicalLocation) {
+        // TODO
+    }
+
+    public void update(HistoricalLocation historicalLocation) {
+        // TODO
+    }
+
+    @Override
+    public void deleteByStaIdentifier(String identifier, Class<HistoricalLocationDTO> entityClass) {
+        // TODO
     }
 }

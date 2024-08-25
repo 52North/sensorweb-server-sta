@@ -126,7 +126,6 @@ public class FilterExprVisitor implements ExprVisitor<Field<?>, STAInvalidQueryE
                 expr.getValue().equals(StaConstants.PROP_RESULT)) {
             return null;
         } else {
-            // TODO
             return rootQC.checkPropertyName(expr.getValue());
         }
     }

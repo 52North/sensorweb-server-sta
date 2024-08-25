@@ -26,19 +26,32 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
+
 package org.n52.sta.data.cloudnative.dao.impl;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
+import org.n52.sta.data.cloudnative.schema.tables.pojos.PlatformLocation;
+import org.springframework.stereotype.Component;
+
+import java.util.Set;
 
 /**
  * @author <a href="mailto:humaid.kidwai@ucalgary.ca">Humaid Kidwai</a>
  */
-public class DatastreamParameterDaoImpl {
-    public void saveAll(ObjectNode properties, String id) {
-        // TODO:
+@Component
+public class ThingLocationDaoImpl implements ThingLocationDao {
+    @Override
+    public void saveAll(Set<PlatformLocation> thingLocations) {
+        // TODO
     }
-    public void deleteByDatasetIdentifier(String id) {
-        // TODO:
+
+    @Override
+    public void deleteByLocationId(long locationId) {
+        // TODO
+
+    }
+
+    @Override
+    public void deleteByThingId(long thingId) {
+        // TODO
     }
 }

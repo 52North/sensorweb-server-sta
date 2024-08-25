@@ -29,9 +29,11 @@
 package org.n52.sta.data.cloudnative.dao.impl;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.jooq.*;
 import org.jooq.Record;
 import org.jooq.impl.DSL;
+import org.n52.series.db.beans.sta.LocationEntity;
 import org.n52.shetland.filter.ExpandItem;
 import org.n52.shetland.oasis.odata.query.option.QueryOptions;
 import org.n52.shetland.ogc.sta.StaConstants;
@@ -43,6 +45,7 @@ import org.n52.sta.data.cloudnative.condition.LocationQueryConditions;
 import org.n52.sta.data.cloudnative.condition.StaEntity;
 import org.n52.sta.data.cloudnative.dao.AbstractStaEntityDao;
 import org.n52.sta.data.cloudnative.dao.LocationDao;
+import org.n52.sta.data.cloudnative.schema.tables.pojos.Location;
 import org.springframework.stereotype.Component;
 
 import java.util.*;
@@ -171,5 +174,26 @@ public class LocationDaoImpl extends AbstractStaEntityDao<LocationDTO> implement
     @Override
     public Field<Long> getEntityId() {
         return StaEntity.LOCATION.LOCATION_ID;
+    }
+
+    @Override
+    public void deleteByStaIdentifier(String identifier, Class<LocationDTO> entityClass) {
+        // TODO
+    }
+
+    public void saveLocationParameters(String id, ObjectNode properties) {
+        // TODO
+    }
+
+    public void save(Location location) {
+        // TODO
+    }
+
+    public void update(Location location) {
+        // TODO
+    }
+
+    public void deleteLocationParameters(String id, ObjectNode properties) {
+        // TODO
     }
 }

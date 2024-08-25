@@ -29,12 +29,14 @@
 package org.n52.sta.data.cloudnative.dao.impl;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.jooq.*;
 import org.jooq.Record;
 import org.jooq.impl.DSL;
 import org.n52.shetland.filter.ExpandItem;
 import org.n52.shetland.oasis.odata.query.option.QueryOptions;
 import org.n52.shetland.ogc.sta.StaConstants;
+import org.n52.shetland.ogc.sta.exception.STACRUDException;
 import org.n52.shetland.ogc.sta.exception.STAInvalidQueryException;
 import org.n52.shetland.ogc.sta.model.STAEntityDefinition;
 import org.n52.sta.api.dto.DatastreamDTO;
@@ -43,6 +45,7 @@ import org.n52.sta.data.cloudnative.condition.DatastreamQueryConditions;
 import org.n52.sta.data.cloudnative.condition.StaEntity;
 import org.n52.sta.data.cloudnative.dao.AbstractStaEntityDao;
 import org.n52.sta.data.cloudnative.dao.DatastreamDao;
+import org.n52.sta.data.cloudnative.schema.tables.pojos.Dataset;
 import org.springframework.stereotype.Component;
 
 import java.util.*;
@@ -56,12 +59,36 @@ public class DatastreamDaoImpl extends AbstractStaEntityDao<DatastreamDTO> imple
 
     private Set<Table<?>> joins;
 
-    @Override
-    public List<DatastreamDTO> findAllByAggregationId(Long id, Class<DatastreamDTO> entityClass)
-            throws STAInvalidQueryException {
 
-        Condition predicate = StaEntity.DATASTREAM.FK_AGGREGATION_ID.eq(id);
-        return findAll(predicate, null, entityClass);
+    @Override
+    public Set<Dataset> findAllPOJOByAggregationId(Long datasetId)
+            throws STAInvalidQueryException {
+        Condition predicate = StaEntity.DATASTREAM.FK_AGGREGATION_ID.eq(datasetId);
+        // TODO: Ensure the mapping happens correctly
+        Set<Dataset> returned = selectQueryBuilder(predicate, DatastreamDTO.class, null, null)
+                .fetch()
+                .stream()
+                .map(record -> record.into(StaEntity.DATASTREAM).into(Dataset.class))
+                .collect(Collectors.toSet());
+        return returned;
+    }
+
+    public Dataset findOnePOJO(Condition predicate) throws STAInvalidQueryException {
+        // TODO: improve code
+        Dataset dataset = selectQueryBuilder(predicate, DatastreamDTO.class, null, null)
+                .fetchAny().into(StaEntity.DATASTREAM).into(Dataset.class);
+        return dataset;
+    }
+
+    public Dataset findPOJOByDatasetId(Long datasetId) throws STAInvalidQueryException, STACRUDException {
+        Condition predicate = StaEntity.DATASTREAM.DATASET_ID.eq(datasetId);
+        Dataset dataset = Optional.ofNullable(selectQueryBuilder(predicate,
+                        DatastreamDTO.class,
+                        null,
+                        null)
+                        .fetchAnyInto(Dataset.class))
+                .orElseThrow(() -> new STACRUDException("Unable to find Datastream!"));
+        return dataset;
     }
 
     @Override
@@ -177,15 +204,28 @@ public class DatastreamDaoImpl extends AbstractStaEntityDao<DatastreamDTO> imple
         return StaEntity.DATASTREAM.DATASET_ID;
     }
 
-    public void save(DatastreamDTO merged) {
+    public void save(Dataset dataset) {
         // TODO
     }
 
-    public void update(String id, DatastreamDTO merged) {
+    public void update(Long id, Dataset dataset) {
         // TODO
     }
 
-    public void deleteById(Long Id) {
+    @Override
+    public void deleteByStaIdentifier(String identifier, Class<DatastreamDTO> entityClass) {
+        // TODO
+    }
+
+    public void deleteById(Long datasetId) {
+        // TODO
+    }
+
+    public void saveDatastreamParameters(String id, ObjectNode properties) {
+        // TODO
+    }
+
+    public void deleteDatastreamParametersByStaIdentifier(String staIdentifier) {
         // TODO
     }
 }

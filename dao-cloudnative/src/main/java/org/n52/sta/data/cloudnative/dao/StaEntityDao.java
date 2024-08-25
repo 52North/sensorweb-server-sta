@@ -64,7 +64,6 @@ public interface StaEntityDao <T extends StaDTO> {
                          QueryOptions queryOptions,
                          Class<T> className) throws STAInvalidQueryException;
 
-
     /**
      * Returns a single entity matching the given {@link Condition} or {@link Optional#empty()} if none found.
      * Additionally, fetches all related entities given by the provided queryOptions.

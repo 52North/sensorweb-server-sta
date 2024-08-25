@@ -29,6 +29,7 @@
 package org.n52.sta.data.cloudnative.dao.impl;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.jooq.*;
 import org.jooq.Record;
 import org.n52.shetland.filter.ExpandItem;
@@ -42,6 +43,7 @@ import org.n52.sta.data.cloudnative.condition.ObservedPropertyQueryConditions;
 import org.n52.sta.data.cloudnative.condition.StaEntity;
 import org.n52.sta.data.cloudnative.dao.AbstractStaEntityDao;
 import org.n52.sta.data.cloudnative.dao.ObservedPropertyDao;
+import org.n52.sta.data.cloudnative.schema.tables.pojos.Phenomenon;
 import org.springframework.stereotype.Component;
 
 import java.util.*;
@@ -81,6 +83,12 @@ public class ObservedPropertyDaoImpl extends AbstractStaEntityDao<ObservedProper
     public boolean existsByName(String name, Class<ObservedPropertyDTO> entityClass)
             throws STAInvalidQueryException {
         Condition predicate = StaEntity.OBSERVED_PROPERTY.NAME.eq(name);
+        return count(predicate, entityClass) > 0;
+    }
+
+    public boolean existsByDefinition(String definition, Class<ObservedPropertyDTO> entityClass)
+            throws STAInvalidQueryException {
+        Condition predicate = StaEntity.OBSERVED_PROPERTY.IDENTIFIER.eq(definition);
         return count(predicate, entityClass) > 0;
     }
 
@@ -138,4 +146,22 @@ public class ObservedPropertyDaoImpl extends AbstractStaEntityDao<ObservedProper
     public Table<?> getEntityTable() {
         return StaEntity.OBSERVED_PROPERTY;
     }
+
+    public void save(Phenomenon phenomenon) {
+        // TODO
+    }
+
+    public void update(Phenomenon phenomenon) {
+        // TODO
+    }
+
+    @Override
+    public void deleteByStaIdentifier(String identifier, Class<ObservedPropertyDTO> entityClass) {
+        // TODO
+    }
+
+    public void saveObservedPropertyParameters(String id, ObjectNode properties) {
+        // TODO
+    }
+    // TODO: deleteObservedPropertyParameters???
 }
