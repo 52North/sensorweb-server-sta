@@ -34,14 +34,16 @@ import org.jooq.*;
 import org.jooq.Record;
 
 import org.n52.shetland.oasis.odata.query.option.QueryOptions;
+import org.n52.shetland.ogc.sta.exception.STACRUDException;
 import org.n52.shetland.ogc.sta.exception.STAInvalidQueryException;
 import org.n52.sta.api.dto.ObservationDTO;
 import org.n52.sta.data.cloudnative.DTOMapper;
 import org.n52.sta.data.cloudnative.condition.ObservationQueryConditions;
 import org.n52.sta.data.cloudnative.condition.StaEntity;
-import org.n52.sta.data.cloudnative.dao.AbstractStaEntityDao;
+import org.n52.sta.data.cloudnative.dao.FirehoseConstants;
 import org.n52.sta.data.cloudnative.dao.ObservationDao;
 
+import org.n52.sta.data.cloudnative.dao.util.StaFirehoseClient;
 import org.n52.sta.data.cloudnative.schema.tables.pojos.Observation;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Order;
@@ -54,8 +56,13 @@ import java.util.*;
  */
 @Component
 public class ObservationDaoImpl extends AbstractStaEntityDao<ObservationDTO> implements ObservationDao {
-
+    private final String tableName = getEntityTable().getName();
+    private final String parameterTableName = "OBSERVATION_PARAMETER";
     private Set<Table<?>> joins;
+
+    public ObservationDaoImpl(DSLContext ctx, StaFirehoseClient firehoseClient) {
+        super(ctx, firehoseClient);
+    }
 
     @Override
     public Observation findFirstByDatasetIdOrderBySamplingTimeStartAsc(Long datasetIdentifier,
@@ -102,11 +109,14 @@ public class ObservationDaoImpl extends AbstractStaEntityDao<ObservationDTO> imp
                 observation.setDatastream(record.map(new DTOMapper.DatastreamRecordMapper()));
             }
             if (joins.contains(StaEntity.OBSERVATION_PARAMETERS)) {
-                observation.setParameters(Optional.ofNullable(observation.getParameters())
-                        .orElse(new ObjectMapper().createObjectNode()));
+                ObjectNode properties = record.map(new DTOMapper.ObservationRecordMapper
+                        .ObservationParameterRecordMapper());
+                if (properties != null) {
+                    observation.setParameters(Optional.ofNullable(observation.getParameters())
+                            .orElse(new ObjectMapper().createObjectNode()));
 
-                observation.getParameters().setAll(record.map(new DTOMapper.ObservationRecordMapper
-                        .ObservationParameterRecordMapper()));
+                    observation.getParameters().setAll(properties);
+                }
             }
 
         }
@@ -146,29 +156,36 @@ public class ObservationDaoImpl extends AbstractStaEntityDao<ObservationDTO> imp
         return StaEntity.OBSERVATION;
     }
 
-    public void save(Observation observation) {
-        // TODO:
+    public void save(Observation observation) throws STACRUDException {
+        ObjectNode dataNode = mapper.convertValue(observation, ObjectNode.class);
+        firehoseClient.icebergMerge(dataNode, tableName, FirehoseConstants.INSERT);
     }
 
-    public void update(Observation updatedObservation) {
-        // TODO:
-    }
-
-    @Override
-    public void deleteByStaIdentifier(String identifier, Class<ObservationDTO> entityClass) {
-        // TODO
+    public void update(Observation updatedObservation) throws STACRUDException {
+        ObjectNode dataNode = mapper.convertValue(updatedObservation, ObjectNode.class);
+        firehoseClient.icebergMerge(dataNode, tableName, FirehoseConstants.UPDATE);
     }
 
     @Override
-    public void deleteAllByDatasetIdIn(Set datasetId) {
-        // TODO
+    public void deleteByStaIdentifier(String staIdentifier) throws STACRUDException {
+        firehoseClient.icebergDeleteByStaIdentifier(staIdentifier, tableName);
     }
 
-    public void saveObservationParameters(String id, ObjectNode parameters) {
-        // TODO
+    @Override
+    public void deleteAllByDatasetIdIn(Set<Long> datasetId) throws STACRUDException {
+        String key = getEntityId().getName();
+        for (Long Id: datasetId) {
+            firehoseClient.icebergDeleteById(key, Id, tableName);
+        }
     }
 
-    public void deleteObservationParameters(Long Id, ObjectNode parameters) {
-        // TODO:
+    public void saveObservationParameters(String id, ObjectNode parameters) throws STACRUDException {
+        String foreignKey = StaEntity.OBSERVATION_PARAMETERS.FK_OBSERVATION_ID.getName();
+        firehoseClient.icebergMergeParameters(parameters, parameterTableName, FirehoseConstants.INSERT, foreignKey, id);
+    }
+
+    public void deleteObservationParameters(Long Id) throws STACRUDException {
+        String key = StaEntity.OBSERVATION_PARAMETERS.PARAMETER_ID.getName();
+        firehoseClient.icebergDeleteById(key, Id, parameterTableName);
     }
 }

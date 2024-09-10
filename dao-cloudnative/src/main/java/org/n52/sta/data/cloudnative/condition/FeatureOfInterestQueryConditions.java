@@ -49,10 +49,7 @@ import java.util.List;
 /**
  * @author <a href="mailto:humaid.kidwai@ucalgary.ca">Humaid Kidwai</a>
  */
-@Component
 public class FeatureOfInterestQueryConditions extends EntityQueryConditions implements SpatialQueryConditions {
-
-    public static Feature StaEntity = FEATURE_OF_INTEREST;
 
     public Condition withObservationStaIdentifier(final String observationIdentifier) {
 
@@ -69,16 +66,16 @@ public class FeatureOfInterestQueryConditions extends EntityQueryConditions impl
 
     @Override
     public Condition withStaIdentifier(String staIdentifier) {
-        return StaEntity.STA_IDENTIFIER.eq(staIdentifier);
+        return FEATURE_OF_INTEREST.STA_IDENTIFIER.eq(staIdentifier);
     }
 
     public Condition withName(String name) {
-        return StaEntity.NAME.eq(name);
+        return FEATURE_OF_INTEREST.NAME.eq(name);
     }
 
     @Override
     public Condition withStaIdentifier(List<String> identifiers) {
-        return StaEntity.STA_IDENTIFIER.in(identifiers);
+        return FEATURE_OF_INTEREST.STA_IDENTIFIER.in(identifiers);
     }
 
     @Override
@@ -110,15 +107,15 @@ public class FeatureOfInterestQueryConditions extends EntityQueryConditions impl
                 case StaConstants.PROP_ENCODINGTYPE:
                 case "featureType":
                     if (operator.equals(FilterConstants.ComparisonOperator.PropertyIsEqualTo)) {
-                        SelectConditionStep<Record1<Long>> subquery;
-                        subquery = ctx
+                        return FEATURE_OF_INTEREST.FK_FORMAT_ID.in(
+                                ctx
                                 .select(FEATURE_OF_INTEREST.FK_FORMAT_ID)
                                 .from(FEATURE_OF_INTEREST)
                                 .join(FORMAT)
                                 .onKey()
                                 .where(FORMAT.DEFINITION.eq("application/vnd.geo+json")
-                                        .or(FORMAT.DEFINITION.eq("application/vnd.geo json")));
-                        return FEATURE_OF_INTEREST.FK_FORMAT_ID.in(subquery);
+                                        .or(FORMAT.DEFINITION.eq("application/vnd.geo json")))
+                        );
                     }
                     return FEATURE_OF_INTEREST.IDENTIFIER.isNotNull();
                 default:

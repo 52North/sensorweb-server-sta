@@ -43,8 +43,9 @@ import org.n52.sta.api.dto.DatastreamDTO;
 import org.n52.sta.data.cloudnative.DTOMapper;
 import org.n52.sta.data.cloudnative.condition.DatastreamQueryConditions;
 import org.n52.sta.data.cloudnative.condition.StaEntity;
-import org.n52.sta.data.cloudnative.dao.AbstractStaEntityDao;
 import org.n52.sta.data.cloudnative.dao.DatastreamDao;
+import org.n52.sta.data.cloudnative.dao.FirehoseConstants;
+import org.n52.sta.data.cloudnative.dao.util.StaFirehoseClient;
 import org.n52.sta.data.cloudnative.schema.tables.pojos.Dataset;
 import org.springframework.stereotype.Component;
 
@@ -56,8 +57,13 @@ import java.util.stream.Collectors;
  */
 @Component
 public class DatastreamDaoImpl extends AbstractStaEntityDao<DatastreamDTO> implements DatastreamDao {
-
+    private final String tableName = getEntityTable().getName();
+    private final String parameterTableName = "DATASET_PARAMETER";
     private Set<Table<?>> joins;
+
+    public DatastreamDaoImpl(DSLContext ctx, StaFirehoseClient firehoseClient) {
+        super(ctx, firehoseClient);
+    }
 
 
     @Override
@@ -73,14 +79,13 @@ public class DatastreamDaoImpl extends AbstractStaEntityDao<DatastreamDTO> imple
         return returned;
     }
 
-    public Dataset findOnePOJO(Condition predicate) throws STAInvalidQueryException {
-        // TODO: improve code
+    public Dataset findByFeaturePOJO(Condition predicate) throws STAInvalidQueryException {
         Dataset dataset = selectQueryBuilder(predicate, DatastreamDTO.class, null, null)
                 .fetchAny().into(StaEntity.DATASTREAM).into(Dataset.class);
         return dataset;
     }
 
-    public Dataset findPOJOByDatasetId(Long datasetId) throws STAInvalidQueryException, STACRUDException {
+    public Dataset findByDatasetIdPOJO(Long datasetId) throws STAInvalidQueryException, STACRUDException {
         Condition predicate = StaEntity.DATASTREAM.DATASET_ID.eq(datasetId);
         Dataset dataset = Optional.ofNullable(selectQueryBuilder(predicate,
                         DatastreamDTO.class,
@@ -110,10 +115,14 @@ public class DatastreamDaoImpl extends AbstractStaEntityDao<DatastreamDTO> imple
                 datastream.setThing(record.map(new DTOMapper.ThingRecordMapper()));
             }
             if (joins.contains(StaEntity.DATASTREAM_PROPERTIES)) {
-                datastream.setProperties(Optional.ofNullable(datastream.getProperties())
-                        .orElse(new ObjectMapper().createObjectNode()));
-                datastream.getProperties().setAll(record.map(new DTOMapper.DatastreamRecordMapper
-                        .DatastreamParameterRecordMapper()));
+                ObjectNode properties = record.map(new DTOMapper.DatastreamRecordMapper
+                        .DatastreamParameterRecordMapper());
+
+                if (properties != null) {
+                    datastream.setProperties(Optional.ofNullable(datastream.getProperties())
+                            .orElse(new ObjectMapper().createObjectNode()));
+                    datastream.getProperties().setAll(properties);
+                }
             }
         }
         return new ArrayList<>(datastreamMap.values());
@@ -140,6 +149,7 @@ public class DatastreamDaoImpl extends AbstractStaEntityDao<DatastreamDTO> imple
 
         joins = new HashSet<>();
         joins.add(StaEntity.UNIT);
+        joins.add(StaEntity.FORMAT);
         joins.add(StaEntity.DATASTREAM_PROPERTIES);
 
         if (queryOptions != null && queryOptions.getExpandFilter() != null) {
@@ -188,7 +198,7 @@ public class DatastreamDaoImpl extends AbstractStaEntityDao<DatastreamDTO> imple
                 return DSL.function("ST_AsText",
                                 String.class,
                                 DSL.function("ST_GeomFromWKB", byte[].class, field))
-                        .as(field.getName());
+                        .as("datastreamObservedArea");
             }
             return field;
         }).collect(Collectors.toList());
@@ -204,28 +214,33 @@ public class DatastreamDaoImpl extends AbstractStaEntityDao<DatastreamDTO> imple
         return StaEntity.DATASTREAM.DATASET_ID;
     }
 
-    public void save(Dataset dataset) {
-        // TODO
+    public void save(Dataset dataset) throws STACRUDException {
+        ObjectNode dataNode = mapper.convertValue(dataset, ObjectNode.class);
+        firehoseClient.icebergMerge(dataNode, tableName, FirehoseConstants.INSERT);
     }
 
-    public void update(Long id, Dataset dataset) {
-        // TODO
+    public void update(Long id, Dataset dataset) throws STACRUDException {
+        ObjectNode dataNode = mapper.convertValue(dataset, ObjectNode.class);
+        firehoseClient.icebergMerge(dataNode, tableName, FirehoseConstants.UPDATE);
     }
 
     @Override
-    public void deleteByStaIdentifier(String identifier, Class<DatastreamDTO> entityClass) {
-        // TODO
+    public void deleteByStaIdentifier(String staIdentifier) throws STACRUDException {
+        firehoseClient.icebergDeleteByStaIdentifier(staIdentifier, tableName);
     }
 
-    public void deleteById(Long datasetId) {
-        // TODO
+    public void deleteById(Long datasetId) throws STACRUDException {
+        String key = StaEntity.DATASTREAM.DATASET_ID.getName();
+        firehoseClient.icebergDeleteById(key, datasetId, tableName);
     }
 
-    public void saveDatastreamParameters(String id, ObjectNode properties) {
-        // TODO
+    public void saveDatastreamParameters(String id, ObjectNode parameters) throws STACRUDException {
+        String foreignKey = StaEntity.DATASTREAM_PROPERTIES.FK_DATASET_ID.getName();
+        firehoseClient.icebergMergeParameters(parameters, parameterTableName, FirehoseConstants.INSERT, foreignKey, id);
     }
 
-    public void deleteDatastreamParametersByStaIdentifier(String staIdentifier) {
-        // TODO
+    public void deleteDatastreamParameters(Long Id) throws STACRUDException {
+        String key = StaEntity.DATASTREAM_PROPERTIES.FK_DATASET_ID.getName();
+        firehoseClient.icebergDeleteById(key, Id, parameterTableName);
     }
 }

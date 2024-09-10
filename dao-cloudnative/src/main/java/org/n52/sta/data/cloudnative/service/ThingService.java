@@ -167,44 +167,47 @@ public class ThingService
     }
 
     @Override
-    protected ThingDTO createOrfetch(ThingDTO thing) throws STACRUDException, STAInvalidQueryException {
-        if (thing.getId() != null && thing.getName() == null) {
+    protected ThingDTO createOrfetch(ThingDTO entity) throws STACRUDException, STAInvalidQueryException {
+        if (entity.getId() != null && entity.getName() == null) {
             Optional<ThingDTO> optionalEntity =
-                    thingDao.findByStaIdentifier(thing.getId(), null, entityClass);
+                    thingDao.findByStaIdentifier(entity.getId(), null, entityClass);
             if (optionalEntity.isPresent()) {
                 return optionalEntity.get();
             } else {
                 throw new STACRUDException(String.format(NO_S_WITH_ID_S_FOUND,
                         StaConstants.THING,
-                        thing.getId()));
+                        entity.getId()));
             }
         }
-        if (thing.getId() == null) {
-            if (thingDao.existsByName(thing.getName(), entityClass)) {
-                return thingDao.findByName(thing.getName(), entityClass).orElse(null);
+        if (entity.getId() == null) {
+            if (thingDao.existsByName(entity.getName(), entityClass)) {
+                return thingDao.findByName(entity.getName(), entityClass).orElse(null);
+            }
+            else {
+                entity.setId(NULL_ID_MASK);
             }
         }
-        synchronized (getLock(thing.getId())) {
-            if (thingDao.existsByStaIdentifier(thing.getId(), entityClass)) {
+        synchronized (getLock(entity.getId())) {
+            if (!Objects.equals(entity.getId(), NULL_ID_MASK) &&
+                    thingDao.existsByStaIdentifier(entity.getId(), entityClass)) {
                 throw new STACRUDException(IDENTIFIER_ALREADY_EXISTS, HTTPStatus.CONFLICT);
             } else {
-                thing.setId(getUniqueTimestamp().toString());
-                //thing = thingDao.intermediateSave(thing);
-                if (thing.getProperties() != null) {
-                    thingDao.saveThingParameters(thing.getId(), thing.getProperties());
+                entity.setId(getUniqueTimestamp().toString());
+                if (entity.getProperties() != null) {
+                    thingDao.saveThingParameters(entity.getId(), entity.getProperties());
                 }
-                processDatastreams(thing);
-                boolean locationChanged = processLocations(thing, thing.getLocations());
-                boolean hasUnpersistedHLocs = thing.getHistoricalLocations() != null &&
-                        thing.getHistoricalLocations().stream().anyMatch(p -> p.getId() == null);
+                processDatastreams(entity);
+                boolean locationChanged = processLocations(entity, entity.getLocations());
+                boolean hasUnpersistedHLocs = entity.getHistoricalLocations() != null &&
+                        entity.getHistoricalLocations().stream().anyMatch(p -> p.getId() == null);
                 if (locationChanged || hasUnpersistedHLocs) {
-                    generateHistoricalLocation(thing);
+                    generateHistoricalLocation(entity);
                 }
-                thingDao.save(POJOWrapper(thing));
+                thingDao.save(POJOWrapper(entity));
             }
         }
 
-        return thing;
+        return entity;
     }
 
     private Platform POJOWrapper(ThingDTO thing) {
@@ -357,9 +360,9 @@ public class ThingService
                 thingLocationDao.deleteByThingId(Long.parseLong(identifier));
                 // delete properties
                 if (thing.getProperties() != null) {
-                    thingDao.deleteThingParameters(thing.getId(), thing.getProperties());
+                    thingDao.deleteThingParameters(Long.valueOf(thing.getId()));
                 }
-                thingDao.deleteByStaIdentifier(identifier, entityClass);
+                thingDao.deleteByStaIdentifier(identifier);
             } else {
                 throw new STACRUDException(UNABLE_TO_DELETE_ENTITY_NOT_FOUND, HTTPStatus.NOT_FOUND);
             }

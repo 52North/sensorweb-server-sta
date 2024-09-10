@@ -35,14 +35,16 @@ import org.jooq.Record;
 import org.n52.shetland.filter.ExpandItem;
 import org.n52.shetland.oasis.odata.query.option.QueryOptions;
 import org.n52.shetland.ogc.sta.StaConstants;
+import org.n52.shetland.ogc.sta.exception.STACRUDException;
 import org.n52.shetland.ogc.sta.exception.STAInvalidQueryException;
 import org.n52.shetland.ogc.sta.model.ObservedPropertyEntityDefinition;
 import org.n52.sta.api.dto.ObservedPropertyDTO;
 import org.n52.sta.data.cloudnative.DTOMapper;
 import org.n52.sta.data.cloudnative.condition.ObservedPropertyQueryConditions;
 import org.n52.sta.data.cloudnative.condition.StaEntity;
-import org.n52.sta.data.cloudnative.dao.AbstractStaEntityDao;
+import org.n52.sta.data.cloudnative.dao.FirehoseConstants;
 import org.n52.sta.data.cloudnative.dao.ObservedPropertyDao;
+import org.n52.sta.data.cloudnative.dao.util.StaFirehoseClient;
 import org.n52.sta.data.cloudnative.schema.tables.pojos.Phenomenon;
 import org.springframework.stereotype.Component;
 
@@ -52,9 +54,15 @@ import java.util.*;
  * @author <a href="mailto:humaid.kidwai@ucalgary.ca">Humaid Kidwai</a>
  */
 @Component
-public class ObservedPropertyDaoImpl extends AbstractStaEntityDao<ObservedPropertyDTO> implements ObservedPropertyDao {
-
+public class ObservedPropertyDaoImpl
+        extends AbstractStaEntityDao<ObservedPropertyDTO> implements ObservedPropertyDao {
+    private final String tableName = getEntityTable().getName();
+    private final String parameterTableName = "PHENOMENON_PARAMETER";
     private Set<Table<?>> joins;
+
+    public ObservedPropertyDaoImpl(DSLContext ctx, StaFirehoseClient firehoseClient) {
+        super(ctx, firehoseClient);
+    }
 
     @Override
     protected List<ObservedPropertyDTO> mapResultToDTO(Result<Record> result) {
@@ -70,10 +78,13 @@ public class ObservedPropertyDaoImpl extends AbstractStaEntityDao<ObservedProper
                 observedProperty.getDatastreams().add(record.map(new DTOMapper.DatastreamRecordMapper()));
             }
             if (joins.contains(StaEntity.OBSERVED_PROPERTY_PROPERTIES)) {
-                observedProperty.setProperties(Optional.ofNullable(observedProperty.getProperties())
-                        .orElse(new ObjectMapper().createObjectNode()));
-                observedProperty.getProperties().setAll(record.map(new DTOMapper.ObservedPropertyRecordMapper.
-                        ObservedPropertyParameterRecordMapper()));
+                ObjectNode properties = record.map(new DTOMapper.ObservedPropertyRecordMapper.
+                        ObservedPropertyParameterRecordMapper());
+                if (properties != null) {
+                    observedProperty.setProperties(Optional.ofNullable(observedProperty.getProperties())
+                            .orElse(new ObjectMapper().createObjectNode()));
+                    observedProperty.getProperties().setAll(properties);
+                }
             }
         }
         return new ArrayList<>(observedPropertyMap.values());
@@ -147,21 +158,28 @@ public class ObservedPropertyDaoImpl extends AbstractStaEntityDao<ObservedProper
         return StaEntity.OBSERVED_PROPERTY;
     }
 
-    public void save(Phenomenon phenomenon) {
-        // TODO
+    public void save(Phenomenon phenomenon) throws STACRUDException {
+        ObjectNode dataNode = mapper.convertValue(phenomenon, ObjectNode.class);
+        firehoseClient.icebergMerge(dataNode, tableName, FirehoseConstants.INSERT);
     }
 
-    public void update(Phenomenon phenomenon) {
-        // TODO
+    public void update(Phenomenon phenomenon) throws STACRUDException {
+        ObjectNode dataNode = mapper.convertValue(phenomenon, ObjectNode.class);
+        firehoseClient.icebergMerge(dataNode, tableName, FirehoseConstants.UPDATE);
     }
 
     @Override
-    public void deleteByStaIdentifier(String identifier, Class<ObservedPropertyDTO> entityClass) {
-        // TODO
+    public void deleteByStaIdentifier(String staIdentifier) throws STACRUDException {
+        firehoseClient.icebergDeleteByStaIdentifier(staIdentifier, tableName);
     }
 
-    public void saveObservedPropertyParameters(String id, ObjectNode properties) {
-        // TODO
+    public void saveObservedPropertyParameters(String id, ObjectNode parameters) throws STACRUDException {
+        String foreignKey = StaEntity.OBSERVED_PROPERTY_PROPERTIES.FK_PHENOMENON_ID.getName();
+        firehoseClient.icebergMergeParameters(parameters, parameterTableName, FirehoseConstants.INSERT, foreignKey, id);
     }
-    // TODO: deleteObservedPropertyParameters???
+
+    public void deleteObservedPropertyParameters(Long Id) throws STACRUDException {
+        String key = StaEntity.OBSERVED_PROPERTY_PROPERTIES.PARAMETER_ID.getName();
+        firehoseClient.icebergDeleteById(key, Id, parameterTableName);
+    }
 }

@@ -60,8 +60,7 @@ public class ObservedPropertyDaoTest {
 
     @BeforeEach
     public void setUp() {
-        observedPropertyDao = new ObservedPropertyDaoImpl();
-        observedPropertyDao.setCtx(ctx);
+        observedPropertyDao = new ObservedPropertyDaoImpl(ctx, null);
     }
 
     @Test
@@ -152,7 +151,7 @@ public class ObservedPropertyDaoTest {
 
         Assertions.assertEquals(result.get().getId(), identifier);
     }
-    
+
     @Test
     public void testWithFindAll() {
         Condition predicate = StaEntity.OBSERVED_PROPERTY_PROPERTIES.NAME.eq("op_code");

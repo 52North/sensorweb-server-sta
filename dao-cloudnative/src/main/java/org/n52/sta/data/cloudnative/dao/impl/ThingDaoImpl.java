@@ -35,13 +35,15 @@ import org.jooq.Record;
 import org.n52.shetland.filter.ExpandItem;
 import org.n52.shetland.oasis.odata.query.option.QueryOptions;
 import org.n52.shetland.ogc.sta.StaConstants;
+import org.n52.shetland.ogc.sta.exception.STACRUDException;
 import org.n52.shetland.ogc.sta.exception.STAInvalidQueryException;
 import org.n52.shetland.ogc.sta.model.STAEntityDefinition;
 import org.n52.sta.api.dto.ThingDTO;
 import org.n52.sta.data.cloudnative.DTOMapper;
 import org.n52.sta.data.cloudnative.condition.StaEntity;
 import org.n52.sta.data.cloudnative.condition.ThingQueryConditions;
-import org.n52.sta.data.cloudnative.dao.AbstractStaEntityDao;
+import org.n52.sta.data.cloudnative.dao.FirehoseConstants;
+import org.n52.sta.data.cloudnative.dao.util.StaFirehoseClient;
 import org.n52.sta.data.cloudnative.dao.ThingDao;
 import org.n52.sta.data.cloudnative.schema.tables.pojos.Platform;
 import org.springframework.stereotype.Component;
@@ -52,9 +54,15 @@ import java.util.*;
  * @author <a href="mailto:humaid.kidwai@ucalgary.ca">Humaid Kidwai</a>
  */
 @Component
-public class ThingDaoImpl extends AbstractStaEntityDao<ThingDTO> implements ThingDao {
-
+public class ThingDaoImpl
+        extends AbstractStaEntityDao<ThingDTO> implements ThingDao {
+    private final String tableName = getEntityTable().getName();
+    private final String parameterTableName = "PLATFORM_PARAMETER";
     private Set<Table<?>> joins;
+
+    public ThingDaoImpl(DSLContext ctx, StaFirehoseClient firehoseClient) {
+        super(ctx, firehoseClient);
+    }
 
     @Override
     public boolean existsByName(String name, Class<ThingDTO> entityClass) throws STAInvalidQueryException {
@@ -125,9 +133,12 @@ public class ThingDaoImpl extends AbstractStaEntityDao<ThingDTO> implements Thin
             }
 
             if (joins.contains(StaEntity.THING_PROPERTIES)) {
-                thing.setProperties(Optional.ofNullable(thing.getProperties())
-                        .orElse(new ObjectMapper().createObjectNode()));
-                thing.getProperties().setAll(record.map(new DTOMapper.ThingRecordMapper.ThingParameterRecordMapper()));
+                ObjectNode properties = record.map(new DTOMapper.ThingRecordMapper.ThingParameterRecordMapper());
+                if (properties != null) {
+                    thing.setProperties(Optional.ofNullable(thing.getProperties())
+                            .orElse(new ObjectMapper().createObjectNode()));
+                    thing.getProperties().setAll(properties);
+                }
             }
 
         }
@@ -159,24 +170,28 @@ public class ThingDaoImpl extends AbstractStaEntityDao<ThingDTO> implements Thin
         return StaEntity.THING;
     }
 
-    public void save(Platform platform) {
-        // TODO
+    public void save(Platform thingPOJO) throws STACRUDException {
+        ObjectNode dataNode = mapper.convertValue(thingPOJO, ObjectNode.class);
+        firehoseClient.icebergMerge(dataNode, tableName, FirehoseConstants.INSERT);
     }
 
-    public void update(Platform thingPOJO) {
-        // TODO
+    public void update(Platform thingPOJO) throws STACRUDException {
+        ObjectNode dataNode = mapper.convertValue(thingPOJO, ObjectNode.class);
+        firehoseClient.icebergMerge(dataNode, tableName, FirehoseConstants.UPDATE);
     }
 
     @Override
-    public void deleteByStaIdentifier(String identifier, Class<ThingDTO> entityClass) {
-        // TODO
+    public void deleteByStaIdentifier(String staIdentifier) throws STACRUDException {
+        firehoseClient.icebergDeleteByStaIdentifier(staIdentifier, tableName);
     }
 
-    public void saveThingParameters(String id, ObjectNode properties) {
-        // TODO
+    public void saveThingParameters(String id, ObjectNode parameters) throws STACRUDException {
+        String foreignKey = StaEntity.THING_PROPERTIES.FK_PLATFORM_ID.getName();
+        firehoseClient.icebergMergeParameters(parameters, parameterTableName, FirehoseConstants.INSERT, foreignKey, id);
     }
 
-    public void deleteThingParameters(String id, ObjectNode properties) {
-        // TODO
+    public void deleteThingParameters(Long id) throws STACRUDException {
+        String key = StaEntity.THING_PROPERTIES.PARAMETER_ID.getName();
+        firehoseClient.icebergDeleteById(key, id, parameterTableName);
     }
 }

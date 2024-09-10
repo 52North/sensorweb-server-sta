@@ -31,6 +31,7 @@ package org.n52.sta.data.cloudnative.service;
 
 import org.jooq.Condition;
 import org.jooq.Field;
+import org.jooq.Null;
 import org.locationtech.jts.io.WKBWriter;
 import org.n52.janmayen.http.HTTPStatus;
 import org.n52.shetland.filter.ExpandFilter;
@@ -67,6 +68,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.time.ZoneOffset;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
@@ -84,10 +86,12 @@ public class DatastreamService extends AbstractSensorThingsEntityServiceImpl<
     private static final Logger LOGGER = LoggerFactory.getLogger(DatastreamService.class);
     private static final DatastreamQueryConditions dQC = new DatastreamQueryConditions();
     private static final String UNKNOWN = "unknown";
+
     private final ObservationDaoImpl observationDao;
     private final DatastreamDaoImpl datastreamDao;
-    private final FormatService formatService;
     private final UnitDaoImpl unitDao;
+
+    private final FormatService formatService;
     private final AtomicLong TS = new AtomicLong();
 
     public DatastreamService(DatastreamDaoImpl datastreamDao,
@@ -189,14 +193,9 @@ public class DatastreamService extends AbstractSensorThingsEntityServiceImpl<
             throws STACRUDException, STAInvalidQueryException {
         if (datastream.getId() != null && datastream.getName() == null) {
             Optional<DatastreamDTO> optionalEntity;
-            try {
-                optionalEntity =
-                        datastreamDao.findOne(dQC.withStaIdentifier(datastream.getId()),
-                                null, entityClass);
-            } catch (STAInvalidQueryException e) {
-                // this should never occur
-                throw new STACRUDException("Invalid query", HTTPStatus.BAD_REQUEST);
-            }
+            optionalEntity =
+                    datastreamDao.findOne(dQC.withStaIdentifier(datastream.getId()),
+                            null, entityClass);
             if (optionalEntity.isPresent()) {
                 return optionalEntity.get();
             } else {
@@ -205,31 +204,28 @@ public class DatastreamService extends AbstractSensorThingsEntityServiceImpl<
             }
         }
         check(datastream);
-
+        if(datastream.getId() == null) {
+            datastream.setId(NULL_ID_MASK);
+        }
         synchronized (getLock(datastream.getId())) {
-            try {
-                if (datastreamDao.existsByStaIdentifier(datastream.getId(), entityClass)) {
-                    throw new STACRUDException(IDENTIFIER_ALREADY_EXISTS, HTTPStatus.CONFLICT);
-                }
-            } catch (STAInvalidQueryException e) {
-                // this should never occur
-                throw new STACRUDException("Invalid Query!", HTTPStatus.BAD_REQUEST);
+
+            if (!Objects.equals(datastream.getId(), NULL_ID_MASK) &&
+                    datastreamDao.existsByStaIdentifier(datastream.getId(), entityClass)) {
+                throw new STACRUDException(IDENTIFIER_ALREADY_EXISTS, HTTPStatus.CONFLICT);
             }
+
             // override @iot.id provided by user
             // we do not allow users to provide their own id
             datastream.setId(getUniqueTimestamp().toString());
-            // save
+            // save entity
             datastreamDao.save(POJOWrapper(datastream));
-
+            // save parameters
             if (datastream.getProperties() != null) {
                 datastreamDao.saveDatastreamParameters(datastream.getId(), datastream.getProperties());
             }
-
+            // save observations
             processObservation(datastream);
         }
-//        return datastreamDao.findByStaIdentifier(datastream.getId(), null, DatastreamDTO.class)
-//                .orElseThrow(() -> new STACRUDException("Datastream requested but still " +
-//                        "processing!"));
         return datastream;
     }
 
@@ -247,9 +243,10 @@ public class DatastreamService extends AbstractSensorThingsEntityServiceImpl<
 
         Time phenomenonTime = datastream.getPhenomenonTime();
         if (phenomenonTime instanceof TimeInstant) {
-            LocalDateTime startTime = ((TimeInstant) phenomenonTime).getValue().toDate()
+            LocalDateTime startTime = ((TimeInstant) phenomenonTime).getValue()
+                    .toDate()
                     .toInstant()
-                    .atZone(ZoneId.systemDefault())
+                    .atZone(ZoneOffset.UTC)
                     .toLocalDateTime();
             dataset.setFirstTime(startTime);
             dataset.setLastTime(startTime);
@@ -257,12 +254,12 @@ public class DatastreamService extends AbstractSensorThingsEntityServiceImpl<
             LocalDateTime startTime = ((TimePeriod) phenomenonTime).getStart()
                     .toDate()
                     .toInstant()
-                    .atZone(ZoneId.systemDefault())
+                    .atZone(ZoneOffset.UTC)
                     .toLocalDateTime();
             LocalDateTime endTime = ((TimePeriod) phenomenonTime).getEnd()
                     .toDate()
                     .toInstant()
-                    .atZone(ZoneId.systemDefault())
+                    .atZone(ZoneOffset.UTC)
                     .toLocalDateTime();
             dataset.setFirstTime(startTime);
             dataset.setLastTime(endTime);
@@ -272,7 +269,7 @@ public class DatastreamService extends AbstractSensorThingsEntityServiceImpl<
         if (resultTime instanceof TimeInstant) {
             LocalDateTime startTime = ((TimeInstant) resultTime).getValue().toDate()
                     .toInstant()
-                    .atZone(ZoneId.systemDefault())
+                    .atZone(ZoneOffset.UTC)
                     .toLocalDateTime();
             dataset.setResultTimeStart(startTime);
             dataset.setResultTimeEnd(startTime);
@@ -280,12 +277,12 @@ public class DatastreamService extends AbstractSensorThingsEntityServiceImpl<
             LocalDateTime startTime = ((TimePeriod) resultTime).getStart()
                     .toDate()
                     .toInstant()
-                    .atZone(ZoneId.systemDefault())
+                    .atZone(ZoneOffset.UTC)
                     .toLocalDateTime();
             LocalDateTime endTime = ((TimePeriod) resultTime).getEnd()
                     .toDate()
                     .toInstant()
-                    .atZone(ZoneId.systemDefault())
+                    .atZone(ZoneOffset.UTC)
                     .toLocalDateTime();
             dataset.setResultTimeStart(startTime);
             dataset.setResultTimeEnd(endTime);
@@ -313,13 +310,14 @@ public class DatastreamService extends AbstractSensorThingsEntityServiceImpl<
                 .getId()));
 
         Format format = formatService.createOrFetchFormat(datastream.getObservationType());
-        dataset.setObservationType(format.getDefinition());
+        dataset.setObservationType("simple");
         dataset.setFkFormatId(format.getFormatId());
 
         return dataset;
     }
 
-    private DatastreamDTO createAndSaveDatasetAggregation(Dataset parent, Long feature, String staIdentifier) {
+    private DatastreamDTO createAndSaveDatasetAggregation(Dataset parent, Long feature, String staIdentifier)
+            throws STACRUDException {
 
         Dataset dataset = new Dataset();
 
@@ -379,16 +377,18 @@ public class DatastreamService extends AbstractSensorThingsEntityServiceImpl<
                     // delete observations
                     observationDao.deleteAllByDatasetIdIn(datasetIds);
                     // delete subdatastreams
-                    datasetIds.forEach(datastreamDao::deleteById);
+                    for (Long id : datasetIds) {
+                        datastreamDao.deleteById(id);
+                    }
                 } else {
                     // delete observations
                     observationDao.deleteAllByDatasetIdIn(Collections.singleton(dataset.getDatasetId()));
                 }
                 // delete properties
-                datastreamDao.deleteDatastreamParametersByStaIdentifier(staIdentifier);
+                datastreamDao.deleteDatastreamParameters(Long.valueOf(staIdentifier));
 
                 //delete main datastream
-                datastreamDao.deleteByStaIdentifier(staIdentifier, DatastreamDTO.class);
+                datastreamDao.deleteByStaIdentifier(staIdentifier);
             } else {
                 throw new STACRUDException(UNABLE_TO_UPDATE_ENTITY_NOT_FOUND, HTTPStatus.NOT_FOUND);
             }
@@ -419,8 +419,7 @@ public class DatastreamService extends AbstractSensorThingsEntityServiceImpl<
             dataset.setDatasetId(getUniqueTimestamp());
             dataset.setStaIdentifier(null);
             dataset.setFkAggregationId(parent.getDatasetId());
-            datastreamDao.deleteById(parent.getDatasetId());
-            datastreamDao.save(dataset);
+            datastreamDao.update(parent.getDatasetId(), dataset);
 
             // Persist parent
             datastreamDao.save(parent);
@@ -475,10 +474,6 @@ public class DatastreamService extends AbstractSensorThingsEntityServiceImpl<
                         datastreamDao.findOne(dQC.withStaIdentifier(id), null, DatastreamDTO.class);
                 if (existing.isPresent()) {
                     DatastreamDTO merged = merge(existing.get(), entity);
-                    if (entity.getUnitOfMeasurement() != null) {
-                        // TODO: WTF is happening here?
-                        merged.setUnitOfMeasurement(entity.getUnitOfMeasurement());
-                    }
                     datastreamDao.update(Long.valueOf(existing.get().getId()), POJOWrapper(merged));
                     return merged;
                 }

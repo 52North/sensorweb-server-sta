@@ -69,7 +69,7 @@ public class HistoricalLocationsQueryConditionsTest {
     }
 
     private String read_parquet(String table) {
-        return String.format("read_parquet('s3://52n-sta/%s') %s ", table, table);
+        return String.format("read_parquet('s3://52n-sta/%s.parquet') %s ", table, table);
     }
 
     @Test

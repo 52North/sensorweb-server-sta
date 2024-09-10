@@ -47,10 +47,8 @@ import java.util.List;
 /**
  * @author <a href="mailto:humaid.kidwai@ucalgary.ca">Humaid Kidwai</a>
  */
-@Component
 public class ObservedPropertyQueryConditions extends EntityQueryConditions {
 
-    public static Phenomenon StaEntity = OBSERVED_PROPERTY;
     private static final String IDENTIFIER = "identifier";
 
     public Condition withDatastreamStaIdentifier(final String datastreamStaIdentifier) {
@@ -96,7 +94,7 @@ public class ObservedPropertyQueryConditions extends EntityQueryConditions {
     }
 
     public Condition withName(String name) {
-        return StaEntity.NAME.eq(name);
+        return OBSERVED_PROPERTY.NAME.eq(name);
     }
 
     @Override

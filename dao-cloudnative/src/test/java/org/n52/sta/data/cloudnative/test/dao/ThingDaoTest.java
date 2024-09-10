@@ -61,8 +61,7 @@ public class ThingDaoTest {
 
     @BeforeEach
     public void setUp() {
-        thingDao = new ThingDaoImpl();
-        thingDao.setCtx(ctx);
+        thingDao = new ThingDaoImpl(ctx, null);
     }
 
     @Test

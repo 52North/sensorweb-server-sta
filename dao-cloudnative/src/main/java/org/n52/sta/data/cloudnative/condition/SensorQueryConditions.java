@@ -44,10 +44,7 @@ import java.util.List;
 /**
  * @author <a href="mailto:humaid.kidwai@ucalgary.ca">Humaid Kidwai</a>
  */
-@Component
 public class SensorQueryConditions extends EntityQueryConditions {
-
-    public static Procedure StaEntity = SENSOR;
 
     public Condition withDatastreamStaIdentifier(final String datastreamIdentifier) {
         return DSL.exists(
@@ -62,16 +59,16 @@ public class SensorQueryConditions extends EntityQueryConditions {
 
     @Override
     public Condition withStaIdentifier(String staIdentifier) {
-        return StaEntity.STA_IDENTIFIER.eq(staIdentifier);
+        return SENSOR.STA_IDENTIFIER.eq(staIdentifier);
     }
 
     @Override
     public Condition withStaIdentifier(List<String> identifiers) {
-        return StaEntity.STA_IDENTIFIER.in(identifiers);
+        return SENSOR.STA_IDENTIFIER.in(identifiers);
     }
 
     public Condition withName(String name) {
-        return StaEntity.NAME.eq(name);
+        return SENSOR.NAME.eq(name);
     }
 
     @Override
@@ -106,7 +103,6 @@ public class SensorQueryConditions extends EntityQueryConditions {
                             propertyValue,
                             operator,
                             switched);
-                    // join redundant?
                     SelectConditionStep<Record1<Long>> subquery = ctx
                             .select(SENSOR.PROCEDURE_ID)
                             .from(SENSOR)
@@ -162,11 +158,11 @@ public class SensorQueryConditions extends EntityQueryConditions {
     public Field checkPropertyName(String property) {
         switch (property) {
             case StaConstants.PROP_ID:
-                return StaEntity.STA_IDENTIFIER;
+                return SENSOR.STA_IDENTIFIER;
             case StaConstants.PROP_NAME:
-                return StaEntity.NAME;
+                return SENSOR.NAME;
             case StaConstants.PROP_DESCRIPTION:
-                return StaEntity.DESCRIPTION;
+                return SENSOR.DESCRIPTION;
             case StaConstants.PROP_PROPERTIES:
                 // TODO:
                 return null;

@@ -74,7 +74,7 @@ import java.util.concurrent.atomic.AtomicLong;
 public abstract class AbstractSensorThingsEntityServiceImpl <T extends StaEntityDao<R>, R extends StaDTO> {
 
     protected static final String RESULT = "result";
-
+    protected static final String NULL_ID_MASK = ((Long)(1L << 63)).toString();
     protected static final String HTTP_PUT_IS_NOT_YET_SUPPORTED = "Http PUT is not yet supported!";
     protected static final String IDENTIFIER_ALREADY_EXISTS = "Identifier already exists!";
     protected static final String UNABLE_TO_UPDATE_ENTITY_NOT_FOUND = "Unable to update. Entity not found.";
@@ -126,12 +126,14 @@ public abstract class AbstractSensorThingsEntityServiceImpl <T extends StaEntity
 
     public R getEntity(String id, QueryOptions queryOptions) throws STACRUDException {
         try {
-            Optional<R> entity =  StaEntityDao.findByStaIdentifier(id, queryOptions, entityClass);
-            if (entity.isPresent()) {
+            Optional<R> optionalEntity =  StaEntityDao.findByStaIdentifier(id, queryOptions, entityClass);
+            if (optionalEntity.isPresent()) {
+                R entity = optionalEntity.get();
                 if (queryOptions.hasExpandFilter()) {
-                    return fetchExpandEntitiesWithFilter(entity.get(), queryOptions.getExpandFilter());
+                    entity = fetchExpandEntitiesWithFilter(entity, queryOptions.getExpandFilter());
                 }
-                return entity.get();
+                entity.setAndParseQueryOptions(queryOptions);
+                return entity;
             }
             else {
                 throw new STACRUDException(UNABLE_TO_GET_ENTITY_NOT_FOUND);
@@ -157,7 +159,9 @@ public abstract class AbstractSensorThingsEntityServiceImpl <T extends StaEntity
     public R getEntityByRelatedEntity(String relatedId, String relatedType, String ownId, QueryOptions queryOptions)
             throws STACRUDException{
         try {
-            return getEntityByRelatedEntityRaw(relatedId, relatedType, ownId, queryOptions);
+            R entity = getEntityByRelatedEntityRaw(relatedId, relatedType, ownId, queryOptions);
+            entity.setAndParseQueryOptions(queryOptions);
+            return entity;
         } catch (RuntimeException e) {
             throw new STACRUDException(e.getMessage(), e);
         }
@@ -226,7 +230,10 @@ public abstract class AbstractSensorThingsEntityServiceImpl <T extends StaEntity
             long count = (queryOptions.hasCountFilter() && queryOptions.getCountFilter().getValue()) ?
                     expanded.getTotalElements() : -1;
             boolean hasNext = expanded.getTotalElements() == queryOptions.getTopFilter().getValue();
-            return new CollectionWrapper(count, expanded.getContent(), hasNext);
+            return new CollectionWrapper(count, expanded.map(e -> {
+                e.setAndParseQueryOptions(queryOptions);
+                return e;
+            }).getContent(), hasNext);
         } else {
             long count = (queryOptions.hasCountFilter() && queryOptions.getCountFilter().getValue()) ?
                     pages.getTotalElements() : -1;
@@ -292,7 +299,8 @@ public abstract class AbstractSensorThingsEntityServiceImpl <T extends StaEntity
         }
     }
 
-    protected abstract Condition byRelatedEntityFilter(String relatedId, String relatedType, String ownId) throws STAInvalidQueryException;
+    protected abstract Condition byRelatedEntityFilter(String relatedId, String relatedType, String ownId)
+            throws STAInvalidQueryException;
 
     /**
      * Fetches $expanded Entities that are filtered via $filter. An individual request is needed for each expanded
@@ -425,13 +433,6 @@ public abstract class AbstractSensorThingsEntityServiceImpl <T extends StaEntity
     protected abstract String checkPropertyName(String property);
 
     protected abstract R merge(R existing, R toMerge) throws STACRUDException;
-
-//    protected <E extends StaDTO & HasNameAndDescription > void mergeIdentifierNameDescription(E existing, E toMerge) {
-//        if (toMerge.getId() != null && !toMerge.getId().isEmpty()) {
-//            existing.setId(toMerge.getId());
-//        }
-//        mergeNameDescription(existing, toMerge);
-//    }
 
     protected <E extends HasNameAndDescription> void mergeNameDescription(E existing, E toMerge) {
         mergeName(existing, toMerge);

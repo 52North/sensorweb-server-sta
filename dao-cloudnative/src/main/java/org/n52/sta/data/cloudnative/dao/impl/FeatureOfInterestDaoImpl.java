@@ -34,13 +34,15 @@ import org.jooq.*;
 import org.jooq.Record;
 import org.jooq.impl.DSL;
 import org.n52.shetland.oasis.odata.query.option.QueryOptions;
+import org.n52.shetland.ogc.sta.exception.STACRUDException;
 import org.n52.shetland.ogc.sta.exception.STAInvalidQueryException;
 import org.n52.sta.api.dto.FeatureOfInterestDTO;
 import org.n52.sta.data.cloudnative.DTOMapper;
 import org.n52.sta.data.cloudnative.condition.FeatureOfInterestQueryConditions;
 import org.n52.sta.data.cloudnative.condition.StaEntity;
-import org.n52.sta.data.cloudnative.dao.AbstractStaEntityDao;
 import org.n52.sta.data.cloudnative.dao.FeatureOfInterestDao;
+import org.n52.sta.data.cloudnative.dao.FirehoseConstants;
+import org.n52.sta.data.cloudnative.dao.util.StaFirehoseClient;
 import org.n52.sta.data.cloudnative.schema.tables.pojos.Feature;
 import org.springframework.stereotype.Component;
 
@@ -48,9 +50,15 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 @Component
-public class FeatureOfInterestDaoImpl extends AbstractStaEntityDao<FeatureOfInterestDTO> implements FeatureOfInterestDao {
-
+public class FeatureOfInterestDaoImpl
+        extends AbstractStaEntityDao<FeatureOfInterestDTO> implements FeatureOfInterestDao {
+    private final String tableName = getEntityTable().getName();
+    private final String parameterTableName = "FEATURE_PARAMETER";
     private Set<Table<?>> joins;
+
+    public FeatureOfInterestDaoImpl(DSLContext ctx, StaFirehoseClient firehoseClient) {
+        super(ctx, firehoseClient);
+    }
 
     @Override
     protected List<FeatureOfInterestDTO> mapResultToDTO(Result<Record> result) {
@@ -60,24 +68,29 @@ public class FeatureOfInterestDaoImpl extends AbstractStaEntityDao<FeatureOfInte
             FeatureOfInterestDTO feature = featureMap.computeIfAbsent(Id,
                     k -> record.map(new DTOMapper.FeatureOfInterestRecordMapper()));
             if (joins.contains(StaEntity.FEATURE_PROPERTIES)) {
-                feature.setProperties(Optional.ofNullable(feature.getProperties())
-                        .orElse(new ObjectMapper().createObjectNode()));
+                ObjectNode properties = record.map(new DTOMapper.FeatureOfInterestRecordMapper
+                        .FeatureParameterRecordMapper());
+                if (properties != null) {
+                    feature.setProperties(Optional.ofNullable(feature.getProperties())
+                            .orElse(new ObjectMapper().createObjectNode()));
 
-                feature.getProperties().setAll(record.map(new DTOMapper.FeatureOfInterestRecordMapper
-                        .FeatureParameterRecordMapper()));
+                    feature.getProperties().setAll(properties);
+                }
             }
         }
         return new ArrayList<>(featureMap.values());
     }
 
     @Override
-    public boolean existsByName(String name, Class<FeatureOfInterestDTO> entityClass) throws STAInvalidQueryException {
+    public boolean existsByName(String name, Class<FeatureOfInterestDTO> entityClass)
+            throws STAInvalidQueryException {
         Condition predicate = StaEntity.FEATURE_OF_INTEREST.NAME.eq(name);
         return count(predicate, entityClass) > 0;
     }
 
     @Override
-    public Optional<FeatureOfInterestDTO> findByName(String name, Class<FeatureOfInterestDTO> entityClass) throws STAInvalidQueryException {
+    public Optional<FeatureOfInterestDTO> findByName(String name, Class<FeatureOfInterestDTO> entityClass)
+            throws STAInvalidQueryException {
         Condition predicate = StaEntity.FEATURE_OF_INTEREST.NAME.eq(name);
         Result<Record> result = selectQueryBuilder(predicate, entityClass, null, null).fetch();
         return Optional.of(mapResultToDTO(result).get(0));
@@ -103,7 +116,7 @@ public class FeatureOfInterestDaoImpl extends AbstractStaEntityDao<FeatureOfInte
                 return DSL.function("ST_AsText",
                                 String.class,
                                 DSL.function("ST_GeomFromWKB", byte[].class, field))
-                        .as(field.getName());
+                        .as("foiGeom");
             }
             return field;
         }).collect(Collectors.toList());
@@ -124,24 +137,28 @@ public class FeatureOfInterestDaoImpl extends AbstractStaEntityDao<FeatureOfInte
         return StaEntity.FEATURE_OF_INTEREST;
     }
 
-    public void save(Feature featureOfInterestPOJO) {
-        // TODO
+    public void save(Feature featureOfInterestPOJO) throws STACRUDException {
+        ObjectNode dataNode = mapper.convertValue(featureOfInterestPOJO, ObjectNode.class);
+        firehoseClient.icebergMerge(dataNode, tableName, FirehoseConstants.INSERT);
     }
 
-    public void update(Feature feature) {
-        // TODO
+    public void update(Feature featureOfInterestPOJO) throws STACRUDException {
+        ObjectNode dataNode = mapper.convertValue(featureOfInterestPOJO, ObjectNode.class);
+        firehoseClient.icebergMerge(dataNode, tableName, FirehoseConstants.UPDATE);
     }
 
     @Override
-    public void deleteByStaIdentifier(String identifier, Class<FeatureOfInterestDTO> entityClass) {
-        // TODO
+    public void deleteByStaIdentifier(String staIdentifier) throws STACRUDException {
+        firehoseClient.icebergDeleteByStaIdentifier(staIdentifier, tableName);
     }
 
-    public void saveFeatureParameters(String featureId, ObjectNode parameters) {
-        // TODO
+    public void saveFeatureParameters(String Id, ObjectNode parameters) throws STACRUDException {
+        String foreignKey = StaEntity.FEATURE_PROPERTIES.FK_FEATURE_ID.getName();
+        firehoseClient.icebergMergeParameters(parameters, parameterTableName, FirehoseConstants.INSERT, foreignKey, Id);
     }
 
-    public void deleteFeatureParameters(String featureId, ObjectNode parameters) {
-        // TODO
+    public void deleteFeatureParameters(Long featureId) throws STACRUDException {
+        String key = StaEntity.FEATURE_PROPERTIES.PARAMETER_ID.getName();
+        firehoseClient.icebergDeleteById(key, featureId, parameterTableName);
     }
 }

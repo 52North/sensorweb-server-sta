@@ -32,8 +32,7 @@ public class LocationDaoTest {
 
     @BeforeEach
     public void setUp() {
-        locationDao = new LocationDaoImpl();
-        locationDao.setCtx(ctx);
+        locationDao = new LocationDaoImpl(ctx, null);
     }
 
     @Test

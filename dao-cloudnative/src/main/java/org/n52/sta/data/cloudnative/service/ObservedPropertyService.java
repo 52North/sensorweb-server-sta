@@ -169,23 +169,23 @@ public class ObservedPropertyService
             if (observedPropertyDao.existsByName(entity.getName(), entityClass)) {
                 Optional<ObservedPropertyDTO> optional
                         = observedPropertyDao.findOne(oQC.withName(entity.getName()), null, entityClass);
-                return optional.isPresent() ? optional.get() : null;
+                return optional.orElse(null);
             } else {
-                // Autogenerate Identifier
-                entity.setId(getUniqueTimestamp().toString());
+                entity.setId(NULL_ID_MASK);
             }
         }
-        // at this point, the Id could be either from the payload, or set above by us.
-        // how do you know if it is set by us?
         synchronized (getLock(entity.getId())) {
             // Check for duplicate definition
             if (observedPropertyDao.existsByDefinition(entity.getDefinition(), entityClass)) {
                 throw new STACRUDException("Observed Property with given Definition already exists!",
                         HTTPStatus.CONFLICT);
             }
-            if (observedPropertyDao.existsByStaIdentifier(entity.getId(), entityClass)) {
+            if (entity.getId() != NULL_ID_MASK &&
+                    observedPropertyDao.existsByStaIdentifier(entity.getId(), entityClass)) {
                 throw new STACRUDException(IDENTIFIER_ALREADY_EXISTS, HTTPStatus.CONFLICT);
             }
+            // Autogenerate Identifier
+            entity.setId(getUniqueTimestamp().toString());
             if (entity.getProperties() != null) {
                 observedPropertyDao.saveObservedPropertyParameters(entity.getId(), entity.getProperties());
             }
@@ -240,6 +240,8 @@ public class ObservedPropertyService
             throws STACRUDException, STAInvalidQueryException {
         synchronized (getLock(id)) {
             if (observedPropertyDao.existsByStaIdentifier(id, entityClass)) {
+                ObservedPropertyDTO observedProperty = observedPropertyDao
+                        .findByStaIdentifier(id, null, entityClass).get();
                 // delete datastreams
                 for (DatastreamDTO datastreamEntity :
                         datastreamDao.findAll(dsQC.withObservedPropertyStaIdentifier(id),
@@ -247,7 +249,11 @@ public class ObservedPropertyService
                                 DatastreamDTO.class)) {
                     getDatastreamService().delete(datastreamEntity.getId());
                 }
-                observedPropertyDao.deleteByStaIdentifier(id, entityClass);
+                // delete parameters
+                if (observedProperty.getProperties() != null) {
+                    observedPropertyDao.deleteObservedPropertyParameters(Long.valueOf(observedProperty.getId()));
+                }
+                observedPropertyDao.deleteByStaIdentifier(id);
             } else {
                 throw new STACRUDException(UNABLE_TO_DELETE_ENTITY_NOT_FOUND, HTTPStatus.NOT_FOUND);
             }

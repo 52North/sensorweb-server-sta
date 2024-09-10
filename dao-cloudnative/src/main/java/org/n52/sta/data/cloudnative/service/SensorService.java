@@ -59,6 +59,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
@@ -79,25 +80,24 @@ public class SensorService
     private static final SensorQueryConditions sQC = new SensorQueryConditions();
     private static final DatastreamQueryConditions dQC = new DatastreamQueryConditions();
 
-    private final FormatDaoImpl formatDao;
     private final DatastreamDaoImpl datastreamDao;
     private final SensorDaoImpl sensorDao;
     private final FormatService formatService;
     private final AtomicLong TS = new AtomicLong();
 
     public SensorService(SensorDaoImpl sensorDao,
-                         FormatDaoImpl formatDao,
                          DatastreamDaoImpl datastreamDao,
-                         Class<SensorDTO> entityClass, FormatService formatService) {
+                         FormatService formatService,
+                         Class<SensorDTO> entityClass) {
         super(sensorDao, entityClass);
-        this.formatDao = formatDao;
         this.datastreamDao = datastreamDao;
         this.sensorDao = sensorDao;
         this.formatService = formatService;
     }
 
     @Override
-    protected SensorDTO fetchExpandEntitiesWithFilter(SensorDTO entity, ExpandFilter expandOption) throws STACRUDException, STAInvalidQueryException {
+    protected SensorDTO fetchExpandEntitiesWithFilter(SensorDTO entity, ExpandFilter expandOption)
+            throws STACRUDException, STAInvalidQueryException {
         for (ExpandItem expandItem : expandOption.getItems()) {
             // We have already handled $expand without filter and expand
             if (!(expandItem.getQueryOptions().hasFilterFilter() || expandItem.getQueryOptions().hasExpandFilter())) {
@@ -161,13 +161,18 @@ public class SensorService
                                 entityClass);
                 return optional.orElse(null);
             }
+            else {
+                entity.setId(NULL_ID_MASK);
+            }
         }
 
         synchronized (getLock(entity.getId())) {
-            if (sensorDao.existsByStaIdentifier(entity.getId(), entityClass)) {
+            if (!Objects.equals(entity.getId(), NULL_ID_MASK) &&
+                    sensorDao.existsByStaIdentifier(entity.getId(), entityClass)) {
                 throw new STACRUDException(IDENTIFIER_ALREADY_EXISTS, HTTPStatus.CONFLICT);
             }
 
+            entity.setId(getUniqueTimestamp().toString());
             // Intermediate save to allow DatastreamService->createOrUpdate to use this entity. Does not trigger
             // intercept handling (e.g. mqtt). Needed as Datastream<->Procedure connection is not yet set but
             // required by interceptors
@@ -176,7 +181,6 @@ public class SensorService
                 sensorDao.saveSensorParameters(entity.getId(), entity.getProperties());
             }
 
-            entity.setId(getUniqueTimestamp().toString());
             // Save with Interception as procedure is now linked to Datastream
             sensorDao.save(POJOWrapper(entity));
 
@@ -249,22 +253,22 @@ public class SensorService
     }
 
     @Override
-    protected void deleteEntity(String id)
+    protected void deleteEntity(String staIdentifier)
             throws STACRUDException, STAInvalidQueryException {
-        synchronized (getLock(id)) {
-            if (sensorDao.existsByStaIdentifier(id, entityClass)) {
+        synchronized (getLock(staIdentifier)) {
+            if (sensorDao.existsByStaIdentifier(staIdentifier, entityClass)) {
                 // delete datastreams
-                for (DatastreamDTO ds : datastreamDao.findAll(dQC.withSensorStaIdentifier(id),
+                for (DatastreamDTO ds : datastreamDao.findAll(dQC.withSensorStaIdentifier(staIdentifier),
                         null,
                         DatastreamDTO.class)) {
                     getDatastreamService().delete(ds.getId());
                 }
 
-                SensorDTO sensor = sensorDao.findByStaIdentifier(id, null, entityClass).get();
+                SensorDTO sensor = sensorDao.findByStaIdentifier(staIdentifier, null, entityClass).get();
                 if (sensor.getProperties() != null) {
-                    sensorDao.deleteSensorParameters(id, sensor.getProperties());
+                    sensorDao.deleteSensorParameters(staIdentifier);
                 }
-                sensorDao.deleteByStaIdentifier(id, entityClass);
+                sensorDao.deleteByStaIdentifier(staIdentifier);
             } else {
                 throw new STACRUDException(UNABLE_TO_DELETE_ENTITY_NOT_FOUND, HTTPStatus.NOT_FOUND);
             }

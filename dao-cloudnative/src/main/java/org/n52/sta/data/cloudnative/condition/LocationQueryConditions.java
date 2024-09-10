@@ -49,10 +49,7 @@ import java.util.List;
 /**
  * @author <a href="mailto:humaid.kidwai@ucalgary.ca">Humaid Kidwai</a>
  */
-@Component
 public class LocationQueryConditions extends EntityQueryConditions implements SpatialQueryConditions {
-
-    public static Location StaEntity = LOCATION;
 
     public Condition withHistoricalLocationStaIdentifier(String historicalLocationIdentifier) {
         // Join and condition
@@ -210,13 +207,14 @@ public class LocationQueryConditions extends EntityQueryConditions implements Sp
                             propertyValue,
                             operator,
                             switched);
-                    SelectConditionStep<Record1<Long>> subquery = ctx
+                    return LOCATION.LOCATION_ID.in(
+                            ctx
                             .select(LOCATION.LOCATION_ID)
                             .from(LOCATION)
                             .join(FORMAT)
                             .onKey()
-                            .where(subCondition);
-                    return LOCATION.LOCATION_ID.in(subquery);
+                            .where(subCondition)
+                    );
                 default:
                     // We are filtering on variable keys on properties
                     if (propertyName.startsWith(StaConstants.PROP_PROPERTIES)) {

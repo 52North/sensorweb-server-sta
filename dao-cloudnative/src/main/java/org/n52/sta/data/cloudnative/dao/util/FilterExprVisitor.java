@@ -5,6 +5,7 @@ import org.jooq.Condition;
 import org.jooq.DatePart;
 import org.jooq.impl.DSL;
 
+import java.time.ZoneOffset;
 import java.util.Date;
 import java.util.function.BiFunction;
 
@@ -185,7 +186,11 @@ public class FilterExprVisitor implements ExprVisitor<Field<?>, STAInvalidQueryE
         if (expr.getTime() instanceof String) {
             return rootQC.checkPropertyName((String) expr.getTime());
         } else {
-            return DSL.val(((TimeInstant) expr.getTime()).getValue().toLocalDateTime());
+            return DSL.val(((TimeInstant) expr.getTime()).getValue()
+                    .toDate()                   // Convert to java.util.Date
+                    .toInstant()                // Convert to java.time.Instant
+                    .atZone(ZoneOffset.UTC)     // Convert to UTC ZonedDateTime
+                    .toLocalDateTime());         // Convert to LocalDateTime
         }
     }
 

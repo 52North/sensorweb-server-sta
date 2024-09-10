@@ -3,9 +3,7 @@ package org.n52.sta.data.cloudnative.test.dao;
 import org.jooq.Condition;
 import org.jooq.DSLContext;
 import org.jooq.impl.DSL;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.n52.shetland.oasis.odata.query.option.QueryOptions;
 import org.n52.shetland.ogc.sta.exception.STAInvalidQueryException;
@@ -24,16 +22,25 @@ import java.util.Optional;
 @ExtendWith(SpringExtension.class)
 @Import(TestDatabaseConfig.class)
 @ActiveProfiles("cloudnative")
+
 public class DatastreamDaoTest {
+    private DSLContext ctx;
+    private final DatastreamDaoImpl datastreamDao;
+
     @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
     @Autowired
-    private DSLContext ctx;
-    private DatastreamDaoImpl datastreamDao;
+    public DatastreamDaoTest(DSLContext ctx) {
+        this.ctx = ctx;
+        datastreamDao = new DatastreamDaoImpl(ctx, null);
+    }
 
-    @BeforeEach
-    public void setUp() {
-        datastreamDao = new DatastreamDaoImpl();
-        datastreamDao.setCtx(ctx);
+    @BeforeAll
+    public static void setUpFirst() {
+        //MinioContainerManager.setUp();
+    }
+    @AfterAll
+    public static void tearDown() {
+        //MinioContainerManager.tearDown();
     }
 
     @Test

@@ -49,10 +49,8 @@ import java.util.List;
 /**
  * @author <a href="mailto:humaid.kidwai@ucalgary.ca">Humaid Kidwai</a>
  */
-@Component
-public class HistoricalLocationQueryConditions extends EntityQueryConditions {
 
-    public static HistoricalLocation StaEntity = HISTORICAL_LOCATION;
+public class HistoricalLocationQueryConditions extends EntityQueryConditions {
 
     public Condition withLocationStaIdentifier(final String locationIdentifier) {
         // Join and condition
@@ -119,27 +117,26 @@ public class HistoricalLocationQueryConditions extends EntityQueryConditions {
     protected Condition handleRelatedPropertyFilter(String propertyName,
                                                     Condition propertyValue) {
 
-        SelectConditionStep<Record1<Long>> subquery;
         if (STAEntityDefinition.THING.equals(propertyName)) {
-            subquery = ctx
+            return HISTORICAL_LOCATION.HISTORICAL_LOCATION_ID.in(
+                    ctx
                     .select(HISTORICAL_LOCATION.HISTORICAL_LOCATION_ID)
                     .from(HISTORICAL_LOCATION)
                     .join(THING)
                     .onKey()
-                    .where(propertyValue);
-
-            return HISTORICAL_LOCATION.HISTORICAL_LOCATION_ID.in(subquery);
+                    .where(propertyValue)
+            );
         } else if (STAEntityDefinition.LOCATIONS.equals(propertyName)) {
-            subquery = ctx
+            return HISTORICAL_LOCATION.HISTORICAL_LOCATION_ID.in(
+                    ctx
                     .select(HISTORICAL_LOCATION.HISTORICAL_LOCATION_ID)
                     .from(LOCATION_HISTORICAL_LOCATION)
                     .join(HISTORICAL_LOCATION)
                     .onKey()
                     .join(LOCATION)
                     .onKey()
-                    .where(propertyValue);
-
-            return HISTORICAL_LOCATION.HISTORICAL_LOCATION_ID.in(subquery);
+                    .where(propertyValue)
+            );
         } else {
             throw new RuntimeException("Could not find related property: " + propertyName);
         }

@@ -32,8 +32,7 @@ public class HistoricalLocationDaoTest {
 
     @BeforeEach
     public void setUp() {
-        historicalLocationDao = new HistoricalLocationDaoImpl();
-        historicalLocationDao.setCtx(ctx);
+        historicalLocationDao = new HistoricalLocationDaoImpl(ctx, null);
     }
     @Test
     public void testWithGetColumn() {

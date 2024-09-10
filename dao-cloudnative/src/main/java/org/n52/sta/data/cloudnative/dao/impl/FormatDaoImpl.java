@@ -28,9 +28,14 @@
  */
 package org.n52.sta.data.cloudnative.dao.impl;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.jooq.*;
 import org.jooq.Record;
+import org.n52.shetland.ogc.sta.exception.STACRUDException;
 import org.n52.sta.data.cloudnative.condition.StaEntity;
+import org.n52.sta.data.cloudnative.dao.FirehoseConstants;
+import org.n52.sta.data.cloudnative.dao.util.StaFirehoseClient;
 import org.n52.sta.data.cloudnative.schema.tables.pojos.Format;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -42,11 +47,16 @@ import java.util.Optional;
  */
 @Component
 public class FormatDaoImpl {
+
     private final DSLContext ctx;
+    private final String tableName = "FORMAT";
+    private final ObjectMapper mapper = new ObjectMapper();
+    private final StaFirehoseClient firehoseClient;
 
     @Autowired
-    public FormatDaoImpl(DSLContext ctx) {
+    public FormatDaoImpl(DSLContext ctx, StaFirehoseClient firehoseClient) {
         this.ctx = ctx;
+        this.firehoseClient = firehoseClient;
     }
 
 
@@ -76,7 +86,8 @@ public class FormatDaoImpl {
         return formatPOJO;
     }
 
-    public void save(Format formatPOJO) {
-        // TODO:
+    public void save(Format formatPOJO) throws STACRUDException {
+        ObjectNode dataNode = mapper.convertValue(formatPOJO, ObjectNode.class);
+        firehoseClient.icebergMerge(dataNode, tableName, FirehoseConstants.INSERT);
     }
 }

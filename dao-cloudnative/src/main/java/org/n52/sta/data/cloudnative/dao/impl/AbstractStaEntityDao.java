@@ -26,8 +26,10 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
  * Public License for more details.
  */
-package org.n52.sta.data.cloudnative.dao;
+package org.n52.sta.data.cloudnative.dao.impl;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.PropertyNamingStrategy;
 import org.jooq.*;
 import org.jooq.Record;
 import org.jooq.impl.DSL;
@@ -35,6 +37,8 @@ import org.jooq.impl.DSL;
 import org.n52.shetland.oasis.odata.query.option.QueryOptions;
 import org.n52.shetland.ogc.sta.exception.STAInvalidQueryException;
 import org.n52.sta.api.dto.*;
+import org.n52.sta.data.cloudnative.dao.StaEntityDao;
+import org.n52.sta.data.cloudnative.dao.util.StaFirehoseClient;
 import org.n52.sta.data.cloudnative.service.AbstractSensorThingsEntityServiceImpl;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -48,7 +52,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
 import java.util.stream.Collectors;
-import jakarta.persistence.NoResultException;
 import javax.validation.constraints.NotNull;
 
 /**
@@ -56,16 +59,15 @@ import javax.validation.constraints.NotNull;
  */
 @Component
 public abstract class AbstractStaEntityDao<T extends StaDTO> implements StaEntityDao<T> {
-
-    protected DSLContext ctx;
+    protected final ObjectMapper mapper = new ObjectMapper();
+    protected final DSLContext ctx;
+    protected final StaFirehoseClient firehoseClient;
 
     @Autowired
-    public void setCtx(DSLContext ctx) {
+    protected AbstractStaEntityDao(DSLContext ctx, StaFirehoseClient firehoseClient) {
         this.ctx = ctx;
-    }
-
-    public DSLContext getCtx() {
-        return ctx;
+        this.firehoseClient = firehoseClient;
+        mapper.setPropertyNamingStrategy(PropertyNamingStrategy.SNAKE_CASE);
     }
 
     @Override
@@ -90,8 +92,6 @@ public abstract class AbstractStaEntityDao<T extends StaDTO> implements StaEntit
                     .where(condition)
                     .fetchOne(DSL.field(columnName, String.class))
             );
-        } catch (NoResultException ex) {
-            return Optional.empty();
         } catch (STAInvalidQueryException e) {
             throw new RuntimeException(e);
         }
@@ -238,14 +238,10 @@ public abstract class AbstractStaEntityDao<T extends StaDTO> implements StaEntit
                 .selectCount()
                 .from(table)
                 .where(spec)
-                .fetchOne(0, long.class);
+                .fetchOne(0, Long.class);
 
         return count == null ? 0 : count;
     }
-
-    @Override
-    public abstract void deleteByStaIdentifier(String identifier,
-                                      Class<T> entityClass);
 
     public Select<Record> selectQueryBuilder(@NotNull Condition where,
                                              @NotNull Class<T> entityClass,
@@ -300,7 +296,7 @@ public abstract class AbstractStaEntityDao<T extends StaDTO> implements StaEntit
 
         List<Field<?>> fieldList = new ArrayList<>();
 
-        // always try to minimize the columns to be fetched from a columnar data store ^_^
+        // always try to minimize the columns to be fetched from a columnar data store
         if(queryOptions != null && queryOptions.getSelectFilter() != null) {
             fieldList.add(getEntityId());
             fieldList.addAll(queryOptions
@@ -311,12 +307,11 @@ public abstract class AbstractStaEntityDao<T extends StaDTO> implements StaEntit
                     .collect(Collectors.toList()));
 
         }
-        // gotta fetch all fields 'cause select clause is not specified :(
+        // gotta fetch all fields 'cause select clause is not specified
         else {
             fieldList = getEntityTableFields();
         }
 
         return fieldList;
     }
-
 }

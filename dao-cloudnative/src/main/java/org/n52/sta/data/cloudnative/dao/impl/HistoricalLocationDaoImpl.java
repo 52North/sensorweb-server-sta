@@ -28,21 +28,22 @@
  */
 package org.n52.sta.data.cloudnative.dao.impl;
 
-import org.jooq.Field;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import org.jooq.*;
 import org.jooq.Record;
-import org.jooq.Result;
-import org.jooq.Table;
 import org.n52.shetland.filter.ExpandItem;
 import org.n52.shetland.oasis.odata.query.option.QueryOptions;
 import org.n52.shetland.ogc.sta.StaConstants;
+import org.n52.shetland.ogc.sta.exception.STACRUDException;
 import org.n52.shetland.ogc.sta.exception.STAInvalidQueryException;
 import org.n52.shetland.ogc.sta.model.STAEntityDefinition;
 import org.n52.sta.api.dto.HistoricalLocationDTO;
 import org.n52.sta.data.cloudnative.DTOMapper;
 import org.n52.sta.data.cloudnative.condition.HistoricalLocationQueryConditions;
 import org.n52.sta.data.cloudnative.condition.StaEntity;
-import org.n52.sta.data.cloudnative.dao.AbstractStaEntityDao;
+import org.n52.sta.data.cloudnative.dao.FirehoseConstants;
 import org.n52.sta.data.cloudnative.dao.HistoricalLocationDao;
+import org.n52.sta.data.cloudnative.dao.util.StaFirehoseClient;
 import org.n52.sta.data.cloudnative.schema.tables.pojos.HistoricalLocation;
 import org.springframework.stereotype.Component;
 
@@ -52,10 +53,14 @@ import java.util.*;
  * @author <a href="mailto:humaid.kidwai@ucalgary.ca">Humaid Kidwai</a>
  */
 @Component
-public class HistoricalLocationDaoImpl extends AbstractStaEntityDao<HistoricalLocationDTO>
-        implements HistoricalLocationDao {
-
+public class HistoricalLocationDaoImpl
+        extends AbstractStaEntityDao<HistoricalLocationDTO> implements HistoricalLocationDao {
+    private final String tableName = getEntityTable().getName();
     private Set<Table<?>> joins;
+
+    public HistoricalLocationDaoImpl(DSLContext ctx, StaFirehoseClient firehoseClient) {
+        super(ctx, firehoseClient);
+    }
 
     @Override
     protected List<HistoricalLocationDTO> mapResultToDTO(Result<Record> result) {
@@ -139,16 +144,18 @@ public class HistoricalLocationDaoImpl extends AbstractStaEntityDao<HistoricalLo
         return StaEntity.HISTORICAL_LOCATION.HISTORICAL_LOCATION_ID;
     }
 
-    public void save(HistoricalLocation historicalLocation) {
-        // TODO
+    public void save(HistoricalLocation historicalLocation) throws STACRUDException {
+        ObjectNode dataNode = mapper.convertValue(historicalLocation, ObjectNode.class);
+        firehoseClient.icebergMerge(dataNode, tableName, FirehoseConstants.INSERT);
     }
 
-    public void update(HistoricalLocation historicalLocation) {
-        // TODO
+    public void update(HistoricalLocation historicalLocation) throws STACRUDException {
+        ObjectNode dataNode = mapper.convertValue(historicalLocation, ObjectNode.class);
+        firehoseClient.icebergMerge(dataNode, tableName, FirehoseConstants.UPDATE);
     }
 
     @Override
-    public void deleteByStaIdentifier(String identifier, Class<HistoricalLocationDTO> entityClass) {
-        // TODO
+    public void deleteByStaIdentifier(String staIdentifier) throws STACRUDException {
+        firehoseClient.icebergDeleteByStaIdentifier(staIdentifier, tableName);
     }
 }

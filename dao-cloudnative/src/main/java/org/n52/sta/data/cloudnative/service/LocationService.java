@@ -50,7 +50,6 @@ import org.n52.sta.data.cloudnative.dao.LocationDao;
 import org.n52.sta.data.cloudnative.dao.impl.LocationDaoImpl;
 import org.n52.sta.data.cloudnative.dao.impl.LocationHistoricalLocationDaoImpl;
 import org.n52.sta.data.cloudnative.dao.impl.ThingLocationDaoImpl;
-import org.n52.sta.data.cloudnative.schema.tables.daos.LocationHistoricalLocationDao;
 import org.n52.sta.data.cloudnative.schema.tables.pojos.Format;
 import org.n52.sta.data.cloudnative.schema.tables.pojos.Location;
 import org.n52.sta.data.cloudnative.schema.tables.pojos.LocationHistoricalLocation;
@@ -89,6 +88,7 @@ public class LocationService
 
     private final FormatService formatService;
     private final boolean updateFOIFeatureEnabled;
+
     private final LocationDaoImpl locationDao;
     private final LocationHistoricalLocationDaoImpl locationHistoricalLocationDao;
     private final ThingLocationDaoImpl thingLocationDao;
@@ -164,41 +164,41 @@ public class LocationService
     }
 
     @Override
-    protected LocationDTO createOrfetch(LocationDTO location)
+    protected LocationDTO createOrfetch(LocationDTO entity)
             throws STACRUDException, STAInvalidQueryException {
-        if (location.getId() != null && location.getName() != null) {
+        if (entity.getId() != null && entity.getName() != null) {
             Optional<LocationDTO> optionalEntity =
-                    locationDao.findByStaIdentifier(location.getId(), null, entityClass);
+                    locationDao.findByStaIdentifier(entity.getId(), null, entityClass);
             if (optionalEntity.isPresent()) {
                 return optionalEntity.get();
             } else {
                 throw new STACRUDException(String.format(NO_S_WITH_ID_S_FOUND,
                         StaConstants.LOCATION,
-                        location.getId()));
+                        entity.getId()));
             }
         }
-        if (location.getId() == null) {
-            if (locationDao.existsByName(location.getName(), entityClass)) {
-                Optional<LocationDTO> optional = locationDao.findByName(location.getName(), entityClass);
+        if (entity.getId() == null) {
+            if (locationDao.existsByName(entity.getName(), entityClass)) {
+                Optional<LocationDTO> optional = locationDao.findByName(entity.getName(), entityClass);
                 return optional.orElse(null);
             } else {
-                // Autogenerate Identifier
-                location.setId(getUniqueTimestamp().toString());
+                entity.setId(NULL_ID_MASK);
             }
         }
-        synchronized (getLock(location.getId())) {
-            if (locationDao.existsByStaIdentifier(location.getId(), entityClass)) {
+        synchronized (getLock(entity.getId())) {
+            if (!Objects.equals(entity.getId(), NULL_ID_MASK) &&
+                    locationDao.existsByStaIdentifier(entity.getId(), entityClass)) {
                 throw new STACRUDException(IDENTIFIER_ALREADY_EXISTS, HTTPStatus.CONFLICT);
             }
             // overwrite user provided Id
-            // location.setId(getUniqueTimestamp().toString());
-            if (location.getProperties() != null) {
-                locationDao.saveLocationParameters(location.getId(), location.getProperties());
+            entity.setId(getUniqueTimestamp().toString());
+            if (entity.getProperties() != null) {
+                locationDao.saveLocationParameters(entity.getId(), entity.getProperties());
             }
-            locationDao.save(POJOWrapper(location));
-            processThings(location);
+            locationDao.save(POJOWrapper(entity));
+            processThings(entity);
         }
-        return location;
+        return entity;
     }
 
     private Location POJOWrapper(LocationDTO location) throws STACRUDException {
@@ -310,9 +310,9 @@ public class LocationService
                 // update LocationHistoricalLocation table
                 locationHistoricalLocationDao.deleteByLocationId(Long.valueOf(id));
                 if (location.getProperties() != null) {
-                    locationDao.deleteLocationParameters(location.getId(), location.getProperties());
+                    locationDao.deleteLocationParameters(Long.valueOf(location.getId()));
                 }
-                locationDao.deleteByStaIdentifier(id, entityClass);
+                locationDao.deleteByStaIdentifier(id);
             } else {
                 throw new STACRUDException(UNABLE_TO_UPDATE_ENTITY_NOT_FOUND, HTTPStatus.NOT_FOUND);
             }
@@ -321,7 +321,7 @@ public class LocationService
     }
 
     @Override
-    protected LocationDTO merge(LocationDTO existing, LocationDTO toMerge) {
+    protected LocationDTO merge(LocationDTO existing, LocationDTO toMerge) throws STACRUDException {
         mergeName(existing, toMerge);
         mergeDescription(existing, toMerge);
         if (toMerge.getGeometry() != null) {

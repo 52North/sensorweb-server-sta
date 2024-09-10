@@ -45,10 +45,7 @@ import org.springframework.stereotype.Component;
 /**
  * @author <a href="mailto:humaid.kidwai@ucalgary.ca">Humaid Kidwai</a>
  */
-@Component
 public class ObservationQueryConditions extends EntityQueryConditions {
-
-    public static Observation StaEntity = OBSERVATION;
 
     public Condition withFeatureOfInterestStaIdentifier(final String featureIdentifier) {
 

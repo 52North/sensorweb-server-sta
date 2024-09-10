@@ -37,7 +37,7 @@ import org.jooq.*;
 import org.jooq.impl.DSL;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
+import org.springframework.beans.factory.annotation.Configurable;
 
 import java.time.LocalDateTime;
 import java.util.Date;
@@ -47,7 +47,7 @@ import java.util.List;
  * @author <a href="mailto:humaid.kidwai@ucalgary.ca">Humaid Kidwai</a>
  */
 
-@Component
+@Configurable
 public abstract class EntityQueryConditions implements StaEntity {
 
     String COULD_NOT_FIND_RELATED_PROPERTY = "Could not find related property: ";
@@ -59,17 +59,8 @@ public abstract class EntityQueryConditions implements StaEntity {
     String INVALID_DATATYPE_CANNOT_CAST = "Invalid Datatypes found. Cannot cast ";
     String ERROR_INVALID_PARAMETER_ENTITY_TYPE = "Error getting entity from '%s'. No such parameter entity found";
 
-    protected DSLContext ctx;
-
-    public DSLContext getCtx() {
-        return ctx;
-    }
-
     @Autowired
-    public void setCtx(DSLContext ctx) {
-        this.ctx = ctx;
-    }
-
+    protected static DSLContext ctx;
     /**
      * Used for testing
      *
@@ -125,18 +116,6 @@ public abstract class EntityQueryConditions implements StaEntity {
 
     protected abstract Condition handleRelatedPropertyFilter(String propertyName, Condition propertyValue);
 
-//    public Condition withName(final String name) {
-//        return DSL.field(STA_NAME_FIELD).equal(name);
-//    }
-//
-//    public Condition withStaIdentifier(final String name) {
-//        return DSL.field(STA_IDENTIFIER_FIELD).equal(name);
-//    }
-//
-//    public Condition withStaIdentifier(final List<String> identifiers) {
-//        return DSL.field(STA_IDENTIFIER_FIELD).in(identifiers);
-//    }
-
     protected <T extends Comparable<? super T>> Condition handleDirectStringPropertyFilter(
             Field<String> stringField,
             Field <?> propertyValue,
@@ -176,15 +155,15 @@ public abstract class EntityQueryConditions implements StaEntity {
 
 
     protected <T extends Comparable<? super T>> Condition handleDirectDateTimePropertyFilter(
-            Field<LocalDateTime> timeField,
-            Field <T> propertyValue,
+            Field<T> timeField,
+            Field <?> propertyValue,
             FilterConstants.ComparisonOperator operator)
             throws STAInvalidFilterExpressionException {
 
         if (Date.class.isAssignableFrom(propertyValue.getDataType().getType())) {
             return this.handleComparableFilter(
-                    (Field<T>) timeField,
-                    propertyValue,
+                    timeField,
+                    (Field<T>) propertyValue,
                     operator
             );
         } else {

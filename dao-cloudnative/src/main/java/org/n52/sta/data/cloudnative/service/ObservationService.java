@@ -60,6 +60,7 @@ import org.n52.sta.data.cloudnative.dao.impl.ObservationDaoImpl;
 import org.n52.sta.data.cloudnative.dao.util.FilterExprVisitor;
 import org.n52.sta.data.cloudnative.schema.tables.pojos.Dataset;
 import org.n52.sta.data.cloudnative.schema.tables.pojos.Observation;
+import org.n52.sta.utils.TimeUtil;
 import org.n52.svalbard.odata.core.expr.Expr;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -72,6 +73,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.time.ZoneOffset;
 import java.util.*;
 
 import java.util.concurrent.atomic.AtomicLong;
@@ -91,17 +93,18 @@ public class ObservationService
     private static final Logger LOGGER = LoggerFactory.getLogger(ObservationService.class);
     protected final DatastreamDaoImpl datastreamDao;
     protected final ObservationDaoImpl observationDao;
+    protected final LocationDaoImpl locationDao;
     private final String OBS_TYPE_SENSORML_OBSERVATION =
             "http://www.52north.org/def/observationType/OGC-OM/2.0/OM_SensorML20Observation";
-    private final Class<ObservationDTO> entityClass;
     private final AtomicLong TS = new AtomicLong();
 
     public ObservationService(ObservationDaoImpl observationDao,
-                              DatastreamDaoImpl datastreamDao) {
+                              DatastreamDaoImpl datastreamDao,
+                              LocationDaoImpl locationDao) {
         super(observationDao, ObservationDTO.class);
-        this.entityClass = ObservationDTO.class;
         this.datastreamDao = datastreamDao;
         this.observationDao = observationDao;
+        this.locationDao = locationDao;
     }
 
     @Override
@@ -118,7 +121,10 @@ public class ObservationService
             if (identifierList.isEmpty()) {
                 return new CollectionWrapper(-1, Collections.emptyList(), false);
             } else {
-                return getEntityCollectionWrapperByIdentifierList(identifierList, pageableRequest, queryOptions, predicate);
+                return getEntityCollectionWrapperByIdentifierList(identifierList,
+                        pageableRequest,
+                        queryOptions,
+                        predicate);
             }
         } catch (RuntimeException | STAInvalidQueryException e) {
             throw new STACRUDException(e.getMessage(), e);
@@ -255,15 +261,15 @@ public class ObservationService
     }
 
     @Override
-    protected ObservationDTO createOrfetch(ObservationDTO observation)
+    protected ObservationDTO createOrfetch(ObservationDTO entity)
             throws STACRUDException, STAInvalidQueryException {
-        synchronized (getLock(observation.getId())) {
+        synchronized (getLock(entity.getId())) {
 
-            check(observation);
+            check(entity);
 
             // Fetch dataset and check if FOI matches to reuse existing dataset
-            Dataset dataset = datastreamDao.findPOJOByDatasetId(Long.valueOf(observation.getDatastream().getId()));
-            FeatureOfInterestDTO feature = this.createOrfetchFeature(observation, dataset.getFkPlatformId());
+            Dataset dataset = datastreamDao.findByDatasetIdPOJO(Long.valueOf(entity.getDatastream().getId()));
+            FeatureOfInterestDTO feature = this.createOrfetchFeature(entity, dataset.getFkPlatformId());
 
             // Check all subdatasets for a matching  dataset
             Set<Dataset> datasets;
@@ -295,21 +301,21 @@ public class ObservationService
             if (!found) {
                 // We have not found a matching dataset, so we need to create a new one
                 LOGGER.debug("Creating new dataset as none with matching FOI exists");
-                observation.setDatastream(getDatastreamService()
+                entity.setDatastream(getDatastreamService()
                         .createOrExpandAggregation(dataset, Long.valueOf(feature.getId())));
             }
 
             // Save Observation
-            observation.setId(getUniqueTimestamp().toString());
-            Observation observationPOJO = POJOWrapper(observation);
+            entity.setId(getUniqueTimestamp().toString());
+            Observation observationPOJO = POJOWrapper(entity);
             observationDao.save(observationPOJO);
 
             // Save Observation Parameters
-            if (observation.getParameters() != null) {
-                observationDao.saveObservationParameters(observation.getId(), observation.getParameters());
+            if (entity.getParameters() != null) {
+                observationDao.saveObservationParameters(entity.getId(), entity.getParameters());
             }
 
-            return observation;
+            return entity;
         }
     }
 
@@ -320,16 +326,17 @@ public class ObservationService
         observationPOJO.setStaIdentifier(entity.getId());
         observationPOJO.setIdentifier(entity.getId());
 
-        observationPOJO.setResultTime(((TimeInstant) entity.getResultTime()).getValue().toDate()
+        observationPOJO.setResultTime(((TimeInstant) entity.getResultTime()).getValue()
+                .toDate()
                 .toInstant()
-                .atZone(ZoneId.systemDefault())
+                .atZone(ZoneOffset.UTC)
                 .toLocalDateTime());
 
         Time phenomenonTime = entity.getPhenomenonTime();
         if (phenomenonTime instanceof TimeInstant) {
             LocalDateTime startTime = ((TimeInstant) phenomenonTime).getValue().toDate()
                     .toInstant()
-                    .atZone(ZoneId.systemDefault())
+                    .atZone(ZoneOffset.UTC)
                     .toLocalDateTime();
             observationPOJO.setSamplingTimeStart(startTime);
             observationPOJO.setSamplingTimeEnd(startTime);
@@ -337,12 +344,12 @@ public class ObservationService
             LocalDateTime startTime = ((TimePeriod) phenomenonTime).getStart()
                     .toDate()
                     .toInstant()
-                    .atZone(ZoneId.systemDefault())
+                    .atZone(ZoneOffset.UTC)
                     .toLocalDateTime();
             LocalDateTime endTime = ((TimePeriod) phenomenonTime).getEnd()
                     .toDate()
                     .toInstant()
-                    .atZone(ZoneId.systemDefault())
+                    .atZone(ZoneOffset.UTC)
                     .toLocalDateTime();
             observationPOJO.setSamplingTimeStart(startTime);
             observationPOJO.setSamplingTimeEnd(endTime);
@@ -350,18 +357,26 @@ public class ObservationService
 
         Time validTime = entity.getValidTime();
         if (validTime instanceof TimeInstant) {
-            observationPOJO.setValidTimeStart(((TimeInstant) validTime).getValue().toDate().toInstant()
-                    .atZone(ZoneId.systemDefault())
+            observationPOJO.setValidTimeStart(((TimeInstant) validTime).getValue()
+                    .toDate()
+                    .toInstant()
+                    .atZone(ZoneOffset.UTC)
                     .toLocalDateTime());
-            observationPOJO.setValidTimeEnd(((TimeInstant) validTime).getValue().toDate().toInstant()
-                    .atZone(ZoneId.systemDefault())
+            observationPOJO.setValidTimeEnd(((TimeInstant) validTime).getValue()
+                    .toDate()
+                    .toInstant()
+                    .atZone(ZoneOffset.UTC)
                     .toLocalDateTime());
         } else if (validTime instanceof TimePeriod) {
-            observationPOJO.setValidTimeStart(((TimePeriod) validTime).getStart().toDate().toInstant()
-                    .atZone(ZoneId.systemDefault())
+            observationPOJO.setValidTimeStart(((TimePeriod) validTime).getStart()
+                    .toDate()
+                    .toInstant()
+                    .atZone(ZoneOffset.UTC)
                     .toLocalDateTime());
-            observationPOJO.setValidTimeEnd(((TimePeriod) validTime).getEnd().toDate().toInstant()
-                    .atZone(ZoneId.systemDefault())
+            observationPOJO.setValidTimeEnd(((TimePeriod) validTime).getEnd()
+                    .toDate()
+                    .toInstant()
+                    .atZone(ZoneOffset.UTC)
                     .toLocalDateTime());
         }
 
@@ -402,7 +417,6 @@ public class ObservationService
         FeatureOfInterestDTO feature = null;
         // Create feature based on Thing.location if there is no feature given
         if (observation.getFeatureOfInterest() == null) {
-            LocationDaoImpl locationDao = new LocationDaoImpl();
             List<LocationDTO> locations = locationDao.findAllByThingId(thingId, LocationDTO.class);
             for (LocationDTO location : locations) {
                 if (feature == null) {
@@ -456,7 +470,7 @@ public class ObservationService
                     ObservationDTO merged = merge(existing.get(), entity);
                     Observation updatedObservation = POJOWrapper(merged);
                     observationDao.update(updatedObservation);
-                    Dataset dataset = datastreamDao.findPOJOByDatasetId(updatedObservation.getFkDatasetId());
+                    Dataset dataset = datastreamDao.findByDatasetIdPOJO(updatedObservation.getFkDatasetId());
                     updateDatastreamPhenomenonTimeOnObservationUpdate(dataset, updatedObservation);
                     return merged;
                 }
@@ -500,7 +514,8 @@ public class ObservationService
                     datastreamEntity.getDatasetId(),
                     ObservationDTO.class);
 
-            LocalDateTime newPhenomenonStart = (firstObservation == null) ? null : firstObservation.getSamplingTimeStart();
+            LocalDateTime newPhenomenonStart = (firstObservation == null) ?
+                    null : firstObservation.getSamplingTimeStart();
 
             // Set Start and End to null if there is no observation.
             if (newPhenomenonStart == null) {
@@ -513,7 +528,8 @@ public class ObservationService
                 Observation lastObservation = observationDao.findFirstByDatasetIdOrderBySamplingTimeEndDesc(
                         datastreamEntity.getDatasetId(),
                         ObservationDTO.class);
-                LocalDateTime newPhenomenonEnd = (lastObservation == null) ? null : lastObservation.getSamplingTimeEnd();
+                LocalDateTime newPhenomenonEnd = (lastObservation == null) ?
+                        null : lastObservation.getSamplingTimeEnd();
                 if (newPhenomenonEnd != null) {
                     datastreamEntity.setFirstTime(newPhenomenonEnd);
                 } else {
@@ -525,7 +541,7 @@ public class ObservationService
             // update parent if its part of the aggregation
             if (datastreamEntity.getFkAggregationId() != null && datastreamEntity.getFkAggregationId() != 1L) {
                 updateDatastreamPhenomenonTimeOnObservationUpdate(
-                        datastreamDao.findPOJOByDatasetId(datastreamEntity.getFkAggregationId()),
+                        datastreamDao.findByDatasetIdPOJO(datastreamEntity.getFkAggregationId()),
                         observation);
             }
         }
@@ -541,11 +557,10 @@ public class ObservationService
                         .findByStaIdentifier(identifier, options, ObservationDTO.class).get();
 
                 if (observation.getParameters() != null) {
-                    observationDao.deleteObservationParameters(Long.valueOf(observation.getId()),
-                            observation.getParameters());
+                    observationDao.deleteObservationParameters(Long.valueOf(observation.getId()));
                 }
-                observationDao.deleteByStaIdentifier(observation.getId(), ObservationDTO.class);
-                Dataset dataset = datastreamDao.findPOJOByDatasetId(Long.valueOf(observation.getDatastream().getId()));
+                observationDao.deleteByStaIdentifier(observation.getId());
+                Dataset dataset = datastreamDao.findByDatasetIdPOJO(Long.valueOf(observation.getDatastream().getId()));
                 updateDatastreamPhenomenonTimeOnObservationUpdate(dataset, POJOWrapper(observation));
             } else {
                 throw new STACRUDException(UNABLE_TO_DELETE_ENTITY_NOT_FOUND, HTTPStatus.NOT_FOUND);
@@ -615,13 +630,22 @@ public class ObservationService
     }
 
     private void mergeSamplingTimeAndCheckResultTime(ObservationDTO existing, ObservationDTO toMerge) {
-        // TODO:
-        Time toMergeSamplingTimeEnd = toMerge.getPhenomenonTime();
-        Time existingSamplingTimeEnd = existing.getPhenomenonTime();
+        Time toMergeSamplingTimeEnd = getSamplingTimeEnd(toMerge.getPhenomenonTime());
+        Time existingSamplingTimeEnd = getSamplingTimeEnd(existing.getPhenomenonTime());
         if (toMergeSamplingTimeEnd != null && existingSamplingTimeEnd.equals(existing.getResultTime())) {
             existing.setResultTime(toMergeSamplingTimeEnd);
         }
         mergePhenomenonTime(existing, toMerge);
+    }
+
+    private Time getSamplingTimeEnd(Time phenomenonTime) {
+        if (phenomenonTime instanceof TimeInstant) {
+            return TimeUtil.createTime(((TimeInstant) phenomenonTime).getValue());
+
+        } else if (phenomenonTime instanceof TimePeriod) {
+            return TimeUtil.createTime(((TimePeriod) phenomenonTime).getEnd());
+        }
+        return null;
     }
 
 

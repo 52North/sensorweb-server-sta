@@ -29,6 +29,13 @@
 
 package org.n52.sta.data.cloudnative.dao.impl;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import org.n52.shetland.ogc.sta.exception.STACRUDException;
+import org.n52.sta.data.cloudnative.condition.StaEntity;
+import org.n52.sta.data.cloudnative.dao.FirehoseConstants;
+import org.n52.sta.data.cloudnative.dao.util.StaFirehoseClient;
+import org.n52.sta.data.cloudnative.dao.ThingLocationDao;
 import org.n52.sta.data.cloudnative.schema.tables.pojos.PlatformLocation;
 import org.springframework.stereotype.Component;
 
@@ -39,19 +46,33 @@ import java.util.Set;
  */
 @Component
 public class ThingLocationDaoImpl implements ThingLocationDao {
-    @Override
-    public void saveAll(Set<PlatformLocation> thingLocations) {
-        // TODO
+
+    private final StaFirehoseClient firehoseClient;
+    private final String tableName = "PLATFORM_LOCATION";
+    private final ObjectMapper mapper = new ObjectMapper();
+
+    public ThingLocationDaoImpl(StaFirehoseClient firehoseClient) {
+        this.firehoseClient = firehoseClient;
     }
 
     @Override
-    public void deleteByLocationId(long locationId) {
-        // TODO
+    public void saveAll(Set<PlatformLocation> thingLocations) throws STACRUDException {
+        for (PlatformLocation thingLocation : thingLocations) {
+            ObjectNode dataNode = mapper.convertValue(thingLocation, ObjectNode.class);
+            firehoseClient.icebergMerge(dataNode, tableName, FirehoseConstants.INSERT);
+        }
+    }
+
+    @Override
+    public void deleteByLocationId(long locationId) throws STACRUDException {
+        String key = StaEntity.THING_LOCATION.FK_LOCATION_ID.getName();
+        firehoseClient.icebergDeleteById(key, locationId, tableName);
 
     }
 
     @Override
-    public void deleteByThingId(long thingId) {
-        // TODO
+    public void deleteByThingId(long thingId) throws STACRUDException {
+        String key = StaEntity.THING_LOCATION.FK_PLATFORM_ID.getName();
+        firehoseClient.icebergDeleteById(key, thingId, tableName);
     }
 }

@@ -27,19 +27,18 @@
  * Public License for more details.
  */
 
-package org.n52.sta.data.cloudnative.dao.impl;
+package org.n52.sta.data.cloudnative.dao;
 
-import org.n52.sta.data.cloudnative.schema.tables.pojos.PlatformLocation;
+import org.n52.shetland.ogc.sta.exception.STACRUDException;
+import org.n52.sta.data.cloudnative.schema.tables.pojos.LocationHistoricalLocation;
 
 import java.util.Set;
 
 /**
  * @author <a href="mailto:humaid.kidwai@ucalgary.ca">Humaid Kidwai</a>
  */
-public interface ThingLocationDao {
-
-    void saveAll(Set<PlatformLocation> thingLocations);
-    void deleteByLocationId(long locationId);
-    void deleteByThingId(long thingId);
-
+public interface LocationHistoricalLocationDao {
+    void saveAll(Set<LocationHistoricalLocation> platformLocations) throws STACRUDException;
+    void deleteByLocationId(long locationId) throws STACRUDException;
+    void deleteByHistoricalLocationId(long historicalLocationId) throws STACRUDException;
 }

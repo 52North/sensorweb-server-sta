@@ -61,8 +61,7 @@ public class SensorDaoTest {
 
     @BeforeEach
     public void setUp() {
-        sensorDao = new SensorDaoImpl();
-        sensorDao.setCtx(ctx);
+        sensorDao = new SensorDaoImpl(ctx, null);
     }
 
     @Test
@@ -181,5 +180,5 @@ public class SensorDaoTest {
 
         Assertions.assertEquals(result, true);
     }
-    
+
 }

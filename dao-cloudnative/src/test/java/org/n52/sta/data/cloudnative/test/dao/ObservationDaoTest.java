@@ -35,8 +35,7 @@ public class ObservationDaoTest {
 
     @BeforeEach
     public void setUp() {
-        observationDao = new ObservationDaoImpl();
-        observationDao.setCtx(ctx);
+        observationDao = new ObservationDaoImpl(ctx, null);
     }
 
 //    @Test
@@ -131,8 +130,8 @@ public class ObservationDaoTest {
 
     @Test
     public void testWithFindAll() {
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS");
-        LocalDateTime phenomenonTime = LocalDateTime.parse("2012-06-26T09:42:02.000", formatter);
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSX");
+        LocalDateTime phenomenonTime = LocalDateTime.parse("2012-06-26T09:42:02.000Z", formatter);
         Condition predicate = StaEntity.OBSERVATION.SAMPLING_TIME_START.eq(phenomenonTime);
         QueryOptions options = null;
         Class<ObservationDTO> entityClass = ObservationDTO.class;

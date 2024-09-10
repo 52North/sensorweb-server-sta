@@ -4,6 +4,7 @@ import org.jooq.Condition;
 import org.jooq.Field;
 import org.jooq.Table;
 import org.n52.shetland.oasis.odata.query.option.QueryOptions;
+import org.n52.shetland.ogc.sta.exception.STACRUDException;
 import org.n52.shetland.ogc.sta.exception.STAInvalidQueryException;
 import org.n52.sta.api.dto.StaDTO;
 import org.springframework.data.domain.Page;
@@ -142,8 +143,7 @@ public interface StaEntityDao <T extends StaDTO> {
      *
      * @param identifier Identifier of the Entity
      */
-    void deleteByStaIdentifier(String identifier,
-                               Class<T> className);
+    void deleteByStaIdentifier(String identifier) throws STACRUDException;
 
 //    /**
 //     * Checks whether Entity with given id exists.

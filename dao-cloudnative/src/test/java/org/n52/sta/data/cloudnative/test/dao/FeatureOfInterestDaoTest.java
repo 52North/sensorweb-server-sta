@@ -7,6 +7,7 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.runner.RunWith;
 import org.n52.shetland.oasis.odata.query.option.QueryOptions;
 import org.n52.shetland.ogc.sta.exception.STAInvalidQueryException;
 import org.n52.sta.api.dto.FeatureOfInterestDTO;
@@ -32,8 +33,7 @@ public class FeatureOfInterestDaoTest {
 
     @BeforeEach
     public void setUp() {
-        featureDao = new FeatureOfInterestDaoImpl();
-        featureDao.setCtx(ctx);
+        featureDao = new FeatureOfInterestDaoImpl(ctx, null);
     }
 
     @Test
@@ -126,7 +126,7 @@ public class FeatureOfInterestDaoTest {
         Assertions.assertEquals(result.get(0).getProperties().findValue("foi_code").toString(),
                 "\"foi.001.sample\"");
     }
-    
+
     @Test
     public void testWithFindByStaIdentifier() {
         String identifier = "60a6ad14-1730-4d75-aa34-fce7795470ce";
@@ -155,5 +155,5 @@ public class FeatureOfInterestDaoTest {
 
         Assertions.assertEquals(result, true);
     }
-    
+
 }

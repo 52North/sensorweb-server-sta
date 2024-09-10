@@ -28,11 +28,14 @@
  */
 package org.n52.sta.data.cloudnative.dao.impl;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.jooq.*;
 import org.jooq.Record;
-import org.n52.sta.api.dto.DatastreamDTO;
-import org.n52.sta.data.cloudnative.DTOMapper;
+import org.n52.shetland.ogc.sta.exception.STACRUDException;
 import org.n52.sta.data.cloudnative.condition.StaEntity;
+import org.n52.sta.data.cloudnative.dao.FirehoseConstants;
+import org.n52.sta.data.cloudnative.dao.util.StaFirehoseClient;
 import org.n52.sta.data.cloudnative.schema.tables.pojos.Unit;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -44,11 +47,16 @@ import java.util.*;
  */
 @Component
 public class UnitDaoImpl {
-    private DSLContext ctx;
+
+    private final DSLContext ctx;
+    private final ObjectMapper mapper = new ObjectMapper();
+    private final StaFirehoseClient firehoseClient;
+    private final String tableName = "UNIT";
 
     @Autowired
-    public UnitDaoImpl(DSLContext ctx) {
+    public UnitDaoImpl(DSLContext ctx, StaFirehoseClient firehoseClient) {
         this.ctx = ctx;
+        this.firehoseClient = firehoseClient;
     }
 
     public boolean existsBySymbol(String symbol) {
@@ -63,8 +71,9 @@ public class UnitDaoImpl {
         return count != null;
     }
 
-    public void save(Unit unitPOJO) {
-        // TODO
+    public void save(Unit unitPOJO) throws STACRUDException {
+        ObjectNode dataNode = mapper.convertValue(unitPOJO, ObjectNode.class);
+        firehoseClient.icebergMerge(dataNode, tableName, FirehoseConstants.INSERT);
     }
 
     public Optional<Unit> findBySymbol(String symbol) {

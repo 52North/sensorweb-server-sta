@@ -115,7 +115,7 @@ public class FormatService {
         return SfConstants.SAMPLING_FEAT_TYPE_SF_SAMPLING_FEATURE;
     }
 
-    public Format createFormatFromGeometry(Geometry geometry) {
+    public Format createFormatFromGeometry(Geometry geometry) throws STACRUDException {
         Format formatPOJO = new Format();
         formatPOJO.setFormatId(getUniqueTimestamp());
         formatPOJO.setDefinition(getFormatDefinitionFromGeometry(geometry));

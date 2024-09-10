@@ -70,6 +70,7 @@ import org.n52.shetland.ogc.sta.exception.STAInvalidQueryException;
 import org.n52.shetland.ogc.sta.model.STAEntityDefinition;
 import org.n52.sta.api.dto.HistoricalLocationDTO;
 import org.n52.sta.api.dto.LocationDTO;
+import org.n52.sta.api.dto.SensorDTO;
 import org.n52.sta.api.dto.ThingDTO;
 import org.n52.sta.data.cloudnative.condition.HistoricalLocationQueryConditions;
 import org.n52.sta.data.cloudnative.condition.StaEntity;
@@ -90,6 +91,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.time.ZoneOffset;
 import java.util.LinkedHashSet;
 import java.util.Optional;
 import java.util.Set;
@@ -116,19 +118,17 @@ public class HistoricalLocationService
 
     private final LocationDaoImpl locationDao;
     private final HistoricalLocationDaoImpl historicalLocationDao;
-    private final ThingDaoImpl thingDao;
     private final LocationHistoricalLocationDaoImpl locationHistoricalLocationDao;
+
     private final AtomicLong TS = new AtomicLong();
 
     public HistoricalLocationService(HistoricalLocationDaoImpl historicalLocationDao,
                                      LocationDaoImpl locationDao,
-                                     ThingDaoImpl thingDao,
                                      LocationHistoricalLocationDaoImpl locationHistoricalLocationDao,
                                      Class<HistoricalLocationDTO> entityClass) {
         super(historicalLocationDao, entityClass);
         this.locationDao = locationDao;
         this.historicalLocationDao = historicalLocationDao;
-        this.thingDao = thingDao;
         this.locationHistoricalLocationDao = locationHistoricalLocationDao;
     }
 
@@ -195,7 +195,25 @@ public class HistoricalLocationService
     @Override
     protected HistoricalLocationDTO createOrfetch(HistoricalLocationDTO entity)
             throws STACRUDException, STAInvalidQueryException {
+
+        if (entity.getId() != null) {
+            Optional<HistoricalLocationDTO> optionalEntity =
+                    historicalLocationDao.findByStaIdentifier(entity.getId(),null, entityClass);
+            if (optionalEntity.isPresent()) {
+                return optionalEntity.get();
+            } else {
+                throw new STACRUDException(String.format(NO_S_WITH_ID_S_FOUND,
+                        StaConstants.SENSOR,
+                        entity.getId()));
+            }
+        }
+        if (entity.getId() == null) {
+            entity.setId(NULL_ID_MASK);
+        }
+
         synchronized (getLock(entity.getId())) {
+            // overwrite the sta_identifier
+            entity.setId(getUniqueTimestamp().toString());
             check(entity);
             HistoricalLocationDTO created = processThing(entity);
             processLocations(created);
@@ -209,9 +227,10 @@ public class HistoricalLocationService
         hLocPOJO.setHistoricalLocationId(Long.valueOf(entity.getId()));
         hLocPOJO.setIdentifier(entity.getId());
         hLocPOJO.setStaIdentifier(entity.getId());
-        LocalDateTime time = ((TimeInstant) entity.getTime()).getValue().toDate()
+        LocalDateTime time = ((TimeInstant) entity.getTime()).getValue()
+                .toDate()
                 .toInstant()
-                .atZone(ZoneId.systemDefault())
+                .atZone(ZoneOffset.UTC)
                 .toLocalDateTime();
         hLocPOJO.setTime(time);
         hLocPOJO.setFkPlatformId(Long.valueOf(entity.getThing().getId()));
@@ -246,6 +265,7 @@ public class HistoricalLocationService
                 locHloc.setFkLocationId(Long.valueOf(location.get().getId()));
                 locationHistoricalLocations.add(locHloc);
             } else {
+                // create location and update LocationHistoricalLocation table
                 LocationHistoricalLocation locHloc = new LocationHistoricalLocation();
                 locHloc.setFkLocationId(Long.valueOf(getLocationService().createOrUpdate(l).getId()));
                 locHloc.setFkHistoricalLocationId(Long.valueOf(historicalLocation.getId()));
@@ -299,7 +319,7 @@ public class HistoricalLocationService
                 // the link between thing<->historicalLocation is invisible to Thing table
                 // so we do not have to update Thing table
 
-                historicalLocationDao.deleteByStaIdentifier(id, entityClass);
+                historicalLocationDao.deleteByStaIdentifier(id);
             } else {
                 throw new STACRUDException(UNABLE_TO_DELETE_ENTITY_NOT_FOUND, HTTPStatus.NOT_FOUND);
             }

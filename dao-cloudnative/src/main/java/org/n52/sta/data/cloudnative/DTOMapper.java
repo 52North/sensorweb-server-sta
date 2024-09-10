@@ -48,6 +48,7 @@ import org.n52.sta.utils.TimeUtil;
 import org.springframework.util.Assert;
 
 import java.sql.Timestamp;
+import java.time.ZoneId;
 
 /**
  * jOOQ Record Mapper for mapping Result Sets to DTO Entities
@@ -60,21 +61,15 @@ public class DTOMapper implements RecordMapperProvider {
     private static final ObjectMapper MAPPER = new ObjectMapper();
 
     private static <T extends HasNameAndDescription> void setStaDescription (T entity, String description){
-        if (description != null) {
-            entity.setDescription(description);
-        }
+        entity.setDescription(description);
     }
 
     private static <T extends HasNameAndDescription> void setStaName (T entity, String name) {
-        if (name != null) {
-            entity.setName(name);
-        }
+        entity.setName(name);
     }
 
     private static <T extends StaDTO> void setStaIdentifier (T entity, String Identifier){
-        if (Identifier != null) {
-            entity.setId(Identifier);
-        }
+        entity.setId(Identifier);
     }
 
     @Override
@@ -115,7 +110,6 @@ public class DTOMapper implements RecordMapperProvider {
             setUnitOfMeasurement(datastream, rec);
             setObservedArea(datastream, rec);
 
-
             return datastream;
         }
         public static class DatastreamParameterRecordMapper implements RecordMapper<Record, ObjectNode> {
@@ -127,9 +121,6 @@ public class DTOMapper implements RecordMapperProvider {
                 if (record.getName() != null) {
                     String key = record.getName();
 
-                    if (record.getValueCount() != null) {
-                        properties.put(key, record.getValueCount());
-                    }
                     if (record.getValueText() != null) {
                         properties.put(key, record.getValueText());
                     }
@@ -139,28 +130,33 @@ public class DTOMapper implements RecordMapperProvider {
                     if (record.getValueBoolean() != null) {
                         properties.put(key, record.getValueBoolean());
                     }
-                    if (record.getValueCategory() != null) {
-                        properties.put(key,
-                                record.getValueCategory());
-                    }
-                    if (record.getValueXml() != null) {
-                        properties.put(key,
-                                record.getValueXml());
-                    }
-                    if (record.getValueJson() != null) {
-                        properties.put(key,
-                                record.getValueJson());
-                    }
-                    if (record.getValueTemporalFrom() != null) {
-                        properties.put(key,
-                                record.getValueTemporalFrom().toString());
-                    }
-                    if (record.getValueTemporalTo() != null) {
-                        properties.put(key,
-                                record.getValueTemporalTo().toString());
-                    }
+//                    if (record.getValueCount() != null) {
+//                        properties.put(key, record.getValueCount());
+//                    }
+//                    if (record.getValueCategory() != null) {
+//                        properties.put(key,
+//                                record.getValueCategory());
+//                    }
+//                    if (record.getValueXml() != null) {
+//                        properties.put(key,
+//                                record.getValueXml());
+//                    }
+//                    if (record.getValueJson() != null) {
+//                        properties.put(key,
+//                                record.getValueJson());
+//                    }
+//                    if (record.getValueTemporalFrom() != null) {
+//                        properties.put(key,
+//                                record.getValueTemporalFrom().toString());
+//                    }
+//                    if (record.getValueTemporalTo() != null) {
+//                        properties.put(key,
+//                                record.getValueTemporalTo().toString());
+//                    }
+                    return properties;
+                } else {
+                    return null;
                 }
-                return properties;
             }
             @Override
             public ObjectNode map(Record record) {
@@ -171,38 +167,56 @@ public class DTOMapper implements RecordMapperProvider {
         private void setPhenomenonTime(Datastream datastream, DatasetRecord record) {
             if (record.getFirstTime() != null && record.getLastTime() != null) {
                 datastream.setPhenomenonTime(TimeUtil.createTime(
-                        TimeUtil.createDateTime(Timestamp.valueOf(record.getFirstTime())),
-                        TimeUtil.createDateTime(Timestamp.valueOf(record.getLastTime())))
+                        TimeUtil.createDateTime(Timestamp.from(
+                                record.getFirstTime()
+                                        .atZone(ZoneId.of("UTC"))
+                                        .toInstant())),
+                        TimeUtil.createDateTime(Timestamp.from(
+                                record.getLastTime()
+                                        .atZone(ZoneId.of("UTC"))
+                                        .toInstant())))
                 );
+            } else {
+                datastream.setPhenomenonTime(null);
             }
         }
 
         private void setResultTime(Datastream datastream, DatasetRecord record) {
 
             if (record.getResultTimeStart() != null && record.getResultTimeEnd() != null) {
-                datastream.setResultTime(TimeUtil.createTime(
-                        TimeUtil.createDateTime(Timestamp.valueOf(record.getResultTimeStart())),
-                        TimeUtil.createDateTime(Timestamp.valueOf(record.getResultTimeEnd())))
+                datastream.setResultTime(
+                        TimeUtil.createTime(
+                            TimeUtil.createDateTime(Timestamp.from(
+                                    record.getResultTimeStart()
+                                    .atZone(ZoneId.of("UTC"))
+                                    .toInstant())),
+                            TimeUtil.createDateTime(Timestamp.from(
+                                    record.getResultTimeEnd()
+                                            .atZone(ZoneId.of("UTC"))
+                                            .toInstant())))
                 );
+            } else {
+                datastream.setResultTime(null);
             }
         }
 
         private void setObservedArea (Datastream datastream, Record record){
 
-            if (record.field("observed_area") != null) {
+            if (record.field(DSL.field("datastreamObservedArea")) != null) {
                 try {
-                    datastream.setObservedArea(WKTReader.read(record.get(DSL.field("observed_area", String.class))));
+                    datastream.setObservedArea(WKTReader.read(
+                            record.get(DSL.field("datastreamObservedArea", String.class))));
                 } catch (ParseException e) {
                     Assert.notNull(null, "Could not parse to WKB" + e.getMessage());
                 }
 
+            } else {
+                datastream.setObservedProperty(null);
             }
         }
 
-        private void setObservationType (Datastream datastream, DatasetRecord record){
-            if (record.getObservationType() != null) {
-                datastream.setObservationType(record.getObservationType());
-            }
+        private void setObservationType (Datastream datastream, DatasetRecord record) {
+            datastream.setObservationType(record.getObservationType());
         }
 
         private void setUnitOfMeasurement(Datastream datastream, Record record) {
@@ -213,16 +227,9 @@ public class DTOMapper implements RecordMapperProvider {
             @Override
             public DatastreamDTO.UnitOfMeasurement map(Record record) {
                 DatastreamDTO.UnitOfMeasurement uom = new DatastreamDTO.UnitOfMeasurement();
-
-                if (record.field(StaEntity.UNIT.NAME) != null) {
-                    uom.setName(record.get(StaEntity.UNIT.NAME));
-                }
-                if (record.field(StaEntity.UNIT.SYMBOL) != null) {
-                    uom.setSymbol(record.get(StaEntity.UNIT.SYMBOL));
-                }
-                if (record.field(StaEntity.UNIT.LINK) != null) {
-                    uom.setDefinition(record.get(StaEntity.UNIT.LINK));
-                }
+                uom.setName(record.get(StaEntity.UNIT.NAME));
+                uom.setSymbol(record.get(StaEntity.UNIT.SYMBOL));
+                uom.setDefinition(record.get(StaEntity.UNIT.LINK));
                 return uom;
             }
         }
@@ -250,9 +257,6 @@ public class DTOMapper implements RecordMapperProvider {
                 if (record.getName() != null) {
                     String key = record.getName();
 
-                    if (record.getValueCount() != null) {
-                        properties.put(key, record.getValueCount());
-                    }
                     if (record.getValueText() != null) {
                         properties.put(key, record.getValueText());
                     }
@@ -262,29 +266,34 @@ public class DTOMapper implements RecordMapperProvider {
                     if (record.getValueBoolean() != null) {
                         properties.put(key, record.getValueBoolean());
                     }
-                    if (record.getValueCategory() != null) {
-                        properties.put(key,
-                                record.getValueCategory());
-                    }
-                    if (record.getValueXml() != null) {
-                        properties.put(key,
-                                record.getValueXml());
-                    }
-                    if (record.getValueJson() != null) {
-                        properties.put(key,
-                                record.getValueJson());
-                    }
-                    if (record.getValueTemporalFrom() != null) {
-                        properties.put(key,
-                                record.getValueTemporalFrom().toString());
-                    }
-                    if (record.getValueTemporalTo() != null) {
-                        properties.put(key,
-                                record.getValueTemporalTo().toString());
-                    }
+//                    if (record.getValueCount() != null) {
+//                        properties.put(key, record.getValueCount());
+//                    }
+//                    if (record.getValueCategory() != null) {
+//                        properties.put(key,
+//                                record.getValueCategory());
+//                    }
+//                    if (record.getValueXml() != null) {
+//                        properties.put(key,
+//                                record.getValueXml());
+//                    }
+//                    if (record.getValueJson() != null) {
+//                        properties.put(key,
+//                                record.getValueJson());
+//                    }
+//                    if (record.getValueTemporalFrom() != null) {
+//                        properties.put(key,
+//                                record.getValueTemporalFrom().toString());
+//                    }
+//                    if (record.getValueTemporalTo() != null) {
+//                        properties.put(key,
+//                                record.getValueTemporalTo().toString());
+//                    }
+                    return properties;
+                } else {
+                    return null;
                 }
 
-                return properties;
             }
             @Override
             public ObjectNode map(Record record) {
@@ -294,12 +303,14 @@ public class DTOMapper implements RecordMapperProvider {
 
 
         private void setGeometry(Location location, Record record) {
-            if (record.field(DSL.field("GEOM")) != null) {
+            if (record.field(DSL.field("locationGeom")) != null) {
                 try {
-                    location.setGeometry(WKTReader.read(record.get(DSL.field("GEOM", String.class))));
+                    location.setGeometry(WKTReader.read(record.get(DSL.field("locationGeom", String.class))));
                 } catch (ParseException e) {
                     Assert.notNull(null, "Could not parse to WKB" + e.getMessage());
                 }
+            } else {
+                location.setGeometry(null);
             }
         }
     }
@@ -312,7 +323,6 @@ public class DTOMapper implements RecordMapperProvider {
             setStaIdentifier(thing, record.getStaIdentifier());
             setStaName(thing, record.getName());
             setStaDescription(thing, record.getDescription());
-            //setProperties(thing, rec);
             return thing;
         }
         public static class ThingParameterRecordMapper implements RecordMapper<Record, ObjectNode> {
@@ -320,24 +330,9 @@ public class DTOMapper implements RecordMapperProvider {
             private ObjectNode setProperties(Record rec) {
                 PlatformParameterRecord record = rec.into(PlatformParameterRecord.class);
                 ObjectNode properties = MAPPER.createObjectNode();
-    //            if (record.getDescription() != null) {
-    //                properties.put(StaEntity.THING_PROPERTIES.DESCRIPTION.getName(),
-    //                        record.getDescription());
-    //            }
-    //            if (record.getLastUpdate() != null) {
-    //                properties.put(StaEntity.THING_PROPERTIES.LAST_UPDATE.getName(),
-    //                        record.getLastUpdate().toString());
-    //            }
-    //            if (record.getDomain() != null) {
-    //                properties.put(StaEntity.THING_PROPERTIES.DOMAIN.getName(),
-    //                        record.getDomain());
-    //            }
                 if (record.getName() != null) {
                     String key = record.getName();
 
-                    if (record.getValueCount() != null) {
-                        properties.put(key, record.getValueCount());
-                    }
                     if (record.getValueText() != null) {
                         properties.put(key, record.getValueText());
                     }
@@ -347,33 +342,28 @@ public class DTOMapper implements RecordMapperProvider {
                     if (record.getValueBoolean() != null) {
                         properties.put(key, record.getValueBoolean());
                     }
-                    if (record.getValueCategory() != null) {
-                        properties.put(key, record.getValueCategory());
-                    }
-                    if (record.getValueXml() != null) {
-                        properties.put(key, record.getValueXml());
-                    }
-                    if (record.getValueJson() != null) {
-                        properties.put(key, record.getValueJson());
-                    }
-                    if (record.getValueTemporalFrom() != null) {
-                        properties.put(key, record.getValueTemporalFrom().toString());
-                    }
-                    if (record.getValueTemporalTo() != null) {
-                        properties.put(key, record.getValueTemporalTo().toString());
-                    }
+//                    if (record.getValueCount() != null) {
+//                        properties.put(key, record.getValueCount());
+//                    }
+//                    if (record.getValueCategory() != null) {
+//                        properties.put(key, record.getValueCategory());
+//                    }
+//                    if (record.getValueXml() != null) {
+//                        properties.put(key, record.getValueXml());
+//                    }
+//                    if (record.getValueJson() != null) {
+//                        properties.put(key, record.getValueJson());
+//                    }
+//                    if (record.getValueTemporalFrom() != null) {
+//                        properties.put(key, record.getValueTemporalFrom().toString());
+//                    }
+//                    if (record.getValueTemporalTo() != null) {
+//                        properties.put(key, record.getValueTemporalTo().toString());
+//                    }
+                    return properties;
+                } else {
+                    return null;
                 }
-    //            if (record.getFkUnitId() != null) {
-    //                properties.put(StaEntity.THING_PROPERTIES.FK_UNIT_ID.getName(),
-    //                        record.getFkUnitId());
-    //            }
-    //            if (record.getFkPlatformId() != null) {
-    //                properties.put(
-    //                        StaEntity.THING_PROPERTIES.FK_PLATFORM_ID.getName(),
-    //                        record.getFkPlatformId()
-    //                );
-    //            }
-                return properties;
             }
             @Override
             public ObjectNode map(Record record) {
@@ -396,7 +386,15 @@ public class DTOMapper implements RecordMapperProvider {
 
         private void setTime(HistoricalLocation historicalLocation, HistoricalLocationRecord record) {
             if(record.getTime() != null) {
-                historicalLocation.setTime(TimeUtil.createTime(new DateTime(Timestamp.valueOf(record.getTime()))));
+                historicalLocation.setTime(TimeUtil.createTime(TimeUtil.createDateTime(
+                        Timestamp.from(
+                                record.getTime()
+                                        .atZone(ZoneId.of("UTC")).toInstant()
+                        )
+                )));
+            }
+            else {
+                historicalLocation.setTime(null);
             }
         }
 
@@ -427,9 +425,6 @@ public class DTOMapper implements RecordMapperProvider {
                 if (record.getName() != null) {
                     String key = record.getName();
 
-                    if (record.getValueCount() != null) {
-                        properties.put(key, record.getValueCount());
-                    }
                     if (record.getValueText() != null) {
                         properties.put(key, record.getValueText());
                     }
@@ -439,28 +434,33 @@ public class DTOMapper implements RecordMapperProvider {
                     if (record.getValueBoolean() != null) {
                         properties.put(key, record.getValueBoolean());
                     }
-                    if (record.getValueCategory() != null) {
-                        properties.put(key,
-                                record.getValueCategory());
-                    }
-                    if (record.getValueXml() != null) {
-                        properties.put(key,
-                                record.getValueXml());
-                    }
-                    if (record.getValueJson() != null) {
-                        properties.put(key,
-                                record.getValueJson());
-                    }
-                    if (record.getValueTemporalFrom() != null) {
-                        properties.put(key,
-                                record.getValueTemporalFrom().toString());
-                    }
-                    if (record.getValueTemporalTo() != null) {
-                        properties.put(key,
-                                record.getValueTemporalTo().toString());
-                    }
+//                    if (record.getValueCount() != null) {
+//                        properties.put(key, record.getValueCount());
+//                    }
+//                    if (record.getValueCategory() != null) {
+//                        properties.put(key,
+//                                record.getValueCategory());
+//                    }
+//                    if (record.getValueXml() != null) {
+//                        properties.put(key,
+//                                record.getValueXml());
+//                    }
+//                    if (record.getValueJson() != null) {
+//                        properties.put(key,
+//                                record.getValueJson());
+//                    }
+//                    if (record.getValueTemporalFrom() != null) {
+//                        properties.put(key,
+//                                record.getValueTemporalFrom().toString());
+//                    }
+//                    if (record.getValueTemporalTo() != null) {
+//                        properties.put(key,
+//                                record.getValueTemporalTo().toString());
+//                    }
+                    return properties;
+                } else {
+                    return null;
                 }
-                return properties;
             }
             @Override
             public ObjectNode map(Record record) {
@@ -469,17 +469,12 @@ public class DTOMapper implements RecordMapperProvider {
         }
 
         private void setMetadata(Sensor sensor, ProcedureRecord record) {
-            if (record.getDescriptionFile() != null) {
-                sensor.setMetadata(record.getDescriptionFile());
-            }
+            sensor.setMetadata(record.getDescriptionFile());
         }
 
         private void setEncodingType(Sensor sensor, Record rec) {
             FormatRecord record = rec.into(FormatRecord.class);
-
-            if (record.getDefinition() != null) {
-                sensor.setEncodingType(record.getDefinition());
-            }
+            sensor.setEncodingType(record.getDefinition());
         }
     }
 
@@ -501,13 +496,9 @@ public class DTOMapper implements RecordMapperProvider {
             private ObjectNode setProperties(Record rec) {
                 PhenomenonParameterRecord record = rec.into(PhenomenonParameterRecord.class);
                 ObjectNode properties = MAPPER.createObjectNode();
-
                 if (record.getName() != null) {
                     String key = record.getName();
 
-                    if (record.getValueCount() != null) {
-                        properties.put(key, record.getValueCount());
-                    }
                     if (record.getValueText() != null) {
                         properties.put(key, record.getValueText());
                     }
@@ -517,28 +508,33 @@ public class DTOMapper implements RecordMapperProvider {
                     if (record.getValueBoolean() != null) {
                         properties.put(key, record.getValueBoolean());
                     }
-                    if (record.getValueCategory() != null) {
-                        properties.put(key,
-                                record.getValueCategory());
-                    }
-                    if (record.getValueXml() != null) {
-                        properties.put(key,
-                                record.getValueXml());
-                    }
-                    if (record.getValueJson() != null) {
-                        properties.put(key,
-                                record.getValueJson());
-                    }
-                    if (record.getValueTemporalFrom() != null) {
-                        properties.put(key,
-                                record.getValueTemporalFrom().toString());
-                    }
-                    if (record.getValueTemporalTo() != null) {
-                        properties.put(key,
-                                record.getValueTemporalTo().toString());
-                    }
+//                    if (record.getValueCount() != null) {
+//                        properties.put(key, record.getValueCount());
+//                    }
+//                    if (record.getValueCategory() != null) {
+//                        properties.put(key,
+//                                record.getValueCategory());
+//                    }
+//                    if (record.getValueXml() != null) {
+//                        properties.put(key,
+//                                record.getValueXml());
+//                    }
+//                    if (record.getValueJson() != null) {
+//                        properties.put(key,
+//                                record.getValueJson());
+//                    }
+//                    if (record.getValueTemporalFrom() != null) {
+//                        properties.put(key,
+//                                record.getValueTemporalFrom().toString());
+//                    }
+//                    if (record.getValueTemporalTo() != null) {
+//                        properties.put(key,
+//                                record.getValueTemporalTo().toString());
+//                    }
+                    return properties;
+                } else {
+                    return null;
                 }
-                return properties;
             }
             @Override
             public ObjectNode map(Record record) {
@@ -547,9 +543,7 @@ public class DTOMapper implements RecordMapperProvider {
         }
 
         private void setDefinition(ObservedProperty observedProperty, PhenomenonRecord record) {
-            if (record.getIdentifier() != null) {
-                observedProperty.setDefinition(record.getIdentifier());
-            }
+            observedProperty.setDefinition(record.getIdentifier());
         }
     }
 
@@ -571,9 +565,17 @@ public class DTOMapper implements RecordMapperProvider {
         private void setPhenomenonTime(Observation observation, ObservationRecord record) {
             if (record.getSamplingTimeStart() != null && record.getSamplingTimeEnd() != null) {
                 observation.setPhenomenonTime(TimeUtil.createTime(
-                        TimeUtil.createDateTime(Timestamp.valueOf(record.getSamplingTimeStart())),
-                        TimeUtil.createDateTime(Timestamp.valueOf(record.getSamplingTimeEnd())))
+                        TimeUtil.createDateTime(Timestamp.from(
+                                record.getSamplingTimeStart()
+                                        .atZone(ZoneId.of("UTC"))
+                                        .toInstant())),
+                        TimeUtil.createDateTime(Timestamp.from(
+                                record.getSamplingTimeEnd()
+                                        .atZone(ZoneId.of("UTC"))
+                                        .toInstant())))
                 );
+            } else {
+                observation.setPhenomenonTime(null);
             }
         }
         public static class ObservationParameterRecordMapper implements RecordMapper<Record, ObjectNode> {
@@ -585,9 +587,6 @@ public class DTOMapper implements RecordMapperProvider {
                 if (record.getName() != null) {
                     String key = record.getName();
 
-                    if (record.getValueCount() != null) {
-                        properties.put(key, record.getValueCount());
-                    }
                     if (record.getValueText() != null) {
                         properties.put(key, record.getValueText());
                     }
@@ -597,28 +596,33 @@ public class DTOMapper implements RecordMapperProvider {
                     if (record.getValueBoolean() != null) {
                         properties.put(key, record.getValueBoolean());
                     }
-                    if (record.getValueCategory() != null) {
-                        properties.put(key,
-                                record.getValueCategory());
-                    }
-                    if (record.getValueXml() != null) {
-                        properties.put(key,
-                                record.getValueXml());
-                    }
-                    if (record.getValueJson() != null) {
-                        properties.put(key,
-                                record.getValueJson());
-                    }
-                    if (record.getValueTemporalFrom() != null) {
-                        properties.put(key,
-                                record.getValueTemporalFrom().toString());
-                    }
-                    if (record.getValueTemporalTo() != null) {
-                        properties.put(key,
-                                record.getValueTemporalTo().toString());
-                    }
+//                    if (record.getValueCount() != null) {
+//                        properties.put(key, record.getValueCount());
+//                    }
+//                    if (record.getValueCategory() != null) {
+//                        properties.put(key,
+//                                record.getValueCategory());
+//                    }
+//                    if (record.getValueXml() != null) {
+//                        properties.put(key,
+//                                record.getValueXml());
+//                    }
+//                    if (record.getValueJson() != null) {
+//                        properties.put(key,
+//                                record.getValueJson());
+//                    }
+//                    if (record.getValueTemporalFrom() != null) {
+//                        properties.put(key,
+//                                record.getValueTemporalFrom().toString());
+//                    }
+//                    if (record.getValueTemporalTo() != null) {
+//                        properties.put(key,
+//                                record.getValueTemporalTo().toString());
+//                    }
+                    return properties;
+                } else {
+                    return null;
                 }
-                return properties;
             }
             @Override
             public ObjectNode map(Record record) {
@@ -637,21 +641,35 @@ public class DTOMapper implements RecordMapperProvider {
                 observation.setResult(record.getValueBoolean());
             } else if (record.getValueCategory() != null) {
                 observation.setResult(record.getValueCategory());
+            } else {
+                observation.setResult(null);
             }
+
         }
 
         private void setValidTime(Observation observation, ObservationRecord record) {
             if (record.getValidTimeStart() != null && record.getValidTimeEnd() != null) {
-                observation.setPhenomenonTime(TimeUtil.createTime(
-                        TimeUtil.createDateTime(Timestamp.valueOf(record.getValidTimeStart())),
-                        TimeUtil.createDateTime(Timestamp.valueOf(record.getValidTimeEnd())))
+                observation.setValidTime(TimeUtil.createTime(
+                        TimeUtil.createDateTime(Timestamp.from(record.getValidTimeStart()
+                                .atZone(ZoneId.of("UTC"))
+                                .toInstant())),
+                        TimeUtil.createDateTime(Timestamp.from(
+                                record.getValidTimeEnd()
+                                        .atZone(ZoneId.of("UTC"))
+                                        .toInstant())))
                 );
+            } else {
+                observation.setValidTime(null);
             }
         }
 
         private void setResultTime(Observation observation, ObservationRecord record) {
             if (record.getResultTime() != null) {
-               observation.setResultTime(TimeUtil.createTime(new DateTime(record.getResultTime())));
+               observation.setResultTime(TimeUtil.createTime(TimeUtil.createDateTime(
+                       Timestamp.from(record.getResultTime().atZone(ZoneId.of("UTC")).toInstant())
+               )));
+            } else {
+                observation.setResultTime(null);
             }
         }
 
@@ -680,9 +698,6 @@ public class DTOMapper implements RecordMapperProvider {
                 if (record.getName() != null) {
                     String key = record.getName();
 
-                    if (record.getValueCount() != null) {
-                        properties.put(key, record.getValueCount());
-                    }
                     if (record.getValueText() != null) {
                         properties.put(key, record.getValueText());
                     }
@@ -692,29 +707,33 @@ public class DTOMapper implements RecordMapperProvider {
                     if (record.getValueBoolean() != null) {
                         properties.put(key, record.getValueBoolean());
                     }
-                    if (record.getValueCategory() != null) {
-                        properties.put(key,
-                                record.getValueCategory());
-                    }
-                    if (record.getValueXml() != null) {
-                        properties.put(key,
-                                record.getValueXml());
-                    }
-                    if (record.getValueJson() != null) {
-                        properties.put(key,
-                                record.getValueJson());
-                    }
-                    if (record.getValueTemporalFrom() != null) {
-                        properties.put(key,
-                                record.getValueTemporalFrom().toString());
-                    }
-                    if (record.getValueTemporalTo() != null) {
-                        properties.put(key,
-                                record.getValueTemporalTo().toString());
-                    }
+//                    if (record.getValueCount() != null) {
+//                        properties.put(key, record.getValueCount());
+//                    }
+//                    if (record.getValueCategory() != null) {
+//                        properties.put(key,
+//                                record.getValueCategory());
+//                    }
+//                    if (record.getValueXml() != null) {
+//                        properties.put(key,
+//                                record.getValueXml());
+//                    }
+//                    if (record.getValueJson() != null) {
+//                        properties.put(key,
+//                                record.getValueJson());
+//                    }
+//                    if (record.getValueTemporalFrom() != null) {
+//                        properties.put(key,
+//                                record.getValueTemporalFrom().toString());
+//                    }
+//                    if (record.getValueTemporalTo() != null) {
+//                        properties.put(key,
+//                                record.getValueTemporalTo().toString());
+//                    }
+                    return properties;
+                } else {
+                    return null;
                 }
-
-                return properties;
             }
 
             @Override
@@ -725,18 +744,18 @@ public class DTOMapper implements RecordMapperProvider {
 
         private void setEncodingType(FeatureOfInterest featureOfInterest, Record rec) {
             FormatRecord record = rec.into(FormatRecord.class);
-            if (record.getDefinition() != null) {
-                featureOfInterest.setEncodingType(record.getDefinition());
-            }
+            featureOfInterest.setEncodingType(record.getDefinition());
         }
 
         private void setFeature(FeatureOfInterest featureOfInterest, Record record) {
-            if (record.field("GEOM") != null) {
+            if (record.field(DSL.field("foiGeom")) != null) {
                 try {
-                    featureOfInterest.setFeature(WKTReader.read(record.get(DSL.field("GEOM", String.class))));
+                    featureOfInterest.setFeature(WKTReader.read(record.get(DSL.field("foiGeom", String.class))));
                 } catch (ParseException e) {
                     Assert.notNull(null, "Could not parse to WKB" + e.getMessage());
                 }
+            } else {
+                featureOfInterest.setFeature(null);
             }
         }
     }

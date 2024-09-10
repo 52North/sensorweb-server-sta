@@ -33,18 +33,19 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.jooq.*;
 import org.jooq.Record;
 import org.jooq.impl.DSL;
-import org.n52.series.db.beans.sta.LocationEntity;
 import org.n52.shetland.filter.ExpandItem;
 import org.n52.shetland.oasis.odata.query.option.QueryOptions;
 import org.n52.shetland.ogc.sta.StaConstants;
+import org.n52.shetland.ogc.sta.exception.STACRUDException;
 import org.n52.shetland.ogc.sta.exception.STAInvalidQueryException;
 import org.n52.shetland.ogc.sta.model.STAEntityDefinition;
 import org.n52.sta.api.dto.LocationDTO;
 import org.n52.sta.data.cloudnative.DTOMapper;
 import org.n52.sta.data.cloudnative.condition.LocationQueryConditions;
 import org.n52.sta.data.cloudnative.condition.StaEntity;
-import org.n52.sta.data.cloudnative.dao.AbstractStaEntityDao;
+import org.n52.sta.data.cloudnative.dao.FirehoseConstants;
 import org.n52.sta.data.cloudnative.dao.LocationDao;
+import org.n52.sta.data.cloudnative.dao.util.StaFirehoseClient;
 import org.n52.sta.data.cloudnative.schema.tables.pojos.Location;
 import org.springframework.stereotype.Component;
 
@@ -56,8 +57,13 @@ import java.util.stream.Collectors;
  */
 @Component
 public class LocationDaoImpl extends AbstractStaEntityDao<LocationDTO> implements LocationDao {
-
+    private final String tableName = getEntityTable().getName();
+    private final String parameterTableName = "LOCATION_PARAMETER";
     private Set<Table<?>> joins;
+
+    public LocationDaoImpl(DSLContext ctx, StaFirehoseClient firehoseClient) {
+        super(ctx, firehoseClient);
+    }
 
     @Override
     public List<LocationDTO> findAllByThingId(Long id, Class<LocationDTO> entityClass)
@@ -91,10 +97,13 @@ public class LocationDaoImpl extends AbstractStaEntityDao<LocationDTO> implement
                 location.getThings().add(record.map(new DTOMapper.ThingRecordMapper()));
             }
             if (joins.contains(StaEntity.LOCATION_PROPERTIES)) {
-                location.setProperties(Optional.ofNullable(location.getProperties())
-                        .orElse(new ObjectMapper().createObjectNode()));
-                location.getProperties().setAll(record.map(new DTOMapper.LocationRecordMapper.
-                        LocationParameterRecordMapper()));
+                ObjectNode properties = record.map(new DTOMapper.LocationRecordMapper.
+                        LocationParameterRecordMapper());
+                if (properties != null) {
+                    location.setProperties(Optional.ofNullable(location.getProperties())
+                            .orElse(new ObjectMapper().createObjectNode()));
+                    location.getProperties().setAll(properties);
+                }
             }
 
         }
@@ -160,7 +169,7 @@ public class LocationDaoImpl extends AbstractStaEntityDao<LocationDTO> implement
                 return DSL.function("ST_AsText",
                                 String.class,
                                 DSL.function("ST_GeomFromWKB", byte[].class, field))
-                        .as(field.getName());
+                        .as("locationGeom");
             }
             return field;
         }).collect(Collectors.toList());
@@ -176,24 +185,28 @@ public class LocationDaoImpl extends AbstractStaEntityDao<LocationDTO> implement
         return StaEntity.LOCATION.LOCATION_ID;
     }
 
+    public void save(Location location) throws STACRUDException {
+        ObjectNode dataNode = mapper.convertValue(location, ObjectNode.class);
+        firehoseClient.icebergMerge(dataNode, tableName, FirehoseConstants.INSERT);
+    }
+
+    public void update(Location location) throws STACRUDException {
+        ObjectNode dataNode = mapper.convertValue(location, ObjectNode.class);
+        firehoseClient.icebergMerge(dataNode, tableName, FirehoseConstants.UPDATE);
+    }
+
     @Override
-    public void deleteByStaIdentifier(String identifier, Class<LocationDTO> entityClass) {
-        // TODO
+    public void deleteByStaIdentifier(String staIdentifier) throws STACRUDException {
+        firehoseClient.icebergDeleteByStaIdentifier(staIdentifier, tableName);
     }
 
-    public void saveLocationParameters(String id, ObjectNode properties) {
-        // TODO
+    public void saveLocationParameters(String id, ObjectNode parameters) throws STACRUDException {
+        String foreignKey = StaEntity.LOCATION_PROPERTIES.FK_LOCATION_ID.getName();
+        firehoseClient.icebergMergeParameters(parameters, parameterTableName, FirehoseConstants.INSERT, foreignKey, id);
     }
 
-    public void save(Location location) {
-        // TODO
-    }
-
-    public void update(Location location) {
-        // TODO
-    }
-
-    public void deleteLocationParameters(String id, ObjectNode properties) {
-        // TODO
+    public void deleteLocationParameters(Long id) throws STACRUDException {
+        String key = StaEntity.LOCATION_PROPERTIES.FK_LOCATION_ID.getName();
+        firehoseClient.icebergDeleteById(key, id, parameterTableName);
     }
 }

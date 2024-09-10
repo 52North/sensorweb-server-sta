@@ -35,14 +35,16 @@ import org.jooq.Record;
 import org.n52.shetland.filter.ExpandItem;
 import org.n52.shetland.oasis.odata.query.option.QueryOptions;
 import org.n52.shetland.ogc.sta.StaConstants;
+import org.n52.shetland.ogc.sta.exception.STACRUDException;
 import org.n52.shetland.ogc.sta.exception.STAInvalidQueryException;
 import org.n52.shetland.ogc.sta.model.SensorEntityDefinition;
 import org.n52.sta.api.dto.SensorDTO;
 import org.n52.sta.data.cloudnative.DTOMapper;
 import org.n52.sta.data.cloudnative.condition.SensorQueryConditions;
 import org.n52.sta.data.cloudnative.condition.StaEntity;
-import org.n52.sta.data.cloudnative.dao.AbstractStaEntityDao;
+import org.n52.sta.data.cloudnative.dao.FirehoseConstants;
 import org.n52.sta.data.cloudnative.dao.SensorDao;
+import org.n52.sta.data.cloudnative.dao.util.StaFirehoseClient;
 import org.n52.sta.data.cloudnative.schema.tables.pojos.Procedure;
 import org.springframework.stereotype.Component;
 
@@ -53,8 +55,13 @@ import java.util.*;
  */
 @Component
 public class SensorDaoImpl extends AbstractStaEntityDao<SensorDTO> implements SensorDao {
-
     private Set<Table<?>> joins;
+    private final String tableName = getEntityTable().getName();
+    private final String parameterTableName = "PROCEDURE_PARAMETER";
+
+    public SensorDaoImpl(DSLContext ctx, StaFirehoseClient firehoseClient) {
+        super(ctx, firehoseClient);
+    }
 
     @Override
     protected List<SensorDTO> mapResultToDTO(Result<Record> result) {
@@ -68,10 +75,13 @@ public class SensorDaoImpl extends AbstractStaEntityDao<SensorDTO> implements Se
                 sensor.getDatastreams().add(record.map(new DTOMapper.DatastreamRecordMapper()));
             }
             if (joins.contains(StaEntity.SENSOR_PROPERTIES)) {
-                sensor.setProperties(Optional.ofNullable(sensor.getProperties())
-                        .orElse(new ObjectMapper().createObjectNode()));
-                sensor.getProperties().setAll(record.map(new DTOMapper
-                        .SensorRecordMapper.SensorParameterRecordMapper()));
+                ObjectNode properties = record.map(new DTOMapper
+                        .SensorRecordMapper.SensorParameterRecordMapper());
+                if (properties != null) {
+                    sensor.setProperties(Optional.ofNullable(sensor.getProperties())
+                            .orElse(new ObjectMapper().createObjectNode()));
+                    sensor.getProperties().setAll(properties);
+                }
             }
         }
         return new ArrayList<>(sensorMap.values());
@@ -138,24 +148,29 @@ public class SensorDaoImpl extends AbstractStaEntityDao<SensorDTO> implements Se
         return StaEntity.SENSOR;
     }
 
-    public void save(Procedure procedure) {
-        // TODO
+    public void save(Procedure sensor) throws STACRUDException {
+        ObjectNode dataNode = mapper.convertValue(sensor, ObjectNode.class);
+        firehoseClient.icebergMerge(dataNode, tableName, FirehoseConstants.INSERT);
     }
 
-    public void update(Procedure procedure) {
-        // TODO
+    public void update(Procedure sensor) throws STACRUDException {
+        ObjectNode dataNode = mapper.convertValue(sensor, ObjectNode.class);
+        firehoseClient.icebergMerge(dataNode, tableName, FirehoseConstants.UPDATE);
     }
 
     @Override
-    public void deleteByStaIdentifier(String identifier, Class<SensorDTO> entityClass) {
-
+    public void deleteByStaIdentifier(String staIdentifier)
+            throws STACRUDException {
+        firehoseClient.icebergDeleteByStaIdentifier(staIdentifier, tableName);
     }
 
-    public void saveSensorParameters(String id, ObjectNode properties) {
-        // TODO
+    public void saveSensorParameters(String id, ObjectNode parameters)
+            throws STACRUDException {
+        String foreignKey = StaEntity.SENSOR_PROPERTIES.FK_PROCEDURE_ID.getName();
+        firehoseClient.icebergMergeParameters(parameters, parameterTableName, FirehoseConstants.INSERT, foreignKey, id);
     }
 
-    public void deleteSensorParameters(String id, ObjectNode properties) {
-        // TODO
+    public void deleteSensorParameters(String fkSensorStaIdentifier) throws STACRUDException {
+        firehoseClient.icebergDeleteByStaIdentifier(fkSensorStaIdentifier, parameterTableName);
     }
 }
