@@ -14,5 +14,5 @@ public interface ObservationDao extends StaEntityDao<ObservationDTO> {
     Observation findFirstByDatasetIdOrderBySamplingTimeEndDesc(Long datasetIdentifier,
                                                                   Class<ObservationDTO> entityClass) throws STAInvalidQueryException;
 
-    void deleteAllByDatasetIdIn(Set<Long> datasetId) throws STACRUDException;
+    void deleteAllByDatasetIdIn(Set<Long> datasetId) throws STACRUDException, STAInvalidQueryException;
 }

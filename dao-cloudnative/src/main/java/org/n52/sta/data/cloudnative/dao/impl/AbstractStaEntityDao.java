@@ -30,6 +30,9 @@ package org.n52.sta.data.cloudnative.dao.impl;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.PropertyNamingStrategy;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateTimeSerializer;
 import org.jooq.*;
 import org.jooq.Record;
 import org.jooq.impl.DSL;
@@ -50,6 +53,8 @@ import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
 import javax.validation.constraints.NotNull;
@@ -67,7 +72,16 @@ public abstract class AbstractStaEntityDao<T extends StaDTO> implements StaEntit
     protected AbstractStaEntityDao(DSLContext ctx, StaFirehoseClient firehoseClient) {
         this.ctx = ctx;
         this.firehoseClient = firehoseClient;
+        configureJacksonMapper();
+    }
+
+    private void configureJacksonMapper() {
         mapper.setPropertyNamingStrategy(PropertyNamingStrategy.SNAKE_CASE);
+        mapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS");
+        JavaTimeModule javaTimeModule = new JavaTimeModule();
+        javaTimeModule.addSerializer(LocalDateTime.class, new LocalDateTimeSerializer(formatter));
+        mapper.registerModule(javaTimeModule);
     }
 
     @Override

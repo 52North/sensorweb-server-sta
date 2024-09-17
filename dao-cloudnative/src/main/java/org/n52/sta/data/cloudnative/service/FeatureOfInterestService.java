@@ -48,13 +48,11 @@ import org.n52.sta.api.dto.ObservationDTO;
 import org.n52.sta.api.dto.impl.FeatureOfInterest;
 import org.n52.sta.data.cloudnative.condition.DatastreamQueryConditions;
 import org.n52.sta.data.cloudnative.condition.FeatureOfInterestQueryConditions;
-import org.n52.sta.data.cloudnative.condition.ObservationQueryConditions;
 import org.n52.sta.data.cloudnative.condition.StaEntity;
 import org.n52.sta.data.cloudnative.dao.FeatureOfInterestDao;
 import org.n52.sta.data.cloudnative.dao.StaEntityDao;
 import org.n52.sta.data.cloudnative.dao.impl.DatastreamDaoImpl;
 import org.n52.sta.data.cloudnative.dao.impl.FeatureOfInterestDaoImpl;
-import org.n52.sta.data.cloudnative.dao.impl.FormatDaoImpl;
 import org.n52.sta.data.cloudnative.dao.impl.ObservationDaoImpl;
 import org.n52.sta.data.cloudnative.schema.tables.pojos.Dataset;
 import org.n52.sta.data.cloudnative.schema.tables.pojos.Feature;
@@ -275,13 +273,13 @@ public class FeatureOfInterestService extends AbstractSensorThingsEntityServiceI
             throws STACRUDException, STAInvalidQueryException {
 
         synchronized (getLock(featureId)) {
-            Dataset dataset = datastreamDao.findByFeaturePOJO(dsQC.withFeatureStaIdentifier(featureId));
+            Dataset datasetPOJO = datastreamDao.findByFeaturePOJO(dsQC.withFeatureStaIdentifier(featureId));
             // delete related observations
-            observationDao.deleteAllByDatasetIdIn(Collections.singleton(dataset.getDatasetId()));
+            observationDao.deleteAllByDatasetIdIn(Collections.singleton(datasetPOJO.getDatasetId()));
             // only delete if we are part of an aggregation
             // if we are not part of an aggregation we must not delete as this would also delete the whole datastream
-            if (dataset.getFkAggregationId() != null && dataset.getFkAggregationId() != 1L) {
-                datastreamDao.deleteById(dataset.getDatasetId());
+            if (datasetPOJO.getFkAggregationId() != null && datasetPOJO.getFkAggregationId() != 1L) {
+                datastreamDao.deleteById(datasetPOJO.getDatasetId());
             }
         }
     }

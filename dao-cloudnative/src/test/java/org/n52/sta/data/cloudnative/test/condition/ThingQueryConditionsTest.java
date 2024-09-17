@@ -66,9 +66,9 @@ public class ThingQueryConditionsTest {
         thingQueryConditions.setDslContext(ctx);
     }
 
-    private String read_parquet(String table) {
+    /*private String read_parquet(String table) {
         return String.format("read_parquet('s3://52n-sta/%s.parquet') %s ", table, table);
-    }
+    }*/
 
     @Test
     public void testWithLocationStaIdentifier_TP() {
@@ -80,12 +80,12 @@ public class ThingQueryConditionsTest {
         String expectedSQL = "exists " +
                 "(select LOCATION.LOCATION_ID " +
                 "from " +
-                read_parquet("PLATFORM_LOCATION") +
+                "PLATFORM_LOCATION " +
                 "join " +
-                read_parquet("PLATFORM") +
+                "PLATFORM " +
                 "on PLATFORM_LOCATION.FK_PLATFORM_ID = PLATFORM.PLATFORM_ID " +
                 "join " +
-                read_parquet("LOCATION") +
+                "LOCATION " +
                 "on PLATFORM_LOCATION.FK_LOCATION_ID = LOCATION.LOCATION_ID " +
                 "where LOCATION.STA_IDENTIFIER = 'location123')";
 
@@ -102,9 +102,9 @@ public class ThingQueryConditionsTest {
         String expectedSQL = "exists " +
                 "(select HISTORICAL_LOCATION.HISTORICAL_LOCATION_ID " +
                 "from " +
-                read_parquet("PLATFORM") +
+                "PLATFORM " +
                 "join " +
-                read_parquet("HISTORICAL_LOCATION") +
+                "HISTORICAL_LOCATION " +
                 "on HISTORICAL_LOCATION.FK_PLATFORM_ID = PLATFORM.PLATFORM_ID " +
                 "where HISTORICAL_LOCATION.STA_IDENTIFIER = 'historicalLocation123')";
 
@@ -121,9 +121,9 @@ public class ThingQueryConditionsTest {
         String expectedSQL = "exists " +
                 "(select DATASET.DATASET_ID " +
                 "from " +
-                read_parquet("PLATFORM") +
+                "PLATFORM " +
                 "join " +
-                read_parquet("DATASET") +
+                "DATASET " +
                 "on DATASET.FK_PLATFORM_ID = PLATFORM.PLATFORM_ID " +
                 "where DATASET.STA_IDENTIFIER = 'datastream123')";
 
@@ -148,7 +148,7 @@ public class ThingQueryConditionsTest {
                 "(select " +
                 "DATASET.FK_PLATFORM_ID " +
                 "from " +
-                read_parquet("DATASET") +
+                "DATASET " +
                 "where " + conditionSQL + ")";
 
         Assertions.assertEquals(expectedSQL, sql);
@@ -174,7 +174,7 @@ public class ThingQueryConditionsTest {
                 "(select " +
                 "DATASET.FK_PLATFORM_ID " +
                 "from " +
-                read_parquet("DATASET") +
+                "DATASET " +
                 "where " + conditionSQL + " AND some_nonexistent_condition)";
 
         Assertions.assertNotEquals(expectedSQL, sql);
@@ -199,9 +199,9 @@ public class ThingQueryConditionsTest {
                 "(select " +
                 "PLATFORM_LOCATION.FK_PLATFORM_ID " +
                 "from " +
-                read_parquet("PLATFORM_LOCATION") +
+                "PLATFORM_LOCATION " +
                 "join " +
-                read_parquet("LOCATION") +
+                "LOCATION " +
                 "on PLATFORM_LOCATION.FK_LOCATION_ID = LOCATION.LOCATION_ID " +
                 "where " + conditionSQL + ")";
 
@@ -228,9 +228,9 @@ public class ThingQueryConditionsTest {
                 "(select " +
                 "PLATFORM_LOCATION.FK_PLATFORM_ID " +
                 "from " +
-                read_parquet("PLATFORM_LOCATION") +
+                "PLATFORM_LOCATION " +
                 "join " +
-                read_parquet("LOCATION") +
+                "LOCATION " +
                 "on PLATFORM_LOCATION.FK_LOCATION_ID = LOCATION.LOCATION_ID " +
                 "where " + conditionSQL + " AND some_nonexistent_condition)";
 
@@ -256,9 +256,9 @@ public class ThingQueryConditionsTest {
                 "(select " +
                 "HISTORICAL_LOCATION.FK_PLATFORM_ID " +
                 "from " +
-                read_parquet("HISTORICAL_LOCATION") +
+                "HISTORICAL_LOCATION " +
                 "join " +
-                read_parquet("PLATFORM") +
+                "PLATFORM " +
                 "on HISTORICAL_LOCATION.FK_PLATFORM_ID = PLATFORM.PLATFORM_ID " +
                 "where " + conditionSQL + ")";
 
@@ -285,9 +285,9 @@ public class ThingQueryConditionsTest {
                 "(select " +
                 "HISTORICAL_LOCATION.FK_PLATFORM_ID " +
                 "from " +
-                read_parquet("HISTORICAL_LOCATION") +
+                "HISTORICAL_LOCATION " +
                 "join " +
-                read_parquet("PLATFORM") +
+                "PLATFORM " +
                 "on HISTORICAL_LOCATION.FK_PLATFORM_ID = PLATFORM.PLATFORM_ID " +
                 "where " + conditionSQL + " AND some_nonexistent_condition)";
 
@@ -464,7 +464,7 @@ public class ThingQueryConditionsTest {
         String expectedSQL = "PLATFORM.PLATFORM_ID in " +
                 "(select PLATFORM_PARAMETER.FK_PLATFORM_ID " +
                 "from " +
-                read_parquet("PLATFORM_PARAMETER") +
+                "PLATFORM_PARAMETER " +
                 "where " +
                 "(PLATFORM_PARAMETER.NAME = 'site_depth' and PLATFORM_PARAMETER.VALUE_TEXT <= '-23m'))";
 

@@ -31,6 +31,11 @@ package org.n52.sta.data.cloudnative.dao.impl;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import org.jetbrains.annotations.NotNull;
+import org.jooq.DSLContext;
+import org.jooq.Record1;
+import org.jooq.Result;
+import org.jooq.Record;
 import org.n52.shetland.ogc.sta.exception.STACRUDException;
 import org.n52.sta.data.cloudnative.condition.StaEntity;
 import org.n52.sta.data.cloudnative.dao.FirehoseConstants;
@@ -50,9 +55,11 @@ public class ThingLocationDaoImpl implements ThingLocationDao {
     private final StaFirehoseClient firehoseClient;
     private final String tableName = "PLATFORM_LOCATION";
     private final ObjectMapper mapper = new ObjectMapper();
+    private final DSLContext ctx;
 
-    public ThingLocationDaoImpl(StaFirehoseClient firehoseClient) {
+    public ThingLocationDaoImpl(StaFirehoseClient firehoseClient, DSLContext ctx) {
         this.firehoseClient = firehoseClient;
+        this.ctx = ctx;
     }
 
     @Override
@@ -65,8 +72,19 @@ public class ThingLocationDaoImpl implements ThingLocationDao {
 
     @Override
     public void deleteByLocationId(long locationId) throws STACRUDException {
-        String key = StaEntity.THING_LOCATION.FK_LOCATION_ID.getName();
-        firehoseClient.icebergDeleteById(key, locationId, tableName);
+        // TODO: Firehose unstable
+        Result<Record1<Long>> ret = ctx
+                .select(StaEntity.THING_LOCATION.FK_PLATFORM_ID)
+                .from(StaEntity.THING_LOCATION)
+                .where(StaEntity.THING_LOCATION.FK_LOCATION_ID.eq(locationId)).fetch();
+        for (Record1<Long> record : ret) {
+            Long platformId = record.value1();
+            if (platformId != null) {
+                deleteByThingId(platformId);
+            }
+        }
+        /*String key = StaEntity.THING_LOCATION.FK_LOCATION_ID.getName();
+        firehoseClient.icebergDeleteById(key, locationId, tableName);*/
 
     }
 

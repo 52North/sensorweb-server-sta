@@ -9,15 +9,19 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.n52.shetland.oasis.odata.query.option.QueryOptions;
 import org.n52.shetland.ogc.sta.exception.STAInvalidQueryException;
+import org.n52.shetland.util.DateTimeHelper;
 import org.n52.sta.api.dto.HistoricalLocationDTO;
 import org.n52.sta.data.cloudnative.condition.StaEntity;
 import org.n52.sta.data.cloudnative.dao.impl.HistoricalLocationDaoImpl;
+import org.n52.sta.data.cloudnative.dao.util.StaFirehoseClient;
 import org.n52.sta.data.cloudnative.test.TestDatabaseConfig;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
+import software.amazon.awssdk.services.firehose.FirehoseClient;
 
+import java.sql.Timestamp;
 import java.util.List;
 import java.util.Optional;
 
@@ -29,31 +33,34 @@ public class HistoricalLocationDaoTest {
     @Autowired
     private DSLContext ctx;
     private HistoricalLocationDaoImpl historicalLocationDao;
+    @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
+    @Autowired private FirehoseClient firehoseClient;
+    private final StaFirehoseClient staFirehose = new StaFirehoseClient(firehoseClient);
 
     @BeforeEach
     public void setUp() {
-        historicalLocationDao = new HistoricalLocationDaoImpl(ctx, null);
+        historicalLocationDao = new HistoricalLocationDaoImpl(ctx, staFirehose);
     }
     @Test
     public void testWithGetColumn() {
         String name = "time";
-        String value = "2024-08-08 21:31:53.864";
+        Timestamp value =  Timestamp.valueOf("2024-08-08 21:31:53.864");
         Condition condition = DSL.field(name).eq(value);
         Class<HistoricalLocationDTO> entityClass = HistoricalLocationDTO.class;
-        Optional<String> result = Optional.empty();
+        Optional<HistoricalLocationDTO> result = Optional.empty();
         try {
-            result = historicalLocationDao.getColumn(condition, name, entityClass);
+            result = historicalLocationDao.findOne(condition, null, entityClass);
         } catch (Exception e) {
             e.printStackTrace();
         }
 
-        Assertions.assertEquals(result.get(), value);
+        Assertions.assertEquals(DateTimeHelper.format(result.get().getTime()), "2024-08-08T21:31:53.864Z");
     }
 
     @Test
     public void testWithFindById() {
         Long id = 2L;
-        String sta_identifier = "bf5bb163-5f59-4ec0-8a6e-116fb627244b";
+        String sta_identifier = "2";
         QueryOptions options = null;
         Class<HistoricalLocationDTO> entityClass = HistoricalLocationDTO.class;
         Optional<HistoricalLocationDTO> result = Optional.empty();
@@ -78,12 +85,12 @@ public class HistoricalLocationDaoTest {
             e.printStackTrace();
         }
         Assertions.assertEquals(result.get(0).getId(),
-                "bf5bb163-5f59-4ec0-8a6e-116fb627244b");
+                "2");
     }
 
     @Test
     public void testWithFindByStaIdentifier() {
-        String identifier = "bf5bb163-5f59-4ec0-8a6e-116fb627244b";
+        String identifier = "2";
         QueryOptions options = null;
         Class<HistoricalLocationDTO> entityClass = HistoricalLocationDTO.class;
         Optional<HistoricalLocationDTO> result = Optional.empty();
@@ -98,7 +105,7 @@ public class HistoricalLocationDaoTest {
 
     @Test
     public void testWithExistsByStaIdentifier() {
-        String identifier = "bf5bb163-5f59-4ec0-8a6e-116fb627244b";
+        String identifier = "2";
         Class<HistoricalLocationDTO> entityClass = HistoricalLocationDTO.class;
         boolean result = false;
         try {

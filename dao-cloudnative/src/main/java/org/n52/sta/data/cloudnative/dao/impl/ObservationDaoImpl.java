@@ -51,6 +51,8 @@ import org.springframework.stereotype.Component;
 
 import java.util.*;
 
+import static org.n52.sta.api.RequestUtils.QUERY_OPTIONS_FACTORY;
+
 /**
  * @author <a href="mailto:humaid.kidwai@ucalgary.ca">Humaid Kidwai</a>
  */
@@ -168,15 +170,31 @@ public class ObservationDaoImpl extends AbstractStaEntityDao<ObservationDTO> imp
 
     @Override
     public void deleteByStaIdentifier(String staIdentifier) throws STACRUDException {
-        firehoseClient.icebergDeleteByStaIdentifier(staIdentifier, tableName);
+        // TODO: Firehose
+        // firehoseClient.icebergDeleteByStaIdentifier(staIdentifier, tableName);
+        firehoseClient.icebergDeleteById(getEntityId().getName(), Long.parseLong(staIdentifier), tableName);
     }
 
     @Override
-    public void deleteAllByDatasetIdIn(Set<Long> datasetId) throws STACRUDException {
-        String key = getEntityId().getName();
+    public void deleteAllByDatasetIdIn(Set<Long> datasetId) throws STACRUDException, STAInvalidQueryException {
+        // get list of observation_id where fk_dataset_id = datasetId
+        // for each obs_id -> deleteById
+        String key = StaEntity.OBSERVATION.OBSERVATION_ID.getName();
+        for (Long id : datasetId) {
+            QueryOptions options = QUERY_OPTIONS_FACTORY.createQueryOptions("$select=id");
+            Condition predicate = StaEntity.OBSERVATION.FK_DATASET_ID.eq(id);
+            List<ObservationDTO> observations = findAll(predicate, options, ObservationDTO.class);
+            for (ObservationDTO observation : observations) {
+                firehoseClient.icebergDeleteById(key, Long.valueOf(observation.getId()), tableName);
+            }
+        }
+        /*
+        // TODO: Firehose unstable
+        String key = StaEntity.OBSERVATION.FK_DATASET_ID.getName();
         for (Long Id: datasetId) {
             firehoseClient.icebergDeleteById(key, Id, tableName);
         }
+        */
     }
 
     public void saveObservationParameters(String id, ObjectNode parameters) throws STACRUDException {
@@ -185,7 +203,7 @@ public class ObservationDaoImpl extends AbstractStaEntityDao<ObservationDTO> imp
     }
 
     public void deleteObservationParameters(Long Id) throws STACRUDException {
-        String key = StaEntity.OBSERVATION_PARAMETERS.PARAMETER_ID.getName();
+        String key = StaEntity.OBSERVATION_PARAMETERS.FK_OBSERVATION_ID.getName();
         firehoseClient.icebergDeleteById(key, Id, parameterTableName);
     }
 }

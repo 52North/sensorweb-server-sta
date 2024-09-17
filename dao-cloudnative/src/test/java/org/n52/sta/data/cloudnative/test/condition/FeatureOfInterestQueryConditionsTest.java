@@ -71,9 +71,9 @@ public class FeatureOfInterestQueryConditionsTest {
         featureQueryConditions.setDslContext(ctx);
     }
 
-    private String read_parquet(String table) {
+    /*private String read_parquet(String table) {
         return String.format("read_parquet('s3://52n-sta/%s.parquet') %s ", table, table);
-    }
+    }*/
 
     @Test
     public void testWithObservationStaIdentifier() {
@@ -85,13 +85,13 @@ public class FeatureOfInterestQueryConditionsTest {
         String expectedSQL = "exists " +
                 "(select OBSERVATION.OBSERVATION_ID " +
                 "from " +
-                read_parquet("FEATURE") +
+                "FEATURE " +
                 "join " +
-                read_parquet("DATASET") +
+                "DATASET " +
                 "on " +
                 "dataset.fk_feature_id = feature.feature_id ".toUpperCase() +
                 "join " +
-                read_parquet("OBSERVATION") +
+                "OBSERVATION " +
                 "on " +
                 "observation.fk_dataset_id = dataset.dataset_id ".toUpperCase() +
                 "where OBSERVATION.STA_IDENTIFIER = 'observation123')";
@@ -115,11 +115,11 @@ public class FeatureOfInterestQueryConditionsTest {
         String expectedSQL = "FEATURE.FEATURE_ID in " +
                 "(select DATASET.FK_FEATURE_ID " +
                 "from " +
-                read_parquet("DATASET") +
+                "DATASET " +
                 "where DATASET.DATASET_ID in " +
                 "(select OBSERVATION.FK_DATASET_ID " +
                 "from " +
-                read_parquet("OBSERVATION") +
+                "OBSERVATION " +
                 "where " + propertyValue + "))";
 
         Assertions.assertEquals(expectedSQL, sql);
@@ -386,9 +386,9 @@ public class FeatureOfInterestQueryConditionsTest {
         String expectedSQL = "FEATURE.FK_FORMAT_ID in " +
                 "(select FEATURE.FK_FORMAT_ID " +
                 "from " +
-                read_parquet("FEATURE") +
+                "FEATURE " +
                 "join " +
-                read_parquet("FORMAT") +
+                "FORMAT " +
                 "on " +
                 "feature.fk_format_id = format.format_id ".toUpperCase() +
                 "where " +
@@ -421,7 +421,7 @@ public class FeatureOfInterestQueryConditionsTest {
         String expectedSQL = "FEATURE.FEATURE_ID in " +
                 "(select FEATURE_PARAMETER.FK_FEATURE_ID " +
                 "from " +
-                read_parquet("FEATURE_PARAMETER") +
+                "FEATURE_PARAMETER " +
                 "where " +
                 "(FEATURE_PARAMETER.NAME = 'fNo' and FEATURE_PARAMETER.VALUE_TEXT = '23.11.09'))";
 

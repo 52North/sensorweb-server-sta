@@ -41,11 +41,13 @@ import org.n52.shetland.ogc.sta.exception.STAInvalidQueryException;
 import org.n52.sta.api.dto.ThingDTO;
 import org.n52.sta.data.cloudnative.condition.StaEntity;
 import org.n52.sta.data.cloudnative.dao.impl.ThingDaoImpl;
+import org.n52.sta.data.cloudnative.dao.util.StaFirehoseClient;
 import org.n52.sta.data.cloudnative.test.TestDatabaseConfig;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
+import software.amazon.awssdk.services.firehose.FirehoseClient;
 
 import java.util.List;
 import java.util.Optional;
@@ -58,10 +60,13 @@ public class ThingDaoTest {
     @Autowired
     private DSLContext ctx;
     private ThingDaoImpl thingDao;
+    @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
+    @Autowired private FirehoseClient firehoseClient;
+    private final StaFirehoseClient staFirehose = new StaFirehoseClient(firehoseClient);
 
     @BeforeEach
     public void setUp() {
-        thingDao = new ThingDaoImpl(ctx, null);
+        thingDao = new ThingDaoImpl(ctx, staFirehose);
     }
 
     @Test
@@ -94,7 +99,7 @@ public class ThingDaoTest {
     @Test
     public void testWithGetColumn() {
         String name = "sta_identifier";
-        String value = "33ed6521-b484-495e-8159-ab4906363235";
+        String value = "2";
         Condition condition = DSL.field(name).eq(value);
         Class<ThingDTO> entityClass = ThingDTO.class;
         Optional<String> result = Optional.empty();
@@ -119,7 +124,7 @@ public class ThingDaoTest {
             e.printStackTrace();
         }
 
-        Assertions.assertEquals(result.get().getId(), "33ed6521-b484-495e-8159-ab4906363235");
+        Assertions.assertEquals(result.get().getId(), "2");
     }
 
     @Test
@@ -140,7 +145,7 @@ public class ThingDaoTest {
 
     @Test
     public void testWithFindByStaIdentifier() {
-        String identifier = "33ed6521-b484-495e-8159-ab4906363235";
+        String identifier = "2";
         QueryOptions options = null;
         Class<ThingDTO> entityClass = ThingDTO.class;
         Optional<ThingDTO> result = Optional.empty();
@@ -169,7 +174,7 @@ public class ThingDaoTest {
 
     @Test
     public void testWithExistsByStaIdentifier() {
-        String identifier = "33ed6521-b484-495e-8159-ab4906363235";
+        String identifier = "2";
         Class<ThingDTO> entityClass = ThingDTO.class;
         boolean result = false;
         try {

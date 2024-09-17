@@ -41,11 +41,13 @@ import org.n52.shetland.ogc.sta.exception.STAInvalidQueryException;
 import org.n52.sta.api.dto.SensorDTO;
 import org.n52.sta.data.cloudnative.condition.StaEntity;
 import org.n52.sta.data.cloudnative.dao.impl.SensorDaoImpl;
+import org.n52.sta.data.cloudnative.dao.util.StaFirehoseClient;
 import org.n52.sta.data.cloudnative.test.TestDatabaseConfig;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
+import software.amazon.awssdk.services.firehose.FirehoseClient;
 
 import java.util.List;
 import java.util.Optional;
@@ -58,10 +60,13 @@ public class SensorDaoTest {
     @Autowired
     private DSLContext ctx;
     private SensorDaoImpl sensorDao;
+    @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
+    @Autowired private FirehoseClient firehoseClient;
+    private final StaFirehoseClient staFirehose = new StaFirehoseClient(firehoseClient);
 
     @BeforeEach
     public void setUp() {
-        sensorDao = new SensorDaoImpl(ctx, null);
+        sensorDao = new SensorDaoImpl(ctx, staFirehose);
     }
 
     @Test
@@ -94,7 +99,7 @@ public class SensorDaoTest {
     @Test
     public void testWithGetColumn() {
         String name = "sta_identifier";
-        String value = "42d1b9af-591c-46ec-bf86-8a9185bec736";
+        String value = "1";
         Condition condition = DSL.field(name).eq(value);
         Class<SensorDTO> entityClass = SensorDTO.class;
         Optional<String> result = Optional.empty();
@@ -119,7 +124,7 @@ public class SensorDaoTest {
             e.printStackTrace();
         }
 
-        Assertions.assertEquals(result.get().getId(), "42d1b9af-591c-46ec-bf86-8a9185bec736");
+        Assertions.assertEquals(result.get().getId(), "1");
     }
 
     @Test
@@ -140,7 +145,7 @@ public class SensorDaoTest {
 
     @Test
     public void testWithFindByStaIdentifier() {
-        String identifier = "42d1b9af-591c-46ec-bf86-8a9185bec736";
+        String identifier = "1";
         QueryOptions options = null;
         Class<SensorDTO> entityClass = SensorDTO.class;
         Optional<SensorDTO> result = Optional.empty();
@@ -169,7 +174,7 @@ public class SensorDaoTest {
 
     @Test
     public void testWithExistsByStaIdentifier() {
-        String identifier = "42d1b9af-591c-46ec-bf86-8a9185bec736";
+        String identifier = "1";
         Class<SensorDTO> entityClass = SensorDTO.class;
         boolean result = false;
         try {

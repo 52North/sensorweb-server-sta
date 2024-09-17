@@ -58,7 +58,7 @@ import java.util.stream.Collectors;
 @Component
 public class DatastreamDaoImpl extends AbstractStaEntityDao<DatastreamDTO> implements DatastreamDao {
     private final String tableName = getEntityTable().getName();
-    private final String parameterTableName = "DATASET_PARAMETER";
+    private final String parameterTableName = StaEntity.DATASTREAM_PROPERTIES.getName();
     private Set<Table<?>> joins;
 
     public DatastreamDaoImpl(DSLContext ctx, StaFirehoseClient firehoseClient) {
@@ -197,7 +197,7 @@ public class DatastreamDaoImpl extends AbstractStaEntityDao<DatastreamDTO> imple
             if (field.getName().equals("OBSERVED_AREA")) {
                 return DSL.function("ST_AsText",
                                 String.class,
-                                DSL.function("ST_GeomFromWKB", byte[].class, field))
+                                DSL.function("ST_GeomFromBinary", byte[].class, field))
                         .as("datastreamObservedArea");
             }
             return field;
@@ -219,20 +219,27 @@ public class DatastreamDaoImpl extends AbstractStaEntityDao<DatastreamDTO> imple
         firehoseClient.icebergMerge(dataNode, tableName, FirehoseConstants.INSERT);
     }
 
-    public void update(Long id, Dataset dataset) throws STACRUDException {
+    public void update(Dataset dataset) throws STACRUDException {
         ObjectNode dataNode = mapper.convertValue(dataset, ObjectNode.class);
         firehoseClient.icebergMerge(dataNode, tableName, FirehoseConstants.UPDATE);
     }
 
     @Override
     public void deleteByStaIdentifier(String staIdentifier) throws STACRUDException {
-        firehoseClient.icebergDeleteByStaIdentifier(staIdentifier, tableName);
+        // TODO: Firehose unstable
+        deleteById(Long.valueOf(staIdentifier));
+        // firehoseClient.icebergDeleteByStaIdentifier(staIdentifier, tableName);
     }
 
     public void deleteById(Long datasetId) throws STACRUDException {
         String key = StaEntity.DATASTREAM.DATASET_ID.getName();
         firehoseClient.icebergDeleteById(key, datasetId, tableName);
     }
+
+    /*public void deleteByAggregationId(Long aggregationId) throws STACRUDException {
+        String key = StaEntity.DATASTREAM.FK_AGGREGATION_ID.getName();
+        firehoseClient.icebergDeleteById(key, aggregationId, tableName);
+    }*/
 
     public void saveDatastreamParameters(String id, ObjectNode parameters) throws STACRUDException {
         String foreignKey = StaEntity.DATASTREAM_PROPERTIES.FK_DATASET_ID.getName();

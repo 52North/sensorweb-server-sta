@@ -115,7 +115,7 @@ public class FeatureOfInterestDaoImpl
             if (field.getName().equals("GEOM")) {
                 return DSL.function("ST_AsText",
                                 String.class,
-                                DSL.function("ST_GeomFromWKB", byte[].class, field))
+                                DSL.function("ST_GeomFromBinary", byte[].class, field))
                         .as("foiGeom");
             }
             return field;
@@ -149,7 +149,11 @@ public class FeatureOfInterestDaoImpl
 
     @Override
     public void deleteByStaIdentifier(String staIdentifier) throws STACRUDException {
-        firehoseClient.icebergDeleteByStaIdentifier(staIdentifier, tableName);
+        // TODO: Firehose unstable
+        firehoseClient.icebergDeleteById(StaEntity.FEATURE_OF_INTEREST.FEATURE_ID.getName(),
+                Long.parseLong(staIdentifier),
+                tableName);
+        // firehoseClient.icebergDeleteByStaIdentifier(staIdentifier, tableName);
     }
 
     public void saveFeatureParameters(String Id, ObjectNode parameters) throws STACRUDException {
@@ -158,7 +162,7 @@ public class FeatureOfInterestDaoImpl
     }
 
     public void deleteFeatureParameters(Long featureId) throws STACRUDException {
-        String key = StaEntity.FEATURE_PROPERTIES.PARAMETER_ID.getName();
+        String key = StaEntity.FEATURE_PROPERTIES.FK_FEATURE_ID.getName();
         firehoseClient.icebergDeleteById(key, featureId, parameterTableName);
     }
 }

@@ -182,7 +182,11 @@ public class ThingDaoImpl
 
     @Override
     public void deleteByStaIdentifier(String staIdentifier) throws STACRUDException {
-        firehoseClient.icebergDeleteByStaIdentifier(staIdentifier, tableName);
+        // TODO: Firehose unstable
+        firehoseClient.icebergDeleteById(StaEntity.THING.PLATFORM_ID.getName(),
+                Long.parseLong(staIdentifier),
+                tableName);
+        //  firehoseClient.icebergDeleteByStaIdentifier(staIdentifier, tableName);
     }
 
     public void saveThingParameters(String id, ObjectNode parameters) throws STACRUDException {
@@ -191,7 +195,7 @@ public class ThingDaoImpl
     }
 
     public void deleteThingParameters(Long id) throws STACRUDException {
-        String key = StaEntity.THING_PROPERTIES.PARAMETER_ID.getName();
+        String key = StaEntity.THING_PROPERTIES.FK_PLATFORM_ID.getName();
         firehoseClient.icebergDeleteById(key, id, parameterTableName);
     }
 }

@@ -13,11 +13,13 @@ import org.n52.shetland.ogc.sta.exception.STAInvalidQueryException;
 import org.n52.sta.api.dto.FeatureOfInterestDTO;
 import org.n52.sta.data.cloudnative.condition.StaEntity;
 import org.n52.sta.data.cloudnative.dao.impl.FeatureOfInterestDaoImpl;
+import org.n52.sta.data.cloudnative.dao.util.StaFirehoseClient;
 import org.n52.sta.data.cloudnative.test.TestDatabaseConfig;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
+import software.amazon.awssdk.services.firehose.FirehoseClient;
 
 import java.util.List;
 import java.util.Optional;
@@ -30,10 +32,22 @@ public class FeatureOfInterestDaoTest {
     @Autowired
     private DSLContext ctx;
     private FeatureOfInterestDaoImpl featureDao;
+    @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
+    @Autowired private FirehoseClient firehoseClient;
+    private final StaFirehoseClient staFirehose = new StaFirehoseClient(firehoseClient);
 
     @BeforeEach
     public void setUp() {
-        featureDao = new FeatureOfInterestDaoImpl(ctx, null);
+        featureDao = new FeatureOfInterestDaoImpl(ctx, staFirehose);
+        ctx.execute("INSERT INTO \"52n_sta_iceberg\".\"feature\" " +
+                "(feature_id, sta_identifier, identifier, fk_format_id, name, description, geom) " +
+                "VALUES (BIGINT '1', " +
+                "VARCHAR '1', " +
+                "VARCHAR '1', " +
+                "BIGINT '12', " +
+                "VARCHAR 'CCIT #361', " +
+                "VARCHAR 'This is CCIT #361, Noah’s dad’s office', " +
+                "from_hex('010300000001000000050000000000000000003e4000000000000024400000000000004440000000000000444000000000000034400000000000004440000000000000244000000000000034400000000000003e400000000000002440'));");
     }
 
     @Test
@@ -66,7 +80,7 @@ public class FeatureOfInterestDaoTest {
     @Test
     public void testWithGetColumn() {
         String name = "sta_identifier";
-        String value = "60a6ad14-1730-4d75-aa34-fce7795470ce";
+        String value = "1";
         Condition condition = DSL.field(name).eq(value);
         Class<FeatureOfInterestDTO> entityClass = FeatureOfInterestDTO.class;
         Optional<String> result = Optional.empty();
@@ -99,7 +113,7 @@ public class FeatureOfInterestDaoTest {
     public void testWithFindOne() {
         String geom = "POLYGON ((100 50, 10 9, 23 4, 100 50), (30 20, 10 4, 4 22, 30 20))";
         Condition predicate = DSL.function("ST_AsText", String.class,
-                DSL.function("ST_GeomFromWKB", byte[].class, StaEntity.FEATURE_OF_INTEREST.GEOM)).eq(geom);
+                DSL.function("ST_GeomFromBinary", byte[].class, StaEntity.FEATURE_OF_INTEREST.GEOM)).eq(geom);
         QueryOptions options = null;
         Class<FeatureOfInterestDTO> entityClass = FeatureOfInterestDTO.class;
         Optional<FeatureOfInterestDTO> result = Optional.empty();
@@ -109,7 +123,7 @@ public class FeatureOfInterestDaoTest {
             e.printStackTrace();
         }
 
-        Assertions.assertEquals(result.get().getId(), "60a6ad14-1730-4d75-aa34-fce7795470ce");
+        Assertions.assertEquals(result.get().getId(), "1");
     }
 
     @Test
@@ -129,7 +143,7 @@ public class FeatureOfInterestDaoTest {
 
     @Test
     public void testWithFindByStaIdentifier() {
-        String identifier = "60a6ad14-1730-4d75-aa34-fce7795470ce";
+        String identifier = "1";
         QueryOptions options = null;
         Class<FeatureOfInterestDTO> entityClass = FeatureOfInterestDTO.class;
         Optional<FeatureOfInterestDTO> result = Optional.empty();
@@ -144,7 +158,7 @@ public class FeatureOfInterestDaoTest {
 
     @Test
     public void testWithExistsByStaIdentifier() {
-        String identifier = "60a6ad14-1730-4d75-aa34-fce7795470ce";
+        String identifier = "1";
         Class<FeatureOfInterestDTO> entityClass = FeatureOfInterestDTO.class;
         boolean result = false;
         try {

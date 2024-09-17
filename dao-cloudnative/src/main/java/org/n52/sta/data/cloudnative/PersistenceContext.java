@@ -31,6 +31,7 @@ package org.n52.sta.data.cloudnative;
 import org.jooq.*;
 import org.jooq.impl.*;
 
+import org.n52.sta.data.cloudnative.dao.FirehoseConstants;
 import org.n52.sta.data.cloudnative.schema.DefaultSchema;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.jdbc.DataSourceBuilder;
@@ -42,6 +43,8 @@ import org.springframework.jdbc.support.SQLErrorCodeSQLExceptionTranslator;
 import org.springframework.jdbc.support.SQLExceptionTranslator;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 import org.springframework.jdbc.datasource.DataSourceTransactionManager;
+import software.amazon.awssdk.auth.credentials.ProfileCredentialsProvider;
+import software.amazon.awssdk.services.firehose.FirehoseClient;
 
 import javax.sql.DataSource;
 import java.io.FileInputStream;
@@ -65,6 +68,14 @@ public class PersistenceContext {
     @Bean
     public TransactionAwareDataSourceProxy transactionAwareDataSource() {
         return new TransactionAwareDataSourceProxy(dataSource());
+    }
+
+    @Bean
+    public FirehoseClient firehoseClient() {
+         return FirehoseClient.builder()
+                .region(FirehoseConstants.REGION)
+                .credentialsProvider(ProfileCredentialsProvider.create())
+                .build();
     }
 
     @Bean

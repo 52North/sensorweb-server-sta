@@ -64,9 +64,9 @@ public class ObservedPropertyQueryConditionsTest {
         observedPropertyQueryConditions.setDslContext(ctx);
     }
 
-    private String read_parquet(String table) {
+    /*private String read_parquet(String table) {
         return String.format("read_parquet('s3://52n-sta/%s.parquet') %s ", table, table);
-    }
+    }*/
 
     @Test
     public void testWithDatastreamStaIdentifier_TP() {
@@ -79,9 +79,9 @@ public class ObservedPropertyQueryConditionsTest {
         String expectedSQL = String.format("exists " +
                 "(select DATASET.DATASET_ID " +
                 "from " +
-                read_parquet("DATASET") +
+                "DATASET " +
                 "join " +
-                read_parquet("PHENOMENON") +
+                "PHENOMENON " +
                 "on " +
                 "dataset.fk_phenomenon_id = phenomenon.phenomenon_id ".toUpperCase() +
                 "where " +
@@ -108,7 +108,7 @@ public class ObservedPropertyQueryConditionsTest {
                 "(select " +
                 "DATASET.FK_PHENOMENON_ID " +
                 "from " +
-                read_parquet("DATASET") +
+                "DATASET " +
                 "where ())";
 
         Assertions.assertEquals(expectedSQL, sql);
@@ -324,7 +324,7 @@ public class ObservedPropertyQueryConditionsTest {
                 "(select " +
                 "phenomenon_parameter.fk_phenomenon_id ".toUpperCase() +
                 "from " +
-                read_parquet("phenomenon_parameter".toUpperCase()) +
+                "phenomenon_parameter ".toUpperCase() +
                 "where " +
                 "(PHENOMENON_PARAMETER.NAME = 'sensitive' and PHENOMENON_PARAMETER.VALUE_TEXT = 'true'))";
 

@@ -43,8 +43,7 @@ public interface GeospatialFunctions {
     String ST_LENGTH = "ST_Length";
 
     /*
-    * - DuckDB expects only GEOMETRY type arguments in all spatial functions
-    * - List of spatial functions supported: https://duckdb.org/docs/extensions/spatial.html
+    * - List of spatial functions supported: https://trino.io/docs/current/functions/geospatial.html
     * */
 
     static Field<Double> st_length(Field<byte[]> geom) {
@@ -125,7 +124,7 @@ public interface GeospatialFunctions {
 
     private static Field<byte[]> geometryfromWKT(String wkt) {
         return DSL.function(
-                "ST_GeomFromText",
+                "ST_GeometryFromText",
                 byte[].class,
                 DSL.inline(wkt)
         );
@@ -133,7 +132,7 @@ public interface GeospatialFunctions {
 
     private static Field<byte[]> geometryFromWKB(Field<byte[]> geom) {
         return DSL.function(
-                "ST_GeomFromWKB",
+                "ST_GeomFromBinary",
                 byte[].class,
                 geom
         );

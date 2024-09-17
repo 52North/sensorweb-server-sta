@@ -13,12 +13,16 @@ import org.n52.shetland.util.DateTimeHelper;
 import org.n52.sta.api.dto.ObservationDTO;
 import org.n52.sta.data.cloudnative.condition.StaEntity;
 import org.n52.sta.data.cloudnative.dao.impl.ObservationDaoImpl;
+import org.n52.sta.data.cloudnative.dao.util.StaFirehoseClient;
+import org.n52.sta.data.cloudnative.schema.tables.pojos.Observation;
 import org.n52.sta.data.cloudnative.test.TestDatabaseConfig;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
+import software.amazon.awssdk.services.firehose.FirehoseClient;
 
+import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
@@ -32,44 +36,47 @@ public class ObservationDaoTest {
     @Autowired
     private DSLContext ctx;
     private ObservationDaoImpl observationDao;
+    @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
+    @Autowired private FirehoseClient firehoseClient;
+    private final StaFirehoseClient staFirehose = new StaFirehoseClient(firehoseClient);
 
     @BeforeEach
     public void setUp() {
-        observationDao = new ObservationDaoImpl(ctx, null);
+        observationDao = new ObservationDaoImpl(ctx, staFirehose);
     }
 
-//    @Test
-//    public void testWithFindFirstByDatasetIdOrderBySamplingTimeStartAsc() {
-//        Long datasetId = 1L;
-//        Class<ObservationDTO> entityClass = ObservationDTO.class;
-//        ObservationDTO observation = null;
-//        try {
-//            observation = observationDao.findFirstByDatasetIdOrderBySamplingTimeStartAsc(datasetId, entityClass);
-//        } catch (STAInvalidQueryException e) {
-//            e.printStackTrace();
-//        }
-//
-//        Assertions.assertEquals(observation.getId(), "7800368e0ff362d2924424b91d4e3d2381cc1ba9ecfd7bcd72b5d7b3c1e17e38");
-//    }
+    @Test
+    public void testWithFindFirstByDatasetIdOrderBySamplingTimeStartAsc() {
+        Long datasetId = 1L;
+        Class<ObservationDTO> entityClass = ObservationDTO.class;
+        Observation observation = null;
+        try {
+            observation = observationDao.findFirstByDatasetIdOrderBySamplingTimeStartAsc(datasetId, entityClass);
+        } catch (STAInvalidQueryException e) {
+            e.printStackTrace();
+        }
 
-//    @Test
-//    public void testWithFindFirstByDatasetIdOrderBySamplingTimeEndDesc() {
-//        Long datasetId = 1L;
-//        Class<ObservationDTO> entityClass = ObservationDTO.class;
-//        ObservationDTO observation = null;
-//        try {
-//            observation = observationDao.findFirstByDatasetIdOrderBySamplingTimeEndDesc(datasetId, entityClass);
-//        } catch (STAInvalidQueryException e) {
-//            e.printStackTrace();
-//        }
-//
-//        Assertions.assertEquals(observation.getId(), "7800368e0ff362d2924424b91d4e3d2381cc1ba9ecfd7bcd72b5d7b3c1e17e38");
-//    }
+        Assertions.assertEquals(observation.getObservationId(), 1L);
+    }
+
+    @Test
+    public void testWithFindFirstByDatasetIdOrderBySamplingTimeEndDesc() {
+        Long datasetId = 1L;
+        Class<ObservationDTO> entityClass = ObservationDTO.class;
+        Observation observation = null;
+        try {
+            observation = observationDao.findFirstByDatasetIdOrderBySamplingTimeEndDesc(datasetId, entityClass);
+        } catch (STAInvalidQueryException e) {
+            e.printStackTrace();
+        }
+
+        Assertions.assertEquals(observation.getObservationId(), 2L);
+    }
 
     @Test
     public void testWithGetColumn() {
         String name = "sta_identifier";
-        String value = "7800368e0ff362d2924424b91d4e3d2381cc1ba9ecfd7bcd72b5d7b3c1e17e38";
+        String value = "101";
         Condition condition = DSL.field(name).eq(value);
         Class<ObservationDTO> entityClass = ObservationDTO.class;
         Optional<String> result = Optional.empty();
@@ -84,7 +91,7 @@ public class ObservationDaoTest {
 
     @Test
     public void testWithFindById() {
-        Long id = 1L;
+        Long id = 60001L;
         QueryOptions options = null;
         Class<ObservationDTO> entityClass = ObservationDTO.class;
         Optional<ObservationDTO> result = Optional.empty();
@@ -94,7 +101,7 @@ public class ObservationDaoTest {
             e.printStackTrace();
         }
 
-        Assertions.assertEquals(result.get().getId(), "7800368e0ff362d2924424b91d4e3d2381cc1ba9ecfd7bcd72b5d7b3c1e17e38");
+        Assertions.assertEquals(result.get().getId(), "60001");
     }
 
     @Test
@@ -115,7 +122,7 @@ public class ObservationDaoTest {
 
     @Test
     public void testWithFindByStaIdentifier() {
-        String identifier = "7800368e0ff362d2924424b91d4e3d2381cc1ba9ecfd7bcd72b5d7b3c1e17e38";
+        String identifier = "2";
         QueryOptions options = null;
         Class<ObservationDTO> entityClass = ObservationDTO.class;
         Optional<ObservationDTO> result = Optional.empty();
@@ -130,9 +137,8 @@ public class ObservationDaoTest {
 
     @Test
     public void testWithFindAll() {
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSX");
-        LocalDateTime phenomenonTime = LocalDateTime.parse("2012-06-26T09:42:02.000Z", formatter);
-        Condition predicate = StaEntity.OBSERVATION.SAMPLING_TIME_START.eq(phenomenonTime);
+        Timestamp phenomenonTime =  Timestamp.valueOf("2012-06-26 09:42:02");
+        Condition predicate = DSL.field(StaEntity.OBSERVATION.SAMPLING_TIME_START.getName()).eq(phenomenonTime);
         QueryOptions options = null;
         Class<ObservationDTO> entityClass = ObservationDTO.class;
         List<ObservationDTO> result = List.of();
@@ -148,7 +154,7 @@ public class ObservationDaoTest {
 
     @Test
     public void testWithExistsByStaIdentifier() {
-        String identifier = "7800368e0ff362d2924424b91d4e3d2381cc1ba9ecfd7bcd72b5d7b3c1e17e38";
+        String identifier = "101";
         Class<ObservationDTO> entityClass = ObservationDTO.class;
         boolean result = false;
         try {

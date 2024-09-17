@@ -168,7 +168,7 @@ public class LocationDaoImpl extends AbstractStaEntityDao<LocationDTO> implement
             if (field.getName().equals("GEOM")) {
                 return DSL.function("ST_AsText",
                                 String.class,
-                                DSL.function("ST_GeomFromWKB", byte[].class, field))
+                                DSL.function("ST_GeomFromBinary", byte[].class, field))
                         .as("locationGeom");
             }
             return field;
@@ -197,7 +197,11 @@ public class LocationDaoImpl extends AbstractStaEntityDao<LocationDTO> implement
 
     @Override
     public void deleteByStaIdentifier(String staIdentifier) throws STACRUDException {
-        firehoseClient.icebergDeleteByStaIdentifier(staIdentifier, tableName);
+        // TODO: Firehose unstable
+        firehoseClient.icebergDeleteById(StaEntity.LOCATION.LOCATION_ID.getName(),
+                Long.parseLong(staIdentifier),
+                tableName);
+        // firehoseClient.icebergDeleteByStaIdentifier(staIdentifier, tableName);
     }
 
     public void saveLocationParameters(String id, ObjectNode parameters) throws STACRUDException {

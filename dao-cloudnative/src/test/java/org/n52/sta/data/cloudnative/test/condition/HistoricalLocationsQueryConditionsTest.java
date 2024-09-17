@@ -68,9 +68,9 @@ public class HistoricalLocationsQueryConditionsTest {
         historicalLocationQueryConditions.setDslContext(ctx);
     }
 
-    private String read_parquet(String table) {
-        return String.format("read_parquet('s3://52n-sta/%s.parquet') %s ", table, table);
-    }
+    /*private String (String table) {
+        return String.format("('s3://52n-sta/%s.parquet') %s ", table, table);
+    }*/
 
     @Test
     public void testWithLocationStaIdentifier() {
@@ -83,19 +83,19 @@ public class HistoricalLocationsQueryConditionsTest {
                 "exists " +
                         "(select LOCATION.LOCATION_ID " +
                         "from " +
-                        read_parquet("location_historical_location".toUpperCase()) +
+                        "LOCATION_HISTORICAL_LOCATION " +
                         "join " +
-                        read_parquet("historical_location".toUpperCase()) +
+                        "HISTORICAL_LOCATION " +
                         "on " +
-                        "location_historical_location.fk_historical_location_id = ".toUpperCase() +
-                        "historical_location.historical_location_id ".toUpperCase() +
+                        "LOCATION_HISTORICAL_LOCATION.FK_HISTORICAL_LOCATION_ID = " +
+                        "HISTORICAL_LOCATION.HISTORICAL_LOCATION_ID " +
                         "join " +
-                        read_parquet("location".toUpperCase()) +
+                        "LOCATION "  +
                         "on " +
-                        "location_historical_location.fk_location_id = ".toUpperCase() +
-                        "location.location_id ".toUpperCase() +
+                        "LOCATION_HISTORICAL_LOCATION.FK_LOCATION_ID = " +
+                        "LOCATION.LOCATION_ID " +
                         "where " +
-                        "location.sta_identifier = '%s')".toUpperCase(),
+                        "LOCATION.STA_IDENTIFIER = '%s')",
                 locationStaIdentifier
         );
 
@@ -113,13 +113,13 @@ public class HistoricalLocationsQueryConditionsTest {
                 "exists " +
                         "(select PLATFORM.PLATFORM_ID " +
                         "from " +
-                        read_parquet("HISTORICAL_LOCATION") +
+                        "HISTORICAL_LOCATION " +
                         "join " +
-                        read_parquet("PLATFORM") +
+                        "PLATFORM " +
                         "on " +
-                        "historical_location.fk_platform_id = platform.platform_id ".toUpperCase() +
+                        "HISTORICAL_LOCATION.FK_PLATFORM_ID = PLATFORM.PLATFORM_ID " +
                         "where " +
-                        "platform.sta_identifier = '%s')".toUpperCase(),
+                        "PLATFORM.STA_IDENTIFIER = '%s')",
                 thingStaIdentifier
         );
 
@@ -188,17 +188,17 @@ public class HistoricalLocationsQueryConditionsTest {
                 "(select " +
                 "HISTORICAL_LOCATION.HISTORICAL_LOCATION_ID " +
                 "from " +
-                read_parquet("LOCATION_HISTORICAL_LOCATION") +
+                "LOCATION_HISTORICAL_LOCATION " +
                 "join " +
-                read_parquet("HISTORICAL_LOCATION") +
+                "HISTORICAL_LOCATION " +
                 "on " +
-                "location_historical_location.fk_historical_location_id = ".toUpperCase() +
-                "historical_location.historical_location_id ".toUpperCase() +
+                "LOCATION_HISTORICAL_LOCATION.FK_HISTORICAL_LOCATION_ID = " +
+                "HISTORICAL_LOCATION.HISTORICAL_LOCATION_ID " +
                 "join " +
-                read_parquet("LOCATION") +
+                "LOCATION " +
                 "on " +
-                "location_historical_location.fk_location_id = ".toUpperCase() +
-                "location.location_id ".toUpperCase() +
+                "LOCATION_HISTORICAL_LOCATION.FK_LOCATION_ID = " +
+                "LOCATION.LOCATION_ID " +
                 "where ())";
 
         Assertions.assertEquals(expectedSQL, sql);
@@ -222,11 +222,11 @@ public class HistoricalLocationsQueryConditionsTest {
                 "(select " +
                 "HISTORICAL_LOCATION.HISTORICAL_LOCATION_ID " +
                 "from " +
-                read_parquet("HISTORICAL_LOCATION") +
+                "HISTORICAL_LOCATION " +
                 "join " +
-                read_parquet("PLATFORM") +
+                "PLATFORM " +
                 "on " +
-                "historical_location.fk_platform_id = platform.platform_id ".toUpperCase() +
+                "HISTORICAL_LOCATION.FK_PLATFORM_ID = PLATFORM.PLATFORM_ID " +
                 "where ())";
 
         Assertions.assertEquals(expectedSQL, sql);

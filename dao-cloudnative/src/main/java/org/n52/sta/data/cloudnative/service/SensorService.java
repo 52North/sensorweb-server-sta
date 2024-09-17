@@ -266,7 +266,7 @@ public class SensorService
 
                 SensorDTO sensor = sensorDao.findByStaIdentifier(staIdentifier, null, entityClass).get();
                 if (sensor.getProperties() != null) {
-                    sensorDao.deleteSensorParameters(staIdentifier);
+                    sensorDao.deleteSensorParameters(Long.parseLong(staIdentifier));
                 }
                 sensorDao.deleteByStaIdentifier(staIdentifier);
             } else {

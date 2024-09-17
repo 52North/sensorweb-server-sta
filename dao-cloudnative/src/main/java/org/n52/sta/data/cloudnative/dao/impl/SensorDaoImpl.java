@@ -161,7 +161,11 @@ public class SensorDaoImpl extends AbstractStaEntityDao<SensorDTO> implements Se
     @Override
     public void deleteByStaIdentifier(String staIdentifier)
             throws STACRUDException {
-        firehoseClient.icebergDeleteByStaIdentifier(staIdentifier, tableName);
+        // TODO: Firehose unstable
+        firehoseClient.icebergDeleteById(StaEntity.SENSOR.PROCEDURE_ID.getName(),
+                Long.parseLong(staIdentifier),
+                tableName);
+        // firehoseClient.icebergDeleteByStaIdentifier(staIdentifier, tableName);
     }
 
     public void saveSensorParameters(String id, ObjectNode parameters)
@@ -170,7 +174,8 @@ public class SensorDaoImpl extends AbstractStaEntityDao<SensorDTO> implements Se
         firehoseClient.icebergMergeParameters(parameters, parameterTableName, FirehoseConstants.INSERT, foreignKey, id);
     }
 
-    public void deleteSensorParameters(String fkSensorStaIdentifier) throws STACRUDException {
-        firehoseClient.icebergDeleteByStaIdentifier(fkSensorStaIdentifier, parameterTableName);
+    public void deleteSensorParameters(Long fkSensorStaIdentifier) throws STACRUDException {
+        String key = StaEntity.SENSOR_PROPERTIES.FK_PROCEDURE_ID.getName();
+        firehoseClient.icebergDeleteById(key, fkSensorStaIdentifier, parameterTableName);
     }
 }

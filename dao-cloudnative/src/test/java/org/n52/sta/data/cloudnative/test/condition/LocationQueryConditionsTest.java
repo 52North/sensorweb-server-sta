@@ -70,9 +70,9 @@ public class LocationQueryConditionsTest {
         locationQueryConditions.setDslContext(ctx);
     }
 
-    private String read_parquet(String table) {
-        return String.format("read_parquet('s3://52n-sta/%s.parquet') %s ", table, table);
-    }
+    /*private String (String table) {
+        return String.format("('s3://52n-sta/%s.parquet') %s ", table, table);
+    }*/
 
     @Test
     public void testWithHistoricalLocationStaIdentifier() {
@@ -84,13 +84,13 @@ public class LocationQueryConditionsTest {
         String expectedSQL = "exists " +
                 "(select 1 one " +
                 "from " +
-                read_parquet("location_historical_location".toUpperCase()) +
+                ("location_historical_location ".toUpperCase()) +
                 "join " +
-                read_parquet("historical_location".toUpperCase()) +
+                ("historical_location ".toUpperCase()) +
                 "on " +
                 "location_historical_location.fk_historical_location_id = historical_location.historical_location_id ".toUpperCase() +
                 "join " +
-                read_parquet("location".toUpperCase()) +
+                ("location ".toUpperCase()) +
                 "on " +
                 "location_historical_location.fk_location_id = location.location_id ".toUpperCase() +
                 "where " +
@@ -109,13 +109,13 @@ public class LocationQueryConditionsTest {
         String expectedSQL = "exists " +
                 "(select 1 one " +
                 "from " +
-                read_parquet("location".toUpperCase()) +
+                ("location ".toUpperCase()) +
                 "join " +
-                read_parquet("platform_location".toUpperCase()) +
+                ("platform_location ".toUpperCase()) +
                 "on " +
                 "platform_location.fk_location_id = location.location_id ".toUpperCase() +
                 "join " +
-                read_parquet("platform".toUpperCase()) +
+                ("platform ".toUpperCase()) +
                 "on " +
                 "platform_location.fk_platform_id = platform.platform_id ".toUpperCase() +
                 "where " +
@@ -314,12 +314,12 @@ public class LocationQueryConditionsTest {
         String expectedSQL = "LOCATION.LOCATION_ID in " +
                 "(select PLATFORM_LOCATION.FK_LOCATION_ID " +
                 "from " +
-                read_parquet("PLATFORM_LOCATION") +
+                "PLATFORM_LOCATION " +
                 "where " +
                 "PLATFORM_LOCATION.FK_PLATFORM_ID in " +
                 "(select PLATFORM.PLATFORM_ID " +
                 "from " +
-                read_parquet("PLATFORM") +
+                "PLATFORM " +
                 "where " + propertyValue + "))";
 
         Assertions.assertEquals(expectedSQL, sql);
@@ -341,12 +341,12 @@ public class LocationQueryConditionsTest {
         String expectedSQL = "LOCATION.LOCATION_ID in " +
                 "(select LOCATION_HISTORICAL_LOCATION.FK_LOCATION_ID " +
                 "from " +
-                read_parquet("location_historical_location".toUpperCase()) +
+                "location_historical_location ".toUpperCase() +
                 "where " +
                 "LOCATION_HISTORICAL_LOCATION.FK_HISTORICAL_LOCATION_ID in " +
                 "(select HISTORICAL_LOCATION.HISTORICAL_LOCATION_ID " +
                 "from " +
-                read_parquet("historical_location".toUpperCase()) +
+                "historical_location ".toUpperCase() +
                 "where " + propertyValue + "))";
 
         Assertions.assertEquals(expectedSQL, sql);
@@ -438,9 +438,9 @@ public class LocationQueryConditionsTest {
         String expectedSQL = "LOCATION.LOCATION_ID in " +
                 "(select LOCATION.LOCATION_ID " +
                 "from " +
-                read_parquet("LOCATION") +
+                "LOCATION " +
                 "join " +
-                read_parquet("FORMAT") +
+                "FORMAT " +
                 "on " +
                 "location.fk_format_id = format.format_id ".toUpperCase() +
                 "where FORMAT.DEFINITION = 'Geo+JSON')";
@@ -468,7 +468,7 @@ public class LocationQueryConditionsTest {
         String expectedSQL = "LOCATION.LOCATION_ID in " +
                 "(select LOCATION_PARAMETER.FK_LOCATION_ID " +
                 "from " +
-                read_parquet("LOCATION_PARAMETER") +
+                "LOCATION_PARAMETER " +
                 "where " +
                 "(LOCATION_PARAMETER.NAME = 'lcTag' and LOCATION_PARAMETER.VALUE_TEXT = 'xzw.1223'))";
 

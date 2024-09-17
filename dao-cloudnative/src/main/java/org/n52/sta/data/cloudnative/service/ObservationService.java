@@ -287,7 +287,7 @@ public class ObservationService
                     // We have a dataset without a feature
                     LOGGER.debug("Reusing existing dataset without FOI.");
                     ds.setFkFeatureId(Long.valueOf(feature.getId()));
-                    datastreamDao.update(ds.getDatasetId(), ds);
+                    datastreamDao.update(ds);
                     found = true;
                     break;
                 } else if (feature.getId().equals(ds.getFkFeatureId().toString())) {
@@ -537,7 +537,7 @@ public class ObservationService
                     datastreamEntity.setLastTime(null);
                 }
             }
-            datastreamDao.update(datastreamEntity.getDatasetId(), datastreamEntity);
+            datastreamDao.update(datastreamEntity);
             // update parent if its part of the aggregation
             if (datastreamEntity.getFkAggregationId() != null && datastreamEntity.getFkAggregationId() != 1L) {
                 updateDatastreamPhenomenonTimeOnObservationUpdate(

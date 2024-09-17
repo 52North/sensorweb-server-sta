@@ -202,7 +202,7 @@ public class DTOMapper implements RecordMapperProvider {
 
         private void setObservedArea (Datastream datastream, Record record){
 
-            if (record.field(DSL.field("datastreamObservedArea")) != null) {
+            if (record.get(DSL.field("datastreamObservedArea")) != null) {
                 try {
                     datastream.setObservedArea(WKTReader.read(
                             record.get(DSL.field("datastreamObservedArea", String.class))));
@@ -303,7 +303,7 @@ public class DTOMapper implements RecordMapperProvider {
 
 
         private void setGeometry(Location location, Record record) {
-            if (record.field(DSL.field("locationGeom")) != null) {
+            if (record.get(DSL.field("locationGeom")) != null) {
                 try {
                     location.setGeometry(WKTReader.read(record.get(DSL.field("locationGeom", String.class))));
                 } catch (ParseException e) {
@@ -387,10 +387,7 @@ public class DTOMapper implements RecordMapperProvider {
         private void setTime(HistoricalLocation historicalLocation, HistoricalLocationRecord record) {
             if(record.getTime() != null) {
                 historicalLocation.setTime(TimeUtil.createTime(TimeUtil.createDateTime(
-                        Timestamp.from(
-                                record.getTime()
-                                        .atZone(ZoneId.of("UTC")).toInstant()
-                        )
+                        Timestamp.from(record.getTime().atZone(ZoneId.of("UTC")).toInstant())
                 )));
             }
             else {
@@ -748,7 +745,7 @@ public class DTOMapper implements RecordMapperProvider {
         }
 
         private void setFeature(FeatureOfInterest featureOfInterest, Record record) {
-            if (record.field(DSL.field("foiGeom")) != null) {
+            if (record.get(DSL.field("foiGeom")) != null) {
                 try {
                     featureOfInterest.setFeature(WKTReader.read(record.get(DSL.field("foiGeom", String.class))));
                 } catch (ParseException e) {

@@ -30,6 +30,9 @@ package org.n52.sta.data.cloudnative.dao.impl;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import org.jooq.DSLContext;
+import org.jooq.Record1;
+import org.jooq.Result;
 import org.n52.shetland.ogc.sta.exception.STACRUDException;
 import org.n52.sta.data.cloudnative.condition.StaEntity;
 import org.n52.sta.data.cloudnative.dao.FirehoseConstants;
@@ -48,9 +51,11 @@ public class LocationHistoricalLocationDaoImpl implements LocationHistoricalLoca
     private final StaFirehoseClient firehoseClient;
     private final String tableName = "LOCATION_HISTORICAL_LOCATION";
     private final ObjectMapper mapper = new ObjectMapper();
+    private final DSLContext ctx;
 
-    public LocationHistoricalLocationDaoImpl(StaFirehoseClient firehoseClient) {
+    public LocationHistoricalLocationDaoImpl(StaFirehoseClient firehoseClient, DSLContext ctx) {
         this.firehoseClient = firehoseClient;
+        this.ctx = ctx;
     }
 
     @Override
@@ -70,7 +75,19 @@ public class LocationHistoricalLocationDaoImpl implements LocationHistoricalLoca
 
     @Override
     public void deleteByHistoricalLocationId(long historicalLocationId) throws STACRUDException {
-        String key = StaEntity.LOCATION_HISTORICAL_LOCATION.FK_HISTORICAL_LOCATION_ID.getName();
-        firehoseClient.icebergDeleteById(key, historicalLocationId, tableName);
+        // TODO: Firehose unstable
+        Result<Record1<Long>> ret = ctx
+                .select(StaEntity.LOCATION_HISTORICAL_LOCATION.FK_LOCATION_ID)
+                .from(StaEntity.LOCATION_HISTORICAL_LOCATION)
+                .where(StaEntity.LOCATION_HISTORICAL_LOCATION.FK_HISTORICAL_LOCATION_ID.eq(historicalLocationId))
+                .fetch();
+        for (Record1<Long> record : ret) {
+            Long locationId = record.value1();
+            if (locationId != null) {
+                deleteByLocationId(locationId);
+            }
+        }
+        /*String key = StaEntity.LOCATION_HISTORICAL_LOCATION.FK_HISTORICAL_LOCATION_ID.getName();
+        firehoseClient.icebergDeleteById(key, historicalLocationId, tableName);*/
     }
 }

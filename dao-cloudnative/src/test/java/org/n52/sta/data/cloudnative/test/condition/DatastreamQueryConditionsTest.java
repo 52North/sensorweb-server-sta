@@ -72,9 +72,9 @@ public class DatastreamQueryConditionsTest {
         datastreamQueryConditions.setDslContext(ctx);
     }
 
-    private String read_parquet(String table) {
+/*    private String read_parquet(String table) {
         return String.format("read_parquet('s3://52n-sta/%s.parquet') %s ", table, table);
-    }
+    }*/
 
     @Test
     public void testWithName() {
@@ -143,9 +143,9 @@ public class DatastreamQueryConditionsTest {
         String expectedSQL = String.format("exists " +
                 "(select 1 one " +
                 "from " +
-                read_parquet("DATASET") +
+                "DATASET " +
                 "join " +
-                read_parquet("FEATURE") +
+                "FEATURE " +
                 "on " +
                 "dataset.fk_feature_id = feature.feature_id ".toUpperCase() +
                 "where " +
@@ -166,9 +166,9 @@ public class DatastreamQueryConditionsTest {
                 "exists " +
                         "(select 1 one " +
                         "from " +
-                        read_parquet("DATASET") +
+                        ("DATASET ") +
                         "join " +
-                        read_parquet("PHENOMENON") +
+                        ("PHENOMENON ") +
                         "on " +
                         "dataset.fk_phenomenon_id = phenomenon.phenomenon_id ".toUpperCase() +
                         "where " +
@@ -190,9 +190,9 @@ public class DatastreamQueryConditionsTest {
                 "exists " +
                         "(select 1 one " +
                         "from " +
-                        read_parquet("DATASET") +
+                        ("DATASET ") +
                         "join " +
-                        read_parquet("PHENOMENON") +
+                        ("PHENOMENON ") +
                         "on " +
                         "dataset.fk_phenomenon_id = phenomenon.phenomenon_id ".toUpperCase() +
                         "where " +
@@ -214,9 +214,9 @@ public class DatastreamQueryConditionsTest {
                 "exists " +
                         "(select 1 one " +
                         "from " +
-                        read_parquet("DATASET") +
+                        ("DATASET ") +
                         "join " +
-                        read_parquet("PLATFORM") +
+                        ("PLATFORM ") +
                         "on " +
                         "dataset.fk_platform_id = platform.platform_id ".toUpperCase() +
                         "where " +
@@ -238,9 +238,9 @@ public class DatastreamQueryConditionsTest {
                 "exists " +
                         "(select 1 one " +
                         "from " +
-                        read_parquet("DATASET") +
+                        ("DATASET ") +
                         "join " +
-                        read_parquet("PLATFORM") +
+                        ("PLATFORM ") +
                         "on " +
                         "dataset.fk_platform_id = platform.platform_id ".toUpperCase() +
                         "where " +
@@ -262,9 +262,9 @@ public class DatastreamQueryConditionsTest {
                 "exists " +
                         "(select 1 one " +
                         "from " +
-                        read_parquet("DATASET") +
+                        ("DATASET ") +
                         "join " +
-                        read_parquet("PROCEDURE") +
+                        ("PROCEDURE ") +
                         "on " +
                         "dataset.fk_procedure_id = procedure.procedure_id ".toUpperCase() +
                         "where " +
@@ -286,9 +286,9 @@ public class DatastreamQueryConditionsTest {
                 "exists " +
                         "(select 1 one " +
                         "from " +
-                        read_parquet("DATASET") +
+                        ("DATASET ") +
                         "join " +
-                        read_parquet("PROCEDURE") +
+                        ("PROCEDURE ") +
                         "on " +
                         "dataset.fk_procedure_id = procedure.procedure_id ".toUpperCase() +
                         "where " +
@@ -309,16 +309,16 @@ public class DatastreamQueryConditionsTest {
         String expectedSQL = String.format("(DATASET.DATASET_ID in " +
                 "(select OBSERVATION.FK_DATASET_ID " +
                 "from " +
-                read_parquet("OBSERVATION") +
+                "OBSERVATION " +
                 "where OBSERVATION.STA_IDENTIFIER = '%s') " +
                 "or DATASET.DATASET_ID in " +
                 "(select DATASET.FK_AGGREGATION_ID " +
                 "from " +
-                read_parquet("DATASET") +
+                "DATASET " +
                 "where DATASET.DATASET_ID in " +
                     "(select OBSERVATION.FK_DATASET_ID " +
                     "from " +
-                    read_parquet("OBSERVATION") +
+                    "OBSERVATION " +
                     "where OBSERVATION.STA_IDENTIFIER = '%s'))" +
                 ")",
                 observationStaIdentifier, observationStaIdentifier);
@@ -342,7 +342,7 @@ public class DatastreamQueryConditionsTest {
         String expectedSQL = "DATASET.DATASET_ID in " +
                 "(select OBSERVATION.FK_DATASET_ID " +
                 "from " +
-                read_parquet("OBSERVATION") +
+                "OBSERVATION " +
                 "where " + propertyValue + ")";
 
         Assertions.assertEquals(expectedSQL, sql);
@@ -364,7 +364,7 @@ public class DatastreamQueryConditionsTest {
         String expectedSQL = "DATASET.FK_PLATFORM_ID in " +
                 "(select PLATFORM.PLATFORM_ID " +
                 "from " +
-                read_parquet("PLATFORM") +
+                "PLATFORM " +
                 "where " + propertyValue + ")";
 
         Assertions.assertEquals(expectedSQL, sql);
@@ -386,7 +386,7 @@ public class DatastreamQueryConditionsTest {
         String expectedSQL = "DATASET.FK_PHENOMENON_ID in " +
                 "(select PHENOMENON.PHENOMENON_ID " +
                 "from " +
-                read_parquet("PHENOMENON") +
+                "PHENOMENON " +
                 "where " + propertyValue + ")";
 
         Assertions.assertEquals(expectedSQL, sql);
@@ -408,7 +408,7 @@ public class DatastreamQueryConditionsTest {
         String expectedSQL = "DATASET.FK_PROCEDURE_ID in " +
                 "(select PROCEDURE.PROCEDURE_ID " +
                 "from " +
-                read_parquet("PROCEDURE") +
+                "PROCEDURE " +
                 "where " + propertyValue + ")";
 
         Assertions.assertEquals(expectedSQL, sql);
@@ -497,7 +497,9 @@ public class DatastreamQueryConditionsTest {
             e.printStackTrace();
         }
         String sql = ctx.renderInlined(result);
-        String expectedSQL = "DATASET.OBSERVATION_TYPE = 'type of the datastream'";
+        String expectedSQL = "DATASET.FK_FORMAT_ID in " +
+                "(select DATASET.FK_FORMAT_ID from DATASET join FORMAT on DATASET.FK_FORMAT_ID = FORMAT.FORMAT_ID " +
+                "where FORMAT.DEFINITION = 'type of the datastream')";
 
         Assertions.assertEquals(expectedSQL, sql);
     }
@@ -522,7 +524,7 @@ public class DatastreamQueryConditionsTest {
         String expectedSQL = "DATASET.DATASET_ID in " +
                 "(select DATASET_PARAMETER.FK_DATASET_ID " +
                 "from " +
-                read_parquet("DATASET_PARAMETER") +
+                "DATASET_PARAMETER " +
                 "where " +
                 "(DATASET_PARAMETER.NAME = 'dsNo' and DATASET_PARAMETER.VALUE_TEXT = '08.09.10'))";
 

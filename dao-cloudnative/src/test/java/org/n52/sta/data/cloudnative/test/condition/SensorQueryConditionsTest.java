@@ -65,9 +65,9 @@ public class SensorQueryConditionsTest {
         sensorQueryConditions.setDslContext(ctx);
     }
 
-    private String read_parquet(String table) {
+    /*private String read_parquet(String table) {
         return String.format("read_parquet('s3://52n-sta/%s.parquet') %s ", table, table);
-    }
+    }*/
 
     @Test
     public void testWithDatastreamStaIdentifier_TP() {
@@ -80,9 +80,9 @@ public class SensorQueryConditionsTest {
         String expectedSQL = "exists " +
                 "(select DATASET.DATASET_ID " +
                 "from " +
-                read_parquet("DATASET") +
+                "DATASET " +
                 "join " +
-                read_parquet("PROCEDURE") +
+                "PROCEDURE " +
                 "on DATASET.FK_PROCEDURE_ID = PROCEDURE.PROCEDURE_ID " +
                 "where DATASET.STA_IDENTIFIER = 'datastream123')";
 
@@ -108,7 +108,7 @@ public class SensorQueryConditionsTest {
                 "(select " +
                 "DATASET.FK_PROCEDURE_ID " +
                 "from " +
-                read_parquet("DATASET") +
+                "DATASET " +
                 "where ())";
 
         Assertions.assertEquals(expectedSQL, sql);
@@ -242,9 +242,9 @@ public class SensorQueryConditionsTest {
         String expectedSQL = "PROCEDURE.PROCEDURE_ID in " +
                 "(select PROCEDURE.PROCEDURE_ID " +
                 "from " +
-                read_parquet("PROCEDURE") +
+                "PROCEDURE " +
                 "join " +
-                read_parquet("FORMAT") +
+                "FORMAT " +
                 "on PROCEDURE.FK_FORMAT_ID = FORMAT.FORMAT_ID " +
                 "where FORMAT.DEFINITION = 'pdf')";
 
@@ -294,7 +294,7 @@ public class SensorQueryConditionsTest {
                 "(select " +
                 "PROCEDURE_PARAMETER.FK_PROCEDURE_ID " +
                 "from " +
-                read_parquet("PROCEDURE_PARAMETER") +
+                "PROCEDURE_PARAMETER " +
                 "where " +
                 "(PROCEDURE_PARAMETER.NAME = 'valid' and PROCEDURE_PARAMETER.VALUE_TEXT = 'true'))";
 

@@ -31,7 +31,6 @@ package org.n52.sta.data.cloudnative.service;
 
 import org.jooq.Condition;
 import org.jooq.Field;
-import org.jooq.Null;
 import org.locationtech.jts.io.WKBWriter;
 import org.n52.janmayen.http.HTTPStatus;
 import org.n52.shetland.filter.ExpandFilter;
@@ -67,7 +66,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
-import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicLong;
@@ -131,18 +129,6 @@ public class DatastreamService extends AbstractSensorThingsEntityServiceImpl<
                             Long.valueOf(entity.getObservedProperty().getId()), expandItem.getQueryOptions()));
                     break;
                 case STAEntityDefinition.OBSERVATIONS:
-//                    // Optimize Request when only First/Last Observation is requested as we have already fetched that.
-//                    if (checkForFirstLastObservation(expandItem)) {
-//                        if (checkForFirstObservation(expandItem) && entity.getFirstObservation() != null) {
-//                            ObservationDTO firstObservation = entity.getFirstObservation();
-//                            entity.setObservations(Collections.singleton(firstObservation));
-//                            break;
-//                        } else if (checkForLastObservation(expandItem) && entity.getLastObservation() != null) {
-//                            ObservationDTO lastObservation = entity.getLastObservation();
-//                            entity.setObservations(Sets.newHashSet(Collections.singleton(lastObservation)));
-//                            break;
-//                        }
-//                    }
                     Page<ObservationDTO> observations = getObservationService()
                             .getEntityCollectionByRelatedEntityRaw(entity.getId(),
                                     STAEntityDefinition.DATASTREAMS,
@@ -316,20 +302,21 @@ public class DatastreamService extends AbstractSensorThingsEntityServiceImpl<
         return dataset;
     }
 
-    private DatastreamDTO createAndSaveDatasetAggregation(Dataset parent, Long feature, String staIdentifier)
+    private DatastreamDTO createAndSaveDatasetAggregation(Dataset parent, Long feature_id)
             throws STACRUDException {
 
         Dataset dataset = new Dataset();
-
         // we can't use staIdentifier and String.valueOf(DatasetId) interchangeably here as it is an aggregation
-        dataset.setStaIdentifier(staIdentifier);
+        dataset.setStaIdentifier(null);
         dataset.setDatasetId(getUniqueTimestamp());
         dataset.setIdentifier(dataset.getDatasetId().toString());
+        dataset.setFkFeatureId(feature_id);
+        dataset.setFkAggregationId(parent.getDatasetId());
+
         dataset.setName(parent.getName());
         dataset.setDescription(parent.getDescription());
         dataset.setObservedArea(parent.getObservedArea());
         dataset.setObservationType(parent.getObservationType());
-        dataset.setFkFeatureId(feature);
         dataset.setFkPhenomenonId(parent.getFkPhenomenonId());
         dataset.setFkProcedureId(parent.getFkProcedureId());
         dataset.setFkUnitId(parent.getFkUnitId());
@@ -339,19 +326,13 @@ public class DatastreamService extends AbstractSensorThingsEntityServiceImpl<
         dataset.setLastTime(parent.getLastTime());
         dataset.setResultTimeStart(parent.getResultTimeStart());
         dataset.setResultTimeEnd(parent.getResultTimeEnd());
-        if (staIdentifier == null) {
-            dataset.setFkAggregationId(parent.getDatasetId());
-        }
-
         datastreamDao.save(dataset);
 
-        DatastreamDTO datastream = new Datastream();
-        // datastream.setId() sets the staIdentifier, dataset.getDatasetId() returns DatasetId
-        // but we maintain the rule staIdentifier == String.valueOf(DatasetId) hence we can use it interchangeably
-        // because the STA client does not know about aggregations and treats the entire aggregation as a single DS
+        DatastreamDTO datastreamDTO = new Datastream();
+        String Id = dataset.getDatasetId().toString();
         // calling function will only need the Id, hence we do not set other fields
-        datastream.setId(dataset.getDatasetId().toString());
-        return datastream;
+        datastreamDTO.setId(Id);
+        return datastreamDTO;
 
     }
 
@@ -367,9 +348,11 @@ public class DatastreamService extends AbstractSensorThingsEntityServiceImpl<
                         .get(0);
 
                 // Delete sub-datasets if we are an aggregation
-                if (dataset.getFkAggregationId() != null) {
+                if (dataset.getFkAggregationId() != null && dataset.getFkAggregationId() == 1L) {
+                    // all sub-datasets have their fk_aggregation_id = parent_dataset_id
+                    Long aggregationId = dataset.getDatasetId();
                     Set<Long> datasetIds = datastreamDao
-                            .findAllPOJOByAggregationId(dataset.getDatasetId())
+                            .findAllPOJOByAggregationId(aggregationId)
                             .stream()
                             .map(Dataset::getDatasetId)
                             .collect(Collectors.toSet());
@@ -377,9 +360,10 @@ public class DatastreamService extends AbstractSensorThingsEntityServiceImpl<
                     // delete observations
                     observationDao.deleteAllByDatasetIdIn(datasetIds);
                     // delete subdatastreams
-                    for (Long id : datasetIds) {
-                        datastreamDao.deleteById(id);
+                    for (Long Id: datasetIds) {
+                        datastreamDao.deleteById(Id);
                     }
+                    // datastreamDao.deleteByAggregationId(aggregationId);
                 } else {
                     // delete observations
                     observationDao.deleteAllByDatasetIdIn(Collections.singleton(dataset.getDatasetId()));
@@ -400,33 +384,41 @@ public class DatastreamService extends AbstractSensorThingsEntityServiceImpl<
      * Creates a DatasetAggregation or expands the existing Aggregation with a new dataset.
      *
      * @param dataset Existing Aggregation or Dataset
-     * @param feature    Feature to be used for the new Dataset
+     * @param feature_id    Feature to be used for the new Dataset
      * @return specific Dataset that was created (not the aggregation)
      * @throws STACRUDException if an error occurred
      */
-    DatastreamDTO createOrExpandAggregation(Dataset dataset, Long feature)
+    DatastreamDTO createOrExpandAggregation(Dataset dataset, Long feature_id)
             throws STACRUDException {
         if (dataset.getFkAggregationId() == null) {
             LOGGER.debug("Creating new DatasetAggregation");
 
-            // We need to create a new aggregation and link the existing dataset with it
+            // Delete existing dataset
+            datastreamDao.deleteById(dataset.getDatasetId());
+
+            // Create a parent dataset
             Dataset parent = new Dataset(dataset);
-            parent.setFkFeatureId(null);
             // 1L is a marker that means this dataset is a parent of an aggregation
             parent.setFkAggregationId(1L);
-
-            // Update existing dataset
-            dataset.setDatasetId(getUniqueTimestamp());
-            dataset.setStaIdentifier(null);
-            dataset.setFkAggregationId(parent.getDatasetId());
-            datastreamDao.update(parent.getDatasetId(), dataset);
-
-            // Persist parent
+            parent.setFkFeatureId(null);
+            // persist the parent dataset
+            // linked entities of the original dataset are not linked to the parent
             datastreamDao.save(parent);
 
-            return createAndSaveDatasetAggregation(parent, feature, null);
+            // We need to create a new aggregation and link the existing dataset with it
+            Dataset subdataset = new Dataset(dataset);
+            subdataset.setStaIdentifier(null);
+            subdataset.setDatasetId(getUniqueTimestamp());
+            subdataset.setFkFeatureId(dataset.getFkFeatureId());
+            subdataset.setFkAggregationId(dataset.getDatasetId());
+            // Persist subdataset
+            datastreamDao.save(subdataset);
+
+
+            // finally create a new aggregation linked to the new feature_id
+            return createAndSaveDatasetAggregation(parent, feature_id);
         } else {
-            return createAndSaveDatasetAggregation(dataset, feature, null);
+            return createAndSaveDatasetAggregation(dataset, feature_id);
         }
     }
 
@@ -474,7 +466,7 @@ public class DatastreamService extends AbstractSensorThingsEntityServiceImpl<
                         datastreamDao.findOne(dQC.withStaIdentifier(id), null, DatastreamDTO.class);
                 if (existing.isPresent()) {
                     DatastreamDTO merged = merge(existing.get(), entity);
-                    datastreamDao.update(Long.valueOf(existing.get().getId()), POJOWrapper(merged));
+                    datastreamDao.update(POJOWrapper(merged));
                     return merged;
                 }
                 throw new STACRUDException(UNABLE_TO_UPDATE_ENTITY_NOT_FOUND, HTTPStatus.NOT_FOUND);

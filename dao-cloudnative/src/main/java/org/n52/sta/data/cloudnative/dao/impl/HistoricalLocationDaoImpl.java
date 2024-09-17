@@ -156,6 +156,10 @@ public class HistoricalLocationDaoImpl
 
     @Override
     public void deleteByStaIdentifier(String staIdentifier) throws STACRUDException {
-        firehoseClient.icebergDeleteByStaIdentifier(staIdentifier, tableName);
+        // TODO: Firehose unstable
+        firehoseClient.icebergDeleteById(StaEntity.HISTORICAL_LOCATION.getName(),
+                Long.parseLong(staIdentifier),
+                tableName);
+        // firehoseClient.icebergDeleteByStaIdentifier(staIdentifier, tableName);
     }
 }

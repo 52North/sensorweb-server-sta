@@ -40,11 +40,13 @@ import org.n52.shetland.ogc.sta.exception.STAInvalidQueryException;
 import org.n52.sta.api.dto.ObservedPropertyDTO;
 import org.n52.sta.data.cloudnative.condition.StaEntity;
 import org.n52.sta.data.cloudnative.dao.impl.ObservedPropertyDaoImpl;
+import org.n52.sta.data.cloudnative.dao.util.StaFirehoseClient;
 import org.n52.sta.data.cloudnative.test.TestDatabaseConfig;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
+import software.amazon.awssdk.services.firehose.FirehoseClient;
 
 import java.util.List;
 import java.util.Optional;
@@ -57,10 +59,13 @@ public class ObservedPropertyDaoTest {
     @Autowired
     private DSLContext ctx;
     private ObservedPropertyDaoImpl observedPropertyDao;
+    @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
+    @Autowired private FirehoseClient firehoseClient;
+    private final StaFirehoseClient staFirehose = new StaFirehoseClient(firehoseClient);
 
     @BeforeEach
     public void setUp() {
-        observedPropertyDao = new ObservedPropertyDaoImpl(ctx, null);
+        observedPropertyDao = new ObservedPropertyDaoImpl(ctx, staFirehose);
     }
 
     @Test
@@ -118,7 +123,7 @@ public class ObservedPropertyDaoTest {
             e.printStackTrace();
         }
 
-        Assertions.assertEquals(result.get().getId(), "d9ebc33b-14dd-4106-880a-f3020e890b8d");
+        Assertions.assertEquals(result.get().getId(), "1");
     }
 
     @Test
@@ -139,7 +144,7 @@ public class ObservedPropertyDaoTest {
 
     @Test
     public void testWithFindByStaIdentifier() {
-        String identifier = "d9ebc33b-14dd-4106-880a-f3020e890b8d";
+        String identifier = "1";
         QueryOptions options = null;
         Class<ObservedPropertyDTO> entityClass = ObservedPropertyDTO.class;
         Optional<ObservedPropertyDTO> result = Optional.empty();
@@ -168,7 +173,7 @@ public class ObservedPropertyDaoTest {
 
     @Test
     public void testWithExistsByStaIdentifier() {
-        String identifier = "d9ebc33b-14dd-4106-880a-f3020e890b8d";
+        String identifier = "1";
         Class<ObservedPropertyDTO> entityClass = ObservedPropertyDTO.class;
         boolean result = false;
         try {

@@ -219,7 +219,7 @@ public class LocationService
     private void processThings(LocationDTO location)
             throws STAInvalidQueryException, STACRUDException {
         if (location.getThings() != null) {
-            Set<PlatformLocation> platformLocationSet = new HashSet<>();
+            Set<PlatformLocation> thingLocationSet = new HashSet<>();
             for (ThingDTO newThing : location.getThings()) {
                 // The only way for a Thing to be processed is if we are currently persisting said Thing
                 // IF this is the case the Thing takes care of Locations itself and we must not mess with it here
@@ -230,10 +230,10 @@ public class LocationService
                 // we do not set the locations link in the DTO
                 ThingDTO savedThing = getThingService().createOrfetch(newThing);;
 
-                PlatformLocation platformLocation = new PlatformLocation();
-                platformLocation.setFkLocationId(Long.valueOf(location.getId()));
-                platformLocation.setFkPlatformId(Long.valueOf(savedThing.getId()));
-                platformLocationSet.add(platformLocation);
+                PlatformLocation thingLocation = new PlatformLocation();
+                thingLocation.setFkLocationId(Long.valueOf(location.getId()));
+                thingLocation.setFkPlatformId(Long.valueOf(savedThing.getId()));
+                thingLocationSet.add(thingLocation);
 
                 // non-standard feature 'updateFOI'
                 if (updateFOIFeatureEnabled && savedThing.getProperties() != null) {
@@ -259,7 +259,7 @@ public class LocationService
                 }
             //}
             }
-            thingLocationDao.saveAll(platformLocationSet);
+            thingLocationDao.saveAll(thingLocationSet);
         }
 
     }
@@ -312,6 +312,9 @@ public class LocationService
                 if (location.getProperties() != null) {
                     locationDao.deleteLocationParameters(Long.valueOf(location.getId()));
                 }
+                // update PlatformLocation table
+                thingLocationDao.deleteByLocationId(Long.valueOf(id));
+                // finally delete the Location entity
                 locationDao.deleteByStaIdentifier(id);
             } else {
                 throw new STACRUDException(UNABLE_TO_UPDATE_ENTITY_NOT_FOUND, HTTPStatus.NOT_FOUND);

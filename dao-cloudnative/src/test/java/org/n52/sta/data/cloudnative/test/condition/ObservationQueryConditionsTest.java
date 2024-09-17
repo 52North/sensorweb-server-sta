@@ -66,9 +66,9 @@ public class ObservationQueryConditionsTest {
         observationQueryConditions.setDslContext(ctx);
     }
 
-    private String read_parquet(String table) {
-        return String.format("read_parquet('s3://52n-sta/%s.parquet') %s ", table, table);
-    }
+    /*private String (String table) {
+        return String.format("('s3://52n-sta/%s.parquet') %s ", table, table);
+    }*/
 
     @Test
     public void testWithFeatureOfInterestStaIdentifier_TP() {
@@ -80,9 +80,9 @@ public class ObservationQueryConditionsTest {
         String sql = ctx.renderInlined(result);
         String expectedSQL = "OBSERVATION.FK_DATASET_ID in " +
                 "(select DATASET.DATASET_ID from " +
-                read_parquet("DATASET") +
+                "DATASET " +
                 "join " +
-                read_parquet("FEATURE") +
+                "FEATURE " +
                 "on DATASET.FK_FEATURE_ID = FEATURE.FEATURE_ID " +
                 "where FEATURE.STA_IDENTIFIER = 'feature123')";
 
@@ -100,9 +100,9 @@ public class ObservationQueryConditionsTest {
         String sql = ctx.renderInlined(result);
         String expectedSQL = "OBSERVATION.FK_DATASET_ID in " +
                 "(select DATASET.DATASET_ID from " +
-                read_parquet("DATASET") +
+                "DATASET " +
                 "join " +
-                read_parquet("OBSERVATION") +
+                "OBSERVATION " +
                 "on " +
                 "observation.fk_dataset_id = dataset.dataset_id ".toUpperCase() +
                 "where DATASET.STA_IDENTIFIER = 'datastream123')";
@@ -143,7 +143,7 @@ public class ObservationQueryConditionsTest {
         String expectedSQL = "OBSERVATION.FK_DATASET_ID in " +
                 "(select DATASET.DATASET_ID " +
                 "from " +
-                read_parquet("DATASET") +
+                "DATASET " +
                 "where " +
                 conditionSQL +
                 ")";
@@ -171,11 +171,11 @@ public class ObservationQueryConditionsTest {
         String expectedSQL = "OBSERVATION.FK_DATASET_ID in " +
                 "(select DATASET.DATASET_ID " +
                 "from " +
-                read_parquet("DATASET") +
+                "DATASET " +
                 "where DATASET.FK_FEATURE_ID in " +
                 "(select FEATURE.FEATURE_ID " +
                 "from " +
-                read_parquet("FEATURE") +
+                "FEATURE " +
                 "where " +
                 conditionSQL +
                 "))";
@@ -203,7 +203,7 @@ public class ObservationQueryConditionsTest {
         String expectedSQL = "OBSERVATION.OBSERVATION_ID in " +
                 "(select OBSERVATION_PARAMETER.FK_OBSERVATION_ID " +
                 "from " +
-                read_parquet("OBSERVATION_PARAMETER") +
+                "OBSERVATION_PARAMETER " +
                 "where " +
                 conditionSQL +
                 ")";
@@ -400,7 +400,7 @@ public class ObservationQueryConditionsTest {
         String expectedSQL = "OBSERVATION.OBSERVATION_ID in " +
                 "(select OBSERVATION_PARAMETER.FK_OBSERVATION_ID " +
                 "from " +
-                read_parquet("OBSERVATION_PARAMETER") +
+                "OBSERVATION_PARAMETER " +
                 "where " +
                 "(OBSERVATION_PARAMETER.NAME = 'valid' and OBSERVATION_PARAMETER.VALUE_TEXT = 'true'))";
 

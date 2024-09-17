@@ -170,7 +170,11 @@ public class ObservedPropertyDaoImpl
 
     @Override
     public void deleteByStaIdentifier(String staIdentifier) throws STACRUDException {
-        firehoseClient.icebergDeleteByStaIdentifier(staIdentifier, tableName);
+        // TODO: Firehose unstable
+        firehoseClient.icebergDeleteById(StaEntity.OBSERVED_PROPERTY.PHENOMENON_ID.getName(),
+                Long.parseLong(staIdentifier),
+                FirehoseConstants.DELETE);
+        // firehoseClient.icebergDeleteByStaIdentifier(staIdentifier, tableName);
     }
 
     public void saveObservedPropertyParameters(String id, ObjectNode parameters) throws STACRUDException {
@@ -179,7 +183,7 @@ public class ObservedPropertyDaoImpl
     }
 
     public void deleteObservedPropertyParameters(Long Id) throws STACRUDException {
-        String key = StaEntity.OBSERVED_PROPERTY_PROPERTIES.PARAMETER_ID.getName();
+        String key = StaEntity.OBSERVED_PROPERTY_PROPERTIES.FK_PHENOMENON_ID.getName();
         firehoseClient.icebergDeleteById(key, Id, parameterTableName);
     }
 }
