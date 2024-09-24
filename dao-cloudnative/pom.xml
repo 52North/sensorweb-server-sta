@@ -118,13 +118,13 @@
             <artifactId>athena-jdbc</artifactId>
             <version>3.2.2</version>
             <scope>system</scope>
-            <systemPath>${project.basedir}/libs/athena-jdbc-3.2.2-with-dependencies.jar</systemPath>
+            <systemPath>D:/dev/git/sensorweb-server-sta/libs/athena-jdbc-3.2.2-with-dependencies.jar</systemPath>
         </dependency>
 
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-jooq</artifactId>
-            <version>2.3.5.RELEASE</version>
+            <version>3.3.4</version>
             <exclusions>
                 <exclusion>
                     <groupId>org.jooq</groupId>
@@ -243,6 +243,10 @@
             <groupId>com.fasterxml.jackson.datatype</groupId>
             <artifactId>jackson-datatype-jsr310</artifactId>
         </dependency>
+		<dependency>
+			<groupId>com.fasterxml.jackson.core</groupId>
+			<artifactId>jackson-databind</artifactId>
+         </dependency>
     </dependencies>
 
     <build>
@@ -289,8 +293,8 @@
                 <executions>
                     <execution>
                         <id>jooq-codegen</id>
-<!--                        <phase>generate-sources</phase>-->
-                        <phase>none</phase>
+                        <phase>generate-sources</phase>
+<!--                        <phase>none</phase>-->
                         <goals>
                             <goal>generate</goal>
                         </goals>

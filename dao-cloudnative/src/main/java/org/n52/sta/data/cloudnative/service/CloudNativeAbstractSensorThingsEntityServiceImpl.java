@@ -71,7 +71,7 @@ import java.util.concurrent.atomic.AtomicLong;
  * @author <a href="mailto:humaid.kidwai@ucalgary.ca">Humaid Kidwai</a>
  */
 @Transactional(rollbackFor = Exception.class)
-public abstract class AbstractSensorThingsEntityServiceImpl <T extends StaEntityDao<R>, R extends StaDTO> {
+public abstract class CloudNativeAbstractSensorThingsEntityServiceImpl <T extends StaEntityDao<R>, R extends StaDTO> {
 
     protected static final String RESULT = "result";
     protected static final String NULL_ID_MASK = ((Long)(1L << 63)).toString();
@@ -86,20 +86,20 @@ public abstract class AbstractSensorThingsEntityServiceImpl <T extends StaEntity
     public static final String INVALID_ENTITY_TYPE = "Cannot find Entity of type '%s'";
     protected static final String NO_S_WITH_ID_S_FOUND = "No %s with id %s found.";
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(AbstractSensorThingsEntityServiceImpl.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(CloudNativeAbstractSensorThingsEntityServiceImpl.class);
 
     @Autowired private MutexFactory lock;
-    private EntityServiceRepository serviceRepository;
+    private CloudNativeEntityServiceRepository serviceRepository;
     private final T StaEntityDao;
     protected final Class<R> entityClass;
 
-    public AbstractSensorThingsEntityServiceImpl(T StaEntityDao, Class<R> entityClass) {
+    public CloudNativeAbstractSensorThingsEntityServiceImpl(T StaEntityDao, Class<R> entityClass) {
         this.entityClass = entityClass;
         this.StaEntityDao = StaEntityDao;
     }
 
 
-    public void setServiceRepository(EntityServiceRepository entityServiceRepository) {
+    public void setServiceRepository(CloudNativeEntityServiceRepository entityServiceRepository) {
         this.serviceRepository = serviceRepository;
     }
 
@@ -469,44 +469,44 @@ public abstract class AbstractSensorThingsEntityServiceImpl <T extends StaEntity
         }
     }
 
-    LocationService getLocationService() {
-        return (LocationService) serviceRepository
-                .getEntityServiceRaw(EntityServiceRepository.EntityTypes.Location);
+    CloudNativeLocationService getLocationService() {
+        return (CloudNativeLocationService) serviceRepository
+                .getEntityServiceRaw(CloudNativeEntityServiceRepository.EntityTypes.Location);
     }
 
-    HistoricalLocationService getHistoricalLocationService() {
-        return (HistoricalLocationService) serviceRepository
-                .getEntityServiceRaw(EntityServiceRepository.EntityTypes.HistoricalLocation);
+    CloudNativeHistoricalLocationService getHistoricalLocationService() {
+        return (CloudNativeHistoricalLocationService) serviceRepository
+                .getEntityServiceRaw(CloudNativeEntityServiceRepository.EntityTypes.HistoricalLocation);
     }
 
-    DatastreamService getDatastreamService() {
-        return (DatastreamService) serviceRepository
-                .getEntityServiceRaw(EntityServiceRepository.EntityTypes.Datastream);
+    CloudNativeDatastreamService getDatastreamService() {
+        return (CloudNativeDatastreamService) serviceRepository
+                .getEntityServiceRaw(CloudNativeEntityServiceRepository.EntityTypes.Datastream);
     }
 
-    FeatureOfInterestService getFeatureOfInterestService() {
-        return (FeatureOfInterestService) serviceRepository
-                .getEntityServiceRaw(EntityServiceRepository.EntityTypes.FeatureOfInterest);
+    CloudNativeFeatureOfInterestService getFeatureOfInterestService() {
+        return (CloudNativeFeatureOfInterestService) serviceRepository
+                .getEntityServiceRaw(CloudNativeEntityServiceRepository.EntityTypes.FeatureOfInterest);
     }
 
-    ThingService getThingService() {
-        return (ThingService) serviceRepository
-                .getEntityServiceRaw(EntityServiceRepository.EntityTypes.Thing);
+    CloudNativeThingService getThingService() {
+        return (CloudNativeThingService) serviceRepository
+                .getEntityServiceRaw(CloudNativeEntityServiceRepository.EntityTypes.Thing);
     }
 
-    SensorService getSensorService() {
-        return (SensorService) serviceRepository
-                .getEntityServiceRaw(EntityServiceRepository.EntityTypes.Sensor);
+    CloudNativeSensorService getSensorService() {
+        return (CloudNativeSensorService) serviceRepository
+                .getEntityServiceRaw(CloudNativeEntityServiceRepository.EntityTypes.Sensor);
     }
 
-    ObservedPropertyService getObservedPropertyService() {
-        return (ObservedPropertyService) serviceRepository
-                .getEntityServiceRaw(EntityServiceRepository.EntityTypes.ObservedProperty);
+    CloudNativeObservedPropertyService getObservedPropertyService() {
+        return (CloudNativeObservedPropertyService) serviceRepository
+                .getEntityServiceRaw(CloudNativeEntityServiceRepository.EntityTypes.ObservedProperty);
     }
 
-    ObservationService getObservationService() {
-        return (ObservationService) serviceRepository
-                .getEntityServiceRaw(EntityServiceRepository.EntityTypes.Observation);
+    CloudNativeObservationService getObservationService() {
+        return (CloudNativeObservationService) serviceRepository
+                .getEntityServiceRaw(CloudNativeEntityServiceRepository.EntityTypes.Observation);
     }
 
     // 1 million unique timestamps/second

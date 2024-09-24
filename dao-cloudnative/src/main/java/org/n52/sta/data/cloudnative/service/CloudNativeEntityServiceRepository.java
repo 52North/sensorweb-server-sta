@@ -43,34 +43,34 @@ import java.util.Map;
  * @author <a href="mailto:humaid.kidwai@ucalgary.ca">Humaid Kidwai</a>
  */
 @Component
-public class EntityServiceRepository implements EntityServiceFactory {
+public class CloudNativeEntityServiceRepository implements EntityServiceFactory {
 
     private Map<EntityTypes, ServiceFacade<?>>
             entityServices = new LinkedHashMap<>();
 
     @Autowired
-    private ServiceFacade.ThingServiceFacade thingServiceFacade;
+    private ServiceFacade.CloudNativeThingServiceFacade thingServiceFacade;
 
     @Autowired
-    private ServiceFacade.LocationServiceFacade locationServiceFacade;
+    private ServiceFacade.CloudNativeLocationServiceFacade locationServiceFacade;
 
     @Autowired
-    private ServiceFacade.HistoricalLocationServiceFacade historicalLocationService;
+    private ServiceFacade.CloudNativeHistoricalLocationServiceFacade historicalLocationService;
 
     @Autowired
-    private ServiceFacade.SensorServiceFacade sensorService;
+    private ServiceFacade.CloudNativeSensorServiceFacade sensorService;
 
     @Autowired
-    private ServiceFacade.DatastreamServiceFacade datastreamService;
+    private ServiceFacade.CloudNativeDatastreamServiceFacade datastreamService;
 
     @Autowired
-    private ServiceFacade.ObservationServiceFacade observationService;
+    private ServiceFacade.CloudNativeObservationServiceFacade observationService;
 
     @Autowired
-    private ServiceFacade.ObservedPropertyServiceFacade observedPropertyService;
+    private ServiceFacade.CloudNativeObservedPropertyServiceFacade observedPropertyService;
 
     @Autowired
-    private ServiceFacade.FeatureOfInterestServiceFacade featureOfInterestService;
+    private ServiceFacade.CloudNativeFeatureOfInterestServiceFacade featureOfInterestService;
 
 
     @PostConstruct
@@ -127,7 +127,7 @@ public class EntityServiceRepository implements EntityServiceFactory {
      * @param entityTypeName the type name of the requested entity service
      * @return the requested entity data service
      */
-    AbstractSensorThingsEntityServiceImpl getEntityServiceRaw(EntityTypes entityTypeName) {
+    CloudNativeAbstractSensorThingsEntityServiceImpl getEntityServiceRaw(EntityTypes entityTypeName) {
         return entityServices.get(entityTypeName).getServiceImpl();
     }
 

@@ -86,11 +86,11 @@ import static org.n52.sta.api.RequestUtils.QUERY_OPTIONS_FACTORY;
 @Component
 @DependsOn({"springApplicationContext"})
 @Transactional
-public class ObservationService
-        extends AbstractSensorThingsEntityServiceImpl<ObservationDao, ObservationDTO> {
+public class CloudNativeObservationService
+        extends CloudNativeAbstractSensorThingsEntityServiceImpl<ObservationDao, ObservationDTO> {
 
     private static final ObservationQueryConditions oQC = new ObservationQueryConditions();
-    private static final Logger LOGGER = LoggerFactory.getLogger(ObservationService.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(CloudNativeObservationService.class);
     protected final DatastreamDaoImpl datastreamDao;
     protected final ObservationDaoImpl observationDao;
     protected final LocationDaoImpl locationDao;
@@ -98,7 +98,7 @@ public class ObservationService
             "http://www.52north.org/def/observationType/OGC-OM/2.0/OM_SensorML20Observation";
     private final AtomicLong TS = new AtomicLong();
 
-    public ObservationService(ObservationDaoImpl observationDao,
+    public CloudNativeObservationService(ObservationDaoImpl observationDao,
                               DatastreamDaoImpl datastreamDao,
                               LocationDaoImpl locationDao) {
         super(observationDao, ObservationDTO.class);

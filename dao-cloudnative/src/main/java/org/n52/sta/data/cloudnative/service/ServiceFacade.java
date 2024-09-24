@@ -50,15 +50,15 @@ import org.springframework.stereotype.Component;
 public class ServiceFacade <R extends StaDTO> implements AbstractSensorThingsEntityService<R> {
 
     private final DaoSemaphore semaphore;
-    private AbstractSensorThingsEntityServiceImpl<?, R> serviceImpl;
+    private CloudNativeAbstractSensorThingsEntityServiceImpl<?, R> serviceImpl;
 
-    public ServiceFacade(AbstractSensorThingsEntityServiceImpl<?, R> serviceImpl,
+    public ServiceFacade(CloudNativeAbstractSensorThingsEntityServiceImpl<?, R> serviceImpl,
                          DaoSemaphore semaphore) {
         this.serviceImpl = serviceImpl;
         this.semaphore = semaphore;
     }
 
-    public AbstractSensorThingsEntityServiceImpl<?, ?> getServiceImpl() {
+    public CloudNativeAbstractSensorThingsEntityServiceImpl<?, ?> getServiceImpl() {
         return serviceImpl;
     }
 
@@ -209,9 +209,9 @@ public class ServiceFacade <R extends StaDTO> implements AbstractSensorThingsEnt
     }
 
     @Component
-    public static class ThingServiceFacade extends ServiceFacade<ThingDTO> {
+    public static class CloudNativeThingServiceFacade extends ServiceFacade<ThingDTO> {
 
-        ThingServiceFacade(ThingService serviceImpl,
+        CloudNativeThingServiceFacade(CloudNativeThingService serviceImpl,
                            DaoSemaphore semaphore) {
             super(serviceImpl, semaphore);
         }
@@ -219,9 +219,9 @@ public class ServiceFacade <R extends StaDTO> implements AbstractSensorThingsEnt
 
 
     @Component
-    public static class LocationServiceFacade extends ServiceFacade<LocationDTO> {
+    public static class CloudNativeLocationServiceFacade extends ServiceFacade<LocationDTO> {
 
-        LocationServiceFacade(LocationService serviceImpl,
+        CloudNativeLocationServiceFacade(CloudNativeLocationService serviceImpl,
                               DaoSemaphore semaphore) {
             super(serviceImpl, semaphore);
         }
@@ -229,10 +229,10 @@ public class ServiceFacade <R extends StaDTO> implements AbstractSensorThingsEnt
 
 
     @Component
-    public static class HistoricalLocationServiceFacade
+    public static class CloudNativeHistoricalLocationServiceFacade
             extends ServiceFacade<HistoricalLocationDTO> {
 
-        HistoricalLocationServiceFacade(HistoricalLocationService serviceImpl,
+        CloudNativeHistoricalLocationServiceFacade(CloudNativeHistoricalLocationService serviceImpl,
                                         DaoSemaphore semaphore) {
             super(serviceImpl, semaphore);
         }
@@ -240,9 +240,9 @@ public class ServiceFacade <R extends StaDTO> implements AbstractSensorThingsEnt
 
 
     @Component
-    public static class SensorServiceFacade extends ServiceFacade<SensorDTO> {
+    public static class CloudNativeSensorServiceFacade extends ServiceFacade<SensorDTO> {
 
-        SensorServiceFacade(SensorService serviceImpl,
+        CloudNativeSensorServiceFacade(CloudNativeSensorService serviceImpl,
                             DaoSemaphore semaphore) {
             super(serviceImpl, semaphore);
         }
@@ -250,10 +250,10 @@ public class ServiceFacade <R extends StaDTO> implements AbstractSensorThingsEnt
 
 
     @Component
-    public static class ObservedPropertyServiceFacade
+    public static class CloudNativeObservedPropertyServiceFacade
             extends ServiceFacade<ObservedPropertyDTO> {
 
-        ObservedPropertyServiceFacade(ObservedPropertyService serviceImpl,
+        CloudNativeObservedPropertyServiceFacade(CloudNativeObservedPropertyService serviceImpl,
                                       DaoSemaphore semaphore) {
             super(serviceImpl, semaphore);
         }
@@ -261,10 +261,10 @@ public class ServiceFacade <R extends StaDTO> implements AbstractSensorThingsEnt
 
 
     @Component
-    public static class ObservationServiceFacade
+    public static class CloudNativeObservationServiceFacade
             extends ServiceFacade<ObservationDTO> {
 
-        ObservationServiceFacade(ObservationService serviceImpl,
+        CloudNativeObservationServiceFacade(CloudNativeObservationService serviceImpl,
                                  DaoSemaphore semaphore) {
             super(serviceImpl, semaphore);
         }
@@ -272,9 +272,9 @@ public class ServiceFacade <R extends StaDTO> implements AbstractSensorThingsEnt
 
 
     @Component
-    public static class DatastreamServiceFacade extends ServiceFacade<DatastreamDTO> {
+    public static class CloudNativeDatastreamServiceFacade extends ServiceFacade<DatastreamDTO> {
 
-        DatastreamServiceFacade(DatastreamService serviceImpl,
+        CloudNativeDatastreamServiceFacade(CloudNativeDatastreamService serviceImpl,
                                 DaoSemaphore semaphore) {
             super(serviceImpl, semaphore);
         }
@@ -282,10 +282,10 @@ public class ServiceFacade <R extends StaDTO> implements AbstractSensorThingsEnt
 
 
     @Component
-    public static class FeatureOfInterestServiceFacade
+    public static class CloudNativeFeatureOfInterestServiceFacade
             extends ServiceFacade<FeatureOfInterestDTO> {
 
-        FeatureOfInterestServiceFacade(FeatureOfInterestService serviceImpl,
+        CloudNativeFeatureOfInterestServiceFacade(CloudNativeFeatureOfInterestService serviceImpl,
                                        DaoSemaphore semaphore) {
             super(serviceImpl, semaphore);
         }

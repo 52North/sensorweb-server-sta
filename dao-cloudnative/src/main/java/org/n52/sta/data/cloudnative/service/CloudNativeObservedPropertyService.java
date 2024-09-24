@@ -72,10 +72,10 @@ import static org.n52.sta.data.cloudnative.dao.StaEntityDao.INVALID_EXPAND_OPTIO
 @Component
 @DependsOn({"springApplicationContext"})
 @Transactional
-public class ObservedPropertyService
-        extends AbstractSensorThingsEntityServiceImpl<ObservedPropertyDao, ObservedPropertyDTO> {
+public class CloudNativeObservedPropertyService
+        extends CloudNativeAbstractSensorThingsEntityServiceImpl<ObservedPropertyDao, ObservedPropertyDTO> {
 
-    private static final Logger logger = LoggerFactory.getLogger(ObservedPropertyService.class);
+    private static final Logger logger = LoggerFactory.getLogger(CloudNativeObservedPropertyService.class);
 
     private static final DatastreamQueryConditions dsQC = new DatastreamQueryConditions();
     private static final ObservedPropertyQueryConditions oQC = new ObservedPropertyQueryConditions();
@@ -84,7 +84,7 @@ public class ObservedPropertyService
     private final ObservedPropertyDaoImpl observedPropertyDao;
     private final AtomicLong TS = new AtomicLong();
 
-    public ObservedPropertyService(ObservedPropertyDaoImpl observedPropertyDao,
+    public CloudNativeObservedPropertyService(ObservedPropertyDaoImpl observedPropertyDao,
                                    DatastreamDaoImpl datastreamDao,
                                    Class<ObservedPropertyDTO> entityClass) {
         super(observedPropertyDao, entityClass);

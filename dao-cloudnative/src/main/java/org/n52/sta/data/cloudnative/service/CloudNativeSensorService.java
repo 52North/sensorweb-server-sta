@@ -72,22 +72,22 @@ import static org.n52.sta.data.cloudnative.dao.StaEntityDao.INVALID_EXPAND_OPTIO
 @Component
 @DependsOn({"springApplicationContext"})
 @Transactional
-public class SensorService
-        extends AbstractSensorThingsEntityServiceImpl<SensorDao, SensorDTO> {
+public class CloudNativeSensorService
+        extends CloudNativeAbstractSensorThingsEntityServiceImpl<SensorDao, SensorDTO> {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(SensorService.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(CloudNativeSensorService.class);
 
     private static final SensorQueryConditions sQC = new SensorQueryConditions();
     private static final DatastreamQueryConditions dQC = new DatastreamQueryConditions();
 
     private final DatastreamDaoImpl datastreamDao;
     private final SensorDaoImpl sensorDao;
-    private final FormatService formatService;
+    private final CloudNativeFormatService formatService;
     private final AtomicLong TS = new AtomicLong();
 
-    public SensorService(SensorDaoImpl sensorDao,
+    public CloudNativeSensorService(SensorDaoImpl sensorDao,
                          DatastreamDaoImpl datastreamDao,
-                         FormatService formatService,
+                         CloudNativeFormatService formatService,
                          Class<SensorDTO> entityClass) {
         super(sensorDao, entityClass);
         this.datastreamDao = datastreamDao;

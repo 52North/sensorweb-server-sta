@@ -49,14 +49,14 @@ import java.util.concurrent.atomic.AtomicLong;
 @Component
 @DependsOn({"springApplicationContext"})
 @Transactional
-public class FormatService {
+public class CloudNativeFormatService {
 
-    private static final Logger logger = LoggerFactory.getLogger(FormatService.class);
+    private static final Logger logger = LoggerFactory.getLogger(CloudNativeFormatService.class);
     private final MutexFactory mutexFactory;
     private final FormatDaoImpl formatDao;
     private static final AtomicLong TS = new AtomicLong();
 
-    public FormatService(MutexFactory mutexFactory,
+    public CloudNativeFormatService(MutexFactory mutexFactory,
                          FormatDaoImpl formatDao) throws STACRUDException {
         this.mutexFactory = mutexFactory;
         this.formatDao = formatDao;

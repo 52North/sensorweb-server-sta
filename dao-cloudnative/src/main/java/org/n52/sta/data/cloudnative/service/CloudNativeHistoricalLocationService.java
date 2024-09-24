@@ -107,12 +107,12 @@ import static org.n52.sta.data.cloudnative.dao.StaEntityDao.INVALID_EXPAND_OPTIO
 @Component
 @DependsOn({"springApplicationContext"})
 @Transactional
-public class HistoricalLocationService
-        extends AbstractSensorThingsEntityServiceImpl<
+public class CloudNativeHistoricalLocationService
+        extends CloudNativeAbstractSensorThingsEntityServiceImpl<
         HistoricalLocationDao,
         HistoricalLocationDTO> {
 
-    private static final Logger logger = LoggerFactory.getLogger(HistoricalLocationService.class);
+    private static final Logger logger = LoggerFactory.getLogger(CloudNativeHistoricalLocationService.class);
 
     private static final HistoricalLocationQueryConditions hlQS = new HistoricalLocationQueryConditions();
 
@@ -122,7 +122,7 @@ public class HistoricalLocationService
 
     private final AtomicLong TS = new AtomicLong();
 
-    public HistoricalLocationService(HistoricalLocationDaoImpl historicalLocationDao,
+    public CloudNativeHistoricalLocationService(HistoricalLocationDaoImpl historicalLocationDao,
                                      LocationDaoImpl locationDao,
                                      LocationHistoricalLocationDaoImpl locationHistoricalLocationDao,
                                      Class<HistoricalLocationDTO> entityClass) {

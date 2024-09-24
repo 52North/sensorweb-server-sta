@@ -75,18 +75,18 @@ import static org.n52.sta.data.cloudnative.dao.StaEntityDao.INVALID_EXPAND_OPTIO
 @Component
 @DependsOn({"springApplicationContext"})
 @Transactional
-public class LocationService
-        extends AbstractSensorThingsEntityServiceImpl<
+public class CloudNativeLocationService
+        extends CloudNativeAbstractSensorThingsEntityServiceImpl<
         LocationDao,
         LocationDTO> {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(LocationService.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(CloudNativeLocationService.class);
 
     private static final LocationQueryConditions lQC = new LocationQueryConditions();
 
     private static final String UNABLE_TO_UPDATE_ENTITY_NOT_FOUND = "Unable to update. Entity not found";
 
-    private final FormatService formatService;
+    private final CloudNativeFormatService formatService;
     private final boolean updateFOIFeatureEnabled;
 
     private final LocationDaoImpl locationDao;
@@ -94,8 +94,8 @@ public class LocationService
     private final ThingLocationDaoImpl thingLocationDao;
 
 
-    public LocationService(LocationDaoImpl locationDao,
-                           FormatService formatDao,
+    public CloudNativeLocationService(LocationDaoImpl locationDao,
+                           CloudNativeFormatService formatDao,
                            LocationHistoricalLocationDaoImpl locationHistoricalLocationDao,
                            ThingLocationDaoImpl thingLocationDao,
                            boolean updateFOIFeatureEnabled,
@@ -247,7 +247,7 @@ public class LocationService
                         if (fieldName.equals("updateFOI")) {
                             try {
                                 LOGGER.debug("Updating FOI with id: " + fieldValue.asText());
-                                FeatureOfInterestService foiService = getFeatureOfInterestService();
+                                CloudNativeFeatureOfInterestService foiService = getFeatureOfInterestService();
                                 foiService.updateFeatureOfInterestGeometry(fieldValue.asText(),
                                         location.getGeometry());
                             } catch (Exception e) {

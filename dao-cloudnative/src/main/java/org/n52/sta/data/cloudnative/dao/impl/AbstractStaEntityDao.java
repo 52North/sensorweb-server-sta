@@ -42,7 +42,7 @@ import org.n52.shetland.ogc.sta.exception.STAInvalidQueryException;
 import org.n52.sta.api.dto.*;
 import org.n52.sta.data.cloudnative.dao.StaEntityDao;
 import org.n52.sta.data.cloudnative.dao.util.StaFirehoseClient;
-import org.n52.sta.data.cloudnative.service.AbstractSensorThingsEntityServiceImpl;
+import org.n52.sta.data.cloudnative.service.CloudNativeAbstractSensorThingsEntityServiceImpl;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -96,7 +96,7 @@ public abstract class AbstractStaEntityDao<T extends StaDTO> implements StaEntit
             Table<?> table = getEntityTable();
             if (table == null) {
                 throw new STAInvalidQueryException(String.format(
-                        AbstractSensorThingsEntityServiceImpl.INVALID_ENTITY_TYPE,
+                        CloudNativeAbstractSensorThingsEntityServiceImpl.INVALID_ENTITY_TYPE,
                         entityClass.getSimpleName()
                 ));
             }
@@ -124,7 +124,7 @@ public abstract class AbstractStaEntityDao<T extends StaDTO> implements StaEntit
         Table<?> table = getEntityTable();
         if (table == null) {
             throw new STAInvalidQueryException(String.format(
-                    AbstractSensorThingsEntityServiceImpl.INVALID_ENTITY_TYPE,
+                    CloudNativeAbstractSensorThingsEntityServiceImpl.INVALID_ENTITY_TYPE,
                     entityClass.getSimpleName()
             ));
         }
@@ -244,7 +244,7 @@ public abstract class AbstractStaEntityDao<T extends StaDTO> implements StaEntit
         Table<?> table = getEntityTable();
         if (table == null) {
             throw new STAInvalidQueryException(String.format(
-                    AbstractSensorThingsEntityServiceImpl.INVALID_ENTITY_TYPE,
+                    CloudNativeAbstractSensorThingsEntityServiceImpl.INVALID_ENTITY_TYPE,
                     entityClass.getSimpleName()
             ));
         }
@@ -267,7 +267,7 @@ public abstract class AbstractStaEntityDao<T extends StaDTO> implements StaEntit
         Table<?> table = getEntityTable();
         if (table == null) {
             throw new STAInvalidQueryException(String.format(
-                    AbstractSensorThingsEntityServiceImpl.INVALID_ENTITY_TYPE,
+                    CloudNativeAbstractSensorThingsEntityServiceImpl.INVALID_ENTITY_TYPE,
                     entityClass.getSimpleName()
             ));
         }

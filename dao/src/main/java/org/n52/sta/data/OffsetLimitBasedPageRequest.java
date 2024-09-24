@@ -134,4 +134,10 @@ public class OffsetLimitBasedPageRequest extends AbstractPageRequest {
         return sort;
     }
 
+	@Override
+	public Pageable withPage(int pageNumber) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
 }

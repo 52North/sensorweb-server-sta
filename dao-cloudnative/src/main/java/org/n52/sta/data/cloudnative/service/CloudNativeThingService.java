@@ -76,19 +76,19 @@ import static org.n52.sta.data.cloudnative.dao.StaEntityDao.INVALID_EXPAND_OPTIO
 @Component
 @DependsOn({"springApplicationContext"})
 @Transactional
-public class ThingService
-        extends AbstractSensorThingsEntityServiceImpl<
+public class CloudNativeThingService
+        extends CloudNativeAbstractSensorThingsEntityServiceImpl<
         ThingDao,
         ThingDTO> {
 
     private static final ThingQueryConditions tQS = new ThingQueryConditions();
-    private static final Logger logger = LoggerFactory.getLogger(ThingService.class);
+    private static final Logger logger = LoggerFactory.getLogger(CloudNativeThingService.class);
     private final ThingDaoImpl thingDao;
     private final AtomicLong TS = new AtomicLong();
     private final ThingLocationDaoImpl thingLocationDao;
     private final LocationHistoricalLocationDaoImpl locationHistoricalLocationDao;
 
-    public ThingService(ThingDaoImpl thingDao,
+    public CloudNativeThingService(ThingDaoImpl thingDao,
                         ThingLocationDaoImpl thingLocationDao,
                         LocationHistoricalLocationDaoImpl locationHistoricalLocationDao,
                         Class<ThingDTO> entityClass) {

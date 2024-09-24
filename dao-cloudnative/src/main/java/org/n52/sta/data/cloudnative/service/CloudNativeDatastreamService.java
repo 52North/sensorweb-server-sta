@@ -77,11 +77,11 @@ import java.util.stream.Collectors;
 @Component
 @DependsOn({"springApplicationContext"})
 @Transactional
-public class DatastreamService extends AbstractSensorThingsEntityServiceImpl<
+public class CloudNativeDatastreamService extends CloudNativeAbstractSensorThingsEntityServiceImpl<
         DatastreamDao,
         DatastreamDTO> {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(DatastreamService.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(CloudNativeDatastreamService.class);
     private static final DatastreamQueryConditions dQC = new DatastreamQueryConditions();
     private static final String UNKNOWN = "unknown";
 
@@ -89,11 +89,11 @@ public class DatastreamService extends AbstractSensorThingsEntityServiceImpl<
     private final DatastreamDaoImpl datastreamDao;
     private final UnitDaoImpl unitDao;
 
-    private final FormatService formatService;
+    private final CloudNativeFormatService formatService;
     private final AtomicLong TS = new AtomicLong();
 
-    public DatastreamService(DatastreamDaoImpl datastreamDao,
-                             FormatService formatService,
+    public CloudNativeDatastreamService(DatastreamDaoImpl datastreamDao,
+                             CloudNativeFormatService formatService,
                              ObservationDaoImpl observationDao,
                              UnitDaoImpl unitDao,
                              Class<DatastreamDTO> entityClass) {
