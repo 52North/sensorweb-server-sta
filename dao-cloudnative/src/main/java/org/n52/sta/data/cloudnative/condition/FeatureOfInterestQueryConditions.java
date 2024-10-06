@@ -30,7 +30,6 @@ package org.n52.sta.data.cloudnative.condition;
 
 import org.jooq.*;
 import org.jooq.impl.DSL;
-import org.n52.series.db.beans.DescribableEntity;
 import org.n52.series.db.beans.parameter.ParameterFactory;
 import org.n52.shetland.oasis.odata.ODataConstants;
 import org.n52.shetland.ogc.filter.FilterConstants;
@@ -38,11 +37,8 @@ import org.n52.shetland.ogc.sta.StaConstants;
 import org.n52.shetland.ogc.sta.exception.STAInvalidFilterExpressionException;
 import org.n52.shetland.ogc.sta.model.STAEntityDefinition;
 import org.n52.sta.data.cloudnative.condition.utils.GeospatialFunctions;
-import org.n52.sta.data.cloudnative.schema.tables.Dataset;
-import org.n52.sta.data.cloudnative.schema.tables.Feature;
-import org.n52.sta.data.cloudnative.schema.tables.FeatureParameter;
+import org.n52.sta.data.cloudnative.schema.tables.Format;
 import org.n52.svalbard.odata.core.expr.GeoValueExpr;
-import org.springframework.stereotype.Component;
 
 import java.util.List;
 
@@ -245,7 +241,8 @@ public class FeatureOfInterestQueryConditions extends EntityQueryConditions impl
             case StaConstants.PROP_FEATURE:
                 return FEATURE_OF_INTEREST.GEOM;
             case StaConstants.PROP_ENCODINGTYPE:
-                return FORMAT.DEFINITION;
+                Format SENSOR_FORMAT = StaEntity.FORMAT.as("FEATURE_FORMAT");
+                return SENSOR_FORMAT.DEFINITION.as("FEATURE_FORMAT_DEFINITION");
             case StaConstants.PROP_PROPERTIES:
                 // TODO
                 return null;

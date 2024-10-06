@@ -32,9 +32,6 @@ package org.n52.sta.data.cloudnative.service;
 import org.jooq.Condition;
 import org.jooq.Field;
 import org.n52.janmayen.http.HTTPStatus;
-import org.n52.series.db.beans.AbstractDatasetEntity;
-import org.n52.series.db.beans.PhenomenonEntity;
-import org.n52.series.db.beans.parameter.phenomenon.PhenomenonParameterEntity;
 import org.n52.shetland.filter.ExpandFilter;
 import org.n52.shetland.filter.ExpandItem;
 import org.n52.shetland.ogc.sta.StaConstants;
@@ -44,6 +41,7 @@ import org.n52.shetland.ogc.sta.model.ObservedPropertyEntityDefinition;
 import org.n52.shetland.ogc.sta.model.STAEntityDefinition;
 import org.n52.sta.api.dto.DatastreamDTO;
 import org.n52.sta.api.dto.ObservedPropertyDTO;
+import org.n52.sta.data.MutexFactory;
 import org.n52.sta.data.cloudnative.condition.DatastreamQueryConditions;
 import org.n52.sta.data.cloudnative.condition.ObservedPropertyQueryConditions;
 import org.n52.sta.data.cloudnative.condition.StaEntity;
@@ -57,10 +55,9 @@ import org.springframework.context.annotation.DependsOn;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
 
@@ -71,25 +68,31 @@ import static org.n52.sta.data.cloudnative.dao.StaEntityDao.INVALID_EXPAND_OPTIO
  */
 @Component
 @DependsOn({"springApplicationContext"})
-@Transactional
 public class CloudNativeObservedPropertyService
         extends CloudNativeAbstractSensorThingsEntityServiceImpl<ObservedPropertyDao, ObservedPropertyDTO> {
 
     private static final Logger logger = LoggerFactory.getLogger(CloudNativeObservedPropertyService.class);
 
-    private static final DatastreamQueryConditions dsQC = new DatastreamQueryConditions();
-    private static final ObservedPropertyQueryConditions oQC = new ObservedPropertyQueryConditions();
+    private static DatastreamQueryConditions dsQC = new DatastreamQueryConditions();
+    private static ObservedPropertyQueryConditions oQC = new ObservedPropertyQueryConditions();
 
     private final DatastreamDaoImpl datastreamDao;
     private final ObservedPropertyDaoImpl observedPropertyDao;
     private final AtomicLong TS = new AtomicLong();
 
     public CloudNativeObservedPropertyService(ObservedPropertyDaoImpl observedPropertyDao,
-                                   DatastreamDaoImpl datastreamDao,
-                                   Class<ObservedPropertyDTO> entityClass) {
-        super(observedPropertyDao, entityClass);
+                                              DatastreamDaoImpl datastreamDao, MutexFactory lock) {
+        super(observedPropertyDao, ObservedPropertyDTO.class, lock);
         this.datastreamDao = datastreamDao;
         this.observedPropertyDao = observedPropertyDao;
+    }
+
+    public static void setObservedPropertyQueryConditions(ObservedPropertyQueryConditions oQC) {
+        CloudNativeObservedPropertyService.oQC = oQC;
+    }
+
+    public static void setDatastreamQueryConditions(DatastreamQueryConditions dsQC) {
+        CloudNativeObservedPropertyService.dsQC = dsQC;
     }
 
     @Override
@@ -180,7 +183,7 @@ public class CloudNativeObservedPropertyService
                 throw new STACRUDException("Observed Property with given Definition already exists!",
                         HTTPStatus.CONFLICT);
             }
-            if (entity.getId() != NULL_ID_MASK &&
+            if (!entity.getId().equals(NULL_ID_MASK) &&
                     observedPropertyDao.existsByStaIdentifier(entity.getId(), entityClass)) {
                 throw new STACRUDException(IDENTIFIER_ALREADY_EXISTS, HTTPStatus.CONFLICT);
             }
@@ -243,10 +246,13 @@ public class CloudNativeObservedPropertyService
                 ObservedPropertyDTO observedProperty = observedPropertyDao
                         .findByStaIdentifier(id, null, entityClass).get();
                 // delete datastreams
-                for (DatastreamDTO datastreamEntity :
-                        datastreamDao.findAll(dsQC.withObservedPropertyStaIdentifier(id),
-                                null,
-                                DatastreamDTO.class)) {
+                Condition predicate = dsQC.withObservedPropertyStaIdentifier(id).
+                        and(StaEntity.DATASTREAM.STA_IDENTIFIER.isNotNull());
+                List<DatastreamDTO> relatedDatastreams = datastreamDao.findAll(
+                        predicate,
+                        null,
+                        DatastreamDTO.class);
+                for (DatastreamDTO datastreamEntity: relatedDatastreams) {
                     getDatastreamService().delete(datastreamEntity.getId());
                 }
                 // delete parameters
@@ -261,8 +267,7 @@ public class CloudNativeObservedPropertyService
     }
 
     @Override
-    protected ObservedPropertyDTO merge(ObservedPropertyDTO existing, ObservedPropertyDTO toMerge)
-            throws STACRUDException {
+    protected ObservedPropertyDTO merge(ObservedPropertyDTO existing, ObservedPropertyDTO toMerge) {
         if(toMerge.getDefinition() != null) {
             existing.setDefinition(toMerge.getDefinition());
         }
@@ -285,12 +290,12 @@ public class CloudNativeObservedPropertyService
     }
 
     @Override
-    Field<String> getStaEntityId() {
+    protected Field<String> getStaEntityId() {
         return StaEntity.OBSERVED_PROPERTY.STA_IDENTIFIER;
     }
 
     @Override
-    AtomicLong getStaEntityTS() {
+    protected AtomicLong getStaEntityTS() {
         return TS;
     }
 }

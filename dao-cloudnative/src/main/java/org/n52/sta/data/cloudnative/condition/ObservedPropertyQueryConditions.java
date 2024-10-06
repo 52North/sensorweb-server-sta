@@ -33,14 +33,10 @@ import org.jooq.Field;
 import org.jooq.Record1;
 import org.jooq.SelectConditionStep;
 import org.jooq.impl.DSL;
-import org.n52.series.db.beans.DescribableEntity;
 import org.n52.series.db.beans.parameter.ParameterFactory;
 import org.n52.shetland.ogc.filter.FilterConstants;
 import org.n52.shetland.ogc.sta.StaConstants;
 import org.n52.shetland.ogc.sta.exception.STAInvalidFilterExpressionException;
-import org.n52.sta.data.cloudnative.schema.tables.Phenomenon;
-import org.n52.sta.data.cloudnative.schema.tables.PhenomenonParameter;
-import org.springframework.stereotype.Component;
 
 import java.util.List;
 
@@ -150,7 +146,7 @@ public class ObservedPropertyQueryConditions extends EntityQueryConditions {
     }
 
     @Override
-    public Field checkPropertyName(String property) {
+    public Field<?> checkPropertyName(String property) {
         switch (property) {
             case StaConstants.PROP_ID:
                 return OBSERVED_PROPERTY.STA_IDENTIFIER;

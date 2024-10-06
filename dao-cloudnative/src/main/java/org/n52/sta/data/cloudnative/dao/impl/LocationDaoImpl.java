@@ -39,10 +39,14 @@ import org.n52.shetland.ogc.sta.StaConstants;
 import org.n52.shetland.ogc.sta.exception.STACRUDException;
 import org.n52.shetland.ogc.sta.exception.STAInvalidQueryException;
 import org.n52.shetland.ogc.sta.model.STAEntityDefinition;
+import org.n52.sta.api.dto.HistoricalLocationDTO;
 import org.n52.sta.api.dto.LocationDTO;
+import org.n52.sta.api.dto.ThingDTO;
 import org.n52.sta.data.cloudnative.DTOMapper;
+import org.n52.sta.data.cloudnative.condition.HistoricalLocationQueryConditions;
 import org.n52.sta.data.cloudnative.condition.LocationQueryConditions;
 import org.n52.sta.data.cloudnative.condition.StaEntity;
+import org.n52.sta.data.cloudnative.condition.ThingQueryConditions;
 import org.n52.sta.data.cloudnative.dao.FirehoseConstants;
 import org.n52.sta.data.cloudnative.dao.LocationDao;
 import org.n52.sta.data.cloudnative.dao.util.StaFirehoseClient;
@@ -58,8 +62,7 @@ import java.util.stream.Collectors;
 @Component
 public class LocationDaoImpl extends AbstractStaEntityDao<LocationDTO> implements LocationDao {
     private final String tableName = getEntityTable().getName();
-    private final String parameterTableName = "LOCATION_PARAMETER";
-    private Set<Table<?>> joins;
+    private final String parameterTableName = StaEntity.FEATURE_PROPERTIES.getName();
 
     public LocationDaoImpl(DSLContext ctx, StaFirehoseClient firehoseClient) {
         super(ctx, firehoseClient);
@@ -69,13 +72,12 @@ public class LocationDaoImpl extends AbstractStaEntityDao<LocationDTO> implement
     public List<LocationDTO> findAllByThingId(Long id, Class<LocationDTO> entityClass)
             throws STAInvalidQueryException {
         Condition predicate = DSL.exists(
-                ctx.select()
-                        .from(StaEntity.LOCATION)
-                        .join(StaEntity.THING_LOCATION)
-                        .onKey()
+                ctx.selectOne()
+                        .from(StaEntity.THING_LOCATION)
                         .join(StaEntity.THING)
                         .onKey()
                         .where(StaEntity.THING.PLATFORM_ID.eq(id))
+                        .and(StaEntity.THING_LOCATION.FK_LOCATION_ID.eq(StaEntity.LOCATION.LOCATION_ID))
         );
         return findAll(predicate, null, entityClass);
     }
@@ -86,15 +88,23 @@ public class LocationDaoImpl extends AbstractStaEntityDao<LocationDTO> implement
         for (Record record : result) {
             Long Id = record.get(StaEntity.LOCATION.LOCATION_ID);
 
-            LocationDTO location = locationMap.computeIfAbsent(Id, k -> record.map(new DTOMapper.LocationRecordMapper()));
+            LocationDTO location = locationMap
+                    .computeIfAbsent(Id, k -> record.map(new DTOMapper.LocationRecordMapper()));
 
             if (joins.contains(StaEntity.HISTORICAL_LOCATION)) {
-                location.setHistoricalLocations(Optional.ofNullable(location.getHistoricalLocations()).orElse(new HashSet<>()));
-                location.getHistoricalLocations().add(record.map(new DTOMapper.HistoricalLocationRecordMapper()));
+                location.setHistoricalLocations(Optional.ofNullable(location.getHistoricalLocations())
+                        .orElse(new HashSet<>()));
+                HistoricalLocationDTO historicalLocation = record.map(new DTOMapper.HistoricalLocationRecordMapper());
+                if (historicalLocation.getId() != null) {
+                    location.getHistoricalLocations().add(historicalLocation);
+                }
             }
             if (joins.contains(StaEntity.THING)) {
                 location.setThings(Optional.ofNullable(location.getThings()).orElse(new HashSet<>()));
-                location.getThings().add(record.map(new DTOMapper.ThingRecordMapper()));
+                ThingDTO thing = record.map(new DTOMapper.ThingRecordMapper());
+                if(thing.getId() != null){
+                    location.getThings().add(thing);
+                }
             }
             if (joins.contains(StaEntity.LOCATION_PROPERTIES)) {
                 ObjectNode properties = record.map(new DTOMapper.LocationRecordMapper.
@@ -117,62 +127,107 @@ public class LocationDaoImpl extends AbstractStaEntityDao<LocationDTO> implement
     }
 
     @Override
-    public Optional<LocationDTO> findByName(String name, Class<LocationDTO> entityClass) throws STAInvalidQueryException {
+    public Optional<LocationDTO> findByName(String name, Class<LocationDTO> entityClass)
+            throws STAInvalidQueryException {
         Condition predicate = StaEntity.LOCATION.NAME.eq(name);
         Result<Record> result = selectQueryBuilder(predicate, entityClass, null, null).fetch();
         return Optional.of(mapResultToDTO(result).get(0));
     }
 
     @Override
-    public Set<Table<?>> createJoinList(QueryOptions queryOptions) throws STAInvalidQueryException {
-        joins = new HashSet<>();
+    public Table<?> createJoinList(QueryOptions queryOptions, Table<?> table, List<Field<?>> select)
+            throws STAInvalidQueryException {
+        joins = new LinkedHashSet<>();
+
         joins.add(StaEntity.LOCATION_PROPERTIES);
+        table = table.leftJoin(StaEntity.LOCATION_PROPERTIES)
+                .on(StaEntity.LOCATION.LOCATION_ID
+                        .eq(StaEntity.LOCATION_PROPERTIES.FK_LOCATION_ID));
+        if (queryOptions == null ||
+                queryOptions.getSelectFilter() == null) {
+            select.addAll(getStaEntityFields(StaEntity.LOCATION_PROPERTIES));
+        }
+
         if (queryOptions != null && queryOptions.getExpandFilter() != null) {
             for (ExpandItem expandItem : queryOptions.getExpandFilter().getItems()) {
                 // We cannot handle nested $filter or $expand
-                if (expandItem.getQueryOptions().hasFilterFilter() || expandItem.getQueryOptions().hasExpandFilter()) {
+                if (expandItem.getQueryOptions().hasFilterFilter() ||
+                        expandItem.getQueryOptions().hasExpandFilter()) {
                     continue;
                 }
                 String expandProperty = expandItem.getPath();
                 switch (expandProperty) {
                     case STAEntityDefinition.HISTORICAL_LOCATIONS:
+
                         joins.add(StaEntity.LOCATION_HISTORICAL_LOCATION);
+                        table = table.leftJoin(StaEntity.LOCATION_HISTORICAL_LOCATION)
+                                        .on(StaEntity.LOCATION_HISTORICAL_LOCATION.FK_LOCATION_ID
+                                                .eq(StaEntity.LOCATION.LOCATION_ID));
+
                         joins.add(StaEntity.HISTORICAL_LOCATION);
+                        table = table.leftJoin(StaEntity.HISTORICAL_LOCATION)
+                                .on(StaEntity.HISTORICAL_LOCATION.HISTORICAL_LOCATION_ID
+                                        .eq(StaEntity.LOCATION_HISTORICAL_LOCATION.FK_HISTORICAL_LOCATION_ID));
+
+                        if (expandItem.getQueryOptions() == null ||
+                                expandItem.getQueryOptions().getSelectFilter() == null) {
+                            select.addAll(getStaEntityFields(StaEntity.HISTORICAL_LOCATION));
+                        } else {
+                            select.addAll(expandItem
+                                    .getQueryOptions()
+                                    .getSelectFilter()
+                                    .getItems()
+                                    .stream()
+                                    .map(e-> new HistoricalLocationQueryConditions().checkPropertyName(e))
+                                    .collect(Collectors.toList()));
+                        }
                         break;
                     case STAEntityDefinition.THINGS:
+
                         joins.add(StaEntity.THING_LOCATION);
+                        table = table.leftJoin(StaEntity.THING_LOCATION)
+                                        .on(StaEntity.THING_LOCATION.FK_LOCATION_ID
+                                                .eq(StaEntity.LOCATION.LOCATION_ID));
+
                         joins.add(StaEntity.THING);
+                        table = table.leftJoin(StaEntity.THING)
+                                .on(StaEntity.THING.PLATFORM_ID
+                                        .eq(StaEntity.THING_LOCATION.FK_PLATFORM_ID));
+
+                        if (expandItem.getQueryOptions() == null ||
+                                expandItem.getQueryOptions().getSelectFilter() == null) {
+                            select.addAll(getStaEntityFields(StaEntity.THING));
+                        } else {
+                            select.addAll(expandItem
+                                    .getQueryOptions()
+                                    .getSelectFilter()
+                                    .getItems()
+                                    .stream()
+                                    .map(e -> new ThingQueryConditions().checkPropertyName(e))
+                                    .collect(Collectors.toList()));
+                        }
                         break;
                     default:
-                        throw new STAInvalidQueryException(String.format(INVALID_EXPAND_OPTION_SUPPLIED, expandProperty,
-                                StaConstants.LOCATION));
+                        throw new STAInvalidQueryException(String.format(
+                                INVALID_EXPAND_OPTION_SUPPLIED,
+                                expandProperty,
+                                StaConstants.LOCATION)
+                        );
                 }
+
             }
         }
-        return joins;
+        return table;
     }
 
     @Override
-    public Field checkPropertyName(String property) {
+    public Field<?> checkPropertyName(String property) {
         return new LocationQueryConditions().checkPropertyName(property);
     }
 
     @Override
     public Table<?> getEntityTable() {
         return StaEntity.LOCATION;
-    }
-
-    @Override
-    public List<Field<?>> getEntityTableFields() {
-        return Arrays.stream(StaEntity.LOCATION.fields()).map(field -> {
-            if (field.getName().equals("GEOM")) {
-                return DSL.function("ST_AsText",
-                                String.class,
-                                DSL.function("ST_GeomFromBinary", byte[].class, field))
-                        .as("locationGeom");
-            }
-            return field;
-        }).collect(Collectors.toList());
     }
 
     @Override

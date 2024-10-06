@@ -87,6 +87,13 @@ spring:
   # - [not implemented yet] STA with MultiDatastream Extension: multiDatastreamExtension
   profiles:
     active: cloudnative
+  athena:
+    user: your-AWS_ACCESS_KEY_ID
+    password: your-AWS_SECRET_ACCESS_KEY
+    region: "us-east-1"
+    s3-output-location: "s3://52n-sta-firehose-iceberg/results"
+    database: "52n_sta_iceberg"
+    workgroup: "primary"
   datasource:
     platform: postgres
     username: postgres

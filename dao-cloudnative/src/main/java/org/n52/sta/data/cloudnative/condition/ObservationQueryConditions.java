@@ -33,14 +33,10 @@ import org.n52.series.db.beans.parameter.ParameterFactory;
 import org.n52.shetland.ogc.filter.FilterConstants;
 import org.n52.shetland.ogc.sta.StaConstants;
 import org.n52.shetland.ogc.sta.exception.STAInvalidFilterExpressionException;
-import java.util.Date;
 import java.util.List;
 
-import org.jooq.impl.DSL;
 import org.n52.shetland.ogc.sta.model.STAEntityDefinition;
-import org.n52.sta.data.cloudnative.schema.tables.Observation;
-import org.n52.sta.data.cloudnative.schema.tables.ObservationParameter;
-import org.springframework.stereotype.Component;
+
 
 /**
  * @author <a href="mailto:humaid.kidwai@ucalgary.ca">Humaid Kidwai</a>
@@ -60,13 +56,14 @@ public class ObservationQueryConditions extends EntityQueryConditions {
     }
 
     public Condition withDatastreamStaIdentifier(final String datastreamStaIdentifier) {
-
+        // fetch Observations belonging to a dataset or subdataset
         SelectConditionStep<Record1<Long>> subquery = ctx
                 .select(DATASTREAM.DATASET_ID)
                 .from(DATASTREAM)
                 .join(OBSERVATION)
                 .onKey()
-                .where(DATASTREAM.STA_IDENTIFIER.eq(datastreamStaIdentifier));
+                .where(DATASTREAM.STA_IDENTIFIER.eq(datastreamStaIdentifier))
+                .or(DATASTREAM.FK_AGGREGATION_ID.eq(Long.parseLong(datastreamStaIdentifier)));
 
         return OBSERVATION.FK_DATASET_ID.in(subquery);
     }
@@ -82,12 +79,12 @@ public class ObservationQueryConditions extends EntityQueryConditions {
     */
     @Override
     public Condition withStaIdentifier(String staIdentifier) {
-        return DATASTREAM.STA_IDENTIFIER.eq(staIdentifier);
+        return OBSERVATION.STA_IDENTIFIER.eq(staIdentifier);
     }
 
     @Override
     public Condition withStaIdentifier(List<String> identifiers) {
-        return DATASTREAM.STA_IDENTIFIER.in(identifiers);
+        return OBSERVATION.STA_IDENTIFIER.in(identifiers);
     }
 
     @Override
@@ -265,13 +262,12 @@ public class ObservationQueryConditions extends EntityQueryConditions {
     }
 
     @Override
-    public Field checkPropertyName(String property) {
+    public Field<?> checkPropertyName(String property) {
         switch (property) {
             case StaConstants.PROP_ID:
                 return OBSERVATION.STA_IDENTIFIER;
 
             case StaConstants.PROP_PHENOMENON_TIME:
-                // TODO: proper ISO8601 comparison
                 return OBSERVATION.SAMPLING_TIME_END;
 
             /* TODO: This is handled separately as result is split up over multiple columns */

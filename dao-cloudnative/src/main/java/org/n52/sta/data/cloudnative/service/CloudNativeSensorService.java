@@ -32,7 +32,6 @@ package org.n52.sta.data.cloudnative.service;
 import org.jooq.Condition;
 import org.jooq.Field;
 import org.n52.janmayen.http.HTTPStatus;
-import org.n52.series.db.beans.AbstractDatasetEntity;
 import org.n52.shetland.filter.ExpandFilter;
 import org.n52.shetland.filter.ExpandItem;
 import org.n52.shetland.ogc.sta.StaConstants;
@@ -42,12 +41,12 @@ import org.n52.shetland.ogc.sta.model.STAEntityDefinition;
 import org.n52.shetland.ogc.sta.model.SensorEntityDefinition;
 import org.n52.sta.api.dto.DatastreamDTO;
 import org.n52.sta.api.dto.SensorDTO;
+import org.n52.sta.data.MutexFactory;
 import org.n52.sta.data.cloudnative.condition.DatastreamQueryConditions;
 import org.n52.sta.data.cloudnative.condition.SensorQueryConditions;
 import org.n52.sta.data.cloudnative.condition.StaEntity;
 import org.n52.sta.data.cloudnative.dao.SensorDao;
 import org.n52.sta.data.cloudnative.dao.impl.DatastreamDaoImpl;
-import org.n52.sta.data.cloudnative.dao.impl.FormatDaoImpl;
 import org.n52.sta.data.cloudnative.dao.impl.SensorDaoImpl;
 import org.n52.sta.data.cloudnative.schema.tables.pojos.Format;
 import org.n52.sta.data.cloudnative.schema.tables.pojos.Procedure;
@@ -57,8 +56,8 @@ import org.springframework.context.annotation.DependsOn;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicLong;
@@ -71,28 +70,34 @@ import static org.n52.sta.data.cloudnative.dao.StaEntityDao.INVALID_EXPAND_OPTIO
  */
 @Component
 @DependsOn({"springApplicationContext"})
-@Transactional
 public class CloudNativeSensorService
         extends CloudNativeAbstractSensorThingsEntityServiceImpl<SensorDao, SensorDTO> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CloudNativeSensorService.class);
 
-    private static final SensorQueryConditions sQC = new SensorQueryConditions();
-    private static final DatastreamQueryConditions dQC = new DatastreamQueryConditions();
-
+    private static SensorQueryConditions sQC = new SensorQueryConditions();
+    private static DatastreamQueryConditions dQC = new DatastreamQueryConditions();
     private final DatastreamDaoImpl datastreamDao;
+
     private final SensorDaoImpl sensorDao;
     private final CloudNativeFormatService formatService;
     private final AtomicLong TS = new AtomicLong();
-
     public CloudNativeSensorService(SensorDaoImpl sensorDao,
-                         DatastreamDaoImpl datastreamDao,
-                         CloudNativeFormatService formatService,
-                         Class<SensorDTO> entityClass) {
-        super(sensorDao, entityClass);
+                                    DatastreamDaoImpl datastreamDao,
+                                    CloudNativeFormatService formatService,
+                                    MutexFactory lock) {
+        super(sensorDao, SensorDTO.class, lock);
         this.datastreamDao = datastreamDao;
         this.sensorDao = sensorDao;
         this.formatService = formatService;
+    }
+
+    public static void setDatastreamQueryConditions(DatastreamQueryConditions dQC) {
+        CloudNativeSensorService.dQC = dQC;
+    }
+
+    public static void setSensorQueryConditions(SensorQueryConditions sQC) {
+        CloudNativeSensorService.sQC = sQC;
     }
 
     @Override
@@ -120,8 +125,7 @@ public class CloudNativeSensorService
     }
 
     @Override
-    protected Condition byRelatedEntityFilter(String relatedId, String relatedType, String ownId)
-            throws STAInvalidQueryException {
+    protected Condition byRelatedEntityFilter(String relatedId, String relatedType, String ownId) {
         Condition filter;
         switch (relatedType) {
             case STAEntityDefinition.DATASTREAMS: {
@@ -199,14 +203,16 @@ public class CloudNativeSensorService
 
     private Procedure POJOWrapper(SensorDTO entity) throws STACRUDException {
         Procedure sensorPOJO = new Procedure();
-        sensorPOJO.setDescription(entity.getDescription());
         sensorPOJO.setIdentifier(entity.getId());
-        sensorPOJO.setName(entity.getName());
         sensorPOJO.setStaIdentifier(entity.getId());
         sensorPOJO.setProcedureId(Long.valueOf(entity.getId()));
+        sensorPOJO.setDescription(entity.getDescription());
+        sensorPOJO.setName(entity.getName());
         sensorPOJO.setDescriptionFile(entity.getMetadata());
-        Format formatPOJO = formatService.createOrFetchFormat(entity.getEncodingType());
-        sensorPOJO.setFkFormatId(formatPOJO.getFormatId());
+        if(entity.getEncodingType() != null) {
+            Format formatPOJO = formatService.createOrFetchFormat(entity.getEncodingType());
+            sensorPOJO.setFkFormatId(formatPOJO.getFormatId());
+        }
         return sensorPOJO;
     }
 
@@ -217,7 +223,7 @@ public class CloudNativeSensorService
         if (HttpMethod.PATCH.equals(method)) {
             synchronized (getLock(id)) {
                 Optional<SensorDTO> existing = sensorDao.findByStaIdentifier(id, null, entityClass);
-                if (existing.isPresent() && entity != null) {
+                if (existing.isPresent()) {
                     SensorDTO merged = merge(existing.get(), entity);
                     if (entity.getDatastreams() != null) {
                         for (DatastreamDTO datastreamEntity : entity.getDatastreams()) {
@@ -258,9 +264,14 @@ public class CloudNativeSensorService
         synchronized (getLock(staIdentifier)) {
             if (sensorDao.existsByStaIdentifier(staIdentifier, entityClass)) {
                 // delete datastreams
-                for (DatastreamDTO ds : datastreamDao.findAll(dQC.withSensorStaIdentifier(staIdentifier),
+                Condition predicate = dQC.withSensorStaIdentifier(staIdentifier)
+                        .and(StaEntity.DATASTREAM.STA_IDENTIFIER.isNotNull());
+                List<DatastreamDTO> relatedDatastreams = datastreamDao.findAll(
+                        predicate,
                         null,
-                        DatastreamDTO.class)) {
+                        DatastreamDTO.class
+                );
+                for (DatastreamDTO ds : relatedDatastreams) {
                     getDatastreamService().delete(ds.getId());
                 }
 
@@ -281,8 +292,7 @@ public class CloudNativeSensorService
     }
 
     @Override
-    protected SensorDTO merge(SensorDTO existing, SensorDTO toMerge)
-            throws STACRUDException {
+    protected SensorDTO merge(SensorDTO existing, SensorDTO toMerge) {
 
         mergeNameDescription(existing, toMerge);
 
@@ -297,12 +307,12 @@ public class CloudNativeSensorService
     }
 
     @Override
-    Field<String> getStaEntityId() {
+    protected Field<String> getStaEntityId() {
         return StaEntity.SENSOR.STA_IDENTIFIER;
     }
 
     @Override
-    AtomicLong getStaEntityTS() {
+    protected AtomicLong getStaEntityTS() {
         return TS;
     }
 }

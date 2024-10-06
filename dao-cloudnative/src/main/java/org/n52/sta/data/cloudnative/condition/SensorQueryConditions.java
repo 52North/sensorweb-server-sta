@@ -35,10 +35,7 @@ import org.n52.shetland.ogc.filter.FilterConstants;
 import org.n52.shetland.ogc.sta.StaConstants;
 import org.n52.shetland.ogc.sta.exception.STAInvalidFilterExpressionException;
 import org.n52.shetland.ogc.sta.model.STAEntityDefinition;
-import org.n52.sta.data.cloudnative.schema.tables.Procedure;
-import org.n52.sta.data.cloudnative.schema.tables.ProcedureParameter;
-import org.springframework.stereotype.Component;
-
+import org.n52.sta.data.cloudnative.schema.tables.Format;
 import java.util.List;
 
 /**
@@ -155,7 +152,7 @@ public class SensorQueryConditions extends EntityQueryConditions {
     }
 
     @Override
-    public Field checkPropertyName(String property) {
+    public Field<?> checkPropertyName(String property) {
         switch (property) {
             case StaConstants.PROP_ID:
                 return SENSOR.STA_IDENTIFIER;
@@ -167,7 +164,8 @@ public class SensorQueryConditions extends EntityQueryConditions {
                 // TODO:
                 return null;
             case StaConstants.PROP_ENCODINGTYPE:
-                return FORMAT.DEFINITION;
+                Format SENSOR_FORMAT = StaEntity.FORMAT.as("SENSOR_FORMAT");
+                return SENSOR_FORMAT.DEFINITION.as("SENSOR_FORMAT_DEFINITION");
             case StaConstants.PROP_METADATA:
                 return SENSOR.DESCRIPTION_FILE;
             default:

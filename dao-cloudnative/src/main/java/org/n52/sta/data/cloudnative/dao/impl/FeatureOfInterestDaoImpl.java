@@ -32,7 +32,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.jooq.*;
 import org.jooq.Record;
-import org.jooq.impl.DSL;
 import org.n52.shetland.oasis.odata.query.option.QueryOptions;
 import org.n52.shetland.ogc.sta.exception.STACRUDException;
 import org.n52.shetland.ogc.sta.exception.STAInvalidQueryException;
@@ -43,6 +42,7 @@ import org.n52.sta.data.cloudnative.condition.StaEntity;
 import org.n52.sta.data.cloudnative.dao.FeatureOfInterestDao;
 import org.n52.sta.data.cloudnative.dao.FirehoseConstants;
 import org.n52.sta.data.cloudnative.dao.util.StaFirehoseClient;
+import org.n52.sta.data.cloudnative.schema.tables.Format;
 import org.n52.sta.data.cloudnative.schema.tables.pojos.Feature;
 import org.springframework.stereotype.Component;
 
@@ -53,8 +53,7 @@ import java.util.stream.Collectors;
 public class FeatureOfInterestDaoImpl
         extends AbstractStaEntityDao<FeatureOfInterestDTO> implements FeatureOfInterestDao {
     private final String tableName = getEntityTable().getName();
-    private final String parameterTableName = "FEATURE_PARAMETER";
-    private Set<Table<?>> joins;
+    private final String parameterTableName = StaEntity.FEATURE_PROPERTIES.getName();
 
     public FeatureOfInterestDaoImpl(DSLContext ctx, StaFirehoseClient firehoseClient) {
         super(ctx, firehoseClient);
@@ -97,29 +96,36 @@ public class FeatureOfInterestDaoImpl
     }
 
     @Override
-    public Set<Table<?>> createJoinList(QueryOptions queryOptions) throws STAInvalidQueryException {
-        joins = new HashSet<>();
-        joins.add(StaEntity.FORMAT);
+    public Table<?> createJoinList(QueryOptions queryOptions, Table<?> table, List<Field<?>> select)
+            throws STAInvalidQueryException {
+        joins = new LinkedHashSet<>();
+
+        Format FEATURE_FORMAT = StaEntity.FORMAT.as("FEATURE_FORMAT");
+        joins.add(FEATURE_FORMAT);
+        table = table.leftJoin(FEATURE_FORMAT)
+                        .on(FEATURE_FORMAT.FORMAT_ID
+                                .eq(StaEntity.FEATURE_OF_INTEREST.FK_FORMAT_ID));
+
         joins.add(StaEntity.FEATURE_PROPERTIES);
-        return joins;
+        table = table.leftJoin(StaEntity.FEATURE_PROPERTIES)
+                .on(StaEntity.FEATURE_PROPERTIES.FK_FEATURE_ID
+                        .eq(StaEntity.FEATURE_OF_INTEREST.FEATURE_ID));
+
+        if (queryOptions == null ||
+                queryOptions.getSelectFilter() == null) {
+            select.addAll(getStaEntityFields(FEATURE_FORMAT)
+                    .stream()
+                    .map(e -> e.as("FEATURE_FORMAT_" + e.getName()))
+                    .collect(Collectors.toList()));
+            select.addAll(getStaEntityFields(StaEntity.FEATURE_PROPERTIES));
+        }
+
+        return table;
     }
 
     @Override
     public Field<?> checkPropertyName(String property) {
         return new FeatureOfInterestQueryConditions().checkPropertyName(property);
-    }
-
-    @Override
-    public List<Field<?>> getEntityTableFields() {
-        return Arrays.stream(StaEntity.FEATURE_OF_INTEREST.fields()).map(field -> {
-            if (field.getName().equals("GEOM")) {
-                return DSL.function("ST_AsText",
-                                String.class,
-                                DSL.function("ST_GeomFromBinary", byte[].class, field))
-                        .as("foiGeom");
-            }
-            return field;
-        }).collect(Collectors.toList());
     }
 
     @Override

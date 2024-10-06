@@ -45,7 +45,9 @@ import org.n52.shetland.ogc.sta.model.STAEntityDefinition;
 import org.n52.sta.api.dto.HistoricalLocationDTO;
 import org.n52.sta.api.dto.LocationDTO;
 import org.n52.sta.api.dto.ThingDTO;
+import org.n52.sta.data.MutexFactory;
 import org.n52.sta.data.cloudnative.condition.LocationQueryConditions;
+import org.n52.sta.data.cloudnative.condition.StaEntity;
 import org.n52.sta.data.cloudnative.dao.LocationDao;
 import org.n52.sta.data.cloudnative.dao.impl.LocationDaoImpl;
 import org.n52.sta.data.cloudnative.dao.impl.LocationHistoricalLocationDaoImpl;
@@ -56,11 +58,11 @@ import org.n52.sta.data.cloudnative.schema.tables.pojos.LocationHistoricalLocati
 import org.n52.sta.data.cloudnative.schema.tables.pojos.PlatformLocation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.DependsOn;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
 import java.util.concurrent.atomic.AtomicLong;
@@ -74,20 +76,19 @@ import static org.n52.sta.data.cloudnative.dao.StaEntityDao.INVALID_EXPAND_OPTIO
  */
 @Component
 @DependsOn({"springApplicationContext"})
-@Transactional
 public class CloudNativeLocationService
         extends CloudNativeAbstractSensorThingsEntityServiceImpl<
         LocationDao,
         LocationDTO> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CloudNativeLocationService.class);
-
-    private static final LocationQueryConditions lQC = new LocationQueryConditions();
-
     private static final String UNABLE_TO_UPDATE_ENTITY_NOT_FOUND = "Unable to update. Entity not found";
 
-    private final CloudNativeFormatService formatService;
+    private static LocationQueryConditions lQC = new LocationQueryConditions();
+
     private final boolean updateFOIFeatureEnabled;
+    private final AtomicLong TS = new AtomicLong();
+    private final CloudNativeFormatService formatService;
 
     private final LocationDaoImpl locationDao;
     private final LocationHistoricalLocationDaoImpl locationHistoricalLocationDao;
@@ -95,17 +96,22 @@ public class CloudNativeLocationService
 
 
     public CloudNativeLocationService(LocationDaoImpl locationDao,
-                           CloudNativeFormatService formatDao,
-                           LocationHistoricalLocationDaoImpl locationHistoricalLocationDao,
-                           ThingLocationDaoImpl thingLocationDao,
-                           boolean updateFOIFeatureEnabled,
-                           Class<LocationDTO> entityClass) {
-        super(locationDao, entityClass);
+                                      CloudNativeFormatService formatDao,
+                                      LocationHistoricalLocationDaoImpl locationHistoricalLocationDao,
+                                      ThingLocationDaoImpl thingLocationDao,
+                                      @Value("false") boolean updateFOIFeatureEnabled,
+                                      MutexFactory lock) {
+        super(locationDao, LocationDTO.class, lock);
         this.formatService = formatDao;
         this.updateFOIFeatureEnabled = updateFOIFeatureEnabled;
         this.locationDao = locationDao;
         this.locationHistoricalLocationDao = locationHistoricalLocationDao;
         this.thingLocationDao = thingLocationDao;
+    }
+
+    // Static setter for testing purposes
+    public static void setLocationQueryConditions(LocationQueryConditions lQC) {
+        CloudNativeLocationService.lQC = lQC;
     }
 
     @Override
@@ -141,8 +147,7 @@ public class CloudNativeLocationService
     }
 
     @Override
-    protected Condition byRelatedEntityFilter(String relatedId, String relatedType, String ownId)
-            throws STAInvalidQueryException {
+    protected Condition byRelatedEntityFilter(String relatedId, String relatedType, String ownId) {
         Condition filter;
         switch (relatedType) {
             case STAEntityDefinition.HISTORICAL_LOCATIONS: {
@@ -166,7 +171,7 @@ public class CloudNativeLocationService
     @Override
     protected LocationDTO createOrfetch(LocationDTO entity)
             throws STACRUDException, STAInvalidQueryException {
-        if (entity.getId() != null && entity.getName() != null) {
+        if (entity.getId() != null && entity.getName() == null) {
             Optional<LocationDTO> optionalEntity =
                     locationDao.findByStaIdentifier(entity.getId(), null, entityClass);
             if (optionalEntity.isPresent()) {
@@ -204,11 +209,13 @@ public class CloudNativeLocationService
     private Location POJOWrapper(LocationDTO location) throws STACRUDException {
         Location locationPOJO = new Location();
         locationPOJO.setStaIdentifier(location.getId());
-        locationPOJO.setName(location.getName());
         locationPOJO.setLocationId(Long.valueOf(location.getId()));
         locationPOJO.setIdentifier(location.getId());
+        locationPOJO.setName(location.getName());
         locationPOJO.setDescription(location.getDescription());
-        locationPOJO.setGeom(new WKBWriter().write(location.getGeometry()));
+        if (location.getGeometry() != null) {
+            locationPOJO.setGeom(new WKBWriter().write(location.getGeometry()));
+        }
         if (location.getEncodingType() != null) {
             Format formatPOJO = formatService.createOrFetchFormat(location.getEncodingType());
             locationPOJO.setFkFormatId(formatPOJO.getFormatId());
@@ -221,19 +228,20 @@ public class CloudNativeLocationService
         if (location.getThings() != null) {
             Set<PlatformLocation> thingLocationSet = new HashSet<>();
             for (ThingDTO newThing : location.getThings()) {
-                // The only way for a Thing to be processed is if we are currently persisting said Thing
-                // IF this is the case the Thing takes care of Locations itself and we must not mess with it here
-                //if (!newThing.isProcessed()) {
 
                 // because Thing table has no links to Location table,
                 // we do not have to update Thing entity here and
                 // we do not set the locations link in the DTO
-                ThingDTO savedThing = getThingService().createOrfetch(newThing);;
 
-                PlatformLocation thingLocation = new PlatformLocation();
-                thingLocation.setFkLocationId(Long.valueOf(location.getId()));
-                thingLocation.setFkPlatformId(Long.valueOf(savedThing.getId()));
-                thingLocationSet.add(thingLocation);
+                // update PlatformLocation table
+                String originalId = newThing.getId();
+                ThingDTO savedThing = getThingService().createOrfetch(newThing);
+                if(!originalId.equals(savedThing.getId())) {
+                    PlatformLocation thingLocation = new PlatformLocation();
+                    thingLocation.setFkLocationId(Long.valueOf(location.getId()));
+                    thingLocation.setFkPlatformId(Long.valueOf(savedThing.getId()));
+                    thingLocationSet.add(thingLocation);
+                }
 
                 // non-standard feature 'updateFOI'
                 if (updateFOIFeatureEnabled && savedThing.getProperties() != null) {
@@ -257,8 +265,9 @@ public class CloudNativeLocationService
                         }
                     }
                 }
-            //}
+
             }
+
             thingLocationDao.saveAll(thingLocationSet);
         }
 
@@ -303,17 +312,21 @@ public class CloudNativeLocationService
                 LocationDTO location = locationDao
                         .findByStaIdentifier(id, options, entityClass)
                         .get();
+
                 // delete all historical locations
-                for (HistoricalLocationDTO historicalLocation : location.getHistoricalLocations()) {
-                    getHistoricalLocationService().delete(historicalLocation.getId());
+                if (!location.getHistoricalLocations().isEmpty()) {
+                    for (HistoricalLocationDTO historicalLocation : location.getHistoricalLocations()) {
+                        getHistoricalLocationService().delete(historicalLocation.getId());
+                    }
+                    // update LocationHistoricalLocation table
+                    locationHistoricalLocationDao.deleteByLocationId(Long.parseLong(id));
                 }
-                // update LocationHistoricalLocation table
-                locationHistoricalLocationDao.deleteByLocationId(Long.valueOf(id));
+                // delete parameters
                 if (location.getProperties() != null) {
                     locationDao.deleteLocationParameters(Long.valueOf(location.getId()));
                 }
                 // update PlatformLocation table
-                thingLocationDao.deleteByLocationId(Long.valueOf(id));
+                thingLocationDao.deleteByLocationId(Long.parseLong(id));
                 // finally delete the Location entity
                 locationDao.deleteByStaIdentifier(id);
             } else {
@@ -347,16 +360,17 @@ public class CloudNativeLocationService
 
     @Override
     protected String checkPropertyName(String property) {
-        return locationDao.checkPropertyName(property).getName();
+        Field<?> field = locationDao.checkPropertyName(property);
+        return field == StaEntity.LOCATION.GEOM ? "locationGeom" : field.getName();
     }
 
     @Override
-    Field<String> getStaEntityId() {
-        return null;
+    protected Field<String> getStaEntityId() {
+        return StaEntity.LOCATION.STA_IDENTIFIER;
     }
 
     @Override
-    AtomicLong getStaEntityTS() {
-        return null;
+    protected AtomicLong getStaEntityTS() {
+        return TS;
     }
 }

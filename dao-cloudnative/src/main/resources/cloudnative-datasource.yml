@@ -1,8 +1,0 @@
-spring:
-  jooq:
-    sql-dialect: DuckDB
-  datasource:
-    url: "jdbc:duckdb:"
-    driver-class-name: org.duckdb.DuckDBDriver
-    hikari:
-      maximum-pool-size: 10

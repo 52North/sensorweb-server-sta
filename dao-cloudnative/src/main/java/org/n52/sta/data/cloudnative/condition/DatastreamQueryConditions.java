@@ -37,7 +37,6 @@ import org.n52.shetland.ogc.sta.StaConstants;
 import org.n52.shetland.ogc.sta.exception.STAInvalidFilterExpressionException;
 import org.n52.shetland.ogc.sta.model.STAEntityDefinition;
 import org.n52.sta.data.cloudnative.schema.tables.*;
-import org.springframework.stereotype.Component;
 
 import java.util.List;
 
@@ -164,71 +163,63 @@ public class DatastreamQueryConditions extends EntityQueryConditions {
     public Condition withFeatureStaIdentifier(final String featureIdentifier) {
         return DSL.exists(
                 ctx.selectOne()
-                        .from(DATASTREAM)
-                        .join(FEATURE_OF_INTEREST)
-                        .onKey()
-                        .where(FEATURE_OF_INTEREST.STA_IDENTIFIER
-                                .eq(featureIdentifier))
+                        .from(FEATURE_OF_INTEREST)
+                        .where(FEATURE_OF_INTEREST.STA_IDENTIFIER.eq(featureIdentifier))
+                        .and(DATASTREAM.FK_FEATURE_ID.eq(FEATURE_OF_INTEREST.FEATURE_ID))
         );
     }
 
     public Condition withObservedPropertyStaIdentifier(final String observedPropertyIdentifier) {
-        return DSL.exists(
+         return DSL.exists(
                 ctx.selectOne()
-                        .from(DATASTREAM)
-                        .join(OBSERVED_PROPERTY)
-                        .onKey()
+                        .from(OBSERVED_PROPERTY)
                         .where(OBSERVED_PROPERTY.STA_IDENTIFIER.eq(observedPropertyIdentifier))
+                        .and(DATASTREAM.FK_PHENOMENON_ID.eq(OBSERVED_PROPERTY.PHENOMENON_ID))
         );
     }
 
     public Condition withObservedPropertyName(final String name) {
         return DSL.exists(
                 ctx.selectOne()
-                        .from(DATASTREAM)
-                        .join(OBSERVED_PROPERTY)
-                        .onKey()
+                        .from(OBSERVED_PROPERTY)
                         .where(OBSERVED_PROPERTY.NAME.eq(name))
+                        .and(DATASTREAM.FK_PHENOMENON_ID.eq(OBSERVED_PROPERTY.PHENOMENON_ID))
         );
     }
 
     public Condition withThingStaIdentifier(final String thingIdentifier) {
         return DSL.exists(
                 ctx.selectOne()
-                        .from(DATASTREAM)
-                        .join(THING)
-                        .onKey()
+                        .from(THING)
                         .where(THING.STA_IDENTIFIER.eq(thingIdentifier))
+                        .and(DATASTREAM.FK_PLATFORM_ID.eq(THING.PLATFORM_ID))
         );
     }
 
     public Condition withThingName(final String name) {
         return DSL.exists(
                 ctx.selectOne()
-                        .from(DATASTREAM)
-                        .join(THING)
-                        .onKey()
+                        .from(THING)
                         .where(THING.NAME.eq(name))
+                        .and(DATASTREAM.FK_PLATFORM_ID.eq(THING.PLATFORM_ID))
         );
     }
 
     public Condition withSensorStaIdentifier(final String sensorIdentifier) {
         return DSL.exists(
                 ctx.selectOne()
-                        .from(DATASTREAM)
-                        .join(SENSOR)
-                        .onKey()
+                        .from(SENSOR)
                         .where(SENSOR.STA_IDENTIFIER.eq(sensorIdentifier))
+                        .and(DATASTREAM.FK_PROCEDURE_ID.eq(SENSOR.PROCEDURE_ID))
         );
     }
 
     public Condition withSensorName(final String name) {
         return DSL.exists(
                 ctx.selectOne()
-                        .from(DATASTREAM)
-                        .join(SENSOR)
-                        .onKey()
+                        .from(SENSOR)
                         .where(SENSOR.NAME.eq(name))
+                        .and(DATASTREAM.FK_PROCEDURE_ID.eq(SENSOR.PROCEDURE_ID))
         );
     }
 
@@ -249,7 +240,7 @@ public class DatastreamQueryConditions extends EntityQueryConditions {
         return DATASTREAM.DATASET_ID.in(sq).or(DATASTREAM.DATASET_ID.in(subquery));
     }
 
-        public Field checkPropertyName(String property) {
+        public Field<?> checkPropertyName(String property) {
         switch (property) {
             case StaConstants.PROP_ID:
                 return DATASTREAM.STA_IDENTIFIER;
@@ -260,10 +251,10 @@ public class DatastreamQueryConditions extends EntityQueryConditions {
             case StaConstants.PROP_OBSERVED_AREA:
                 return DATASTREAM.OBSERVED_AREA;
             case StaConstants.PROP_UOM:
-                // TODO
                 return UNIT.NAME;
             case StaConstants.PROP_OBSERVATION_TYPE:
-                return FORMAT.DEFINITION;
+                Format DATASTREAM_FORMAT = StaEntity.FORMAT.as("DATASTREAM_FORMAT");
+                return DATASTREAM_FORMAT.DEFINITION.as("DATASTREAM_FORMAT_DEFINITION");
             case StaConstants.PROP_PHENOMENON_TIME:
                 return DATASTREAM.FIRST_TIME;
             case StaConstants.PROP_RESULT_TIME:

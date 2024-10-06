@@ -30,12 +30,11 @@
 package org.n52.sta.data.cloudnative.dao.impl;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.PropertyNamingStrategy;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import org.jetbrains.annotations.NotNull;
 import org.jooq.DSLContext;
 import org.jooq.Record1;
 import org.jooq.Result;
-import org.jooq.Record;
 import org.n52.shetland.ogc.sta.exception.STACRUDException;
 import org.n52.sta.data.cloudnative.condition.StaEntity;
 import org.n52.sta.data.cloudnative.dao.FirehoseConstants;
@@ -60,6 +59,11 @@ public class ThingLocationDaoImpl implements ThingLocationDao {
     public ThingLocationDaoImpl(StaFirehoseClient firehoseClient, DSLContext ctx) {
         this.firehoseClient = firehoseClient;
         this.ctx = ctx;
+        configureJacksonMapper();
+    }
+
+    private void configureJacksonMapper() {
+        mapper.setPropertyNamingStrategy(PropertyNamingStrategy.SNAKE_CASE);
     }
 
     @Override

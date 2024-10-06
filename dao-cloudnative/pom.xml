@@ -49,26 +49,6 @@
             <groupId>org.springframework</groupId>
             <artifactId>spring-beans</artifactId>
         </dependency>
-<!--        <dependency>-->
-<!--            <groupId>org.testcontainers</groupId>-->
-<!--            <artifactId>minio</artifactId>-->
-<!--            <version>1.20.1</version>-->
-<!--        </dependency>-->
-        <dependency>
-            <groupId>io.minio</groupId>
-            <artifactId>minio</artifactId>
-            <version>8.5.3</version>
-            <exclusions>
-                <exclusion>
-                    <groupId>org.apache.commons</groupId>
-                    <artifactId>commons-compress</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>com.squareup.okhttp3</groupId>
-                    <artifactId>okhttp</artifactId>
-                </exclusion>
-            </exclusions>
-        </dependency>
         <dependency>
             <groupId>com.squareup.okhttp3</groupId>
             <artifactId>okhttp</artifactId>
@@ -109,16 +89,11 @@
             <scope>compile</scope>
         </dependency>
         <dependency>
-            <groupId>org.duckdb</groupId>
-            <artifactId>duckdb_jdbc</artifactId>
-            <version>0.10.0</version>
-        </dependency>
-        <dependency>
             <groupId>com.amazon.athena</groupId>
             <artifactId>athena-jdbc</artifactId>
             <version>3.2.2</version>
             <scope>system</scope>
-            <systemPath>D:/dev/git/sensorweb-server-sta/libs/athena-jdbc-3.2.2-with-dependencies.jar</systemPath>
+            <systemPath>${project.basedir}/libs/athena-jdbc-3.2.2-with-dependencies.jar</systemPath>
         </dependency>
 
         <dependency>
@@ -310,10 +285,6 @@
                                     <key>scripts</key>
                                     <value>src/main/resources/schema.sql</value>
                                 </property>
-                                <property>
-                                    <key>dialect</key>
-                                    <value>DuckDB</value>
-                                </property>
                                 <!-- The default schema for unqualified objects:
 
                                      - public: all unqualified objects are located in the PUBLIC (upper case) schema
@@ -357,9 +328,6 @@
                                  In that case, the DefaultGeneratorStrategy uses the parent table name instead of the FK name. -->
                             <implicitJoinPathsUseTableNameForUnambiguousFKs>true</implicitJoinPathsUseTableNameForUnambiguousFKs>
 
-                            <!-- Tell the KotlinGenerator to generate properties in addition to methods for these paths.
-                                 The default is true. -->
-                            <implicitJoinPathsAsKotlinProperties>true</implicitJoinPathsAsKotlinProperties>
                         </generate>
                         <target>
                             <packageName>org.n52.sta.data.cloudnative.schema</packageName>

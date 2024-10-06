@@ -47,6 +47,7 @@ import org.n52.shetland.ogc.sta.model.STAEntityDefinition;
 import org.n52.sta.api.dto.DatastreamDTO;
 import org.n52.sta.api.dto.ObservationDTO;
 import org.n52.sta.api.dto.impl.Datastream;
+import org.n52.sta.data.MutexFactory;
 import org.n52.sta.data.cloudnative.condition.DatastreamQueryConditions;
 import org.n52.sta.data.cloudnative.condition.StaEntity;
 import org.n52.sta.data.cloudnative.dao.DatastreamDao;
@@ -63,7 +64,6 @@ import org.springframework.context.annotation.DependsOn;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
@@ -76,32 +76,37 @@ import java.util.stream.Collectors;
  */
 @Component
 @DependsOn({"springApplicationContext"})
-@Transactional
 public class CloudNativeDatastreamService extends CloudNativeAbstractSensorThingsEntityServiceImpl<
         DatastreamDao,
         DatastreamDTO> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CloudNativeDatastreamService.class);
-    private static final DatastreamQueryConditions dQC = new DatastreamQueryConditions();
-    private static final String UNKNOWN = "unknown";
 
+    private static DatastreamQueryConditions dQC = new DatastreamQueryConditions();
+
+    private static final String UNKNOWN = "unknown";
     private final ObservationDaoImpl observationDao;
+
     private final DatastreamDaoImpl datastreamDao;
     private final UnitDaoImpl unitDao;
-
     private final CloudNativeFormatService formatService;
+
     private final AtomicLong TS = new AtomicLong();
 
     public CloudNativeDatastreamService(DatastreamDaoImpl datastreamDao,
-                             CloudNativeFormatService formatService,
-                             ObservationDaoImpl observationDao,
-                             UnitDaoImpl unitDao,
-                             Class<DatastreamDTO> entityClass) {
-        super(datastreamDao, entityClass);
+                                        CloudNativeFormatService formatService,
+                                        ObservationDaoImpl observationDao,
+                                        UnitDaoImpl unitDao,
+                                        MutexFactory lock) {
+        super(datastreamDao, DatastreamDTO.class, lock);
         this.observationDao = observationDao;
         this.datastreamDao = datastreamDao;
         this.formatService = formatService;
         this.unitDao = unitDao;
+    }
+
+    public static void setDatastreamQueryConditions(DatastreamQueryConditions dQC) {
+        CloudNativeDatastreamService.dQC = dQC;
     }
 
     @Override
@@ -109,6 +114,7 @@ public class CloudNativeDatastreamService extends CloudNativeAbstractSensorThing
             throws STACRUDException, STAInvalidQueryException {
         for (ExpandItem expandItem : expandOption.getItems()) {
             String expandProperty = expandItem.getPath();
+            // Nested $expand and $filter is only supported for Observation entity
             // We have already handled $expand without filter and expand
             // Except for $expand on Observations
             if (!(expandItem.getQueryOptions().hasFilterFilter() || expandItem.getQueryOptions().hasExpandFilter())
@@ -189,10 +195,13 @@ public class CloudNativeDatastreamService extends CloudNativeAbstractSensorThing
                         "No Datastream with id '" + datastream.getId() + "' " + "found");
             }
         }
+
         check(datastream);
+
         if(datastream.getId() == null) {
             datastream.setId(NULL_ID_MASK);
         }
+
         synchronized (getLock(datastream.getId())) {
 
             if (!Objects.equals(datastream.getId(), NULL_ID_MASK) &&
@@ -221,10 +230,13 @@ public class CloudNativeDatastreamService extends CloudNativeAbstractSensorThing
         Dataset dataset = new Dataset();
 
         dataset.setDatasetId(Long.valueOf(datastream.getId()));
+        dataset.setIdentifier(datastream.getId());
         dataset.setStaIdentifier(datastream.getId());
         dataset.setName(datastream.getName());
         dataset.setDescription(datastream.getDescription());
-        dataset.setObservedArea(new WKBWriter().write(datastream.getObservedArea()));
+        if (dataset.getObservedArea() != null) {
+            dataset.setObservedArea(new WKBWriter().write(datastream.getObservedArea()));
+        }
 
 
         Time phenomenonTime = datastream.getPhenomenonTime();
@@ -279,25 +291,35 @@ public class CloudNativeDatastreamService extends CloudNativeAbstractSensorThing
         // must set this link when observations are created
         dataset.setFkFeatureId(null);
 
-        dataset.setFkPhenomenonId(Long.valueOf(getObservedPropertyService()
-                .createOrfetch(datastream.getObservedProperty())
-                .getId()));
+        if (datastream.getObservedProperty() != null) {
+            dataset.setFkPhenomenonId(Long.valueOf(getObservedPropertyService()
+                    .createOrfetch(datastream.getObservedProperty())
+                    .getId()));
+        }
 
-        dataset.setFkProcedureId(Long.valueOf(getSensorService()
-                .createOrfetch(datastream.getSensor())
-                .getId()));
+        if (datastream.getSensor() != null) {
+            dataset.setFkProcedureId(Long.valueOf(getSensorService()
+                    .createOrfetch(datastream.getSensor())
+                    .getId()));
+        }
 
-        dataset.setFkUnitId(this
-                .createOrfetchUnit(datastream)
-                .getUnitId());
+        Unit uomPOJO = this.createOrfetchUnit(datastream);
+        if (uomPOJO != null) {
+            dataset.setFkUnitId(uomPOJO.getUnitId());
+        }
 
-        dataset.setFkPlatformId(Long.valueOf(getThingService()
-                .createOrfetch(datastream.getThing())
-                .getId()));
+        if (datastream.getThing() != null) {
+            dataset.setFkPlatformId(Long.valueOf(getThingService()
+                    .createOrfetch(datastream.getThing())
+                    .getId()));
+        }
 
-        Format format = formatService.createOrFetchFormat(datastream.getObservationType());
+        if(datastream.getObservationType() != null) {
+            Format format = formatService.createOrFetchFormat(datastream.getObservationType());
+            dataset.setFkFormatId(format.getFormatId());
+        }
+        // we do not support other profiles as of now
         dataset.setObservationType("simple");
-        dataset.setFkFormatId(format.getFormatId());
 
         return dataset;
     }
@@ -339,39 +361,38 @@ public class CloudNativeDatastreamService extends CloudNativeAbstractSensorThing
     @Override
     protected void deleteEntity(String staIdentifier) throws STACRUDException, STAInvalidQueryException {
         synchronized (getLock(staIdentifier)) {
+            // caution to always pass parent entities
+            // sub datasets have sta_identifier set to null
             if (datastreamDao.existsByStaIdentifier(staIdentifier, DatastreamDTO.class)) {
 
-                Condition predicate = getStaEntityId().eq(staIdentifier);
-                Dataset dataset = datastreamDao
-                        .selectQueryBuilder(predicate, entityClass, null, null)
-                        .fetchInto(Dataset.class)
-                        .get(0);
+                Dataset dataset = datastreamDao.findByStaIdentifierPOJO(staIdentifier);
 
                 // Delete sub-datasets if we are an aggregation
                 if (dataset.getFkAggregationId() != null && dataset.getFkAggregationId() == 1L) {
                     // all sub-datasets have their fk_aggregation_id = parent_dataset_id
                     Long aggregationId = dataset.getDatasetId();
                     Set<Long> datasetIds = datastreamDao
-                            .findAllPOJOByAggregationId(aggregationId)
+                            .findAllByAggregationIdPOJO(aggregationId)
                             .stream()
                             .map(Dataset::getDatasetId)
                             .collect(Collectors.toSet());
+                    // TODO: datastreamDao.deleteByAggregationId(aggregationId);
 
-                    // delete observations
+                    // delete observations from subdatastreams
                     observationDao.deleteAllByDatasetIdIn(datasetIds);
                     // delete subdatastreams
                     for (Long Id: datasetIds) {
                         datastreamDao.deleteById(Id);
                     }
-                    // datastreamDao.deleteByAggregationId(aggregationId);
+                    // delete observations from parent datastream
+                    observationDao.deleteByDatasetId(Long.parseLong(staIdentifier));
                 } else {
-                    // delete observations
+                    // delete observations from singular datastream
                     observationDao.deleteAllByDatasetIdIn(Collections.singleton(dataset.getDatasetId()));
                 }
                 // delete properties
                 datastreamDao.deleteDatastreamParameters(Long.valueOf(staIdentifier));
-
-                //delete main datastream
+                //delete parent datastream
                 datastreamDao.deleteByStaIdentifier(staIdentifier);
             } else {
                 throw new STACRUDException(UNABLE_TO_UPDATE_ENTITY_NOT_FOUND, HTTPStatus.NOT_FOUND);
@@ -402,7 +423,7 @@ public class CloudNativeDatastreamService extends CloudNativeAbstractSensorThing
             parent.setFkAggregationId(1L);
             parent.setFkFeatureId(null);
             // persist the parent dataset
-            // linked entities of the original dataset are not linked to the parent
+            // linked entities of the original dataset are now linked to the parent
             datastreamDao.save(parent);
 
             // We need to create a new aggregation and link the existing dataset with it
@@ -440,8 +461,10 @@ public class CloudNativeDatastreamService extends CloudNativeAbstractSensorThing
      * @return Predicate based on FilterOption from queryOptions
      */
     @Override
-    public Condition getFilterPredicate(Class<DatastreamDTO> entityClass, QueryOptions queryOptions) {
-        Condition isNotAggregated = StaEntity.DATASTREAM.FK_AGGREGATION_ID.isNull();
+    protected Condition getFilterPredicate(Class<DatastreamDTO> entityClass, QueryOptions queryOptions) {
+        // filter out subdatasets and fetch only parent datasets
+        Condition isNotAggregated = StaEntity.DATASTREAM.FK_AGGREGATION_ID.isNull()
+                .or(StaEntity.DATASTREAM.FK_AGGREGATION_ID.eq(1L));
         if (!queryOptions.hasFilterFilter()) {
             return isNotAggregated;
         } else {
@@ -507,7 +530,8 @@ public class CloudNativeDatastreamService extends CloudNativeAbstractSensorThing
 
     @Override
     protected String checkPropertyName(String property) {
-        return datastreamDao.checkPropertyName(property).getName();
+        Field<?> field = datastreamDao.checkPropertyName(property);
+        return field == StaEntity.DATASTREAM.OBSERVED_AREA ? "datastreamObservedArea" : field.getName();
     }
 
     @Override
@@ -566,7 +590,8 @@ public class CloudNativeDatastreamService extends CloudNativeAbstractSensorThing
 
     private Unit createOrfetchUnit(DatastreamDTO datastream) throws STACRUDException {
         Unit unitPOJO = null;
-        if (datastream.getUnitOfMeasurement() != null) {
+        if (datastream.getUnitOfMeasurement() != null &&
+                datastream.getUnitOfMeasurement().getSymbol() != null) {
             synchronized (getLock(datastream.getUnitOfMeasurement().getSymbol() + "unit")) {
                 if (!unitDao.existsBySymbol(datastream.getUnitOfMeasurement().getSymbol())) {
                     unitPOJO = new Unit();
@@ -584,19 +609,20 @@ public class CloudNativeDatastreamService extends CloudNativeAbstractSensorThing
     }
 
     private void check(DatastreamDTO datastream) throws STACRUDException {
-        if (datastream.getThing() == null || datastream.getObservedProperty() == null
-                || datastream.getSensor() == null) {
+        if (datastream.getThing() == null ||
+                datastream.getObservedProperty() == null ||
+                datastream.getSensor() == null) {
             throw new STACRUDException("The datastream to create is invalid", HTTPStatus.BAD_REQUEST);
         }
     }
 
     @Override
-    Field<String> getStaEntityId() {
+    protected Field<String> getStaEntityId() {
         return StaEntity.DATASTREAM.STA_IDENTIFIER;
     }
 
     @Override
-    AtomicLong getStaEntityTS() {
+    protected AtomicLong getStaEntityTS() {
         return TS;
     }
 }

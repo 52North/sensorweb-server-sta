@@ -35,11 +35,13 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateTimeSerializer;
 import org.jooq.*;
 import org.jooq.Record;
+import org.jooq.conf.ParamType;
 import org.jooq.impl.DSL;
 
 import org.n52.shetland.oasis.odata.query.option.QueryOptions;
 import org.n52.shetland.ogc.sta.exception.STAInvalidQueryException;
 import org.n52.sta.api.dto.*;
+import org.n52.sta.data.cloudnative.condition.StaEntity;
 import org.n52.sta.data.cloudnative.dao.StaEntityDao;
 import org.n52.sta.data.cloudnative.dao.util.StaFirehoseClient;
 import org.n52.sta.data.cloudnative.service.CloudNativeAbstractSensorThingsEntityServiceImpl;
@@ -51,7 +53,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -67,11 +68,13 @@ public abstract class AbstractStaEntityDao<T extends StaDTO> implements StaEntit
     protected final ObjectMapper mapper = new ObjectMapper();
     protected final DSLContext ctx;
     protected final StaFirehoseClient firehoseClient;
+    protected LinkedHashSet<Table<?>> joins;
 
     @Autowired
     protected AbstractStaEntityDao(DSLContext ctx, StaFirehoseClient firehoseClient) {
         this.ctx = ctx;
         this.firehoseClient = firehoseClient;
+        // for Firehose serialization requirements
         configureJacksonMapper();
     }
 
@@ -85,7 +88,6 @@ public abstract class AbstractStaEntityDao<T extends StaDTO> implements StaEntit
     }
 
     @Override
-    @Transactional(readOnly = true)
     public Optional<String> getColumn(Condition condition,
                                       String columnName,
                                       Class<T> entityClass) {
@@ -137,21 +139,21 @@ public abstract class AbstractStaEntityDao<T extends StaDTO> implements StaEntit
         if (pageable.getSort().isSorted()) {
             List<SortField<?>> sortFields = pageable.getSort().stream()
                     .map(order -> {
-                        Field<?> field = checkPropertyName(order.getProperty());
+                        Field<?> field = DSL.field(order.getProperty());
                         return order.isAscending() ? field.asc() : field.desc();
                     })
                     .collect(Collectors.toList());
             selectQuery = (SelectConditionStep<Record1<String>>) selectQuery.orderBy(sortFields);
         }
 
+
         if (pageable.isPaged()) {
-            selectQuery = (SelectConditionStep<Record1<String>>) selectQuery.limit(pageable.getPageSize())
-                    .offset((int) pageable.getOffset());
+            selectQuery = (SelectConditionStep<Record1<String>>) selectQuery.offset((int) pageable.getOffset());
+            return ctx.fetch(selectQuery.getSQL(ParamType.INLINED) + " limit " + pageable.getPageSize())
+                    .getValues(DSL.field(columnName, String.class));
+        } else {
+            return selectQuery.fetch().getValues(DSL.field(columnName, String.class));
         }
-
-        Result<Record1<String>> result =  selectQuery.fetch();
-
-        return result.getValues(DSL.field(columnName, String.class));
     }
 
 
@@ -163,7 +165,7 @@ public abstract class AbstractStaEntityDao<T extends StaDTO> implements StaEntit
 
         Condition predicate = getEntityId().eq(id);
         Result<Record> result = selectQueryBuilder(predicate, entityClass, null, queryOptions).fetch();
-        return Optional.ofNullable(mapResultToDTO(result)).map(dto -> dto.get(0));
+        return Optional.ofNullable(mapResultToDTO(result)).map(dto -> !dto.isEmpty() ? dto.get(0) : null);
     }
 
     @Override
@@ -173,7 +175,7 @@ public abstract class AbstractStaEntityDao<T extends StaDTO> implements StaEntit
 
 
         Result<Record> result = selectQueryBuilder(predicate, entityClass, null, queryOptions).fetch();
-        return Optional.ofNullable(mapResultToDTO(result)).map(dto -> dto.get(0));
+        return Optional.ofNullable(mapResultToDTO(result)).map(dto -> !dto.isEmpty() ? dto.get(0) : null);
     }
 
     @Override
@@ -184,7 +186,7 @@ public abstract class AbstractStaEntityDao<T extends StaDTO> implements StaEntit
         Condition predicate = getStaEntityId().eq(identifier);
 
         Result<Record> result = selectQueryBuilder(predicate, entityClass, null, queryOptions).fetch();
-        return Optional.ofNullable(mapResultToDTO(result)).map(dto -> dto.get(0));
+        return Optional.ofNullable(mapResultToDTO(result)).map(dto -> !dto.isEmpty() ? dto.get(0) : null);
     }
 
     @Override
@@ -221,10 +223,15 @@ public abstract class AbstractStaEntityDao<T extends StaDTO> implements StaEntit
                 entityClass,
                 sort,
                 queryOptions);
+        Result<Record> result;
         if(pageable.isPaged()) {
-            query = (SelectSeekStepN<Record>) query.limit(pageable.getPageSize()).offset((int) pageable.getOffset());
+            // query = (SelectSeekStepN<Record>) query.limit(pageable.getPageSize()).offset((int) pageable.getOffset());
+            query = (SelectSeekStepN<Record>) query.offset((int) pageable.getOffset());
+            result = ctx.fetch(query.getSQL(ParamType.INLINED) + " limit " + pageable.getPageSize());
+            // query = (SelectSeekStepN<Record>) query.limit(pageable.getPageSize());
+        } else {
+            result = query.fetch();
         }
-        Result<Record> result = query.fetch();
         List<T> content = mapResultToDTO(result);
 
         return new PageImpl<>(content, pageable, content.size());
@@ -260,7 +267,7 @@ public abstract class AbstractStaEntityDao<T extends StaDTO> implements StaEntit
     public Select<Record> selectQueryBuilder(@NotNull Condition where,
                                              @NotNull Class<T> entityClass,
                                              @Nullable Sort sort,
-                                             @Nullable QueryOptions queryOptions)
+                                             @Nullable QueryOptions queryOptions /* TODO */)
             throws STAInvalidQueryException {
 
 
@@ -273,6 +280,10 @@ public abstract class AbstractStaEntityDao<T extends StaDTO> implements StaEntit
         }
         List<Field<?>> select = new ArrayList<>(getSelect(queryOptions));
         Table<?> from = getJoin(select, table, queryOptions);
+        if(joins.contains(StaEntity.DATASTREAM)) {
+            where = where.and(StaEntity.DATASTREAM.FK_AGGREGATION_ID.isNull()
+                    .or(StaEntity.DATASTREAM.FK_AGGREGATION_ID.eq(1L)));
+        }
         List<SortField<?>> orderBy = getOrderBy(sort);
 
         if(orderBy != null) {
@@ -291,19 +302,9 @@ public abstract class AbstractStaEntityDao<T extends StaDTO> implements StaEntit
                     .collect(Collectors.toList());
     }
 
-    private Table<?> getJoin(List<Field<?>> fromTables, Table<?> table, QueryOptions queryOptions)
+    private Table<?> getJoin(List<Field<?>> select, Table<?> table, QueryOptions queryOptions)
             throws STAInvalidQueryException {
-
-        Set<Table<?>> joins = createJoinList(queryOptions);
-
-        for (Table<?> toJoin : joins) {
-            table = table.leftJoin(toJoin).onKey();
-            if (queryOptions == null || queryOptions.getSelectFilter() == null) {
-                fromTables.addAll(Arrays.asList(toJoin.fields()));
-            }
-        }
-
-        return table;
+        return createJoinList(queryOptions, table, select);
     }
 
     private List<Field<?>> getSelect(QueryOptions queryOptions) {
@@ -319,13 +320,48 @@ public abstract class AbstractStaEntityDao<T extends StaDTO> implements StaEntit
                     .stream()
                     .map(this::checkPropertyName)
                     .collect(Collectors.toList()));
-
         }
-        // gotta fetch all fields 'cause select clause is not specified
+        // fetch all fields because select clause is not specified
         else {
-            fieldList = getEntityTableFields();
+            fieldList = getStaEntityFields(getEntityTable());
         }
 
         return fieldList;
+    }
+
+    protected List<Field<?>> getStaEntityFields(Table<?> entityTable) {
+        if(entityTable == StaEntity.DATASTREAM) {
+            return Arrays.stream(StaEntity.DATASTREAM.fields()).map(field -> {
+                if (field.getName().equals("OBSERVED_AREA")) {
+                    return DSL.function("ST_AsText",
+                                    String.class,
+                                    DSL.function("ST_GeomFromBinary", byte[].class, field))
+                            .as("datastreamObservedArea");
+                }
+                return field;
+            }).collect(Collectors.toList());
+        } else if (entityTable == StaEntity.FEATURE_OF_INTEREST) {
+            return Arrays.stream(StaEntity.FEATURE_OF_INTEREST.fields()).map(field -> {
+                if (field.getName().equals("GEOM")) {
+                    return DSL.function("ST_AsText",
+                                    String.class,
+                                    DSL.function("ST_GeomFromBinary", byte[].class, field))
+                            .as("foiGeom");
+                }
+                return field;
+            }).collect(Collectors.toList());
+        } else if (entityTable == StaEntity.LOCATION) {
+            return Arrays.stream(StaEntity.LOCATION.fields()).map(field -> {
+                if (field.getName().equals("GEOM")) {
+                    return DSL.function("ST_AsText",
+                                    String.class,
+                                    DSL.function("ST_GeomFromBinary", byte[].class, field))
+                            .as("locationGeom");
+                }
+                return field;
+            }).collect(Collectors.toList());
+        } else {
+          return Arrays.asList(entityTable.fields());
+        }
     }
 }

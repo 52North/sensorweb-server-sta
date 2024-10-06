@@ -39,7 +39,6 @@ import org.jooq.impl.DSL;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Configurable;
 
-import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.List;
 
@@ -60,7 +59,7 @@ public abstract class EntityQueryConditions implements StaEntity {
     String ERROR_INVALID_PARAMETER_ENTITY_TYPE = "Error getting entity from '%s'. No such parameter entity found";
 
     @Autowired
-    protected static DSLContext ctx;
+    protected DSLContext ctx;
     /**
      * Used for testing
      *

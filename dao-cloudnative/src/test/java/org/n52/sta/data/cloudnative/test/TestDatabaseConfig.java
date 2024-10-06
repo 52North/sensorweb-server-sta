@@ -37,26 +37,16 @@ import org.jooq.impl.DSL;
 import org.jooq.conf.Settings;
 import org.jooq.impl.DefaultConfiguration;
 import org.n52.sta.data.cloudnative.dao.FirehoseConstants;
-import org.n52.sta.data.cloudnative.schema.DefaultSchema;
-import org.springframework.boot.jdbc.DataSourceBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
 import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
-import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.firehose.FirehoseClient;
-import software.amazon.awssdk.services.glue.GlueClient;
-import software.amazon.awssdk.services.glue.model.GetTableRequest;
-import software.amazon.awssdk.services.glue.model.GetTableResponse;
 
 import javax.sql.DataSource;
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.Properties;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 @Configuration
 public class TestDatabaseConfig {
@@ -97,6 +87,7 @@ public class TestDatabaseConfig {
         config.addDataSourceProperty("Region", region);
         config.addDataSourceProperty("Database", database);
         config.addDataSourceProperty("OutputLocation", s3_output_location);
+        config.setAutoCommit(true);
         config.setMaximumPoolSize(5);
         return new HikariDataSource(config);
     }
@@ -109,7 +100,7 @@ public class TestDatabaseConfig {
         jooqConfiguration.set(settings);
         jooqConfiguration.set(dataSource);
         jooqConfiguration.set(SQLDialect.DEFAULT);
-        DSLContext ctx =  DSL.using(jooqConfiguration);
+        DSLContext ctx = DSL.using(jooqConfiguration);
         return ctx;
     }
 

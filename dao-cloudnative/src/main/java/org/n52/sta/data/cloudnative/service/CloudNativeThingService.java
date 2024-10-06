@@ -46,9 +46,13 @@ import org.n52.sta.api.dto.HistoricalLocationDTO;
 import org.n52.sta.api.dto.LocationDTO;
 import org.n52.sta.api.dto.ThingDTO;
 import org.n52.sta.api.dto.impl.HistoricalLocation;
+import org.n52.sta.api.dto.impl.Thing;
+import org.n52.sta.data.MutexFactory;
+import org.n52.sta.data.cloudnative.condition.DatastreamQueryConditions;
 import org.n52.sta.data.cloudnative.condition.StaEntity;
 import org.n52.sta.data.cloudnative.condition.ThingQueryConditions;
 import org.n52.sta.data.cloudnative.dao.ThingDao;
+import org.n52.sta.data.cloudnative.dao.impl.DatastreamDaoImpl;
 import org.n52.sta.data.cloudnative.dao.impl.LocationHistoricalLocationDaoImpl;
 import org.n52.sta.data.cloudnative.dao.impl.ThingDaoImpl;
 import org.n52.sta.data.cloudnative.dao.impl.ThingLocationDaoImpl;
@@ -61,7 +65,6 @@ import org.springframework.context.annotation.DependsOn;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
 import java.util.concurrent.atomic.AtomicLong;
@@ -75,44 +78,52 @@ import static org.n52.sta.data.cloudnative.dao.StaEntityDao.INVALID_EXPAND_OPTIO
  */
 @Component
 @DependsOn({"springApplicationContext"})
-@Transactional
 public class CloudNativeThingService
         extends CloudNativeAbstractSensorThingsEntityServiceImpl<
         ThingDao,
         ThingDTO> {
 
-    private static final ThingQueryConditions tQS = new ThingQueryConditions();
+    private static ThingQueryConditions tQC = new ThingQueryConditions();
+    private static DatastreamQueryConditions dsQC = new DatastreamQueryConditions();
     private static final Logger logger = LoggerFactory.getLogger(CloudNativeThingService.class);
     private final ThingDaoImpl thingDao;
-    private final AtomicLong TS = new AtomicLong();
     private final ThingLocationDaoImpl thingLocationDao;
     private final LocationHistoricalLocationDaoImpl locationHistoricalLocationDao;
+    private final DatastreamDaoImpl datastreamDao;
+    private final AtomicLong TS = new AtomicLong();
 
     public CloudNativeThingService(ThingDaoImpl thingDao,
-                        ThingLocationDaoImpl thingLocationDao,
-                        LocationHistoricalLocationDaoImpl locationHistoricalLocationDao,
-                        Class<ThingDTO> entityClass) {
-        super(thingDao, entityClass);
+                                   ThingLocationDaoImpl thingLocationDao,
+                                   LocationHistoricalLocationDaoImpl locationHistoricalLocationDao,
+                                   DatastreamDaoImpl datastreamDao,
+                                   MutexFactory lock) {
+        super(thingDao, ThingDTO.class, lock);
         this.thingDao = thingDao;
         this.thingLocationDao = thingLocationDao;
         this.locationHistoricalLocationDao = locationHistoricalLocationDao;
+        this.datastreamDao = datastreamDao;
     }
 
+    public static void setDatastreamQueryConditions(DatastreamQueryConditions dsQC) {
+        CloudNativeThingService.dsQC = dsQC;
+    }
+    public static void setThingQueryConditions (ThingQueryConditions tQC) {
+        CloudNativeThingService.tQC = tQC;
+    }
     @Override
-    protected Condition byRelatedEntityFilter(String relatedId, String relatedType, String ownId)
-            throws STAInvalidQueryException {
+    protected Condition byRelatedEntityFilter(String relatedId, String relatedType, String ownId) {
         Condition filter;
         switch (relatedType) {
             case STAEntityDefinition.HISTORICAL_LOCATIONS: {
-                filter = tQS.withHistoricalLocationStaIdentifier(relatedId);
+                filter = tQC.withHistoricalLocationStaIdentifier(relatedId);
                 break;
             }
             case STAEntityDefinition.DATASTREAMS: {
-                filter = tQS.withDatastreamStaIdentifier(relatedId);
+                filter = tQC.withDatastreamStaIdentifier(relatedId);
                 break;
             }
             case STAEntityDefinition.LOCATIONS: {
-                filter = tQS.withLocationStaIdentifier(relatedId);
+                filter = tQC.withLocationStaIdentifier(relatedId);
                 break;
             }
             default:
@@ -120,7 +131,7 @@ public class CloudNativeThingService
         }
 
         if (ownId != null) {
-            filter = filter.and(tQS.withStaIdentifier(ownId));
+            filter = filter.and(tQC.withStaIdentifier(ownId));
         }
         return filter;
     }
@@ -167,7 +178,8 @@ public class CloudNativeThingService
     }
 
     @Override
-    protected ThingDTO createOrfetch(ThingDTO entity) throws STACRUDException, STAInvalidQueryException {
+    protected ThingDTO createOrfetch(ThingDTO entity)
+            throws STACRUDException, STAInvalidQueryException {
         if (entity.getId() != null && entity.getName() == null) {
             Optional<ThingDTO> optionalEntity =
                     thingDao.findByStaIdentifier(entity.getId(), null, entityClass);
@@ -225,34 +237,43 @@ public class CloudNativeThingService
         if (thing == null) {
             throw new STACRUDException("Error processing HistoricalLocations. Thing does not exist!");
         }
+        Set<HistoricalLocationDTO> persistedHistoricalLocations =  new HashSet<>();
         // Persist nested HistoricalLocations
         if (thing.getHistoricalLocations() != null) {
-            Set<HistoricalLocationDTO> historicalLocations = thing.getHistoricalLocations();
             //thing.setHistoricalLocations(null);
-            for (HistoricalLocationDTO historicalLocation : historicalLocations) {
+            for (HistoricalLocationDTO historicalLocation : thing.getHistoricalLocations()) {
                 // Check if historicalLocation is not already persisted
                 if (historicalLocation.getId() == null) {
-                    historicalLocation.setThing(thing);
-                    getHistoricalLocationService().createOrUpdate(historicalLocation);
+                    // avoid persisting Thing again
+                    ThingDTO relatedThing = new Thing();
+                    relatedThing.setDescription("AUTOGENERATED");
+                    relatedThing.setId(thing.getId());
+                    historicalLocation.setThing(relatedThing);
+                    // avoid persisting Location again
+                    historicalLocation.setLocations(new HashSet<>());
+                    persistedHistoricalLocations.add(getHistoricalLocationService().createOrUpdate(historicalLocation));
                 }
             }
         }
 
         // Create new HistoricalLocation based on current location
         if (thing.getLocations() != null) {
-            Set<HistoricalLocationDTO> historicalLocations = thing.getHistoricalLocations() != null
-                    ? new LinkedHashSet<>(thing.getHistoricalLocations())
-                    : new LinkedHashSet<>();
             Set<LocationHistoricalLocation> locationHistLocationTable = new HashSet<>();
 
             HistoricalLocationDTO historicalLocation = new HistoricalLocation();
             historicalLocation.setId(getUniqueTimestamp().toString());
             historicalLocation.setTime(new TimeInstant(DateTime.now()));
-            historicalLocation.setThing(thing);
+            // avoid persisting Thing again
+            ThingDTO relatedThing = new Thing();
+            relatedThing.setId(thing.getId());
+            relatedThing.setDescription("AUTOGENERATED");
+            historicalLocation.setThing(relatedThing);
+            // avoid persisting Location again
+            historicalLocation.setLocations(new HashSet<>());
             HistoricalLocationDTO createdHistoricalLocation =
                     getHistoricalLocationService().createOrUpdate(historicalLocation);
             if (createdHistoricalLocation != null) {
-                historicalLocations.add(createdHistoricalLocation);
+                persistedHistoricalLocations.add(createdHistoricalLocation);
             }
             for (LocationDTO location : thing.getLocations()) {
                 // update LocationHistoricalLocation link table here
@@ -261,9 +282,9 @@ public class CloudNativeThingService
                 locationHistLocationRecord.setFkLocationId(Long.valueOf(location.getId()));
                 locationHistLocationTable.add(locationHistLocationRecord);
             }
-            thing.setHistoricalLocations(historicalLocations);
             locationHistoricalLocationDao.saveAll(locationHistLocationTable);
         }
+        thing.setHistoricalLocations(persistedHistoricalLocations);
     }
 
     private void processDatastreams(ThingDTO thing)
@@ -286,6 +307,8 @@ public class CloudNativeThingService
             Set<PlatformLocation> thingLocationTable = new HashSet<>();
             thing.setLocations(new HashSet<>());
             for (LocationDTO location : nestedLocations) {
+                String originalId = location.getId();
+                location.setThings(null);
                 LocationDTO savedLocation = getLocationService().createOrfetch(location);
 
                 PlatformLocation thingLocationRecord = new PlatformLocation();
@@ -294,7 +317,7 @@ public class CloudNativeThingService
                 thingLocationTable.add(thingLocationRecord);
 
                 savedLocations.add(savedLocation);
-                if (!location.getId().equals(savedLocation.getId())) {
+                if (!originalId.equals(savedLocation.getId())) {
                     didPersist = true;
                 }
             }
@@ -346,16 +369,23 @@ public class CloudNativeThingService
         synchronized (getLock(identifier)) {
             if (thingDao.existsByStaIdentifier(identifier, entityClass)) {
                 QueryOptions options = QUERY_OPTIONS_FACTORY
-                        .createQueryOptions("$expand=Datastreams,HistoricalLocations");
+                        .createQueryOptions("$expand=HistoricalLocations");
                 ThingDTO thing = thingDao.findByStaIdentifier(identifier, options, entityClass).get();
                 // delete datastreams
-                for (DatastreamDTO ds : thing.getDatastreams()) {
-                    getDatastreamService().delete(ds.getId());
+                Condition predicate = dsQC.withThingStaIdentifier(identifier)
+                        .and(StaEntity.DATASTREAM.STA_IDENTIFIER.isNotNull());
+                List<DatastreamDTO> relatedDatastreams = datastreamDao.findAll(
+                        predicate,
+                        null,
+                        DatastreamDTO.class);
+                for (DatastreamDTO ds : relatedDatastreams) {
+                        getDatastreamService().delete(ds.getId());
                 }
                 // delete historicalLocation
                 for (HistoricalLocationDTO hloc : thing.getHistoricalLocations()) {
                     getHistoricalLocationService().delete(hloc.getId());
                 }
+
                 // delete ThingLocation links
                 thingLocationDao.deleteByThingId(Long.parseLong(identifier));
                 // delete properties
@@ -393,12 +423,12 @@ public class CloudNativeThingService
     }
 
     @Override
-    Field<String> getStaEntityId() {
+    protected Field<String> getStaEntityId() {
         return StaEntity.THING.STA_IDENTIFIER;
     }
 
     @Override
-    AtomicLong getStaEntityTS() {
+    protected AtomicLong getStaEntityTS() {
         return TS;
     }
 }

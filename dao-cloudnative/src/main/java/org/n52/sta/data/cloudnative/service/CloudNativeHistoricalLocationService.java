@@ -62,7 +62,6 @@ import org.jooq.Field;
 import org.n52.janmayen.http.HTTPStatus;
 import org.n52.shetland.filter.ExpandFilter;
 import org.n52.shetland.filter.ExpandItem;
-import org.n52.shetland.oasis.odata.query.option.QueryOptions;
 import org.n52.shetland.ogc.gml.time.TimeInstant;
 import org.n52.shetland.ogc.sta.StaConstants;
 import org.n52.shetland.ogc.sta.exception.STACRUDException;
@@ -70,15 +69,13 @@ import org.n52.shetland.ogc.sta.exception.STAInvalidQueryException;
 import org.n52.shetland.ogc.sta.model.STAEntityDefinition;
 import org.n52.sta.api.dto.HistoricalLocationDTO;
 import org.n52.sta.api.dto.LocationDTO;
-import org.n52.sta.api.dto.SensorDTO;
 import org.n52.sta.api.dto.ThingDTO;
+import org.n52.sta.data.MutexFactory;
 import org.n52.sta.data.cloudnative.condition.HistoricalLocationQueryConditions;
 import org.n52.sta.data.cloudnative.condition.StaEntity;
 import org.n52.sta.data.cloudnative.dao.HistoricalLocationDao;
 import org.n52.sta.data.cloudnative.dao.impl.HistoricalLocationDaoImpl;
-import org.n52.sta.data.cloudnative.dao.impl.LocationDaoImpl;
 import org.n52.sta.data.cloudnative.dao.impl.LocationHistoricalLocationDaoImpl;
-import org.n52.sta.data.cloudnative.dao.impl.ThingDaoImpl;
 import org.n52.sta.data.cloudnative.schema.tables.pojos.HistoricalLocation;
 import org.n52.sta.data.cloudnative.schema.tables.pojos.LocationHistoricalLocation;
 import org.slf4j.Logger;
@@ -87,10 +84,8 @@ import org.springframework.context.annotation.DependsOn;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
-import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.util.LinkedHashSet;
 import java.util.Optional;
@@ -98,7 +93,6 @@ import java.util.Set;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
 
-import static org.n52.sta.api.RequestUtils.QUERY_OPTIONS_FACTORY;
 import static org.n52.sta.data.cloudnative.dao.StaEntityDao.INVALID_EXPAND_OPTION_SUPPLIED;
 
 /**
@@ -106,7 +100,6 @@ import static org.n52.sta.data.cloudnative.dao.StaEntityDao.INVALID_EXPAND_OPTIO
  */
 @Component
 @DependsOn({"springApplicationContext"})
-@Transactional
 public class CloudNativeHistoricalLocationService
         extends CloudNativeAbstractSensorThingsEntityServiceImpl<
         HistoricalLocationDao,
@@ -114,22 +107,24 @@ public class CloudNativeHistoricalLocationService
 
     private static final Logger logger = LoggerFactory.getLogger(CloudNativeHistoricalLocationService.class);
 
-    private static final HistoricalLocationQueryConditions hlQS = new HistoricalLocationQueryConditions();
+    private static HistoricalLocationQueryConditions hlQC = new HistoricalLocationQueryConditions();
 
-    private final LocationDaoImpl locationDao;
     private final HistoricalLocationDaoImpl historicalLocationDao;
     private final LocationHistoricalLocationDaoImpl locationHistoricalLocationDao;
 
     private final AtomicLong TS = new AtomicLong();
 
     public CloudNativeHistoricalLocationService(HistoricalLocationDaoImpl historicalLocationDao,
-                                     LocationDaoImpl locationDao,
-                                     LocationHistoricalLocationDaoImpl locationHistoricalLocationDao,
-                                     Class<HistoricalLocationDTO> entityClass) {
-        super(historicalLocationDao, entityClass);
-        this.locationDao = locationDao;
+                                                LocationHistoricalLocationDaoImpl locationHistoricalLocationDao,
+                                                MutexFactory lock) {
+        super(historicalLocationDao, HistoricalLocationDTO.class, lock);
         this.historicalLocationDao = historicalLocationDao;
         this.locationHistoricalLocationDao = locationHistoricalLocationDao;
+    }
+
+    // Static setter for testing purposes
+    public static void setHistoricalLocationQueryConditions(HistoricalLocationQueryConditions hlQC) {
+        CloudNativeHistoricalLocationService.hlQC = hlQC;
     }
 
     @Override
@@ -170,16 +165,15 @@ public class CloudNativeHistoricalLocationService
     }
 
     @Override
-    protected Condition byRelatedEntityFilter(String relatedId, String relatedType, String ownId)
-            throws STAInvalidQueryException {
+    protected Condition byRelatedEntityFilter(String relatedId, String relatedType, String ownId) {
         Condition filter;
         switch (relatedType) {
             case STAEntityDefinition.LOCATIONS: {
-                filter = hlQS.withLocationStaIdentifier(relatedId);
+                filter = hlQC.withLocationStaIdentifier(relatedId);
                 break;
             }
             case STAEntityDefinition.THINGS: {
-                filter = hlQS.withThingStaIdentifier(relatedId);
+                filter = hlQC.withThingStaIdentifier(relatedId);
                 break;
             }
             default:
@@ -187,7 +181,7 @@ public class CloudNativeHistoricalLocationService
         }
 
         if (ownId != null) {
-            filter = filter.and(hlQS.withStaIdentifier(ownId));
+            filter = filter.and(hlQC.withStaIdentifier(ownId));
         }
         return filter;
     }
@@ -196,7 +190,7 @@ public class CloudNativeHistoricalLocationService
     protected HistoricalLocationDTO createOrfetch(HistoricalLocationDTO entity)
             throws STACRUDException, STAInvalidQueryException {
 
-        if (entity.getId() != null) {
+        if (entity.getId() != null && entity.getTime() == null) {
             Optional<HistoricalLocationDTO> optionalEntity =
                     historicalLocationDao.findByStaIdentifier(entity.getId(),null, entityClass);
             if (optionalEntity.isPresent()) {
@@ -233,17 +227,21 @@ public class CloudNativeHistoricalLocationService
                 .atZone(ZoneOffset.UTC)
                 .toLocalDateTime();
         hLocPOJO.setTime(time);
-        hLocPOJO.setFkPlatformId(Long.valueOf(entity.getThing().getId()));
+        hLocPOJO.setFkPlatformId(Long.parseLong(entity.getThing().getId()));
+
         return hLocPOJO;
     }
     private void check(HistoricalLocationDTO historicalLocation) throws STACRUDException {
-        if (historicalLocation.getThing() == null && historicalLocation.getLocations() != null) {
+        if (historicalLocation.getThing() == null || historicalLocation.getLocations() == null) {
             throw new STACRUDException("The HistoricalLocation to create is invalid", HTTPStatus.BAD_REQUEST);
         }
     }
     private HistoricalLocationDTO processThing(HistoricalLocationDTO historicalLocation)
             throws STAInvalidQueryException, STACRUDException {
-
+        if(historicalLocation.getThing().getDescription() != null
+                && historicalLocation.getThing().getDescription().equals("AUTOGENERATED")) {
+            return historicalLocation;
+        }
         ThingDTO thing = getThingService().createOrfetch(historicalLocation.getThing());
         historicalLocation.setThing(thing);
         return historicalLocation;
@@ -252,28 +250,18 @@ public class CloudNativeHistoricalLocationService
     private void processLocations(HistoricalLocationDTO historicalLocation)
             throws STAInvalidQueryException, STACRUDException {
         Set<LocationHistoricalLocation> locationHistoricalLocations = new LinkedHashSet<>();
+
         for (LocationDTO l : historicalLocation.getLocations()) {
-            Optional<LocationDTO> location =
-                    locationDao.findByStaIdentifier(l.getId(), null, LocationDTO.class);
-            if (location.isPresent()) {
-                location.get().addHistoricalLocation(historicalLocation);
-                // because the location<->historical location link is invisible to location table
-                // we do not update the location table
-                // and update the LocationHistoricalLocation table instead
-                LocationHistoricalLocation locHloc = new LocationHistoricalLocation();
-                locHloc.setFkHistoricalLocationId(Long.valueOf(historicalLocation.getId()));
-                locHloc.setFkLocationId(Long.valueOf(location.get().getId()));
-                locationHistoricalLocations.add(locHloc);
-            } else {
-                // create location and update LocationHistoricalLocation table
-                LocationHistoricalLocation locHloc = new LocationHistoricalLocation();
-                locHloc.setFkLocationId(Long.valueOf(getLocationService().createOrUpdate(l).getId()));
-                locHloc.setFkHistoricalLocationId(Long.valueOf(historicalLocation.getId()));
-                locationHistoricalLocations.add(locHloc);
-            }
+            LocationDTO location = getLocationService().createOrfetch(l);
+            location.addHistoricalLocation(historicalLocation);
+            LocationHistoricalLocation locHloc = new LocationHistoricalLocation();
+            locHloc.setFkHistoricalLocationId(Long.valueOf(historicalLocation.getId()));
+            locHloc.setFkLocationId(Long.valueOf(location.getId()));
+            locationHistoricalLocations.add(locHloc);
         }
         // Update LocationHistoricalLocation table
         locationHistoricalLocationDao.saveAll(locationHistoricalLocations);
+
     }
 
     @Override
@@ -314,7 +302,7 @@ public class CloudNativeHistoricalLocationService
                         historicalLocationDao.findByStaIdentifier(id, null, entityClass).get();
 
                 // delete location<->historicalLocation records from link table
-                locationHistoricalLocationDao.deleteByHistoricalLocationId(Long.valueOf(historicalLocation.getId()));
+                locationHistoricalLocationDao.deleteByHistoricalLocationId(Long.parseLong(historicalLocation.getId()));
 
                 // the link between thing<->historicalLocation is invisible to Thing table
                 // so we do not have to update Thing table
@@ -353,12 +341,12 @@ public class CloudNativeHistoricalLocationService
     }
 
     @Override
-    Field<String> getStaEntityId() {
+    protected Field<String> getStaEntityId() {
         return StaEntity.HISTORICAL_LOCATION.STA_IDENTIFIER;
     }
 
     @Override
-    AtomicLong getStaEntityTS() {
+    protected AtomicLong getStaEntityTS() {
         return TS;
     }
 }

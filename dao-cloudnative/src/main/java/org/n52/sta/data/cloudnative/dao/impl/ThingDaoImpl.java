@@ -38,17 +38,21 @@ import org.n52.shetland.ogc.sta.StaConstants;
 import org.n52.shetland.ogc.sta.exception.STACRUDException;
 import org.n52.shetland.ogc.sta.exception.STAInvalidQueryException;
 import org.n52.shetland.ogc.sta.model.STAEntityDefinition;
+import org.n52.sta.api.dto.DatastreamDTO;
+import org.n52.sta.api.dto.HistoricalLocationDTO;
+import org.n52.sta.api.dto.LocationDTO;
 import org.n52.sta.api.dto.ThingDTO;
 import org.n52.sta.data.cloudnative.DTOMapper;
-import org.n52.sta.data.cloudnative.condition.StaEntity;
-import org.n52.sta.data.cloudnative.condition.ThingQueryConditions;
+import org.n52.sta.data.cloudnative.condition.*;
 import org.n52.sta.data.cloudnative.dao.FirehoseConstants;
 import org.n52.sta.data.cloudnative.dao.util.StaFirehoseClient;
 import org.n52.sta.data.cloudnative.dao.ThingDao;
+import org.n52.sta.data.cloudnative.schema.tables.Format;
 import org.n52.sta.data.cloudnative.schema.tables.pojos.Platform;
 import org.springframework.stereotype.Component;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * @author <a href="mailto:humaid.kidwai@ucalgary.ca">Humaid Kidwai</a>
@@ -57,8 +61,7 @@ import java.util.*;
 public class ThingDaoImpl
         extends AbstractStaEntityDao<ThingDTO> implements ThingDao {
     private final String tableName = getEntityTable().getName();
-    private final String parameterTableName = "PLATFORM_PARAMETER";
-    private Set<Table<?>> joins;
+    private final String parameterTableName = StaEntity.THING_PROPERTIES.getName();
 
     public ThingDaoImpl(DSLContext ctx, StaFirehoseClient firehoseClient) {
         super(ctx, firehoseClient);
@@ -78,26 +81,112 @@ public class ThingDaoImpl
     }
 
     @Override
-    public Set<Table<?>> createJoinList(QueryOptions queryOptions) throws STAInvalidQueryException {
-        joins = new HashSet<>();
+    public Table<?> createJoinList(QueryOptions queryOptions, Table<?> table, List<Field<?>> select)
+            throws STAInvalidQueryException {
+        joins = new LinkedHashSet<>();
+
         joins.add(StaEntity.THING_PROPERTIES);
+        table = table.leftJoin(StaEntity.THING_PROPERTIES)
+                .on(StaEntity.THING_PROPERTIES.FK_PLATFORM_ID
+                        .eq(StaEntity.THING.PLATFORM_ID));
+
+        if (queryOptions == null ||
+                queryOptions.getSelectFilter() == null) {
+            select.addAll(getStaEntityFields(StaEntity.THING_PROPERTIES));
+        }
+
         if (queryOptions != null && queryOptions.getExpandFilter() != null) {
             for (ExpandItem expandItem : queryOptions.getExpandFilter().getItems()) {
                 // We cannot handle nested $filter or $expand
-                if (expandItem.getQueryOptions().hasFilterFilter() || expandItem.getQueryOptions().hasExpandFilter()) {
+                if (expandItem.getQueryOptions().hasFilterFilter() ||
+                        expandItem.getQueryOptions().hasExpandFilter()) {
                     continue;
                 }
                 String expandProperty = expandItem.getPath();
                 switch (expandProperty) {
                     case STAEntityDefinition.HISTORICAL_LOCATIONS:
+
                         joins.add(StaEntity.HISTORICAL_LOCATION);
+                        table = table.leftJoin(StaEntity.HISTORICAL_LOCATION)
+                                .on(StaEntity.HISTORICAL_LOCATION.FK_PLATFORM_ID
+                                        .eq(StaEntity.THING.PLATFORM_ID));
+
+                        if (expandItem.getQueryOptions() == null ||
+                                expandItem.getQueryOptions().getSelectFilter() == null) {
+                            select.addAll(getStaEntityFields(StaEntity.HISTORICAL_LOCATION));
+                        } else {
+                            select.addAll(expandItem
+                                    .getQueryOptions()
+                                    .getSelectFilter()
+                                    .getItems()
+                                    .stream()
+                                    .map(e-> new HistoricalLocationQueryConditions().checkPropertyName(e))
+                                    .collect(Collectors.toList()));
+                        }
+
                         break;
                     case STAEntityDefinition.DATASTREAMS:
+
                         joins.add(StaEntity.DATASTREAM);
+                        table = table.leftJoin(StaEntity.DATASTREAM)
+                                .on(StaEntity.DATASTREAM.FK_PLATFORM_ID
+                                        .eq(StaEntity.THING.PLATFORM_ID));
+
+                        Format DATASTREAM_FORMAT = StaEntity.FORMAT.as("DATASTREAM_FORMAT");
+                        joins.add(DATASTREAM_FORMAT);
+                        table = table.leftJoin(DATASTREAM_FORMAT)
+                                .on(DATASTREAM_FORMAT.FORMAT_ID
+                                        .eq(StaEntity.DATASTREAM.FK_FORMAT_ID));
+
+                        joins.add(StaEntity.UNIT);
+                        table = table.leftJoin(StaEntity.UNIT)
+                                .on(StaEntity.DATASTREAM.FK_UNIT_ID
+                                        .eq(StaEntity.UNIT.UNIT_ID));
+
+                        if (expandItem.getQueryOptions() == null ||
+                                expandItem.getQueryOptions().getSelectFilter() == null) {
+                            select.addAll(getStaEntityFields(StaEntity.DATASTREAM));
+                            select.addAll(getStaEntityFields(DATASTREAM_FORMAT)
+                                    .stream()
+                                    .map(e -> e.as("DATASTREAM_FORMAT_" + e.getName()))
+                                    .collect(Collectors.toList())
+                            );
+                            select.addAll(getStaEntityFields(StaEntity.UNIT));
+                        } else {
+                            select.addAll(expandItem
+                                    .getQueryOptions()
+                                    .getSelectFilter()
+                                    .getItems()
+                                    .stream()
+                                    .map(e-> new DatastreamQueryConditions().checkPropertyName(e))
+                                    .collect(Collectors.toList()));
+                        }
+
                         break;
                     case STAEntityDefinition.LOCATIONS:
                         joins.add(StaEntity.THING_LOCATION);
+                        table = table.leftJoin(StaEntity.THING_LOCATION)
+                                .on(StaEntity.THING_LOCATION.FK_PLATFORM_ID
+                                        .eq(StaEntity.THING.PLATFORM_ID));
+
                         joins.add(StaEntity.LOCATION);
+                        table = table.leftJoin(StaEntity.LOCATION)
+                                .on(StaEntity.LOCATION.LOCATION_ID
+                                        .eq(StaEntity.THING_LOCATION.FK_LOCATION_ID));
+
+                        if (expandItem.getQueryOptions() == null ||
+                                expandItem.getQueryOptions().getSelectFilter() == null) {
+                            select.addAll(getStaEntityFields(StaEntity.LOCATION));
+                        } else {
+                            select.addAll(expandItem
+                                    .getQueryOptions()
+                                    .getSelectFilter()
+                                    .getItems()
+                                    .stream()
+                                    .map(e-> new LocationQueryConditions().checkPropertyName(e))
+                                    .collect(Collectors.toList()));
+                        }
+
                         break;
                     default:
                         throw new STAInvalidQueryException(String.format(INVALID_EXPAND_OPTION_SUPPLIED,
@@ -106,7 +195,7 @@ public class ThingDaoImpl
                 }
             }
         }
-        return joins;
+        return table;
     }
 
     @Override
@@ -118,18 +207,27 @@ public class ThingDaoImpl
 
             if (joins.contains(StaEntity.DATASTREAM)) {
                 thing.setDatastreams(Optional.ofNullable(thing.getDatastreams()).orElseGet(HashSet::new));
-                thing.getDatastreams().add(record.map(new DTOMapper.DatastreamRecordMapper()));
+                DatastreamDTO datastream = record.map(new DTOMapper.DatastreamRecordMapper());
+                if (datastream.getId() != null) {
+                    thing.getDatastreams().add(datastream);
+                }
             }
 
             if (joins.contains(StaEntity.LOCATION)) {
                 thing.setLocations(Optional.ofNullable(thing.getLocations()).orElseGet(HashSet::new));
-                thing.getLocations().add(record.map(new DTOMapper.LocationRecordMapper()));
+                LocationDTO location = record.map(new DTOMapper.LocationRecordMapper());
+                if (location.getId() != null) {
+                    thing.getLocations().add(location);
+                }
             }
 
             if (joins.contains(StaEntity.HISTORICAL_LOCATION)) {
                 thing.setHistoricalLocations(Optional.ofNullable(thing.getHistoricalLocations())
                         .orElseGet(HashSet::new));
-                thing.getHistoricalLocations().add(record.map(new DTOMapper.HistoricalLocationRecordMapper()));
+                HistoricalLocationDTO hloc = record.map(new DTOMapper.HistoricalLocationRecordMapper());
+                if (hloc.getId() != null) {
+                    thing.getHistoricalLocations().add(hloc);
+                }
             }
 
             if (joins.contains(StaEntity.THING_PROPERTIES)) {
@@ -143,11 +241,6 @@ public class ThingDaoImpl
 
         }
         return new ArrayList<>(thingMap.values());
-    }
-
-    @Override
-    public List<Field<?>> getEntityTableFields() {
-        return new ArrayList<>(Arrays.asList(StaEntity.THING.fields()));
     }
 
     @Override

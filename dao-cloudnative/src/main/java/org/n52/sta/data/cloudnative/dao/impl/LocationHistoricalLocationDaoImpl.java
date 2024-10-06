@@ -29,6 +29,7 @@
 package org.n52.sta.data.cloudnative.dao.impl;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.PropertyNamingStrategy;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.jooq.DSLContext;
 import org.jooq.Record1;
@@ -56,6 +57,11 @@ public class LocationHistoricalLocationDaoImpl implements LocationHistoricalLoca
     public LocationHistoricalLocationDaoImpl(StaFirehoseClient firehoseClient, DSLContext ctx) {
         this.firehoseClient = firehoseClient;
         this.ctx = ctx;
+        configureJacksonMapper();
+    }
+
+    private void configureJacksonMapper() {
+        mapper.setPropertyNamingStrategy(PropertyNamingStrategy.SNAKE_CASE);
     }
 
     @Override

@@ -29,6 +29,7 @@
 package org.n52.sta.data.cloudnative.dao.impl;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.PropertyNamingStrategy;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.jooq.*;
 import org.jooq.Record;
@@ -51,12 +52,17 @@ public class UnitDaoImpl {
     private final DSLContext ctx;
     private final ObjectMapper mapper = new ObjectMapper();
     private final StaFirehoseClient firehoseClient;
-    private final String tableName = "UNIT";
+    private final String tableName = StaEntity.UNIT.getName();
 
     @Autowired
     public UnitDaoImpl(DSLContext ctx, StaFirehoseClient firehoseClient) {
         this.ctx = ctx;
         this.firehoseClient = firehoseClient;
+        configureJacksonMapper();
+    }
+
+    private void configureJacksonMapper() {
+        mapper.setPropertyNamingStrategy(PropertyNamingStrategy.SNAKE_CASE);
     }
 
     public boolean existsBySymbol(String symbol) {
@@ -68,7 +74,7 @@ public class UnitDaoImpl {
                 .where(predicate)
                 .fetchOne(0, long.class);
 
-        return count != null;
+        return count!= null && count > 0;
     }
 
     public void save(Unit unitPOJO) throws STACRUDException {

@@ -29,6 +29,7 @@
 
 package org.n52.sta.data.cloudnative.test.dao;
 
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.jooq.Condition;
 import org.jooq.DSLContext;
 import org.jooq.impl.DSL;
@@ -37,8 +38,10 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.n52.shetland.oasis.odata.query.option.QueryOptions;
+import org.n52.shetland.ogc.sta.exception.STACRUDException;
 import org.n52.shetland.ogc.sta.exception.STAInvalidQueryException;
 import org.n52.sta.api.dto.SensorDTO;
+import org.n52.sta.data.cloudnative.schema.tables.pojos.Procedure;
 import org.n52.sta.data.cloudnative.condition.StaEntity;
 import org.n52.sta.data.cloudnative.dao.impl.SensorDaoImpl;
 import org.n52.sta.data.cloudnative.dao.util.StaFirehoseClient;
@@ -56,17 +59,29 @@ import java.util.Optional;
 @Import(TestDatabaseConfig.class)
 @ActiveProfiles("cloudnative")
 public class SensorDaoTest {
-    @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
-    @Autowired
     private DSLContext ctx;
     private SensorDaoImpl sensorDao;
-    @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
-    @Autowired private FirehoseClient firehoseClient;
-    private final StaFirehoseClient staFirehose = new StaFirehoseClient(firehoseClient);
+    private FirehoseClient firehoseClient;
+    private StaFirehoseClient staFirehose;
 
-    @BeforeEach
-    public void setUp() {
+    @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
+    @Autowired
+    public void SensorDaoTest(DSLContext ctx, FirehoseClient firehoseClient) {
+        this.firehoseClient = firehoseClient;
+        staFirehose = new StaFirehoseClient(firehoseClient);
         sensorDao = new SensorDaoImpl(ctx, staFirehose);
+    }
+
+    @Test
+    public void save() throws STACRUDException {
+        Procedure sensor = new Procedure();
+        sensor.setStaIdentifier("7860");
+        sensor.setDescriptionFile("random.metadata.com/sensor7860");
+        sensor.setProcedureId(7860L);
+        sensor.setName("test sensor");
+        sensor.setDescription("some description");
+
+        sensorDao.save(sensor);
     }
 
     @Test

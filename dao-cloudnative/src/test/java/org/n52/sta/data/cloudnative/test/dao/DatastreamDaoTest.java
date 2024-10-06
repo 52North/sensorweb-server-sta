@@ -10,7 +10,7 @@ import org.n52.shetland.ogc.sta.exception.STACRUDException;
 import org.n52.shetland.ogc.sta.exception.STAInvalidQueryException;
 import org.n52.sta.api.dto.DatastreamDTO;
 import org.n52.sta.data.cloudnative.condition.StaEntity;
-import org.n52.sta.data.cloudnative.dao.FirehoseConstants;
+
 import org.n52.sta.data.cloudnative.dao.impl.DatastreamDaoImpl;
 import org.n52.sta.data.cloudnative.dao.util.StaFirehoseClient;
 import org.n52.sta.data.cloudnative.schema.tables.pojos.Dataset;
@@ -19,8 +19,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
-import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
-import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
 import software.amazon.awssdk.services.firehose.FirehoseClient;
 
 import java.time.LocalDateTime;
@@ -34,11 +32,11 @@ public class DatastreamDaoTest {
     private DSLContext ctx;
     private final DatastreamDaoImpl datastreamDao;
     private FirehoseClient firehoseClient;
-    private StaFirehoseClient staFirehose = null;
+    private StaFirehoseClient staFirehose;
 
     @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
     @Autowired
-    public DatastreamDaoTest(DSLContext ctx, FirehoseClient firehoseClient) throws STACRUDException {
+    public DatastreamDaoTest(DSLContext ctx, FirehoseClient firehoseClient) {
         this.ctx = ctx;
         this.firehoseClient = firehoseClient;
         staFirehose = new StaFirehoseClient(firehoseClient);
@@ -63,9 +61,6 @@ public class DatastreamDaoTest {
         datasetPOJO.setObservationType("simple");
 
         datastreamDao.save(datasetPOJO);
-
-        //ctx.execute("INSERT INTO \"52n_sta_iceberg\".\"dataset\" (dataset_id, identifier, sta_identifier,name,description,first_time,last_time,fk_procedure_id,fk_phenomenon_id,fk_platform_id,fk_unit_id,fk_format_id,fk_feature_id, observation_type) VALUES (BIGINT '999', '999', '999', VARCHAR 'oven temperature', VARCHAR 'This is a datastream for an oven’s internal temperature.', TIMESTAMP '2024-03-25 11:12:13', TIMESTAMP '2024-03-25 11:12:13', 1, 1, 2, 1, 5, 1, 'simple');");
-
     }
 
     @Test

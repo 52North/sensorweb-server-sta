@@ -32,12 +32,11 @@ import org.n52.shetland.ogc.sta.exception.STAInvalidQueryException;
 import org.n52.sta.api.dto.DatastreamDTO;
 import org.n52.sta.data.cloudnative.schema.tables.pojos.Dataset;
 
-import java.util.List;
 import java.util.Set;
 
 /**
  * @author <a href="mailto:humaid.kidwai@ucalgary.ca">Humaid Kidwai</a>
  */
 public interface DatastreamDao extends StaNamedEntityDao <DatastreamDTO> {
-    Set<Dataset> findAllPOJOByAggregationId(Long id) throws STAInvalidQueryException;
+    Set<Dataset> findAllByAggregationIdPOJO(Long id) throws STAInvalidQueryException;
 }

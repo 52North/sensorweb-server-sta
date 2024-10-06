@@ -39,7 +39,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.DependsOn;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -48,7 +47,6 @@ import java.util.concurrent.atomic.AtomicLong;
  */
 @Component
 @DependsOn({"springApplicationContext"})
-@Transactional
 public class CloudNativeFormatService {
 
     private static final Logger logger = LoggerFactory.getLogger(CloudNativeFormatService.class);
@@ -57,7 +55,7 @@ public class CloudNativeFormatService {
     private static final AtomicLong TS = new AtomicLong();
 
     public CloudNativeFormatService(MutexFactory mutexFactory,
-                         FormatDaoImpl formatDao) throws STACRUDException {
+                         FormatDaoImpl formatDao) {
         this.mutexFactory = mutexFactory;
         this.formatDao = formatDao;
 
@@ -79,24 +77,31 @@ public class CloudNativeFormatService {
                 SfConstants.SAMPLING_FEAT_TYPE_SF_SPECIMEN,
         };
 
-        for (String common_format : COMMON_FORMATS) {
-            createOrFetchFormat(common_format);
-        }
+        /*try {
+            for (String common_format : COMMON_FORMATS) {
+                createOrFetchFormat(common_format);
+            }
+        } catch (STACRUDException e) {
+            logger.debug("Failed to Insert common format");
+        }*/
     }
 
     public Format createOrFetchFormat(String formatType) throws STACRUDException {
-        synchronized (mutexFactory.getLock(formatType)) {
-            if (!formatDao.existsByFormat(formatType)) {
-                Format formatPOJO = new Format();
-                formatPOJO.setFormatId(getUniqueTimestamp());
-                formatPOJO.setDefinition(formatType);
-                logger.debug("Persisting new formatPOJO: " + formatPOJO.getDefinition());
-                formatDao.save(formatPOJO);
-                return formatPOJO;
-            } else {
-                return formatDao.findByFormat(formatType).get();
+        if (formatType != null) {
+            synchronized (mutexFactory.getLock(formatType)) {
+                if (!formatDao.existsByFormat(formatType)) {
+                    Format formatPOJO = new Format();
+                    formatPOJO.setFormatId(getUniqueTimestamp());
+                    formatPOJO.setDefinition(formatType);
+                    logger.debug("Persisting new formatPOJO: " + formatPOJO.getDefinition());
+                    formatDao.save(formatPOJO);
+                    return formatPOJO;
+                } else {
+                    return formatDao.findByFormat(formatType).get();
+                }
             }
         }
+        return null;
     }
 
     public String getFormatDefinitionFromGeometry(Geometry geometry) {

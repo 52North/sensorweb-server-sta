@@ -38,9 +38,10 @@ import org.n52.shetland.ogc.sta.exception.STACRUDException;
 import org.n52.shetland.ogc.sta.exception.STAInvalidQueryException;
 import org.n52.shetland.ogc.sta.model.STAEntityDefinition;
 import org.n52.sta.api.dto.HistoricalLocationDTO;
+import org.n52.sta.api.dto.LocationDTO;
+import org.n52.sta.api.dto.ThingDTO;
 import org.n52.sta.data.cloudnative.DTOMapper;
-import org.n52.sta.data.cloudnative.condition.HistoricalLocationQueryConditions;
-import org.n52.sta.data.cloudnative.condition.StaEntity;
+import org.n52.sta.data.cloudnative.condition.*;
 import org.n52.sta.data.cloudnative.dao.FirehoseConstants;
 import org.n52.sta.data.cloudnative.dao.HistoricalLocationDao;
 import org.n52.sta.data.cloudnative.dao.util.StaFirehoseClient;
@@ -48,6 +49,7 @@ import org.n52.sta.data.cloudnative.schema.tables.pojos.HistoricalLocation;
 import org.springframework.stereotype.Component;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * @author <a href="mailto:humaid.kidwai@ucalgary.ca">Humaid Kidwai</a>
@@ -56,7 +58,6 @@ import java.util.*;
 public class HistoricalLocationDaoImpl
         extends AbstractStaEntityDao<HistoricalLocationDTO> implements HistoricalLocationDao {
     private final String tableName = getEntityTable().getName();
-    private Set<Table<?>> joins;
 
     public HistoricalLocationDaoImpl(DSLContext ctx, StaFirehoseClient firehoseClient) {
         super(ctx, firehoseClient);
@@ -73,11 +74,18 @@ public class HistoricalLocationDaoImpl
                     k -> record.map(new DTOMapper.HistoricalLocationRecordMapper()));
 
             if (joins.contains(StaEntity.LOCATION)) {
-                historicalLocation.setLocations(Optional.ofNullable(historicalLocation.getLocations()).orElse(new HashSet<>()));
-                historicalLocation.getLocations().add(record.map(new DTOMapper.LocationRecordMapper()));
+                historicalLocation.setLocations(Optional.ofNullable(historicalLocation.getLocations())
+                        .orElse(new HashSet<>()));
+                LocationDTO loc = record.map(new DTOMapper.LocationRecordMapper());
+                if (loc.getId() != null) {
+                    historicalLocation.getLocations().add(loc);
+                }
             }
             if (joins.contains(StaEntity.THING)) {
-                historicalLocation.setThing(record.map(new DTOMapper.ThingRecordMapper()));
+                ThingDTO thing = record.map(new DTOMapper.ThingRecordMapper());
+                if (thing.getId() != null) {
+                    historicalLocation.setThing(thing);
+                }
             }
 
             historicalLocations.add(historicalLocation);
@@ -86,20 +94,45 @@ public class HistoricalLocationDaoImpl
     }
 
     @Override
-    public Set<Table<?>> createJoinList(QueryOptions queryOptions)
+    public Table<?> createJoinList(QueryOptions queryOptions, Table<?> table, List<Field<?>> select)
             throws STAInvalidQueryException {
-        joins = new HashSet<>();
+
+        joins = new LinkedHashSet<>();
+
         if (queryOptions != null && queryOptions.getExpandFilter() != null) {
             for (ExpandItem expandItem : queryOptions.getExpandFilter().getItems()) {
                 // We cannot handle nested $filter or $expand
-                if (expandItem.getQueryOptions().hasFilterFilter() || expandItem.getQueryOptions().hasExpandFilter()) {
+                if (expandItem.getQueryOptions().hasFilterFilter() ||
+                        expandItem.getQueryOptions().hasExpandFilter()) {
                     continue;
                 }
                 String expandProperty = expandItem.getPath();
                 switch (expandProperty) {
                     case STAEntityDefinition.LOCATIONS:
+
                         joins.add(StaEntity.LOCATION_HISTORICAL_LOCATION);
+                        table = table.leftJoin(StaEntity.LOCATION_HISTORICAL_LOCATION)
+                                        .on(StaEntity.LOCATION_HISTORICAL_LOCATION.FK_HISTORICAL_LOCATION_ID
+                                                .eq(StaEntity.HISTORICAL_LOCATION.HISTORICAL_LOCATION_ID));
+
                         joins.add(StaEntity.LOCATION);
+                        table = table.leftJoin(StaEntity.LOCATION)
+                                .on(StaEntity.LOCATION.LOCATION_ID
+                                        .eq(StaEntity.LOCATION_HISTORICAL_LOCATION.FK_LOCATION_ID));
+
+                        if (expandItem.getQueryOptions() == null ||
+                                expandItem.getQueryOptions().getSelectFilter() == null) {
+                            select.addAll(getStaEntityFields(StaEntity.LOCATION));
+                        } else {
+                            select.addAll(expandItem
+                                    .getQueryOptions()
+                                    .getSelectFilter()
+                                    .getItems()
+                                    .stream()
+                                    .map(e-> new LocationQueryConditions().checkPropertyName(e))
+                                    .collect(Collectors.toList()));
+                        }
+
                         break;
                     case STAEntityDefinition.THING:
                         // fallthru
@@ -107,7 +140,24 @@ public class HistoricalLocationDaoImpl
                         // The Definition in Section 8.2.3 of the OGC STA v1.0 defines the relations as "Thing"
                         // We will allow both for now
                     case STAEntityDefinition.THINGS:
+
                         joins.add(StaEntity.THING);
+                        table = table.leftJoin(StaEntity.THING)
+                                .on(StaEntity.THING.PLATFORM_ID
+                                        .eq(StaEntity.HISTORICAL_LOCATION.FK_PLATFORM_ID));
+
+                        if (expandItem.getQueryOptions() == null ||
+                                expandItem.getQueryOptions().getSelectFilter() == null) {
+                            select.addAll(getStaEntityFields(StaEntity.THING));
+                        } else {
+                            select.addAll(expandItem
+                                    .getQueryOptions()
+                                    .getSelectFilter()
+                                    .getItems()
+                                    .stream()
+                                    .map(e-> new ThingQueryConditions().checkPropertyName(e))
+                                    .collect(Collectors.toList()));
+                        }
                         break;
                     default:
                         throw new STAInvalidQueryException(String.format(INVALID_EXPAND_OPTION_SUPPLIED,
@@ -116,22 +166,17 @@ public class HistoricalLocationDaoImpl
                 }
             }
         }
-        return joins;
+        return table;
     }
 
     @Override
-    public Field checkPropertyName(String property) {
+    public Field<?> checkPropertyName(String property) {
         return new HistoricalLocationQueryConditions().checkPropertyName(property);
     }
 
     @Override
     public Table<?> getEntityTable() {
         return StaEntity.HISTORICAL_LOCATION;
-    }
-
-    @Override
-    public List<Field<?>> getEntityTableFields() {
-        return Arrays.asList(StaEntity.HISTORICAL_LOCATION.fields());
     }
 
     @Override
@@ -157,7 +202,7 @@ public class HistoricalLocationDaoImpl
     @Override
     public void deleteByStaIdentifier(String staIdentifier) throws STACRUDException {
         // TODO: Firehose unstable
-        firehoseClient.icebergDeleteById(StaEntity.HISTORICAL_LOCATION.getName(),
+        firehoseClient.icebergDeleteById(StaEntity.HISTORICAL_LOCATION.HISTORICAL_LOCATION_ID.getName(),
                 Long.parseLong(staIdentifier),
                 tableName);
         // firehoseClient.icebergDeleteByStaIdentifier(staIdentifier, tableName);

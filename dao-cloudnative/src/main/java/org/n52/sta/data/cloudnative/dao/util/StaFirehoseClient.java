@@ -36,7 +36,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import software.amazon.awssdk.auth.credentials.ProfileCredentialsProvider;
 import software.amazon.awssdk.core.SdkBytes;
 import software.amazon.awssdk.services.firehose.FirehoseClient;
 import software.amazon.awssdk.services.firehose.model.PutRecordRequest;
@@ -45,8 +44,6 @@ import software.amazon.awssdk.services.firehose.model.Record;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
-import java.nio.charset.StandardCharsets;
-import java.util.Base64;
 import java.util.Iterator;
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -99,11 +96,7 @@ public class StaFirehoseClient implements FirehoseConstants {
         adf_record.setAll(dataNode);
 
         try {
-            String dataPayload = mapper.writeValueAsString(rootNode) /*+ "\n"*/;
-            /*ObjectNode outerNode = mapper.createObjectNode();
-            outerNode.put("Data", dataPayload);
-            streamToFirehose(mapper.writeValueAsString(outerNode));*/
-            streamToFirehose(dataPayload);
+            streamToFirehose(mapper.writeValueAsString(rootNode));
         } catch (JsonProcessingException e) {
             throw new STACRUDException("Bad request: cannot parse payload for table " + operation);
         }
@@ -160,12 +153,7 @@ public class StaFirehoseClient implements FirehoseConstants {
                 default:
                     throw new RuntimeException("Could not identify value type of parameters!");
             }
-            adf_record.put(foreignKey, foreignKeyVal);
-
-            // Wrap the rootNode inside another JSON object with "Data" field
-            ObjectNode outerNode = mapper.createObjectNode();
-            outerNode.set("Data", rootNode);
-
+            adf_record.put(foreignKey.toLowerCase(), foreignKeyVal);
             try {
                 streamToFirehose(mapper.writeValueAsString(rootNode));
             } catch (JsonProcessingException e) {
@@ -186,14 +174,10 @@ public class StaFirehoseClient implements FirehoseConstants {
 
 
         ObjectNode adf_record = rootNode.putObject(FirehoseConstants.ADF_RECORD);
-        adf_record.put(key, Id);
-
-        // Wrap the rootNode inside another JSON object with "Data" field
-        ObjectNode outerNode = mapper.createObjectNode();
-        outerNode.set("Data", rootNode);
+        adf_record.put(key.toLowerCase(), Id);
 
         try {
-            streamToFirehose(mapper.writeValueAsString(outerNode));
+            streamToFirehose(mapper.writeValueAsString(rootNode));
         } catch (JsonProcessingException e) {
             throw new STACRUDException("Bad request: cannot parse payload for table " + FirehoseConstants.DELETE);
         }
@@ -224,27 +208,13 @@ public class StaFirehoseClient implements FirehoseConstants {
 
     private void streamToFirehose(String jsonPayload) {
         try {
-            /*Record record = Record.builder()
+            Record record = Record.builder()
                     .data(SdkBytes.fromUtf8String(jsonPayload))
                     .build();
 
             PutRecordRequest putRecordRequest = PutRecordRequest.builder()
                     .deliveryStreamName(FirehoseConstants.DELIVERY_STREAM_NAME)
                     .record(record)
-                    .build();*/
-
-            // Convert JSON string to byte array
-            byte[] data = jsonPayload.getBytes(StandardCharsets.UTF_8);
-
-            // Base64 encode the byte array
-            // String base64EncodedData = Base64.getEncoder().encodeToString(data);
-
-            // Create a PutRecordRequest
-            PutRecordRequest putRecordRequest = PutRecordRequest.builder()
-                    .deliveryStreamName(FirehoseConstants.DELIVERY_STREAM_NAME)
-                    .record(Record.builder()
-                            .data(SdkBytes.fromByteArray(Base64.getEncoder().encode(data)))
-                            .build())
                     .build();
 
             PutRecordResponse resp = firehoseClient.putRecord(putRecordRequest);

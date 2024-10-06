@@ -127,7 +127,7 @@ public class CloudNativeEntityServiceRepository implements EntityServiceFactory 
      * @param entityTypeName the type name of the requested entity service
      * @return the requested entity data service
      */
-    CloudNativeAbstractSensorThingsEntityServiceImpl getEntityServiceRaw(EntityTypes entityTypeName) {
+    public CloudNativeAbstractSensorThingsEntityServiceImpl getEntityServiceRaw(EntityTypes entityTypeName) {
         return entityServices.get(entityTypeName).getServiceImpl();
     }
 

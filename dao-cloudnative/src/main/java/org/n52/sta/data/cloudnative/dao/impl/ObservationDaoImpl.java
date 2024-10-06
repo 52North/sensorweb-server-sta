@@ -33,23 +33,32 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.jooq.*;
 import org.jooq.Record;
 
+import org.n52.shetland.filter.ExpandItem;
 import org.n52.shetland.oasis.odata.query.option.QueryOptions;
+import org.n52.shetland.ogc.sta.StaConstants;
 import org.n52.shetland.ogc.sta.exception.STACRUDException;
 import org.n52.shetland.ogc.sta.exception.STAInvalidQueryException;
+import org.n52.shetland.ogc.sta.model.STAEntityDefinition;
+import org.n52.sta.api.dto.DatastreamDTO;
+import org.n52.sta.api.dto.FeatureOfInterestDTO;
 import org.n52.sta.api.dto.ObservationDTO;
 import org.n52.sta.data.cloudnative.DTOMapper;
+import org.n52.sta.data.cloudnative.condition.DatastreamQueryConditions;
 import org.n52.sta.data.cloudnative.condition.ObservationQueryConditions;
 import org.n52.sta.data.cloudnative.condition.StaEntity;
 import org.n52.sta.data.cloudnative.dao.FirehoseConstants;
 import org.n52.sta.data.cloudnative.dao.ObservationDao;
 
 import org.n52.sta.data.cloudnative.dao.util.StaFirehoseClient;
+import org.n52.sta.data.cloudnative.schema.tables.Format;
 import org.n52.sta.data.cloudnative.schema.tables.pojos.Observation;
+import org.n52.sta.data.cloudnative.schema.tables.records.ObservationRecord;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Order;
 import org.springframework.stereotype.Component;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static org.n52.sta.api.RequestUtils.QUERY_OPTIONS_FACTORY;
 
@@ -59,8 +68,7 @@ import static org.n52.sta.api.RequestUtils.QUERY_OPTIONS_FACTORY;
 @Component
 public class ObservationDaoImpl extends AbstractStaEntityDao<ObservationDTO> implements ObservationDao {
     private final String tableName = getEntityTable().getName();
-    private final String parameterTableName = "OBSERVATION_PARAMETER";
-    private Set<Table<?>> joins;
+    private final String parameterTableName = StaEntity.OBSERVATION_PARAMETERS.getName();
 
     public ObservationDaoImpl(DSLContext ctx, StaFirehoseClient firehoseClient) {
         super(ctx, firehoseClient);
@@ -77,8 +85,11 @@ public class ObservationDaoImpl extends AbstractStaEntityDao<ObservationDTO> imp
                 entityClass,
                 sort,
                 null);
-        return query.limit(1).fetch().into(StaEntity.OBSERVATION).into(Observation.class).get(0);
-
+        Result<ObservationRecord> result = query.limit(1).fetchInto(StaEntity.OBSERVATION);
+        if (!result.isEmpty()) {
+            return result.into(Observation.class).get(0);
+        }
+        return null;
     }
 
     @Override
@@ -92,7 +103,11 @@ public class ObservationDaoImpl extends AbstractStaEntityDao<ObservationDTO> imp
                 entityClass,
                 sort,
                 null);
-        return query.limit(1).fetch().into(StaEntity.OBSERVATION).into(Observation.class).get(0);
+        Result<ObservationRecord> result = query.limit(1).fetchInto(StaEntity.OBSERVATION);
+        if (!result.isEmpty()) {
+            return result.into(Observation.class).get(0);
+        }
+        return null;
     }
 
     @Override
@@ -105,10 +120,16 @@ public class ObservationDaoImpl extends AbstractStaEntityDao<ObservationDTO> imp
                     k -> record.map(new DTOMapper.ObservationRecordMapper()));
 
             if (joins.contains(StaEntity.FEATURE_OF_INTEREST)) {
-                observation.setFeatureOfInterest(record.map(new DTOMapper.FeatureOfInterestRecordMapper()));
+                FeatureOfInterestDTO feature = record.map(new DTOMapper.FeatureOfInterestRecordMapper());
+                if (feature.getId() != null) {
+                    observation.setFeatureOfInterest(feature);
+                }
             }
-            if (joins.contains(StaEntity.OBSERVATION)) {
-                observation.setDatastream(record.map(new DTOMapper.DatastreamRecordMapper()));
+            if (joins.contains(StaEntity.DATASTREAM)) {
+                DatastreamDTO datastream = record.map(new DTOMapper.DatastreamRecordMapper());
+                if(datastream.getId() != null) {
+                    observation.setDatastream(datastream);
+                }
             }
             if (joins.contains(StaEntity.OBSERVATION_PARAMETERS)) {
                 ObjectNode properties = record.map(new DTOMapper.ObservationRecordMapper
@@ -116,7 +137,6 @@ public class ObservationDaoImpl extends AbstractStaEntityDao<ObservationDTO> imp
                 if (properties != null) {
                     observation.setParameters(Optional.ofNullable(observation.getParameters())
                             .orElse(new ObjectMapper().createObjectNode()));
-
                     observation.getParameters().setAll(properties);
                 }
             }
@@ -131,11 +151,6 @@ public class ObservationDaoImpl extends AbstractStaEntityDao<ObservationDTO> imp
     }
 
     @Override
-    public List<Field<?>> getEntityTableFields() {
-        return Arrays.asList(StaEntity.OBSERVATION.fields());
-    }
-
-    @Override
     public Field<String> getStaEntityId() {
         return StaEntity.OBSERVATION.STA_IDENTIFIER;
     }
@@ -146,11 +161,76 @@ public class ObservationDaoImpl extends AbstractStaEntityDao<ObservationDTO> imp
     }
 
     @Override
-    public Set<Table<?>> createJoinList(QueryOptions queryOptions)
+    public Table<?> createJoinList(QueryOptions queryOptions, Table<?> table, List<Field<?>> select)
             throws STAInvalidQueryException {
-        joins = new HashSet<>();
+        joins = new LinkedHashSet<>();
+
         joins.add(StaEntity.OBSERVATION_PARAMETERS);
-        return joins;
+        table = table.leftJoin(StaEntity.OBSERVATION_PARAMETERS)
+                .on(StaEntity.OBSERVATION_PARAMETERS.FK_OBSERVATION_ID
+                        .eq(StaEntity.OBSERVATION.OBSERVATION_ID));
+
+        if (queryOptions == null ||
+                queryOptions.getSelectFilter() == null) {
+            select.addAll(getStaEntityFields(StaEntity.OBSERVATION_PARAMETERS));
+        }
+
+        if (queryOptions != null && queryOptions.getExpandFilter() != null) {
+            for (ExpandItem expandItem : queryOptions.getExpandFilter().getItems()) {
+                // We cannot handle nested $filter or $expand
+                if (expandItem.getQueryOptions().hasFilterFilter() ||
+                        expandItem.getQueryOptions().hasExpandFilter()) {
+                    continue;
+                }
+                String expandProperty = expandItem.getPath();
+                switch (expandProperty) {
+                    case STAEntityDefinition.DATASTREAM:
+                    case STAEntityDefinition.DATASTREAMS:
+
+                        joins.add(StaEntity.DATASTREAM);
+                        table = table.leftJoin(StaEntity.DATASTREAM)
+                                        .on(StaEntity.DATASTREAM.DATASET_ID
+                                                .eq(StaEntity.OBSERVATION.FK_DATASET_ID));
+
+                        Format DATASTREAM_FORMAT = StaEntity.FORMAT.as("DATASTREAM_FORMAT");
+                        joins.add(DATASTREAM_FORMAT);
+                        table = table.leftJoin(DATASTREAM_FORMAT)
+                                .on(DATASTREAM_FORMAT.FORMAT_ID
+                                        .eq(StaEntity.DATASTREAM.FK_FORMAT_ID));
+
+                        joins.add(StaEntity.UNIT);
+                        table = table.leftJoin(StaEntity.UNIT)
+                                .on(StaEntity.DATASTREAM.FK_UNIT_ID
+                                        .eq(StaEntity.UNIT.UNIT_ID));
+
+                        if (expandItem.getQueryOptions() == null ||
+                                expandItem.getQueryOptions().getSelectFilter() == null) {
+                            select.addAll(getStaEntityFields(StaEntity.DATASTREAM));
+                            select.addAll(getStaEntityFields(DATASTREAM_FORMAT)
+                                    .stream()
+                                    .map(e -> e.as("DATASTREAM_FORMAT_" + e.getName()))
+                                    .collect(Collectors.toList())
+                            );
+                            select.addAll(getStaEntityFields(StaEntity.UNIT));
+                        } else {
+                            select.addAll(expandItem
+                                    .getQueryOptions()
+                                    .getSelectFilter()
+                                    .getItems()
+                                    .stream()
+                                    .map(e-> new DatastreamQueryConditions().checkPropertyName(e))
+                                    .collect(Collectors.toList()));
+                        }
+
+                        break;
+                    default:
+                        throw new STAInvalidQueryException(String.format(INVALID_EXPAND_OPTION_SUPPLIED,
+                                expandProperty,
+                                StaConstants.OBSERVATION));
+                }
+            }
+        }
+        return table;
     }
 
     @Override
@@ -170,7 +250,7 @@ public class ObservationDaoImpl extends AbstractStaEntityDao<ObservationDTO> imp
 
     @Override
     public void deleteByStaIdentifier(String staIdentifier) throws STACRUDException {
-        // TODO: Firehose
+        // TODO: Firehose unstable
         // firehoseClient.icebergDeleteByStaIdentifier(staIdentifier, tableName);
         firehoseClient.icebergDeleteById(getEntityId().getName(), Long.parseLong(staIdentifier), tableName);
     }
@@ -179,22 +259,19 @@ public class ObservationDaoImpl extends AbstractStaEntityDao<ObservationDTO> imp
     public void deleteAllByDatasetIdIn(Set<Long> datasetId) throws STACRUDException, STAInvalidQueryException {
         // get list of observation_id where fk_dataset_id = datasetId
         // for each obs_id -> deleteById
-        String key = StaEntity.OBSERVATION.OBSERVATION_ID.getName();
         for (Long id : datasetId) {
-            QueryOptions options = QUERY_OPTIONS_FACTORY.createQueryOptions("$select=id");
-            Condition predicate = StaEntity.OBSERVATION.FK_DATASET_ID.eq(id);
-            List<ObservationDTO> observations = findAll(predicate, options, ObservationDTO.class);
-            for (ObservationDTO observation : observations) {
-                firehoseClient.icebergDeleteById(key, Long.valueOf(observation.getId()), tableName);
-            }
+            deleteByDatasetId(id);
         }
-        /*
-        // TODO: Firehose unstable
-        String key = StaEntity.OBSERVATION.FK_DATASET_ID.getName();
-        for (Long Id: datasetId) {
-            firehoseClient.icebergDeleteById(key, Id, tableName);
+    }
+
+    public void deleteByDatasetId(Long datasetId) throws STACRUDException, STAInvalidQueryException {
+        String key = StaEntity.OBSERVATION.OBSERVATION_ID.getName();
+        QueryOptions options = QUERY_OPTIONS_FACTORY.createQueryOptions("$select=id");
+        Condition predicate = StaEntity.OBSERVATION.FK_DATASET_ID.eq(datasetId);
+        List<ObservationDTO> observations = findAll(predicate, options, ObservationDTO.class);
+        for (ObservationDTO observation : observations) {
+            firehoseClient.icebergDeleteById(key, Long.parseLong(observation.getId()), tableName);
         }
-        */
     }
 
     public void saveObservationParameters(String id, ObjectNode parameters) throws STACRUDException {

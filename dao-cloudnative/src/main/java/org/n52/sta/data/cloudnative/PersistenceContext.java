@@ -28,47 +28,60 @@
  */
 package org.n52.sta.data.cloudnative;
 
+import com.zaxxer.hikari.HikariConfig;
+import com.zaxxer.hikari.HikariDataSource;
 import org.jooq.*;
 import org.jooq.impl.*;
 
 import org.n52.sta.data.cloudnative.dao.FirehoseConstants;
-import org.n52.sta.data.cloudnative.schema.DefaultSchema;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
-import org.springframework.boot.jdbc.DataSourceBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.PropertySource;
-import org.springframework.jdbc.datasource.TransactionAwareDataSourceProxy;
 import org.springframework.jdbc.support.SQLErrorCodeSQLExceptionTranslator;
 import org.springframework.jdbc.support.SQLExceptionTranslator;
-import org.springframework.transaction.annotation.EnableTransactionManagement;
-import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 import software.amazon.awssdk.auth.credentials.ProfileCredentialsProvider;
 import software.amazon.awssdk.services.firehose.FirehoseClient;
 
 import javax.sql.DataSource;
-import java.io.FileInputStream;
-import java.io.IOException;
 import java.sql.SQLException;
-import java.util.Properties;
-import java.util.Set;
-import java.util.stream.Collectors;
+
 
 @Configuration
-@EnableTransactionManagement
 @EnableConfigurationProperties
-@PropertySource("classpath:cloudnative-datasource.yml")
 public class PersistenceContext {
+
+    @Value("${spring.athena.user}")
+    private String user;
+
+    @Value("${spring.athena.password}")
+    private String password;
+
+    @Value("${spring.athena.region}")
+    private String region;
+
+    @Value("${spring.athena.s3-output-location}")
+    private String s3OutputLocation;
+
+    @Value("${spring.athena.database}")
+    private String database;
+
+    @Value("${spring.athena.workgroup}")
+    private String workgroup;
 
     @Bean
     public DataSource dataSource() {
-        return DataSourceBuilder.create().build();
+        HikariConfig config = new HikariConfig();
+        config.setJdbcUrl("jdbc:athena://");
+        config.setDriverClassName("com.amazon.athena.jdbc.AthenaDriver");
+        config.addDataSourceProperty("User", user);
+        config.addDataSourceProperty("Password", password);
+        config.addDataSourceProperty("Region", region);
+        config.addDataSourceProperty("Database", database);
+        config.addDataSourceProperty("OutputLocation", s3OutputLocation);
+        return new HikariDataSource(config);
     }
 
-    @Bean
-    public TransactionAwareDataSourceProxy transactionAwareDataSource() {
-        return new TransactionAwareDataSourceProxy(dataSource());
-    }
 
     @Bean
     public FirehoseClient firehoseClient() {
@@ -79,54 +92,22 @@ public class PersistenceContext {
     }
 
     @Bean
-    public DataSourceTransactionManager transactionManager() {
-        return new DataSourceTransactionManager(dataSource());
-    }
-
-    @Bean
     public DataSourceConnectionProvider connectionProvider() {
-        return new DataSourceConnectionProvider(transactionAwareDataSource());
+        return new DataSourceConnectionProvider(dataSource());
     }
 
     @Bean
-    public DSLContext dsl() throws SQLException {
+    public DSLContext dsl()
+            throws SQLException {
 
         // Configure jOOQ
         DefaultConfiguration jooqConfiguration = new DefaultConfiguration();
         jooqConfiguration.set(connectionProvider());
         jooqConfiguration.set(new DefaultExecuteListenerProvider(exceptionTransformer()));
-        jooqConfiguration.set(SQLDialect.DUCKDB);
-        // Register the inline VisitListener
-        jooqConfiguration.set(new VisitListener() {
-
-            private final Set<Class<?>> StaTableClasses = DefaultSchema.DEFAULT_SCHEMA.getTables()
-                    .stream()
-                    .map(Table::getClass)
-                    .collect(Collectors.toSet());
-
-            @Override
-            public void visitStart(VisitContext context) {
-                QueryPart part = context.queryPart();
-                if (part instanceof Table &&
-                        !(part instanceof Field) &&
-                        StaTableClasses.contains((part.getClass()))) {
-                    handleTable(context, (Table<?>) part);
-                }
-            }
-
-            private void handleTable(VisitContext context, Table<?> table) {
-                String parquetReadFunction = String.format("read_parquet('s3://52n-sta/%s')", table.getName());
-                Table<?> aliasedTable = DSL.table(parquetReadFunction).as(table.getName());
-                context.queryPart(aliasedTable);
-            }
-        });
+        jooqConfiguration.set(SQLDialect.DEFAULT);
 
         // Create context
         DSLContext ctx = DSL.using(jooqConfiguration);
-
-        // Load Extensions
-        installAndLoadSpatialExtension(ctx);
-        installLoadAndConfigureHTTPFSExtension(ctx);
 
         return ctx;
     }
@@ -137,41 +118,6 @@ public class PersistenceContext {
         return new ExceptionTranslator();
     }
 
-    private void installAndLoadSpatialExtension(DSLContext ctx) {
-        ctx.execute("INSTALL spatial;");
-        ctx.execute("LOAD spatial;");
-        System.out.println("Spatial extension loaded successfully.");
-    }
-
-    private void installLoadAndConfigureHTTPFSExtension(DSLContext ctx) {
-        ctx.execute("INSTALL httpfs;");
-        ctx.execute("LOAD httpfs;");
-
-        Properties properties = new Properties();
-        try (FileInputStream fis = new FileInputStream("blob.properties")) {
-            properties.load(fis);
-
-            // Retrieve properties
-            String type = properties.getProperty("type");
-            String keyId = properties.getProperty("keyId");
-            String secret = properties.getProperty("secret");
-            String region = properties.getProperty("region");
-
-            // Format the CREATE SECRET statement
-            String createSecretStatement = String.format(
-                    "CREATE SECRET secret1 (" +
-                            "    TYPE %s," +
-                            "    KEY_ID '%s'," +
-                            "    SECRET '%s'," +
-                            "    REGION '%s'" +
-                            ");",
-                    type, keyId, secret, region
-            );
-            ctx.execute(createSecretStatement);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-    }
 
     public static class ExceptionTranslator extends DefaultExecuteListener {
         public void exception(ExecuteContext context) {

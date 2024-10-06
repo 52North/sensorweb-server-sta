@@ -29,6 +29,7 @@
 package org.n52.sta.data.cloudnative.dao.impl;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.PropertyNamingStrategy;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.jooq.*;
 import org.jooq.Record;
@@ -49,7 +50,7 @@ import java.util.Optional;
 public class FormatDaoImpl {
 
     private final DSLContext ctx;
-    private final String tableName = "FORMAT";
+    private final String tableName = StaEntity.FORMAT.getName();
     private final ObjectMapper mapper = new ObjectMapper();
     private final StaFirehoseClient firehoseClient;
 
@@ -57,8 +58,11 @@ public class FormatDaoImpl {
     public FormatDaoImpl(DSLContext ctx, StaFirehoseClient firehoseClient) {
         this.ctx = ctx;
         this.firehoseClient = firehoseClient;
+        configureJacksonMapper();
     }
-
+    private void configureJacksonMapper() {
+        mapper.setPropertyNamingStrategy(PropertyNamingStrategy.SNAKE_CASE);
+    }
 
     public boolean existsByFormat(String definition) {
         Condition predicate = StaEntity.FORMAT.DEFINITION.eq(definition);
@@ -69,13 +73,13 @@ public class FormatDaoImpl {
                 .where(predicate)
                 .fetchOne(0, long.class);
 
-        return count != null;
+        return count != null && count != 0;
     }
 
     public Optional<Format> findByFormat(String definition) {
         Condition predicate = StaEntity.FORMAT.DEFINITION.eq(definition);
         // definition must be unique
-        Record result = ctx.select().from(StaEntity.UNIT).where(predicate).fetchOne();
+        Record result = ctx.select().from(StaEntity.FORMAT).where(predicate).fetchOne();
         return Optional.of(mapResultToPOJO(result));
     }
 

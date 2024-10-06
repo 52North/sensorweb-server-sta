@@ -12,15 +12,14 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.lang.Nullable;
 
-import javax.transaction.Transactional;
+
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
+
 
 /**
  * @author <a href="mailto:humaid.kidwai@ucalgary.ca">Humaid Kidwai</a>
  */
-@Transactional
 public interface StaEntityDao <T extends StaDTO> {
 
     String INVALID_EXPAND_OPTION_SUPPLIED =
@@ -145,35 +144,11 @@ public interface StaEntityDao <T extends StaDTO> {
      */
     void deleteByStaIdentifier(String identifier) throws STACRUDException;
 
-//    /**
-//     * Checks whether Entity with given id exists.
-//     *
-//     * @param identifier Identifier of the Entity
-//     * @return true if Entity exists. false otherwise
-//     */
-//    boolean existsByIdentifier(String identifier);
-//
-//    /**
-//     * Finds Entity by identifier. Fetches Entity and all related Entities given by EntityGraphs
-//     *
-//     * @param identifier      Identifier of the wanted Entity
-//     * @param queryOptions    OData query options
-//     * @return Entity found in Database. Optional.empty() otherwise
-//     */
-//    Optional<T> findByIdentifier(String identifier, QueryOptions queryOptions);
-//
-//    /**
-//     * Deletes Entity with given Identifier
-//     *
-//     * @param identifier Identifier of the Entity
-//     */
-//    void deleteByIdentifier(String identifier);
 
     long count(@Nullable Condition spec,
                Class<T> className) throws STAInvalidQueryException;
 
 
-    List<Field<?>> getEntityTableFields();
 
     Field<String> getStaEntityId();
 
@@ -183,6 +158,7 @@ public interface StaEntityDao <T extends StaDTO> {
 
     Field<?> checkPropertyName(String property);
 
-    Set<Table<?>> createJoinList(QueryOptions queryOptions) throws STAInvalidQueryException;
+    Table<?> createJoinList(QueryOptions queryOptions, Table<?> table, List<Field<?>> select)
+            throws STAInvalidQueryException;
 
 }

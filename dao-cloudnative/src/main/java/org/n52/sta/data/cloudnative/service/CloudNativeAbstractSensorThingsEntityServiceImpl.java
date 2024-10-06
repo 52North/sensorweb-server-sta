@@ -57,8 +57,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.http.HttpMethod;
 
 import java.util.Optional;
@@ -70,7 +68,6 @@ import java.util.concurrent.atomic.AtomicLong;
  *
  * @author <a href="mailto:humaid.kidwai@ucalgary.ca">Humaid Kidwai</a>
  */
-@Transactional(rollbackFor = Exception.class)
 public abstract class CloudNativeAbstractSensorThingsEntityServiceImpl <T extends StaEntityDao<R>, R extends StaDTO> {
 
     protected static final String RESULT = "result";
@@ -88,19 +85,20 @@ public abstract class CloudNativeAbstractSensorThingsEntityServiceImpl <T extend
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CloudNativeAbstractSensorThingsEntityServiceImpl.class);
 
-    @Autowired private MutexFactory lock;
+    private final MutexFactory lock;
     private CloudNativeEntityServiceRepository serviceRepository;
     private final T StaEntityDao;
     protected final Class<R> entityClass;
 
-    public CloudNativeAbstractSensorThingsEntityServiceImpl(T StaEntityDao, Class<R> entityClass) {
+    public CloudNativeAbstractSensorThingsEntityServiceImpl(T StaEntityDao, Class<R> entityClass, MutexFactory lock) {
         this.entityClass = entityClass;
         this.StaEntityDao = StaEntityDao;
+        this.lock = lock;
     }
 
 
     public void setServiceRepository(CloudNativeEntityServiceRepository entityServiceRepository) {
-        this.serviceRepository = serviceRepository;
+        this.serviceRepository = entityServiceRepository;
     }
 
     /**
@@ -190,22 +188,19 @@ public abstract class CloudNativeAbstractSensorThingsEntityServiceImpl <T extend
         return StaEntityDao.count(byRelatedEntityFilter(relatedId, relatedType, ownId), entityClass) > 0;
     }
 
-    @Transactional(rollbackFor = Exception.class)
     public R create(StaDTO entity) throws STACRUDException, STAInvalidQueryException {
         return createOrfetch((R) entity);
     }
 
-    @Transactional(rollbackFor = Exception.class)
     public R update(String id, StaDTO entity, HttpMethod method) throws STACRUDException, STAInvalidQueryException {
         return updateEntity(id, (R) entity, method);
     }
 
-    @Transactional(rollbackFor = Exception.class)
     public void delete(String id) throws STACRUDException, STAInvalidQueryException {
         this.deleteEntity(id);
     }
 
-    public R getEntityByIdRaw(Long id, QueryOptions queryOptions) throws STACRUDException {
+    protected R getEntityByIdRaw(Long id, QueryOptions queryOptions) throws STACRUDException {
         try {
             Optional<R> entity = StaEntityDao.findById(id, queryOptions, entityClass);
             if (entity.isPresent() && queryOptions.hasExpandFilter()) {
@@ -242,7 +237,7 @@ public abstract class CloudNativeAbstractSensorThingsEntityServiceImpl <T extend
         }
     }
 
-    public R getEntityByRelatedEntityRaw(String relatedId,
+    protected R getEntityByRelatedEntityRaw(String relatedId,
                                           String relatedType,
                                           String ownId,
                                           QueryOptions queryOptions) throws STACRUDException {
@@ -325,18 +320,15 @@ public abstract class CloudNativeAbstractSensorThingsEntityServiceImpl <T extend
         return StaEntityDao.count(getFilterPredicate(entityClass, queryOptions), entityClass);
     }
 
-    @Transactional(rollbackFor = Exception.class)
     protected abstract R createOrfetch(R entity)
             throws STACRUDException, STAInvalidQueryException;
 
     protected abstract R createOrUpdate(R entity)
             throws STACRUDException, STAInvalidQueryException;
 
-    @Transactional(rollbackFor = Exception.class)
     protected abstract R updateEntity(String id, R entity, HttpMethod method)
             throws STACRUDException, STAInvalidQueryException;
 
-    @Transactional(rollbackFor = Exception.class)
     protected abstract void deleteEntity(String id)
             throws STACRUDException, STAInvalidQueryException;
 
@@ -363,7 +355,7 @@ public abstract class CloudNativeAbstractSensorThingsEntityServiceImpl <T extend
      * @param queryOptions {@link QueryOptions} to create {@link PageRequest}
      * @return {@link PageRequest} of type {@link OffsetLimitBasedPageRequest}
      */
-    OffsetLimitBasedPageRequest createPageableRequest(QueryOptions queryOptions) {
+    protected OffsetLimitBasedPageRequest createPageableRequest(QueryOptions queryOptions) {
         long offset = queryOptions.hasSkipFilter() ? queryOptions.getSkipFilter().getValue() : 0;
         Sort sort;
         if (queryOptions.hasOrderByFilter()) {
@@ -373,12 +365,14 @@ public abstract class CloudNativeAbstractSensorThingsEntityServiceImpl <T extend
                         sortProperty.isSetSortOrder() &&
                                 sortProperty.getSortOrder().equals(FilterConstants.SortOrder.DESC) ?
                                 Sort.Direction.DESC : Sort.Direction.ASC;
-                sort = sort.and(sortProperty.getValueReference().equals(RESULT) ? handleResultSort(direction) :
-                        Sort.by(direction, StaEntityDao.checkPropertyName(sortProperty.getValueReference()).getName()));
+                sort = sort.and(sortProperty.getValueReference().equals(RESULT) ?
+                        handleResultSort(direction) : Sort.by(direction,
+                        checkPropertyName(sortProperty.getValueReference())
+                        )
+                );
             }
         } else {
-            sort = Sort.by(Sort.Direction.ASC,
-                    getStaEntityId().getName());
+            sort = Sort.by(Sort.Direction.ASC, getStaEntityId().getQualifiedName().toString());
         }
         return new OffsetLimitBasedPageRequest((int) offset,
                 queryOptions.getTopFilter().getValue().intValue(),
@@ -406,7 +400,7 @@ public abstract class CloudNativeAbstractSensorThingsEntityServiceImpl <T extend
      * @param queryOptions QueryOptions Object
      * @return jOOQ Condition based on FilterOption from queryOptions
      */
-    public Condition getFilterPredicate(Class<R> entityClass, QueryOptions queryOptions) {
+    protected Condition getFilterPredicate(Class<R> entityClass, QueryOptions queryOptions) {
 
         if (!queryOptions.hasFilterFilter()) {
             // Filter out non-root observations
@@ -510,7 +504,7 @@ public abstract class CloudNativeAbstractSensorThingsEntityServiceImpl <T extend
     }
 
     // 1 million unique timestamps/second
-    public Long getUniqueTimestamp() {
+    protected Long getUniqueTimestamp() {
         AtomicLong TS = getStaEntityTS();
         long micros = System.currentTimeMillis() * 1000;
         for ( ; ; ) {
@@ -522,8 +516,8 @@ public abstract class CloudNativeAbstractSensorThingsEntityServiceImpl <T extend
         }
     }
 
-    abstract Field<String> getStaEntityId();
+    protected abstract Field<String> getStaEntityId();
 
-    abstract AtomicLong getStaEntityTS();
+    protected abstract AtomicLong getStaEntityTS();
 
 }

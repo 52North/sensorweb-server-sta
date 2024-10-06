@@ -38,26 +38,29 @@ import org.n52.shetland.ogc.sta.StaConstants;
 import org.n52.shetland.ogc.sta.exception.STACRUDException;
 import org.n52.shetland.ogc.sta.exception.STAInvalidQueryException;
 import org.n52.shetland.ogc.sta.model.SensorEntityDefinition;
+import org.n52.sta.api.dto.DatastreamDTO;
 import org.n52.sta.api.dto.SensorDTO;
 import org.n52.sta.data.cloudnative.DTOMapper;
+import org.n52.sta.data.cloudnative.condition.DatastreamQueryConditions;
 import org.n52.sta.data.cloudnative.condition.SensorQueryConditions;
 import org.n52.sta.data.cloudnative.condition.StaEntity;
 import org.n52.sta.data.cloudnative.dao.FirehoseConstants;
 import org.n52.sta.data.cloudnative.dao.SensorDao;
 import org.n52.sta.data.cloudnative.dao.util.StaFirehoseClient;
+import org.n52.sta.data.cloudnative.schema.tables.Format;
 import org.n52.sta.data.cloudnative.schema.tables.pojos.Procedure;
 import org.springframework.stereotype.Component;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * @author <a href="mailto:humaid.kidwai@ucalgary.ca">Humaid Kidwai</a>
  */
 @Component
 public class SensorDaoImpl extends AbstractStaEntityDao<SensorDTO> implements SensorDao {
-    private Set<Table<?>> joins;
     private final String tableName = getEntityTable().getName();
-    private final String parameterTableName = "PROCEDURE_PARAMETER";
+    private final String parameterTableName = StaEntity.SENSOR_PROPERTIES.getName();
 
     public SensorDaoImpl(DSLContext ctx, StaFirehoseClient firehoseClient) {
         super(ctx, firehoseClient);
@@ -72,7 +75,10 @@ public class SensorDaoImpl extends AbstractStaEntityDao<SensorDTO> implements Se
 
             if (joins.contains(StaEntity.DATASTREAM)) {
                 sensor.setDatastreams(Optional.ofNullable(sensor.getDatastreams()).orElse(new HashSet<>()));
-                sensor.getDatastreams().add(record.map(new DTOMapper.DatastreamRecordMapper()));
+                DatastreamDTO datastream = record.map(new DTOMapper.DatastreamRecordMapper());
+                if (datastream.getId() != null) {
+                    sensor.getDatastreams().add(datastream);
+                }
             }
             if (joins.contains(StaEntity.SENSOR_PROPERTIES)) {
                 ObjectNode properties = record.map(new DTOMapper
@@ -101,36 +107,89 @@ public class SensorDaoImpl extends AbstractStaEntityDao<SensorDTO> implements Se
     }
 
     @Override
-    public Set<Table<?>> createJoinList(QueryOptions queryOptions) throws STAInvalidQueryException {
-        joins = new HashSet<>();
-        joins.add(StaEntity.FORMAT);
+    public Table<?> createJoinList(QueryOptions queryOptions, Table<?> table, List<Field<?>> select)
+            throws STAInvalidQueryException {
+        joins = new LinkedHashSet<>();
+
+        Format SENSOR_FORMAT = StaEntity.FORMAT.as("SENSOR_FORMAT");
+        joins.add(SENSOR_FORMAT);
+        table = table.leftJoin(SENSOR_FORMAT)
+                .on(SENSOR_FORMAT.FORMAT_ID
+                        .eq(StaEntity.SENSOR.FK_FORMAT_ID));
+
         joins.add(StaEntity.SENSOR_PROPERTIES);
+        table = table.leftJoin(StaEntity.SENSOR_PROPERTIES)
+                .on(StaEntity.SENSOR_PROPERTIES.FK_PROCEDURE_ID
+                        .eq(StaEntity.SENSOR.PROCEDURE_ID));
+
+        if (queryOptions == null ||
+                queryOptions.getSelectFilter() == null) {
+            select.addAll(getStaEntityFields(SENSOR_FORMAT)
+                    .stream()
+                    .map(e -> e.as("SENSOR_FORMAT_" + e.getName()))
+                    .collect(Collectors.toList()));
+            select.addAll(getStaEntityFields(StaEntity.SENSOR_PROPERTIES));
+        }
+
         if (queryOptions != null && queryOptions.getExpandFilter() != null) {
             for (ExpandItem expandItem : queryOptions.getExpandFilter().getItems()) {
                 // We cannot handle nested $filter or $expand
-                if (expandItem.getQueryOptions().hasFilterFilter() || expandItem.getQueryOptions().hasExpandFilter()) {
+                if (expandItem.getQueryOptions().hasFilterFilter() ||
+                        expandItem.getQueryOptions().hasExpandFilter()) {
                     continue;
                 }
                 String expandProperty = expandItem.getPath();
                 if (SensorEntityDefinition.DATASTREAMS.equals(expandProperty)) {
+
                     joins.add(StaEntity.DATASTREAM);
+                    table = table.leftJoin(StaEntity.DATASTREAM)
+                            .on(StaEntity.DATASTREAM.FK_PROCEDURE_ID
+                                    .eq(StaEntity.SENSOR.PROCEDURE_ID));
+
+                    Format DATASTREAM_FORMAT = StaEntity.FORMAT.as("DATASTREAM_FORMAT");
+                    joins.add(DATASTREAM_FORMAT);
+                    table = table.leftJoin(DATASTREAM_FORMAT)
+                            .on(DATASTREAM_FORMAT.FORMAT_ID
+                                    .eq(StaEntity.DATASTREAM.FK_FORMAT_ID));
+
+                    joins.add(StaEntity.UNIT);
+                    table = table.leftJoin(StaEntity.UNIT)
+                            .on(StaEntity.DATASTREAM.FK_UNIT_ID
+                                    .eq(StaEntity.UNIT.UNIT_ID));
+
+                    if (expandItem.getQueryOptions() == null ||
+                            expandItem.getQueryOptions().getSelectFilter() == null) {
+                        select.addAll(getStaEntityFields(StaEntity.DATASTREAM));
+                        select.addAll(getStaEntityFields(DATASTREAM_FORMAT)
+                                .stream()
+                                .map(e -> e.as("DATASTREAM_FORMAT_" + e.getName()))
+                                .collect(Collectors.toList())
+                        );
+                        select.addAll(getStaEntityFields(StaEntity.UNIT));
+                    } else {
+                        select.addAll(expandItem
+                                .getQueryOptions()
+                                .getSelectFilter()
+                                .getItems()
+                                .stream()
+                                .map(e-> new DatastreamQueryConditions().checkPropertyName(e))
+                                .collect(Collectors.toList()));
+                    }
                 }
-                throw new STAInvalidQueryException(String.format(INVALID_EXPAND_OPTION_SUPPLIED,
-                        expandProperty,
-                        StaConstants.SENSOR));
+                else {
+                    throw new STAInvalidQueryException(String.format(INVALID_EXPAND_OPTION_SUPPLIED,
+                            expandProperty,
+                            StaConstants.SENSOR));
+                }
+
             }
         }
-        return joins;
+        return table;
     }
 
     @Override
-    public Field checkPropertyName(String property) {
+    public Field<?> checkPropertyName(String property) {
         return new SensorQueryConditions().checkPropertyName(property);
-    }
-
-    @Override
-    public List<Field<?>> getEntityTableFields() {
-        return Arrays.asList(StaEntity.SENSOR.fields());
     }
 
     @Override

@@ -38,11 +38,8 @@ import org.n52.shetland.ogc.sta.StaConstants;
 import org.n52.shetland.ogc.sta.exception.STAInvalidFilterExpressionException;
 import org.n52.shetland.ogc.sta.model.STAEntityDefinition;
 import org.n52.sta.data.cloudnative.condition.utils.GeospatialFunctions;
-import org.n52.sta.data.cloudnative.schema.tables.Dataset;
-import org.n52.sta.data.cloudnative.schema.tables.Location;
 import org.n52.sta.data.cloudnative.schema.tables.LocationParameter;
 import org.n52.svalbard.odata.core.expr.GeoValueExpr;
-import org.springframework.stereotype.Component;
 
 import java.util.List;
 
@@ -263,7 +260,7 @@ public class LocationQueryConditions extends EntityQueryConditions implements Sp
     }
 
     @Override
-    public Field checkPropertyName(String property) {
+    public Field<?> checkPropertyName(String property) {
         switch (property) {
             case StaConstants.PROP_ID:
                 return LOCATION.STA_IDENTIFIER;
