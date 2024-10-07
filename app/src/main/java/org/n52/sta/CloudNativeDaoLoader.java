@@ -29,6 +29,10 @@
 
 package org.n52.sta;
 
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.autoconfigure.data.jpa.JpaRepositoriesAutoConfiguration;
+import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
+import org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaAutoConfiguration;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
@@ -42,8 +46,13 @@ import org.springframework.context.annotation.aspectj.EnableSpringConfigured;
 @Configuration
 @ComponentScan(basePackages = {
         "org.n52.sta.http.vanilla",
-        "org.n52.sta.mqtt.vanilla",
+//        "org.n52.sta.mqtt.vanilla",
         "org.n52.sta.data.cloudnative",
+})
+@SpringBootApplication(exclude = {
+        JpaRepositoriesAutoConfiguration.class,
+        HibernateJpaAutoConfiguration.class,
+        DataSourceAutoConfiguration.class
 })
 @EnableSpringConfigured
 public class CloudNativeDaoLoader {
