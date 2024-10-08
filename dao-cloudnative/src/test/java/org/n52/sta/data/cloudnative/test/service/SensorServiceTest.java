@@ -209,7 +209,7 @@ public class SensorServiceTest {
         try {
             SensorDTO sensor = sensorService.getEntity(
                     entityId,
-                    QUERY_OPTIONS_FACTORY.createQueryOptions("$expand=Datastreams")
+                    QUERY_OPTIONS_FACTORY.createQueryOptions("$expand=Datastreams($select=id, name, description)")
             );
             Assertions.assertNotNull(sensor);
             Assertions.assertEquals(sensor.getId(), entityId);

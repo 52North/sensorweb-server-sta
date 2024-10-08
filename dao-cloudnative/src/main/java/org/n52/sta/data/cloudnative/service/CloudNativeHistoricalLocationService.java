@@ -221,12 +221,14 @@ public class CloudNativeHistoricalLocationService
         hLocPOJO.setHistoricalLocationId(Long.valueOf(entity.getId()));
         hLocPOJO.setIdentifier(entity.getId());
         hLocPOJO.setStaIdentifier(entity.getId());
-        LocalDateTime time = ((TimeInstant) entity.getTime()).getValue()
-                .toDate()
-                .toInstant()
-                .atZone(ZoneOffset.UTC)
-                .toLocalDateTime();
-        hLocPOJO.setTime(time);
+        if (entity.getTime() != null) {
+            LocalDateTime time = ((TimeInstant) entity.getTime()).getValue()
+                    .toDate()
+                    .toInstant()
+                    .atZone(ZoneOffset.UTC)
+                    .toLocalDateTime();
+            hLocPOJO.setTime(time);
+        }
         hLocPOJO.setFkPlatformId(Long.parseLong(entity.getThing().getId()));
 
         return hLocPOJO;

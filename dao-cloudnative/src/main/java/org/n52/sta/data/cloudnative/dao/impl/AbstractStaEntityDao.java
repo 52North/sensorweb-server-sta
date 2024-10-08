@@ -149,8 +149,9 @@ public abstract class AbstractStaEntityDao<T extends StaDTO> implements StaEntit
 
         if (pageable.isPaged()) {
             selectQuery = (SelectConditionStep<Record1<String>>) selectQuery.offset((int) pageable.getOffset());
-            return ctx.fetch(selectQuery.getSQL(ParamType.INLINED) + " limit " + pageable.getPageSize())
-                    .getValues(DSL.field(columnName, String.class));
+            // jOOQ does not support Athena's offset/limit dialect
+            String sql = selectQuery.getSQL(ParamType.INLINED) + " limit " + pageable.getPageSize();
+            return ctx.fetch(sql).getValues(DSL.field(columnName, String.class));
         } else {
             return selectQuery.fetch().getValues(DSL.field(columnName, String.class));
         }
@@ -226,9 +227,10 @@ public abstract class AbstractStaEntityDao<T extends StaDTO> implements StaEntit
         Result<Record> result;
         if(pageable.isPaged()) {
             // query = (SelectSeekStepN<Record>) query.limit(pageable.getPageSize()).offset((int) pageable.getOffset());
+            // jOOQ does not support Athena's offset/limit dialect
             query = (SelectSeekStepN<Record>) query.offset((int) pageable.getOffset());
-            result = ctx.fetch(query.getSQL(ParamType.INLINED) + " limit " + pageable.getPageSize());
-            // query = (SelectSeekStepN<Record>) query.limit(pageable.getPageSize());
+            String sql = query.getSQL(ParamType.INLINED) + " limit " + pageable.getPageSize();
+            result = ctx.fetch(sql);
         } else {
             result = query.fetch();
         }

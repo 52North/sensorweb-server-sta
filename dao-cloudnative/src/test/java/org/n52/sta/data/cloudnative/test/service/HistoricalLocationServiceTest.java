@@ -160,6 +160,7 @@ public class HistoricalLocationServiceTest {
     @Order(3)
     public void testDelete() {
         try {
+            entityId = "1727567885954000";
             historicalLocationService.delete(entityId);
             Thread.sleep(45000);
             Assertions.assertFalse(historicalLocationDao.existsByStaIdentifier(entityId, HistoricalLocationDTO.class));

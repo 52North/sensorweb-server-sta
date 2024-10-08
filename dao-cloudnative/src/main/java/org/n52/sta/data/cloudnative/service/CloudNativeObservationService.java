@@ -397,6 +397,7 @@ public class CloudNativeObservationService
                     .atZone(ZoneOffset.UTC)
                     .toLocalDateTime());
         }
+        // TODO: check if phenomenontime and resultTime can be set to current time when null
 
         setObservationPOJOValueType(observationPOJO, entity.getDatastream().getObservationType(), entity.getResult());
         observationPOJO.setFkDatasetId(Long.valueOf(entity.getDatastream().getId()));

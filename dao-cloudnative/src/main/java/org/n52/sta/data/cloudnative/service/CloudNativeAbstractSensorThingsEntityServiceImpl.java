@@ -233,7 +233,10 @@ public abstract class CloudNativeAbstractSensorThingsEntityServiceImpl <T extend
             long count = (queryOptions.hasCountFilter() && queryOptions.getCountFilter().getValue()) ?
                     pages.getTotalElements() : -1;
             boolean hasNext = pages.getTotalElements() == queryOptions.getTopFilter().getValue();
-            return new CollectionWrapper(count, pages.getContent(), hasNext);
+            return new CollectionWrapper(count, pages.map(e -> {
+                e.setAndParseQueryOptions(queryOptions);
+                return e;
+            }).getContent(), hasNext);
         }
     }
 

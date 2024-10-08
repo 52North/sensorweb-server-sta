@@ -97,11 +97,12 @@ public class DTOMapper implements RecordMapperProvider {
     public static class DatastreamRecordMapper implements RecordMapper<Record, Datastream> {
         @Override
         public Datastream map(Record rec) {
-            DatasetRecord record = rec.into(DatasetRecord.class);
+            DatasetRecord record = rec.into(StaEntity.DATASTREAM).into(DatasetRecord.class);
             Datastream datastream = new Datastream();
 
             // aggregate datasets do not have staIdentifier
-            setStaIdentifier(datastream, record.getDatasetId().toString());
+            Long Id = record.getDatasetId();
+            setStaIdentifier(datastream, Id == null ? null : Id.toString());
             setStaName(datastream, record.getName());
             setStaDescription(datastream, record.getDescription());
             setPhenomenonTime(datastream, record);
@@ -115,7 +116,8 @@ public class DTOMapper implements RecordMapperProvider {
         public static class DatastreamParameterRecordMapper implements RecordMapper<Record, ObjectNode> {
 
             private ObjectNode setProperties(Record rec) {
-                DatasetParameterRecord record = rec.into(DatasetParameterRecord.class);
+                DatasetParameterRecord record = rec
+                        .into(StaEntity.DATASTREAM_PROPERTIES).into(DatasetParameterRecord.class);
                 ObjectNode properties = MAPPER.createObjectNode();
 
                 if (record.getName() != null) {
@@ -202,7 +204,7 @@ public class DTOMapper implements RecordMapperProvider {
 
         private void setObservedArea (Datastream datastream, Record record){
 
-            if (record.get(DSL.field("datastreamObservedArea")) != null) {
+            if (record.field(DSL.field("datastreamObservedArea")) != null) {
                 try {
                     datastream.setObservedArea(WKTReader.read(
                             record.get(DSL.field("datastreamObservedArea", String.class))));
@@ -233,9 +235,15 @@ public class DTOMapper implements RecordMapperProvider {
             @Override
             public DatastreamDTO.UnitOfMeasurement map(Record record) {
                 DatastreamDTO.UnitOfMeasurement uom = new DatastreamDTO.UnitOfMeasurement();
-                uom.setName(record.get(StaEntity.UNIT.NAME));
-                uom.setSymbol(record.get(StaEntity.UNIT.SYMBOL));
-                uom.setDefinition(record.get(StaEntity.UNIT.LINK));
+                if (record.field(StaEntity.UNIT.NAME) != null) {
+                    uom.setName(record.get(StaEntity.UNIT.NAME));
+                }
+                if (record.field(StaEntity.UNIT.SYMBOL) != null) {
+                    uom.setSymbol(record.get(StaEntity.UNIT.SYMBOL));
+                }
+                if (record.field(StaEntity.UNIT.LINK) != null) {
+                    uom.setDefinition(record.get(StaEntity.UNIT.LINK));
+                }
                 return uom;
             }
         }
@@ -246,7 +254,7 @@ public class DTOMapper implements RecordMapperProvider {
         @Override
         public Location map(Record rec) {
             Location location = new Location();
-            LocationRecord record = rec.into(LocationRecord.class);
+            LocationRecord record = rec.into(StaEntity.LOCATION).into(LocationRecord.class);
 
             setStaIdentifier(location, record.getStaIdentifier());
             setStaName(location, record.getName());
@@ -259,7 +267,8 @@ public class DTOMapper implements RecordMapperProvider {
 
         public static class LocationParameterRecordMapper implements RecordMapper<Record, ObjectNode> {
             private ObjectNode setProperties(Record rec) {
-                LocationParameterRecord record = rec.into(LocationParameterRecord.class);
+                LocationParameterRecord record = rec
+                        .into(StaEntity.LOCATION_PROPERTIES).into(LocationParameterRecord.class);
                 ObjectNode properties = MAPPER.createObjectNode();
 
                 if (record.getName() != null) {
@@ -311,7 +320,7 @@ public class DTOMapper implements RecordMapperProvider {
 
 
         private void setGeometry(Location location, Record record) {
-            if (record.get(DSL.field("locationGeom")) != null) {
+            if (record.field(DSL.field("locationGeom")) != null) {
                 try {
                     location.setGeometry(WKTReader.read(record.get(DSL.field("locationGeom", String.class))));
                 } catch (ParseException e) {
@@ -327,7 +336,7 @@ public class DTOMapper implements RecordMapperProvider {
         @Override
         public Thing map(Record rec) {
             Thing thing = new Thing();
-            PlatformRecord record = rec.into(PlatformRecord.class);
+            PlatformRecord record = rec.into(StaEntity.THING).into(PlatformRecord.class);
             setStaIdentifier(thing, record.getStaIdentifier());
             setStaName(thing, record.getName());
             setStaDescription(thing, record.getDescription());
@@ -336,7 +345,8 @@ public class DTOMapper implements RecordMapperProvider {
         public static class ThingParameterRecordMapper implements RecordMapper<Record, ObjectNode> {
 
             private ObjectNode setProperties(Record rec) {
-                PlatformParameterRecord record = rec.into(PlatformParameterRecord.class);
+                PlatformParameterRecord record = rec
+                        .into(StaEntity.THING_PROPERTIES).into(PlatformParameterRecord.class);
                 ObjectNode properties = MAPPER.createObjectNode();
                 if (record.getName() != null) {
                     String key = record.getName();
@@ -366,7 +376,8 @@ public class DTOMapper implements RecordMapperProvider {
         @Override
         public HistoricalLocation map(Record rec) {
             HistoricalLocation historicalLocation = new HistoricalLocation();
-            HistoricalLocationRecord record = rec.into(HistoricalLocationRecord.class);
+            HistoricalLocationRecord record = rec
+                    .into(StaEntity.HISTORICAL_LOCATION).into(HistoricalLocationRecord.class);
 
             setStaIdentifier(historicalLocation, record.getStaIdentifier());
             setTime(historicalLocation, record);
@@ -392,7 +403,7 @@ public class DTOMapper implements RecordMapperProvider {
         @Override
         public Sensor map(Record rec) {
             Sensor sensor = new Sensor();
-            ProcedureRecord record = rec.into(ProcedureRecord.class);
+            ProcedureRecord record = rec.into(StaEntity.SENSOR).into(ProcedureRecord.class);
 
             setStaIdentifier(sensor, record.getStaIdentifier());
             setStaName(sensor, record.getName());
@@ -406,7 +417,8 @@ public class DTOMapper implements RecordMapperProvider {
         public static class SensorParameterRecordMapper implements RecordMapper<Record, ObjectNode> {
 
             private ObjectNode setProperties(Record rec) {
-                ProcedureParameterRecord record = rec.into(ProcedureParameterRecord.class);
+                ProcedureParameterRecord record = rec
+                        .into(StaEntity.SENSOR_PROPERTIES).into(ProcedureParameterRecord.class);
                 ObjectNode properties = MAPPER.createObjectNode();
 
                 if (record.getName() != null) {
@@ -448,7 +460,7 @@ public class DTOMapper implements RecordMapperProvider {
         @Override
         public ObservedProperty map(Record rec) {
             ObservedProperty observedProperty = new ObservedProperty();
-            PhenomenonRecord record = rec.into(PhenomenonRecord.class);
+            PhenomenonRecord record = rec.into(StaEntity.OBSERVED_PROPERTY).into(PhenomenonRecord.class);
 
             setStaIdentifier(observedProperty, record.getStaIdentifier());
             setStaName(observedProperty, record.getName());
@@ -460,7 +472,8 @@ public class DTOMapper implements RecordMapperProvider {
         public static class ObservedPropertyParameterRecordMapper implements RecordMapper<Record, ObjectNode> {
 
             private ObjectNode setProperties(Record rec) {
-                PhenomenonParameterRecord record = rec.into(PhenomenonParameterRecord.class);
+                PhenomenonParameterRecord record = rec
+                        .into(StaEntity.OBSERVED_PROPERTY_PROPERTIES).into(PhenomenonParameterRecord.class);
                 ObjectNode properties = MAPPER.createObjectNode();
                 if (record.getName() != null) {
                     String key = record.getName();
@@ -494,7 +507,7 @@ public class DTOMapper implements RecordMapperProvider {
         @Override
         public Observation map(Record rec) {
             Observation observation = new Observation();
-            ObservationRecord record = rec.into(ObservationRecord.class);
+            ObservationRecord record = rec.into(StaEntity.OBSERVATION).into(ObservationRecord.class);
 
             setStaIdentifier(observation, record.getStaIdentifier());
             setPhenomenonTime(observation, record);
@@ -524,7 +537,8 @@ public class DTOMapper implements RecordMapperProvider {
         public static class ObservationParameterRecordMapper implements RecordMapper<Record, ObjectNode> {
 
             private ObjectNode setParameters(Record rec) {
-                ObservationParameterRecord record = rec.into(ObservationParameterRecord.class);
+                ObservationParameterRecord record = rec
+                        .into(StaEntity.OBSERVATION_PARAMETERS).into(ObservationParameterRecord.class);
                 ObjectNode properties = MAPPER.createObjectNode();
 
                 if (record.getName() != null) {
@@ -599,7 +613,7 @@ public class DTOMapper implements RecordMapperProvider {
         @Override
         public FeatureOfInterest map(Record rec) {
             FeatureOfInterest featureOfInterest = new FeatureOfInterest();
-            FeatureRecord record = rec.into(FeatureRecord.class);
+            FeatureRecord record = rec.into(StaEntity.FEATURE_OF_INTEREST).into(FeatureRecord.class);
 
             setStaIdentifier(featureOfInterest, record.getStaIdentifier());
             setStaName(featureOfInterest, record.getName());
@@ -612,7 +626,8 @@ public class DTOMapper implements RecordMapperProvider {
         public static class FeatureParameterRecordMapper implements RecordMapper<Record, ObjectNode> {
 
             private ObjectNode setProperties(Record rec) {
-                FeatureParameterRecord record = rec.into(FeatureParameterRecord.class);
+                FeatureParameterRecord record = rec
+                        .into(StaEntity.FEATURE_PROPERTIES).into(FeatureParameterRecord.class);
                 ObjectNode properties = MAPPER.createObjectNode();
 
                 if (record.getName() != null) {
@@ -647,7 +662,7 @@ public class DTOMapper implements RecordMapperProvider {
         }
 
         private void setFeature(FeatureOfInterest featureOfInterest, Record record) {
-            if (record.get(DSL.field("foiGeom")) != null) {
+            if (record.field(DSL.field("foiGeom")) != null) {
                 try {
                     featureOfInterest.setFeature(WKTReader.read(record.get(DSL.field("foiGeom", String.class))));
                 } catch (ParseException e) {
