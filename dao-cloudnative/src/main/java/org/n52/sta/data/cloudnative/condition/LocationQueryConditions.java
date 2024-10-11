@@ -40,12 +40,14 @@ import org.n52.shetland.ogc.sta.model.STAEntityDefinition;
 import org.n52.sta.data.cloudnative.condition.utils.GeospatialFunctions;
 import org.n52.sta.data.cloudnative.schema.tables.LocationParameter;
 import org.n52.svalbard.odata.core.expr.GeoValueExpr;
+import org.springframework.stereotype.Component;
 
 import java.util.List;
 
 /**
  * @author <a href="mailto:humaid.kidwai@ucalgary.ca">Humaid Kidwai</a>
  */
+@Component
 public class LocationQueryConditions extends EntityQueryConditions implements SpatialQueryConditions {
 
     public Condition withHistoricalLocationStaIdentifier(String historicalLocationIdentifier) {

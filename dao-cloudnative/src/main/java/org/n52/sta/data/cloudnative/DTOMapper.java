@@ -203,11 +203,10 @@ public class DTOMapper implements RecordMapperProvider {
         }
 
         private void setObservedArea (Datastream datastream, Record record){
-
-            if (record.field(DSL.field("datastreamObservedArea")) != null) {
+            Field<String> observed_area = DSL.field("datastreamObservedArea", String.class);
+            if (record.field(observed_area) != null && record.get(observed_area) != null) {
                 try {
-                    datastream.setObservedArea(WKTReader.read(
-                            record.get(DSL.field("datastreamObservedArea", String.class))));
+                    datastream.setObservedArea(WKTReader.read(record.get(observed_area)));
                 } catch (ParseException e) {
                     Assert.notNull(null, "Could not parse to WKB" + e.getMessage());
                 }
@@ -254,7 +253,7 @@ public class DTOMapper implements RecordMapperProvider {
         @Override
         public Location map(Record rec) {
             Location location = new Location();
-            LocationRecord record = rec.into(StaEntity.LOCATION).into(LocationRecord.class);
+            LocationRecord record = rec.into(LocationRecord.class);
 
             setStaIdentifier(location, record.getStaIdentifier());
             setStaName(location, record.getName());
@@ -320,9 +319,10 @@ public class DTOMapper implements RecordMapperProvider {
 
 
         private void setGeometry(Location location, Record record) {
-            if (record.field(DSL.field("locationGeom")) != null) {
+            Field<String> geom = DSL.field("locationGeom", String.class);
+            if (record.field(geom) != null && record.get(geom) != null) {
                 try {
-                    location.setGeometry(WKTReader.read(record.get(DSL.field("locationGeom", String.class))));
+                    location.setGeometry(WKTReader.read(record.get(geom)));
                 } catch (ParseException e) {
                     Assert.notNull(null, "Could not parse to WKB" + e.getMessage());
                 }
@@ -662,9 +662,10 @@ public class DTOMapper implements RecordMapperProvider {
         }
 
         private void setFeature(FeatureOfInterest featureOfInterest, Record record) {
-            if (record.field(DSL.field("foiGeom")) != null) {
+            Field<String> geom = DSL.field("foiGeom", String.class);
+            if (record.field(geom) != null && record.get(geom) != null) {
                 try {
-                    featureOfInterest.setFeature(WKTReader.read(record.get(DSL.field("foiGeom", String.class))));
+                    featureOfInterest.setFeature(WKTReader.read(record.get(geom)));
                 } catch (ParseException e) {
                     Assert.notNull(null, "Could not parse to WKB" + e.getMessage());
                 }

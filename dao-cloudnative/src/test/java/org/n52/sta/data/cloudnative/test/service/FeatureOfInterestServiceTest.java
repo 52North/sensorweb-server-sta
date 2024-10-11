@@ -12,8 +12,7 @@ import org.mockito.MockitoAnnotations;
 import org.n52.sta.api.dto.FeatureOfInterestDTO;
 import org.n52.sta.api.dto.impl.FeatureOfInterest;
 import org.n52.sta.data.MutexFactory;
-import org.n52.sta.data.cloudnative.condition.DatastreamQueryConditions;
-import org.n52.sta.data.cloudnative.condition.FeatureOfInterestQueryConditions;
+import org.n52.sta.data.cloudnative.condition.*;
 import org.n52.sta.data.cloudnative.dao.impl.*;
 import org.n52.sta.data.cloudnative.dao.util.StaFirehoseClient;
 import org.n52.sta.data.cloudnative.service.CloudNativeEntityServiceRepository;
@@ -46,8 +45,14 @@ public class FeatureOfInterestServiceTest {
     private FeatureOfInterestDaoImpl featureDao;
     private LocationDaoImpl locationDao;
 
-    private FeatureOfInterestQueryConditions foiQC;
-    private DatastreamQueryConditions dsQC;
+    private final ObservationQueryConditions oQC;
+    private final DatastreamQueryConditions dsQC;
+    private final FeatureOfInterestQueryConditions foiQC;
+    private final ThingQueryConditions tQC;
+    private final SensorQueryConditions sQC;
+    private final ObservedPropertyQueryConditions opQC;
+    private final HistoricalLocationQueryConditions hlQC;
+    private final LocationQueryConditions lQC;
     @Mock
     private CloudNativeEntityServiceRepository mockServiceRepository;
 
@@ -67,32 +72,44 @@ public class FeatureOfInterestServiceTest {
         this.firehoseClient = firehoseClient;
         this.staFirehose = new StaFirehoseClient(firehoseClient);
 
-        datastreamDao = new DatastreamDaoImpl(ctx, staFirehose);
+
+        oQC = new ObservationQueryConditions();
+        dsQC = new DatastreamQueryConditions();
+        foiQC = new FeatureOfInterestQueryConditions();
+        tQC = new ThingQueryConditions();
+        sQC = new SensorQueryConditions();
+        opQC = new ObservedPropertyQueryConditions();
+        lQC = new LocationQueryConditions();
+        hlQC = new HistoricalLocationQueryConditions();
+        sQC.setDslContext(ctx);
+        opQC.setDslContext(ctx);
+        foiQC.setDslContext(ctx);
+        dsQC.setDslContext(ctx);
+        oQC.setDslContext(ctx);
+        tQC.setDslContext(ctx);
+        lQC.setDslContext(ctx);
+        hlQC.setDslContext(ctx);
+
+        observationDao = new ObservationDaoImpl(ctx, staFirehose, dsQC, oQC);
+        datastreamDao = new DatastreamDaoImpl(ctx, staFirehose, dsQC, tQC, sQC, opQC);
+        featureDao = new FeatureOfInterestDaoImpl(ctx, staFirehose, foiQC);
+        locationDao = new LocationDaoImpl(ctx, staFirehose, hlQC, lQC, tQC);
         formatDao = new FormatDaoImpl(ctx, staFirehose);
-        observationDao = new ObservationDaoImpl(ctx, staFirehose);
-        featureDao = new FeatureOfInterestDaoImpl(ctx, staFirehose);
-        locationDao = new LocationDaoImpl(ctx, staFirehose);
 
         formatService = new CloudNativeFormatService(mutex, formatDao);
-        foiService = new CloudNativeFeatureOfInterestService(
-                formatService,
+        foiService = new CloudNativeFeatureOfInterestService(formatService,
                 observationDao,
                 datastreamDao,
                 featureDao,
-                mutex);
-        observationService = new CloudNativeObservationService(
-                observationDao,
+                mutex,
+                foiQC,
+                dsQC);
+        observationService = new CloudNativeObservationService(observationDao,
                 datastreamDao,
                 locationDao,
-                mutex
-        );
+                mutex,
+                oQC);
 
-        foiQC = new FeatureOfInterestQueryConditions();
-        dsQC = new DatastreamQueryConditions();
-        foiQC.setDslContext(ctx);
-        dsQC.setDslContext(ctx);
-        CloudNativeFeatureOfInterestService.setFeatureQueryConditions(foiQC);
-        CloudNativeFeatureOfInterestService.setDatastreamQueryConditions(dsQC);
     }
 
     @Test

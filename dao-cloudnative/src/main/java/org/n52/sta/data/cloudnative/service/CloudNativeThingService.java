@@ -83,8 +83,8 @@ public class CloudNativeThingService
         ThingDao,
         ThingDTO> {
 
-    private static ThingQueryConditions tQC = new ThingQueryConditions();
-    private static DatastreamQueryConditions dsQC = new DatastreamQueryConditions();
+    private final ThingQueryConditions tQC;
+    private final DatastreamQueryConditions dsQC;
     private static final Logger logger = LoggerFactory.getLogger(CloudNativeThingService.class);
     private final ThingDaoImpl thingDao;
     private final ThingLocationDaoImpl thingLocationDao;
@@ -96,20 +96,18 @@ public class CloudNativeThingService
                                    ThingLocationDaoImpl thingLocationDao,
                                    LocationHistoricalLocationDaoImpl locationHistoricalLocationDao,
                                    DatastreamDaoImpl datastreamDao,
-                                   MutexFactory lock) {
+                                   MutexFactory lock,
+                                   ThingQueryConditions tQC,
+                                   DatastreamQueryConditions dsQC) {
         super(thingDao, ThingDTO.class, lock);
         this.thingDao = thingDao;
         this.thingLocationDao = thingLocationDao;
         this.locationHistoricalLocationDao = locationHistoricalLocationDao;
         this.datastreamDao = datastreamDao;
+        this.tQC = tQC;
+        this.dsQC = dsQC;
     }
 
-    public static void setDatastreamQueryConditions(DatastreamQueryConditions dsQC) {
-        CloudNativeThingService.dsQC = dsQC;
-    }
-    public static void setThingQueryConditions (ThingQueryConditions tQC) {
-        CloudNativeThingService.tQC = tQC;
-    }
     @Override
     protected Condition byRelatedEntityFilter(String relatedId, String relatedType, String ownId) {
         Condition filter;

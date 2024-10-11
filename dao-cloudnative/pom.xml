@@ -21,11 +21,6 @@
 
     <dependencies>
         <dependency>
-            <groupId>org.springframework</groupId>
-            <artifactId>spring-aspects</artifactId>
-            <version>6.1.5</version>
-        </dependency>
-        <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-autoconfigure</artifactId>
         </dependency>
@@ -232,27 +227,6 @@
                 <version>3.5.0</version>
             </plugin>
             <plugin>
-                <groupId>dev.aspectj</groupId>
-                <artifactId>aspectj-maven-plugin</artifactId>
-                <version>1.13.1</version>
-                <configuration>
-                    <complianceLevel>17</complianceLevel>
-                    <aspectLibraries>
-                        <aspectLibrary>
-                            <groupId>org.springframework</groupId>
-                            <artifactId>spring-aspects</artifactId>
-                        </aspectLibrary>
-                    </aspectLibraries>
-                </configuration>
-                <executions>
-                    <execution>
-                        <goals>
-                            <goal>compile</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>3.8.1</version>
                 <configuration>
@@ -268,7 +242,7 @@
                 <executions>
                     <execution>
                         <id>jooq-codegen</id>
-                        <phase>generate-sources</phase>
+                        <phase>compile</phase>
 <!--                        <phase>none</phase>-->
                         <goals>
                             <goal>generate</goal>

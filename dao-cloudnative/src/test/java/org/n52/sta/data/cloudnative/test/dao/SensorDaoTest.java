@@ -41,8 +41,8 @@ import org.n52.shetland.oasis.odata.query.option.QueryOptions;
 import org.n52.shetland.ogc.sta.exception.STACRUDException;
 import org.n52.shetland.ogc.sta.exception.STAInvalidQueryException;
 import org.n52.sta.api.dto.SensorDTO;
+import org.n52.sta.data.cloudnative.condition.*;
 import org.n52.sta.data.cloudnative.schema.tables.pojos.Procedure;
-import org.n52.sta.data.cloudnative.condition.StaEntity;
 import org.n52.sta.data.cloudnative.dao.impl.SensorDaoImpl;
 import org.n52.sta.data.cloudnative.dao.util.StaFirehoseClient;
 import org.n52.sta.data.cloudnative.test.TestDatabaseConfig;
@@ -63,13 +63,16 @@ public class SensorDaoTest {
     private SensorDaoImpl sensorDao;
     private FirehoseClient firehoseClient;
     private StaFirehoseClient staFirehose;
+    private final DatastreamQueryConditions dsQC = new DatastreamQueryConditions();
+    private final SensorQueryConditions sQC = new SensorQueryConditions();
 
     @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
     @Autowired
     public void SensorDaoTest(DSLContext ctx, FirehoseClient firehoseClient) {
+        sQC.setDslContext(ctx);
         this.firehoseClient = firehoseClient;
         staFirehose = new StaFirehoseClient(firehoseClient);
-        sensorDao = new SensorDaoImpl(ctx, staFirehose);
+        sensorDao = new SensorDaoImpl(ctx, staFirehose, dsQC, sQC);
     }
 
     @Test

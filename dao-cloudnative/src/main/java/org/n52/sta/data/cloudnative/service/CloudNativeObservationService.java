@@ -90,7 +90,7 @@ import static org.n52.sta.api.RequestUtils.QUERY_OPTIONS_FACTORY;
 public class CloudNativeObservationService
         extends CloudNativeAbstractSensorThingsEntityServiceImpl<ObservationDao, ObservationDTO> {
 
-    private static ObservationQueryConditions oQC = new ObservationQueryConditions();
+    private final ObservationQueryConditions oQC;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CloudNativeObservationService.class);
     protected final DatastreamDaoImpl datastreamDao;
@@ -100,15 +100,13 @@ public class CloudNativeObservationService
     public CloudNativeObservationService(ObservationDaoImpl observationDao,
                                          DatastreamDaoImpl datastreamDao,
                                          LocationDaoImpl locationDao,
-                                         MutexFactory lock) {
+                                         MutexFactory lock,
+                                         ObservationQueryConditions oQC) {
         super(observationDao, ObservationDTO.class, lock);
         this.datastreamDao = datastreamDao;
         this.observationDao = observationDao;
         this.locationDao = locationDao;
-    }
-
-    public static void setObservationQueryConditions(ObservationQueryConditions oQC) {
-        CloudNativeObservationService.oQC = oQC;
+        this.oQC = oQC;
     }
 
     @Override
@@ -496,7 +494,7 @@ public class CloudNativeObservationService
                     ObservationDTO merged = merge(existing.get(), entity);
                     Observation updatedObservation = POJOWrapper(merged);
                     observationDao.update(updatedObservation);
-                    Dataset dataset = datastreamDao.findByDatasetIdPOJO(updatedObservation.getFkDatasetId());
+                    Dataset dataset = datastreamDao.findByDatasetIdPOJO(updatedObservation.getFkDatasetId(), null);
                     updateDatastreamPhenomenonTimeOnObservationUpdate(dataset, updatedObservation);
                     return merged;
                 } else {
@@ -570,7 +568,7 @@ public class CloudNativeObservationService
             // update parent if its part of the aggregation
             if (datastreamEntity.getFkAggregationId() != null && datastreamEntity.getFkAggregationId() != 1L) {
                 updateDatastreamPhenomenonTimeOnObservationUpdate(
-                        datastreamDao.findByDatasetIdPOJO(datastreamEntity.getFkAggregationId()),
+                        datastreamDao.findByDatasetIdPOJO(datastreamEntity.getFkAggregationId(), null),
                         observation);
             }
         }
@@ -589,7 +587,7 @@ public class CloudNativeObservationService
                     observationDao.deleteObservationParameters(Long.valueOf(observation.getId()));
                 }
                 observationDao.deleteByStaIdentifier(observation.getId());
-                Dataset dataset = datastreamDao.findByDatasetIdPOJO(Long.valueOf(observation.getDatastream().getId()));
+                Dataset dataset = datastreamDao.findByDatasetIdPOJO(Long.valueOf(observation.getDatastream().getId()), null);
                 updateDatastreamPhenomenonTimeOnObservationUpdate(dataset, POJOWrapper(observation));
             } else {
                 throw new STACRUDException(UNABLE_TO_DELETE_ENTITY_NOT_FOUND, HTTPStatus.NOT_FOUND);

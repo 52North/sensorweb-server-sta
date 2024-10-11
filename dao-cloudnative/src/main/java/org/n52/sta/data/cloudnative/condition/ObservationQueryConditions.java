@@ -36,11 +36,13 @@ import org.n52.shetland.ogc.sta.exception.STAInvalidFilterExpressionException;
 import java.util.List;
 
 import org.n52.shetland.ogc.sta.model.STAEntityDefinition;
+import org.springframework.stereotype.Component;
 
 
 /**
  * @author <a href="mailto:humaid.kidwai@ucalgary.ca">Humaid Kidwai</a>
  */
+@Component
 public class ObservationQueryConditions extends EntityQueryConditions {
 
     public Condition withFeatureOfInterestStaIdentifier(final String featureIdentifier) {

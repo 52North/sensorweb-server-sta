@@ -38,6 +38,9 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.n52.shetland.oasis.odata.query.option.QueryOptions;
 import org.n52.shetland.ogc.sta.exception.STAInvalidQueryException;
 import org.n52.sta.api.dto.ObservedPropertyDTO;
+import org.n52.sta.data.cloudnative.condition.DatastreamQueryConditions;
+import org.n52.sta.data.cloudnative.condition.ObservationQueryConditions;
+import org.n52.sta.data.cloudnative.condition.ObservedPropertyQueryConditions;
 import org.n52.sta.data.cloudnative.condition.StaEntity;
 import org.n52.sta.data.cloudnative.dao.impl.ObservedPropertyDaoImpl;
 import org.n52.sta.data.cloudnative.dao.util.StaFirehoseClient;
@@ -62,10 +65,14 @@ public class ObservedPropertyDaoTest {
     @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
     @Autowired private FirehoseClient firehoseClient;
     private final StaFirehoseClient staFirehose = new StaFirehoseClient(firehoseClient);
+    private final DatastreamQueryConditions dsQC = new DatastreamQueryConditions();
+    private final ObservedPropertyQueryConditions opQC = new ObservedPropertyQueryConditions();
 
     @BeforeEach
     public void setUp() {
-        observedPropertyDao = new ObservedPropertyDaoImpl(ctx, staFirehose);
+        dsQC.setDslContext(ctx);
+        opQC.setDslContext(ctx);
+        observedPropertyDao = new ObservedPropertyDaoImpl(ctx, staFirehose, dsQC, opQC);
     }
 
     @Test

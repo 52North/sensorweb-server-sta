@@ -11,6 +11,7 @@ import org.junit.runner.RunWith;
 import org.n52.shetland.oasis.odata.query.option.QueryOptions;
 import org.n52.shetland.ogc.sta.exception.STAInvalidQueryException;
 import org.n52.sta.api.dto.FeatureOfInterestDTO;
+import org.n52.sta.data.cloudnative.condition.FeatureOfInterestQueryConditions;
 import org.n52.sta.data.cloudnative.condition.StaEntity;
 import org.n52.sta.data.cloudnative.dao.impl.FeatureOfInterestDaoImpl;
 import org.n52.sta.data.cloudnative.dao.util.StaFirehoseClient;
@@ -35,10 +36,12 @@ public class FeatureOfInterestDaoTest {
     @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
     @Autowired private FirehoseClient firehoseClient;
     private final StaFirehoseClient staFirehose = new StaFirehoseClient(firehoseClient);
+    private final FeatureOfInterestQueryConditions foiQC = new FeatureOfInterestQueryConditions();
 
     @BeforeEach
     public void setUp() {
-        featureDao = new FeatureOfInterestDaoImpl(ctx, staFirehose);
+        foiQC.setDslContext(ctx);
+        featureDao = new FeatureOfInterestDaoImpl(ctx, staFirehose, foiQC);
         ctx.execute("INSERT INTO \"52n_sta_iceberg\".\"feature\" " +
                 "(feature_id, sta_identifier, identifier, fk_format_id, name, description, geom) " +
                 "VALUES (BIGINT '1', " +

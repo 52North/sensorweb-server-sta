@@ -11,7 +11,10 @@ import org.n52.shetland.oasis.odata.query.option.QueryOptions;
 import org.n52.shetland.ogc.sta.exception.STAInvalidQueryException;
 import org.n52.shetland.util.DateTimeHelper;
 import org.n52.sta.api.dto.HistoricalLocationDTO;
+import org.n52.sta.data.cloudnative.condition.HistoricalLocationQueryConditions;
+import org.n52.sta.data.cloudnative.condition.LocationQueryConditions;
 import org.n52.sta.data.cloudnative.condition.StaEntity;
+import org.n52.sta.data.cloudnative.condition.ThingQueryConditions;
 import org.n52.sta.data.cloudnative.dao.impl.HistoricalLocationDaoImpl;
 import org.n52.sta.data.cloudnative.dao.util.StaFirehoseClient;
 import org.n52.sta.data.cloudnative.test.TestDatabaseConfig;
@@ -36,10 +39,17 @@ public class HistoricalLocationDaoTest {
     @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
     @Autowired private FirehoseClient firehoseClient;
     private final StaFirehoseClient staFirehose = new StaFirehoseClient(firehoseClient);
+    private final HistoricalLocationQueryConditions hlQC = new HistoricalLocationQueryConditions();
+    private final LocationQueryConditions lQC = new LocationQueryConditions();
+    private final ThingQueryConditions tQC = new ThingQueryConditions();
+
 
     @BeforeEach
     public void setUp() {
-        historicalLocationDao = new HistoricalLocationDaoImpl(ctx, staFirehose);
+        hlQC.setDslContext(ctx);
+        lQC.setDslContext(ctx);
+        tQC.setDslContext(ctx);
+        historicalLocationDao = new HistoricalLocationDaoImpl(ctx, staFirehose, lQC, tQC, hlQC);
     }
     @Test
     public void testWithGetColumn() {

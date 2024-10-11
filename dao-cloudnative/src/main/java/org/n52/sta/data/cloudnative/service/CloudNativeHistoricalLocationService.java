@@ -107,7 +107,7 @@ public class CloudNativeHistoricalLocationService
 
     private static final Logger logger = LoggerFactory.getLogger(CloudNativeHistoricalLocationService.class);
 
-    private static HistoricalLocationQueryConditions hlQC = new HistoricalLocationQueryConditions();
+    private final HistoricalLocationQueryConditions hlQC;
 
     private final HistoricalLocationDaoImpl historicalLocationDao;
     private final LocationHistoricalLocationDaoImpl locationHistoricalLocationDao;
@@ -116,16 +116,14 @@ public class CloudNativeHistoricalLocationService
 
     public CloudNativeHistoricalLocationService(HistoricalLocationDaoImpl historicalLocationDao,
                                                 LocationHistoricalLocationDaoImpl locationHistoricalLocationDao,
-                                                MutexFactory lock) {
+                                                MutexFactory lock,
+                                                HistoricalLocationQueryConditions hlQC) {
         super(historicalLocationDao, HistoricalLocationDTO.class, lock);
         this.historicalLocationDao = historicalLocationDao;
         this.locationHistoricalLocationDao = locationHistoricalLocationDao;
+        this.hlQC = hlQC;
     }
 
-    // Static setter for testing purposes
-    public static void setHistoricalLocationQueryConditions(HistoricalLocationQueryConditions hlQC) {
-        CloudNativeHistoricalLocationService.hlQC = hlQC;
-    }
 
     @Override
     protected HistoricalLocationDTO fetchExpandEntitiesWithFilter(HistoricalLocationDTO entity,

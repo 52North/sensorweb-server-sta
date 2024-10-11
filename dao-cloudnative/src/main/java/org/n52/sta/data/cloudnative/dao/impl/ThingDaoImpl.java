@@ -62,9 +62,22 @@ public class ThingDaoImpl
         extends AbstractStaEntityDao<ThingDTO> implements ThingDao {
     private final String tableName = getEntityTable().getName();
     private final String parameterTableName = StaEntity.THING_PROPERTIES.getName();
+    private final ThingQueryConditions tQC;
+    private final LocationQueryConditions lQC;
+    private final DatastreamQueryConditions dsQC;
+    private final HistoricalLocationQueryConditions hlQC;
 
-    public ThingDaoImpl(DSLContext ctx, StaFirehoseClient firehoseClient) {
+    public ThingDaoImpl(DSLContext ctx,
+                        StaFirehoseClient firehoseClient,
+                        ThingQueryConditions tQC,
+                        LocationQueryConditions lQC,
+                        DatastreamQueryConditions dsQC,
+                        HistoricalLocationQueryConditions hlQC) {
         super(ctx, firehoseClient);
+        this.tQC = tQC;
+        this.lQC = lQC;
+        this.dsQC = dsQC;
+        this.hlQC = hlQC;
     }
 
     @Override
@@ -120,7 +133,7 @@ public class ThingDaoImpl
                                     .getSelectFilter()
                                     .getItems()
                                     .stream()
-                                    .map(e-> new HistoricalLocationQueryConditions().checkPropertyName(e))
+                                    .map(e-> hlQC.checkPropertyName(e))
                                     .collect(Collectors.toList()));
                         }
 
@@ -158,7 +171,7 @@ public class ThingDaoImpl
                                     .getSelectFilter()
                                     .getItems()
                                     .stream()
-                                    .map(e-> new DatastreamQueryConditions().checkPropertyName(e))
+                                    .map(e-> dsQC.checkPropertyName(e))
                                     .collect(Collectors.toList()));
                         }
 
@@ -183,7 +196,7 @@ public class ThingDaoImpl
                                     .getSelectFilter()
                                     .getItems()
                                     .stream()
-                                    .map(e-> new LocationQueryConditions().checkPropertyName(e))
+                                    .map(e-> lQC.checkPropertyName(e))
                                     .collect(Collectors.toList()));
                         }
 
@@ -200,7 +213,7 @@ public class ThingDaoImpl
 
     @Override
     protected List<ThingDTO> mapResultToDTO(Result<Record> result) {
-        Map<Long, ThingDTO> thingMap = new HashMap<>();
+        Map<Long, ThingDTO> thingMap = new TreeMap<>();
         for (Record record : result) {
             Long Id = record.get(StaEntity.THING.PLATFORM_ID);
             ThingDTO thing = thingMap.computeIfAbsent(Id, k -> record.map(new DTOMapper.ThingRecordMapper()));
@@ -245,7 +258,7 @@ public class ThingDaoImpl
 
     @Override
     public Field<?> checkPropertyName(String property) {
-        return new ThingQueryConditions().checkPropertyName(property);
+        return tQC.checkPropertyName(property);
     }
 
     @Override

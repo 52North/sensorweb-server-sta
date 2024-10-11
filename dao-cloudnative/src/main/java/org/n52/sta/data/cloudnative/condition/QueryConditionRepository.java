@@ -28,8 +28,8 @@
  */
 package org.n52.sta.data.cloudnative.condition;
 
-
 import org.n52.shetland.ogc.sta.exception.STAInvalidFilterExpressionException;
+import org.n52.sta.data.cloudnative.SpringContext;
 
 /**
  * @author <a href="mailto:humaid.kidwai@ucalgary.ca">Humaid Kidwai</a>
@@ -41,46 +41,46 @@ public class QueryConditionRepository {
             case "PlatformEntity":
             case "Thing":
             case "Things": {
-                return new ThingQueryConditions();
+                return SpringContext.getBean(ThingQueryConditions.class);
             }
             case "LocationEntity":
             case "Location":
             case "Locations": {
-                return new LocationQueryConditions();
+                return SpringContext.getBean(LocationQueryConditions.class);
             }
             case "HistoricalLocationEntity":
             case "HistoricalLocation":
             case "HistoricalLocations": {
-                return new HistoricalLocationQueryConditions();
+                return SpringContext.getBean(HistoricalLocationQueryConditions.class);
             }
             case "AbstractDatasetEntity":
             case "DatasetEntity":
             case "DatasetAggregationEntity":
             case "Datastream":
             case "Datastreams": {
-                return new DatastreamQueryConditions();
+                return SpringContext.getBean(DatastreamQueryConditions.class);
             }
             case "ProcedureEntity":
             case "Sensor":
             case "Sensors": {
-                return new SensorQueryConditions();
+                return SpringContext.getBean(SensorQueryConditions.class);
             }
             case "ObservationEntity":
             case "DataEntity":
             case "Observation":
             case "Observations": {
-                return new ObservationQueryConditions();
+                return SpringContext.getBean(ObservationQueryConditions.class);
             }
             case "FeatureEntity":
             case "AbstractFeatureEntity":
             case "FeatureOfInterest":
             case "FeaturesOfInterest": {
-                return new FeatureOfInterestQueryConditions();
+                return SpringContext.getBean(FeatureOfInterestQueryConditions.class);
             }
             case "PhenomenonEntity":
             case "ObservedProperty":
             case "ObservedProperties": {
-                return new ObservedPropertyQueryConditions();
+                return SpringContext.getBean(ObservedPropertyQueryConditions.class);
             }
             default:
                 throw new STAInvalidFilterExpressionException("Unable to find QueryCondition for type: " + name);

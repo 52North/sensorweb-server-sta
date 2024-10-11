@@ -53,6 +53,7 @@ import org.n52.sta.data.cloudnative.dao.util.StaFirehoseClient;
 import org.n52.sta.data.cloudnative.schema.tables.Format;
 import org.n52.sta.data.cloudnative.schema.tables.pojos.Observation;
 import org.n52.sta.data.cloudnative.schema.tables.records.ObservationRecord;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Order;
 import org.springframework.stereotype.Component;
@@ -69,9 +70,15 @@ import static org.n52.sta.api.RequestUtils.QUERY_OPTIONS_FACTORY;
 public class ObservationDaoImpl extends AbstractStaEntityDao<ObservationDTO> implements ObservationDao {
     private final String tableName = getEntityTable().getName();
     private final String parameterTableName = StaEntity.OBSERVATION_PARAMETERS.getName();
-
-    public ObservationDaoImpl(DSLContext ctx, StaFirehoseClient firehoseClient) {
+    private final DatastreamQueryConditions dsQC;
+    private final ObservationQueryConditions oQC;
+    public ObservationDaoImpl(DSLContext ctx,
+                              StaFirehoseClient firehoseClient,
+                              DatastreamQueryConditions dsQC,
+                              ObservationQueryConditions oQC) {
         super(ctx, firehoseClient);
+        this.dsQC = dsQC;
+        this.oQC = oQC;
     }
 
     @Override
@@ -112,7 +119,7 @@ public class ObservationDaoImpl extends AbstractStaEntityDao<ObservationDTO> imp
 
     @Override
     protected List<ObservationDTO> mapResultToDTO(Result<Record> result) {
-        Map<Long, ObservationDTO> observationMap = new HashMap();
+        Map<Long, ObservationDTO> observationMap = new TreeMap<>();
         for (Record record : result) {
             Long Id = record.get(StaEntity.OBSERVATION.OBSERVATION_ID);
 
@@ -147,7 +154,7 @@ public class ObservationDaoImpl extends AbstractStaEntityDao<ObservationDTO> imp
 
     @Override
     public Field checkPropertyName(String property) {
-        return new ObservationQueryConditions().checkPropertyName(property);
+        return oQC.checkPropertyName(property);
     }
 
     @Override
@@ -218,7 +225,7 @@ public class ObservationDaoImpl extends AbstractStaEntityDao<ObservationDTO> imp
                                     .getSelectFilter()
                                     .getItems()
                                     .stream()
-                                    .map(e-> new DatastreamQueryConditions().checkPropertyName(e))
+                                    .map(e-> dsQC.checkPropertyName(e))
                                     .collect(Collectors.toList()));
                         }
 

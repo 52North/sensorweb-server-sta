@@ -37,13 +37,14 @@ import org.n52.shetland.ogc.sta.StaConstants;
 import org.n52.shetland.ogc.sta.exception.STAInvalidFilterExpressionException;
 import org.n52.shetland.ogc.sta.model.STAEntityDefinition;
 import org.n52.sta.data.cloudnative.schema.tables.*;
+import org.springframework.stereotype.Component;
 
 import java.util.List;
 
 /**
  * @author <a href="mailto:humaid.kidwai@ucalgary.ca">Humaid Kidwai</a>
  */
-
+@Component
 public class DatastreamQueryConditions extends EntityQueryConditions {
 
     public Condition withName(final String name) {

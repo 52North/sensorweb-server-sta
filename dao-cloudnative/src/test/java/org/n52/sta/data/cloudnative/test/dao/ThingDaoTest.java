@@ -39,7 +39,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.n52.shetland.oasis.odata.query.option.QueryOptions;
 import org.n52.shetland.ogc.sta.exception.STAInvalidQueryException;
 import org.n52.sta.api.dto.ThingDTO;
-import org.n52.sta.data.cloudnative.condition.StaEntity;
+import org.n52.sta.data.cloudnative.condition.*;
+import org.n52.sta.data.cloudnative.dao.impl.HistoricalLocationDaoImpl;
 import org.n52.sta.data.cloudnative.dao.impl.ThingDaoImpl;
 import org.n52.sta.data.cloudnative.dao.util.StaFirehoseClient;
 import org.n52.sta.data.cloudnative.test.TestDatabaseConfig;
@@ -63,10 +64,18 @@ public class ThingDaoTest {
     @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
     @Autowired private FirehoseClient firehoseClient;
     private final StaFirehoseClient staFirehose = new StaFirehoseClient(firehoseClient);
+    private final DatastreamQueryConditions dsQC = new DatastreamQueryConditions();
+    private final HistoricalLocationQueryConditions hlQC = new HistoricalLocationQueryConditions();
+    private final LocationQueryConditions lQC = new LocationQueryConditions();
+    private final ThingQueryConditions tQC = new ThingQueryConditions();
 
     @BeforeEach
     public void setUp() {
-        thingDao = new ThingDaoImpl(ctx, staFirehose);
+        dsQC.setDslContext(ctx);
+        hlQC.setDslContext(ctx);
+        lQC.setDslContext(ctx);
+        tQC.setDslContext(ctx);
+        thingDao = new ThingDaoImpl(ctx, staFirehose, tQC, lQC, dsQC, hlQC);
     }
 
     @Test

@@ -50,6 +50,7 @@ import org.n52.sta.data.cloudnative.dao.util.StaFirehoseClient;
 import org.n52.sta.data.cloudnative.schema.tables.Format;
 import org.n52.sta.data.cloudnative.schema.tables.pojos.Dataset;
 import org.n52.sta.data.cloudnative.schema.tables.records.DatasetRecord;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.*;
@@ -62,9 +63,21 @@ import java.util.stream.Collectors;
 public class DatastreamDaoImpl extends AbstractStaEntityDao<DatastreamDTO> implements DatastreamDao {
     private final String tableName = getEntityTable().getName();
     private final String parameterTableName = StaEntity.DATASTREAM_PROPERTIES.getName();
-
-    public DatastreamDaoImpl(DSLContext ctx, StaFirehoseClient firehoseClient) {
+    private final DatastreamQueryConditions dsQC;
+    private final ThingQueryConditions tQC;
+    private final SensorQueryConditions sQC;
+    private final ObservedPropertyQueryConditions opQC;
+    public DatastreamDaoImpl(DSLContext ctx,
+                             StaFirehoseClient firehoseClient,
+                             DatastreamQueryConditions dsQC,
+                             ThingQueryConditions tQC,
+                             SensorQueryConditions sQC,
+                             ObservedPropertyQueryConditions opQC) {
         super(ctx, firehoseClient);
+        this.dsQC = dsQC;
+        this.tQC = tQC;
+        this.sQC = sQC;
+        this.opQC = opQC;
     }
 
 
@@ -84,7 +97,8 @@ public class DatastreamDaoImpl extends AbstractStaEntityDao<DatastreamDTO> imple
                 .fetchAnyInto(DatasetRecord.class).into(Dataset.class);
     }
 
-    public Dataset findByDatasetIdPOJO(Long datasetId) throws STAInvalidQueryException, STACRUDException {
+    public Dataset findByDatasetIdPOJO(Long datasetId, QueryOptions queryOptions)
+            throws STAInvalidQueryException, STACRUDException {
         Condition predicate = StaEntity.DATASTREAM.DATASET_ID.eq(datasetId);
         Result<Record> records = selectQueryBuilder(predicate,
                 DatastreamDTO.class,
@@ -117,7 +131,7 @@ public class DatastreamDaoImpl extends AbstractStaEntityDao<DatastreamDTO> imple
 
     @Override
     public List<DatastreamDTO> mapResultToDTO(Result<Record> result) {
-        Map<Long, DatastreamDTO> datastreamMap = new HashMap<>();
+        Map<Long, DatastreamDTO> datastreamMap = new TreeMap<>();
         for (Record record : result) {
             Long Id = record.get(StaEntity.DATASTREAM.DATASET_ID);
 
@@ -239,7 +253,7 @@ public class DatastreamDaoImpl extends AbstractStaEntityDao<DatastreamDTO> imple
                                     .getSelectFilter()
                                     .getItems()
                                     .stream()
-                                    .map(e-> new SensorQueryConditions().checkPropertyName(e))
+                                    .map(e-> sQC.checkPropertyName(e))
                                     .collect(Collectors.toList()));
                         }
                         break;
@@ -258,7 +272,7 @@ public class DatastreamDaoImpl extends AbstractStaEntityDao<DatastreamDTO> imple
                                     .getSelectFilter()
                                     .getItems()
                                     .stream()
-                                    .map(e-> new ThingQueryConditions().checkPropertyName(e))
+                                    .map(e-> tQC.checkPropertyName(e))
                                     .collect(Collectors.toList()));
                         }
                         break;
@@ -277,7 +291,7 @@ public class DatastreamDaoImpl extends AbstractStaEntityDao<DatastreamDTO> imple
                                     .getSelectFilter()
                                     .getItems()
                                     .stream()
-                                    .map(e-> new ObservedPropertyQueryConditions().checkPropertyName(e))
+                                    .map(e-> opQC.checkPropertyName(e))
                                     .collect(Collectors.toList()));
                         }
 
@@ -297,7 +311,7 @@ public class DatastreamDaoImpl extends AbstractStaEntityDao<DatastreamDTO> imple
 
     @Override
     public Field<?> checkPropertyName(String property) {
-        return new DatastreamQueryConditions().checkPropertyName(property);
+        return dsQC.checkPropertyName(property);
     }
 
     @Override

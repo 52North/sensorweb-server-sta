@@ -35,7 +35,7 @@ public class FilterExprVisitor implements ExprVisitor<Field<?>, STAInvalidQueryE
     private static final String DOLLAR = "%";
     private static final String SLASH = "/";
 
-    private EntityQueryConditions rootQC;
+    private final EntityQueryConditions rootQC;
 
     public FilterExprVisitor(String entity)
             throws STAInvalidFilterExpressionException {

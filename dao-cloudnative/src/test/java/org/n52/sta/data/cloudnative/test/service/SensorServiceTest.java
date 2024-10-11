@@ -7,13 +7,11 @@ import org.junit.jupiter.api.*;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.n52.sta.api.CollectionWrapper;
-import org.n52.sta.data.cloudnative.condition.DatastreamQueryConditions;
+import org.n52.sta.data.cloudnative.condition.*;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.n52.sta.api.dto.SensorDTO;
 import org.n52.sta.api.dto.impl.Sensor;
 import org.n52.sta.data.MutexFactory;
-import org.n52.sta.data.cloudnative.condition.ObservationQueryConditions;
-import org.n52.sta.data.cloudnative.condition.SensorQueryConditions;
 import org.n52.sta.data.cloudnative.dao.impl.*;
 import org.n52.sta.data.cloudnative.dao.util.StaFirehoseClient;
 import org.n52.sta.data.cloudnative.service.*;
@@ -47,15 +45,23 @@ public class SensorServiceTest {
     private final MutexFactory mutex = new MutexFactory();
     private final ObjectMapper mapper = new ObjectMapper();
     private static String entityId;
-    private SensorQueryConditions sQC;
     private DatastreamQueryConditions dQC;
     // dependencies
     private final ObservationDaoImpl observationDao;
-    private final ObservationQueryConditions oQC;
     private final UnitDaoImpl unitDao;
     private final LocationDaoImpl locationDao;
     private final CloudNativeDatastreamService datastreamService;
     private final CloudNativeObservationService observationService;
+
+    private final ObservationQueryConditions oQC;
+    private final DatastreamQueryConditions dsQC;
+    private final FeatureOfInterestQueryConditions foiQC;
+    private final ThingQueryConditions tQC;
+    private final SensorQueryConditions sQC;
+    private final ObservedPropertyQueryConditions opQC;
+    private final HistoricalLocationQueryConditions hlQC;
+    private final LocationQueryConditions lQC;
+
     @Mock
     private CloudNativeEntityServiceRepository mockServiceRepository;
 
@@ -66,37 +72,51 @@ public class SensorServiceTest {
         this.firehoseClient = firehoseClient;
         this.staFirehose = new StaFirehoseClient(firehoseClient);
 
-        datastreamDao = new DatastreamDaoImpl(ctx, staFirehose);
-        sensorDao = new SensorDaoImpl(ctx, staFirehose);
+        oQC = new ObservationQueryConditions();
+        dsQC = new DatastreamQueryConditions();
+        foiQC = new FeatureOfInterestQueryConditions();
+        tQC = new ThingQueryConditions();
+        sQC = new SensorQueryConditions();
+        opQC = new ObservedPropertyQueryConditions();
+        lQC = new LocationQueryConditions();
+        hlQC = new HistoricalLocationQueryConditions();
+        sQC.setDslContext(ctx);
+        opQC.setDslContext(ctx);
+        foiQC.setDslContext(ctx);
+        dsQC.setDslContext(ctx);
+        oQC.setDslContext(ctx);
+        tQC.setDslContext(ctx);
+        lQC.setDslContext(ctx);
+        hlQC.setDslContext(ctx);
+
+        datastreamDao = new DatastreamDaoImpl(ctx, staFirehose, dsQC, tQC, sQC, opQC);
+        sensorDao = new SensorDaoImpl(ctx, staFirehose, dsQC, sQC);
         formatDao = new FormatDaoImpl(ctx, staFirehose);
 
         formatService = new CloudNativeFormatService(mutex, formatDao);
-        sensorService = new CloudNativeSensorService(sensorDao, datastreamDao, formatService, mutex);
+        sensorService = new CloudNativeSensorService(sensorDao,
+                datastreamDao,
+                formatService,
+                mutex,
+                sQC,
+                dsQC);
 
-        sQC = new SensorQueryConditions();
-        dQC = new DatastreamQueryConditions();
-        dQC.setDslContext(ctx);
-        sQC.setDslContext(ctx);
-        CloudNativeSensorService.setSensorQueryConditions(sQC);
-        CloudNativeSensorService.setDatastreamQueryConditions(dQC);
 
         // dependencies
-        oQC = new ObservationQueryConditions();
-        oQC.setDslContext(ctx);
-        observationDao = new ObservationDaoImpl(ctx, staFirehose);
+        observationDao = new ObservationDaoImpl(ctx, staFirehose, dsQC, oQC);
+        locationDao = new LocationDaoImpl(ctx, staFirehose, hlQC, lQC, tQC);
         unitDao = new UnitDaoImpl(ctx, staFirehose);
-        locationDao = new LocationDaoImpl(ctx, staFirehose);
-        datastreamService = new CloudNativeDatastreamService(
-                datastreamDao,
+        datastreamService = new CloudNativeDatastreamService(datastreamDao,
                 formatService,
                 observationDao,
                 unitDao,
-                mutex
-        );
+                mutex,
+                dsQC);
         observationService = new CloudNativeObservationService(observationDao,
                 datastreamDao,
                 locationDao,
-                mutex);
+                mutex,
+                oQC);
         MockitoAnnotations.openMocks(this);
         when(mockServiceRepository.getEntityServiceRaw(CloudNativeEntityServiceRepository.EntityTypes.Datastream))
                 .thenReturn(datastreamService);
@@ -104,8 +124,6 @@ public class SensorServiceTest {
                 .thenReturn(observationService);
         sensorService.setServiceRepository(mockServiceRepository);
         datastreamService.setServiceRepository(mockServiceRepository);
-        CloudNativeDatastreamService.setDatastreamQueryConditions(dQC);
-        CloudNativeObservationService.setObservationQueryConditions(oQC);
     }
 
     @Test

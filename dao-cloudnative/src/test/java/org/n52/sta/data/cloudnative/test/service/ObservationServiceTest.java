@@ -18,7 +18,7 @@ import org.n52.sta.api.dto.impl.Datastream;
 import org.n52.sta.api.dto.impl.FeatureOfInterest;
 import org.n52.sta.api.dto.impl.Observation;
 import org.n52.sta.data.MutexFactory;
-import org.n52.sta.data.cloudnative.condition.ObservationQueryConditions;
+import org.n52.sta.data.cloudnative.condition.*;
 import org.n52.sta.data.cloudnative.dao.impl.*;
 import org.n52.sta.data.cloudnative.dao.util.StaFirehoseClient;
 import org.n52.sta.data.cloudnative.service.*;
@@ -52,7 +52,6 @@ public class ObservationServiceTest {
     private final ObservationDaoImpl observationDao;
     private final DatastreamDaoImpl datastreamDao;
     private final CloudNativeObservationService observationService;
-    private final ObservationQueryConditions oQC;
     private final ObjectMapper mapper = new ObjectMapper();
     private static String entityId;
     private final FeatureOfInterestDaoImpl featureDao;
@@ -61,6 +60,16 @@ public class ObservationServiceTest {
     private final CloudNativeFormatService formatService;
     private final CloudNativeDatastreamService datastreamService;
     private final UnitDaoImpl unitDao;
+
+    private final ObservationQueryConditions oQC;
+    private final DatastreamQueryConditions dsQC;
+    private final FeatureOfInterestQueryConditions foiQC;
+    private final ThingQueryConditions tQC;
+    private final SensorQueryConditions sQC;
+    private final ObservedPropertyQueryConditions opQC;
+    private final HistoricalLocationQueryConditions hlQC;
+    private final LocationQueryConditions lQC;
+
     @Mock
     private CloudNativeEntityServiceRepository mockServiceRepository;
 
@@ -71,19 +80,36 @@ public class ObservationServiceTest {
         this.ctx = ctx;
         this.staFirehose = new StaFirehoseClient(firehoseClient);
         this.mutex = new MutexFactory();
-        observationDao = new ObservationDaoImpl(ctx, staFirehose);
-        locationDao = new LocationDaoImpl(ctx, staFirehose);
-        datastreamDao = new DatastreamDaoImpl(ctx, staFirehose);
+
         oQC = new ObservationQueryConditions();
+        dsQC = new DatastreamQueryConditions();
+        foiQC = new FeatureOfInterestQueryConditions();
+        tQC = new ThingQueryConditions();
+        sQC = new SensorQueryConditions();
+        opQC = new ObservedPropertyQueryConditions();
+        lQC = new LocationQueryConditions();
+        hlQC = new HistoricalLocationQueryConditions();
+        sQC.setDslContext(ctx);
+        opQC.setDslContext(ctx);
+        foiQC.setDslContext(ctx);
+        dsQC.setDslContext(ctx);
         oQC.setDslContext(ctx);
-        CloudNativeObservationService.setObservationQueryConditions(oQC);
+        tQC.setDslContext(ctx);
+        lQC.setDslContext(ctx);
+        hlQC.setDslContext(ctx);
+
+        observationDao = new ObservationDaoImpl(ctx, staFirehose, dsQC, oQC);
+        datastreamDao = new DatastreamDaoImpl(ctx, staFirehose, dsQC, tQC, sQC, opQC);
+        locationDao = new LocationDaoImpl(ctx, staFirehose, hlQC, lQC, tQC);
+
         observationService = new CloudNativeObservationService(observationDao,
                 datastreamDao,
                 locationDao,
-                mutex);
+                mutex,
+                oQC);
 
         // dependencies
-        featureDao = new FeatureOfInterestDaoImpl(ctx, staFirehose);
+        featureDao = new FeatureOfInterestDaoImpl(ctx, staFirehose, foiQC);
         formatDao = new FormatDaoImpl(ctx, staFirehose);
         unitDao = new UnitDaoImpl(ctx, staFirehose);
         formatService = new CloudNativeFormatService(mutex, formatDao);
@@ -91,12 +117,15 @@ public class ObservationServiceTest {
                 observationDao,
                 datastreamDao,
                 featureDao,
-                mutex);
+                mutex,
+                foiQC,
+                dsQC);
         datastreamService = new CloudNativeDatastreamService(datastreamDao,
                 formatService,
                 observationDao,
                 unitDao,
-                mutex);
+                mutex,
+                dsQC);
 
         // Stub a method on the mock repository
         MockitoAnnotations.openMocks(this);

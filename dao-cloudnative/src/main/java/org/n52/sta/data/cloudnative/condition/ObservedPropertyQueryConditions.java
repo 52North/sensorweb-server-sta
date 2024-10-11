@@ -37,12 +37,14 @@ import org.n52.series.db.beans.parameter.ParameterFactory;
 import org.n52.shetland.ogc.filter.FilterConstants;
 import org.n52.shetland.ogc.sta.StaConstants;
 import org.n52.shetland.ogc.sta.exception.STAInvalidFilterExpressionException;
+import org.springframework.stereotype.Component;
 
 import java.util.List;
 
 /**
  * @author <a href="mailto:humaid.kidwai@ucalgary.ca">Humaid Kidwai</a>
  */
+@Component
 public class ObservedPropertyQueryConditions extends EntityQueryConditions {
 
     private static final String IDENTIFIER = "identifier";

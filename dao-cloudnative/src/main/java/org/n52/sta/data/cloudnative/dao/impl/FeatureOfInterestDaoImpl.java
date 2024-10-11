@@ -44,6 +44,7 @@ import org.n52.sta.data.cloudnative.dao.FirehoseConstants;
 import org.n52.sta.data.cloudnative.dao.util.StaFirehoseClient;
 import org.n52.sta.data.cloudnative.schema.tables.Format;
 import org.n52.sta.data.cloudnative.schema.tables.pojos.Feature;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.*;
@@ -54,14 +55,16 @@ public class FeatureOfInterestDaoImpl
         extends AbstractStaEntityDao<FeatureOfInterestDTO> implements FeatureOfInterestDao {
     private final String tableName = getEntityTable().getName();
     private final String parameterTableName = StaEntity.FEATURE_PROPERTIES.getName();
+    private final FeatureOfInterestQueryConditions fQC;
 
-    public FeatureOfInterestDaoImpl(DSLContext ctx, StaFirehoseClient firehoseClient) {
+    public FeatureOfInterestDaoImpl(DSLContext ctx, StaFirehoseClient firehoseClient, FeatureOfInterestQueryConditions fQC) {
         super(ctx, firehoseClient);
+        this.fQC = fQC;
     }
 
     @Override
     protected List<FeatureOfInterestDTO> mapResultToDTO(Result<Record> result) {
-        Map<Long, FeatureOfInterestDTO> featureMap = new HashMap<>();
+        Map<Long, FeatureOfInterestDTO> featureMap = new TreeMap<>();
         for (Record record : result) {
             Long Id = record.get(StaEntity.FEATURE_OF_INTEREST.FEATURE_ID);
             FeatureOfInterestDTO feature = featureMap.computeIfAbsent(Id,
@@ -125,7 +128,7 @@ public class FeatureOfInterestDaoImpl
 
     @Override
     public Field<?> checkPropertyName(String property) {
-        return new FeatureOfInterestQueryConditions().checkPropertyName(property);
+        return fQC.checkPropertyName(property);
     }
 
     @Override

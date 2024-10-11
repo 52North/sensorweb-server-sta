@@ -35,6 +35,7 @@ import org.n52.sta.api.EntityServiceFactory;
 import org.n52.sta.api.dto.StaDTO;
 import org.n52.sta.utils.AbstractSTARequestHandler;
 import org.springframework.web.servlet.HandlerMapping;
+import org.springframework.web.util.UrlPathHelper;
 
 import javax.servlet.http.HttpServletRequest;
 import java.net.URLDecoder;
@@ -77,7 +78,7 @@ public abstract class EntityRequestHandler extends AbstractSTARequestHandler {
     public StaDTO readEntityDirect(String entity,
                                    String id,
                                    HttpServletRequest request) throws Exception {
-        String lookupPath = (String) request.getAttribute(HandlerMapping.LOOKUP_PATH);
+        String lookupPath = (String) request.getAttribute(UrlPathHelper.PATH_ATTRIBUTE);
         validateResource(lookupPath, serviceRepository);
 
         String entityId = unescapeIdIfWanted(id.substring(1, id.length() - 1));
@@ -97,7 +98,7 @@ public abstract class EntityRequestHandler extends AbstractSTARequestHandler {
     public StaDTO readEntityRefDirect(String entity,
                                       String id,
                                       HttpServletRequest request) throws Exception {
-        String lookupPath = (String) request.getAttribute(HandlerMapping.LOOKUP_PATH);
+        String lookupPath = (String) request.getAttribute(UrlPathHelper.PATH_ATTRIBUTE);
         validateResource(lookupPath.substring(0, lookupPath.length() - 5), serviceRepository);
 
         String entityId = unescapeIdIfWanted(id.substring(1, id.length() - 1));
@@ -120,7 +121,7 @@ public abstract class EntityRequestHandler extends AbstractSTARequestHandler {
                                     String target,
                                     HttpServletRequest request)
         throws Exception {
-        String lookupPath = (String) request.getAttribute(HandlerMapping.LOOKUP_PATH);
+        String lookupPath = (String) request.getAttribute(UrlPathHelper.PATH_ATTRIBUTE);
         validateResource(lookupPath, serviceRepository);
 
         String[] split = splitId(entity);
@@ -148,7 +149,7 @@ public abstract class EntityRequestHandler extends AbstractSTARequestHandler {
                                        String target,
                                        HttpServletRequest request)
         throws Exception {
-        String lookupPath = (String) request.getAttribute(HandlerMapping.LOOKUP_PATH);
+        String lookupPath = (String) request.getAttribute(UrlPathHelper.PATH_ATTRIBUTE);
         validateResource(lookupPath.substring(0, lookupPath.length() - 5), serviceRepository);
 
         String[] split = splitId(entity);

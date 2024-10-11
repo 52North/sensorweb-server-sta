@@ -266,7 +266,7 @@ public abstract class AbstractStaEntityDao<T extends StaDTO> implements StaEntit
         return count == null ? 0 : count;
     }
 
-    public Select<Record> selectQueryBuilder(@NotNull Condition where,
+    public Select<Record> selectQueryBuilder(@Nullable Condition where,
                                              @NotNull Class<T> entityClass,
                                              @Nullable Sort sort,
                                              @Nullable QueryOptions queryOptions /* TODO */)
@@ -283,15 +283,24 @@ public abstract class AbstractStaEntityDao<T extends StaDTO> implements StaEntit
         List<Field<?>> select = new ArrayList<>(getSelect(queryOptions));
         Table<?> from = getJoin(select, table, queryOptions);
         if(joins.contains(StaEntity.DATASTREAM)) {
-            where = where.and(StaEntity.DATASTREAM.FK_AGGREGATION_ID.isNull()
-                    .or(StaEntity.DATASTREAM.FK_AGGREGATION_ID.eq(1L)));
+            Condition clause = StaEntity.DATASTREAM.FK_AGGREGATION_ID.isNull()
+                    .or(StaEntity.DATASTREAM.FK_AGGREGATION_ID.eq(1L));
+            where = where == null ? clause : where.and(clause);
         }
         List<SortField<?>> orderBy = getOrderBy(sort);
 
-        if(orderBy != null) {
-            return ctx.select(select).from(from).where(where).orderBy(orderBy);
+        if (where != null) {
+            if(orderBy != null) {
+                return ctx.select(select).from(from).where(where).orderBy(orderBy);
+            }
+            return ctx.select(select).from(from).where(where);
+        } else {
+            if(orderBy != null) {
+                return ctx.select(select).from(from).orderBy(orderBy);
+            }
+            return ctx.select(select).from(from);
         }
-        return ctx.select(select).from(from).where(where);
+
 
     }
 

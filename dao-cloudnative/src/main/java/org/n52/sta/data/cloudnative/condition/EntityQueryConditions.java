@@ -37,7 +37,7 @@ import org.jooq.*;
 import org.jooq.impl.DSL;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Configurable;
+import org.springframework.stereotype.Component;
 
 import java.util.Date;
 import java.util.List;
@@ -46,7 +46,7 @@ import java.util.List;
  * @author <a href="mailto:humaid.kidwai@ucalgary.ca">Humaid Kidwai</a>
  */
 
-@Configurable
+@Component
 public abstract class EntityQueryConditions implements StaEntity {
 
     String COULD_NOT_FIND_RELATED_PROPERTY = "Could not find related property: ";
@@ -60,6 +60,7 @@ public abstract class EntityQueryConditions implements StaEntity {
 
     @Autowired
     protected DSLContext ctx;
+
     /**
      * Used for testing
      *

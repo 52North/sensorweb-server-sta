@@ -73,26 +73,23 @@ public class CloudNativeObservedPropertyService
 
     private static final Logger logger = LoggerFactory.getLogger(CloudNativeObservedPropertyService.class);
 
-    private static DatastreamQueryConditions dsQC = new DatastreamQueryConditions();
-    private static ObservedPropertyQueryConditions oQC = new ObservedPropertyQueryConditions();
+    private final DatastreamQueryConditions dsQC;
+    private final ObservedPropertyQueryConditions opQC;
 
     private final DatastreamDaoImpl datastreamDao;
     private final ObservedPropertyDaoImpl observedPropertyDao;
     private final AtomicLong TS = new AtomicLong();
 
     public CloudNativeObservedPropertyService(ObservedPropertyDaoImpl observedPropertyDao,
-                                              DatastreamDaoImpl datastreamDao, MutexFactory lock) {
+                                              DatastreamDaoImpl datastreamDao,
+                                              MutexFactory lock,
+                                              DatastreamQueryConditions dsQC,
+                                              ObservedPropertyQueryConditions opQC) {
         super(observedPropertyDao, ObservedPropertyDTO.class, lock);
         this.datastreamDao = datastreamDao;
         this.observedPropertyDao = observedPropertyDao;
-    }
-
-    public static void setObservedPropertyQueryConditions(ObservedPropertyQueryConditions oQC) {
-        CloudNativeObservedPropertyService.oQC = oQC;
-    }
-
-    public static void setDatastreamQueryConditions(DatastreamQueryConditions dsQC) {
-        CloudNativeObservedPropertyService.dsQC = dsQC;
+        this.dsQC = dsQC;
+        this.opQC = opQC;
     }
 
     @Override
@@ -140,14 +137,14 @@ public class CloudNativeObservedPropertyService
         Condition filter;
         switch (relatedType) {
             case STAEntityDefinition.DATASTREAMS: {
-                filter = oQC.withDatastreamStaIdentifier(relatedId);
+                filter = opQC.withDatastreamStaIdentifier(relatedId);
                 break;
             }
             default:
                 throw new IllegalStateException(String.format(TRYING_TO_FILTER_BY_UNRELATED_TYPE, relatedType));
         }
         if (ownId != null) {
-            filter = filter.and(oQC.withStaIdentifier(ownId));
+            filter = filter.and(opQC.withStaIdentifier(ownId));
         }
         return filter;
     }
@@ -171,7 +168,7 @@ public class CloudNativeObservedPropertyService
         if (entity.getId() == null) {
             if (observedPropertyDao.existsByName(entity.getName(), entityClass)) {
                 Optional<ObservedPropertyDTO> optional
-                        = observedPropertyDao.findOne(oQC.withName(entity.getName()), null, entityClass);
+                        = observedPropertyDao.findOne(opQC.withName(entity.getName()), null, entityClass);
                 return optional.orElse(null);
             } else {
                 entity.setId(NULL_ID_MASK);

@@ -15,8 +15,7 @@ import org.n52.sta.api.dto.ThingDTO;
 import org.n52.sta.api.dto.impl.Location;
 import org.n52.sta.api.dto.impl.Thing;
 import org.n52.sta.data.MutexFactory;
-import org.n52.sta.data.cloudnative.condition.DatastreamQueryConditions;
-import org.n52.sta.data.cloudnative.condition.ThingQueryConditions;
+import org.n52.sta.data.cloudnative.condition.*;
 import org.n52.sta.data.cloudnative.dao.impl.*;
 import org.n52.sta.data.cloudnative.dao.util.StaFirehoseClient;
 import org.n52.sta.data.cloudnative.service.*;
@@ -44,6 +43,15 @@ public class ThingServiceTest {
     private final StaFirehoseClient staFirehose;
     private final ObjectMapper mapper = new ObjectMapper();
     private static String entityId;
+
+    private final ObservationQueryConditions oQC;
+    private final DatastreamQueryConditions dsQC;
+    private final FeatureOfInterestQueryConditions foiQC;
+    private final ThingQueryConditions tQC;
+    private final SensorQueryConditions sQC;
+    private final ObservedPropertyQueryConditions opQC;
+    private final HistoricalLocationQueryConditions hlQC;
+    private final LocationQueryConditions lQC;
 
     private final LocationHistoricalLocationDaoImpl locationHistoricalLocationDao;
     private final ThingLocationDaoImpl thingLocationDao;
@@ -74,28 +82,42 @@ public class ThingServiceTest {
         this.staFirehose = new StaFirehoseClient(firehoseClient);
         this.mutex = new MutexFactory();
 
+        oQC = new ObservationQueryConditions();
+        dsQC = new DatastreamQueryConditions();
+        foiQC = new FeatureOfInterestQueryConditions();
+        tQC = new ThingQueryConditions();
+        sQC = new SensorQueryConditions();
+        opQC = new ObservedPropertyQueryConditions();
+        lQC = new LocationQueryConditions();
+        hlQC = new HistoricalLocationQueryConditions();
+        sQC.setDslContext(ctx);
+        opQC.setDslContext(ctx);
+        foiQC.setDslContext(ctx);
+        dsQC.setDslContext(ctx);
+        oQC.setDslContext(ctx);
+        tQC.setDslContext(ctx);
+        lQC.setDslContext(ctx);
+        hlQC.setDslContext(ctx);
+
         thingLocationDao = new ThingLocationDaoImpl(staFirehose, ctx);
         locationHistoricalLocationDao = new LocationHistoricalLocationDaoImpl(staFirehose, ctx);
-        thingDao = new ThingDaoImpl(ctx, staFirehose);
-        datastreamDao = new DatastreamDaoImpl(ctx, staFirehose);
-        ThingQueryConditions tQC = new ThingQueryConditions();
-        tQC.setDslContext(ctx);
-        DatastreamQueryConditions dQC = new DatastreamQueryConditions();
-        dQC.setDslContext(ctx);
-        CloudNativeThingService.setThingQueryConditions(tQC);
-        CloudNativeThingService.setDatastreamQueryConditions(dQC);
+        thingDao = new ThingDaoImpl(ctx, staFirehose, tQC, lQC, dsQC, hlQC);
+        datastreamDao = new DatastreamDaoImpl(ctx, staFirehose, dsQC, tQC, sQC, opQC);
+
 
         thingService = new CloudNativeThingService(thingDao,
                 thingLocationDao,
                 locationHistoricalLocationDao,
                 datastreamDao,
-                mutex);
+                mutex,
+                tQC,
+                dsQC);
 
         // dependencies
-        observationDao = new ObservationDaoImpl(ctx, staFirehose);
+        observationDao = new ObservationDaoImpl(ctx, staFirehose, dsQC, oQC);
+        locationDao = new LocationDaoImpl(ctx, staFirehose, hlQC, lQC, tQC);
+        historicalLocationDao = new HistoricalLocationDaoImpl(ctx, staFirehose, lQC, tQC, hlQC);
         unitDao = new UnitDaoImpl(ctx, staFirehose);
-        locationDao = new LocationDaoImpl(ctx, staFirehose);
-        historicalLocationDao = new HistoricalLocationDaoImpl(ctx, staFirehose);
         formatDao = new FormatDaoImpl(ctx, staFirehose);
         formatService = new CloudNativeFormatService(mutex, formatDao);
         locationService = new CloudNativeLocationService(locationDao,
@@ -103,18 +125,19 @@ public class ThingServiceTest {
                 locationHistoricalLocationDao,
                 thingLocationDao,
                 false,
-                mutex);
+                mutex,
+                lQC);
         historicalLocationService = new CloudNativeHistoricalLocationService(
                 historicalLocationDao,
                 locationHistoricalLocationDao,
-                mutex);
-        datastreamService = new CloudNativeDatastreamService(
-                datastreamDao,
+                mutex,
+                hlQC);
+        datastreamService = new CloudNativeDatastreamService(datastreamDao,
                 formatService,
                 observationDao,
                 unitDao,
-                mutex
-        );
+                mutex,
+                dsQC);
         // Stub a method on the mock repository
         MockitoAnnotations.openMocks(this);
         when(mockServiceRepository.getEntityServiceRaw(CloudNativeEntityServiceRepository.EntityTypes.HistoricalLocation))

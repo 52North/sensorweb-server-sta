@@ -11,8 +11,7 @@ import org.mockito.MockitoAnnotations;
 import org.n52.sta.api.dto.ObservedPropertyDTO;
 import org.n52.sta.api.dto.impl.ObservedProperty;
 import org.n52.sta.data.MutexFactory;
-import org.n52.sta.data.cloudnative.condition.DatastreamQueryConditions;
-import org.n52.sta.data.cloudnative.condition.ObservedPropertyQueryConditions;
+import org.n52.sta.data.cloudnative.condition.*;
 import org.n52.sta.data.cloudnative.dao.impl.*;
 import org.n52.sta.data.cloudnative.dao.util.StaFirehoseClient;
 import org.n52.sta.data.cloudnative.service.CloudNativeDatastreamService;
@@ -44,13 +43,21 @@ public class ObservedPropertyServiceTest {
     private CloudNativeObservedPropertyService observedPropertyService;
     private final ObjectMapper mapper = new ObjectMapper();
     private static String entityId;
-    private DatastreamQueryConditions dsQC;
-    private ObservedPropertyQueryConditions oQC;
     private final ObservationDaoImpl observationDao;
     private final FormatDaoImpl formatDao;
     private final UnitDaoImpl unitDao;
     private final CloudNativeFormatService formatService;
     private final CloudNativeDatastreamService datastreamService;
+
+    private final ObservationQueryConditions oQC;
+    private final DatastreamQueryConditions dsQC;
+    private final FeatureOfInterestQueryConditions foiQC;
+    private final ThingQueryConditions tQC;
+    private final SensorQueryConditions sQC;
+    private final ObservedPropertyQueryConditions opQC;
+    private final HistoricalLocationQueryConditions hlQC;
+    private final LocationQueryConditions lQC;
+
     @Mock
     private CloudNativeEntityServiceRepository mockServiceRepository;
 
@@ -61,19 +68,34 @@ public class ObservedPropertyServiceTest {
         this.firehoseClient = firehoseClient;
         this.staFirehose = new StaFirehoseClient(firehoseClient);
 
-        datastreamDao = new DatastreamDaoImpl(ctx, staFirehose);
-        observedPropertyDao = new ObservedPropertyDaoImpl(ctx, staFirehose);
-
-        observedPropertyService = new CloudNativeObservedPropertyService(observedPropertyDao, datastreamDao, mutex);
-
+        oQC = new ObservationQueryConditions();
         dsQC = new DatastreamQueryConditions();
-        oQC = new ObservedPropertyQueryConditions();
+        foiQC = new FeatureOfInterestQueryConditions();
+        tQC = new ThingQueryConditions();
+        sQC = new SensorQueryConditions();
+        opQC = new ObservedPropertyQueryConditions();
+        lQC = new LocationQueryConditions();
+        hlQC = new HistoricalLocationQueryConditions();
+        sQC.setDslContext(ctx);
+        opQC.setDslContext(ctx);
+        foiQC.setDslContext(ctx);
         dsQC.setDslContext(ctx);
         oQC.setDslContext(ctx);
-        CloudNativeObservedPropertyService.setObservedPropertyQueryConditions(oQC);
-        CloudNativeObservedPropertyService.setDatastreamQueryConditions(dsQC);
+        tQC.setDslContext(ctx);
+        lQC.setDslContext(ctx);
+        hlQC.setDslContext(ctx);
 
-        observationDao = new ObservationDaoImpl(ctx, staFirehose);
+        datastreamDao = new DatastreamDaoImpl(ctx, staFirehose, dsQC, tQC, sQC, opQC);
+        observedPropertyDao = new ObservedPropertyDaoImpl(ctx, staFirehose, dsQC, opQC);
+
+        observedPropertyService = new CloudNativeObservedPropertyService(observedPropertyDao,
+                datastreamDao,
+                mutex,
+                dsQC,
+                opQC);
+
+
+        observationDao = new ObservationDaoImpl(ctx, staFirehose, dsQC, oQC);
         formatDao = new FormatDaoImpl(ctx, staFirehose);
         unitDao = new UnitDaoImpl(ctx, staFirehose);
         formatService = new CloudNativeFormatService(mutex, formatDao);
@@ -81,7 +103,8 @@ public class ObservedPropertyServiceTest {
                 formatService,
                 observationDao,
                 unitDao,
-                mutex);
+                mutex,
+                dsQC);
         MockitoAnnotations.openMocks(this);
         when(mockServiceRepository.getEntityServiceRaw(CloudNativeEntityServiceRepository.EntityTypes.Datastream))
                 .thenReturn(datastreamService);

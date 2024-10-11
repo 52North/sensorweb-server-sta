@@ -63,9 +63,18 @@ import java.util.stream.Collectors;
 public class LocationDaoImpl extends AbstractStaEntityDao<LocationDTO> implements LocationDao {
     private final String tableName = getEntityTable().getName();
     private final String parameterTableName = StaEntity.FEATURE_PROPERTIES.getName();
-
-    public LocationDaoImpl(DSLContext ctx, StaFirehoseClient firehoseClient) {
+    private final HistoricalLocationQueryConditions hlQC;
+    private final LocationQueryConditions lQC;
+    private final ThingQueryConditions tQC;
+    public LocationDaoImpl(DSLContext ctx,
+                           StaFirehoseClient firehoseClient,
+                           HistoricalLocationQueryConditions hlQC,
+                           LocationQueryConditions lQC,
+                           ThingQueryConditions tQC) {
         super(ctx, firehoseClient);
+        this.hlQC = hlQC;
+        this.lQC = lQC;
+        this.tQC = tQC;
     }
 
     @Override
@@ -84,7 +93,7 @@ public class LocationDaoImpl extends AbstractStaEntityDao<LocationDTO> implement
 
     @Override
     protected List<LocationDTO> mapResultToDTO(Result<Record> result) {
-        Map<Long, LocationDTO> locationMap = new HashMap<>();
+        Map<Long, LocationDTO> locationMap = new TreeMap<>();
         for (Record record : result) {
             Long Id = record.get(StaEntity.LOCATION.LOCATION_ID);
 
@@ -178,7 +187,7 @@ public class LocationDaoImpl extends AbstractStaEntityDao<LocationDTO> implement
                                     .getSelectFilter()
                                     .getItems()
                                     .stream()
-                                    .map(e-> new HistoricalLocationQueryConditions().checkPropertyName(e))
+                                    .map(e-> hlQC.checkPropertyName(e))
                                     .collect(Collectors.toList()));
                         }
                         break;
@@ -203,7 +212,7 @@ public class LocationDaoImpl extends AbstractStaEntityDao<LocationDTO> implement
                                     .getSelectFilter()
                                     .getItems()
                                     .stream()
-                                    .map(e -> new ThingQueryConditions().checkPropertyName(e))
+                                    .map(e -> tQC.checkPropertyName(e))
                                     .collect(Collectors.toList()));
                         }
                         break;
@@ -222,7 +231,7 @@ public class LocationDaoImpl extends AbstractStaEntityDao<LocationDTO> implement
 
     @Override
     public Field<?> checkPropertyName(String property) {
-        return new LocationQueryConditions().checkPropertyName(property);
+        return lQC.checkPropertyName(property);
     }
 
     @Override

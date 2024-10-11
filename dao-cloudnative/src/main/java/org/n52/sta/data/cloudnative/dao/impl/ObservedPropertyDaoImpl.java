@@ -62,14 +62,20 @@ public class ObservedPropertyDaoImpl
         extends AbstractStaEntityDao<ObservedPropertyDTO> implements ObservedPropertyDao {
     private final String tableName = getEntityTable().getName();
     private final String parameterTableName = StaEntity.OBSERVED_PROPERTY_PROPERTIES.getName();
-
-    public ObservedPropertyDaoImpl(DSLContext ctx, StaFirehoseClient firehoseClient) {
+    private final DatastreamQueryConditions dsQC;
+    private final ObservedPropertyQueryConditions opQC;
+    public ObservedPropertyDaoImpl(DSLContext ctx,
+                                   StaFirehoseClient firehoseClient,
+                                   DatastreamQueryConditions dsQC,
+                                   ObservedPropertyQueryConditions opQC) {
         super(ctx, firehoseClient);
+        this.dsQC = dsQC;
+        this.opQC = opQC;
     }
 
     @Override
     protected List<ObservedPropertyDTO> mapResultToDTO(Result<Record> result) {
-        Map<Long, ObservedPropertyDTO> observedPropertyMap = new HashMap<Long, ObservedPropertyDTO>();
+        Map<Long, ObservedPropertyDTO> observedPropertyMap = new TreeMap<>();
         for (Record record : result) {
             Long Id = record.get(StaEntity.OBSERVED_PROPERTY.PHENOMENON_ID);
             ObservedPropertyDTO observedProperty = observedPropertyMap.computeIfAbsent(Id,
@@ -173,7 +179,7 @@ public class ObservedPropertyDaoImpl
                                 .getSelectFilter()
                                 .getItems()
                                 .stream()
-                                .map(e-> new DatastreamQueryConditions().checkPropertyName(e))
+                                .map(e-> dsQC.checkPropertyName(e))
                                 .collect(Collectors.toList()));
                     }
 
@@ -191,7 +197,7 @@ public class ObservedPropertyDaoImpl
 
     @Override
     public Field<?> checkPropertyName(String property) {
-        return new ObservedPropertyQueryConditions().checkPropertyName(property);
+        return opQC.checkPropertyName(property);
     }
 
     @Override

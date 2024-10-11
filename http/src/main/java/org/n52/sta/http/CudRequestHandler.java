@@ -43,6 +43,7 @@ import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.servlet.HandlerMapping;
+import org.springframework.web.util.UrlPathHelper;
 
 import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
@@ -96,7 +97,7 @@ public abstract class CudRequestHandler<T extends StaDTO> extends AbstractSTAReq
                                     String body,
                                     HttpServletRequest request)
         throws Exception {
-        String lookupPath = (String) request.getAttribute(HandlerMapping.LOOKUP_PATH);
+        String lookupPath = (String) request.getAttribute(UrlPathHelper.PATH_ATTRIBUTE);
         validateResource(lookupPath, serviceRepository);
 
         // Add information about the related Entity to json payload to be used during deserialization
@@ -126,7 +127,7 @@ public abstract class CudRequestHandler<T extends StaDTO> extends AbstractSTAReq
                                     @RequestBody String body,
                                     HttpServletRequest request)
         throws Exception {
-        String lookupPath = (String) request.getAttribute(HandlerMapping.LOOKUP_PATH);
+        String lookupPath = (String) request.getAttribute(UrlPathHelper.PATH_ATTRIBUTE);
         validateResource(lookupPath, serviceRepository);
 
         Class<EntityPatch> clazz = collectionNameToPatchClass(collectionName);
@@ -154,7 +155,7 @@ public abstract class CudRequestHandler<T extends StaDTO> extends AbstractSTAReq
                                      String body,
                                      HttpServletRequest request)
         throws Exception {
-        String lookupPath = (String) request.getAttribute(HandlerMapping.LOOKUP_PATH);
+        String lookupPath = (String) request.getAttribute(UrlPathHelper.PATH_ATTRIBUTE);
         validateResource(lookupPath, serviceRepository);
 
         String[] split = splitId(entity);
@@ -192,7 +193,7 @@ public abstract class CudRequestHandler<T extends StaDTO> extends AbstractSTAReq
                                String id,
                                HttpServletRequest request)
         throws Exception {
-        String lookupPath = (String) request.getAttribute(HandlerMapping.LOOKUP_PATH);
+        String lookupPath = (String) request.getAttribute(UrlPathHelper.PATH_ATTRIBUTE);
         validateResource(lookupPath, serviceRepository);
         serviceRepository.getEntityService(collectionName).delete(
             unescapeIdIfWanted(id.substring(1, id.length() - 1)));
@@ -213,7 +214,7 @@ public abstract class CudRequestHandler<T extends StaDTO> extends AbstractSTAReq
                                       String body,
                                       HttpServletRequest request)
         throws Exception {
-        String lookupPath = (String) request.getAttribute(HandlerMapping.LOOKUP_PATH);
+        String lookupPath = (String) request.getAttribute(UrlPathHelper.PATH_ATTRIBUTE);
         validateResource(lookupPath, serviceRepository);
 
         String[] split = splitId(entity);

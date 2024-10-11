@@ -52,6 +52,7 @@ import org.n52.sta.data.cloudnative.schema.tables.pojos.Format;
 import org.n52.sta.data.cloudnative.schema.tables.pojos.Procedure;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.DependsOn;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpMethod;
@@ -75,8 +76,8 @@ public class CloudNativeSensorService
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CloudNativeSensorService.class);
 
-    private static SensorQueryConditions sQC = new SensorQueryConditions();
-    private static DatastreamQueryConditions dQC = new DatastreamQueryConditions();
+    private final SensorQueryConditions sQC;
+    private final DatastreamQueryConditions dQC;
     private final DatastreamDaoImpl datastreamDao;
 
     private final SensorDaoImpl sensorDao;
@@ -85,19 +86,15 @@ public class CloudNativeSensorService
     public CloudNativeSensorService(SensorDaoImpl sensorDao,
                                     DatastreamDaoImpl datastreamDao,
                                     CloudNativeFormatService formatService,
-                                    MutexFactory lock) {
+                                    MutexFactory lock,
+                                    SensorQueryConditions sQC,
+                                    DatastreamQueryConditions dQC) {
         super(sensorDao, SensorDTO.class, lock);
         this.datastreamDao = datastreamDao;
         this.sensorDao = sensorDao;
         this.formatService = formatService;
-    }
-
-    public static void setDatastreamQueryConditions(DatastreamQueryConditions dQC) {
-        CloudNativeSensorService.dQC = dQC;
-    }
-
-    public static void setSensorQueryConditions(SensorQueryConditions sQC) {
-        CloudNativeSensorService.sQC = sQC;
+        this.sQC = sQC;
+        this.dQC = dQC;
     }
 
     @Override

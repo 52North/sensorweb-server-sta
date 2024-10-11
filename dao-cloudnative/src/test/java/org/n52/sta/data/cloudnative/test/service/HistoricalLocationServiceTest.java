@@ -14,7 +14,7 @@ import org.n52.sta.api.dto.impl.HistoricalLocation;
 import org.n52.sta.api.dto.impl.Location;
 import org.n52.sta.api.dto.impl.Thing;
 import org.n52.sta.data.MutexFactory;
-import org.n52.sta.data.cloudnative.condition.HistoricalLocationQueryConditions;
+import org.n52.sta.data.cloudnative.condition.*;
 import org.n52.sta.data.cloudnative.dao.impl.*;
 import org.n52.sta.data.cloudnative.dao.util.StaFirehoseClient;
 import org.n52.sta.data.cloudnative.service.*;
@@ -50,12 +50,20 @@ public class HistoricalLocationServiceTest {
     private final LocationHistoricalLocationDaoImpl locationHistoricalLocationDao;
     private final ThingLocationDaoImpl thingLocationDao;
     private final ThingDaoImpl thingDao;
+    private final DatastreamDaoImpl datastreamDao;
     private final CloudNativeHistoricalLocationService historicalLocationService;
     private final CloudNativeLocationService locationService;
     private final CloudNativeFormatService formatService;
     private final CloudNativeThingService thingService;
     private static String entityId;
+
+    private final DatastreamQueryConditions dsQC;
+    private final ThingQueryConditions tQC;
+    private final SensorQueryConditions sQC;
+    private final ObservedPropertyQueryConditions opQC;
     private final HistoricalLocationQueryConditions hlQC;
+    private final LocationQueryConditions lQC;
+
     @Mock
     private CloudNativeEntityServiceRepository mockServiceRepository;
 
@@ -66,33 +74,50 @@ public class HistoricalLocationServiceTest {
         this.firehoseClient = firehoseClient;
         this.staFirehose = new StaFirehoseClient(firehoseClient);
         this.mutex = new MutexFactory();
-        locationDao = new LocationDaoImpl(ctx, staFirehose);
-        historicalLocationDao = new HistoricalLocationDaoImpl(ctx, staFirehose);
+
+        dsQC = new DatastreamQueryConditions();
+        tQC = new ThingQueryConditions();
+        sQC = new SensorQueryConditions();
+        opQC = new ObservedPropertyQueryConditions();
+        lQC = new LocationQueryConditions();
+        hlQC = new HistoricalLocationQueryConditions();
+        sQC.setDslContext(ctx);
+        opQC.setDslContext(ctx);
+        dsQC.setDslContext(ctx);
+        tQC.setDslContext(ctx);
+        lQC.setDslContext(ctx);
+        hlQC.setDslContext(ctx);
+
+        locationDao = new LocationDaoImpl(ctx, staFirehose, hlQC, lQC, tQC);
+        historicalLocationDao = new HistoricalLocationDaoImpl(ctx, staFirehose, lQC, tQC, hlQC);
         locationHistoricalLocationDao = new LocationHistoricalLocationDaoImpl(staFirehose, ctx);
         historicalLocationService = new CloudNativeHistoricalLocationService(
                 historicalLocationDao,
                 locationHistoricalLocationDao,
-                mutex);
+                mutex,
+                hlQC);
 
         // dependencies
         formatDao = new FormatDaoImpl(ctx, staFirehose);
         formatService = new CloudNativeFormatService(mutex, formatDao);
         thingLocationDao = new ThingLocationDaoImpl(staFirehose, ctx);
+        datastreamDao = new DatastreamDaoImpl(ctx, staFirehose, dsQC, tQC, sQC, opQC);
         locationService = new CloudNativeLocationService(locationDao,
                 formatService,
                 locationHistoricalLocationDao,
                 thingLocationDao,
                 false,
-                mutex);
-        thingDao = new ThingDaoImpl(ctx, staFirehose);
+                mutex,
+                lQC);
+        thingDao = new ThingDaoImpl(ctx, staFirehose, tQC, lQC, dsQC, hlQC);
         thingService = new CloudNativeThingService(thingDao,
                 thingLocationDao,
                 locationHistoricalLocationDao,
-                new DatastreamDaoImpl(ctx, staFirehose),
-                mutex);
-        hlQC = new HistoricalLocationQueryConditions();
-        hlQC.setDslContext(ctx);
-        CloudNativeHistoricalLocationService.setHistoricalLocationQueryConditions(hlQC);
+                datastreamDao,
+                mutex,
+                tQC,
+                dsQC);
+
     }
 
     @Test

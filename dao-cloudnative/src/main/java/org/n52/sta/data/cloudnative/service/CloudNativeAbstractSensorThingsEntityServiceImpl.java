@@ -96,7 +96,6 @@ public abstract class CloudNativeAbstractSensorThingsEntityServiceImpl <T extend
         this.lock = lock;
     }
 
-
     public void setServiceRepository(CloudNativeEntityServiceRepository entityServiceRepository) {
         this.serviceRepository = entityServiceRepository;
     }

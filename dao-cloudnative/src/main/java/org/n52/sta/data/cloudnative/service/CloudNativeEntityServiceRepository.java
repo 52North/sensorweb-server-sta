@@ -102,9 +102,8 @@ public class CloudNativeEntityServiceRepository implements EntityServiceFactory 
     }
 
     @PostConstruct
-
     private void initServices() {
-        // Set the
+        // Set the service repository for all service classes
         entityServices.forEach(
                 (t, e) -> e.getServiceImpl().setServiceRepository(this)
         );

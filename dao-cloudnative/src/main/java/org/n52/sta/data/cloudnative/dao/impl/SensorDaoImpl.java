@@ -49,6 +49,7 @@ import org.n52.sta.data.cloudnative.dao.SensorDao;
 import org.n52.sta.data.cloudnative.dao.util.StaFirehoseClient;
 import org.n52.sta.data.cloudnative.schema.tables.Format;
 import org.n52.sta.data.cloudnative.schema.tables.pojos.Procedure;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.*;
@@ -61,14 +62,21 @@ import java.util.stream.Collectors;
 public class SensorDaoImpl extends AbstractStaEntityDao<SensorDTO> implements SensorDao {
     private final String tableName = getEntityTable().getName();
     private final String parameterTableName = StaEntity.SENSOR_PROPERTIES.getName();
+    private final DatastreamQueryConditions dsQC;
+    private final SensorQueryConditions sQC;
 
-    public SensorDaoImpl(DSLContext ctx, StaFirehoseClient firehoseClient) {
+    public SensorDaoImpl(DSLContext ctx,
+                         StaFirehoseClient firehoseClient,
+                         DatastreamQueryConditions dsQC,
+                         SensorQueryConditions sQC) {
         super(ctx, firehoseClient);
+        this.dsQC = dsQC;
+        this.sQC = sQC;
     }
 
     @Override
     protected List<SensorDTO> mapResultToDTO(Result<Record> result) {
-        Map<Long, SensorDTO> sensorMap = new HashMap<Long, SensorDTO>();
+        Map<Long, SensorDTO> sensorMap = new TreeMap<>();
         for (Record record : result) {
             Long Id = record.get(StaEntity.SENSOR.PROCEDURE_ID);
             SensorDTO sensor = sensorMap.computeIfAbsent(Id, k -> record.map(new DTOMapper.SensorRecordMapper()));
@@ -172,7 +180,7 @@ public class SensorDaoImpl extends AbstractStaEntityDao<SensorDTO> implements Se
                                 .getSelectFilter()
                                 .getItems()
                                 .stream()
-                                .map(e-> new DatastreamQueryConditions().checkPropertyName(e))
+                                .map(e-> dsQC.checkPropertyName(e))
                                 .collect(Collectors.toList()));
                     }
                 }
@@ -189,7 +197,7 @@ public class SensorDaoImpl extends AbstractStaEntityDao<SensorDTO> implements Se
 
     @Override
     public Field<?> checkPropertyName(String property) {
-        return new SensorQueryConditions().checkPropertyName(property);
+        return sQC.checkPropertyName(property);
     }
 
     @Override

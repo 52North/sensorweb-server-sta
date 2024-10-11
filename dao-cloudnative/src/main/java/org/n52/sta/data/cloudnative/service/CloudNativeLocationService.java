@@ -84,7 +84,7 @@ public class CloudNativeLocationService
     private static final Logger LOGGER = LoggerFactory.getLogger(CloudNativeLocationService.class);
     private static final String UNABLE_TO_UPDATE_ENTITY_NOT_FOUND = "Unable to update. Entity not found";
 
-    private static LocationQueryConditions lQC = new LocationQueryConditions();
+    private final LocationQueryConditions lQC;
 
     private final boolean updateFOIFeatureEnabled;
     private final AtomicLong TS = new AtomicLong();
@@ -100,18 +100,14 @@ public class CloudNativeLocationService
                                       LocationHistoricalLocationDaoImpl locationHistoricalLocationDao,
                                       ThingLocationDaoImpl thingLocationDao,
                                       @Value("false") boolean updateFOIFeatureEnabled,
-                                      MutexFactory lock) {
+                                      MutexFactory lock, LocationQueryConditions lQC) {
         super(locationDao, LocationDTO.class, lock);
         this.formatService = formatDao;
         this.updateFOIFeatureEnabled = updateFOIFeatureEnabled;
         this.locationDao = locationDao;
         this.locationHistoricalLocationDao = locationHistoricalLocationDao;
         this.thingLocationDao = thingLocationDao;
-    }
-
-    // Static setter for testing purposes
-    public static void setLocationQueryConditions(LocationQueryConditions lQC) {
-        CloudNativeLocationService.lQC = lQC;
+        this.lQC = lQC;
     }
 
     @Override

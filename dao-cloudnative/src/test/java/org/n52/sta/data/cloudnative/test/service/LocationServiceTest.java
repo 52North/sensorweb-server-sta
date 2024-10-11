@@ -16,8 +16,7 @@ import org.n52.sta.api.dto.impl.HistoricalLocation;
 import org.n52.sta.api.dto.impl.Location;
 import org.n52.sta.api.dto.impl.Thing;
 import org.n52.sta.data.MutexFactory;
-import org.n52.sta.data.cloudnative.condition.EntityQueryConditions;
-import org.n52.sta.data.cloudnative.condition.LocationQueryConditions;
+import org.n52.sta.data.cloudnative.condition.*;
 import org.n52.sta.data.cloudnative.dao.impl.*;
 import org.n52.sta.data.cloudnative.dao.util.StaFirehoseClient;
 import org.n52.sta.data.cloudnative.service.*;
@@ -48,6 +47,7 @@ public class LocationServiceTest {
     private final LocationHistoricalLocationDaoImpl locationHistoricalLocationDao;
     private final ThingLocationDaoImpl thingLocationDao;
     private final ThingDaoImpl thingDao;
+    private final DatastreamDaoImpl datastreamDao;
     private final HistoricalLocationDaoImpl historicalLocationDao;
     private final CloudNativeThingService thingService;
     private final CloudNativeFormatService formatService;
@@ -59,7 +59,14 @@ public class LocationServiceTest {
     private final StaFirehoseClient staFirehose;
     private final ObjectMapper mapper = new ObjectMapper();
     private static String entityId;
+
+    private final DatastreamQueryConditions dsQC;
+    private final ThingQueryConditions tQC;
+    private final SensorQueryConditions sQC;
+    private final ObservedPropertyQueryConditions opQC;
+    private final HistoricalLocationQueryConditions hlQC;
     private final LocationQueryConditions lQC;
+
     @Mock
     private CloudNativeEntityServiceRepository mockServiceRepository;
 
@@ -70,35 +77,51 @@ public class LocationServiceTest {
         this.firehoseClient = firehoseClient;
         this.staFirehose = new StaFirehoseClient(firehoseClient);
         updateFOIFeatureEnabled = true;
+
+        dsQC = new DatastreamQueryConditions();
+        tQC = new ThingQueryConditions();
+        sQC = new SensorQueryConditions();
+        opQC = new ObservedPropertyQueryConditions();
+        lQC = new LocationQueryConditions();
+        hlQC = new HistoricalLocationQueryConditions();
+        sQC.setDslContext(ctx);
+        opQC.setDslContext(ctx);
+        dsQC.setDslContext(ctx);
+        tQC.setDslContext(ctx);
+        lQC.setDslContext(ctx);
+        hlQC.setDslContext(ctx);
+
         mutex = new MutexFactory();
         formatDao = new FormatDaoImpl(ctx, staFirehose);
         formatService = new CloudNativeFormatService(mutex, formatDao);
-        locationDao = new LocationDaoImpl(ctx, staFirehose);
         locationHistoricalLocationDao = new LocationHistoricalLocationDaoImpl(staFirehose, ctx);
         thingLocationDao = new ThingLocationDaoImpl(staFirehose, ctx);
+        locationDao = new LocationDaoImpl(ctx, staFirehose, hlQC, lQC, tQC);
         locationService = new CloudNativeLocationService(locationDao,
                 formatService,
                 locationHistoricalLocationDao,
                 thingLocationDao,
-                updateFOIFeatureEnabled,
-                mutex);
+                false,
+                mutex,
+                lQC);
 
-        lQC = new LocationQueryConditions();
-        lQC.setDslContext(ctx);
-        CloudNativeLocationService.setLocationQueryConditions(lQC);
 
         // dependencies
-        historicalLocationDao = new HistoricalLocationDaoImpl(ctx, staFirehose);
-        thingDao = new ThingDaoImpl(ctx, staFirehose);
+        historicalLocationDao = new HistoricalLocationDaoImpl(ctx, staFirehose, lQC, tQC, hlQC);
+        thingDao = new ThingDaoImpl(ctx, staFirehose, tQC, lQC, dsQC, hlQC);
+        datastreamDao = new DatastreamDaoImpl(ctx, staFirehose, dsQC, tQC, sQC, opQC);
         thingService = new CloudNativeThingService(thingDao,
                 thingLocationDao,
                 locationHistoricalLocationDao,
-                new DatastreamDaoImpl(ctx, staFirehose),
-                mutex);
+                datastreamDao,
+                mutex,
+                tQC,
+                dsQC);
         historicalLocationService = new CloudNativeHistoricalLocationService(
                 historicalLocationDao,
                 locationHistoricalLocationDao,
-                mutex);
+                mutex,
+                hlQC);
 
     }
 

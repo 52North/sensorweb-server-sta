@@ -58,15 +58,23 @@ import java.util.stream.Collectors;
 public class HistoricalLocationDaoImpl
         extends AbstractStaEntityDao<HistoricalLocationDTO> implements HistoricalLocationDao {
     private final String tableName = getEntityTable().getName();
-
-    public HistoricalLocationDaoImpl(DSLContext ctx, StaFirehoseClient firehoseClient) {
+    private final LocationQueryConditions lQC;
+    private final ThingQueryConditions tQC;
+    private final HistoricalLocationQueryConditions hlQC;
+    public HistoricalLocationDaoImpl(DSLContext ctx,
+                                     StaFirehoseClient firehoseClient,
+                                     LocationQueryConditions lQC,
+                                     ThingQueryConditions tQC,
+                                     HistoricalLocationQueryConditions hlQC) {
         super(ctx, firehoseClient);
+        this.lQC = lQC;
+        this.tQC = tQC;
+        this.hlQC = hlQC;
     }
 
     @Override
     protected List<HistoricalLocationDTO> mapResultToDTO(Result<Record> result) {
-        List<HistoricalLocationDTO> historicalLocations = new ArrayList<>();
-        Map<Long, HistoricalLocationDTO> historicalLocationMap = new HashMap<>();
+        Map<Long, HistoricalLocationDTO> historicalLocationMap = new TreeMap<>();
         for (Record record : result) {
             Long id = record.get(StaEntity.HISTORICAL_LOCATION.HISTORICAL_LOCATION_ID);
 
@@ -87,10 +95,8 @@ public class HistoricalLocationDaoImpl
                     historicalLocation.setThing(thing);
                 }
             }
-
-            historicalLocations.add(historicalLocation);
         }
-        return historicalLocations;
+        return new ArrayList<>(historicalLocationMap.values());
     }
 
     @Override
@@ -129,7 +135,7 @@ public class HistoricalLocationDaoImpl
                                     .getSelectFilter()
                                     .getItems()
                                     .stream()
-                                    .map(e-> new LocationQueryConditions().checkPropertyName(e))
+                                    .map(e-> lQC.checkPropertyName(e))
                                     .collect(Collectors.toList()));
                         }
 
@@ -155,7 +161,7 @@ public class HistoricalLocationDaoImpl
                                     .getSelectFilter()
                                     .getItems()
                                     .stream()
-                                    .map(e-> new ThingQueryConditions().checkPropertyName(e))
+                                    .map(e-> tQC.checkPropertyName(e))
                                     .collect(Collectors.toList()));
                         }
                         break;
@@ -171,7 +177,7 @@ public class HistoricalLocationDaoImpl
 
     @Override
     public Field<?> checkPropertyName(String property) {
-        return new HistoricalLocationQueryConditions().checkPropertyName(property);
+        return hlQC.checkPropertyName(property);
     }
 
     @Override

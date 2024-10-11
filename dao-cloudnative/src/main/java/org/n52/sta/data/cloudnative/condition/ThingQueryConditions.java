@@ -43,6 +43,7 @@ import java.util.List;
 /**
  * @author <a href="mailto:humaid.kidwai@ucalgary.ca">Humaid Kidwai</a>
  */
+@Component
 public class ThingQueryConditions extends EntityQueryConditions {
 
     public Condition withLocationStaIdentifier(final String locationIdentifier) {

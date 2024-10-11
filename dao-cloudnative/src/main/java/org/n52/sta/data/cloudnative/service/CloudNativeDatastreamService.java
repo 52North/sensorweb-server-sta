@@ -49,6 +49,8 @@ import org.n52.sta.api.dto.ObservationDTO;
 import org.n52.sta.api.dto.impl.Datastream;
 import org.n52.sta.data.MutexFactory;
 import org.n52.sta.data.cloudnative.condition.DatastreamQueryConditions;
+import org.n52.sta.data.cloudnative.condition.EntityQueryConditions;
+import org.n52.sta.data.cloudnative.condition.QueryConditionRepository;
 import org.n52.sta.data.cloudnative.condition.StaEntity;
 import org.n52.sta.data.cloudnative.dao.DatastreamDao;
 import org.n52.sta.data.cloudnative.dao.StaEntityDao;
@@ -60,6 +62,7 @@ import org.n52.sta.data.cloudnative.schema.tables.pojos.*;
 import org.n52.svalbard.odata.core.expr.Expr;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.DependsOn;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpMethod;
@@ -82,7 +85,7 @@ public class CloudNativeDatastreamService extends CloudNativeAbstractSensorThing
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CloudNativeDatastreamService.class);
 
-    private static DatastreamQueryConditions dQC = new DatastreamQueryConditions();
+    private final DatastreamQueryConditions dQC;
 
     private static final String UNKNOWN = "unknown";
     private final ObservationDaoImpl observationDao;
@@ -97,16 +100,13 @@ public class CloudNativeDatastreamService extends CloudNativeAbstractSensorThing
                                         CloudNativeFormatService formatService,
                                         ObservationDaoImpl observationDao,
                                         UnitDaoImpl unitDao,
-                                        MutexFactory lock) {
+                                        MutexFactory lock, DatastreamQueryConditions dQC) {
         super(datastreamDao, DatastreamDTO.class, lock);
         this.observationDao = observationDao;
         this.datastreamDao = datastreamDao;
         this.formatService = formatService;
         this.unitDao = unitDao;
-    }
-
-    public static void setDatastreamQueryConditions(DatastreamQueryConditions dQC) {
-        CloudNativeDatastreamService.dQC = dQC;
+        this.dQC = dQC;
     }
 
     @Override

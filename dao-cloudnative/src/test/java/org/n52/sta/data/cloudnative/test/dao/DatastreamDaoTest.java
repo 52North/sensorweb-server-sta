@@ -9,7 +9,7 @@ import org.n52.shetland.oasis.odata.query.option.QueryOptions;
 import org.n52.shetland.ogc.sta.exception.STACRUDException;
 import org.n52.shetland.ogc.sta.exception.STAInvalidQueryException;
 import org.n52.sta.api.dto.DatastreamDTO;
-import org.n52.sta.data.cloudnative.condition.StaEntity;
+import org.n52.sta.data.cloudnative.condition.*;
 
 import org.n52.sta.data.cloudnative.dao.impl.DatastreamDaoImpl;
 import org.n52.sta.data.cloudnative.dao.util.StaFirehoseClient;
@@ -33,6 +33,10 @@ public class DatastreamDaoTest {
     private final DatastreamDaoImpl datastreamDao;
     private FirehoseClient firehoseClient;
     private StaFirehoseClient staFirehose;
+    private final DatastreamQueryConditions dsQC = new DatastreamQueryConditions();
+    private final SensorQueryConditions sQC = new SensorQueryConditions();
+    private final ThingQueryConditions tQC = new ThingQueryConditions();
+    private final ObservedPropertyQueryConditions oQC = new ObservedPropertyQueryConditions();
 
     @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
     @Autowired
@@ -40,7 +44,11 @@ public class DatastreamDaoTest {
         this.ctx = ctx;
         this.firehoseClient = firehoseClient;
         staFirehose = new StaFirehoseClient(firehoseClient);
-        datastreamDao = new DatastreamDaoImpl(ctx, staFirehose);
+        dsQC.setDslContext(ctx);
+        sQC.setDslContext(ctx);
+        tQC.setDslContext(ctx);
+        oQC.setDslContext(ctx);
+        datastreamDao = new DatastreamDaoImpl(ctx, staFirehose, dsQC, tQC, sQC, oQC);
     }
     @Test
     public void save() throws STACRUDException {

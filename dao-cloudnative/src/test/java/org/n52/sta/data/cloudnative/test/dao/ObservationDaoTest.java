@@ -11,6 +11,8 @@ import org.n52.shetland.oasis.odata.query.option.QueryOptions;
 import org.n52.shetland.ogc.sta.exception.STAInvalidQueryException;
 import org.n52.shetland.util.DateTimeHelper;
 import org.n52.sta.api.dto.ObservationDTO;
+import org.n52.sta.data.cloudnative.condition.DatastreamQueryConditions;
+import org.n52.sta.data.cloudnative.condition.ObservationQueryConditions;
 import org.n52.sta.data.cloudnative.condition.StaEntity;
 import org.n52.sta.data.cloudnative.dao.impl.ObservationDaoImpl;
 import org.n52.sta.data.cloudnative.dao.util.StaFirehoseClient;
@@ -39,10 +41,14 @@ public class ObservationDaoTest {
     @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
     @Autowired private FirehoseClient firehoseClient;
     private final StaFirehoseClient staFirehose = new StaFirehoseClient(firehoseClient);
+    private final DatastreamQueryConditions dsQC = new DatastreamQueryConditions();
+    private final ObservationQueryConditions oQC = new ObservationQueryConditions();
 
     @BeforeEach
     public void setUp() {
-        observationDao = new ObservationDaoImpl(ctx, staFirehose);
+        dsQC.setDslContext(ctx);
+        oQC.setDslContext(ctx);
+        observationDao = new ObservationDaoImpl(ctx, staFirehose, dsQC, oQC);
     }
 
     @Test

@@ -40,7 +40,9 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.jdbc.support.SQLErrorCodeSQLExceptionTranslator;
 import org.springframework.jdbc.support.SQLExceptionTranslator;
+import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
 import software.amazon.awssdk.auth.credentials.ProfileCredentialsProvider;
+import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
 import software.amazon.awssdk.services.firehose.FirehoseClient;
 
 import javax.sql.DataSource;
@@ -85,9 +87,11 @@ public class PersistenceContext {
 
     @Bean
     public FirehoseClient firehoseClient() {
-         return FirehoseClient.builder()
+        return FirehoseClient.builder()
                 .region(FirehoseConstants.REGION)
-                .credentialsProvider(ProfileCredentialsProvider.create())
+                .credentialsProvider(StaticCredentialsProvider.create(AwsBasicCredentials.create(
+                        user,
+                        password)))
                 .build();
     }
 
