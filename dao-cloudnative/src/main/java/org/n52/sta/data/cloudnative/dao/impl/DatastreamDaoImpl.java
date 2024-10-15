@@ -50,7 +50,6 @@ import org.n52.sta.data.cloudnative.dao.util.StaFirehoseClient;
 import org.n52.sta.data.cloudnative.schema.tables.Format;
 import org.n52.sta.data.cloudnative.schema.tables.pojos.Dataset;
 import org.n52.sta.data.cloudnative.schema.tables.records.DatasetRecord;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.*;
@@ -85,19 +84,25 @@ public class DatastreamDaoImpl extends AbstractStaEntityDao<DatastreamDTO> imple
     public Set<Dataset> findAllByAggregationIdPOJO(Long datasetId)
             throws STAInvalidQueryException {
         Condition predicate = StaEntity.DATASTREAM.FK_AGGREGATION_ID.eq(datasetId);
-        return selectQueryBuilder(predicate, DatastreamDTO.class, null, null)
-                .fetch()
-                .stream()
-                .map(record -> record.into(StaEntity.DATASTREAM).into(Dataset.class))
-                .collect(Collectors.toSet());
+        Result<Record> records = selectQueryBuilder(predicate,
+                DatastreamDTO.class,
+                null,
+                null)
+                .fetch();
+        return new HashSet<>(mapResultToPOJO(records));
     }
 
-    public Dataset findByFeatureIdPOJO(Condition predicate) throws STAInvalidQueryException {
-        return selectQueryBuilder(predicate, DatastreamDTO.class, null, null)
-                .fetchAnyInto(DatasetRecord.class).into(Dataset.class);
+    public Dataset findByFeatureIdPOJO(Condition predicate)
+            throws STAInvalidQueryException {
+        Result<Record> records = selectQueryBuilder(predicate,
+                DatastreamDTO.class,
+                null,
+                null)
+                .fetch();
+        return mapResultToPOJO(records).get(0);
     }
 
-    public Dataset findByDatasetIdPOJO(Long datasetId, QueryOptions queryOptions)
+    public Dataset findByDatasetIdPOJO(Long datasetId)
             throws STAInvalidQueryException, STACRUDException {
         Condition predicate = StaEntity.DATASTREAM.DATASET_ID.eq(datasetId);
         Result<Record> records = selectQueryBuilder(predicate,
@@ -106,7 +111,7 @@ public class DatastreamDaoImpl extends AbstractStaEntityDao<DatastreamDTO> imple
                 null)
                 .fetch();
 
-        return Optional.ofNullable(records.get(0).into(Dataset.class))
+        return Optional.ofNullable(mapResultToPOJO(records).get(0))
                 .orElseThrow(() -> new STACRUDException("Unable to find Datastream!"));
     }
 
@@ -118,7 +123,7 @@ public class DatastreamDaoImpl extends AbstractStaEntityDao<DatastreamDTO> imple
                 null)
                 .fetch();
 
-        return Optional.ofNullable(records.get(0).into(Dataset.class))
+        return Optional.ofNullable(mapResultToPOJO(records).get(0))
                 .orElseThrow(() -> new STACRUDException("Unable to find Datastream!"));
     }
 
@@ -129,11 +134,24 @@ public class DatastreamDaoImpl extends AbstractStaEntityDao<DatastreamDTO> imple
                 .orElseThrow(() -> new STACRUDException("Unable to find Datastream!"));
     }
 
+    public List<Dataset> mapResultToPOJO(Result<Record> result) {
+        Map<Long, Dataset> pojoMap = new HashMap<>();
+        for (Record record : result) {
+            DatasetRecord datasetRecord = new DatasetRecord();
+            DTOMapper.mapEntityRecord(DTOMapper.mapAliasedFields(record, StaEntity.DATASTREAM), datasetRecord);
+            Long Id = datasetRecord.getDatasetId();
+            Dataset dataset = pojoMap.computeIfAbsent(Id, k -> datasetRecord.into(Dataset.class));
+        }
+        return new ArrayList<>(pojoMap.values());
+    }
+
     @Override
     public List<DatastreamDTO> mapResultToDTO(Result<Record> result) {
         Map<Long, DatastreamDTO> datastreamMap = new TreeMap<>();
         for (Record record : result) {
-            Long Id = record.get(StaEntity.DATASTREAM.DATASET_ID);
+            Long Id = (Long) record.get(StaEntity.alias(
+                    StaEntity.DATASTREAM,
+                    StaEntity.DATASTREAM.DATASET_ID));
 
             DatastreamDTO datastream = datastreamMap.computeIfAbsent(Id,
                     k -> record.map(new DTOMapper.DatastreamRecordMapper()));
@@ -210,11 +228,7 @@ public class DatastreamDaoImpl extends AbstractStaEntityDao<DatastreamDTO> imple
         if (queryOptions == null ||
                 queryOptions.getSelectFilter() == null) {
             select.addAll(getStaEntityFields(StaEntity.UNIT));
-            select.addAll(getStaEntityFields(DATASTREAM_FORMAT)
-                    .stream()
-                    .map(e -> e.as("DATASTREAM_FORMAT_" + e.getName()))
-                    .collect(Collectors.toList())
-            );
+            select.addAll(getStaEntityFields(DATASTREAM_FORMAT));
             select.addAll(getStaEntityFields(StaEntity.DATASTREAM_PROPERTIES));
         }
 
@@ -253,7 +267,7 @@ public class DatastreamDaoImpl extends AbstractStaEntityDao<DatastreamDTO> imple
                                     .getSelectFilter()
                                     .getItems()
                                     .stream()
-                                    .map(e-> sQC.checkPropertyName(e))
+                                    .map(sQC::checkPropertyName)
                                     .collect(Collectors.toList()));
                         }
                         break;
@@ -272,7 +286,7 @@ public class DatastreamDaoImpl extends AbstractStaEntityDao<DatastreamDTO> imple
                                     .getSelectFilter()
                                     .getItems()
                                     .stream()
-                                    .map(e-> tQC.checkPropertyName(e))
+                                    .map(tQC::checkPropertyName)
                                     .collect(Collectors.toList()));
                         }
                         break;
@@ -291,7 +305,7 @@ public class DatastreamDaoImpl extends AbstractStaEntityDao<DatastreamDTO> imple
                                     .getSelectFilter()
                                     .getItems()
                                     .stream()
-                                    .map(e-> opQC.checkPropertyName(e))
+                                    .map(opQC::checkPropertyName)
                                     .collect(Collectors.toList()));
                         }
 

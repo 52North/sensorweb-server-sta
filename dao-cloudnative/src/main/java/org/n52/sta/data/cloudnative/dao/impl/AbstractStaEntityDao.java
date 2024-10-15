@@ -60,6 +60,8 @@ import java.util.*;
 import java.util.stream.Collectors;
 import javax.validation.constraints.NotNull;
 
+import static org.n52.sta.data.cloudnative.condition.StaEntity.DATASET_AGGREGATION_MARKER;
+
 /**
  * @author <a href="mailto:humaid.kidwai@ucalgary.ca">Humaid Kidwai</a>
  */
@@ -280,11 +282,11 @@ public abstract class AbstractStaEntityDao<T extends StaDTO> implements StaEntit
                     entityClass.getSimpleName()
             ));
         }
-        List<Field<?>> select = new ArrayList<>(getSelect(queryOptions));
+        List<Field<?>> select = new ArrayList<>(getSelect(table, queryOptions));
         Table<?> from = getJoin(select, table, queryOptions);
         if(joins.contains(StaEntity.DATASTREAM)) {
             Condition clause = StaEntity.DATASTREAM.FK_AGGREGATION_ID.isNull()
-                    .or(StaEntity.DATASTREAM.FK_AGGREGATION_ID.eq(1L));
+                    .or(StaEntity.DATASTREAM.FK_AGGREGATION_ID.eq(DATASET_AGGREGATION_MARKER));
             where = where == null ? clause : where.and(clause);
         }
         List<SortField<?>> orderBy = getOrderBy(sort);
@@ -318,13 +320,13 @@ public abstract class AbstractStaEntityDao<T extends StaDTO> implements StaEntit
         return createJoinList(queryOptions, table, select);
     }
 
-    private List<Field<?>> getSelect(QueryOptions queryOptions) {
+    private List<Field<?>> getSelect(Table<?> table, QueryOptions queryOptions) {
 
         List<Field<?>> fieldList = new ArrayList<>();
 
         // always try to minimize the columns to be fetched from a columnar data store
         if(queryOptions != null && queryOptions.getSelectFilter() != null) {
-            fieldList.add(getEntityId());
+            fieldList.add(StaEntity.alias(table, getEntityId()));
             fieldList.addAll(queryOptions
                     .getSelectFilter()
                     .getItems()
@@ -349,7 +351,7 @@ public abstract class AbstractStaEntityDao<T extends StaDTO> implements StaEntit
                                     DSL.function("ST_GeomFromBinary", byte[].class, field))
                             .as("datastreamObservedArea");
                 }
-                return field;
+                return field.as(entityTable.getName() + "_" + field.getName());
             }).collect(Collectors.toList());
         } else if (entityTable == StaEntity.FEATURE_OF_INTEREST) {
             return Arrays.stream(StaEntity.FEATURE_OF_INTEREST.fields()).map(field -> {
@@ -359,7 +361,7 @@ public abstract class AbstractStaEntityDao<T extends StaDTO> implements StaEntit
                                     DSL.function("ST_GeomFromBinary", byte[].class, field))
                             .as("foiGeom");
                 }
-                return field;
+                return field.as(entityTable.getName() + "_" + field.getName());
             }).collect(Collectors.toList());
         } else if (entityTable == StaEntity.LOCATION) {
             return Arrays.stream(StaEntity.LOCATION.fields()).map(field -> {
@@ -369,10 +371,12 @@ public abstract class AbstractStaEntityDao<T extends StaDTO> implements StaEntit
                                     DSL.function("ST_GeomFromBinary", byte[].class, field))
                             .as("locationGeom");
                 }
-                return field;
+                return field.as(entityTable.getName() + "_" + field.getName());
             }).collect(Collectors.toList());
         } else {
-          return Arrays.asList(entityTable.fields());
+          return Arrays.stream(entityTable.fields())
+                  .map(field -> field.as(entityTable.getName() + "_" + field.getName()))
+                  .collect(Collectors.toList());
         }
     }
 }

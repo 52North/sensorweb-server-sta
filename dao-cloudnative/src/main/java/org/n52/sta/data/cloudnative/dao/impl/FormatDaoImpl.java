@@ -79,7 +79,7 @@ public class FormatDaoImpl {
     public Optional<Format> findByFormat(String definition) {
         Condition predicate = StaEntity.FORMAT.DEFINITION.eq(definition);
         // definition must be unique
-        Record result = ctx.select().from(StaEntity.FORMAT).where(predicate).fetchOne();
+        Record result = ctx.select().from(StaEntity.FORMAT).where(predicate).fetchAny();
         return Optional.of(mapResultToPOJO(result));
     }
 

@@ -77,7 +77,10 @@ public class ObservedPropertyDaoImpl
     protected List<ObservedPropertyDTO> mapResultToDTO(Result<Record> result) {
         Map<Long, ObservedPropertyDTO> observedPropertyMap = new TreeMap<>();
         for (Record record : result) {
-            Long Id = record.get(StaEntity.OBSERVED_PROPERTY.PHENOMENON_ID);
+            Long Id = (Long) record.get(StaEntity.alias(
+                    StaEntity.OBSERVED_PROPERTY,
+                    StaEntity.OBSERVED_PROPERTY.PHENOMENON_ID));
+
             ObservedPropertyDTO observedProperty = observedPropertyMap.computeIfAbsent(Id,
                     k -> record.map(new DTOMapper.ObservedPropertyRecordMapper()));
 
@@ -167,11 +170,7 @@ public class ObservedPropertyDaoImpl
                     if (expandItem.getQueryOptions() == null ||
                             expandItem.getQueryOptions().getSelectFilter() == null) {
                         select.addAll(getStaEntityFields(StaEntity.DATASTREAM));
-                        select.addAll(getStaEntityFields(DATASTREAM_FORMAT)
-                                .stream()
-                                .map(e -> e.as("DATASTREAM_FORMAT_" + e.getName()))
-                                .collect(Collectors.toList())
-                        );
+                        select.addAll(getStaEntityFields(DATASTREAM_FORMAT));
                         select.addAll(getStaEntityFields(StaEntity.UNIT));
                     } else {
                         select.addAll(expandItem
@@ -179,7 +178,7 @@ public class ObservedPropertyDaoImpl
                                 .getSelectFilter()
                                 .getItems()
                                 .stream()
-                                .map(e-> dsQC.checkPropertyName(e))
+                                .map(dsQC::checkPropertyName)
                                 .collect(Collectors.toList()));
                     }
 

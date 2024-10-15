@@ -133,7 +133,7 @@ public class ThingDaoImpl
                                     .getSelectFilter()
                                     .getItems()
                                     .stream()
-                                    .map(e-> hlQC.checkPropertyName(e))
+                                    .map(hlQC::checkPropertyName)
                                     .collect(Collectors.toList()));
                         }
 
@@ -159,11 +159,7 @@ public class ThingDaoImpl
                         if (expandItem.getQueryOptions() == null ||
                                 expandItem.getQueryOptions().getSelectFilter() == null) {
                             select.addAll(getStaEntityFields(StaEntity.DATASTREAM));
-                            select.addAll(getStaEntityFields(DATASTREAM_FORMAT)
-                                    .stream()
-                                    .map(e -> e.as("DATASTREAM_FORMAT_" + e.getName()))
-                                    .collect(Collectors.toList())
-                            );
+                            select.addAll(getStaEntityFields(DATASTREAM_FORMAT));
                             select.addAll(getStaEntityFields(StaEntity.UNIT));
                         } else {
                             select.addAll(expandItem
@@ -171,7 +167,7 @@ public class ThingDaoImpl
                                     .getSelectFilter()
                                     .getItems()
                                     .stream()
-                                    .map(e-> dsQC.checkPropertyName(e))
+                                    .map(dsQC::checkPropertyName)
                                     .collect(Collectors.toList()));
                         }
 
@@ -196,7 +192,7 @@ public class ThingDaoImpl
                                     .getSelectFilter()
                                     .getItems()
                                     .stream()
-                                    .map(e-> lQC.checkPropertyName(e))
+                                    .map(lQC::checkPropertyName)
                                     .collect(Collectors.toList()));
                         }
 
@@ -215,7 +211,10 @@ public class ThingDaoImpl
     protected List<ThingDTO> mapResultToDTO(Result<Record> result) {
         Map<Long, ThingDTO> thingMap = new TreeMap<>();
         for (Record record : result) {
-            Long Id = record.get(StaEntity.THING.PLATFORM_ID);
+            Long Id = (Long) record.get(StaEntity.alias(
+                    StaEntity.THING,
+                    StaEntity.THING.PLATFORM_ID));
+
             ThingDTO thing = thingMap.computeIfAbsent(Id, k -> record.map(new DTOMapper.ThingRecordMapper()));
 
             if (joins.contains(StaEntity.DATASTREAM)) {

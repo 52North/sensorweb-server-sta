@@ -29,6 +29,8 @@
 package org.n52.sta.data.cloudnative.condition;
 
 
+import org.jooq.Field;
+import org.jooq.Table;
 import org.n52.sta.data.cloudnative.schema.tables.*;
 
 
@@ -60,5 +62,10 @@ public interface StaEntity {
     ProcedureParameter SENSOR_PROPERTIES = ProcedureParameter.PROCEDURE_PARAMETER;
     PlatformParameter THING_PROPERTIES = PlatformParameter.PLATFORM_PARAMETER;
 
+    static Field<?> alias(Table<?> table, Field<?> field) {
+        return field.as(table.getName() + "_" + field.getName());
+    }
+
+    Long DATASET_AGGREGATION_MARKER = -1L;
 
 }

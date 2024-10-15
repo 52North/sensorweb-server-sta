@@ -76,7 +76,10 @@ public class HistoricalLocationDaoImpl
     protected List<HistoricalLocationDTO> mapResultToDTO(Result<Record> result) {
         Map<Long, HistoricalLocationDTO> historicalLocationMap = new TreeMap<>();
         for (Record record : result) {
-            Long id = record.get(StaEntity.HISTORICAL_LOCATION.HISTORICAL_LOCATION_ID);
+
+            Long id = (Long) record.get(
+                    StaEntity.alias(StaEntity.HISTORICAL_LOCATION,
+                            StaEntity.HISTORICAL_LOCATION.HISTORICAL_LOCATION_ID));
 
             HistoricalLocationDTO historicalLocation = historicalLocationMap.computeIfAbsent(id,
                     k -> record.map(new DTOMapper.HistoricalLocationRecordMapper()));
@@ -135,7 +138,7 @@ public class HistoricalLocationDaoImpl
                                     .getSelectFilter()
                                     .getItems()
                                     .stream()
-                                    .map(e-> lQC.checkPropertyName(e))
+                                    .map(lQC::checkPropertyName)
                                     .collect(Collectors.toList()));
                         }
 
@@ -161,7 +164,7 @@ public class HistoricalLocationDaoImpl
                                     .getSelectFilter()
                                     .getItems()
                                     .stream()
-                                    .map(e-> tQC.checkPropertyName(e))
+                                    .map(tQC::checkPropertyName)
                                     .collect(Collectors.toList()));
                         }
                         break;

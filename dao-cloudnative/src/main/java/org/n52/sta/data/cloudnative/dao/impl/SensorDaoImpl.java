@@ -49,7 +49,6 @@ import org.n52.sta.data.cloudnative.dao.SensorDao;
 import org.n52.sta.data.cloudnative.dao.util.StaFirehoseClient;
 import org.n52.sta.data.cloudnative.schema.tables.Format;
 import org.n52.sta.data.cloudnative.schema.tables.pojos.Procedure;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.*;
@@ -78,7 +77,10 @@ public class SensorDaoImpl extends AbstractStaEntityDao<SensorDTO> implements Se
     protected List<SensorDTO> mapResultToDTO(Result<Record> result) {
         Map<Long, SensorDTO> sensorMap = new TreeMap<>();
         for (Record record : result) {
-            Long Id = record.get(StaEntity.SENSOR.PROCEDURE_ID);
+            Long Id = (Long) record.get(StaEntity.alias(
+                    StaEntity.SENSOR,
+                    StaEntity.SENSOR.PROCEDURE_ID));
+
             SensorDTO sensor = sensorMap.computeIfAbsent(Id, k -> record.map(new DTOMapper.SensorRecordMapper()));
 
             if (joins.contains(StaEntity.DATASTREAM)) {
@@ -132,10 +134,7 @@ public class SensorDaoImpl extends AbstractStaEntityDao<SensorDTO> implements Se
 
         if (queryOptions == null ||
                 queryOptions.getSelectFilter() == null) {
-            select.addAll(getStaEntityFields(SENSOR_FORMAT)
-                    .stream()
-                    .map(e -> e.as("SENSOR_FORMAT_" + e.getName()))
-                    .collect(Collectors.toList()));
+            select.addAll(getStaEntityFields(SENSOR_FORMAT));
             select.addAll(getStaEntityFields(StaEntity.SENSOR_PROPERTIES));
         }
 
@@ -168,11 +167,7 @@ public class SensorDaoImpl extends AbstractStaEntityDao<SensorDTO> implements Se
                     if (expandItem.getQueryOptions() == null ||
                             expandItem.getQueryOptions().getSelectFilter() == null) {
                         select.addAll(getStaEntityFields(StaEntity.DATASTREAM));
-                        select.addAll(getStaEntityFields(DATASTREAM_FORMAT)
-                                .stream()
-                                .map(e -> e.as("DATASTREAM_FORMAT_" + e.getName()))
-                                .collect(Collectors.toList())
-                        );
+                        select.addAll(getStaEntityFields(DATASTREAM_FORMAT));
                         select.addAll(getStaEntityFields(StaEntity.UNIT));
                     } else {
                         select.addAll(expandItem
@@ -180,7 +175,7 @@ public class SensorDaoImpl extends AbstractStaEntityDao<SensorDTO> implements Se
                                 .getSelectFilter()
                                 .getItems()
                                 .stream()
-                                .map(e-> dsQC.checkPropertyName(e))
+                                .map(dsQC::checkPropertyName)
                                 .collect(Collectors.toList()));
                     }
                 }

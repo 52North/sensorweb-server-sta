@@ -57,21 +57,19 @@ public class LocationQueryConditions extends EntityQueryConditions implements Sp
                         .from(LOCATION_HISTORICAL_LOCATION)
                         .join(HISTORICAL_LOCATION)
                         .onKey()
-                        .join(LOCATION)
-                        .onKey()
                         .where(HISTORICAL_LOCATION.STA_IDENTIFIER.eq(historicalLocationIdentifier))
+                        .and(LOCATION.LOCATION_ID.eq(LOCATION_HISTORICAL_LOCATION.FK_LOCATION_ID))
         );
     }
 
     public Condition withThingStaIdentifier(final String thingIdentifier) {
         return DSL.exists(
                 ctx.selectOne()
-                        .from(LOCATION)
-                        .join(THING_LOCATION)
-                        .onKey()
+                        .from(THING_LOCATION)
                         .join(THING)
                         .onKey()
                         .where(THING.STA_IDENTIFIER.eq(thingIdentifier))
+                        .and(LOCATION.LOCATION_ID.eq(THING_LOCATION.FK_LOCATION_ID))
         );
     }
 
@@ -265,13 +263,13 @@ public class LocationQueryConditions extends EntityQueryConditions implements Sp
     public Field<?> checkPropertyName(String property) {
         switch (property) {
             case StaConstants.PROP_ID:
-                return LOCATION.STA_IDENTIFIER;
+                return StaEntity.alias(LOCATION, LOCATION.STA_IDENTIFIER);
             case StaConstants.PROP_NAME:
-                return LOCATION.NAME;
+                return StaEntity.alias(LOCATION, LOCATION.NAME);
             case StaConstants.PROP_DESCRIPTION:
-                return LOCATION.DESCRIPTION;
+                return StaEntity.alias(LOCATION, LOCATION.DESCRIPTION);
             case StaConstants.PROP_LOCATION:
-                return LOCATION.GEOM;
+                return StaEntity.alias(LOCATION, LOCATION.GEOM);
             case StaConstants.PROP_ENCODINGTYPE:
                 return FORMAT.DEFINITION;
             case StaConstants.PROP_PROPERTIES:

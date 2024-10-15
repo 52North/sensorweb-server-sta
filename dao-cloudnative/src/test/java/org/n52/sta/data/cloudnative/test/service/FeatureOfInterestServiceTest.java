@@ -151,16 +151,31 @@ public class FeatureOfInterestServiceTest {
     @Test
     @Order(2)
     public void testUpdate() {
+        entityId = "2";
         FeatureOfInterestDTO foi = new FeatureOfInterest();
         foi.setId(entityId);
-        foi.setDescription("Updated Gas Production Wellpad");
+        String wktLineString = "LINESTRING (30 10, 10 30, 40 40)";
+        Geometry geom = null;
+        try {
+            geom = new WKTReader().read(wktLineString);
+            foi.setFeature(geom);
+        } catch (Exception e) {
+            e.printStackTrace();
+            fail();
+        }
+        // foi.setDescription("Updated Gas Production Wellpad");
         try {
             foiService.update(entityId, foi, HttpMethod.PATCH);
             Thread.sleep(45000);
-            String expected = featureDao.findById(
-                    Long.parseLong(entityId), null, FeatureOfInterestDTO.class).get().getDescription();
-            String actual = "Updated Gas Production Wellpad";
-            Assertions.assertEquals(expected, actual);
+            FeatureOfInterestDTO feature = featureDao.findById(
+                    Long.parseLong(entityId),
+                    null,
+                    FeatureOfInterestDTO.class)
+                    .get();
+//            String expected = feature.getDescription();
+//            String actual = "Updated Gas Production Wellpad";
+//            Assertions.assertEquals(expected, actual);
+            Assertions.assertEquals(feature.getFeature(), geom);
         } catch (Exception e) {
             e.printStackTrace();
             fail();

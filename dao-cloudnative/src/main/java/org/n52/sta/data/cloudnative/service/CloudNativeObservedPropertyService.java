@@ -39,6 +39,7 @@ import org.n52.shetland.ogc.sta.exception.STACRUDException;
 import org.n52.shetland.ogc.sta.exception.STAInvalidQueryException;
 import org.n52.shetland.ogc.sta.model.ObservedPropertyEntityDefinition;
 import org.n52.shetland.ogc.sta.model.STAEntityDefinition;
+import org.n52.sta.api.CollectionWrapper;
 import org.n52.sta.api.dto.DatastreamDTO;
 import org.n52.sta.api.dto.ObservedPropertyDTO;
 import org.n52.sta.data.MutexFactory;
@@ -52,12 +53,12 @@ import org.n52.sta.data.cloudnative.schema.tables.pojos.Phenomenon;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.DependsOn;
-import org.springframework.data.domain.Page;
 import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
 
@@ -116,11 +117,14 @@ public class CloudNativeObservedPropertyService
             }
             String expandProperty = expandItem.getPath();
             if (ObservedPropertyEntityDefinition.DATASTREAMS.equals(expandProperty)) {
-                Page<DatastreamDTO> datastreams = getDatastreamService()
-                        .getEntityCollectionByRelatedEntityRaw(entity.getId(),
+                CollectionWrapper datastreams = getDatastreamService()
+                        .getEntityCollectionByRelatedEntity(entity.getId(),
                                 STAEntityDefinition.OBSERVED_PROPERTIES,
                                 expandItem.getQueryOptions());
-                entity.setDatastreams(datastreams.get().collect(Collectors.toSet()));
+                entity.setDatastreams((Set<DatastreamDTO>) datastreams
+                        .getEntities()
+                        .stream()
+                        .collect(Collectors.toSet()));
             } else {
                 throw new STAInvalidQueryException(String.format(INVALID_EXPAND_OPTION_SUPPLIED,
                         expandProperty,

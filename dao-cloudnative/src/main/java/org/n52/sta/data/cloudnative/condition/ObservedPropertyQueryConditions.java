@@ -53,9 +53,8 @@ public class ObservedPropertyQueryConditions extends EntityQueryConditions {
         return DSL.exists(
                 ctx.select(DATASTREAM.DATASET_ID)
                         .from(DATASTREAM)
-                        .join(OBSERVED_PROPERTY)
-                        .onKey()
                         .where(DATASTREAM.STA_IDENTIFIER.eq(datastreamStaIdentifier))
+                        .and(OBSERVED_PROPERTY.PHENOMENON_ID.eq(DATASTREAM.FK_PHENOMENON_ID))
         );
     }
 
@@ -151,13 +150,13 @@ public class ObservedPropertyQueryConditions extends EntityQueryConditions {
     public Field<?> checkPropertyName(String property) {
         switch (property) {
             case StaConstants.PROP_ID:
-                return OBSERVED_PROPERTY.STA_IDENTIFIER;
+                return StaEntity.alias(OBSERVED_PROPERTY, OBSERVED_PROPERTY.STA_IDENTIFIER);
             case StaConstants.PROP_DEFINITION:
-                return OBSERVED_PROPERTY.IDENTIFIER;
+                return StaEntity.alias(OBSERVED_PROPERTY, OBSERVED_PROPERTY.IDENTIFIER);
             case StaConstants.PROP_NAME:
-                return OBSERVED_PROPERTY.NAME;
+                return StaEntity.alias(OBSERVED_PROPERTY, OBSERVED_PROPERTY.NAME);
             case StaConstants.PROP_DESCRIPTION:
-                return OBSERVED_PROPERTY.DESCRIPTION;
+                return StaEntity.alias(OBSERVED_PROPERTY, OBSERVED_PROPERTY.DESCRIPTION);
             case StaConstants.PROP_PROPERTIES:
                 // TODO:
                 return null;

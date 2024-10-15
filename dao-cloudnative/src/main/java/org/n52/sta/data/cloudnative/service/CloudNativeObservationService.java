@@ -63,7 +63,6 @@ import org.n52.sta.data.cloudnative.dao.impl.ObservationDaoImpl;
 import org.n52.sta.data.cloudnative.dao.util.FilterExprVisitor;
 import org.n52.sta.data.cloudnative.schema.tables.pojos.Dataset;
 import org.n52.sta.data.cloudnative.schema.tables.pojos.Observation;
-import org.n52.sta.data.cloudnative.schema.tables.records.DatasetRecord;
 import org.n52.sta.utils.TimeUtil;
 import org.n52.svalbard.odata.core.expr.Expr;
 import org.slf4j.Logger;
@@ -81,6 +80,7 @@ import java.util.*;
 import java.util.concurrent.atomic.AtomicLong;
 
 import static org.n52.sta.api.RequestUtils.QUERY_OPTIONS_FACTORY;
+import static org.n52.sta.data.cloudnative.condition.StaEntity.DATASET_AGGREGATION_MARKER;
 
 /**
  * @author <a href="mailto:humaid.kidwai@ucalgary.ca">Humaid Kidwai</a>
@@ -176,8 +176,7 @@ public class CloudNativeObservationService
             throws STACRUDException {
         try {
             OffsetLimitBasedPageRequest pageableRequest = createPageableRequest(queryOptions);
-            Condition predicate =
-                    byRelatedEntityFilter(relatedId, relatedType, null)
+            Condition predicate = byRelatedEntityFilter(relatedId, relatedType, null)
                             .and(getFilterPredicate(entityClass, queryOptions));
 
             List<String> identifierList = observationDao.getColumnList(predicate,
@@ -221,6 +220,7 @@ public class CloudNativeObservationService
             String expandProperty = expandItem.getPath();
             switch (expandProperty) {
                 case STAEntityDefinition.DATASTREAM:
+                    // datastream is always set in DTOMapper
                     DatastreamDTO datastream = getDatastreamService()
                             .getEntityByIdRaw(Long.valueOf(entity.getDatastream().getId()),
                                     expandItem.getQueryOptions());
@@ -262,23 +262,30 @@ public class CloudNativeObservationService
         return filter;
     }
 
-    @Override
-    protected ObservationDTO createOrfetch(ObservationDTO entity)
+    protected ObservationDTO createOrfetchHelper(ObservationDTO entity, DatastreamDTO datastream)
             throws STACRUDException, STAInvalidQueryException {
         synchronized (getLock(entity.getId())) {
 
             check(entity);
 
-            // Fetch dataset/datastream
-            Result<Record> datastreamRecord = datastreamDao
-                    .findRecordByStaIdentifier(Long.valueOf(entity.getDatastream().getId()));
-            if (datastreamRecord.isEmpty()) {
-                throw new STACRUDException(String.format(NO_S_WITH_ID_S_FOUND,
-                        StaConstants.DATASTREAM,
-                        entity.getDatastream().getId()));
+            Dataset dataset;
+            if (datastream == null) {
+                // Fetch dataset/datastream
+                Result<Record> datastreamRecord = datastreamDao
+                        .findRecordByStaIdentifier(Long.valueOf(entity.getDatastream().getId()));
+                if (datastreamRecord.isEmpty()) {
+                    throw new STACRUDException(String.format(NO_S_WITH_ID_S_FOUND,
+                            StaConstants.DATASTREAM,
+                            entity.getDatastream().getId()));
+                }
+                datastream = datastreamDao.mapResultToDTO(datastreamRecord).get(0);
+                dataset = datastreamDao.mapResultToPOJO(datastreamRecord).get(0);
+            } else {
+                datastream.setObservedProperty(null);
+                datastream.setSensor(null);
+                // dataset.setFkPlatformId(datastream.getThing().getId());
+                dataset = getDatastreamService().POJOWrapper(datastream);
             }
-            Dataset dataset = datastreamRecord.get(0).into(DatasetRecord.class).into(Dataset.class);
-            DatastreamDTO datastream = datastreamDao.mapResultToDTO(datastreamRecord).get(0);
 
             // check if FOI matches to reuse existing dataset
             FeatureOfInterestDTO feature = this.createOrfetchFeature(entity, dataset.getFkPlatformId());
@@ -331,6 +338,12 @@ public class CloudNativeObservationService
 
             return entity;
         }
+    }
+
+    @Override
+    protected ObservationDTO createOrfetch(ObservationDTO entity)
+            throws STACRUDException, STAInvalidQueryException {
+        return createOrfetchHelper(entity, null);
     }
 
     private Observation POJOWrapper(ObservationDTO entity) {
@@ -406,31 +419,23 @@ public class CloudNativeObservationService
     private void setObservationPOJOValueType(Observation entity, String observationType, Object value) {
         switch (observationType) {
             case OmConstants.OBS_TYPE_MEASUREMENT:
-                if (value instanceof String) {
-                    entity.setValueQuantity(BigDecimal.valueOf(Double.parseDouble((String) value)));
-                } else {
-                    entity.setValueQuantity(BigDecimal.valueOf(((Number) value).doubleValue()));
-                }
+                entity.setValueQuantity(BigDecimal.valueOf(Double.parseDouble(value.toString())));
                 entity.setValueType("quantity");
                 break;
             case OmConstants.OBS_TYPE_CATEGORY_OBSERVATION:
-                entity.setValueCategory((String) value);
+                entity.setValueCategory(value.toString());
                 entity.setValueType("category");
                 break;
             case OmConstants.OBS_TYPE_COUNT_OBSERVATION:
-                if (value instanceof String) {
-                    entity.setValueCount(Integer.parseInt((String )value));
-                } else {
-                    entity.setValueCount(((Number) value).intValue());
-                }
+                entity.setValueCount(Integer.parseInt(value.toString()));
                 entity.setValueType("count");
                 break;
             case OmConstants.OBS_TYPE_TEXT_OBSERVATION:
-                entity.setValueText((String) value);
+                entity.setValueText(value.toString());
                 entity.setValueType("text");
                 break;
             case OmConstants.OBS_TYPE_TRUTH_OBSERVATION:
-                entity.setValueBoolean((short) (((String) value).equals("true") ? 1 : 0));
+                entity.setValueBoolean((short) (value.toString().equals("true") ? 1 : 0));
                 entity.setValueType("bool");
                 break;
         }
@@ -494,7 +499,7 @@ public class CloudNativeObservationService
                     ObservationDTO merged = merge(existing.get(), entity);
                     Observation updatedObservation = POJOWrapper(merged);
                     observationDao.update(updatedObservation);
-                    Dataset dataset = datastreamDao.findByDatasetIdPOJO(updatedObservation.getFkDatasetId(), null);
+                    Dataset dataset = datastreamDao.findByDatasetIdPOJO(updatedObservation.getFkDatasetId());
                     updateDatastreamPhenomenonTimeOnObservationUpdate(dataset, updatedObservation);
                     return merged;
                 } else {
@@ -566,9 +571,10 @@ public class CloudNativeObservationService
             }
             datastreamDao.update(datastreamEntity);
             // update parent if its part of the aggregation
-            if (datastreamEntity.getFkAggregationId() != null && datastreamEntity.getFkAggregationId() != 1L) {
+            if (datastreamEntity.getFkAggregationId() != null &&
+                    !Objects.equals(datastreamEntity.getFkAggregationId(), DATASET_AGGREGATION_MARKER)) {
                 updateDatastreamPhenomenonTimeOnObservationUpdate(
-                        datastreamDao.findByDatasetIdPOJO(datastreamEntity.getFkAggregationId(), null),
+                        datastreamDao.findByDatasetIdPOJO(datastreamEntity.getFkAggregationId()),
                         observation);
             }
         }
@@ -587,7 +593,7 @@ public class CloudNativeObservationService
                     observationDao.deleteObservationParameters(Long.valueOf(observation.getId()));
                 }
                 observationDao.deleteByStaIdentifier(observation.getId());
-                Dataset dataset = datastreamDao.findByDatasetIdPOJO(Long.valueOf(observation.getDatastream().getId()), null);
+                Dataset dataset = datastreamDao.findByDatasetIdPOJO(Long.valueOf(observation.getDatastream().getId()));
                 updateDatastreamPhenomenonTimeOnObservationUpdate(dataset, POJOWrapper(observation));
             } else {
                 throw new STACRUDException(UNABLE_TO_DELETE_ENTITY_NOT_FOUND, HTTPStatus.NOT_FOUND);

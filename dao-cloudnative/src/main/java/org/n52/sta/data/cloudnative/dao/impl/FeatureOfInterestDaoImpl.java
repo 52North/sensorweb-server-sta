@@ -44,11 +44,9 @@ import org.n52.sta.data.cloudnative.dao.FirehoseConstants;
 import org.n52.sta.data.cloudnative.dao.util.StaFirehoseClient;
 import org.n52.sta.data.cloudnative.schema.tables.Format;
 import org.n52.sta.data.cloudnative.schema.tables.pojos.Feature;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Component
 public class FeatureOfInterestDaoImpl
@@ -66,7 +64,10 @@ public class FeatureOfInterestDaoImpl
     protected List<FeatureOfInterestDTO> mapResultToDTO(Result<Record> result) {
         Map<Long, FeatureOfInterestDTO> featureMap = new TreeMap<>();
         for (Record record : result) {
-            Long Id = record.get(StaEntity.FEATURE_OF_INTEREST.FEATURE_ID);
+            Long Id = (Long) record.get(StaEntity.alias(
+                    StaEntity.FEATURE_OF_INTEREST,
+                    StaEntity.FEATURE_OF_INTEREST.FEATURE_ID));
+
             FeatureOfInterestDTO feature = featureMap.computeIfAbsent(Id,
                     k -> record.map(new DTOMapper.FeatureOfInterestRecordMapper()));
             if (joins.contains(StaEntity.FEATURE_PROPERTIES)) {
@@ -116,10 +117,7 @@ public class FeatureOfInterestDaoImpl
 
         if (queryOptions == null ||
                 queryOptions.getSelectFilter() == null) {
-            select.addAll(getStaEntityFields(FEATURE_FORMAT)
-                    .stream()
-                    .map(e -> e.as("FEATURE_FORMAT_" + e.getName()))
-                    .collect(Collectors.toList()));
+            select.addAll(getStaEntityFields(FEATURE_FORMAT));
             select.addAll(getStaEntityFields(StaEntity.FEATURE_PROPERTIES));
         }
 

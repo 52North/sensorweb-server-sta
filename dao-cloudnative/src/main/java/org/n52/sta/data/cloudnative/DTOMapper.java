@@ -48,6 +48,8 @@ import org.springframework.util.Assert;
 
 import java.sql.Timestamp;
 import java.time.ZoneId;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * jOOQ Record Mapper for mapping Result Sets to DTO Entities
@@ -94,67 +96,74 @@ public class DTOMapper implements RecordMapperProvider {
         }
     }
 
+    public static Map<Field<?>, Object> mapAliasedFields(Record fetchedRecord, Table<?> table) {
+        Map<Field<?>, Object> fieldAliasValueMap = new HashMap<>();
+        for (Field<?> field : table.fields()) {
+            Field<?> aliasedField = field.as(table.getName() + "_" + field.getName());
+            Object value = null;
+            if (fetchedRecord.field(aliasedField) != null) {
+                value = fetchedRecord.get(aliasedField, field.getType());
+            }
+            fieldAliasValueMap.put(field, value);
+
+        }
+        return fieldAliasValueMap;
+    }
+
+    public static void mapEntityRecord(Map<Field<?>, Object> fieldAliasValueMap, Record tableRecord) {
+        for (Map.Entry<Field<?>, Object> entry : fieldAliasValueMap.entrySet()) {
+            Field<?> field = entry.getKey();
+            Object value = entry.getValue();
+
+            try {
+                tableRecord.set((Field<Object>)field, value);
+            } catch (Exception e) {
+                System.err.println("Error setting value for field " + field.getName() + ": " + e.getMessage());
+                e.printStackTrace();
+            }
+        }
+    }
+
     public static class DatastreamRecordMapper implements RecordMapper<Record, Datastream> {
         @Override
-        public Datastream map(Record rec) {
-            DatasetRecord record = rec.into(StaEntity.DATASTREAM).into(DatasetRecord.class);
+        public Datastream map(Record record) {
             Datastream datastream = new Datastream();
+            DatasetRecord datasetRecord = new DatasetRecord();
+
+            mapEntityRecord(mapAliasedFields(record, StaEntity.DATASTREAM), datasetRecord);
 
             // aggregate datasets do not have staIdentifier
-            Long Id = record.getDatasetId();
-            setStaIdentifier(datastream, Id == null ? null : Id.toString());
-            setStaName(datastream, record.getName());
-            setStaDescription(datastream, record.getDescription());
-            setPhenomenonTime(datastream, record);
-            setResultTime(datastream, record);
-            setObservationType(datastream, rec);
-            setUnitOfMeasurement(datastream, rec);
-            setObservedArea(datastream, rec);
+            setStaIdentifier(datastream, datasetRecord.getDatasetId() == null ? null : datasetRecord.getDatasetId().toString());
+            setStaName(datastream, datasetRecord.getName());
+            setStaDescription(datastream, datasetRecord.getDescription());
+            setPhenomenonTime(datastream, datasetRecord);
+            setResultTime(datastream, datasetRecord);
+            setObservationType(datastream, record);
+            setUnitOfMeasurement(datastream, record);
+            setObservedArea(datastream, record);
 
             return datastream;
         }
         public static class DatastreamParameterRecordMapper implements RecordMapper<Record, ObjectNode> {
 
-            private ObjectNode setProperties(Record rec) {
-                DatasetParameterRecord record = rec
-                        .into(StaEntity.DATASTREAM_PROPERTIES).into(DatasetParameterRecord.class);
+            private ObjectNode setProperties(Record record) {
+                DatasetParameterRecord tableRecord = new DatasetParameterRecord();
+                mapEntityRecord(mapAliasedFields(record, StaEntity.DATASTREAM_PROPERTIES), tableRecord);
+
                 ObjectNode properties = MAPPER.createObjectNode();
 
-                if (record.getName() != null) {
-                    String key = record.getName();
+                if (tableRecord.getName() != null) {
+                    String key = tableRecord.getName();
 
-                    if (record.getValueText() != null) {
-                        properties.put(key, record.getValueText());
+                    if (tableRecord.getValueText() != null) {
+                        properties.put(key, tableRecord.getValueText());
                     }
-                    if (record.getValueQuantity() != null) {
-                        properties.put(key, record.getValueQuantity());
+                    if (tableRecord.getValueQuantity() != null) {
+                        properties.put(key, tableRecord.getValueQuantity());
                     }
-                    if (record.getValueBoolean() != null) {
-                        properties.put(key, record.getValueBoolean());
+                    if (tableRecord.getValueBoolean() != null) {
+                        properties.put(key, tableRecord.getValueBoolean());
                     }
-//                    if (record.getValueCount() != null) {
-//                        properties.put(key, record.getValueCount());
-//                    }
-//                    if (record.getValueCategory() != null) {
-//                        properties.put(key,
-//                                record.getValueCategory());
-//                    }
-//                    if (record.getValueXml() != null) {
-//                        properties.put(key,
-//                                record.getValueXml());
-//                    }
-//                    if (record.getValueJson() != null) {
-//                        properties.put(key,
-//                                record.getValueJson());
-//                    }
-//                    if (record.getValueTemporalFrom() != null) {
-//                        properties.put(key,
-//                                record.getValueTemporalFrom().toString());
-//                    }
-//                    if (record.getValueTemporalTo() != null) {
-//                        properties.put(key,
-//                                record.getValueTemporalTo().toString());
-//                    }
                     return properties;
                 } else {
                     return null;
@@ -234,15 +243,14 @@ public class DTOMapper implements RecordMapperProvider {
             @Override
             public DatastreamDTO.UnitOfMeasurement map(Record record) {
                 DatastreamDTO.UnitOfMeasurement uom = new DatastreamDTO.UnitOfMeasurement();
-                if (record.field(StaEntity.UNIT.NAME) != null) {
-                    uom.setName(record.get(StaEntity.UNIT.NAME));
-                }
-                if (record.field(StaEntity.UNIT.SYMBOL) != null) {
-                    uom.setSymbol(record.get(StaEntity.UNIT.SYMBOL));
-                }
-                if (record.field(StaEntity.UNIT.LINK) != null) {
-                    uom.setDefinition(record.get(StaEntity.UNIT.LINK));
-                }
+                UnitRecord tableRecord = new UnitRecord();
+
+                mapEntityRecord(mapAliasedFields(record, StaEntity.UNIT), tableRecord);
+
+                uom.setName(tableRecord.getName());
+                uom.setSymbol(tableRecord.getSymbol());
+                uom.setDefinition(tableRecord.getLink());
+
                 return uom;
             }
         }
@@ -251,60 +259,39 @@ public class DTOMapper implements RecordMapperProvider {
 
     public static class LocationRecordMapper implements RecordMapper<Record, Location> {
         @Override
-        public Location map(Record rec) {
+        public Location map(Record record) {
             Location location = new Location();
-            LocationRecord record = rec.into(LocationRecord.class);
+            LocationRecord tableRecord = new LocationRecord();
 
-            setStaIdentifier(location, record.getStaIdentifier());
-            setStaName(location, record.getName());
-            setStaDescription(location, record.getDescription());
-            setGeometry(location, rec);
+            mapEntityRecord(mapAliasedFields(record, StaEntity.LOCATION), tableRecord);
+
+            setStaIdentifier(location, tableRecord.getStaIdentifier());
+            setStaName(location, tableRecord.getName());
+            setStaDescription(location, tableRecord.getDescription());
+            setGeometry(location, record);
             // encodingType is static for Location
 
             return location;
         }
 
         public static class LocationParameterRecordMapper implements RecordMapper<Record, ObjectNode> {
-            private ObjectNode setProperties(Record rec) {
-                LocationParameterRecord record = rec
-                        .into(StaEntity.LOCATION_PROPERTIES).into(LocationParameterRecord.class);
+            private ObjectNode setProperties(Record record) {
+                LocationParameterRecord tableRecord = new LocationParameterRecord();
+                mapEntityRecord(mapAliasedFields(record, StaEntity.LOCATION_PROPERTIES), tableRecord);
                 ObjectNode properties = MAPPER.createObjectNode();
 
-                if (record.getName() != null) {
-                    String key = record.getName();
+                if (tableRecord.getName() != null) {
+                    String key = tableRecord.getName();
 
-                    if (record.getValueText() != null) {
-                        properties.put(key, record.getValueText());
+                    if (tableRecord.getValueText() != null) {
+                        properties.put(key, tableRecord.getValueText());
                     }
-                    if (record.getValueQuantity() != null) {
-                        properties.put(key, record.getValueQuantity());
+                    if (tableRecord.getValueQuantity() != null) {
+                        properties.put(key, tableRecord.getValueQuantity());
                     }
-                    if (record.getValueBoolean() != null) {
-                        properties.put(key, record.getValueBoolean());
+                    if (tableRecord.getValueBoolean() != null) {
+                        properties.put(key, tableRecord.getValueBoolean());
                     }
-//                    if (record.getValueCount() != null) {
-//                        properties.put(key, record.getValueCount());
-//                    }
-//                    if (record.getValueCategory() != null) {
-//                        properties.put(key,
-//                                record.getValueCategory());
-//                    }
-//                    if (record.getValueXml() != null) {
-//                        properties.put(key,
-//                                record.getValueXml());
-//                    }
-//                    if (record.getValueJson() != null) {
-//                        properties.put(key,
-//                                record.getValueJson());
-//                    }
-//                    if (record.getValueTemporalFrom() != null) {
-//                        properties.put(key,
-//                                record.getValueTemporalFrom().toString());
-//                    }
-//                    if (record.getValueTemporalTo() != null) {
-//                        properties.put(key,
-//                                record.getValueTemporalTo().toString());
-//                    }
                     return properties;
                 } else {
                     return null;
@@ -334,31 +321,36 @@ public class DTOMapper implements RecordMapperProvider {
 
     public static class ThingRecordMapper implements RecordMapper<Record, Thing> {
         @Override
-        public Thing map(Record rec) {
+        public Thing map(Record record) {
             Thing thing = new Thing();
-            PlatformRecord record = rec.into(StaEntity.THING).into(PlatformRecord.class);
-            setStaIdentifier(thing, record.getStaIdentifier());
-            setStaName(thing, record.getName());
-            setStaDescription(thing, record.getDescription());
+            PlatformRecord tableRecord = new PlatformRecord();
+
+            mapEntityRecord(mapAliasedFields(record, StaEntity.THING), tableRecord);
+
+            setStaIdentifier(thing, tableRecord.getStaIdentifier());
+            setStaName(thing, tableRecord.getName());
+            setStaDescription(thing, tableRecord.getDescription());
             return thing;
         }
         public static class ThingParameterRecordMapper implements RecordMapper<Record, ObjectNode> {
 
-            private ObjectNode setProperties(Record rec) {
-                PlatformParameterRecord record = rec
-                        .into(StaEntity.THING_PROPERTIES).into(PlatformParameterRecord.class);
-                ObjectNode properties = MAPPER.createObjectNode();
-                if (record.getName() != null) {
-                    String key = record.getName();
+            private ObjectNode setProperties(Record record) {
+                PlatformParameterRecord tableRecord = new PlatformParameterRecord();
 
-                    if (record.getValueText() != null) {
-                        properties.put(key, record.getValueText());
+                mapEntityRecord(mapAliasedFields(record, StaEntity.THING_PROPERTIES), tableRecord);
+
+                ObjectNode properties = MAPPER.createObjectNode();
+                if (tableRecord.getName() != null) {
+                    String key = tableRecord.getName();
+
+                    if (tableRecord.getValueText() != null) {
+                        properties.put(key, tableRecord.getValueText());
                     }
-                    if (record.getValueQuantity() != null) {
-                        properties.put(key, record.getValueQuantity());
+                    if (tableRecord.getValueQuantity() != null) {
+                        properties.put(key, tableRecord.getValueQuantity());
                     }
-                    if (record.getValueBoolean() != null) {
-                        properties.put(key, record.getValueBoolean());
+                    if (tableRecord.getValueBoolean() != null) {
+                        properties.put(key, tableRecord.getValueBoolean());
                     }
                     return properties;
                 } else {
@@ -374,13 +366,14 @@ public class DTOMapper implements RecordMapperProvider {
 
     public static class HistoricalLocationRecordMapper implements RecordMapper<Record, HistoricalLocation> {
         @Override
-        public HistoricalLocation map(Record rec) {
+        public HistoricalLocation map(Record record) {
             HistoricalLocation historicalLocation = new HistoricalLocation();
-            HistoricalLocationRecord record = rec
-                    .into(StaEntity.HISTORICAL_LOCATION).into(HistoricalLocationRecord.class);
+            HistoricalLocationRecord tableRecord = new HistoricalLocationRecord();
 
-            setStaIdentifier(historicalLocation, record.getStaIdentifier());
-            setTime(historicalLocation, record);
+            mapEntityRecord(mapAliasedFields(record, StaEntity.HISTORICAL_LOCATION), tableRecord);
+
+            setStaIdentifier(historicalLocation, tableRecord.getStaIdentifier());
+            setTime(historicalLocation, tableRecord);
 
             return historicalLocation;
         }
@@ -401,37 +394,40 @@ public class DTOMapper implements RecordMapperProvider {
     public static class SensorRecordMapper implements RecordMapper<Record, Sensor> {
 
         @Override
-        public Sensor map(Record rec) {
+        public Sensor map(Record record) {
             Sensor sensor = new Sensor();
-            ProcedureRecord record = rec.into(StaEntity.SENSOR).into(ProcedureRecord.class);
+            ProcedureRecord tableRecord = new ProcedureRecord();
 
-            setStaIdentifier(sensor, record.getStaIdentifier());
-            setStaName(sensor, record.getName());
-            setStaDescription(sensor, record.getDescription());
-            setEncodingType(sensor, rec);
-            setMetadata(sensor, record);
+            mapEntityRecord(mapAliasedFields(record, StaEntity.SENSOR), tableRecord);
+
+            setStaIdentifier(sensor, tableRecord.getStaIdentifier());
+            setStaName(sensor, tableRecord.getName());
+            setStaDescription(sensor, tableRecord.getDescription());
+            setEncodingType(sensor, record);
+            setMetadata(sensor, tableRecord);
 
             return sensor;
         }
 
         public static class SensorParameterRecordMapper implements RecordMapper<Record, ObjectNode> {
 
-            private ObjectNode setProperties(Record rec) {
-                ProcedureParameterRecord record = rec
-                        .into(StaEntity.SENSOR_PROPERTIES).into(ProcedureParameterRecord.class);
+            private ObjectNode setProperties(Record record) {
+                ProcedureParameterRecord tableRecord = new ProcedureParameterRecord();
                 ObjectNode properties = MAPPER.createObjectNode();
 
-                if (record.getName() != null) {
-                    String key = record.getName();
+                mapEntityRecord(mapAliasedFields(record, StaEntity.SENSOR_PROPERTIES), tableRecord);
 
-                    if (record.getValueText() != null) {
-                        properties.put(key, record.getValueText());
+                if (tableRecord.getName() != null) {
+                    String key = tableRecord.getName();
+
+                    if (tableRecord.getValueText() != null) {
+                        properties.put(key, tableRecord.getValueText());
                     }
-                    if (record.getValueQuantity() != null) {
-                        properties.put(key, record.getValueQuantity());
+                    if (tableRecord.getValueQuantity() != null) {
+                        properties.put(key, tableRecord.getValueQuantity());
                     }
-                    if (record.getValueBoolean() != null) {
-                        properties.put(key, record.getValueBoolean());
+                    if (tableRecord.getValueBoolean() != null) {
+                        properties.put(key, tableRecord.getValueBoolean());
                     }
                     return properties;
                 } else {
@@ -458,34 +454,38 @@ public class DTOMapper implements RecordMapperProvider {
 
     public static class ObservedPropertyRecordMapper implements RecordMapper<Record, ObservedProperty> {
         @Override
-        public ObservedProperty map(Record rec) {
+        public ObservedProperty map(Record record) {
             ObservedProperty observedProperty = new ObservedProperty();
-            PhenomenonRecord record = rec.into(StaEntity.OBSERVED_PROPERTY).into(PhenomenonRecord.class);
+            PhenomenonRecord tableRecord = new PhenomenonRecord();
 
-            setStaIdentifier(observedProperty, record.getStaIdentifier());
-            setStaName(observedProperty, record.getName());
-            setStaDescription(observedProperty, record.getDescription());
-            setDefinition(observedProperty, record);
+            mapEntityRecord(mapAliasedFields(record, StaEntity.OBSERVED_PROPERTY), tableRecord);
+
+            setStaIdentifier(observedProperty, tableRecord.getStaIdentifier());
+            setStaName(observedProperty, tableRecord.getName());
+            setStaDescription(observedProperty, tableRecord.getDescription());
+            setDefinition(observedProperty, tableRecord);
 
             return observedProperty;
         }
         public static class ObservedPropertyParameterRecordMapper implements RecordMapper<Record, ObjectNode> {
 
-            private ObjectNode setProperties(Record rec) {
-                PhenomenonParameterRecord record = rec
-                        .into(StaEntity.OBSERVED_PROPERTY_PROPERTIES).into(PhenomenonParameterRecord.class);
+            private ObjectNode setProperties(Record record) {
+                PhenomenonParameterRecord tableRecord = new PhenomenonParameterRecord();
                 ObjectNode properties = MAPPER.createObjectNode();
-                if (record.getName() != null) {
-                    String key = record.getName();
 
-                    if (record.getValueText() != null) {
-                        properties.put(key, record.getValueText());
+                mapEntityRecord(mapAliasedFields(record, StaEntity.OBSERVED_PROPERTY_PROPERTIES), tableRecord);
+
+                if (tableRecord.getName() != null) {
+                    String key = tableRecord.getName();
+
+                    if (tableRecord.getValueText() != null) {
+                        properties.put(key, tableRecord.getValueText());
                     }
-                    if (record.getValueQuantity() != null) {
-                        properties.put(key, record.getValueQuantity());
+                    if (tableRecord.getValueQuantity() != null) {
+                        properties.put(key, tableRecord.getValueQuantity());
                     }
-                    if (record.getValueBoolean() != null) {
-                        properties.put(key, record.getValueBoolean());
+                    if (tableRecord.getValueBoolean() != null) {
+                        properties.put(key, tableRecord.getValueBoolean());
                     }
                     return properties;
                 } else {
@@ -505,17 +505,27 @@ public class DTOMapper implements RecordMapperProvider {
 
     public static class ObservationRecordMapper implements RecordMapper<Record, Observation> {
         @Override
-        public Observation map(Record rec) {
+        public Observation map(Record record) {
             Observation observation = new Observation();
-            ObservationRecord record = rec.into(StaEntity.OBSERVATION).into(ObservationRecord.class);
+            ObservationRecord tableRecord = new ObservationRecord();
 
-            setStaIdentifier(observation, record.getStaIdentifier());
-            setPhenomenonTime(observation, record);
-            setResultTime(observation, record);
-            setResult(observation, record);
-            setValidTime(observation, record);
+            mapEntityRecord(mapAliasedFields(record, StaEntity.OBSERVATION), tableRecord);
 
+            setStaIdentifier(observation, tableRecord.getStaIdentifier());
+            setPhenomenonTime(observation, tableRecord);
+            setResultTime(observation, tableRecord);
+            setResult(observation, tableRecord);
+            setValidTime(observation, tableRecord);
+            setRelatedDatastreamId(observation, tableRecord);
             return observation;
+        }
+
+        private void setRelatedDatastreamId(Observation observation, ObservationRecord record) {
+            if (record.getFkDatasetId() != null) {
+                DatastreamDTO datastream = new Datastream();
+                datastream.setId(record.getFkDatasetId().toString());
+                observation.setDatastream(datastream);
+            }
         }
 
         private void setPhenomenonTime(Observation observation, ObservationRecord record) {
@@ -536,22 +546,23 @@ public class DTOMapper implements RecordMapperProvider {
         }
         public static class ObservationParameterRecordMapper implements RecordMapper<Record, ObjectNode> {
 
-            private ObjectNode setParameters(Record rec) {
-                ObservationParameterRecord record = rec
-                        .into(StaEntity.OBSERVATION_PARAMETERS).into(ObservationParameterRecord.class);
+            private ObjectNode setParameters(Record record) {
+                ObservationParameterRecord tableRecord = new ObservationParameterRecord();
                 ObjectNode properties = MAPPER.createObjectNode();
 
-                if (record.getName() != null) {
-                    String key = record.getName();
+                mapEntityRecord(mapAliasedFields(record, StaEntity.OBSERVATION_PARAMETERS), tableRecord);
 
-                    if (record.getValueText() != null) {
-                        properties.put(key, record.getValueText());
+                if (tableRecord.getName() != null) {
+                    String key = tableRecord.getName();
+
+                    if (tableRecord.getValueText() != null) {
+                        properties.put(key, tableRecord.getValueText());
                     }
-                    if (record.getValueQuantity() != null) {
-                        properties.put(key, record.getValueQuantity());
+                    if (tableRecord.getValueQuantity() != null) {
+                        properties.put(key, tableRecord.getValueQuantity());
                     }
-                    if (record.getValueBoolean() != null) {
-                        properties.put(key, record.getValueBoolean());
+                    if (tableRecord.getValueBoolean() != null) {
+                        properties.put(key, tableRecord.getValueBoolean());
                     }
                     return properties;
                 } else {
@@ -611,36 +622,39 @@ public class DTOMapper implements RecordMapperProvider {
 
     public static class FeatureOfInterestRecordMapper implements RecordMapper<Record, FeatureOfInterest> {
         @Override
-        public FeatureOfInterest map(Record rec) {
+        public FeatureOfInterest map(Record record) {
             FeatureOfInterest featureOfInterest = new FeatureOfInterest();
-            FeatureRecord record = rec.into(StaEntity.FEATURE_OF_INTEREST).into(FeatureRecord.class);
+            FeatureRecord tableRecord = new FeatureRecord();
 
-            setStaIdentifier(featureOfInterest, record.getStaIdentifier());
-            setStaName(featureOfInterest, record.getName());
-            setStaDescription(featureOfInterest, record.getDescription());
-            setFeature(featureOfInterest, rec);
-            setEncodingType(featureOfInterest, rec);
+            mapEntityRecord(mapAliasedFields(record, StaEntity.FEATURE_OF_INTEREST), tableRecord);
+
+            setStaIdentifier(featureOfInterest, tableRecord.getStaIdentifier());
+            setStaName(featureOfInterest, tableRecord.getName());
+            setStaDescription(featureOfInterest, tableRecord.getDescription());
+            setFeature(featureOfInterest, record);
+            setEncodingType(featureOfInterest, record);
 
             return featureOfInterest;
         }
         public static class FeatureParameterRecordMapper implements RecordMapper<Record, ObjectNode> {
 
-            private ObjectNode setProperties(Record rec) {
-                FeatureParameterRecord record = rec
-                        .into(StaEntity.FEATURE_PROPERTIES).into(FeatureParameterRecord.class);
+            private ObjectNode setProperties(Record record) {
+                FeatureParameterRecord tableRecord = new FeatureParameterRecord();
                 ObjectNode properties = MAPPER.createObjectNode();
 
-                if (record.getName() != null) {
-                    String key = record.getName();
+                mapEntityRecord(mapAliasedFields(record, StaEntity.FEATURE_PROPERTIES), tableRecord);
 
-                    if (record.getValueText() != null) {
-                        properties.put(key, record.getValueText());
+                if (tableRecord.getName() != null) {
+                    String key = tableRecord.getName();
+
+                    if (tableRecord.getValueText() != null) {
+                        properties.put(key, tableRecord.getValueText());
                     }
-                    if (record.getValueQuantity() != null) {
-                        properties.put(key, record.getValueQuantity());
+                    if (tableRecord.getValueQuantity() != null) {
+                        properties.put(key, tableRecord.getValueQuantity());
                     }
-                    if (record.getValueBoolean() != null) {
-                        properties.put(key, record.getValueBoolean());
+                    if (tableRecord.getValueBoolean() != null) {
+                        properties.put(key, tableRecord.getValueBoolean());
                     }
                     return properties;
                 } else {

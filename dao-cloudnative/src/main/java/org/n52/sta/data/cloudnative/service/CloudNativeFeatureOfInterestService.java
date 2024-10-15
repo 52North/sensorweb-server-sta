@@ -41,7 +41,7 @@ import org.n52.shetland.ogc.sta.StaConstants;
 import org.n52.shetland.ogc.sta.exception.STACRUDException;
 import org.n52.shetland.ogc.sta.exception.STAInvalidQueryException;
 import org.n52.shetland.ogc.sta.model.STAEntityDefinition;
-import org.n52.sta.api.dto.DatastreamDTO;
+import org.n52.sta.api.CollectionWrapper;
 import org.n52.sta.api.dto.FeatureOfInterestDTO;
 import org.n52.sta.api.dto.LocationDTO;
 import org.n52.sta.api.dto.ObservationDTO;
@@ -60,14 +60,15 @@ import org.n52.sta.data.cloudnative.schema.tables.pojos.Feature;
 import org.n52.sta.data.cloudnative.schema.tables.pojos.Format;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.DependsOn;
-import org.springframework.data.domain.Page;
 import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Component;
 
 import java.util.*;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.stream.Collectors;
+
+import static org.n52.sta.data.cloudnative.condition.StaEntity.DATASET_AGGREGATION_MARKER;
 
 /**
  * @author <a href="mailto:humaid.kidwai@ucalgary.ca">Humaid Kidwai</a>
@@ -114,11 +115,14 @@ public class CloudNativeFeatureOfInterestService extends CloudNativeAbstractSens
         for (ExpandItem expandItem : expandOption.getItems()) {
             String expandProperty = expandItem.getPath();
             if (STAEntityDefinition.OBSERVATIONS.equals(expandProperty)) {
-                Page<ObservationDTO> observation = getObservationService()
-                        .getEntityCollectionByRelatedEntityRaw(entity.getId(),
+                CollectionWrapper observation = getObservationService()
+                        .getEntityCollectionByRelatedEntity(entity.getId(),
                                 STAEntityDefinition.FEATURES_OF_INTEREST,
                                 expandItem.getQueryOptions());
-                observations.addAll(observation.toSet());
+                observations.addAll((Collection<? extends ObservationDTO>) observation
+                        .getEntities()
+                        .stream()
+                        .collect(Collectors.toSet()));
             } else {
                 throw new STAInvalidQueryException(String.format(StaEntityDao.INVALID_EXPAND_OPTION_SUPPLIED,
                         expandProperty,
@@ -289,7 +293,8 @@ public class CloudNativeFeatureOfInterestService extends CloudNativeAbstractSens
                 observationDao.deleteAllByDatasetIdIn(Collections.singleton(datasetPOJO.getDatasetId()));
                 // only delete if we are part of an aggregation
                 // if we are not part of an aggregation we must not delete as this would also delete the whole datastream
-                if (datasetPOJO.getFkAggregationId() != null && datasetPOJO.getFkAggregationId() != 1L) {
+                if (datasetPOJO.getFkAggregationId() != null &&
+                        !Objects.equals(datasetPOJO.getFkAggregationId(), DATASET_AGGREGATION_MARKER)) {
                     datastreamDao.deleteById(datasetPOJO.getDatasetId());
                 }
             }
@@ -317,7 +322,7 @@ public class CloudNativeFeatureOfInterestService extends CloudNativeAbstractSens
             throws STACRUDException {
         try {
 
-            Dataset dataset = datastreamDao.findByDatasetIdPOJO(id, queryOptions);
+            Dataset dataset = datastreamDao.findByDatasetIdPOJO(id);
             Long featureId = dataset.getFkFeatureId();
             FeatureOfInterestDTO foi = featureDao.findById(featureId, queryOptions, entityClass).get();
             if (queryOptions.hasExpandFilter()) {

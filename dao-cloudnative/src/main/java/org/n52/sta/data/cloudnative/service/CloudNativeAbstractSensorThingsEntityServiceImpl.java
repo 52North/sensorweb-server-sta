@@ -71,7 +71,7 @@ import java.util.concurrent.atomic.AtomicLong;
 public abstract class CloudNativeAbstractSensorThingsEntityServiceImpl <T extends StaEntityDao<R>, R extends StaDTO> {
 
     protected static final String RESULT = "result";
-    protected static final String NULL_ID_MASK = ((Long)(1L << 63)).toString();
+    protected static final String NULL_ID_MASK = String.valueOf(Long.MIN_VALUE);
     protected static final String HTTP_PUT_IS_NOT_YET_SUPPORTED = "Http PUT is not yet supported!";
     protected static final String IDENTIFIER_ALREADY_EXISTS = "Identifier already exists!";
     protected static final String UNABLE_TO_UPDATE_ENTITY_NOT_FOUND = "Unable to update. Entity not found.";
@@ -202,8 +202,12 @@ public abstract class CloudNativeAbstractSensorThingsEntityServiceImpl <T extend
     protected R getEntityByIdRaw(Long id, QueryOptions queryOptions) throws STACRUDException {
         try {
             Optional<R> entity = StaEntityDao.findById(id, queryOptions, entityClass);
-            if (entity.isPresent() && queryOptions.hasExpandFilter()) {
-                return fetchExpandEntitiesWithFilter(entity.get(), queryOptions.getExpandFilter());
+            if (entity.isPresent()) {
+                if (queryOptions.hasExpandFilter()) {
+                    return fetchExpandEntitiesWithFilter(entity.get(), queryOptions.getExpandFilter());
+                } else {
+                    return entity.get();
+                }
             } else {
                 throw new STACRUDException(UNABLE_TO_GET_ENTITY_NOT_FOUND);
             }
@@ -249,8 +253,12 @@ public abstract class CloudNativeAbstractSensorThingsEntityServiceImpl <T extend
                             getFilterPredicate(entityClass, queryOptions)),
                             queryOptions,
                             entityClass);
-            if (entity.isPresent() && queryOptions.hasExpandFilter()) {
-                return fetchExpandEntitiesWithFilter(entity.get(), queryOptions.getExpandFilter());
+            if (entity.isPresent()) {
+                if (queryOptions.hasExpandFilter()) {
+                    return fetchExpandEntitiesWithFilter(entity.get(), queryOptions.getExpandFilter());
+                } else {
+                    return entity.get();
+                }
             } else {
                 throw new STACRUDException(UNABLE_TO_GET_ENTITY_NOT_FOUND);
             }

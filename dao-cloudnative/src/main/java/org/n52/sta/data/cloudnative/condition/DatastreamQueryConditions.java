@@ -48,15 +48,21 @@ import java.util.List;
 public class DatastreamQueryConditions extends EntityQueryConditions {
 
     public Condition withName(final String name) {
-        return DATASTREAM.FK_AGGREGATION_ID.isNull().and(DATASTREAM.NAME.eq(name));
+        return DATASTREAM.FK_AGGREGATION_ID.isNull()
+                .or(DATASTREAM.FK_AGGREGATION_ID.eq(DATASET_AGGREGATION_MARKER))
+                .and(DATASTREAM.NAME.eq(name));
     }
 
     public Condition withStaIdentifier(final String staIdentifier) {
-        return DATASTREAM.FK_AGGREGATION_ID.isNull().and(DATASTREAM.STA_IDENTIFIER.eq(staIdentifier));
+        return DATASTREAM.FK_AGGREGATION_ID.isNull()
+                .or(DATASTREAM.FK_AGGREGATION_ID.eq(DATASET_AGGREGATION_MARKER))
+                .and(DATASTREAM.STA_IDENTIFIER.eq(staIdentifier));
     }
 
     public Condition withStaIdentifier(final List<String> identifiers) {
-        return DATASTREAM.FK_AGGREGATION_ID.isNull().and(DATASTREAM.STA_IDENTIFIER.in(identifiers));
+        return DATASTREAM.FK_AGGREGATION_ID.isNull()
+                .or(DATASTREAM.FK_AGGREGATION_ID.eq(DATASET_AGGREGATION_MARKER))
+                .and(DATASTREAM.STA_IDENTIFIER.in(identifiers));
     }
 
 
@@ -244,22 +250,22 @@ public class DatastreamQueryConditions extends EntityQueryConditions {
         public Field<?> checkPropertyName(String property) {
         switch (property) {
             case StaConstants.PROP_ID:
-                return DATASTREAM.STA_IDENTIFIER;
+                return StaEntity.alias(DATASTREAM, DATASTREAM.STA_IDENTIFIER);
             case StaConstants.PROP_NAME:
-                return DATASTREAM.NAME;
+                return StaEntity.alias(DATASTREAM, DATASTREAM.NAME);
             case StaConstants.PROP_DESCRIPTION:
-                return DATASTREAM.DESCRIPTION;
+                return StaEntity.alias(DATASTREAM, DATASTREAM.DESCRIPTION);
             case StaConstants.PROP_OBSERVED_AREA:
-                return DATASTREAM.OBSERVED_AREA;
+                return StaEntity.alias(DATASTREAM, DATASTREAM.OBSERVED_AREA);
             case StaConstants.PROP_UOM:
-                return UNIT.NAME;
+                return StaEntity.alias(UNIT, UNIT.NAME);
             case StaConstants.PROP_OBSERVATION_TYPE:
                 Format DATASTREAM_FORMAT = StaEntity.FORMAT.as("DATASTREAM_FORMAT");
                 return DATASTREAM_FORMAT.DEFINITION.as("DATASTREAM_FORMAT_DEFINITION");
             case StaConstants.PROP_PHENOMENON_TIME:
-                return DATASTREAM.FIRST_TIME;
+                return StaEntity.alias(DATASTREAM, DATASTREAM.FIRST_TIME);
             case StaConstants.PROP_RESULT_TIME:
-                return DATASTREAM.RESULT_TIME_START;
+                return StaEntity.alias(DATASTREAM, DATASTREAM.RESULT_TIME_START);
             case StaConstants.PROP_PROPERTIES:
                 // TODO:
                 return null;

@@ -50,9 +50,8 @@ public class SensorQueryConditions extends EntityQueryConditions {
         return DSL.exists(
                 ctx.select(DATASTREAM.DATASET_ID)
                         .from(DATASTREAM)
-                        .join(SENSOR)
-                        .onKey()
                         .where(DATASTREAM.STA_IDENTIFIER.eq(datastreamIdentifier))
+                        .and(SENSOR.PROCEDURE_ID.eq(DATASTREAM.FK_PROCEDURE_ID))
         );
 
     }
@@ -158,11 +157,11 @@ public class SensorQueryConditions extends EntityQueryConditions {
     public Field<?> checkPropertyName(String property) {
         switch (property) {
             case StaConstants.PROP_ID:
-                return SENSOR.STA_IDENTIFIER;
+                return StaEntity.alias(SENSOR, SENSOR.STA_IDENTIFIER);
             case StaConstants.PROP_NAME:
-                return SENSOR.NAME;
+                return StaEntity.alias(SENSOR, SENSOR.NAME);
             case StaConstants.PROP_DESCRIPTION:
-                return SENSOR.DESCRIPTION;
+                return StaEntity.alias(SENSOR, SENSOR.DESCRIPTION);
             case StaConstants.PROP_PROPERTIES:
                 // TODO:
                 return null;
@@ -170,7 +169,7 @@ public class SensorQueryConditions extends EntityQueryConditions {
                 Format SENSOR_FORMAT = StaEntity.FORMAT.as("SENSOR_FORMAT");
                 return SENSOR_FORMAT.DEFINITION.as("SENSOR_FORMAT_DEFINITION");
             case StaConstants.PROP_METADATA:
-                return SENSOR.DESCRIPTION_FILE;
+                return StaEntity.alias(SENSOR, SENSOR.DESCRIPTION_FILE);
             default:
                 return null;
         }

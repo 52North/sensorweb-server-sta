@@ -42,6 +42,7 @@ import org.n52.shetland.ogc.sta.StaConstants;
 import org.n52.shetland.ogc.sta.exception.STACRUDException;
 import org.n52.shetland.ogc.sta.exception.STAInvalidQueryException;
 import org.n52.shetland.ogc.sta.model.STAEntityDefinition;
+import org.n52.sta.api.CollectionWrapper;
 import org.n52.sta.api.dto.HistoricalLocationDTO;
 import org.n52.sta.api.dto.LocationDTO;
 import org.n52.sta.api.dto.ThingDTO;
@@ -60,7 +61,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.DependsOn;
-import org.springframework.data.domain.Page;
 import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Component;
 
@@ -121,18 +121,24 @@ public class CloudNativeLocationService
             String expandProperty = expandItem.getPath();
             switch (expandProperty) {
                 case STAEntityDefinition.HISTORICAL_LOCATIONS:
-                    Page<HistoricalLocationDTO> hLocs = getHistoricalLocationService()
-                            .getEntityCollectionByRelatedEntityRaw(entity.getId(),
+                    CollectionWrapper hLocs = getHistoricalLocationService()
+                            .getEntityCollectionByRelatedEntity(entity.getId(),
                                     STAEntityDefinition.LOCATIONS,
                                     expandItem.getQueryOptions());
-                    entity.setHistoricalLocations(hLocs.get().collect(Collectors.toSet()));
+                    entity.setHistoricalLocations((Set<HistoricalLocationDTO>) hLocs
+                            .getEntities()
+                            .stream()
+                            .collect(Collectors.toSet()));
                     break;
                 case STAEntityDefinition.THINGS:
-                    Page<ThingDTO> things =
-                            getThingService().getEntityCollectionByRelatedEntityRaw(entity.getId(),
+                    CollectionWrapper things =
+                            getThingService().getEntityCollectionByRelatedEntity(entity.getId(),
                                     STAEntityDefinition.LOCATIONS,
                                     expandItem.getQueryOptions());
-                    entity.setThings(things.get().collect(Collectors.toSet()));
+                    entity.setThings((Set<ThingDTO>) things
+                            .getEntities()
+                            .stream()
+                            .collect(Collectors.toSet()));
                     break;
                 default:
                     throw new STAInvalidQueryException(String.format(INVALID_EXPAND_OPTION_SUPPLIED, expandProperty,

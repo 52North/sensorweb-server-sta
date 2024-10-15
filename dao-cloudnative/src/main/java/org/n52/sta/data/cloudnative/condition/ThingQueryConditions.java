@@ -35,7 +35,6 @@ import org.n52.shetland.ogc.filter.FilterConstants;
 import org.n52.shetland.ogc.sta.StaConstants;
 import org.n52.shetland.ogc.sta.exception.STAInvalidFilterExpressionException;
 import org.n52.shetland.ogc.sta.model.STAEntityDefinition;
-import org.n52.sta.data.cloudnative.schema.tables.Platform;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -51,31 +50,28 @@ public class ThingQueryConditions extends EntityQueryConditions {
         return DSL.exists(
                 ctx.select(LOCATION.LOCATION_ID)
                         .from(THING_LOCATION)
-                        .join(THING)
-                        .onKey()
                         .join(LOCATION)
                         .onKey()
                         .where(LOCATION.STA_IDENTIFIER.eq(locationIdentifier))
+                        .and(THING.PLATFORM_ID.eq(THING_LOCATION.FK_PLATFORM_ID))
         );
     }
 
     public Condition withHistoricalLocationStaIdentifier(final String historicalIdentifier) {
         return DSL.exists(
                 ctx.select(HISTORICAL_LOCATION.HISTORICAL_LOCATION_ID)
-                        .from(THING)
-                        .join(HISTORICAL_LOCATION)
-                        .onKey()
+                        .from(HISTORICAL_LOCATION)
                         .where(HISTORICAL_LOCATION.STA_IDENTIFIER.eq(historicalIdentifier))
+                        .and(THING.PLATFORM_ID.eq(HISTORICAL_LOCATION.FK_PLATFORM_ID))
         );
     }
 
     public Condition withDatastreamStaIdentifier(final String datastreamIdentifier) {
         return DSL.exists(
                 ctx.select(DATASTREAM.DATASET_ID)
-                        .from(THING)
-                        .join(DATASTREAM)
-                        .onKey()
+                        .from(DATASTREAM)
                         .where(DATASTREAM.STA_IDENTIFIER.eq(datastreamIdentifier))
+                        .and(THING.PLATFORM_ID.eq(DATASTREAM.FK_PLATFORM_ID))
         );
     }
 
@@ -180,11 +176,11 @@ public class ThingQueryConditions extends EntityQueryConditions {
     public Field<?> checkPropertyName(String property) {
         switch (property) {
             case StaConstants.PROP_ID:
-                return THING.STA_IDENTIFIER;
+                return StaEntity.alias(THING, THING.STA_IDENTIFIER);
             case StaConstants.PROP_NAME:
-                return THING.NAME;
+                return StaEntity.alias(THING, THING.NAME);
             case StaConstants.PROP_DESCRIPTION:
-                return THING.DESCRIPTION;
+                return StaEntity.alias(THING, THING.DESCRIPTION);
             case StaConstants.PROP_PROPERTIES:
                 // TODO:
                 return null;

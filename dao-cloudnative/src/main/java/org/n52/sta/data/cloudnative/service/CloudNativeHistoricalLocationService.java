@@ -67,6 +67,7 @@ import org.n52.shetland.ogc.sta.StaConstants;
 import org.n52.shetland.ogc.sta.exception.STACRUDException;
 import org.n52.shetland.ogc.sta.exception.STAInvalidQueryException;
 import org.n52.shetland.ogc.sta.model.STAEntityDefinition;
+import org.n52.sta.api.CollectionWrapper;
 import org.n52.sta.api.dto.HistoricalLocationDTO;
 import org.n52.sta.api.dto.LocationDTO;
 import org.n52.sta.api.dto.ThingDTO;
@@ -81,7 +82,6 @@ import org.n52.sta.data.cloudnative.schema.tables.pojos.LocationHistoricalLocati
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.DependsOn;
-import org.springframework.data.domain.Page;
 import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Component;
 
@@ -137,11 +137,14 @@ public class CloudNativeHistoricalLocationService
             String expandProperty = expandItem.getPath();
             switch (expandProperty) {
                 case STAEntityDefinition.LOCATIONS:
-                    Page<LocationDTO> locations = getLocationService()
-                            .getEntityCollectionByRelatedEntityRaw(entity.getId(),
+                    CollectionWrapper locations = getLocationService()
+                            .getEntityCollectionByRelatedEntity(entity.getId(),
                                     STAEntityDefinition.HISTORICAL_LOCATIONS,
                                     expandItem.getQueryOptions());
-                    entity.setLocations(locations.get().collect(Collectors.toSet()));
+                    entity.setLocations((Set<LocationDTO>) locations
+                            .getEntities()
+                            .stream()
+                            .collect(Collectors.toSet()));
                     break;
                 case STAEntityDefinition.THING:
                     // fallthru
@@ -149,9 +152,11 @@ public class CloudNativeHistoricalLocationService
                     // The Definition in Section 8.2.3 of the OGC STA v1.0 defines the relations as "Thing"
                     // We will allow both for now
                 case STAEntityDefinition.THINGS:
-                    entity.setThing(getThingService()
-                            .getEntityByIdRaw(Long.valueOf(entity.getThing().getId()),
-                                    expandItem.getQueryOptions()));
+                    entity.setThing(getThingService().getEntityByRelatedEntity(
+                            entity.getId(),
+                            STAEntityDefinition.HISTORICAL_LOCATIONS,
+                            null,
+                            expandItem.getQueryOptions()));
                     break;
                 default:
                     throw new STAInvalidQueryException(String.format(INVALID_EXPAND_OPTION_SUPPLIED,

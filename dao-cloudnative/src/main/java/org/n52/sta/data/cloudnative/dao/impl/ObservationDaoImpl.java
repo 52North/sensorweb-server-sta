@@ -33,12 +33,9 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.jooq.*;
 import org.jooq.Record;
 
-import org.n52.shetland.filter.ExpandItem;
 import org.n52.shetland.oasis.odata.query.option.QueryOptions;
-import org.n52.shetland.ogc.sta.StaConstants;
 import org.n52.shetland.ogc.sta.exception.STACRUDException;
 import org.n52.shetland.ogc.sta.exception.STAInvalidQueryException;
-import org.n52.shetland.ogc.sta.model.STAEntityDefinition;
 import org.n52.sta.api.dto.DatastreamDTO;
 import org.n52.sta.api.dto.FeatureOfInterestDTO;
 import org.n52.sta.api.dto.ObservationDTO;
@@ -50,16 +47,13 @@ import org.n52.sta.data.cloudnative.dao.FirehoseConstants;
 import org.n52.sta.data.cloudnative.dao.ObservationDao;
 
 import org.n52.sta.data.cloudnative.dao.util.StaFirehoseClient;
-import org.n52.sta.data.cloudnative.schema.tables.Format;
 import org.n52.sta.data.cloudnative.schema.tables.pojos.Observation;
 import org.n52.sta.data.cloudnative.schema.tables.records.ObservationRecord;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Order;
 import org.springframework.stereotype.Component;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 import static org.n52.sta.api.RequestUtils.QUERY_OPTIONS_FACTORY;
 
@@ -121,7 +115,9 @@ public class ObservationDaoImpl extends AbstractStaEntityDao<ObservationDTO> imp
     protected List<ObservationDTO> mapResultToDTO(Result<Record> result) {
         Map<Long, ObservationDTO> observationMap = new TreeMap<>();
         for (Record record : result) {
-            Long Id = record.get(StaEntity.OBSERVATION.OBSERVATION_ID);
+            Long Id = (Long) record.get(StaEntity.alias(
+                    StaEntity.OBSERVATION,
+                    StaEntity.OBSERVATION.OBSERVATION_ID));
 
             ObservationDTO observation = observationMap.computeIfAbsent(Id,
                     k -> record.map(new DTOMapper.ObservationRecordMapper()));
@@ -153,7 +149,7 @@ public class ObservationDaoImpl extends AbstractStaEntityDao<ObservationDTO> imp
     }
 
     @Override
-    public Field checkPropertyName(String property) {
+    public Field<?> checkPropertyName(String property) {
         return oQC.checkPropertyName(property);
     }
 
@@ -180,62 +176,6 @@ public class ObservationDaoImpl extends AbstractStaEntityDao<ObservationDTO> imp
         if (queryOptions == null ||
                 queryOptions.getSelectFilter() == null) {
             select.addAll(getStaEntityFields(StaEntity.OBSERVATION_PARAMETERS));
-        }
-
-        if (queryOptions != null && queryOptions.getExpandFilter() != null) {
-            for (ExpandItem expandItem : queryOptions.getExpandFilter().getItems()) {
-                // We cannot handle nested $filter or $expand
-                if (expandItem.getQueryOptions().hasFilterFilter() ||
-                        expandItem.getQueryOptions().hasExpandFilter()) {
-                    continue;
-                }
-                String expandProperty = expandItem.getPath();
-                switch (expandProperty) {
-                    case STAEntityDefinition.DATASTREAM:
-                    case STAEntityDefinition.DATASTREAMS:
-
-                        joins.add(StaEntity.DATASTREAM);
-                        table = table.leftJoin(StaEntity.DATASTREAM)
-                                        .on(StaEntity.DATASTREAM.DATASET_ID
-                                                .eq(StaEntity.OBSERVATION.FK_DATASET_ID));
-
-                        Format DATASTREAM_FORMAT = StaEntity.FORMAT.as("DATASTREAM_FORMAT");
-                        joins.add(DATASTREAM_FORMAT);
-                        table = table.leftJoin(DATASTREAM_FORMAT)
-                                .on(DATASTREAM_FORMAT.FORMAT_ID
-                                        .eq(StaEntity.DATASTREAM.FK_FORMAT_ID));
-
-                        joins.add(StaEntity.UNIT);
-                        table = table.leftJoin(StaEntity.UNIT)
-                                .on(StaEntity.DATASTREAM.FK_UNIT_ID
-                                        .eq(StaEntity.UNIT.UNIT_ID));
-
-                        if (expandItem.getQueryOptions() == null ||
-                                expandItem.getQueryOptions().getSelectFilter() == null) {
-                            select.addAll(getStaEntityFields(StaEntity.DATASTREAM));
-                            select.addAll(getStaEntityFields(DATASTREAM_FORMAT)
-                                    .stream()
-                                    .map(e -> e.as("DATASTREAM_FORMAT_" + e.getName()))
-                                    .collect(Collectors.toList())
-                            );
-                            select.addAll(getStaEntityFields(StaEntity.UNIT));
-                        } else {
-                            select.addAll(expandItem
-                                    .getQueryOptions()
-                                    .getSelectFilter()
-                                    .getItems()
-                                    .stream()
-                                    .map(e-> dsQC.checkPropertyName(e))
-                                    .collect(Collectors.toList()));
-                        }
-
-                        break;
-                    default:
-                        throw new STAInvalidQueryException(String.format(INVALID_EXPAND_OPTION_SUPPLIED,
-                                expandProperty,
-                                StaConstants.OBSERVATION));
-                }
-            }
         }
         return table;
     }

@@ -95,7 +95,9 @@ public class LocationDaoImpl extends AbstractStaEntityDao<LocationDTO> implement
     protected List<LocationDTO> mapResultToDTO(Result<Record> result) {
         Map<Long, LocationDTO> locationMap = new TreeMap<>();
         for (Record record : result) {
-            Long Id = record.get(StaEntity.LOCATION.LOCATION_ID);
+            Long Id = (Long) record.get(StaEntity.alias(
+                    StaEntity.LOCATION,
+                    StaEntity.LOCATION.LOCATION_ID));
 
             LocationDTO location = locationMap
                     .computeIfAbsent(Id, k -> record.map(new DTOMapper.LocationRecordMapper()));
@@ -187,7 +189,7 @@ public class LocationDaoImpl extends AbstractStaEntityDao<LocationDTO> implement
                                     .getSelectFilter()
                                     .getItems()
                                     .stream()
-                                    .map(e-> hlQC.checkPropertyName(e))
+                                    .map(hlQC::checkPropertyName)
                                     .collect(Collectors.toList()));
                         }
                         break;
@@ -212,7 +214,7 @@ public class LocationDaoImpl extends AbstractStaEntityDao<LocationDTO> implement
                                     .getSelectFilter()
                                     .getItems()
                                     .stream()
-                                    .map(e -> tQC.checkPropertyName(e))
+                                    .map(tQC::checkPropertyName)
                                     .collect(Collectors.toList()));
                         }
                         break;

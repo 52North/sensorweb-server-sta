@@ -31,19 +31,14 @@ package org.n52.sta.data.cloudnative.condition;
 
 import org.jooq.Condition;
 import org.jooq.Field;
-import org.jooq.Record1;
-import org.jooq.SelectConditionStep;
 import org.jooq.impl.DSL;
 
 import org.n52.shetland.ogc.filter.FilterConstants;
 import org.n52.shetland.ogc.sta.StaConstants;
 import org.n52.shetland.ogc.sta.exception.STAInvalidFilterExpressionException;
 import org.n52.shetland.ogc.sta.model.STAEntityDefinition;
-import org.n52.sta.data.cloudnative.schema.tables.Dataset;
-import org.n52.sta.data.cloudnative.schema.tables.HistoricalLocation;
 import org.springframework.stereotype.Component;
 
-import java.util.Date;
 import java.util.List;
 
 /**
@@ -57,21 +52,20 @@ public class HistoricalLocationQueryConditions extends EntityQueryConditions {
         return DSL.exists(
                 ctx.select(LOCATION.LOCATION_ID)
                         .from(LOCATION_HISTORICAL_LOCATION)
-                        .join(HISTORICAL_LOCATION)
-                        .onKey()
                         .join(LOCATION)
                         .onKey()
                         .where(LOCATION.STA_IDENTIFIER.eq(locationIdentifier))
+                        .and(HISTORICAL_LOCATION.HISTORICAL_LOCATION_ID
+                                .eq(LOCATION_HISTORICAL_LOCATION.FK_HISTORICAL_LOCATION_ID))
         );
     }
 
     public Condition withThingStaIdentifier(final String thingIdentifier) {
         return DSL.exists(
                 ctx.select(THING.PLATFORM_ID)
-                        .from(HISTORICAL_LOCATION)
-                        .join(THING)
-                        .onKey()
+                        .from(THING)
                         .where(THING.STA_IDENTIFIER.eq(thingIdentifier))
+                        .and(HISTORICAL_LOCATION.FK_PLATFORM_ID.eq(THING.PLATFORM_ID))
         );
     }
 
@@ -146,9 +140,9 @@ public class HistoricalLocationQueryConditions extends EntityQueryConditions {
     public Field<?> checkPropertyName(String property) {
         switch (property) {
             case StaConstants.PROP_ID:
-                return HISTORICAL_LOCATION.STA_IDENTIFIER;
+                return StaEntity.alias(HISTORICAL_LOCATION, HISTORICAL_LOCATION.STA_IDENTIFIER);
             case StaConstants.PROP_TIME:
-                return HISTORICAL_LOCATION.TIME;
+                return StaEntity.alias(HISTORICAL_LOCATION, HISTORICAL_LOCATION.TIME);
             default:
                 // TODO:
                 return null;

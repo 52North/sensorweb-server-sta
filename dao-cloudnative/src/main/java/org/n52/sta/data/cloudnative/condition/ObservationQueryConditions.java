@@ -74,11 +74,6 @@ public class ObservationQueryConditions extends EntityQueryConditions {
         return OBSERVATION.FK_DATASET_ID.eq(datastreamId);
     }
 
-    /*
-    public Condition withParent(final long parentId) {
-        return null;
-    }
-    */
     @Override
     public Condition withStaIdentifier(String staIdentifier) {
         return OBSERVATION.STA_IDENTIFIER.eq(staIdentifier);
@@ -267,18 +262,18 @@ public class ObservationQueryConditions extends EntityQueryConditions {
     public Field<?> checkPropertyName(String property) {
         switch (property) {
             case StaConstants.PROP_ID:
-                return OBSERVATION.STA_IDENTIFIER;
+                return StaEntity.alias(OBSERVATION, OBSERVATION.STA_IDENTIFIER);
 
             case StaConstants.PROP_PHENOMENON_TIME:
-                return OBSERVATION.SAMPLING_TIME_END;
+                return StaEntity.alias(OBSERVATION, OBSERVATION.SAMPLING_TIME_END);
 
             /* TODO: This is handled separately as result is split up over multiple columns */
             case StaConstants.PROP_RESULT:
                 return null;
             case StaConstants.PROP_RESULT_TIME:
-                return OBSERVATION.RESULT_TIME;
+                return StaEntity.alias(OBSERVATION, OBSERVATION.RESULT_TIME);
             case StaConstants.PROP_VALID_TIME:
-                return OBSERVATION.VALID_TIME_START;
+                return StaEntity.alias(OBSERVATION, OBSERVATION.VALID_TIME_START);
             case StaConstants.PROP_PARAMETERS:
                 // TODO:
                 return null;

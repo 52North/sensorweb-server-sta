@@ -53,12 +53,11 @@ public class FeatureOfInterestQueryConditions extends EntityQueryConditions impl
 
         return DSL.exists(
                 ctx.select(OBSERVATION.OBSERVATION_ID)
-                        .from(FEATURE_OF_INTEREST)
-                        .join(DATASTREAM)
-                        .onKey()
+                        .from(DATASTREAM)
                         .join(OBSERVATION)
                         .onKey()
                         .where(OBSERVATION.STA_IDENTIFIER.eq(observationIdentifier))
+                        .and(FEATURE_OF_INTEREST.FEATURE_ID.eq(DATASTREAM.FK_FEATURE_ID))
         );
     }
 
@@ -232,16 +231,16 @@ public class FeatureOfInterestQueryConditions extends EntityQueryConditions impl
     }
 
     @Override
-    public Field checkPropertyName(String property) {
+    public Field<?> checkPropertyName(String property) {
         switch (property) {
             case StaConstants.PROP_ID:
-                return FEATURE_OF_INTEREST.STA_IDENTIFIER;
+                return StaEntity.alias(FEATURE_OF_INTEREST, FEATURE_OF_INTEREST.STA_IDENTIFIER);
             case StaConstants.PROP_NAME:
-                return FEATURE_OF_INTEREST.NAME;
+                return StaEntity.alias(FEATURE_OF_INTEREST, FEATURE_OF_INTEREST.NAME);
             case StaConstants.PROP_DESCRIPTION:
-                return FEATURE_OF_INTEREST.DESCRIPTION;
+                return StaEntity.alias(FEATURE_OF_INTEREST, FEATURE_OF_INTEREST.DESCRIPTION);
             case StaConstants.PROP_FEATURE:
-                return FEATURE_OF_INTEREST.GEOM;
+                return StaEntity.alias(FEATURE_OF_INTEREST,FEATURE_OF_INTEREST.GEOM);
             case StaConstants.PROP_ENCODINGTYPE:
                 Format SENSOR_FORMAT = StaEntity.FORMAT.as("FEATURE_FORMAT");
                 return SENSOR_FORMAT.DEFINITION.as("FEATURE_FORMAT_DEFINITION");
