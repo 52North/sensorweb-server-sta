@@ -277,7 +277,8 @@ public abstract class EntityQueryConditions implements StaEntity {
      * @return name of the property in database
      */
 
-    public abstract Field<?> checkPropertyName(String property);
+    public abstract Field<?> checkAliasedPropertyName(String property);
+    public abstract Field<?> checkOriginalPropertyName(String property);
 
     private Field<Long> getEntityId(ParameterFactory.EntityType entityType) {
         switch (entityType) {

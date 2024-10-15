@@ -156,7 +156,7 @@ public interface StaEntityDao <T extends StaDTO> {
 
     Table<?> getEntityTable();
 
-    Field<?> checkPropertyName(String property);
+    Field<?> checkAliasedPropertyName(String property);
 
     Table<?> createJoinList(QueryOptions queryOptions, Table<?> table, List<Field<?>> select)
             throws STAInvalidQueryException;

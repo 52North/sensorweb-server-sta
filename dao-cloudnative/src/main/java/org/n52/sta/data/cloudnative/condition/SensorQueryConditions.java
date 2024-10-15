@@ -154,7 +154,7 @@ public class SensorQueryConditions extends EntityQueryConditions {
     }
 
     @Override
-    public Field<?> checkPropertyName(String property) {
+    public Field<?> checkAliasedPropertyName(String property) {
         switch (property) {
             case StaConstants.PROP_ID:
                 return StaEntity.alias(SENSOR, SENSOR.STA_IDENTIFIER);
@@ -170,6 +170,28 @@ public class SensorQueryConditions extends EntityQueryConditions {
                 return SENSOR_FORMAT.DEFINITION.as("SENSOR_FORMAT_DEFINITION");
             case StaConstants.PROP_METADATA:
                 return StaEntity.alias(SENSOR, SENSOR.DESCRIPTION_FILE);
+            default:
+                return null;
+        }
+    }
+
+    @Override
+    public Field<?> checkOriginalPropertyName(String property) {
+        switch (property) {
+            case StaConstants.PROP_ID:
+                return SENSOR.STA_IDENTIFIER;
+            case StaConstants.PROP_NAME:
+                return SENSOR.NAME;
+            case StaConstants.PROP_DESCRIPTION:
+                return SENSOR.DESCRIPTION;
+            case StaConstants.PROP_PROPERTIES:
+                // TODO:
+                return null;
+            case StaConstants.PROP_ENCODINGTYPE:
+                Format SENSOR_FORMAT = StaEntity.FORMAT.as("SENSOR_FORMAT");
+                return SENSOR_FORMAT.DEFINITION.as("SENSOR_FORMAT_DEFINITION");
+            case StaConstants.PROP_METADATA:
+                return SENSOR.DESCRIPTION_FILE;
             default:
                 return null;
         }

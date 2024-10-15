@@ -122,7 +122,7 @@ public interface GeospatialFunctions {
         );
     }
 
-    private static Field<byte[]> geometryfromWKT(String wkt) {
+    static Field<byte[]> geometryfromWKT(String wkt) {
         return DSL.function(
                 "ST_GeometryFromText",
                 byte[].class,
@@ -130,7 +130,7 @@ public interface GeospatialFunctions {
         );
     }
 
-    private static Field<byte[]> geometryFromWKB(Field<byte[]> geom) {
+    static Field<byte[]> geometryFromWKB(Field<byte[]> geom) {
         return DSL.function(
                 "ST_GeomFromBinary",
                 byte[].class,

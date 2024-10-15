@@ -547,7 +547,7 @@ public class CloudNativeDatastreamService extends CloudNativeAbstractSensorThing
 
     @Override
     protected String checkPropertyName(String property) {
-        Field<?> field = datastreamDao.checkPropertyName(property);
+        Field<?> field = datastreamDao.checkAliasedPropertyName(property);
         return field == StaEntity.DATASTREAM.OBSERVED_AREA ? "datastreamObservedArea" : field.getName();
     }
 

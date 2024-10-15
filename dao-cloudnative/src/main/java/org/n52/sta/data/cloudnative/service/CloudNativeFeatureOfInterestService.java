@@ -420,7 +420,7 @@ public class CloudNativeFeatureOfInterestService extends CloudNativeAbstractSens
 
     @Override
     protected String checkPropertyName(String property) {
-        Field<?> field = featureDao.checkPropertyName(property);
+        Field<?> field = featureDao.checkAliasedPropertyName(property);
         return field == StaEntity.FEATURE_OF_INTEREST.GEOM ? "foiGeom" : field.getName();
     }
 

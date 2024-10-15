@@ -231,7 +231,7 @@ public class FeatureOfInterestQueryConditions extends EntityQueryConditions impl
     }
 
     @Override
-    public Field<?> checkPropertyName(String property) {
+    public Field<?> checkAliasedPropertyName(String property) {
         switch (property) {
             case StaConstants.PROP_ID:
                 return StaEntity.alias(FEATURE_OF_INTEREST, FEATURE_OF_INTEREST.STA_IDENTIFIER);
@@ -241,6 +241,28 @@ public class FeatureOfInterestQueryConditions extends EntityQueryConditions impl
                 return StaEntity.alias(FEATURE_OF_INTEREST, FEATURE_OF_INTEREST.DESCRIPTION);
             case StaConstants.PROP_FEATURE:
                 return StaEntity.alias(FEATURE_OF_INTEREST,FEATURE_OF_INTEREST.GEOM);
+            case StaConstants.PROP_ENCODINGTYPE:
+                Format SENSOR_FORMAT = StaEntity.FORMAT.as("FEATURE_FORMAT");
+                return SENSOR_FORMAT.DEFINITION.as("FEATURE_FORMAT_DEFINITION");
+            case StaConstants.PROP_PROPERTIES:
+                // TODO
+                return null;
+            default:
+                return null;
+        }
+    }
+
+    @Override
+    public Field<?> checkOriginalPropertyName(String property) {
+        switch (property) {
+            case StaConstants.PROP_ID:
+                return FEATURE_OF_INTEREST.STA_IDENTIFIER;
+            case StaConstants.PROP_NAME:
+                return FEATURE_OF_INTEREST.NAME;
+            case StaConstants.PROP_DESCRIPTION:
+                return FEATURE_OF_INTEREST.DESCRIPTION;
+            case StaConstants.PROP_FEATURE:
+                return FEATURE_OF_INTEREST.GEOM;
             case StaConstants.PROP_ENCODINGTYPE:
                 Format SENSOR_FORMAT = StaEntity.FORMAT.as("FEATURE_FORMAT");
                 return SENSOR_FORMAT.DEFINITION.as("FEATURE_FORMAT_DEFINITION");

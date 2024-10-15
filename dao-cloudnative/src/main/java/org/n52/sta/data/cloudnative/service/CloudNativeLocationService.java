@@ -362,7 +362,7 @@ public class CloudNativeLocationService
 
     @Override
     protected String checkPropertyName(String property) {
-        Field<?> field = locationDao.checkPropertyName(property);
+        Field<?> field = locationDao.checkAliasedPropertyName(property);
         return field == StaEntity.LOCATION.GEOM ? "locationGeom" : field.getName();
     }
 

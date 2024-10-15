@@ -138,7 +138,7 @@ public class HistoricalLocationDaoImpl
                                     .getSelectFilter()
                                     .getItems()
                                     .stream()
-                                    .map(lQC::checkPropertyName)
+                                    .map(lQC::checkAliasedPropertyName)
                                     .collect(Collectors.toList()));
                         }
 
@@ -164,7 +164,7 @@ public class HistoricalLocationDaoImpl
                                     .getSelectFilter()
                                     .getItems()
                                     .stream()
-                                    .map(tQC::checkPropertyName)
+                                    .map(tQC::checkAliasedPropertyName)
                                     .collect(Collectors.toList()));
                         }
                         break;
@@ -179,8 +179,8 @@ public class HistoricalLocationDaoImpl
     }
 
     @Override
-    public Field<?> checkPropertyName(String property) {
-        return hlQC.checkPropertyName(property);
+    public Field<?> checkAliasedPropertyName(String property) {
+        return hlQC.checkAliasedPropertyName(property);
     }
 
     @Override

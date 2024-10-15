@@ -342,7 +342,7 @@ public class CloudNativeHistoricalLocationService
 
     @Override
     protected String checkPropertyName(String property) {
-        return historicalLocationDao.checkPropertyName(property).getName();
+        return historicalLocationDao.checkAliasedPropertyName(property).getName();
     }
 
     @Override

@@ -133,7 +133,7 @@ public class ThingDaoImpl
                                     .getSelectFilter()
                                     .getItems()
                                     .stream()
-                                    .map(hlQC::checkPropertyName)
+                                    .map(hlQC::checkAliasedPropertyName)
                                     .collect(Collectors.toList()));
                         }
 
@@ -167,7 +167,7 @@ public class ThingDaoImpl
                                     .getSelectFilter()
                                     .getItems()
                                     .stream()
-                                    .map(dsQC::checkPropertyName)
+                                    .map(dsQC::checkAliasedPropertyName)
                                     .collect(Collectors.toList()));
                         }
 
@@ -192,7 +192,7 @@ public class ThingDaoImpl
                                     .getSelectFilter()
                                     .getItems()
                                     .stream()
-                                    .map(lQC::checkPropertyName)
+                                    .map(lQC::checkAliasedPropertyName)
                                     .collect(Collectors.toList()));
                         }
 
@@ -256,8 +256,8 @@ public class ThingDaoImpl
     }
 
     @Override
-    public Field<?> checkPropertyName(String property) {
-        return tQC.checkPropertyName(property);
+    public Field<?> checkAliasedPropertyName(String property) {
+        return tQC.checkAliasedPropertyName(property);
     }
 
     @Override

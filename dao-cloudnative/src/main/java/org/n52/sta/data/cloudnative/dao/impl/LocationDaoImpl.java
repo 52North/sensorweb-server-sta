@@ -189,7 +189,7 @@ public class LocationDaoImpl extends AbstractStaEntityDao<LocationDTO> implement
                                     .getSelectFilter()
                                     .getItems()
                                     .stream()
-                                    .map(hlQC::checkPropertyName)
+                                    .map(hlQC::checkAliasedPropertyName)
                                     .collect(Collectors.toList()));
                         }
                         break;
@@ -214,7 +214,7 @@ public class LocationDaoImpl extends AbstractStaEntityDao<LocationDTO> implement
                                     .getSelectFilter()
                                     .getItems()
                                     .stream()
-                                    .map(tQC::checkPropertyName)
+                                    .map(tQC::checkAliasedPropertyName)
                                     .collect(Collectors.toList()));
                         }
                         break;
@@ -232,8 +232,8 @@ public class LocationDaoImpl extends AbstractStaEntityDao<LocationDTO> implement
     }
 
     @Override
-    public Field<?> checkPropertyName(String property) {
-        return lQC.checkPropertyName(property);
+    public Field<?> checkAliasedPropertyName(String property) {
+        return lQC.checkAliasedPropertyName(property);
     }
 
     @Override

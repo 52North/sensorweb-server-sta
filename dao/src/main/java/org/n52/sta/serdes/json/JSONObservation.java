@@ -122,7 +122,7 @@ public class JSONObservation extends JSONBase.JSONwithIdTime<ObservationDTO> imp
 
         // validTime
         if (validTime != null) {
-            self.setPhenomenonTime(parseTime(validTime));
+            self.setValidTime(parseTime(validTime));
         }
 
         self.setResult(result);

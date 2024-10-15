@@ -175,7 +175,7 @@ public class SensorDaoImpl extends AbstractStaEntityDao<SensorDTO> implements Se
                                 .getSelectFilter()
                                 .getItems()
                                 .stream()
-                                .map(dsQC::checkPropertyName)
+                                .map(dsQC::checkAliasedPropertyName)
                                 .collect(Collectors.toList()));
                     }
                 }
@@ -191,8 +191,8 @@ public class SensorDaoImpl extends AbstractStaEntityDao<SensorDTO> implements Se
     }
 
     @Override
-    public Field<?> checkPropertyName(String property) {
-        return sQC.checkPropertyName(property);
+    public Field<?> checkAliasedPropertyName(String property) {
+        return sQC.checkAliasedPropertyName(property);
     }
 
     @Override

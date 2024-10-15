@@ -259,7 +259,7 @@ public class ObservationQueryConditions extends EntityQueryConditions {
     }
 
     @Override
-    public Field<?> checkPropertyName(String property) {
+    public Field<?> checkAliasedPropertyName(String property) {
         switch (property) {
             case StaConstants.PROP_ID:
                 return StaEntity.alias(OBSERVATION, OBSERVATION.STA_IDENTIFIER);
@@ -280,5 +280,31 @@ public class ObservationQueryConditions extends EntityQueryConditions {
             default:
                 return null;
         }
+    }
+
+        @Override
+        public Field<?> checkOriginalPropertyName(String property) {
+            switch (property) {
+                case StaConstants.PROP_ID:
+                    return OBSERVATION.STA_IDENTIFIER;
+
+                case StaConstants.PROP_PHENOMENON_TIME:
+                    return OBSERVATION.SAMPLING_TIME_END;
+
+                /* TODO: This is handled separately as result is split up over multiple columns */
+                case StaConstants.PROP_RESULT:
+                    return null;
+                case StaConstants.PROP_RESULT_TIME:
+                    return OBSERVATION.RESULT_TIME;
+                case StaConstants.PROP_VALID_TIME:
+                    return OBSERVATION.VALID_TIME_START;
+                case StaConstants.PROP_PARAMETERS:
+                    // TODO:
+                    return null;
+                default:
+                    return null;
+            }
+
+
     }
 }

@@ -260,7 +260,7 @@ public class LocationQueryConditions extends EntityQueryConditions implements Sp
     }
 
     @Override
-    public Field<?> checkPropertyName(String property) {
+    public Field<?> checkAliasedPropertyName(String property) {
         switch (property) {
             case StaConstants.PROP_ID:
                 return StaEntity.alias(LOCATION, LOCATION.STA_IDENTIFIER);
@@ -270,6 +270,27 @@ public class LocationQueryConditions extends EntityQueryConditions implements Sp
                 return StaEntity.alias(LOCATION, LOCATION.DESCRIPTION);
             case StaConstants.PROP_LOCATION:
                 return StaEntity.alias(LOCATION, LOCATION.GEOM);
+            case StaConstants.PROP_ENCODINGTYPE:
+                return FORMAT.DEFINITION;
+            case StaConstants.PROP_PROPERTIES:
+                // TODO
+                return null;
+            default:
+                return null;
+        }
+    }
+
+    @Override
+    public Field<?> checkOriginalPropertyName(String property) {
+        switch (property) {
+            case StaConstants.PROP_ID:
+                return LOCATION.STA_IDENTIFIER;
+            case StaConstants.PROP_NAME:
+                return LOCATION.NAME;
+            case StaConstants.PROP_DESCRIPTION:
+                return LOCATION.DESCRIPTION;
+            case StaConstants.PROP_LOCATION:
+                return LOCATION.GEOM;
             case StaConstants.PROP_ENCODINGTYPE:
                 return FORMAT.DEFINITION;
             case StaConstants.PROP_PROPERTIES:

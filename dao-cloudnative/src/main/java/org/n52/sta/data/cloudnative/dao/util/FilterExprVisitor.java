@@ -127,7 +127,7 @@ public class FilterExprVisitor implements ExprVisitor<Field<?>, STAInvalidQueryE
                 expr.getValue().equals(StaConstants.PROP_RESULT)) {
             return null;
         } else {
-            return rootQC.checkPropertyName(expr.getValue());
+            return rootQC.checkOriginalPropertyName(expr.getValue());
         }
     }
 
@@ -184,7 +184,7 @@ public class FilterExprVisitor implements ExprVisitor<Field<?>, STAInvalidQueryE
     public Field<?> visitTime(TimeValueExpr expr) throws STAInvalidQueryException {
         // This is always literal as we handle member Expressions seperately
         if (expr.getTime() instanceof String) {
-            return rootQC.checkPropertyName((String) expr.getTime());
+            return rootQC.checkOriginalPropertyName((String) expr.getTime());
         } else {
             return DSL.val(((TimeInstant) expr.getTime()).getValue()
                     .toDate()                   // Convert to java.util.Date

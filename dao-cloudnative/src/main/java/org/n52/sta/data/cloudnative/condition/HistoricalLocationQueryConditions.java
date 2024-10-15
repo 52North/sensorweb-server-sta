@@ -137,12 +137,25 @@ public class HistoricalLocationQueryConditions extends EntityQueryConditions {
     }
 
     @Override
-    public Field<?> checkPropertyName(String property) {
+    public Field<?> checkAliasedPropertyName(String property) {
         switch (property) {
             case StaConstants.PROP_ID:
                 return StaEntity.alias(HISTORICAL_LOCATION, HISTORICAL_LOCATION.STA_IDENTIFIER);
             case StaConstants.PROP_TIME:
                 return StaEntity.alias(HISTORICAL_LOCATION, HISTORICAL_LOCATION.TIME);
+            default:
+                // TODO:
+                return null;
+        }
+    }
+
+    @Override
+    public Field<?> checkOriginalPropertyName(String property) {
+        switch (property) {
+            case StaConstants.PROP_ID:
+                return HISTORICAL_LOCATION.STA_IDENTIFIER;
+            case StaConstants.PROP_TIME:
+                return HISTORICAL_LOCATION.TIME;
             default:
                 // TODO:
                 return null;

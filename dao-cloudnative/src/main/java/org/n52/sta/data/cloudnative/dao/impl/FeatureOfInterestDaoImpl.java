@@ -125,8 +125,8 @@ public class FeatureOfInterestDaoImpl
     }
 
     @Override
-    public Field<?> checkPropertyName(String property) {
-        return fQC.checkPropertyName(property);
+    public Field<?> checkAliasedPropertyName(String property) {
+        return fQC.checkAliasedPropertyName(property);
     }
 
     @Override

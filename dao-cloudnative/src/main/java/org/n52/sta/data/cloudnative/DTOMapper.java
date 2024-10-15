@@ -36,6 +36,7 @@ import org.jooq.Record;
 import org.jooq.impl.DSL;
 import org.locationtech.jts.io.ParseException;
 
+import org.locationtech.jts.io.WKBReader;
 import org.locationtech.jts.io.WKTReader;
 import org.n52.sta.api.dto.*;
 import org.n52.sta.api.dto.impl.*;
@@ -58,7 +59,7 @@ import java.util.Map;
  */
 public class DTOMapper implements RecordMapperProvider {
 
-    private static final WKTReader WKTReader = new WKTReader();
+    private static final WKBReader WKBReader = new WKBReader();
     private static final ObjectMapper MAPPER = new ObjectMapper();
 
     private static <T extends HasNameAndDescription> void setStaDescription (T entity, String description){
@@ -119,7 +120,6 @@ public class DTOMapper implements RecordMapperProvider {
                 tableRecord.set((Field<Object>)field, value);
             } catch (Exception e) {
                 System.err.println("Error setting value for field " + field.getName() + ": " + e.getMessage());
-                e.printStackTrace();
             }
         }
     }
@@ -140,7 +140,7 @@ public class DTOMapper implements RecordMapperProvider {
             setResultTime(datastream, datasetRecord);
             setObservationType(datastream, record);
             setUnitOfMeasurement(datastream, record);
-            setObservedArea(datastream, record);
+            setObservedArea(datastream, datasetRecord);
 
             return datastream;
         }
@@ -211,11 +211,10 @@ public class DTOMapper implements RecordMapperProvider {
             }
         }
 
-        private void setObservedArea (Datastream datastream, Record record){
-            Field<String> observed_area = DSL.field("datastreamObservedArea", String.class);
-            if (record.field(observed_area) != null && record.get(observed_area) != null) {
+        private void setObservedArea (Datastream datastream, DatasetRecord record){
+            if (record.getObservedArea() != null) {
                 try {
-                    datastream.setObservedArea(WKTReader.read(record.get(observed_area)));
+                    datastream.setObservedArea(WKBReader.read(record.getObservedArea()));
                 } catch (ParseException e) {
                     Assert.notNull(null, "Could not parse to WKB" + e.getMessage());
                 }
@@ -268,7 +267,7 @@ public class DTOMapper implements RecordMapperProvider {
             setStaIdentifier(location, tableRecord.getStaIdentifier());
             setStaName(location, tableRecord.getName());
             setStaDescription(location, tableRecord.getDescription());
-            setGeometry(location, record);
+            setGeometry(location, tableRecord);
             // encodingType is static for Location
 
             return location;
@@ -305,11 +304,10 @@ public class DTOMapper implements RecordMapperProvider {
         }
 
 
-        private void setGeometry(Location location, Record record) {
-            Field<String> geom = DSL.field("locationGeom", String.class);
-            if (record.field(geom) != null && record.get(geom) != null) {
+        private void setGeometry(Location location, LocationRecord record) {
+            if (record.getGeom() != null) {
                 try {
-                    location.setGeometry(WKTReader.read(record.get(geom)));
+                    location.setGeometry(WKBReader.read(record.getGeom()));
                 } catch (ParseException e) {
                     Assert.notNull(null, "Could not parse to WKB" + e.getMessage());
                 }
@@ -631,7 +629,7 @@ public class DTOMapper implements RecordMapperProvider {
             setStaIdentifier(featureOfInterest, tableRecord.getStaIdentifier());
             setStaName(featureOfInterest, tableRecord.getName());
             setStaDescription(featureOfInterest, tableRecord.getDescription());
-            setFeature(featureOfInterest, record);
+            setFeature(featureOfInterest, tableRecord);
             setEncodingType(featureOfInterest, record);
 
             return featureOfInterest;
@@ -668,18 +666,17 @@ public class DTOMapper implements RecordMapperProvider {
             }
         }
 
-        private void setEncodingType(FeatureOfInterest featureOfInterest, Record rec) {
+        private void setEncodingType(FeatureOfInterest featureOfInterest, Record record) {
             Field<String> definition = DSL.field("FEATURE_FORMAT_DEFINITION", String.class);
-            if (rec.field(definition) != null) {
-                featureOfInterest.setEncodingType(rec.get(definition));
+            if (record.field(definition) != null) {
+                featureOfInterest.setEncodingType(record.get(definition));
             }
         }
 
-        private void setFeature(FeatureOfInterest featureOfInterest, Record record) {
-            Field<String> geom = DSL.field("foiGeom", String.class);
-            if (record.field(geom) != null && record.get(geom) != null) {
+        private void setFeature(FeatureOfInterest featureOfInterest, FeatureRecord record) {
+            if (record.getGeom() != null) {
                 try {
-                    featureOfInterest.setFeature(WKTReader.read(record.get(geom)));
+                    featureOfInterest.setFeature(WKBReader.read(record.getGeom()));
                 } catch (ParseException e) {
                     Assert.notNull(null, "Could not parse to WKB" + e.getMessage());
                 }

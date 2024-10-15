@@ -77,13 +77,13 @@ public class CloudNativeFormatService {
                 SfConstants.SAMPLING_FEAT_TYPE_SF_SPECIMEN,
         };
 
-        try {
+        /*try {
             for (String common_format : COMMON_FORMATS) {
                 createOrFetchFormat(common_format);
             }
         } catch (STACRUDException e) {
             logger.debug("Failed to Insert common format");
-        }
+        }*/
     }
 
     public Format createOrFetchFormat(String formatType) throws STACRUDException {

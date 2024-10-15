@@ -173,7 +173,7 @@ public class ThingQueryConditions extends EntityQueryConditions {
     }
 
     @Override
-    public Field<?> checkPropertyName(String property) {
+    public Field<?> checkAliasedPropertyName(String property) {
         switch (property) {
             case StaConstants.PROP_ID:
                 return StaEntity.alias(THING, THING.STA_IDENTIFIER);
@@ -181,6 +181,23 @@ public class ThingQueryConditions extends EntityQueryConditions {
                 return StaEntity.alias(THING, THING.NAME);
             case StaConstants.PROP_DESCRIPTION:
                 return StaEntity.alias(THING, THING.DESCRIPTION);
+            case StaConstants.PROP_PROPERTIES:
+                // TODO:
+                return null;
+            default:
+                return null;
+        }
+    }
+
+    @Override
+    public Field<?> checkOriginalPropertyName(String property) {
+        switch (property) {
+            case StaConstants.PROP_ID:
+                return THING.STA_IDENTIFIER;
+            case StaConstants.PROP_NAME:
+                return THING.NAME;
+            case StaConstants.PROP_DESCRIPTION:
+                return THING.DESCRIPTION;
             case StaConstants.PROP_PROPERTIES:
                 // TODO:
                 return null;

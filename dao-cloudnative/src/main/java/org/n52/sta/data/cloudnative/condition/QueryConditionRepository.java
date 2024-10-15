@@ -38,46 +38,42 @@ public class QueryConditionRepository {
     public static EntityQueryConditions getCondition(String name)
             throws STAInvalidFilterExpressionException {
         switch (name) {
-            case "PlatformEntity":
+            case "ThingDTO":
             case "Thing":
             case "Things": {
                 return SpringContext.getBean(ThingQueryConditions.class);
             }
-            case "LocationEntity":
+            case "LocationDTO":
             case "Location":
             case "Locations": {
                 return SpringContext.getBean(LocationQueryConditions.class);
             }
-            case "HistoricalLocationEntity":
+            case "HistoricalLocationDTO":
             case "HistoricalLocation":
             case "HistoricalLocations": {
                 return SpringContext.getBean(HistoricalLocationQueryConditions.class);
             }
-            case "AbstractDatasetEntity":
-            case "DatasetEntity":
-            case "DatasetAggregationEntity":
+            case "DatastreamDTO":
             case "Datastream":
             case "Datastreams": {
                 return SpringContext.getBean(DatastreamQueryConditions.class);
             }
-            case "ProcedureEntity":
+            case "SensorDTO":
             case "Sensor":
             case "Sensors": {
                 return SpringContext.getBean(SensorQueryConditions.class);
             }
-            case "ObservationEntity":
-            case "DataEntity":
+            case "ObservationDTO":
             case "Observation":
             case "Observations": {
                 return SpringContext.getBean(ObservationQueryConditions.class);
             }
-            case "FeatureEntity":
-            case "AbstractFeatureEntity":
+            case "FeatureOfInterestDTO":
             case "FeatureOfInterest":
             case "FeaturesOfInterest": {
                 return SpringContext.getBean(FeatureOfInterestQueryConditions.class);
             }
-            case "PhenomenonEntity":
+            case "ObservedPropertyDTO":
             case "ObservedProperty":
             case "ObservedProperties": {
                 return SpringContext.getBean(ObservedPropertyQueryConditions.class);

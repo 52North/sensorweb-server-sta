@@ -420,7 +420,7 @@ public abstract class CloudNativeAbstractSensorThingsEntityServiceImpl <T extend
             FilterFilter filterOption = queryOptions.getFilterFilter();
             Expr filter = (Expr) filterOption.getFilter();
             try {
-                return (Condition) filter.accept(new FilterExprVisitor(entityClass.getName()));
+                return (Condition) filter.accept(new FilterExprVisitor(entityClass.getSimpleName()));
             } catch (STAInvalidQueryException e) {
                 throw new RuntimeException(e);
             }

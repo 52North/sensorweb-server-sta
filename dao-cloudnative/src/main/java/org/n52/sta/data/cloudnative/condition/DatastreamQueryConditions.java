@@ -32,11 +32,14 @@ import org.jooq.*;
 import org.jooq.impl.DSL;
 
 import org.n52.series.db.beans.parameter.ParameterFactory;
+import org.n52.shetland.oasis.odata.ODataConstants;
 import org.n52.shetland.ogc.filter.FilterConstants;
 import org.n52.shetland.ogc.sta.StaConstants;
 import org.n52.shetland.ogc.sta.exception.STAInvalidFilterExpressionException;
 import org.n52.shetland.ogc.sta.model.STAEntityDefinition;
+import org.n52.sta.data.cloudnative.condition.utils.GeospatialFunctions;
 import org.n52.sta.data.cloudnative.schema.tables.*;
+import org.n52.svalbard.odata.core.expr.GeoValueExpr;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -45,7 +48,7 @@ import java.util.List;
  * @author <a href="mailto:humaid.kidwai@ucalgary.ca">Humaid Kidwai</a>
  */
 @Component
-public class DatastreamQueryConditions extends EntityQueryConditions {
+public class DatastreamQueryConditions extends EntityQueryConditions implements SpatialQueryConditions {
 
     public Condition withName(final String name) {
         return DATASTREAM.FK_AGGREGATION_ID.isNull()
@@ -75,6 +78,7 @@ public class DatastreamQueryConditions extends EntityQueryConditions {
         try {
             switch (propertyName) {
                 case StaConstants.PROP_ID:
+                    // handleDirectNumberPropertyFilter()
                     return handleDirectStringPropertyFilter(
                             DATASTREAM.STA_IDENTIFIER,
                             propertyValue,
@@ -247,7 +251,7 @@ public class DatastreamQueryConditions extends EntityQueryConditions {
         return DATASTREAM.DATASET_ID.in(sq).or(DATASTREAM.DATASET_ID.in(subquery));
     }
 
-        public Field<?> checkPropertyName(String property) {
+        public Field<?> checkAliasedPropertyName(String property) {
         switch (property) {
             case StaConstants.PROP_ID:
                 return StaEntity.alias(DATASTREAM, DATASTREAM.STA_IDENTIFIER);
@@ -274,4 +278,107 @@ public class DatastreamQueryConditions extends EntityQueryConditions {
         }
     }
 
+    @Override
+    public Field<?> checkOriginalPropertyName(String property) {
+        switch (property) {
+            case StaConstants.PROP_ID:
+                return DATASTREAM.STA_IDENTIFIER;
+            case StaConstants.PROP_NAME:
+                return DATASTREAM.NAME;
+            case StaConstants.PROP_DESCRIPTION:
+                return DATASTREAM.DESCRIPTION;
+            case StaConstants.PROP_OBSERVED_AREA:
+                return DATASTREAM.OBSERVED_AREA;
+            case StaConstants.PROP_UOM:
+                return UNIT.NAME;
+            case StaConstants.PROP_OBSERVATION_TYPE:
+                Format DATASTREAM_FORMAT = StaEntity.FORMAT.as("DATASTREAM_FORMAT");
+                return DATASTREAM_FORMAT.DEFINITION.as("DATASTREAM_FORMAT_DEFINITION");
+            case StaConstants.PROP_PHENOMENON_TIME:
+                return DATASTREAM.FIRST_TIME;
+            case StaConstants.PROP_RESULT_TIME:
+                return DATASTREAM.RESULT_TIME_START;
+            case StaConstants.PROP_PROPERTIES:
+                // TODO:
+                return null;
+            default:
+                return null;
+        }
+    }
+
+    @Override
+    public Field<Double> handleGeospatial(GeoValueExpr expr,
+                                          String spatialFunctionName,
+                                          String argument) {
+        if (StaConstants.PROP_OBSERVED_AREA.equals(expr.getGeometry())) {
+            switch (spatialFunctionName) {
+                case ODataConstants.GeoFunctions.GEO_DISTANCE:
+                    return GeospatialFunctions.st_distance(DATASTREAM.OBSERVED_AREA, argument);
+                case ODataConstants.GeoFunctions.GEO_LENGTH:
+                    return GeospatialFunctions.st_length(DATASTREAM.OBSERVED_AREA);
+                default:
+                    break;
+
+            }
+        } else {
+            switch (spatialFunctionName) {
+                case ODataConstants.GeoFunctions.GEO_DISTANCE:
+                    return GeospatialFunctions.st_distance(expr.getGeometry(), argument);
+                case ODataConstants.GeoFunctions.GEO_LENGTH:
+                    return GeospatialFunctions.st_length(expr.getGeometry());
+                default:
+                    break;
+            }
+
+        }
+        throw new RuntimeException("Could not find spatial function: " + spatialFunctionName);
+    }
+
+    @Override
+    public Condition handleGeoSpatialPropertyFilter(String propertyName,
+                                                    String spatialFunctionName,
+                                                    String... arguments) {
+        if (!StaConstants.PROP_OBSERVED_AREA.equals(propertyName)) {
+            throw new RuntimeException("Could not find property: " + propertyName);
+        }
+
+        switch (spatialFunctionName) {
+            case ODataConstants.SpatialFunctions.ST_EQUALS:
+                return GeospatialFunctions.st_equals(
+                        DATASTREAM.OBSERVED_AREA,
+                        arguments[0]);
+            case ODataConstants.SpatialFunctions.ST_DISJOINT:
+                return GeospatialFunctions.st_disjoint(
+                        DATASTREAM.OBSERVED_AREA,
+                        arguments[0]);
+            case ODataConstants.SpatialFunctions.ST_TOUCHES:
+                return GeospatialFunctions.st_touches(
+                        DATASTREAM.OBSERVED_AREA,
+                        arguments[0]);
+            case ODataConstants.SpatialFunctions.ST_WITHIN:
+                return GeospatialFunctions.st_within(
+                        DATASTREAM.OBSERVED_AREA,
+                        arguments[0]);
+            case ODataConstants.SpatialFunctions.ST_OVERLAPS:
+                return GeospatialFunctions.st_overlaps(
+                        DATASTREAM.OBSERVED_AREA,
+                        arguments[0]);
+            case ODataConstants.SpatialFunctions.ST_CROSSES:
+                return GeospatialFunctions.st_crosses(
+                        DATASTREAM.OBSERVED_AREA,
+                        arguments[0]);
+            case ODataConstants.GeoFunctions.GEO_INTERSECTS:
+                //fallthru
+            case ODataConstants.SpatialFunctions.ST_INTERSECTS:
+                return GeospatialFunctions.st_intersects(
+                        DATASTREAM.OBSERVED_AREA,
+                        arguments[0]);
+            case ODataConstants.SpatialFunctions.ST_CONTAINS:
+                return GeospatialFunctions.st_contains(
+                        DATASTREAM.OBSERVED_AREA,
+                        arguments[0]);
+            default:
+                throw new RuntimeException("Could not find function: " + spatialFunctionName);
+        }
+    }
 }

@@ -288,7 +288,7 @@ public class CloudNativeSensorService
 
     @Override
     protected String checkPropertyName(String property) {
-        return sensorDao.checkPropertyName(property).getName();
+        return sensorDao.checkAliasedPropertyName(property).getName();
     }
 
     @Override

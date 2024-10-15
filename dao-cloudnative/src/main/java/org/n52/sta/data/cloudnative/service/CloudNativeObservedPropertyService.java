@@ -287,7 +287,7 @@ public class CloudNativeObservedPropertyService
 
     @Override
     protected String checkPropertyName(String property) {
-        return observedPropertyDao.checkPropertyName(property).getName();
+        return observedPropertyDao.checkAliasedPropertyName(property).getName();
     }
 
     @Override

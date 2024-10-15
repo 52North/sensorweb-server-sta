@@ -267,7 +267,7 @@ public class DatastreamDaoImpl extends AbstractStaEntityDao<DatastreamDTO> imple
                                     .getSelectFilter()
                                     .getItems()
                                     .stream()
-                                    .map(sQC::checkPropertyName)
+                                    .map(sQC::checkAliasedPropertyName)
                                     .collect(Collectors.toList()));
                         }
                         break;
@@ -286,7 +286,7 @@ public class DatastreamDaoImpl extends AbstractStaEntityDao<DatastreamDTO> imple
                                     .getSelectFilter()
                                     .getItems()
                                     .stream()
-                                    .map(tQC::checkPropertyName)
+                                    .map(tQC::checkAliasedPropertyName)
                                     .collect(Collectors.toList()));
                         }
                         break;
@@ -305,7 +305,7 @@ public class DatastreamDaoImpl extends AbstractStaEntityDao<DatastreamDTO> imple
                                     .getSelectFilter()
                                     .getItems()
                                     .stream()
-                                    .map(opQC::checkPropertyName)
+                                    .map(opQC::checkAliasedPropertyName)
                                     .collect(Collectors.toList()));
                         }
 
@@ -324,8 +324,8 @@ public class DatastreamDaoImpl extends AbstractStaEntityDao<DatastreamDTO> imple
     }
 
     @Override
-    public Field<?> checkPropertyName(String property) {
-        return dsQC.checkPropertyName(property);
+    public Field<?> checkAliasedPropertyName(String property) {
+        return dsQC.checkAliasedPropertyName(property);
     }
 
     @Override

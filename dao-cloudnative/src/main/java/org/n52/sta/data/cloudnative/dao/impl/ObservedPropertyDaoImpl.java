@@ -178,7 +178,7 @@ public class ObservedPropertyDaoImpl
                                 .getSelectFilter()
                                 .getItems()
                                 .stream()
-                                .map(dsQC::checkPropertyName)
+                                .map(dsQC::checkAliasedPropertyName)
                                 .collect(Collectors.toList()));
                     }
 
@@ -195,8 +195,8 @@ public class ObservedPropertyDaoImpl
     }
 
     @Override
-    public Field<?> checkPropertyName(String property) {
-        return opQC.checkPropertyName(property);
+    public Field<?> checkAliasedPropertyName(String property) {
+        return opQC.checkAliasedPropertyName(property);
     }
 
     @Override

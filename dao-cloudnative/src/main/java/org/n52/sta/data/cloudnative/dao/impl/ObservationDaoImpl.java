@@ -149,8 +149,8 @@ public class ObservationDaoImpl extends AbstractStaEntityDao<ObservationDTO> imp
     }
 
     @Override
-    public Field<?> checkPropertyName(String property) {
-        return oQC.checkPropertyName(property);
+    public Field<?> checkAliasedPropertyName(String property) {
+        return oQC.checkAliasedPropertyName(property);
     }
 
     @Override

@@ -66,6 +66,6 @@ public interface StaEntity {
         return field.as(table.getName() + "_" + field.getName());
     }
 
-    Long DATASET_AGGREGATION_MARKER = -1L;
+    Long DATASET_AGGREGATION_MARKER = 1L;
 
 }

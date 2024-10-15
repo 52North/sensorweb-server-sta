@@ -331,7 +331,7 @@ public abstract class AbstractStaEntityDao<T extends StaDTO> implements StaEntit
                     .getSelectFilter()
                     .getItems()
                     .stream()
-                    .map(this::checkPropertyName)
+                    .map(this::checkAliasedPropertyName)
                     .collect(Collectors.toList()));
         }
         // fetch all fields because select clause is not specified
@@ -343,40 +343,8 @@ public abstract class AbstractStaEntityDao<T extends StaDTO> implements StaEntit
     }
 
     protected List<Field<?>> getStaEntityFields(Table<?> entityTable) {
-        if(entityTable == StaEntity.DATASTREAM) {
-            return Arrays.stream(StaEntity.DATASTREAM.fields()).map(field -> {
-                if (field.getName().equals("OBSERVED_AREA")) {
-                    return DSL.function("ST_AsText",
-                                    String.class,
-                                    DSL.function("ST_GeomFromBinary", byte[].class, field))
-                            .as("datastreamObservedArea");
-                }
-                return field.as(entityTable.getName() + "_" + field.getName());
-            }).collect(Collectors.toList());
-        } else if (entityTable == StaEntity.FEATURE_OF_INTEREST) {
-            return Arrays.stream(StaEntity.FEATURE_OF_INTEREST.fields()).map(field -> {
-                if (field.getName().equals("GEOM")) {
-                    return DSL.function("ST_AsText",
-                                    String.class,
-                                    DSL.function("ST_GeomFromBinary", byte[].class, field))
-                            .as("foiGeom");
-                }
-                return field.as(entityTable.getName() + "_" + field.getName());
-            }).collect(Collectors.toList());
-        } else if (entityTable == StaEntity.LOCATION) {
-            return Arrays.stream(StaEntity.LOCATION.fields()).map(field -> {
-                if (field.getName().equals("GEOM")) {
-                    return DSL.function("ST_AsText",
-                                    String.class,
-                                    DSL.function("ST_GeomFromBinary", byte[].class, field))
-                            .as("locationGeom");
-                }
-                return field.as(entityTable.getName() + "_" + field.getName());
-            }).collect(Collectors.toList());
-        } else {
-          return Arrays.stream(entityTable.fields())
-                  .map(field -> field.as(entityTable.getName() + "_" + field.getName()))
-                  .collect(Collectors.toList());
-        }
+      return Arrays.stream(entityTable.fields())
+              .map(field -> StaEntity.alias(entityTable, field))
+              .collect(Collectors.toList());
     }
 }

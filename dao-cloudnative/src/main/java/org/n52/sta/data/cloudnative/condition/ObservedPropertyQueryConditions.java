@@ -147,7 +147,7 @@ public class ObservedPropertyQueryConditions extends EntityQueryConditions {
     }
 
     @Override
-    public Field<?> checkPropertyName(String property) {
+    public Field<?> checkAliasedPropertyName(String property) {
         switch (property) {
             case StaConstants.PROP_ID:
                 return StaEntity.alias(OBSERVED_PROPERTY, OBSERVED_PROPERTY.STA_IDENTIFIER);
@@ -157,6 +157,25 @@ public class ObservedPropertyQueryConditions extends EntityQueryConditions {
                 return StaEntity.alias(OBSERVED_PROPERTY, OBSERVED_PROPERTY.NAME);
             case StaConstants.PROP_DESCRIPTION:
                 return StaEntity.alias(OBSERVED_PROPERTY, OBSERVED_PROPERTY.DESCRIPTION);
+            case StaConstants.PROP_PROPERTIES:
+                // TODO:
+                return null;
+            default:
+                return null;
+        }
+    }
+
+    @Override
+    public Field<?> checkOriginalPropertyName(String property) {
+        switch (property) {
+            case StaConstants.PROP_ID:
+                return OBSERVED_PROPERTY.STA_IDENTIFIER;
+            case StaConstants.PROP_DEFINITION:
+                return OBSERVED_PROPERTY.IDENTIFIER;
+            case StaConstants.PROP_NAME:
+                return OBSERVED_PROPERTY.NAME;
+            case StaConstants.PROP_DESCRIPTION:
+                return OBSERVED_PROPERTY.DESCRIPTION;
             case StaConstants.PROP_PROPERTIES:
                 // TODO:
                 return null;
