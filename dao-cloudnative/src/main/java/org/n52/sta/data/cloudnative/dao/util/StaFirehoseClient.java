@@ -37,6 +37,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import software.amazon.awssdk.core.SdkBytes;
+import software.amazon.awssdk.core.exception.SdkException;
 import software.amazon.awssdk.services.firehose.FirehoseClient;
 import software.amazon.awssdk.services.firehose.model.PutRecordRequest;
 import software.amazon.awssdk.services.firehose.model.PutRecordResponse;
@@ -44,6 +45,7 @@ import software.amazon.awssdk.services.firehose.model.Record;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
+import java.time.Duration;
 import java.util.Iterator;
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -58,6 +60,9 @@ public class StaFirehoseClient implements FirehoseConstants {
     private final ObjectMapper mapper = new ObjectMapper();
     private final AtomicLong TS = new AtomicLong();
 
+    private final int MAX_RETRY_ATTEMPTS = 5;
+    private final Duration BASE_BACKOFF_TIME = Duration.ofSeconds(1);
+
     @Autowired
     public StaFirehoseClient(FirehoseClient firehoseClient) {
         this.firehoseClient = firehoseClient;
@@ -65,7 +70,7 @@ public class StaFirehoseClient implements FirehoseConstants {
 
     private Long getUniqueTimestamp() {
         long micros = System.currentTimeMillis() * 1000;
-        for ( ; ; ) {
+        for (; ; ) {
             long value = TS.get();
             if (micros <= value)
                 micros = value + 1;
@@ -73,12 +78,13 @@ public class StaFirehoseClient implements FirehoseConstants {
                 return micros;
         }
     }
+
     /**
      * Upserts STA Entities into Iceberg tables by streaming it into Firehose
      *
-     * @param dataNode STA Entity
-     * @param tableName    Feature to be used for the new Dataset
-     * @param operation  INSERT / UPDATE
+     * @param dataNode  STA Entity
+     * @param tableName Feature to be used for the new Dataset
+     * @param operation INSERT / UPDATE
      */
     public void icebergMerge(ObjectNode dataNode, String tableName, String operation)
             throws STACRUDException {
@@ -103,10 +109,10 @@ public class StaFirehoseClient implements FirehoseConstants {
     }
 
     public void icebergMergeParameters(ObjectNode dataNode,
-                                 String tableName,
-                                 String operation,
-                                 String foreignKey,
-                                 String foreignKeyVal)
+                                       String tableName,
+                                       String operation,
+                                       String foreignKey,
+                                       String foreignKeyVal)
             throws STACRUDException {
         ObjectNode rootNode = mapper.createObjectNode();
 
@@ -184,7 +190,6 @@ public class StaFirehoseClient implements FirehoseConstants {
     }
 
 
-
     /*public void icebergDeleteByStaIdentifier(String id, String tableName) throws STACRUDException {
         ObjectNode rootNode = mapper.createObjectNode();
 
@@ -205,22 +210,50 @@ public class StaFirehoseClient implements FirehoseConstants {
             throw new STACRUDException("Bad request: cannot parse payload for table " + FirehoseConstants.DELETE);
         }
     }*/
-
     private void streamToFirehose(String jsonPayload) {
-        try {
-            Record record = Record.builder()
-                    .data(SdkBytes.fromUtf8String(jsonPayload))
-                    .build();
+        int retryAttempt = 0;
+        boolean success = false;
 
-            PutRecordRequest putRecordRequest = PutRecordRequest.builder()
-                    .deliveryStreamName(FirehoseConstants.DELIVERY_STREAM_NAME)
-                    .record(record)
-                    .build();
+        while (retryAttempt < MAX_RETRY_ATTEMPTS && !success) {
+            try {
+                // Prepare the record for Firehose
+                Record record = Record.builder()
+                        .data(SdkBytes.fromUtf8String(jsonPayload))
+                        .build();
 
-            PutRecordResponse resp = firehoseClient.putRecord(putRecordRequest);
-            LOGGER.debug("Record sent successfully to Firehose.");
-        } catch (Exception e) {
-            LOGGER.debug("Error sending to Firehose: " + e.getMessage());
+                PutRecordRequest putRecordRequest = PutRecordRequest.builder()
+                        .deliveryStreamName(FirehoseConstants.DELIVERY_STREAM_NAME)
+                        .record(record)
+                        .build();
+
+                // Send the record to Firehose
+                PutRecordResponse response = firehoseClient.putRecord(putRecordRequest);
+
+                if (response.sdkHttpResponse().isSuccessful()) {
+                    LOGGER.debug("Record sent successfully to Firehose.");
+                    success = true;
+                } else {
+                    LOGGER.error("Failed to send record to Firehose: " + response.sdkHttpResponse().statusText().orElse("Unknown error"));
+                }
+
+            } catch (SdkException e) {
+                LOGGER.error("Firehose request failed. Attempt: {}. Error: {}", retryAttempt + 1, e.getMessage());
+                // Backoff before retrying
+                try {
+                    Thread.sleep(BASE_BACKOFF_TIME.multipliedBy((long) Math.pow(2, retryAttempt)).toMillis());
+                } catch (InterruptedException e1) {
+                    LOGGER.error("Interrupted while waiting for firehose request to complete.");
+                }
+            } catch (Exception e) {
+                LOGGER.error("Unexpected error while sending to Firehose: " + e.getMessage(), e);
+                break;  // Break out of the loop for non-retryable exceptions
+            }
+
+            retryAttempt++;
+        }
+
+        if (!success) {
+            LOGGER.error("Failed to send record to Firehose after {} attempts.", MAX_RETRY_ATTEMPTS);
         }
     }
 }

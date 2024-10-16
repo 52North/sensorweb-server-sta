@@ -212,7 +212,6 @@ public class CloudNativeLocationService
         Location locationPOJO = new Location();
         locationPOJO.setStaIdentifier(location.getId());
         locationPOJO.setLocationId(Long.valueOf(location.getId()));
-        locationPOJO.setIdentifier(location.getId());
         locationPOJO.setName(location.getName());
         locationPOJO.setDescription(location.getDescription());
         if (location.getGeometry() != null) {

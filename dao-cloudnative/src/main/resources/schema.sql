@@ -16,7 +16,7 @@ create table if not exists feature (
     feature_id bigint not null,
 --     discriminator varchar(255),
     fk_format_id bigint not null,
-    identifier varchar(255) not null,
+--     identifier varchar(255) not null,
     sta_identifier varchar(255) not null,
     name varchar(255),
     description varchar,
@@ -25,7 +25,7 @@ create table if not exists feature (
     geom blob,
     constraint feature_pkey primary key (feature_id),
     foreign key (fk_format_id) references format (format_id),
-    constraint un_feature_identifier unique (identifier),
+--     constraint un_feature_identifier unique (identifier),
     constraint un_feature_staidentifier unique (sta_identifier)
 --     constraint un_feature_url unique (url)
     );
@@ -66,12 +66,12 @@ create table if not exists feature_parameter (
     );
 create table if not exists platform (
     platform_id bigint not null,
-    identifier varchar(255) not null,
+--     identifier varchar(255) not null,
     sta_identifier varchar(255) not null,
     name varchar(255),
     description varchar,
     constraint platform_pkey primary key (platform_id),
-    constraint un_platform_identifier unique (identifier),
+--     constraint un_platform_identifier unique (identifier),
     constraint un_platform_staidentifier unique (sta_identifier)
     );
 create table if not exists platform_parameter (
@@ -111,18 +111,18 @@ create table if not exists platform_parameter (
     );
 create table if not exists historical_location (
     historical_location_id bigint not null,
-    identifier varchar(255) not null,
+--     identifier varchar(255) not null,
     sta_identifier varchar(255) not null,
     fk_platform_id bigint not null,
     time timestamp not null,
     foreign key (fk_platform_id) references platform (platform_id),
     constraint historical_location_pkey primary key (historical_location_id),
-    constraint un_historicallocation_identifier unique (identifier),
+--     constraint un_historicallocation_identifier unique (identifier),
     constraint un_historicallocation_staidentifier unique (sta_identifier)
     );
 create table if not exists location (
     location_id bigint not null,
-    identifier varchar(255) not null,
+--     identifier varchar(255) not null,
     sta_identifier varchar(255) not null,
     name varchar(255) not null,
     description varchar not null,
@@ -131,7 +131,7 @@ create table if not exists location (
     fk_format_id bigint not null,
     foreign key (fk_format_id) references format (format_id),
     constraint location_pkey primary key (location_id),
-    constraint un_location_identifier unique (identifier),
+--     constraint un_location_identifier unique (identifier),
     constraint un_location_staidentifier unique (sta_identifier)
     );
 create table if not exists location_parameter (
@@ -230,7 +230,7 @@ create table if not exists phenomenon_parameter (
     );
 create table if not exists procedure (
     procedure_id bigint not null,
-    identifier varchar(255) not null,
+--     identifier varchar(255) not null,
     sta_identifier varchar(255) not null,
 --     fk_identifier_codespace_id bigint,
     name varchar(255),
@@ -244,7 +244,7 @@ create table if not exists procedure (
 --     foreign key (fk_type_of_procedure_id) references procedure (procedure_id),
     foreign key (fk_format_id) references format (format_id),
     constraint procedure_pkey primary key (procedure_id),
-    constraint un_procedure_identifier unique (identifier),
+--     constraint un_procedure_identifier unique (identifier),
     constraint un_procedure_staidentifier unique (sta_identifier)
     --     constraint procedure_is_reference_check check (is_reference = array[1, 0]),
 --     constraint procedure_is_aggregation_check check (is_aggregation = array[1, 0])
@@ -286,7 +286,7 @@ create table if not exists procedure_parameter (
     );
 create table if not exists dataset (
     dataset_id bigint not null,
-    identifier varchar(255) not null,
+--     identifier varchar(255) not null,
     sta_identifier varchar(255),
     name varchar(255),
     description varchar,
@@ -325,7 +325,7 @@ create table if not exists dataset (
     foreign key (fk_unit_id) references unit (unit_id),
     foreign key (fk_format_id) references format (format_id),
     constraint dataset_pkey primary key (dataset_id),
-    constraint un_dataset_identifier unique (identifier),
+--     constraint un_dataset_identifier unique (identifier),
     constraint un_dataset_identity unique (
                                               fk_procedure_id,
                                               fk_phenomenon_id,
@@ -412,7 +412,7 @@ create table if not exists observation (
     sampling_time_start timestamp not null,
     sampling_time_end timestamp not null,
     result_time timestamp,
-    identifier varchar(255),
+--     identifier varchar(255),
     sta_identifier varchar(255) not null,
     name varchar(255),
     description varchar,
@@ -425,7 +425,7 @@ create table if not exists observation (
 --     value_description varchar(255),
 --     vertical_from numeric(20, 10) not null default 0,
 --     vertical_to numeric(20, 10) not null default 0,
-    fk_parent_observation_id bigint,
+--     fk_parent_observation_id bigint,
     value_quantity numeric(20, 10),
     value_text varchar(255),
     value_count int,
@@ -439,7 +439,7 @@ create table if not exists observation (
     foreign key (fk_dataset_id) references dataset (dataset_id),
 --     foreign key (fk_parent_observation_id) references observation (observation_id),
     constraint observation_pkey primary key (observation_id),
-    constraint un_observation_identifier unique (identifier),
+--     constraint un_observation_identifier unique (identifier),
     constraint un_observation_identity unique (
                                                   value_type,
                                                   fk_dataset_id,

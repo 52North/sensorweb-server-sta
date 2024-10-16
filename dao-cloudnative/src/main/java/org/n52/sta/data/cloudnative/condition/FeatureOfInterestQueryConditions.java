@@ -37,6 +37,7 @@ import org.n52.shetland.ogc.sta.StaConstants;
 import org.n52.shetland.ogc.sta.exception.STAInvalidFilterExpressionException;
 import org.n52.shetland.ogc.sta.model.STAEntityDefinition;
 import org.n52.sta.data.cloudnative.condition.utils.GeospatialFunctions;
+import org.n52.sta.data.cloudnative.schema.tables.Dataset;
 import org.n52.sta.data.cloudnative.schema.tables.Format;
 import org.n52.svalbard.odata.core.expr.GeoValueExpr;
 import org.springframework.stereotype.Component;
@@ -50,7 +51,6 @@ import java.util.List;
 public class FeatureOfInterestQueryConditions extends EntityQueryConditions implements SpatialQueryConditions {
 
     public Condition withObservationStaIdentifier(final String observationIdentifier) {
-
         return DSL.exists(
                 ctx.select(OBSERVATION.OBSERVATION_ID)
                         .from(DATASTREAM)
@@ -58,6 +58,18 @@ public class FeatureOfInterestQueryConditions extends EntityQueryConditions impl
                         .onKey()
                         .where(OBSERVATION.STA_IDENTIFIER.eq(observationIdentifier))
                         .and(FEATURE_OF_INTEREST.FEATURE_ID.eq(DATASTREAM.FK_FEATURE_ID))
+        );
+    }
+
+    public Condition withDatasetId(final Long datasetId) {
+        return DSL.exists(
+                ctx.select(DATASTREAM.DATASET_ID)
+                        .from(DATASTREAM)
+                        .join(FEATURE_OF_INTEREST)
+                        .onKey()
+                        .where(DATASTREAM.DATASET_ID.eq(datasetId))
+                        .and(FEATURE_OF_INTEREST.FEATURE_ID.eq(DATASTREAM.FK_FEATURE_ID))
+
         );
     }
 
@@ -114,7 +126,7 @@ public class FeatureOfInterestQueryConditions extends EntityQueryConditions impl
                                         .or(FORMAT.DEFINITION.eq("application/vnd.geo json")))
                         );
                     }
-                    return FEATURE_OF_INTEREST.IDENTIFIER.isNotNull();
+                    return FEATURE_OF_INTEREST.STA_IDENTIFIER.isNotNull();
                 default:
                     // We are filtering on variable keys on properties
                     if (propertyName.startsWith(StaConstants.PROP_PROPERTIES)) {

@@ -203,7 +203,6 @@ public class CloudNativeSensorService
 
     private Procedure POJOWrapper(SensorDTO entity) throws STACRUDException {
         Procedure sensorPOJO = new Procedure();
-        sensorPOJO.setIdentifier(entity.getId());
         sensorPOJO.setStaIdentifier(entity.getId());
         sensorPOJO.setProcedureId(Long.valueOf(entity.getId()));
         sensorPOJO.setDescription(entity.getDescription());

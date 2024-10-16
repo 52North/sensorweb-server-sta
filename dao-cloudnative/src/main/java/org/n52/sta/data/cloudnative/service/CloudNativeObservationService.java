@@ -351,7 +351,6 @@ public class CloudNativeObservationService
 
         observationPOJO.setObservationId(Long.valueOf(entity.getId()));
         observationPOJO.setStaIdentifier(entity.getId());
-        observationPOJO.setIdentifier(entity.getId());
 
         if (entity.getResultTime() != null) {
             observationPOJO.setResultTime(((TimeInstant) entity.getResultTime()).getValue()
@@ -448,9 +447,6 @@ public class CloudNativeObservationService
         if (observation.getFeatureOfInterest() == null) {
             List<LocationDTO> locations = locationDao.findAllByThingId(thingId, LocationDTO.class);
             for (LocationDTO location : locations) {
-                if (feature == null) {
-                    feature = getFeatureOfInterestService().createFeatureOfInterest(location);
-                }
                 if (location.getGeometry() != null) {
                     feature = getFeatureOfInterestService().createFeatureOfInterest(location);
                     break;
@@ -513,18 +509,15 @@ public class CloudNativeObservationService
     }
 
     @Override
-    protected Condition getFilterPredicate(Class entityClass, QueryOptions queryOptions) {
-        Condition defaultFilter = StaEntity.OBSERVATION.FK_PARENT_OBSERVATION_ID.isNull();
+    protected Condition getFilterPredicate(Class<ObservationDTO> entityClass, QueryOptions queryOptions) {
         if (!queryOptions.hasFilterFilter()) {
-            // Filter out non-root observations
-            // e.g. Profile-/TrajectoryObservations
-            return defaultFilter;
+            return null;
         } else {
             FilterFilter filterOption = queryOptions.getFilterFilter();
             Expr filter = (Expr) filterOption.getFilter();
             try {
-                return defaultFilter.and((Field<Boolean>) filter.accept(
-                                new FilterExprVisitor(STAEntityDefinition.OBSERVATION)));
+                return (Condition) filter.accept(
+                                new FilterExprVisitor(STAEntityDefinition.OBSERVATION));
             } catch (STAInvalidQueryException e) {
                 throw new RuntimeException(e);
             }
