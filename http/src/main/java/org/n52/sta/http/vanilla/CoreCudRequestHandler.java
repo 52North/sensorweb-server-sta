@@ -37,6 +37,7 @@ import org.n52.sta.api.dto.StaDTO;
 import org.n52.sta.http.CudRequestHandler;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -67,8 +68,8 @@ public class CoreCudRequestHandler<T extends StaDTO> extends CudRequestHandler<T
         consumes = "application/json",
         value = "/{collectionName:" + CoreRequestUtils.BASE_COLLECTION_REGEX + "$}",
         produces = "application/json")
-    public StaDTO handlePostDirect(@PathVariable String collectionName,
-                                   @RequestBody String body)
+    public ResponseEntity<StaDTO> handlePostDirect(@PathVariable String collectionName,
+                                                  @RequestBody String body)
         throws IOException, STACRUDException, STAInvalidUrlException {
         return super.handlePostDirect(collectionName, body);
     }
@@ -85,7 +86,7 @@ public class CoreCudRequestHandler<T extends StaDTO> extends CudRequestHandler<T
         },
         produces = "application/json"
     )
-    public StaDTO handlePostRelated(@PathVariable String entity,
+    public ResponseEntity<StaDTO> handlePostRelated(@PathVariable String entity,
                                     @PathVariable String target,
                                     @RequestBody String body,
                                     HttpServletRequest request)

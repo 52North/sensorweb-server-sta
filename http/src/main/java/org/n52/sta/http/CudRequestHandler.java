@@ -38,15 +38,20 @@ import org.n52.sta.api.EntityServiceFactory;
 import org.n52.sta.api.dto.EntityPatch;
 import org.n52.sta.api.dto.StaDTO;
 import org.n52.sta.utils.AbstractSTARequestHandler;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.servlet.HandlerMapping;
+import org.springframework.web.servlet.function.EntityResponse;
 import org.springframework.web.util.UrlPathHelper;
 
 import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
+import java.net.URI;
 
 /**
  * Handles all CUD requests (POST, PUT, DELETE)
@@ -74,12 +79,23 @@ public abstract class CudRequestHandler<T extends StaDTO> extends AbstractSTAReq
      * @param body           request Body. Automatically set by Spring via @RequestBody
      */
     @SuppressWarnings("unchecked")
-    public StaDTO handlePostDirect(String collectionName,
-                                   String body)
+    public ResponseEntity<StaDTO> handlePostDirect(String collectionName,
+                                                  String body)
         throws IOException, STACRUDException, STAInvalidUrlException {
         Class<T> clazz = collectionNameToClass(collectionName);
-        return ((AbstractSensorThingsEntityService<T>)
+        StaDTO createdEntity = ((AbstractSensorThingsEntityService<T>)
             serviceRepository.getEntityService(collectionName)).create(mapper.readValue(body, clazz));
+
+        // Construct the Location URI based on the self-link format
+        String Id = createdEntity.getId();
+        String locationUri = rootUrl + collectionName + "(" + Id + ")";
+
+        // Set the Location header with the URI of the created resource
+        HttpHeaders headers = new HttpHeaders();
+        headers.setLocation(URI.create(locationUri));
+
+        // Return ResponseEntity with HTTP 201 status and Location header
+        return new ResponseEntity<>(createdEntity, headers, HttpStatus.CREATED);
     }
 
     /**
@@ -92,10 +108,10 @@ public abstract class CudRequestHandler<T extends StaDTO> extends AbstractSTAReq
      * @param request full request
      */
     @SuppressWarnings("unchecked")
-    public StaDTO handlePostRelated(String entity,
-                                    String target,
-                                    String body,
-                                    HttpServletRequest request)
+    public ResponseEntity<StaDTO> handlePostRelated(String entity,
+                                                    String target,
+                                                    String body,
+                                                    HttpServletRequest request)
         throws Exception {
         String lookupPath = (String) request.getAttribute(UrlPathHelper.PATH_ATTRIBUTE);
         validateResource(lookupPath, serviceRepository);
@@ -109,8 +125,20 @@ public abstract class CudRequestHandler<T extends StaDTO> extends AbstractSTAReq
         jsonBody.put(REFERENCED_FROM_ID, sourceId);
 
         Class<T> clazz = collectionNameToClass(target);
-        return ((AbstractSensorThingsEntityService<T>)
+        StaDTO createdEntity = ((AbstractSensorThingsEntityService<T>)
             serviceRepository.getEntityService(target)).create(mapper.readValue(jsonBody.toString(), clazz));
+
+        // Construct the Location URI based on the self-link format
+        String Id = createdEntity.getId();
+        String locationUri = rootUrl + target + "(" + Id + ")";
+
+        // Set the Location header with the URI of the created resource
+        HttpHeaders headers = new HttpHeaders();
+        headers.setLocation(URI.create(locationUri));
+
+        // Return ResponseEntity with HTTP 201 status and Location header
+        return new ResponseEntity<>(createdEntity, headers, HttpStatus.CREATED);
+
     }
 
     /**

@@ -238,37 +238,48 @@ public abstract class EntityQueryConditions implements StaEntity {
             throws STAInvalidFilterExpressionException {
 
         String key = propertyName.substring(StaConstants.PROP_PROPERTIES.length() + 1);
+
+
+        Table<?> table = getParameterTable(entityType);
+        Field<Long> entityId = getEntityId(entityType);
+
+        if (table == null || entityId == null) {
+            // handle exception
+            throw new STAInvalidFilterExpressionException(
+                    String.format(ERROR_INVALID_PARAMETER_ENTITY_TYPE, entityType));
+        }
+        Condition subqueryCondition;
+
         if (propertyValue.getDataType().getType().equals(String.class)) {
-
-            Table<?> table = getParameterTable(entityType);
-            Field<Long> entityId = getEntityId(entityType);
-
-            if (table == null || entityId == null) {
-                // handle exception
-                throw new STAInvalidFilterExpressionException(
-                        String.format(ERROR_INVALID_PARAMETER_ENTITY_TYPE, entityType));
-            }
-
             // value could also be: value_json,value_xml,value_category,value_text, value_count, value_quantity,etc
             Field<String> valueField = DSL.field(DSL.name(table.getName(), "VALUE_TEXT"), String.class);
 
             // Build the subquery condition
-            Condition subqueryCondition = DSL.field(DSL.name(table.getName(), "NAME")).eq(DSL.val(key))
+            subqueryCondition = DSL.field(DSL.name(table.getName(), "NAME")).eq(DSL.val(key))
                     .and(handleDirectStringPropertyFilter(valueField, propertyValue, operator, switched));
+        } else if (propertyValue.getDataType().getType().equals(Double.class)) {
+            // value could also be: value_json,value_xml,value_category,value_text, value_count, value_quantity,etc
+            Field<Double> valueField = DSL.field(DSL.name(table.getName(), "VALUE_QUANTITY"), Double.class);
 
-            // Build the subquery
-            SelectConditionStep<? extends Record1<Long>> subquery = ctx
-                    .select(referenceField)
-                    .from(table)
-                    .where(subqueryCondition);
-
-            // Main query condition
-            return entityId.in(subquery);
-
+            // Build the subquery condition
+            subqueryCondition = DSL.field(DSL.name(table.getName(), "NAME")).eq(DSL.val(key))
+                    .and(handleDirectNumberPropertyFilter(valueField, propertyValue, operator));
         } else {
             throw new STAInvalidFilterExpressionException(
                     String.format(ERROR_GETTING_FILTER_NO_PROP_OR_WRONG_TYPE, key, "String"));
         }
+
+
+        // Build the subquery
+        SelectConditionStep<? extends Record1<Long>> subquery = ctx
+                .select(referenceField)
+                .from(table)
+                .where(subqueryCondition);
+
+        // Main query condition
+        return entityId.in(subquery);
+
+
     }
     /**
      * Translate STA property name to Database property name
