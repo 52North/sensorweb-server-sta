@@ -287,13 +287,14 @@ public final class FilterExprVisitor<T> implements ExprVisitor<Expression<?>, ST
         if (expr.getRight().isMember() && expr.getLeft().isMember()) {
             throw new STAInvalidQueryException("comparison of two member variables not implemented yet");
         } else if (expr.getRight().isMember()) {
-            if (expr.getRight().asMember().get().getValue().contains(SLASH)) {
-                return convertToForeignExpression(expr.getRight().asMember().get().getValue(),
-                                                  expr.getLeft().accept(this),
+            String rightValue = expr.getRight().asMember().get().getValue();
+            if (rightValue.contains(SLASH)) {
+                return convertToForeignExpression(rightValue,
+                                                  evaluateValueExpression(expr.getLeft(), rightValue),
                                                   operator);
             } else {
-                return rootQS.getFilterForProperty(expr.getRight().asMember().get().getValue(),
-                                                   expr.getLeft().accept(this),
+                return rootQS.getFilterForProperty(rightValue,
+                                                   evaluateValueExpression(expr.getLeft(), rightValue),
                                                    operator,
                                                    false)
                     .toPredicate(root, query, builder);
@@ -304,11 +305,11 @@ public final class FilterExprVisitor<T> implements ExprVisitor<Expression<?>, ST
                 && !leftValue.startsWith(StaConstants.PROP_PROPERTIES)
                 && !leftValue.startsWith(StaConstants.PROP_PARAMETERS)) {
                 return convertToForeignExpression(leftValue,
-                                                  expr.getRight().accept(this),
+                                                  evaluateValueExpression(expr.getRight(), leftValue),
                                                   operator);
             } else {
                 return rootQS.getFilterForProperty(leftValue,
-                                                   expr.getRight().accept(this),
+                                                   evaluateValueExpression(expr.getRight(), leftValue),
                                                    operator,
                                                    false)
                     .toPredicate(root, query, builder);
@@ -318,6 +319,33 @@ public final class FilterExprVisitor<T> implements ExprVisitor<Expression<?>, ST
             throw new STAInvalidQueryException("[This should never happen!] Tried to evaluate member comparison " +
                                                    "without members being involved!");
         }
+    }
+
+    /**
+     * Evaluates the value side of a comparison against a Member.
+     * Identifiers of Entities are stored as Strings, so a numeric literal compared against an Entity's id
+     * (e.g. {@code Datastream/id eq 12}) is converted to its String representation instead of being rejected
+     * by the String identifier filter.
+     *
+     * @param expr       Expression holding the value to compare against
+     * @param memberPath path of the Member the value is compared against
+     * @return Expression holding the (possibly converted) value
+     * @throws STAInvalidQueryException if the Expression could not be evaluated
+     */
+    private Expression<?> evaluateValueExpression(Expr expr, String memberPath) throws STAInvalidQueryException {
+        if (isIdentifierPath(memberPath) && expr.isNumericValue()) {
+            return builder.literal(expr.asNumericValue().get().getValue().toString());
+        }
+        return expr.accept(this);
+    }
+
+    private boolean isIdentifierPath(String memberPath) {
+        if (memberPath.startsWith(StaConstants.PROP_PROPERTIES)
+            || memberPath.startsWith(StaConstants.PROP_PARAMETERS)) {
+            // properties/parameters are no Entity identifiers and are handled separately
+            return false;
+        }
+        return StaConstants.PROP_ID.equals(memberPath.substring(memberPath.lastIndexOf(SLASH) + 1));
     }
 
     /**
