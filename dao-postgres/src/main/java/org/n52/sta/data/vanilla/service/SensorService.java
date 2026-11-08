@@ -62,7 +62,9 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.EntityManager;
+import java.util.HashSet;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -302,8 +304,20 @@ public class SensorService
         synchronized (getLock(identifier)) {
             if (getRepository().existsByStaIdentifier(identifier)) {
                 // delete datastreams
-                for (AbstractDatasetEntity ds : datastreamRepository.findAll(dQS.withSensorStaIdentifier(identifier))) {
-                    getDatastreamService().delete(ds.getStaIdentifier());
+                // Datasets belonging to an Aggregation have no staIdentifier of their
+                // own, so resolve them to the Datastream owning them (the Aggregation)
+                // and delete each Datastream only once.
+                Set<String> datastreamIdentifiers = new HashSet<>();
+                for (AbstractDatasetEntity ds :
+                    datastreamRepository.findAll(dQS.withSensorStaIdentifier(identifier))) {
+                    if (ds.getAggregation() != null) {
+                        datastreamIdentifiers.add(ds.getAggregation().getStaIdentifier());
+                    } else {
+                        datastreamIdentifiers.add(ds.getStaIdentifier());
+                    }
+                }
+                for (String datastreamIdentifier : datastreamIdentifiers) {
+                    getDatastreamService().delete(datastreamIdentifier);
                 }
 
                 ProcedureEntity sensor = getRepository().findByStaIdentifier(identifier).get();

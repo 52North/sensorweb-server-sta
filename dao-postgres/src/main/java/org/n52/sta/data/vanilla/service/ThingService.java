@@ -321,8 +321,19 @@ public class ThingService
                                                         EntityGraphRepository.FetchGraph.FETCHGRAPH_HIST_LOCATIONS)
                         .get();
                 // delete datastreams
+                // Datasets belonging to an Aggregation have no staIdentifier of their
+                // own, so resolve them to the Datastream owning them (the Aggregation)
+                // and delete each Datastream only once.
+                Set<String> datastreamIdentifiers = new HashSet<>();
                 for (AbstractDatasetEntity ds : thing.getDatasets()) {
-                    getDatastreamService().delete(ds.getStaIdentifier());
+                    if (ds.getAggregation() != null) {
+                        datastreamIdentifiers.add(ds.getAggregation().getStaIdentifier());
+                    } else {
+                        datastreamIdentifiers.add(ds.getStaIdentifier());
+                    }
+                }
+                for (String datastreamIdentifier : datastreamIdentifiers) {
+                    getDatastreamService().delete(datastreamIdentifier);
                 }
                 // delete historicalLocation
                 for (HistoricalLocationEntity hloc : thing.getHistoricalLocations()) {
