@@ -58,7 +58,9 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.EntityManager;
+import java.util.HashSet;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -275,9 +277,20 @@ public class ObservedPropertyService
         synchronized (getLock(id)) {
             if (getRepository().existsByStaIdentifier(id)) {
                 // delete datastreams
+                // Datasets belonging to an Aggregation have no staIdentifier of their
+                // own, so resolve them to the Datastream owning them (the Aggregation)
+                // and delete each Datastream only once.
+                Set<String> datastreamIdentifiers = new HashSet<>();
                 for (AbstractDatasetEntity datastreamEntity :
                     datastreamRepository.findAll(dQS.withObservedPropertyStaIdentifier(id))) {
-                    getDatastreamService().delete(datastreamEntity.getStaIdentifier());
+                    if (datastreamEntity.getAggregation() != null) {
+                        datastreamIdentifiers.add(datastreamEntity.getAggregation().getStaIdentifier());
+                    } else {
+                        datastreamIdentifiers.add(datastreamEntity.getStaIdentifier());
+                    }
+                }
+                for (String datastreamIdentifier : datastreamIdentifiers) {
+                    getDatastreamService().delete(datastreamIdentifier);
                 }
                 getRepository().deleteByStaIdentifier(id);
             } else {

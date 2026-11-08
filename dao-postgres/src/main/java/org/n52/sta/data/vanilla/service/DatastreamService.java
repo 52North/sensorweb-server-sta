@@ -460,10 +460,14 @@ public class DatastreamService extends AbstractSensorThingsEntityServiceImpl<
                 datastream.setFirstObservation(null);
                 datastream.setLastObservation(null);
 
-                // Delete subdatasets if we are aggregation
-                if (datastream instanceof DatasetAggregationEntity) {
-                    Set<AbstractDatasetEntity> allByAggregationId =
-                        getRepository().findAllByAggregationId(datastream.getId());
+                // Delete subdatasets if this datastream is an aggregation.
+                // Whether subdatasets exist is checked explicitly instead of using an
+                // instanceof check, as the datastream may be loaded as a proxy of the
+                // abstract dataset type (e.g. via the aggregation association of one
+                // of its subdatasets), which is not a DatasetAggregationEntity instance.
+                Set<AbstractDatasetEntity> allByAggregationId =
+                    getRepository().findAllByAggregationId(datastream.getId());
+                if (!allByAggregationId.isEmpty()) {
                     Set<Long> datasetIds = allByAggregationId.stream()
                         .map(IdEntity::getId)
                         .collect(Collectors.toSet());
